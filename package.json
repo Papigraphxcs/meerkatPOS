@@ -1,0 +1,9 @@
+{
+  "name": "xpos",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && yarn dev",
+    "build": "cd frontend && yarn install && yarn build"
+  }
+}
