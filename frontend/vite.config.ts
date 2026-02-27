@@ -7,41 +7,81 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  base: "/assets/xpos/dist/js/",
+  base: "/xpos/",
   plugins: [vue()],
   css: {
     postcss: "./postcss.config.js",
   },
-  build: {
-    target: "esnext",
-    modulePreload: false,
-    outDir: "../xpos/public/dist/js",
-    emptyOutDir: true,
-    cssCodeSplit: false,
-    rollupOptions: {
-      input: {
-        xpos: path.resolve(__dirname, "src/xpos.bundle.ts"),
-        loader: path.resolve(__dirname, "src/loader.ts"),
-      },
-      output: {
-        format: "es",
-        entryFileNames: "[name].js",
-        chunkFileNames: "[name]-[hash].js",
-        assetFileNames: "xpos.[ext]",
-        manualChunks: (id) => {
-          if (id.includes("node_modules")) {
-            if (id.includes("vue-router")) return "vue-router";
-            if (id.includes("vue")) return "vue";
-            if (id.includes("pinia")) return "pinia";
-            return "vendor";
-          }
-        },
-      },
-    },
-  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+    },
+  },
+  server: {
+    port: 5174,
+    middlewareMode: false,
+    proxy: {
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
+        configure: (proxy) => {
+          proxy.on("proxyReq", (_proxyReq, req) => {
+            console.log("[Proxy] API Request:", req.method, req.url);
+          });
+        },
+      },
+      "/method": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/method/, "/method"),
+      },
+      "/assets": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+      "/upload_file": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+      "/api/resource": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+      "/socket.io": {
+        target: "http://localhost:9000",
+        changeOrigin: true,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/socket.io/, "/socket.io"),
+      },
+    },
+  },
+  optimizeDeps: {
+    exclude: ["@vite/client", "@vite/env"],
+  },
+  build: {
+    outDir: path.resolve(__dirname, "../xpos/public/xpos"),
+    emptyOutDir: true,
+    sourcemap: true,
+    rollupOptions: {
+      input: path.resolve(__dirname, "index.html"),
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+
+          if (
+            id.includes("node_modules/vue") ||
+            id.includes("node_modules/vue-router") ||
+            id.includes("node_modules/pinia")
+          ) {
+            return "vendor-vue";
+          }
+
+          const parts = id.split("node_modules/")[1]?.split("/") || [];
+          const pkgName = parts[0]?.startsWith("@") ? `${parts[0]}/${parts[1]}` : parts[0];
+          if (pkgName) return `vendor-${pkgName.replace("/", "-")}`;
+        },
+      },
     },
   },
 });

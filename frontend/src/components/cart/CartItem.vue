@@ -1,81 +1,105 @@
 <template>
 	<div
-		class="group flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-surface-50 transition-colors duration-150 animate-fade-in"
+		class="group flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-muted/50 transition-colors duration-150 dark:hover:bg-accent/50"
 	>
 		<!-- Item Image / Icon -->
-		<div class="w-10 h-10 rounded-lg bg-surface-100 overflow-hidden shrink-0 flex items-center justify-center">
+		<div class="w-10 h-10 rounded-lg bg-muted overflow-hidden shrink-0 flex items-center justify-center">
 			<img
 				v-if="item.image"
 				:src="item.image"
 				:alt="item.item_name"
 				class="w-full h-full object-cover"
 			/>
-			<svg v-else class="w-5 h-5 text-surface-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-			</svg>
+			<Package v-else class="w-5 h-5 text-muted-foreground/40" />
 		</div>
 
 		<!-- Item Info -->
 		<div class="flex-1 min-w-0">
-			<p class="text-xs font-medium text-surface-700 leading-tight truncate">
+			<p class="text-xs font-medium text-foreground leading-tight truncate">
 				{{ item.item_name }}
 			</p>
-			<p class="text-[11px] text-surface-400 mt-0.5">
-				{{ currencySymbol }}{{ formatPrice(item.rate) }} each
-			</p>
+
+			<!-- Editable Rate -->
+			<div class="flex items-center gap-1 mt-0.5">
+				<template v-if="posStore.allowEditRate">
+					<span class="text-[11px] text-muted-foreground">{{ currencySymbol }}</span>
+					<input
+						:value="item.rate"
+						type="number"
+						min="0"
+						step="0.01"
+						class="w-16 h-5 text-[11px] font-medium text-foreground bg-transparent border-b border-dashed border-border
+								 focus:outline-none focus:border-primary dark:border-muted-foreground/40
+								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+						@change="onRateChange"
+					/>
+					<span class="text-[11px] text-muted-foreground">each</span>
+				</template>
+				<p v-else class="text-[11px] text-muted-foreground">
+					{{ currencySymbol }}{{ formatPrice(item.rate) }} each
+				</p>
+			</div>
 
 			<!-- Qty Controls -->
 			<div class="flex items-center gap-1.5 mt-1.5">
-				<button
-					@click="decrementQty"
-					class="w-6 h-6 rounded-md bg-surface-100 hover:bg-surface-200 flex items-center justify-center
-								 text-surface-600 transition-colors active:scale-90"
-				>
-					<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
-					</svg>
-				</button>
+				<Button variant="secondary" size="icon-sm" class="w-6 h-6" @click="decrementQty">
+					<Minus class="w-3 h-3" />
+				</Button>
 				<input
 					:value="item.qty"
 					type="number"
 					min="0"
-					class="w-10 h-6 text-center text-xs font-semibold text-surface-800 bg-surface-50 rounded-md
-								 border border-surface-200 focus:outline-none focus:ring-1 focus:ring-primary-400
+					class="w-10 h-6 text-center text-xs font-semibold text-foreground bg-muted/50 rounded-md
+								 border border-border focus:outline-none focus:ring-1 focus:ring-ring
+								 dark:bg-accent/50 dark:border-muted-foreground/30
 								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 					@change="onQtyChange"
 				/>
-				<button
-					@click="incrementQty"
-					class="w-6 h-6 rounded-md bg-primary-50 hover:bg-primary-100 flex items-center justify-center
-								 text-primary-600 transition-colors active:scale-90"
-				>
-					<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-					</svg>
-				</button>
+				<Button variant="secondary" size="icon-sm" class="w-6 h-6 bg-primary/10 text-primary hover:bg-primary/20" @click="incrementQty">
+					<Plus class="w-3 h-3" />
+				</Button>
+
+				<!-- Inline Discount (if allowed) -->
+				<template v-if="posStore.allowEditItemDiscount">
+					<span class="text-[10px] text-muted-foreground ml-1">disc:</span>
+					<input
+						:value="item.discount_percentage || 0"
+						type="number"
+						min="0"
+						:max="maxDiscount || 100"
+						step="0.5"
+						class="w-10 h-6 text-center text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-md
+								 border border-emerald-200 dark:border-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-400
+								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+						@change="onDiscountChange"
+					/>
+					<span class="text-[10px] text-muted-foreground">%</span>
+				</template>
 			</div>
 		</div>
 
 		<!-- Amount & Delete -->
 		<div class="flex flex-col items-end gap-1 shrink-0">
-			<span class="text-sm font-bold text-surface-800">
+			<span class="text-sm font-bold text-foreground tabular-nums">
 				{{ currencySymbol }}{{ formatPrice(lineTotal) }}
 			</span>
-			<button
+			<Button
+				variant="ghost"
+				size="icon-sm"
+				class="opacity-0 group-hover:opacity-100 w-5 h-5 hover:text-destructive transition-all"
 				@click="$emit('remove', index)"
-				class="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-md hover:bg-red-50
-							 flex items-center justify-center transition-all"
 			>
-				<svg class="w-3.5 h-3.5 text-red-400 hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-				</svg>
-			</button>
+				<Trash2 class="w-3.5 h-3.5" />
+			</Button>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { usePosStore } from "@/stores/posStore";
+import { Button } from "@/components/ui/button";
+import { Package, Minus, Plus, Trash2 } from "lucide-vue-next";
 
 const props = defineProps({
 	item: { type: Object, required: true },
@@ -83,14 +107,18 @@ const props = defineProps({
 	currencySymbol: { type: String, default: "$" },
 });
 
-const emit = defineEmits(["update-qty", "remove"]);
+const emit = defineEmits(["update-qty", "update-rate", "update-discount", "remove"]);
+
+const posStore = usePosStore();
+
+const maxDiscount = computed(() => posStore.maxDiscountAllowed);
 
 const lineTotal = computed(() => {
 	const total = props.item.qty * props.item.rate;
 	const discount = props.item.discount_percentage
 		? (total * props.item.discount_percentage) / 100
 		: props.item.discount_amount || 0;
-	return total - discount;
+	return Math.round((total - discount + Number.EPSILON) * 100) / 100;
 });
 
 function incrementQty() {
@@ -106,7 +134,19 @@ function onQtyChange(e: Event) {
 	emit("update-qty", props.index, val);
 }
 
+function onRateChange(e: Event) {
+	const val = parseFloat((e.target as HTMLInputElement).value) || 0;
+	emit("update-rate", props.index, Math.round(val * 100) / 100);
+}
+
+function onDiscountChange(e: Event) {
+	let val = parseFloat((e.target as HTMLInputElement).value) || 0;
+	const max = maxDiscount.value || 100;
+	val = Math.min(val, max);
+	emit("update-discount", props.index, "percentage", val);
+}
+
 function formatPrice(price: number | string) {
-	return parseFloat(String(price) || "0").toFixed(2);
+	return (Math.round((parseFloat(String(price) || "0") + Number.EPSILON) * 100) / 100).toFixed(2);
 }
 </script>

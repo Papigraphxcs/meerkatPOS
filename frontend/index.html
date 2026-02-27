@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ layout_direction }}">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" href="/assets/xpos/images/xpos-logo.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{{ app_name }}</title>
+		<script>
+			// Apply theme immediately before Vue mounts to prevent flash
+			(function () {
+				const theme = localStorage.getItem("xpos-theme") || "system";
+				let effectiveTheme = theme;
+
+				if (theme === "system") {
+					effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+						? "dark"
+						: "light";
+				}
+
+				const html = document.documentElement;
+				if (effectiveTheme === "dark") {
+					html.classList.add("dark");
+					html.classList.remove("light");
+				} else {
+					html.classList.add("light");
+					html.classList.remove("dark");
+				}
+			})();
+		</script>
+	</head>
+
+	<body>
+		<div id="app"></div>
+		<script>
+			window.xpos = window.xpos || {};
+			window.xpos.boot = {{ boot | json }};
+			window.xpos._messages = window.xpos.boot["__messages"];
+			window.xpos.csrf_token = "{{ csrf_token }}";
+		</script>
+		<script type="module" src="/src/main.ts"></script>
+	</body>
+</html>

@@ -1,16 +1,16 @@
 <template>
-	<div class="shrink-0 border-t border-surface-100 bg-white px-4 py-4 space-y-3">
+	<div class="shrink-0 border-t border-border bg-background px-4 py-4 space-y-3 dark:border-border">
 		<!-- Totals -->
 		<div class="space-y-1.5">
 			<div class="flex items-center justify-between text-sm">
-				<span class="text-surface-500">Subtotal</span>
-				<span class="font-medium text-surface-700">
+				<span class="text-muted-foreground">Subtotal</span>
+				<span class="font-medium text-foreground">
 					{{ posStore.currencySymbol }}{{ formatPrice(cartStore.subtotal) }}
 				</span>
 			</div>
 			<div v-if="cartStore.taxAmount > 0" class="flex items-center justify-between text-sm">
-				<span class="text-surface-500">Tax</span>
-				<span class="font-medium text-surface-700">
+				<span class="text-muted-foreground">Tax</span>
+				<span class="font-medium text-foreground">
 					{{ posStore.currencySymbol }}{{ formatPrice(cartStore.taxAmount) }}
 				</span>
 			</div>
@@ -18,84 +18,104 @@
 				v-if="cartStore.discountPercentage > 0 || cartStore.discountAmount > 0"
 				class="flex items-center justify-between text-sm"
 			>
-				<span class="text-surface-500">Discount</span>
-				<span class="font-medium text-emerald-600">
+				<span class="text-muted-foreground">Discount</span>
+				<span class="font-medium text-emerald-600 dark:text-emerald-400">
 					-{{ posStore.currencySymbol }}{{ formatPrice(discountValue) }}
 				</span>
 			</div>
-			<div class="xpos-divider !my-2"></div>
+			<!-- Loyalty Redemption -->
+			<div v-if="cartStore.redeemLoyaltyPoints && cartStore.loyaltyAmount > 0"
+				class="flex items-center justify-between text-sm"
+			>
+				<span class="text-violet-600 dark:text-violet-400 flex items-center gap-1">
+					<Gift class="w-3.5 h-3.5" /> Loyalty
+				</span>
+				<span class="font-medium text-violet-600 dark:text-violet-400">
+					-{{ posStore.currencySymbol }}{{ formatPrice(cartStore.loyaltyAmount) }}
+				</span>
+			</div>
+			<!-- Write-off -->
+			<div v-if="cartStore.writeOffAmount > 0" class="flex items-center justify-between text-sm">
+				<span class="text-muted-foreground">Write Off</span>
+				<span class="font-medium text-amber-600 dark:text-amber-400">
+					-{{ posStore.currencySymbol }}{{ formatPrice(cartStore.writeOffAmount) }}
+				</span>
+			</div>
+			<Separator class="!my-2" />
 			<div class="flex items-center justify-between">
-				<span class="text-base font-bold text-surface-800">Total</span>
-				<span class="text-xl font-extrabold text-primary-600">
-					{{ posStore.currencySymbol }}{{ formatPrice(cartStore.grandTotal) }}
+				<span class="text-base font-bold text-foreground">Total</span>
+				<span class="text-xl font-extrabold"
+					:class="cartStore.isReturnMode ? 'text-amber-600 dark:text-amber-400' : 'text-primary dark:text-primary'"
+				>
+					{{ cartStore.isReturnMode ? '-' : '' }}{{ posStore.currencySymbol }}{{ formatPrice(Math.abs(cartStore.grandTotal)) }}
 				</span>
 			</div>
 		</div>
 
 		<!-- Actions -->
 		<div class="flex gap-2">
-			<!-- Discount Button -->
-			<button
+			<Button
+				v-if="posStore.allowEditAdditionalDiscount"
+				variant="outline"
+				size="sm"
+				class="flex-1"
+				:class="{ 'border-emerald-300 text-emerald-600 bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:bg-emerald-900/20': hasDiscount }"
+				:disabled="cartStore.isEmpty"
 				@click="showDiscount = !showDiscount"
-				class="xpos-btn-secondary text-xs flex-1"
-				:class="{ '!bg-emerald-50 !text-emerald-700 !border-emerald-200': hasDiscount }"
-				:disabled="cartStore.isEmpty"
 			>
-				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-				</svg>
+				<Tag class="w-4 h-4" />
 				Discount
-			</button>
+			</Button>
 
-			<!-- Hold Button -->
-			<button
-				@click="holdOrder"
-				class="xpos-btn-secondary text-xs"
+			<!-- Coupon button -->
+			<Button
+				v-if="posStore.fetchCoupon"
+				variant="outline"
+				size="sm"
+				class="flex-1"
+				:class="{ 'border-violet-300 text-violet-600 bg-violet-50 dark:border-violet-700 dark:text-violet-400 dark:bg-violet-900/20': !!cartStore.appliedCoupon }"
 				:disabled="cartStore.isEmpty"
-				title="Save as draft"
+				@click="showCoupon = !showCoupon"
 			>
-				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-				</svg>
-			</button>
+				<Ticket class="w-4 h-4" />
+				Coupon
+			</Button>
 
-			<!-- Clear Cart Button -->
-			<button
-				@click="cartStore.clearCart()"
-				class="xpos-btn-ghost text-xs text-red-500 hover:!bg-red-50"
-				:disabled="cartStore.isEmpty"
-				title="Clear cart"
-			>
-				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-				</svg>
-			</button>
+			<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground" :disabled="cartStore.isEmpty" @click="holdOrder" title="Save as draft">
+				<Clock class="w-4 h-4" />
+			</Button>
+
+			<Button variant="outline" size="sm" class="text-destructive hover:text-destructive dark:border-border" :disabled="cartStore.isEmpty" @click="cartStore.clearCart()" title="Clear cart">
+				<Trash2 class="w-4 h-4" />
+			</Button>
 		</div>
 
 		<!-- Discount Panel -->
 		<transition name="slide-up">
-			<div v-if="showDiscount" class="bg-surface-50 rounded-xl p-3 space-y-2">
+			<div v-if="showDiscount" class="bg-muted rounded-lg p-3 space-y-2">
 				<div class="flex items-center gap-2">
-					<button
-						:class="[discountType === 'percentage' ? 'bg-primary-600 text-white' : 'bg-white text-surface-600']"
-						class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+					<Button
+						:variant="discountType === 'percentage' ? 'default' : 'outline'"
+						size="sm"
+						class="px-3"
 						@click="discountType = 'percentage'"
 					>
 						%
-					</button>
-					<button
-						:class="[discountType === 'amount' ? 'bg-primary-600 text-white' : 'bg-white text-surface-600']"
-						class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+					</Button>
+					<Button
+						:variant="discountType === 'amount' ? 'default' : 'outline'"
+						size="sm"
+						class="px-3"
 						@click="discountType = 'amount'"
 					>
 						{{ posStore.currencySymbol }}
-					</button>
-					<input
+					</Button>
+					<Input
 						v-model.number="discountInput"
 						type="number"
 						min="0"
 						:max="discountType === 'percentage' ? 100 : undefined"
-						class="xpos-input text-sm flex-1"
+						class="flex-1"
 						:placeholder="discountType === 'percentage' ? 'Discount %' : 'Discount amount'"
 						@input="applyDiscount"
 					/>
@@ -103,20 +123,41 @@
 			</div>
 		</transition>
 
+		<!-- Coupon Panel -->
+		<transition name="slide-up">
+			<div v-if="showCoupon" class="bg-muted rounded-lg p-3 space-y-2">
+				<div class="flex items-center gap-2">
+					<Input
+						v-model="couponInput"
+						type="text"
+						placeholder="Enter coupon code..."
+						class="flex-1"
+						@keydown.enter="applyCouponCode"
+					/>
+					<Button size="sm" :disabled="!couponInput || isApplyingCoupon" @click="applyCouponCode">
+						<template v-if="isApplyingCoupon">
+							<Loader2 class="w-4 h-4 animate-spin" />
+						</template>
+						<template v-else>Apply</template>
+					</Button>
+				</div>
+				<p v-if="couponError" class="text-xs text-destructive">{{ couponError }}</p>
+			</div>
+		</transition>
+
 		<!-- Pay Button -->
-		<button
-			@click="cartStore.openPaymentDialog()"
+		<Button
+			size="xl"
+			class="w-full font-bold tracking-wide shadow-lg"
+			:class="cartStore.isReturnMode
+				? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-500/25 text-white'
+				: 'bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-primary/25'"
 			:disabled="cartStore.isEmpty || !cartStore.customer"
-			class="w-full xpos-btn-primary xpos-btn-lg text-base font-bold tracking-wide
-						 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600
-						 shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40
-						 disabled:from-surface-300 disabled:to-surface-300 disabled:shadow-none"
+			@click="cartStore.openPaymentDialog()"
 		>
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-			</svg>
-			{{ cartStore.isEmpty ? 'Add items to pay' : !cartStore.customer ? 'Select customer first' : `Pay ${posStore.currencySymbol}${formatPrice(cartStore.grandTotal)}` }}
-		</button>
+			<Wallet class="w-5 h-5" />
+			{{ payButtonLabel }}
+		</Button>
 	</div>
 </template>
 
@@ -124,14 +165,24 @@
 import { ref, computed } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
+import { useOfferStore } from "@/stores/offerStore";
 import { call, showSuccess, showError } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2 } from "lucide-vue-next";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
+const offerStore = useOfferStore();
 
 const showDiscount = ref(false);
+const showCoupon = ref(false);
 const discountType = ref("percentage");
 const discountInput = ref(0);
+const couponInput = ref("");
+const couponError = ref("");
+const isApplyingCoupon = ref(false);
 
 const hasDiscount = computed(() =>
 	cartStore.discountPercentage > 0 || cartStore.discountAmount > 0
@@ -144,28 +195,100 @@ const discountValue = computed(() => {
 	return cartStore.discountAmount;
 });
 
+const payButtonLabel = computed(() => {
+	if (cartStore.isEmpty) return "Add items to pay";
+	if (!cartStore.customer) return "Select customer first";
+	const amt = `${posStore.currencySymbol}${formatPrice(Math.abs(cartStore.grandTotal))}`;
+	return cartStore.isReturnMode ? `Process Return ${amt}` : `Pay ${amt}`;
+});
+
 function applyDiscount() {
 	cartStore.setDiscount(discountType.value as "percentage" | "amount", discountInput.value || 0);
+}
+
+async function applyCouponCode() {
+	if (!couponInput.value) return;
+	isApplyingCoupon.value = true;
+	couponError.value = "";
+
+	try {
+		const result = await offerStore.fetchCoupon(couponInput.value, cartStore.customer?.name || "");
+		if (result) {
+			cartStore.applyCoupon(result);
+			showCoupon.value = false;
+			couponInput.value = "";
+		} else {
+			couponError.value = "Invalid or expired coupon code";
+		}
+	} catch (error) {
+		couponError.value = "Failed to validate coupon";
+	} finally {
+		isApplyingCoupon.value = false;
+	}
+}
+
+function extractErrorMessage(error: unknown): string {
+	if (!error) return "Unknown error";
+	if (typeof error === "string") return error;
+	const err = error as Record<string, unknown>;
+	if (err._server_messages) {
+		try {
+			const msgs = JSON.parse(err._server_messages as string);
+			const parsed = typeof msgs === "string" ? [msgs] : msgs;
+			return parsed.map((m: string) => {
+				try { return JSON.parse(m).message || m; } catch { return m; }
+			}).join(", ");
+		} catch { /* fallthrough */ }
+	}
+	if (err.message && typeof err.message === "string") return err.message;
+	if (err.exc_type && typeof err.exc_type === "string") return err.exc_type;
+	try { return JSON.stringify(error); } catch { return String(error); }
 }
 
 async function holdOrder() {
 	if (cartStore.isEmpty) return;
 
+	// Validate required data is available
+	const profileName = posStore.profileName;
+	const shiftName = posStore.posOpeningShift?.name || "";
+	
+	if (!profileName) {
+		showError("POS Profile is not set. Please close and reopen the shift.");
+		return;
+	}
+	
+	if (!shiftName) {
+		showError("No open shift found. Please open a shift first.");
+		return;
+	}
+
 	try {
-		const data = cartStore.getInvoiceData(
-			posStore.profileName,
-			posStore.posOpeningShift?.name || ""
-		);
+		const data = cartStore.getInvoiceData(profileName, shiftName);
+		
+		// Ensure customer is set
 		if (!data.customer) {
-			data.customer = frappe.boot?.sysdefaults?.customer || "";
+			// Try to get default customer from boot data
+			const bootCustomer = (window.xpos?.boot as Record<string, unknown>)?.sysdefaults as Record<string, string> | undefined;
+			data.customer = bootCustomer?.customer || "";
 		}
+		
+		if (!data.customer) {
+			showError("Please select a customer before holding the order.");
+			return;
+		}
+		
+		if (!data.items || data.items.length === 0) {
+			showError("No items in cart to save.");
+			return;
+		}
+
 		await call("xpos.api.invoices.save_draft_invoice", {
 			data: JSON.stringify(data),
 		});
 		cartStore.clearAll();
 		showSuccess("Order saved as draft");
 	} catch (error: unknown) {
-		showError("Failed to save draft: " + ((error as Error)?.message || error));
+		showError("Failed to save draft: " + extractErrorMessage(error));
 	}
 }
 

@@ -9,6 +9,8 @@ export interface POSProfile {
   taxes_and_charges?: string;
   write_off_account?: string;
   write_off_cost_center?: string;
+  selling_price_list?: string;
+  customer?: string;
   // POS Awesome custom fields
   posa_allow_user_to_edit_rate?: boolean;
   posa_allow_user_to_edit_additional_discount?: boolean;
@@ -116,6 +118,7 @@ export interface POSClosingShiftDetail {
   expected_amount: number;
   closing_amount: number;
   difference: number;
+  opening_amount?: number;
 }
 
 export interface POSClosingShiftTax {
@@ -143,6 +146,9 @@ export interface POSItem {
   barcode?: string;
   item_tax_template?: string;
   is_stock_item?: boolean;
+  has_variants?: boolean;
+  variant_of?: string;
+  is_template?: boolean;
   [key: string]: unknown;
 }
 
@@ -150,12 +156,67 @@ export interface CartItem extends POSItem {
   qty: number;
   discount_percentage: number;
   discount_amount: number;
+  posa_notes?: string;
+  posa_delivery_date?: string;
+  posa_offers?: string;
+  posa_is_offer?: boolean;
+  posa_is_replace?: boolean;
+  conversion_factor?: number;
+  // loyalty
+  posa_offer_applied?: boolean;
 }
 
 export interface ItemGroup {
   name: string;
   parent_item_group?: string;
   is_group?: boolean;
+}
+
+// ─── Item Detail Types (from get_item_detail API) ──
+
+export interface ItemDetail {
+  item_code: string;
+  item_name: string;
+  uom: string;
+  stock_uom: string;
+  has_serial_no: boolean;
+  has_batch_no: boolean;
+  uoms: ItemUOM[];
+  batches: BatchInfo[];
+  serial_numbers: string[];
+  barcode_uom?: string;
+  conversion_factor?: number;
+  price_list_rate?: number;
+  [key: string]: unknown;
+}
+
+export interface ItemUOM {
+  uom: string;
+  conversion_factor: number;
+}
+
+export interface BatchInfo {
+  batch_no: string;
+  qty: number;
+  expiry_date?: string;
+}
+
+export interface ItemVariant {
+  item_code: string;
+  item_name: string;
+  attributes: Record<string, string>;
+  [key: string]: unknown;
+}
+
+export interface ItemAttribute {
+  attribute: string;
+  values: string[];
+}
+
+export interface StockAvailability {
+  item_code: string;
+  actual_qty: number;
+  warehouse: string;
 }
 
 // ─── Customer Types ────────────────────────────────
@@ -170,10 +231,56 @@ export interface Customer {
   customer_type?: string;
   loyalty_program?: string;
   loyalty_points?: number;
+  loyalty_amount?: number;
   posa_discount?: number;
   posa_referral_code?: string;
   posa_birthday?: string;
+  default_price_list?: string;
+  gender?: string;
+  tax_id?: string;
   [key: string]: unknown;
+}
+
+export interface CustomerAddress {
+  name: string;
+  address_title?: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  country: string;
+  pincode?: string;
+  phone?: string;
+  is_primary_address?: boolean;
+  is_shipping_address?: boolean;
+}
+
+export interface CustomerCredit {
+  total_credit: number;
+  credit_notes: CreditNote[];
+  unallocated_payments: UnallocatedPayment[];
+  loyalty_points?: number;
+  loyalty_amount?: number;
+}
+
+export interface CreditNote {
+  name: string;
+  grand_total: number;
+  outstanding_amount: number;
+  posting_date: string;
+  customer: string;
+}
+
+export interface UnallocatedPayment {
+  name: string;
+  unallocated_amount: number;
+  posting_date: string;
+  mode_of_payment?: string;
+}
+
+export interface SalesPerson {
+  name: string;
+  sales_person_name?: string;
 }
 
 // ─── Invoice Types ─────────────────────────────────
@@ -218,6 +325,17 @@ export interface InvoiceData {
   posa_delivery_date?: string;
   posa_offers?: string;
   posa_coupons?: string;
+  loyalty_points?: number;
+  loyalty_amount?: number;
+  redeem_loyalty_points?: boolean;
+  sales_person?: string;
+  is_return?: boolean;
+  return_against?: string;
+  write_off_amount?: number;
+  write_off_account?: string;
+  posa_authorization_code?: string;
+  currency?: string;
+  conversion_rate?: number;
 }
 
 export interface Invoice {
@@ -235,6 +353,20 @@ export interface Invoice {
   payments: InvoicePayment[];
   is_return?: boolean;
   return_against?: string;
+  loyalty_points?: number;
+  loyalty_amount?: number;
+  [key: string]: unknown;
+}
+
+// ─── Return Types ──────────────────────────────────
+
+export interface ReturnInvoice {
+  name: string;
+  customer: string;
+  customer_name: string;
+  posting_date: string;
+  grand_total: number;
+  items: InvoiceItem[];
   [key: string]: unknown;
 }
 
@@ -262,6 +394,17 @@ export interface POSCoupon {
   coupon_name: string;
   coupon_type: string;
   coupon_code?: string;
+  pricing_rule?: string;
+  valid_from?: string;
+  valid_upto?: string;
+  [key: string]: unknown;
+}
+
+export interface GiftCoupon {
+  name: string;
+  coupon_code: string;
+  amount: number;
+  balance_amount: number;
   [key: string]: unknown;
 }
 
@@ -280,6 +423,13 @@ export interface POSCashMovement {
   expense_account?: string;
   source_account?: string;
   [key: string]: unknown;
+}
+
+export interface CashMovementContext {
+  expense_accounts: string[];
+  deposit_accounts: string[];
+  cash_account: string;
+  mode_of_payment: string;
 }
 
 // ─── Delivery Charges Types ────────────────────────
@@ -301,6 +451,91 @@ export interface ReferralCode {
   [key: string]: unknown;
 }
 
+// ─── Payment Types ─────────────────────────────────
+
+export interface OutstandingInvoice {
+  name: string;
+  grand_total: number;
+  outstanding_amount: number;
+  posting_date: string;
+  customer: string;
+}
+
+export interface PaymentRequest {
+  name: string;
+  status: string;
+  [key: string]: unknown;
+}
+
+// ─── Pricing Rule Types ────────────────────────────
+
+export interface PricingRule {
+  name: string;
+  title?: string;
+  apply_on: string;
+  applicable_for?: string;
+  price_or_product_discount: string;
+  rate_or_discount?: string;
+  discount_percentage?: number;
+  discount_amount?: number;
+  rate?: number;
+  items?: { item_code: string }[];
+  [key: string]: unknown;
+}
+
+// ─── Sales Order / Quotation Types ─────────────────
+
+export interface SalesOrder {
+  name: string;
+  customer: string;
+  customer_name: string;
+  transaction_date: string;
+  grand_total: number;
+  status: string;
+  items: SalesOrderItem[];
+  [key: string]: unknown;
+}
+
+export interface SalesOrderItem {
+  item_code: string;
+  item_name: string;
+  qty: number;
+  rate: number;
+  amount: number;
+  uom?: string;
+  [key: string]: unknown;
+}
+
+export interface Quotation {
+  name: string;
+  party_name: string;
+  transaction_date: string;
+  grand_total: number;
+  status: string;
+  items: SalesOrderItem[];
+  [key: string]: unknown;
+}
+
+// ─── Print Format Types ────────────────────────────
+
+export interface PrintFormat {
+  name: string;
+  doc_type?: string;
+  standard?: string;
+  [key: string]: unknown;
+}
+
+// ─── Bundle Types ──────────────────────────────────
+
+export interface BundleComponent {
+  item_code: string;
+  item_name?: string;
+  qty: number;
+  rate?: number;
+  uom?: string;
+  description?: string;
+}
+
 // ─── API Response Types ────────────────────────────
 
 export interface ShiftCheckResult {
@@ -319,10 +554,20 @@ export interface OpeningData {
 export interface ShiftSummary {
   net_total: number;
   grand_total: number;
-  total_quantity: number;
-  payments: POSClosingShiftDetail[];
-  taxes: POSClosingShiftTax[];
-  invoices: Invoice[];
+  total_invoices: number;
+  returns_count: number;
+  payment_summary: Record<string, number>;
+  opening_balances: Record<string, number>;
+  tax_summary: POSClosingShiftTax[];
+  pos_profile: string;
+  company: string;
+  invoices: {
+    name: string;
+    customer: string;
+    customer_name: string;
+    grand_total: number;
+    is_return: boolean;
+  }[];
 }
 
 // ─── Utility Types ─────────────────────────────────

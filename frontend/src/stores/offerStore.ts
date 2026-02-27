@@ -1,0 +1,110 @@
+import { defineStore } from "pinia";
+import { ref, type Ref } from "vue";
+import { call } from "@/services/api";
+import type {
+  POSOffer,
+  POSCoupon,
+  GiftCoupon,
+  DeliveryCharge,
+} from "@/types/pos.types";
+
+export const useOfferStore = defineStore("offers", () => {
+  // ─── State ─────────────────────────────────────
+  const offers: Ref<POSOffer[]> = ref([]);
+  const isLoading: Ref<boolean> = ref(false);
+
+  const coupon: Ref<POSCoupon | null> = ref(null);
+  const isLoadingCoupon: Ref<boolean> = ref(false);
+
+  const giftCoupons: Ref<GiftCoupon[]> = ref([]);
+
+  const deliveryCharges: Ref<DeliveryCharge[]> = ref([]);
+
+  // ─── Actions ───────────────────────────────────
+  async function fetchOffers(posProfile: string, itemCodes?: string[], customer?: string): Promise<POSOffer[]> {
+    isLoading.value = true;
+    try {
+      const result = await call<POSOffer[]>(
+        "xpos.api.offers.get_offers",
+        {
+          pos_profile: posProfile,
+          item_codes: JSON.stringify(itemCodes || []),
+          customer: customer || "",
+        }
+      );
+      offers.value = result || [];
+      return offers.value;
+    } catch (error) {
+      console.error("Error fetching offers:", error);
+      return [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function fetchCoupon(couponCode: string, customer?: string): Promise<POSCoupon | null> {
+    isLoadingCoupon.value = true;
+    try {
+      const result = await call<POSCoupon | null>(
+        "xpos.api.offers.get_pos_coupon",
+        { coupon: couponCode, customer: customer || "" }
+      );
+      coupon.value = result;
+      return result;
+    } catch (error) {
+      console.error("Error fetching coupon:", error);
+      return null;
+    } finally {
+      isLoadingCoupon.value = false;
+    }
+  }
+
+  async function fetchGiftCoupons(customer?: string): Promise<GiftCoupon[]> {
+    try {
+      const result = await call<GiftCoupon[]>(
+        "xpos.api.offers.get_active_gift_coupons",
+        { customer: customer || "" }
+      );
+      giftCoupons.value = result || [];
+      return giftCoupons.value;
+    } catch (error) {
+      console.error("Error fetching gift coupons:", error);
+      return [];
+    }
+  }
+
+  async function fetchDeliveryCharges(posProfile: string): Promise<DeliveryCharge[]> {
+    try {
+      const result = await call<DeliveryCharge[]>(
+        "xpos.api.offers.get_applicable_delivery_charges",
+        { pos_profile: posProfile }
+      );
+      deliveryCharges.value = result || [];
+      return deliveryCharges.value;
+    } catch (error) {
+      console.error("Error fetching delivery charges:", error);
+      return [];
+    }
+  }
+
+  function clearOffers(): void {
+    offers.value = [];
+    coupon.value = null;
+    giftCoupons.value = [];
+    deliveryCharges.value = [];
+  }
+
+  return {
+    offers,
+    isLoading,
+    coupon,
+    isLoadingCoupon,
+    giftCoupons,
+    deliveryCharges,
+    fetchOffers,
+    fetchCoupon,
+    fetchGiftCoupons,
+    fetchDeliveryCharges,
+    clearOffers,
+  };
+});

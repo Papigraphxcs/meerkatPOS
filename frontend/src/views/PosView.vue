@@ -1,7 +1,7 @@
 <template>
 	<div class="flex h-full overflow-hidden">
 		<!-- ===== LEFT: Items Section ===== -->
-		<div class="flex-1 flex flex-col min-w-0 border-r border-surface-100">
+		<div class="flex-1 flex flex-col min-w-0 border-r border-border bg-background">
 			<!-- Search & Filters -->
 			<div class="shrink-0 p-4 pb-2 space-y-3">
 				<SearchBar
@@ -10,22 +10,24 @@
 				/>
 				<!-- Category Pills -->
 				<div class="flex items-center gap-2 overflow-x-auto pb-1 xpos-scrollbar">
-					<button
+					<Button
+						:variant="itemStore.selectedGroup === 'All Item Groups' ? 'default' : 'outline'"
+						size="sm"
+						class="rounded-full shrink-0"
 						@click="selectGroup('All Item Groups')"
-						class="category-pill"
-						:class="{ 'category-pill-active': itemStore.selectedGroup === 'All Item Groups' }"
 					>
 						All
-					</button>
-					<button
+					</Button>
+					<Button
 						v-for="group in topGroups"
 						:key="group.name"
+						:variant="itemStore.selectedGroup === group.name ? 'default' : 'outline'"
+						size="sm"
+						class="rounded-full shrink-0"
 						@click="selectGroup(group.name)"
-						class="category-pill"
-						:class="{ 'category-pill-active': itemStore.selectedGroup === group.name }"
 					>
 						{{ group.name }}
-					</button>
+					</Button>
 				</div>
 			</div>
 
@@ -42,7 +44,7 @@
 		</div>
 
 		<!-- ===== RIGHT: Cart Section ===== -->
-		<div class="w-[380px] xl:w-[420px] flex flex-col bg-white shrink-0">
+		<div class="w-[380px] xl:w-[420px] flex flex-col bg-background dark:bg-card shrink-0">
 			<Cart />
 		</div>
 	</div>
@@ -53,13 +55,18 @@ import { computed, onMounted, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useItemStore } from "@/stores/itemStore";
 import { useCartStore } from "@/stores/cartStore";
+import { useOfferStore } from "@/stores/offerStore";
 import SearchBar from "@/components/items/SearchBar.vue";
 import ItemGrid from "@/components/items/ItemGrid.vue";
 import Cart from "@/components/cart/Cart.vue";
+import { Button } from "@/components/ui/button";
+
+import type { POSItem } from "@/types/pos.types";
 
 const posStore = usePosStore();
 const itemStore = useItemStore();
 const cartStore = useCartStore();
+const offerStore = useOfferStore();
 
 const topGroups = computed(() => {
 	const groups = itemStore.parentGroups.filter(
@@ -68,7 +75,6 @@ const topGroups = computed(() => {
 	return groups.slice(0, 12);
 });
 
-// Load items when POS is ready
 onMounted(() => {
 	if (posStore.isReady) {
 		loadInitialData();
@@ -94,15 +100,14 @@ function onSearch(term: string) {
 async function onBarcodeScan(barcode: string) {
 	const result = await itemStore.searchByBarcode(barcode, posStore.profileName);
 	if (result) {
-		cartStore.addItem({
+		handleAddItem({
 			item_code: result.item_code,
 			item_name: result.item_name,
 			rate: 0,
 			stock_uom: result.uom,
 			uom: result.uom,
-		});
-		// Fetch price for the item
-		const items = await itemStore.fetchItems(posStore.profileName);
+		} as POSItem);
+		await itemStore.fetchItems(posStore.profileName);
 	}
 }
 
@@ -111,22 +116,37 @@ function selectGroup(group: string) {
 	itemStore.fetchItems(posStore.profileName);
 }
 
-function handleAddItem(item: { item_code: string; item_name: string; rate: number; uom: string; stock_uom: string; [key: string]: unknown }) {
+function handleAddItem(item: POSItem) {
+	// Check if item is a template (has variants) — open variant picker
+	if (item.has_variants && !posStore.hideVariantsItems) {
+		itemStore.openVariantPicker(item, posStore.profileName);
+		return;
+	}
+
 	cartStore.addItem(item);
+
+	// Fetch applicable offers in background
+	if (posStore.fetchCoupon) {
+		offerStore.fetchOffers(
+			posStore.profileName,
+			cartStore.items.map((i) => i.item_code),
+			cartStore.customer?.name || ""
+		).then((offers) => {
+			// Auto-apply offers
+			if (offers && offers.length > 0) {
+				for (const offer of offers) {
+					cartStore.applyOffer(offer);
+				}
+			}
+		}).catch(() => { /* ignore */ });
+	}
+}
+
+function handleShowDetail(item: POSItem) {
+	itemStore.openItemDetail(item, posStore.profileName);
 }
 
 function handleLoadMore() {
 	itemStore.loadMore(posStore.profileName);
 }
 </script>
-
-<style scoped>
-.category-pill {
-	@apply px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap
-				 bg-surface-100 text-surface-600 hover:bg-surface-200
-				 transition-all duration-200 border border-transparent;
-}
-.category-pill-active {
-	@apply bg-primary-50 text-primary-700 border-primary-200 shadow-sm;
-}
-</style>

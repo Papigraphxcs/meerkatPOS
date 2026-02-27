@@ -9,7 +9,11 @@ from frappe.utils import flt, nowdate, now_datetime, cint
 
 @frappe.whitelist()
 def get_opening_data():
-	"""Get data needed for the shift opening dialog."""
+	"""Get data needed for the shift opening dialog.
+
+	Same as POS Awesome's get_opening_dialog_data — returns POS profiles,
+	companies, and payment methods for the current user.
+	"""
 	data = {}
 
 	# Get POS Profiles accessible to the current user
@@ -56,7 +60,10 @@ def get_opening_data():
 
 @frappe.whitelist()
 def open_shift(pos_profile, company, balance_details):
-	"""Create and submit a POS Opening Shift."""
+	"""Create and submit a POS Opening Shift.
+
+	Same as POS Awesome's create_opening_voucher.
+	"""
 	balance_details = json.loads(balance_details) if isinstance(balance_details, str) else balance_details
 
 	new_shift = frappe.get_doc({
@@ -83,12 +90,17 @@ def open_shift(pos_profile, company, balance_details):
 
 
 @frappe.whitelist()
-def check_open_shift():
-	"""Check if the current user has an open POS shift."""
+def check_open_shift(user=None):
+	"""Check if the current user has an open POS shift.
+
+	Same as POS Awesome's check_opening_shift.
+	"""
+	user = user or frappe.session.user
+
 	open_shifts = frappe.db.get_all(
 		"POS Opening Shift",
 		filters={
-			"user": frappe.session.user,
+			"user": user,
 			"pos_closing_shift": ["is", "not set"],
 			"docstatus": 1,
 			"status": "Open",
@@ -112,28 +124,55 @@ def check_open_shift():
 
 @frappe.whitelist()
 def close_shift(opening_shift, closing_details):
-	"""Create a POS Closing Shift and close the opening shift."""
+	"""Create a POS Closing Shift and close the opening shift.
+
+	Enhanced version that matches POS Awesome's closing shift features:
+	- Aggregates invoices by POS opening shift reference
+	- Tax summary per shift
+	- Payment reconciliation with expected vs actual amounts
+	"""
 	closing_details = json.loads(closing_details) if isinstance(closing_details, str) else closing_details
 
 	opening = frappe.get_doc("POS Opening Shift", opening_shift)
 
 	# Get all submitted invoices for this shift
-	invoices = frappe.get_all(
-		"Sales Invoice",
-		filters={
-			"pos_profile": opening.pos_profile,
-			"posting_date": [">=", opening.posting_date],
-			"docstatus": 1,
-			"is_pos": 1,
-			"owner": opening.user,
-		},
-		fields=["name", "grand_total", "net_total", "total_taxes_and_charges"],
-	)
+	# First try by posa_pos_opening_shift field, then fallback to date/user filter
+	invoices = []
+	try:
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={
+				"posa_pos_opening_shift": opening.name,
+				"docstatus": 1,
+				"is_pos": 1,
+			},
+			fields=["name", "grand_total", "net_total", "total_taxes_and_charges",
+					 "customer", "is_return"],
+		)
+	except Exception:
+		pass
+
+	if not invoices:
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={
+				"pos_profile": opening.pos_profile,
+				"posting_date": [">=", opening.posting_date],
+				"docstatus": 1,
+				"is_pos": 1,
+				"owner": opening.user,
+			},
+			fields=["name", "grand_total", "net_total", "total_taxes_and_charges",
+					 "customer", "is_return"],
+		)
 
 	# Calculate totals
 	grand_total = sum(flt(inv.grand_total) for inv in invoices)
 	net_total = sum(flt(inv.net_total) for inv in invoices)
 	total_qty = len(invoices)
+
+	# Returns count
+	returns_count = sum(1 for inv in invoices if inv.get("is_return"))
 
 	closing_shift = frappe.get_doc({
 		"doctype": "POS Closing Shift",
@@ -161,13 +200,25 @@ def close_shift(opening_shift, closing_details):
 				"difference": flt(detail.get("difference", 0)),
 			})
 
+	# Add tax summary
+	tax_summary = _get_shift_tax_summary(invoices)
+	for tax in tax_summary:
+		try:
+			closing_shift.append("taxes", {
+				"account_head": tax.get("account_head"),
+				"rate": flt(tax.get("rate")),
+				"amount": flt(tax.get("amount")),
+			})
+		except Exception:
+			pass
+
 	# Add invoices to POS Transactions
 	for inv in invoices:
 		closing_shift.append("pos_transactions", {
 			"pos_invoice": inv.name,
 			"posting_date": nowdate(),
 			"grand_total": inv.grand_total,
-			"customer": frappe.db.get_value("Sales Invoice", inv.name, "customer"),
+			"customer": inv.customer,
 		})
 
 	closing_shift.insert(ignore_permissions=True)
@@ -178,29 +229,51 @@ def close_shift(opening_shift, closing_details):
 		"grand_total": grand_total,
 		"net_total": net_total,
 		"total_invoices": total_qty,
+		"returns_count": returns_count,
 	}
 
 
 @frappe.whitelist()
 def get_shift_summary(opening_shift):
-	"""Get summary of the current shift for closing."""
+	"""Get summary of the current shift for closing.
+
+	Enhanced version with tax breakdown and return info.
+	"""
 	opening = frappe.get_doc("POS Opening Shift", opening_shift)
 
 	# Get all submitted invoices for this shift
-	invoices = frappe.get_all(
-		"Sales Invoice",
-		filters={
-			"pos_profile": opening.pos_profile,
-			"posting_date": [">=", opening.posting_date],
-			"docstatus": 1,
-			"is_pos": 1,
-			"owner": opening.user,
-		},
-		fields=["name", "grand_total", "net_total", "paid_amount", "change_amount"],
-	)
+	invoices = []
+	try:
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={
+				"posa_pos_opening_shift": opening.name,
+				"docstatus": 1,
+				"is_pos": 1,
+			},
+			fields=["name", "grand_total", "net_total", "paid_amount",
+					 "change_amount", "is_return", "customer", "customer_name"],
+		)
+	except Exception:
+		pass
+
+	if not invoices:
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={
+				"pos_profile": opening.pos_profile,
+				"posting_date": [">=", opening.posting_date],
+				"docstatus": 1,
+				"is_pos": 1,
+				"owner": opening.user,
+			},
+			fields=["name", "grand_total", "net_total", "paid_amount",
+					 "change_amount", "is_return", "customer", "customer_name"],
+		)
 
 	grand_total = sum(flt(inv.grand_total) for inv in invoices)
 	net_total = sum(flt(inv.net_total) for inv in invoices)
+	returns_count = sum(1 for inv in invoices if inv.get("is_return"))
 
 	# Get payment breakdown
 	payment_summary = {}
@@ -220,16 +293,31 @@ def get_shift_summary(opening_shift):
 	opening_balances = {}
 	for detail in opening.balance_details:
 		mode = detail.mode_of_payment
-		opening_balances[mode] = flt(detail.opening_amount)
+		opening_balances[mode] = flt(detail.amount)
+
+	# Tax summary
+	tax_summary = _get_shift_tax_summary(invoices)
 
 	return {
 		"total_invoices": len(invoices),
 		"grand_total": grand_total,
 		"net_total": net_total,
+		"returns_count": returns_count,
 		"payment_summary": payment_summary,
 		"opening_balances": opening_balances,
+		"tax_summary": tax_summary,
 		"pos_profile": opening.pos_profile,
 		"company": opening.company,
+		"invoices": [
+			{
+				"name": inv.name,
+				"customer": inv.customer,
+				"customer_name": inv.customer_name,
+				"grand_total": inv.grand_total,
+				"is_return": inv.is_return,
+			}
+			for inv in invoices
+		],
 	}
 
 
@@ -242,3 +330,31 @@ def _enrich_shift_data(data, pos_profile):
 		frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0
 	)
 	data["stock_settings"] = {"allow_negative_stock": bool(allow_negative_stock)}
+
+
+def _get_shift_tax_summary(invoices):
+	"""Aggregate tax info across all shift invoices."""
+	if not invoices:
+		return []
+
+	inv_names = [inv.name for inv in invoices]
+	if not inv_names:
+		return []
+
+	taxes = frappe.db.sql(
+		"""
+		SELECT
+			account_head,
+			rate,
+			SUM(tax_amount) AS amount
+		FROM `tabSales Taxes and Charges`
+		WHERE parent IN ({placeholders})
+			AND parenttype = 'Sales Invoice'
+		GROUP BY account_head, rate
+		ORDER BY account_head
+		""".format(placeholders=", ".join(["%s"] * len(inv_names))),
+		inv_names,
+		as_dict=True,
+	)
+
+	return taxes

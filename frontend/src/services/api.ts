@@ -1,26 +1,76 @@
 /**
  * X POS API Service
- * Wraps frappe.call for clean async/await usage
+ * Works in both standalone SPA mode and embedded Frappe desk mode
  */
+
+function getCsrfToken(): string {
+  // Try multiple sources for CSRF token
+  return (
+    window.xpos?.csrf_token ||
+    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ||
+    ""
+  );
+}
+
+/**
+ * Make an API call using native fetch (standalone mode)
+ * Mirrors desktop/desk implementation for consistency
+ */
+async function fetchCall<T = unknown>(
+  method: string,
+  args: Record<string, unknown> = {}
+): Promise<T> {
+  const csrfToken = getCsrfToken();
+  
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "X-Frappe-CSRF-Token": csrfToken,
+  };
+
+  const response = await fetch(`/api/method/${method}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(args),
+    credentials: "same-origin",
+  });
+
+  const data = await response.json();
+
+  // Handle various error status codes
+  if (!response.ok || data.exc) {
+    let errorMsg: string;
+    
+    if (data._server_messages) {
+      try {
+        const serverMessages = JSON.parse(data._server_messages);
+        const firstMessage = serverMessages[0];
+        const parsed = typeof firstMessage === 'string' ? JSON.parse(firstMessage) : firstMessage;
+        errorMsg = parsed.message || parsed.title || String(parsed);
+      } catch {
+        errorMsg = data._server_messages;
+      }
+    } else if (data.exc) {
+      errorMsg = Array.isArray(data.exc) ? data.exc[0] : data.exc;
+    } else {
+      errorMsg = data.message || `HTTP error! status: ${response.status}`;
+    }
+    
+    throw new Error(errorMsg);
+  }
+
+  return data.message as T;
+}
 
 export function call<T = unknown>(
   method: string,
   args: Record<string, unknown> = {},
   callback?: (r: { message: T }) => void
 ): Promise<T> {
-  return new Promise((resolve, reject) => {
-    frappe.call({
-      method,
-      args,
-      async: true,
-      callback: (r: { message: unknown }) => {
-        if (callback) callback(r as { message: T });
-        resolve(r.message as T);
-      },
-      error: (err: unknown) => {
-        reject(err);
-      },
-    });
+  // Use native fetch for standalone mode
+  return fetchCall<T>(method, args).then((message) => {
+    if (callback) callback({ message });
+    return message;
   });
 }
 
@@ -28,17 +78,9 @@ export function getList<T = unknown>(
   doctype: string,
   args: Record<string, unknown> = {}
 ): Promise<T[]> {
-  return new Promise((resolve, reject) => {
-    frappe.call({
-      method: "frappe.client.get_list",
-      args: {
-        doctype,
-        ...args,
-      },
-      async: true,
-      callback: (r: { message: unknown }) => resolve(r.message as T[]),
-      error: (err: unknown) => reject(err),
-    });
+  return fetchCall<T[]>("frappe.client.get_list", {
+    doctype,
+    ...args,
   });
 }
 
@@ -47,27 +89,43 @@ export function getValue<T = unknown>(
   name: string | Record<string, unknown>,
   fieldname: string | string[]
 ): Promise<T> {
-  return new Promise((resolve, reject) => {
-    frappe.call({
-      method: "frappe.client.get_value",
-      args: { doctype, filters: name, fieldname },
-      async: true,
-      callback: (r: { message: unknown }) => resolve(r.message as T),
-      error: (err: unknown) => reject(err),
-    });
+  return fetchCall<T>("frappe.client.get_value", {
+    doctype,
+    filters: name,
+    fieldname,
   });
 }
 
+export function getDoc<T = unknown>(
+  doctype: string,
+  name: string
+): Promise<T> {
+  return fetchCall<T>("frappe.client.get", {
+    doctype,
+    name,
+  });
+}
+
+export function saveDoc<T = unknown>(
+  doc: Record<string, unknown>
+): Promise<T> {
+  return fetchCall<T>("frappe.client.save", { doc });
+}
+
+export function insertDoc<T = unknown>(
+  doc: Record<string, unknown>
+): Promise<T> {
+  return fetchCall<T>("frappe.client.insert", { doc });
+}
+
 /**
- * Format currency using Frappe's format_currency if available
+ * Format currency using Intl.NumberFormat
  */
 export function formatCurrency(value: number, currency?: string): string {
-  if (typeof frappe !== "undefined" && frappe.format_currency) {
-    return frappe.format_currency(value, currency);
-  }
+  const cur = currency || (window.xpos?.boot as { sysdefaults?: { currency?: string } })?.sysdefaults?.currency || "USD";
   return new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: currency || "USD",
+    currency: cur,
     minimumFractionDigits: 2,
   }).format(value || 0);
 }
@@ -78,6 +136,8 @@ export function formatCurrency(value: number, currency?: string): string {
 export function showSuccess(message: string): void {
   if (typeof frappe !== "undefined" && frappe.show_alert) {
     frappe.show_alert({ message, indicator: "green" }, 3);
+  } else {
+    console.log("[Success]", message);
   }
 }
 
@@ -87,6 +147,8 @@ export function showSuccess(message: string): void {
 export function showError(message: string): void {
   if (typeof frappe !== "undefined" && frappe.show_alert) {
     frappe.show_alert({ message, indicator: "red" }, 5);
+  } else {
+    console.error("[Error]", message);
   }
 }
 
@@ -96,5 +158,7 @@ export function showError(message: string): void {
 export function showInfo(message: string): void {
   if (typeof frappe !== "undefined" && frappe.show_alert) {
     frappe.show_alert({ message, indicator: "blue" }, 3);
+  } else {
+    console.info("[Info]", message);
   }
 }

@@ -1,0 +1,280 @@
+# Copyright (c) 2026, Ali Raza and contributors
+# For license information, please see license.txt
+
+"""
+POS Payments API.
+
+Provides the same payment features as POS Awesome:
+- Phone payment requests (M-Pesa, etc.)
+- Customer credit retrieval & redemption
+- Outstanding invoice lookup
+- Unallocated payment lookup
+- Payment entry creation
+"""
+
+import json
+import frappe
+from frappe import _
+from frappe.utils import flt, nowdate
+
+
+@frappe.whitelist()
+def get_available_credit(customer, company):
+	"""Return all available credit (outstanding returns + unallocated advances) for a customer.
+
+	Same as POS Awesome's get_available_credit.
+	"""
+	if not customer or not company:
+		return []
+
+	credits = []
+
+	# Unallocated payment entries (advances)
+	unallocated = frappe.db.sql(
+		"""
+		SELECT
+			pe.name AS credit_origin,
+			(pe.paid_amount - pe.total_allocated_amount) AS total_credit,
+			'Payment Entry' AS type,
+			pe.posting_date
+		FROM `tabPayment Entry` pe
+		WHERE pe.party_type = 'Customer'
+			AND pe.party = %(customer)s
+			AND pe.company = %(company)s
+			AND pe.docstatus = 1
+			AND pe.payment_type = 'Receive'
+			AND (pe.paid_amount - pe.total_allocated_amount) > 0
+		ORDER BY pe.posting_date ASC
+		""",
+		{"customer": customer, "company": company},
+		as_dict=True,
+	)
+	credits.extend(unallocated)
+
+	# Outstanding credit notes
+	credit_notes = frappe.db.sql(
+		"""
+		SELECT
+			si.name AS credit_origin,
+			ABS(si.outstanding_amount) AS total_credit,
+			'Sales Invoice' AS type,
+			si.posting_date
+		FROM `tabSales Invoice` si
+		WHERE si.customer = %(customer)s
+			AND si.company = %(company)s
+			AND si.docstatus = 1
+			AND si.is_return = 1
+			AND si.outstanding_amount < 0
+		ORDER BY si.posting_date ASC
+		""",
+		{"customer": customer, "company": company},
+		as_dict=True,
+	)
+	credits.extend(credit_notes)
+
+	return credits
+
+
+@frappe.whitelist()
+def get_outstanding_invoices(customer, company, currency=None, pos_profile=None, page_start=0, page_length=20):
+	"""Fetch outstanding invoices for a customer.
+
+	Same as POS Awesome's get_outstanding_invoices.
+	"""
+	filters = {
+		"customer": customer,
+		"company": company,
+		"docstatus": 1,
+		"outstanding_amount": [">", 0],
+		"is_return": 0,
+	}
+
+	if currency:
+		filters["currency"] = currency
+
+	invoices = frappe.get_list(
+		"Sales Invoice",
+		filters=filters,
+		fields=[
+			"name", "customer", "customer_name", "posting_date",
+			"grand_total", "outstanding_amount", "currency",
+		],
+		limit_start=page_start,
+		limit_page_length=page_length,
+		order_by="posting_date asc",
+	)
+
+	return invoices
+
+
+@frappe.whitelist()
+def get_unallocated_payments(customer, company, currency=None, mode_of_payment=None):
+	"""Returns unallocated payments, journal entries, and credit notes for a customer.
+
+	Same as POS Awesome's get_unallocated_payments.
+	"""
+	payments = []
+
+	# Unallocated payment entries
+	pe_filters = {
+		"party_type": "Customer",
+		"party": customer,
+		"company": company,
+		"docstatus": 1,
+		"payment_type": "Receive",
+		"unallocated_amount": [">", 0],
+	}
+	if mode_of_payment:
+		pe_filters["mode_of_payment"] = mode_of_payment
+
+	pe_list = frappe.get_list(
+		"Payment Entry",
+		filters=pe_filters,
+		fields=[
+			"name", "posting_date", "paid_amount",
+			"unallocated_amount", "mode_of_payment", "paid_to_account_currency as currency",
+		],
+	)
+	for pe in pe_list:
+		pe["type"] = "Payment Entry"
+		payments.append(pe)
+
+	# Unallocated credit notes
+	cn_list = frappe.db.sql(
+		"""
+		SELECT
+			name, posting_date, grand_total,
+			ABS(outstanding_amount) AS unallocated_amount,
+			currency
+		FROM `tabSales Invoice`
+		WHERE customer = %(customer)s
+			AND company = %(company)s
+			AND docstatus = 1
+			AND is_return = 1
+			AND outstanding_amount < 0
+		ORDER BY posting_date ASC
+		""",
+		{"customer": customer, "company": company},
+		as_dict=True,
+	)
+	for cn in cn_list:
+		cn["type"] = "Credit Note"
+		payments.append(cn)
+
+	return payments
+
+
+@frappe.whitelist()
+def create_payment_entry(data):
+	"""Create a payment entry for a customer.
+
+	Creates a Payment Entry document for manual payments outside the invoice flow.
+	"""
+	if isinstance(data, str):
+		data = json.loads(data)
+
+	customer = data.get("customer")
+	company = data.get("company")
+	amount = flt(data.get("amount"))
+	mode_of_payment = data.get("mode_of_payment")
+
+	if not all([customer, company, amount, mode_of_payment]):
+		frappe.throw(_("Customer, Company, Amount, and Mode of Payment are required"))
+
+	# Get the account for the mode of payment
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+
+	account_details = get_bank_cash_account(mode_of_payment, company)
+
+	pe = frappe.new_doc("Payment Entry")
+	pe.payment_type = "Receive"
+	pe.party_type = "Customer"
+	pe.party = customer
+	pe.company = company
+	pe.paid_amount = amount
+	pe.received_amount = amount
+	pe.mode_of_payment = mode_of_payment
+	pe.paid_to = account_details.get("account")
+	pe.posting_date = nowdate()
+	pe.reference_no = data.get("reference_no", "POS Payment")
+	pe.reference_date = nowdate()
+
+	if data.get("reference_doctype") and data.get("reference_name"):
+		pe.append("references", {
+			"reference_doctype": data["reference_doctype"],
+			"reference_name": data["reference_name"],
+			"allocated_amount": amount,
+		})
+
+	pe.insert(ignore_permissions=True)
+
+	if data.get("submit"):
+		pe.submit()
+
+	return {
+		"name": pe.name,
+		"paid_amount": pe.paid_amount,
+		"status": "Submitted" if pe.docstatus == 1 else "Draft",
+	}
+
+
+@frappe.whitelist()
+def create_payment_request(doc):
+	"""Creates a phone payment request (M-Pesa, etc.).
+
+	Same as POS Awesome's create_payment_request.
+	"""
+	if isinstance(doc, str):
+		doc = json.loads(doc)
+
+	for pay in doc.get("payments", []):
+		if pay.get("type") == "Phone":
+			if flt(pay.get("amount")) <= 0:
+				frappe.throw(_("Payment amount cannot be less than or equal to 0"))
+
+			if not doc.get("contact_mobile"):
+				frappe.throw(_("Please enter the phone number first"))
+
+			# Check for existing payment request
+			payment_gateway_account = frappe.db.get_value(
+				"Payment Gateway Account",
+				{"payment_account": pay.get("account")},
+				"name",
+			)
+
+			existing = frappe.db.exists({
+				"doctype": "Payment Request",
+				"reference_doctype": "Sales Invoice",
+				"reference_name": doc.get("name"),
+				"payment_gateway_account": payment_gateway_account,
+			})
+
+			if existing:
+				pr = frappe.get_doc("Payment Request", existing)
+				pr.request_phone_payment()
+				return pr.as_dict()
+
+			# Create new payment request
+			from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+
+			args = {
+				"dt": "Sales Invoice",
+				"dn": doc.get("name"),
+				"recipient_id": doc.get("contact_mobile"),
+				"mode_of_payment": pay.get("mode_of_payment"),
+				"payment_gateway_account": payment_gateway_account,
+				"payment_request_type": "Inward",
+				"party_type": "Customer",
+				"party": doc.get("customer"),
+				"return_doc": True,
+			}
+
+			try:
+				pr = make_payment_request(**args)
+				pr.submit()
+				return pr.as_dict()
+			except Exception as e:
+				frappe.log_error(f"Payment request creation failed: {e}", "X POS Payment Request")
+				frappe.throw(_("Failed to create payment request: {0}").format(str(e)))
+
+	return None

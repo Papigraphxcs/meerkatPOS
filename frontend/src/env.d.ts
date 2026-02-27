@@ -67,4 +67,10 @@ declare const frappe: Frappe;
 // Window augmentation
 interface Window {
   __xposBundlePromise?: Promise<unknown>;
+  xpos?: {
+    boot?: Record<string, unknown>;
+    _messages?: Record<string, string>;
+    csrf_token?: string;
+  };
+  frappe?: Frappe;
 }

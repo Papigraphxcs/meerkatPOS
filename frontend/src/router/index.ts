@@ -22,11 +22,16 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
+// Standalone SPA router instance
+export const router: Router = createRouter({
+  history: createWebHistory("/xpos"),
+  routes,
+});
+
+// Factory function for embedded mode (legacy)
 export function createXPosRouter(): Router {
-  const router = createRouter({
+  return createRouter({
     history: createWebHistory("/app/xpos"),
     routes,
   });
-
-  return router;
 }

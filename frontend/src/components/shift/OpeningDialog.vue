@@ -1,100 +1,94 @@
 <template>
-	<div class="fixed inset-0 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 z-50 flex items-center justify-center p-4">
-		<div class="w-full max-w-md animate-scale-in">
+	<div class="fixed inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/95 z-50 flex items-center justify-center p-4">
+		<div class="w-full max-w-md animate-in fade-in zoom-in-95 duration-300">
 			<!-- Logo & Title -->
 			<div class="text-center mb-8">
 				<div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 shadow-lg">
-					<svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-					</svg>
+					<Zap class="w-8 h-8 text-primary-foreground" />
 				</div>
-				<h1 class="text-2xl font-bold text-white mb-1">X POS</h1>
-				<p class="text-primary-200 text-sm">Open your shift to get started</p>
+				<h1 class="text-2xl font-bold text-primary-foreground mb-1">X POS</h1>
+				<p class="text-primary-foreground/70 text-sm">Open your shift to get started</p>
 			</div>
 
 			<!-- Form Card -->
-			<div class="bg-white rounded-2xl shadow-elevated p-6 space-y-5">
-				<!-- Loading -->
-				<div v-if="isLoadingData" class="flex items-center justify-center py-8">
-					<div class="w-8 h-8 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-				</div>
-
-				<template v-else>
-					<!-- POS Profile Select -->
-					<div>
-						<label class="text-sm font-semibold text-surface-700 mb-1.5 block">POS Profile</label>
-						<select
-							v-model="selectedProfile"
-							class="xpos-input"
-							@change="onProfileChange"
-						>
-							<option value="" disabled>Select POS Profile</option>
-							<option
-								v-for="profile in profiles"
-								:key="profile.name"
-								:value="profile.name"
-							>
-								{{ profile.name }} ({{ profile.company }})
-							</option>
-						</select>
+			<Card>
+				<CardContent class="p-6 space-y-5">
+					<!-- Loading -->
+					<div v-if="isLoadingData" class="flex items-center justify-center py-8">
+						<Loader2 class="w-8 h-8 text-primary animate-spin" />
 					</div>
 
-					<!-- Company (auto-filled) -->
-					<div v-if="selectedCompany">
-						<label class="text-sm font-semibold text-surface-700 mb-1.5 block">Company</label>
-						<div class="xpos-input bg-surface-50 text-surface-600">{{ selectedCompany }}</div>
-					</div>
-
-					<!-- Opening Balance -->
-					<div v-if="paymentMethodsList.length > 0">
-						<label class="text-sm font-semibold text-surface-700 mb-2 block">Opening Cash Balance</label>
-						<div class="space-y-2">
-							<div
-								v-for="method in paymentMethodsList"
-								:key="method.mode_of_payment"
-								class="flex items-center gap-3"
+					<template v-else>
+						<!-- POS Profile Select -->
+						<div>
+							<label class="text-sm font-semibold text-foreground mb-1.5 block">POS Profile</label>
+							<select
+								v-model="selectedProfile"
+								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+								@change="onProfileChange"
 							>
-								<span class="text-sm text-surface-600 w-28 truncate">{{ method.mode_of_payment }}</span>
-								<input
-									v-model.number="method.opening_amount"
-									type="number"
-									min="0"
-									step="0.01"
-									class="xpos-input flex-1"
-									placeholder="0.00"
-								/>
+								<option value="" disabled>Select POS Profile</option>
+								<option
+									v-for="profile in profiles"
+									:key="profile.name"
+									:value="profile.name"
+								>
+									{{ profile.name }} ({{ profile.company }})
+								</option>
+							</select>
+						</div>
+
+						<!-- Company (auto-filled) -->
+						<div v-if="selectedCompany">
+							<label class="text-sm font-semibold text-foreground mb-1.5 block">Company</label>
+							<div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground">{{ selectedCompany }}</div>
+						</div>
+
+						<!-- Opening Balance -->
+						<div v-if="paymentMethodsList.length > 0">
+							<label class="text-sm font-semibold text-foreground mb-2 block">Opening Cash Balance</label>
+							<div class="space-y-2">
+								<div
+									v-for="method in paymentMethodsList"
+									:key="method.mode_of_payment"
+									class="flex items-center gap-3"
+								>
+									<span class="text-sm text-muted-foreground w-28 truncate">{{ method.mode_of_payment }}</span>
+									<Input
+										v-model.number="method.opening_amount"
+										type="number"
+										min="0"
+										step="0.01"
+										class="flex-1"
+										placeholder="0.00"
+									/>
+								</div>
 							</div>
 						</div>
-					</div>
 
-					<!-- Open Shift Button -->
-					<button
-						@click="handleOpenShift"
-						:disabled="!selectedProfile || isOpening"
-						class="w-full xpos-btn-primary xpos-btn-lg text-base font-bold
-									 bg-gradient-to-r from-primary-600 to-primary-500
-									 disabled:from-surface-300 disabled:to-surface-300"
-					>
-						<span v-if="isOpening" class="flex items-center gap-2">
-							<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-							</svg>
-							Opening Shift...
-						</span>
-						<span v-else class="flex items-center gap-2">
-							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-							</svg>
-							Open Shift
-						</span>
-					</button>
-				</template>
-			</div>
+						<!-- Open Shift Button -->
+						<Button
+							size="xl"
+							class="w-full font-bold bg-gradient-to-r from-primary to-primary/90"
+							:disabled="!selectedProfile || isOpening"
+							@click="handleOpenShift"
+						>
+							<template v-if="isOpening">
+								<Loader2 class="w-5 h-5 animate-spin" />
+								Opening Shift...
+							</template>
+							<template v-else>
+								<Lock class="w-5 h-5" />
+								Open Shift
+							</template>
+						</Button>
+					</template>
+				</CardContent>
+			</Card>
 
 			<!-- Back to desk link -->
 			<div class="text-center mt-4">
-				<a href="/app" class="text-primary-200 hover:text-white text-sm transition-colors no-underline">
+				<a href="/app" class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline">
 					← Back to Desk
 				</a>
 			</div>
@@ -106,6 +100,10 @@
 import { ref, onMounted } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { showError } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Zap, Loader2, Lock } from "lucide-vue-next";
 
 interface ProfileOption {
 	name: string;
@@ -134,7 +132,6 @@ onMounted(async () => {
 		const data = await posStore.fetchOpeningData();
 		profiles.value = (data?.pos_profiles || []) as ProfileOption[];
 
-		// Auto-select if only one profile
 		if (profiles.value.length === 1) {
 			selectedProfile.value = profiles.value[0].name;
 			onProfileChange();
@@ -151,7 +148,6 @@ function onProfileChange() {
 	if (profile) {
 		selectedCompany.value = profile.company;
 
-		// Get payment methods for this profile
 		const openingData = posStore.openingData as Record<string, unknown> | null;
 		const methods = ((openingData?.payment_methods || []) as PaymentMethodEntry[]).filter(
 			(m) => m.parent === selectedProfile.value
@@ -161,7 +157,6 @@ function onProfileChange() {
 			opening_amount: 0,
 		}));
 
-		// If no methods found, add Cash as default
 		if (paymentMethodsList.value.length === 0) {
 			paymentMethodsList.value = [{ mode_of_payment: "Cash", opening_amount: 0 }];
 		}

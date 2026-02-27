@@ -12,24 +12,25 @@ required_apps = ["frappe", "erpnext"]
 add_to_apps_screen = [
     {
         "name": "xpos",
-        "logo": "/assets/xpos/images/xpos-logo.png",
+        "logo": "/assets/xpos/images/xpos-logo.svg",
         "title": "X POS",
-        "route": "/app/xpos",
+        "route": "/xpos",
     }
+]
+
+# Website Route Rules
+# -------------------
+# Serve the X POS SPA for deep links under /xpos
+website_route_rules = [
+    {"from_route": "/xpos", "to_route": "xpos"},
+    {"from_route": "/xpos/<path:app_path>", "to_route": "xpos"},
 ]
 
 # Includes in <head>
 # ------------------
+# Note: Removed app_include_js and app_include_css as X POS is now a standalone SPA
 
 _asset_version = get_build_version()
-
-app_include_js = [
-    f"/assets/xpos/dist/js/loader.js?v={_asset_version}",
-]
-
-app_include_css = [
-    f"/assets/xpos/dist/js/xpos.css?v={_asset_version}",
-]
 
 # include js in doctype views
 doctype_js = {
