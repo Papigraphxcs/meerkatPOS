@@ -32,18 +32,38 @@
 			<div class="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
 				<!-- Left: Amount & Methods -->
 				<div class="flex-1 flex flex-col p-4 gap-3 min-w-0 overflow-y-auto xpos-scrollbar">
-					<!-- Grand Total -->
-					<div class="text-center py-3 rounded-xl border" :class="cartStore.isReturnMode
+					<!-- Grand Total with Tax Breakdown -->
+					<div class="rounded-xl border" :class="cartStore.isReturnMode
 						? 'bg-amber-500/5 border-amber-500/10'
 						: 'bg-primary/5 border-primary/10'">
-						<p class="text-xs font-medium mb-0.5"
-							:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary/70'">
-							{{ cartStore.isReturnMode ? 'Refund Amount' : 'Amount Due' }}
-						</p>
-						<p class="text-3xl font-extrabold tabular-nums"
-							:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary'">
-							{{ posStore.currencySymbol }}{{ formatPrice(Math.abs(cartStore.grandTotal)) }}
-						</p>
+						<div class="text-center py-3">
+							<p class="text-xs font-medium mb-0.5"
+								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary/70'">
+								{{ cartStore.isReturnMode ? 'Refund Amount' : 'Amount Due' }}
+							</p>
+							<p class="text-3xl font-extrabold tabular-nums"
+								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary'">
+								{{ posStore.currencySymbol }}{{ formatPrice(Math.abs(cartStore.grandTotal)) }}
+							</p>
+						</div>
+						<!-- Tax Summary (collapsed) -->
+						<div v-if="cartStore.calculatedTaxes.length > 0" class="px-4 pb-3 pt-1 border-t border-border/50">
+							<div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
+								<span>Subtotal</span>
+								<span>{{ posStore.currencySymbol }}{{ formatPrice(cartStore.subtotal) }}</span>
+							</div>
+							<div v-for="(tax, idx) in cartStore.calculatedTaxes" :key="idx"
+								class="flex items-center justify-between text-xs text-muted-foreground">
+								<span class="flex items-center gap-1">
+									{{ tax.description }}
+									<span class="text-[10px]">({{ tax.rate }}%)</span>
+									<span v-if="tax.included_in_print_rate" class="text-[9px] text-blue-500">incl.</span>
+								</span>
+								<span :class="tax.included_in_print_rate ? 'text-blue-500' : ''">
+									{{ tax.included_in_print_rate ? '' : '+' }}{{ posStore.currencySymbol }}{{ formatPrice(tax.amount) }}
+								</span>
+							</div>
+						</div>
 					</div>
 
 					<!-- Payment Methods -->
@@ -211,23 +231,44 @@
 				class="shrink-0 border-t border-border px-5 py-3 bg-muted/30 justify-between sm:justify-between">
 				<div class="hidden sm:flex items-center gap-2 text-[10px] text-muted-foreground">
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Enter</kbd>
-					<span>Submit</span>
+					<span>Save & Print</span>
+					<span class="mx-1">|</span>
+					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Shift+Enter</kbd>
+					<span>Save Only</span>
 					<span class="mx-1">|</span>
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Esc</kbd>
 					<span>Cancel</span>
 				</div>
-				<div class="flex items-center gap-3">
+				<div class="flex items-center gap-2">
 					<Button variant="outline" @click="close" tabindex="-1">Cancel</Button>
-					<Button ref="submitBtn" :variant="cartStore.isReturnMode ? 'destructive' : 'success'"
-						class="font-bold px-6 shadow-md" :disabled="isSubmitting || !canSubmit" @click="submitPayment">
-						<template v-if="isSubmitting">
+					<Button
+						variant="outline"
+						class="font-medium"
+						:disabled="isSubmitting || !canSubmit"
+						@click="submitPayment(false)"
+					>
+						<template v-if="isSubmitting && !printAfterSave">
+							<Loader2 class="w-4 h-4 animate-spin" />
+						</template>
+						<template v-else>
+							<Save class="w-4 h-4" />
+						</template>
+						Save Only
+					</Button>
+					<Button
+						ref="submitBtn"
+						:variant="cartStore.isReturnMode ? 'destructive' : 'success'"
+						class="font-bold px-4 shadow-md"
+						:disabled="isSubmitting || !canSubmit"
+						@click="submitPayment(true)"
+					>
+						<template v-if="isSubmitting && printAfterSave">
 							<Loader2 class="w-4 h-4 animate-spin" />
 							Processing...
 						</template>
 						<template v-else>
-							<Check class="w-4 h-4" />
-							{{ cartStore.isReturnMode ? 'Process Return' : 'Complete' }} {{ posStore.currencySymbol }}{{
-								formatPrice(Math.abs(cartStore.grandTotal)) }}
+							<Printer class="w-4 h-4" />
+							{{ cartStore.isReturnMode ? 'Return & Print' : 'Save & Print' }}
 						</template>
 					</Button>
 				</div>
@@ -248,7 +289,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, X, Check, Loader2, Delete, Gift, RotateCcw, Plus } from "lucide-vue-next";
+import { Wallet, X, Check, Loader2, Delete, Gift, RotateCcw, Plus, Save, Printer } from "lucide-vue-next";
 
 import type { InvoicePayment } from "@/types/pos.types";
 
@@ -266,6 +307,7 @@ const selectedMethod = ref("");
 const tenderedAmount = ref(0);
 const isSubmitting = ref(false);
 const writeOffInput = ref(0);
+const printAfterSave = ref(false);
 
 // Split payment state
 const isSplitPayment = ref(false);
@@ -372,7 +414,34 @@ onMounted(async () => {
 			}
 		} catch { /* ignore */ }
 	}
+
+	// Add keyboard shortcut handler
+	document.addEventListener("keydown", handleGlobalKeydown);
 });
+
+onUnmounted(() => {
+	document.removeEventListener("keydown", handleGlobalKeydown);
+});
+
+function handleGlobalKeydown(e: KeyboardEvent) {
+	// Only handle if dialog is open and not already submitting
+	if (!cartStore.showPaymentDialog || isSubmitting.value) return;
+
+	// Enter key - submit with print (default)
+	if (e.key === "Enter" && !e.shiftKey && canSubmit.value) {
+		// Don't interfere with input fields
+		const target = e.target as HTMLElement;
+		if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+		e.preventDefault();
+		submitPayment(true);
+	}
+
+	// Shift+Enter - submit without print
+	if (e.key === "Enter" && e.shiftKey && canSubmit.value) {
+		e.preventDefault();
+		submitPayment(false);
+	}
+}
 
 // ─── Keyboard Navigation ─────────────────────────
 function focusMethod(idx: number) {
@@ -471,9 +540,56 @@ function handleNumpad(key: string) {
 	}
 }
 
-async function submitPayment() {
+// ─── Validation ──────────────────────────────────
+function validateForSubmission(): { valid: boolean; message?: string } {
+	// Common validations
+	if (cartStore.isEmpty) {
+		return { valid: false, message: "Cart is empty" };
+	}
+
+	if (!cartStore.customer?.name) {
+		return { valid: false, message: "Customer is required" };
+	}
+
+	// Return-specific validations
+	if (cartStore.isReturnMode) {
+		if (!cartStore.returnAgainst) {
+			return { valid: false, message: "Return against invoice is required for returns" };
+		}
+
+		// Validate all items have negative quantities
+		const invalidItems = cartStore.items.filter(item => item.qty >= 0);
+		if (invalidItems.length > 0) {
+			return { valid: false, message: "Return items must have negative quantities" };
+		}
+
+		// Validate grand total is negative
+		if (cartStore.grandTotal >= 0) {
+			return { valid: false, message: "Return total must be negative (refund amount)" };
+		}
+	} else {
+		// Regular sale validations
+		const invalidItems = cartStore.items.filter(item => item.qty <= 0);
+		if (invalidItems.length > 0) {
+			return { valid: false, message: "All items must have positive quantities" };
+		}
+	}
+
+	return { valid: true };
+}
+
+async function submitPayment(withPrint: boolean = true) {
 	if (isSubmitting.value || !canSubmit.value) return;
+
+	// Run validation
+	const validation = validateForSubmission();
+	if (!validation.valid) {
+		showError(validation.message || "Validation failed");
+		return;
+	}
+
 	isSubmitting.value = true;
+	printAfterSave.value = withPrint;
 
 	try {
 		const invoiceData = cartStore.getInvoiceData(
@@ -487,7 +603,7 @@ async function submitPayment() {
 			invoiceData.payments = [
 				{
 					mode_of_payment: selectedMethod.value,
-					amount: roundCurrency(Math.abs(cartStore.grandTotal)),
+					amount: roundCurrency(cartStore.grandTotal),
 				},
 			];
 		}
@@ -503,12 +619,55 @@ async function submitPayment() {
 		} else {
 			showSuccess("Invoice " + result.name + " created successfully!");
 		}
+
+		// Print invoice if requested
+		if (withPrint && result.name) {
+			await printInvoice(result.name);
+		}
+
 		cartStore.clearAll();
 	} catch (error: unknown) {
 		showError("Payment failed: " + extractErrorMessage(error));
 		console.error("Payment error:", error);
 	} finally {
 		isSubmitting.value = false;
+		printAfterSave.value = false;
+	}
+}
+
+/**
+ * Print the invoice using the configured print format
+ */
+async function printInvoice(invoiceName: string) {
+	try {
+		const printFormat = posStore.printSettings?.print_format || "POS Invoice";
+		const letterHead = posStore.printSettings?.letter_head || "";
+
+		// Determine doctype based on POS profile settings
+		const usePosInvoice = posStore.posProfile?.create_pos_invoice_instead_of_sales_invoice;
+		const doctype = usePosInvoice ? "POS Invoice" : "Sales Invoice";
+
+		// Build print URL
+		const baseUrl = window.location.origin;
+		const printUrl = `${baseUrl}/printview?doctype=${encodeURIComponent(doctype)}&name=${encodeURIComponent(invoiceName)}&format=${encodeURIComponent(printFormat)}&no_letterhead=${letterHead ? '0' : '1'}`;
+
+		// Open print window
+		const printWindow = window.open(printUrl, "_blank", "width=800,height=600");
+
+		if (printWindow) {
+			// Wait for content to load then trigger print
+			printWindow.onload = () => {
+				setTimeout(() => {
+					printWindow.print();
+				}, 500);
+			};
+		} else {
+			// Fallback: open in same tab if popup blocked
+			window.open(printUrl, "_blank");
+		}
+	} catch (error) {
+		console.error("Print error:", error);
+		showError("Failed to print invoice");
 	}
 }
 

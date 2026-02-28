@@ -111,6 +111,7 @@ import { ref, computed, watch } from "vue";
 import { useItemStore } from "@/stores/itemStore";
 import { useCartStore } from "@/stores/cartStore";
 import { usePosStore } from "@/stores/posStore";
+import { showError } from "@/services/api";
 import {
     Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -194,7 +195,7 @@ function addToCart(): void {
 
     if (detail.value?.has_serial_no && selectedSerials.value.length > 0) {
         for (const sn of selectedSerials.value) {
-            cartStore.addItemWithDetails(
+            const result = cartStore.addItemWithDetails(
                 itemForDetail.value,
                 1,
                 rate,
@@ -203,9 +204,13 @@ function addToCart(): void {
                 selectedBatch.value,
                 uomConversionFactor.value
             );
+            if (!result.success) {
+                showError(result.message || "Cannot add item to cart");
+                return;
+            }
         }
     } else {
-        cartStore.addItemWithDetails(
+        const result = cartStore.addItemWithDetails(
             itemForDetail.value,
             selectedQty.value,
             rate,
@@ -214,6 +219,10 @@ function addToCart(): void {
             selectedBatch.value,
             uomConversionFactor.value
         );
+        if (!result.success) {
+            showError(result.message || "Cannot add item to cart");
+            return;
+        }
     }
 
     close();

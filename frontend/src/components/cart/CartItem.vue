@@ -19,8 +19,9 @@
 				{{ item.item_name }}
 			</p>
 
-			<!-- Editable Rate -->
-			<div class="flex items-center gap-1 mt-0.5">
+			<!-- Rate & UOM Row -->
+			<div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+				<!-- Editable Rate -->
 				<template v-if="posStore.allowEditRate">
 					<span class="text-[11px] text-muted-foreground">{{ currencySymbol }}</span>
 					<input
@@ -33,15 +34,48 @@
 								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 						@change="onRateChange"
 					/>
-					<span class="text-[11px] text-muted-foreground">each</span>
 				</template>
 				<p v-else class="text-[11px] text-muted-foreground">
-					{{ currencySymbol }}{{ formatPrice(item.rate) }} each
+					{{ currencySymbol }}{{ formatPrice(item.rate) }}
 				</p>
+
+				<!-- UOM Selection -->
+				<span class="text-[11px] text-muted-foreground">/</span>
+				<button
+					v-if="posStore.allowEditRate && hasMultipleUOMs"
+					@click="showUOMSelector = !showUOMSelector"
+					class="text-[11px] text-primary hover:underline focus:outline-none"
+				>
+					{{ item.uom || item.stock_uom }}
+					<ChevronDown class="w-3 h-3 inline-block" />
+				</button>
+				<span v-else class="text-[11px] text-muted-foreground">
+					{{ item.uom || item.stock_uom }}
+				</span>
+			</div>
+
+			<!-- UOM Dropdown -->
+			<div v-if="showUOMSelector && itemUOMs.length > 0" class="mt-1 p-1.5 bg-muted rounded-md">
+				<div class="flex flex-wrap gap-1">
+					<button
+						v-for="u in itemUOMs"
+						:key="u.uom"
+						@click="selectUOM(u)"
+						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all"
+						:class="(item.uom || item.stock_uom) === u.uom
+							? 'bg-primary text-primary-foreground'
+							: 'bg-background border border-border hover:border-primary/40'"
+					>
+						{{ u.uom }}
+						<span v-if="u.conversion_factor !== 1" class="text-[9px] opacity-70">
+							(×{{ u.conversion_factor }})
+						</span>
+					</button>
+				</div>
 			</div>
 
 			<!-- Qty Controls -->
-			<div class="flex items-center gap-1.5 mt-1.5">
+			<div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
 				<Button variant="secondary" size="icon-sm" class="w-6 h-6" @click="decrementQty">
 					<Minus class="w-3 h-3" />
 				</Button>
@@ -59,22 +93,56 @@
 					<Plus class="w-3 h-3" />
 				</Button>
 
-				<!-- Inline Discount (if allowed) -->
+				<!-- Discount Toggle Button -->
 				<template v-if="posStore.allowEditItemDiscount">
-					<span class="text-[10px] text-muted-foreground ml-1">disc:</span>
+					<button
+						@click="showDiscountInput = !showDiscountInput"
+						class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all"
+						:class="hasItemDiscount
+							? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
+							: 'bg-muted text-muted-foreground hover:bg-emerald-50 dark:hover:bg-emerald-900/20'"
+					>
+						<Percent class="w-3 h-3 inline-block" />
+						{{ hasItemDiscount ? formatDiscount : 'Disc' }}
+					</button>
+				</template>
+			</div>
+
+			<!-- Discount Input Panel -->
+			<div v-if="showDiscountInput && posStore.allowEditItemDiscount" class="mt-1.5 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-md border border-emerald-200 dark:border-emerald-800">
+				<div class="flex items-center gap-2">
+					<button
+						@click="discountType = 'percentage'"
+						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all"
+						:class="discountType === 'percentage'
+							? 'bg-emerald-600 text-white'
+							: 'bg-white dark:bg-muted border border-emerald-300 dark:border-emerald-700'"
+					>
+						%
+					</button>
+					<button
+						@click="discountType = 'amount'"
+						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all"
+						:class="discountType === 'amount'
+							? 'bg-emerald-600 text-white'
+							: 'bg-white dark:bg-muted border border-emerald-300 dark:border-emerald-700'"
+					>
+						{{ currencySymbol }}
+					</button>
 					<input
-						:value="item.discount_percentage || 0"
+						v-model.number="discountInput"
 						type="number"
 						min="0"
-						:max="maxDiscount || 100"
+						:max="discountType === 'percentage' ? (maxDiscount || 100) : undefined"
 						step="0.5"
-						class="w-10 h-6 text-center text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-md
-								 border border-emerald-200 dark:border-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-400
+						placeholder="0"
+						class="flex-1 h-6 text-center text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-white dark:bg-muted rounded
+								 border border-emerald-300 dark:border-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-400
 								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-						@change="onDiscountChange"
+						@blur="applyDiscount"
+						@keydown.enter="applyDiscount"
 					/>
-					<span class="text-[10px] text-muted-foreground">%</span>
-				</template>
+				</div>
 			</div>
 		</div>
 
@@ -82,6 +150,9 @@
 		<div class="flex flex-col items-end gap-1 shrink-0">
 			<span class="text-sm font-bold text-foreground tabular-nums">
 				{{ currencySymbol }}{{ formatPrice(lineTotal) }}
+			</span>
+			<span v-if="hasItemDiscount" class="text-[10px] text-emerald-600 dark:text-emerald-400">
+				-{{ currencySymbol }}{{ formatPrice(discountAmount) }}
 			</span>
 			<Button
 				variant="ghost"
@@ -96,10 +167,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { usePosStore } from "@/stores/posStore";
+import { useItemStore } from "@/stores/itemStore";
 import { Button } from "@/components/ui/button";
-import { Package, Minus, Plus, Trash2 } from "lucide-vue-next";
+import { Package, Minus, Plus, Trash2, Percent, ChevronDown } from "lucide-vue-next";
+import type { ItemUOM } from "@/types/pos.types";
 
 const props = defineProps({
 	item: { type: Object, required: true },
@@ -107,19 +180,99 @@ const props = defineProps({
 	currencySymbol: { type: String, default: "$" },
 });
 
-const emit = defineEmits(["update-qty", "update-rate", "update-discount", "remove"]);
+const emit = defineEmits(["update-qty", "update-rate", "update-discount", "update-uom", "remove"]);
 
 const posStore = usePosStore();
+const itemStore = useItemStore();
+
+// Local state
+const showUOMSelector = ref(false);
+const showDiscountInput = ref(false);
+const discountType = ref<"percentage" | "amount">("percentage");
+const discountInput = ref(0);
+const itemUOMs = ref<ItemUOM[]>([]);
 
 const maxDiscount = computed(() => posStore.maxDiscountAllowed);
 
+const hasMultipleUOMs = computed(() => itemUOMs.value.length > 1);
+
+const hasItemDiscount = computed(() =>
+	(props.item.discount_percentage || 0) > 0 || (props.item.discount_amount || 0) > 0
+);
+
+const formatDiscount = computed(() => {
+	if (props.item.discount_percentage > 0) {
+		return `${props.item.discount_percentage}%`;
+	}
+	if (props.item.discount_amount > 0) {
+		return `${props.currencySymbol}${props.item.discount_amount}`;
+	}
+	return '';
+});
+
+const discountAmount = computed(() => {
+	const total = props.item.qty * props.item.rate;
+	if (props.item.discount_percentage > 0) {
+		return (total * props.item.discount_percentage) / 100;
+	}
+	// For amount discount on return items (negative qty), negate the discount
+	// so calculations work correctly
+	const amt = props.item.discount_amount || 0;
+	return props.item.qty < 0 ? -amt : amt;
+});
+
 const lineTotal = computed(() => {
 	const total = props.item.qty * props.item.rate;
-	const discount = props.item.discount_percentage
-		? (total * props.item.discount_percentage) / 100
-		: props.item.discount_amount || 0;
-	return Math.round((total - discount + Number.EPSILON) * 100) / 100;
+	return Math.round((total - discountAmount.value + Number.EPSILON) * 100) / 100;
 });
+
+// Load item UOMs on mount
+onMounted(async () => {
+	if (posStore.allowEditRate) {
+		await loadItemUOMs();
+	}
+	// Set initial discount values
+	if (props.item.discount_percentage > 0) {
+		discountType.value = "percentage";
+		discountInput.value = props.item.discount_percentage;
+	} else if (props.item.discount_amount > 0) {
+		discountType.value = "amount";
+		discountInput.value = props.item.discount_amount;
+	}
+});
+
+// Watch for item changes to reload UOMs
+watch(() => props.item.item_code, async () => {
+	if (posStore.allowEditRate) {
+		await loadItemUOMs();
+	}
+});
+
+async function loadItemUOMs() {
+	try {
+		const detail = await itemStore.fetchItemDetail(
+			props.item.item_code,
+			posStore.profileName,
+			posStore.warehouse
+		);
+		if (detail?.uoms) {
+			itemUOMs.value = detail.uoms;
+		} else {
+			// Default to stock UOM if no UOMs returned
+			itemUOMs.value = [{ uom: props.item.stock_uom || props.item.uom, conversion_factor: 1 }];
+		}
+	} catch {
+		itemUOMs.value = [{ uom: props.item.stock_uom || props.item.uom, conversion_factor: 1 }];
+	}
+}
+
+function selectUOM(u: ItemUOM) {
+	// Calculate new rate based on conversion factor
+	const baseRate = props.item.rate / (props.item.conversion_factor || 1);
+	const newRate = Math.round(baseRate * u.conversion_factor * 100) / 100;
+	emit("update-uom", props.index, u.uom, newRate, u.conversion_factor);
+	showUOMSelector.value = false;
+}
 
 function incrementQty() {
 	emit("update-qty", props.index, props.item.qty + 1);
@@ -139,11 +292,13 @@ function onRateChange(e: Event) {
 	emit("update-rate", props.index, Math.round(val * 100) / 100);
 }
 
-function onDiscountChange(e: Event) {
-	let val = parseFloat((e.target as HTMLInputElement).value) || 0;
-	const max = maxDiscount.value || 100;
-	val = Math.min(val, max);
-	emit("update-discount", props.index, "percentage", val);
+function applyDiscount() {
+	let val = discountInput.value || 0;
+	if (discountType.value === "percentage") {
+		const max = maxDiscount.value || 100;
+		val = Math.min(val, max);
+	}
+	emit("update-discount", props.index, discountType.value, val);
 }
 
 function formatPrice(price: number | string) {

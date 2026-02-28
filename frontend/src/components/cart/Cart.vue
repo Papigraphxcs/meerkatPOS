@@ -18,7 +18,7 @@
 
 		<!-- Cart Header -->
 		<div class="shrink-0 px-4 pt-4 pb-3">
-			<div class="flex items-center justify-between mb-3">
+			<div class="flex items-center justify-between mb-3 space-x-2">
 				<h2 class="text-base font-bold text-foreground flex items-center gap-2">
 					<ShoppingCart class="w-5 h-5 text-primary dark:text-primary" />
 					Cart
@@ -26,16 +26,35 @@
 						{{ cartStore.itemCount }}
 					</Badge>
 				</h2>
+				<Button
+					v-if="cartStore.customer && !cartStore.isReturnMode"
+					variant="outline"
+					size="sm"
+					class="w-fit justify-start gap-2 border-violet-300 text-violet-600 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400 dark:hover:bg-violet-900/20"
+					@click="customerStore.showLoyaltyDialog = true"
+				>
+				<Gift class="w-4 h-4" />
+				Loyalty Program
+			</Button>
 			</div>
 
 			<!-- Customer Selection -->
 			<button
-				@click="customerStore.showCustomerDialog = true; customerStore.searchCustomers()"
-				class="w-full flex items-center gap-3 p-2.5 rounded-lg border border-dashed border-border
-							 hover:border-primary hover:bg-primary/5 transition-all duration-200 group
-							 dark:border-muted-foreground/30 dark:hover:border-primary"
+				@click="handleCustomerClick"
+				class="w-full flex items-center gap-3 p-2.5 rounded-lg border transition-all duration-200 group"
+				:class="cartStore.isReturnMode
+					? 'border-border bg-muted/50 cursor-not-allowed dark:border-muted-foreground/30'
+					: 'border-dashed border-border hover:border-primary hover:bg-primary/5 dark:border-muted-foreground/30 dark:hover:border-primary'"
+				:disabled="cartStore.isReturnMode"
 			>
 				<Avatar size="sm" class="group-hover:ring-2 group-hover:ring-primary/20 transition-all">
+					<img
+						v-if="cartStore.customer && cartStore.customer.image"
+						:src="cartStore.customer.image as string"
+						:alt="cartStore.customer.customer_name"
+						class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+						loading="lazy"
+					/>
 					<AvatarFallback>
 						<User class="w-3.5 h-3.5" />
 					</AvatarFallback>
@@ -43,10 +62,16 @@
 				<div class="text-left flex-1 min-w-0">
 					<p class="text-sm font-medium text-foreground truncate">{{ cartStore.customerName }}</p>
 					<p class="text-[11px] text-muted-foreground">
-						{{ cartStore.customer ? 'Click to change' : 'Click to select customer' }}
+						<template v-if="cartStore.isReturnMode">
+							Customer locked for return
+						</template>
+						<template v-else>
+							{{ cartStore.customer ? 'Click to change' : 'Click to select customer' }}
+						</template>
 					</p>
 				</div>
-				<ChevronDown class="w-4 h-4 text-muted-foreground/50" />
+				<Lock v-if="cartStore.isReturnMode" class="w-4 h-4 text-muted-foreground/50" />
+				<ChevronDown v-else class="w-4 h-4 text-muted-foreground/50" />
 			</button>
 		</div>
 
@@ -71,9 +96,10 @@
 					:item="item"
 					:index="index"
 					:currency-symbol="posStore.currencySymbol"
-					@update-qty="cartStore.updateItemQty"
+					@update-qty="handleUpdateQty"
 					@update-rate="cartStore.updateItemRate"
 					@update-discount="cartStore.updateItemDiscount"
+					@update-uom="cartStore.updateItemUOM"
 					@remove="cartStore.removeItem"
 				/>
 			</TransitionGroup>
@@ -130,6 +156,7 @@
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useCustomerStore } from "@/stores/customerStore";
+import { showError } from "@/services/api";
 import CartItem from "./CartItem.vue";
 import CartSummary from "./CartSummary.vue";
 import { Button } from "@/components/ui/button";
@@ -137,9 +164,27 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, User, ChevronDown, RotateCcw, X } from "lucide-vue-next";
+import { ShoppingCart, User, ChevronDown, RotateCcw, X, Lock, Gift } from "lucide-vue-next";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
 const customerStore = useCustomerStore();
+
+// Handle customer selection click - disabled in return mode
+function handleCustomerClick() {
+	if (cartStore.isReturnMode) {
+		showError("Customer cannot be changed in return mode");
+		return;
+	}
+	customerStore.showCustomerDialog = true;
+	customerStore.searchCustomers();
+}
+
+// Wrapper function to handle qty update with error messages
+function handleUpdateQty(index: number, qty: number) {
+	const result = cartStore.updateItemQty(index, qty);
+	if (!result.success && result.message) {
+		showError(result.message);
+	}
+}
 </script>

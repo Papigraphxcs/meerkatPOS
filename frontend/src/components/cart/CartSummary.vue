@@ -8,21 +8,52 @@
 					{{ posStore.currencySymbol }}{{ formatPrice(cartStore.subtotal) }}
 				</span>
 			</div>
-			<div v-if="cartStore.taxAmount > 0" class="flex items-center justify-between text-sm">
-				<span class="text-muted-foreground">Tax</span>
-				<span class="font-medium text-foreground">
-					{{ posStore.currencySymbol }}{{ formatPrice(cartStore.taxAmount) }}
+
+			<!-- Item Discounts Total -->
+			<div v-if="itemDiscountTotal > 0" class="flex items-center justify-between text-sm">
+				<span class="text-muted-foreground flex items-center gap-1">
+					<Percent class="w-3 h-3" /> Item Discounts
+				</span>
+				<span class="font-medium text-emerald-600 dark:text-emerald-400">
+					-{{ posStore.currencySymbol }}{{ formatPrice(itemDiscountTotal) }}
 				</span>
 			</div>
+
+			<!-- Individual Tax Lines -->
+			<template v-if="cartStore.calculatedTaxes.length > 0">
+				<div
+					v-for="(tax, idx) in cartStore.calculatedTaxes"
+					:key="idx"
+					class="flex items-center justify-between text-sm"
+				>
+					<span class="text-muted-foreground flex items-center gap-1">
+						{{ tax.description }}
+						<span class="text-xs text-muted-foreground/70">({{ tax.rate }}%)</span>
+						<span v-if="tax.included_in_print_rate" class="text-[10px] text-blue-500">incl.</span>
+					</span>
+					<span class="font-medium" :class="tax.included_in_print_rate ? 'text-blue-600 dark:text-blue-400' : 'text-foreground'">
+						{{ tax.included_in_print_rate ? '' : '+' }}{{ posStore.currencySymbol }}{{ formatPrice(tax.amount) }}
+					</span>
+				</div>
+			</template>
+
+			<!-- Additional Discount -->
 			<div
 				v-if="cartStore.discountPercentage > 0 || cartStore.discountAmount > 0"
 				class="flex items-center justify-between text-sm"
 			>
-				<span class="text-muted-foreground">Discount</span>
+				<span class="text-muted-foreground flex items-center gap-1">
+					<Tag class="w-3 h-3" />
+					Additional Discount
+					<span v-if="cartStore.discountPercentage > 0" class="text-xs text-emerald-600 dark:text-emerald-400">
+						({{ cartStore.discountPercentage }}%)
+					</span>
+				</span>
 				<span class="font-medium text-emerald-600 dark:text-emerald-400">
 					-{{ posStore.currencySymbol }}{{ formatPrice(discountValue) }}
 				</span>
 			</div>
+
 			<!-- Loyalty Redemption -->
 			<div v-if="cartStore.redeemLoyaltyPoints && cartStore.loyaltyAmount > 0"
 				class="flex items-center justify-between text-sm"
@@ -34,6 +65,7 @@
 					-{{ posStore.currencySymbol }}{{ formatPrice(cartStore.loyaltyAmount) }}
 				</span>
 			</div>
+
 			<!-- Write-off -->
 			<div v-if="cartStore.writeOffAmount > 0" class="flex items-center justify-between text-sm">
 				<span class="text-muted-foreground">Write Off</span>
@@ -41,7 +73,9 @@
 					-{{ posStore.currencySymbol }}{{ formatPrice(cartStore.writeOffAmount) }}
 				</span>
 			</div>
+
 			<Separator class="!my-2" />
+
 			<div class="flex items-center justify-between">
 				<span class="text-base font-bold text-foreground">Total</span>
 				<span class="text-xl font-extrabold"
@@ -170,7 +204,7 @@ import { call, showSuccess, showError } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2 } from "lucide-vue-next";
+import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2, Percent } from "lucide-vue-next";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
@@ -187,6 +221,17 @@ const isApplyingCoupon = ref(false);
 const hasDiscount = computed(() =>
 	cartStore.discountPercentage > 0 || cartStore.discountAmount > 0
 );
+
+// Calculate total item-level discounts
+const itemDiscountTotal = computed(() => {
+	return cartStore.items.reduce((sum, item) => {
+		const itemTotal = item.qty * item.rate;
+		if (item.discount_percentage > 0) {
+			return sum + Math.abs((itemTotal * item.discount_percentage) / 100);
+		}
+		return sum + Math.abs(item.discount_amount || 0);
+	}, 0);
+});
 
 const discountValue = computed(() => {
 	if (cartStore.discountPercentage > 0) {

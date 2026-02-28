@@ -322,14 +322,46 @@ def get_shift_summary(opening_shift):
 
 
 def _enrich_shift_data(data, pos_profile):
-	"""Add profile, company, and settings data to shift response."""
-	data["pos_profile"] = frappe.get_cached_doc("POS Profile", pos_profile).as_dict()
-	data["company"] = frappe.get_cached_doc("Company", data["pos_profile"]["company"]).as_dict()
+	"""Add profile, company, settings, and tax template data to shift response."""
+	profile = frappe.get_cached_doc("POS Profile", pos_profile)
+	data["pos_profile"] = profile.as_dict()
+	data["company"] = frappe.get_cached_doc("Company", profile.company).as_dict()
 
 	allow_negative_stock = cint(
 		frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0
 	)
 	data["stock_settings"] = {"allow_negative_stock": bool(allow_negative_stock)}
+
+	# Add tax template details if configured
+	if profile.taxes_and_charges:
+		try:
+			tax_template = frappe.get_cached_doc("Sales Taxes and Charges Template", profile.taxes_and_charges)
+			data["taxes"] = [
+				{
+					"description": tax.description or (str(tax.account_head).split(" - ")[0] if tax.account_head else "Tax"),
+					"charge_type": tax.charge_type,
+					"rate": flt(tax.rate),
+					"account_head": tax.account_head,
+					"included_in_print_rate": cint(tax.included_in_print_rate) or 0,
+				}
+				for tax in tax_template.taxes
+			]
+			data["tax_inclusive"] = cint(profile.get("posa_tax_inclusive")) or 0
+		except Exception:
+			data["taxes"] = []
+			data["tax_inclusive"] = 0
+	else:
+		data["taxes"] = []
+		data["tax_inclusive"] = 0
+	
+	# Add print settings from POS profile
+	data["print_settings"] = {
+		"print_format": profile.get("print_format") or "POS Invoice",
+		"print_format_for_online": profile.get("print_format_for_online"),
+		"allow_print_before_pay": cint(profile.get("posa_allow_print_draft_invoices")) or 0,
+		"auto_print_receipt": cint(profile.get("auto_print_receipt")) or 0,
+		"letter_head": profile.get("letter_head") or "",
+	}
 
 
 def _get_shift_tax_summary(invoices):

@@ -162,6 +162,9 @@ export interface CartItem extends POSItem {
   posa_is_offer?: boolean;
   posa_is_replace?: boolean;
   conversion_factor?: number;
+  // Item-level tax
+  item_tax_template?: string;
+  item_tax_map?: Record<string, number>;
   // loyalty
   posa_offer_applied?: boolean;
 }
@@ -283,6 +286,37 @@ export interface SalesPerson {
   sales_person_name?: string;
 }
 
+// ─── Loyalty Program Types ─────────────────────────
+
+export interface LoyaltyProgramTier {
+  tier_name: string;
+  min_spent: number;
+  collection_factor: number;
+}
+
+export interface LoyaltyProgram {
+  name: string;
+  loyalty_program_name?: string;
+  company?: string;
+  conversion_factor: number;
+  expiry_duration?: number;
+  tiers?: LoyaltyProgramTier[];
+}
+
+export interface CustomerLoyaltyInfo {
+  enrolled: boolean;
+  customer: string;
+  customer_name: string;
+  loyalty_program?: string | null;
+  loyalty_program_name?: string;
+  conversion_factor?: number;
+  loyalty_points?: number;
+  points_value?: number;
+  current_tier?: string | null;
+  tiers?: LoyaltyProgramTier[];
+  expiry_duration?: number;
+}
+
 // ─── Invoice Types ─────────────────────────────────
 
 export interface InvoiceItem {
@@ -296,6 +330,7 @@ export interface InvoiceItem {
   discount_amount?: number;
   serial_no?: string;
   batch_no?: string;
+  item_tax_template?: string;
   posa_notes?: string;
   posa_delivery_date?: string;
   posa_offers?: string;
@@ -338,11 +373,18 @@ export interface InvoiceData {
   conversion_rate?: number;
 }
 
+export interface InvoiceTax {
+  description: string;
+  rate: number;
+  tax_amount: number;
+}
+
 export interface Invoice {
   name: string;
   customer: string;
   customer_name: string;
   posting_date: string;
+  posting_time?: string;
   grand_total: number;
   net_total: number;
   paid_amount: number;
@@ -351,10 +393,30 @@ export interface Invoice {
   docstatus: number;
   items: InvoiceItem[];
   payments: InvoicePayment[];
+  taxes?: InvoiceTax[];
   is_return?: boolean;
   return_against?: string;
   loyalty_points?: number;
   loyalty_amount?: number;
+  // Additional fields
+  total_taxes_and_charges?: number;
+  change_amount?: number;
+  discount_amount?: number;
+  additional_discount_percentage?: number;
+  base_discount_amount?: number;
+  total_qty?: number;
+  total?: number;
+  sales_partner?: string;
+  commission_rate?: number;
+  total_commission?: number;
+  loyalty_program?: string;
+  redeem_loyalty_points?: number;
+  loyalty_redemption_account?: string;
+  owner?: string;
+  pos_profile?: string;
+  coupon_code?: string;
+  remarks?: string;
+  currency?: string;
   [key: string]: unknown;
 }
 
@@ -538,11 +600,30 @@ export interface BundleComponent {
 
 // ─── API Response Types ────────────────────────────
 
+export interface TaxDetail {
+  description: string;
+  charge_type: string;
+  rate: number;
+  account_head: string;
+  included_in_print_rate: number;
+}
+
+export interface PrintSettings {
+  print_format: string;
+  print_format_for_online?: string;
+  allow_print_before_pay: number;
+  auto_print_receipt: number;
+  letter_head: string;
+}
+
 export interface ShiftCheckResult {
   pos_opening_shift: POSOpeningShift;
   pos_profile: POSProfile;
   company: Company;
   stock_settings?: StockSettings;
+  taxes?: TaxDetail[];
+  tax_inclusive?: number;
+  print_settings?: PrintSettings;
 }
 
 export interface OpeningData {

@@ -9,12 +9,21 @@ import type {
   InvoicePayment,
   POSOffer,
   POSCoupon,
+  TaxDetail,
 } from "@/types/pos.types";
+
+// Tax breakdown for display
+export interface CalculatedTax {
+  description: string;
+  rate: number;
+  amount: number;
+  included_in_print_rate: boolean;
+}
 
 export const useCartStore = defineStore("cart", () => {
   // ─── State ─────────────────────────────────────
   const items: Ref<CartItem[]> = ref([]);
-  const customer: Ref<{ name: string; customer_name?: string } | null> = ref(null);
+  const customer: Ref<{ name: string; customer_name?: string, image?: string } | null> = ref(null);
   const discountPercentage: Ref<number> = ref(0);
   const discountAmount: Ref<number> = ref(0);
   const showPaymentDialog: Ref<boolean> = ref(false);
@@ -65,23 +74,133 @@ export const useCartStore = defineStore("cart", () => {
   const subtotal: ComputedRef<number> = computed(() =>
     items.value.reduce((sum: number, item: CartItem) => {
       const itemTotal = item.qty * item.rate;
-      const discount = item.discount_percentage
-        ? (itemTotal * item.discount_percentage) / 100
-        : item.discount_amount || 0;
+      let discount = 0;
+      if (item.discount_percentage) {
+        // Percentage discount works correctly for both positive and negative totals
+        discount = (itemTotal * item.discount_percentage) / 100;
+      } else if (item.discount_amount) {
+        // For amount discount on return items (negative qty), we need to negate the discount
+        // so that subtracting it reduces the refund amount
+        discount = item.qty < 0 ? -item.discount_amount : item.discount_amount;
+      }
       return sum + (itemTotal - discount);
     }, 0)
   );
 
-  const taxRate: ComputedRef<number> = computed(() => {
+  // Calculate individual tax amounts based on tax template
+  // Supports item-level tax templates: when an item has an item_tax_map,
+  // its tax rate overrides the global POS profile rate for matching account heads.
+  const calculatedTaxes: ComputedRef<CalculatedTax[]> = computed(() => {
     const posStore = usePosStore();
-    const profile = posStore.posProfile;
-    if (!profile?.taxes_and_charges) return 0;
-    return 0;
+    const taxDetails = posStore.taxes || [];
+    const taxInclusive = posStore.taxInclusiveMode;
+
+    // Compute per-item net amount (after item discounts)
+    const itemNets: { net: number; taxMap: Record<string, number> | undefined }[] = [];
+    for (const item of items.value) {
+      const itemTotal = item.qty * item.rate;
+      let discount = 0;
+      if (item.discount_percentage) {
+        discount = (itemTotal * item.discount_percentage) / 100;
+      } else if (item.discount_amount) {
+        discount = item.qty < 0 ? -item.discount_amount : item.discount_amount;
+      }
+      itemNets.push({
+        net: itemTotal - discount,
+        taxMap: item.item_tax_map,
+      });
+    }
+
+    if (itemNets.length === 0) return [];
+
+    const result: CalculatedTax[] = [];
+
+    for (const tax of taxDetails) {
+      const isIncluded = tax.included_in_print_rate === 1;
+      let totalTaxAmount = 0;
+
+      // Calculate tax per-item to respect item-level overrides
+      for (const { net, taxMap } of itemNets) {
+        // Determine effective rate for this item & tax account
+        let effectiveRate = tax.rate;
+        if (taxMap && tax.account_head in taxMap) {
+          effectiveRate = taxMap[tax.account_head];
+        }
+
+        if (tax.charge_type === "On Net Total") {
+          if (taxInclusive && isIncluded) {
+            totalTaxAmount += (net * effectiveRate) / (100 + effectiveRate);
+          } else if (!isIncluded) {
+            totalTaxAmount += (net * effectiveRate) / 100;
+          }
+        }
+      }
+
+      // Actual (fixed) taxes are not per-item
+      if (tax.charge_type === "Actual") {
+        totalTaxAmount = tax.rate;
+      }
+
+      if (totalTaxAmount !== 0) {
+        result.push({
+          description: tax.description || "Tax",
+          rate: tax.rate,
+          amount: Math.round(totalTaxAmount * 100) / 100,
+          included_in_print_rate: isIncluded,
+        });
+      }
+    }
+
+    // Also collect taxes from item_tax_maps that don't exist in the POS profile taxes.
+    // These are item-specific tax accounts not in the global template.
+    const profileAccountHeads = new Set(taxDetails.map((t) => t.account_head));
+    const extraTaxAccounts: Map<string, number> = new Map();
+
+    for (const { net, taxMap } of itemNets) {
+      if (!taxMap) continue;
+      for (const [accountHead, rate] of Object.entries(taxMap)) {
+        if (profileAccountHeads.has(accountHead)) continue;
+        const taxAmount = (net * rate) / 100;
+        extraTaxAccounts.set(
+          accountHead,
+          (extraTaxAccounts.get(accountHead) || 0) + taxAmount
+        );
+      }
+    }
+
+    for (const [accountHead, amount] of extraTaxAccounts) {
+      if (amount !== 0) {
+        const desc = accountHead.split(" - ")[0] || "Tax";
+        result.push({
+          description: desc,
+          rate: 0,
+          amount: Math.round(amount * 100) / 100,
+          included_in_print_rate: false,
+        });
+      }
+    }
+
+    return result;
   });
 
-  const taxAmount: ComputedRef<number> = computed(
-    () => (subtotal.value * taxRate.value) / 100
-  );
+  // Total tax that is NOT included in prices (to be added)
+  const taxAmount: ComputedRef<number> = computed(() => {
+    return calculatedTaxes.value
+      .filter((t) => !t.included_in_print_rate)
+      .reduce((sum, t) => sum + t.amount, 0);
+  });
+
+  // Total tax that IS included in prices (for display only)
+  const includedTaxAmount: ComputedRef<number> = computed(() => {
+    return calculatedTaxes.value
+      .filter((t) => t.included_in_print_rate)
+      .reduce((sum, t) => sum + t.amount, 0);
+  });
+
+  // Total of all taxes (for display)
+  const totalTaxAmount: ComputedRef<number> = computed(() => {
+    return calculatedTaxes.value.reduce((sum, t) => sum + t.amount, 0);
+  });
 
   const grandTotal: ComputedRef<number> = computed(() => {
     let total = subtotal.value + taxAmount.value;
@@ -90,15 +209,16 @@ export const useCartStore = defineStore("cart", () => {
     } else if (discountAmount.value > 0) {
       total -= discountAmount.value;
     }
-    // Subtract loyalty amount
-    if (redeemLoyaltyPoints.value && loyaltyAmount.value > 0) {
+    // Subtract loyalty amount (not applicable for returns)
+    if (!isReturnMode.value && redeemLoyaltyPoints.value && loyaltyAmount.value > 0) {
       total -= loyaltyAmount.value;
     }
-    // Subtract write-off
-    if (writeOffAmount.value > 0) {
+    // Subtract write-off (not applicable for returns)
+    if (!isReturnMode.value && writeOffAmount.value > 0) {
       total -= writeOffAmount.value;
     }
-    return Math.max(0, total);
+    // For returns, allow negative total; for regular sales, ensure non-negative
+    return isReturnMode.value ? total : Math.max(0, total);
   });
 
   const isEmpty: ComputedRef<boolean> = computed(() => items.value.length === 0);
@@ -121,7 +241,53 @@ export const useCartStore = defineStore("cart", () => {
   );
 
   // ─── Actions ───────────────────────────────────
-  function addItem(item: POSItem): void {
+
+  /**
+   * Check if item can be added to cart based on stock availability
+   * Returns true if item can be added, false otherwise
+   */
+  function canAddItem(item: POSItem): { allowed: boolean; message?: string } {
+    const posStore = usePosStore();
+    const allowNegativeStock = posStore.stockSettings?.allow_negative_stock;
+
+    // If negative stock is allowed, always permit adding
+    if (allowNegativeStock) {
+      return { allowed: true };
+    }
+
+    // Check available quantity
+    const actualQty = item.actual_qty ?? 0;
+    if (actualQty <= 0) {
+      return {
+        allowed: false,
+        message: `${item.item_name} is out of stock`
+      };
+    }
+
+    // Check if adding would exceed available stock
+    const existingItem = items.value.find(
+      (i: CartItem) =>
+        i.item_code === item.item_code && !i.serial_no && !i.batch_no
+    );
+    const currentQtyInCart = existingItem?.qty || 0;
+
+    if (currentQtyInCart + 1 > actualQty) {
+      return {
+        allowed: false,
+        message: `Only ${actualQty} ${item.uom || item.stock_uom} of ${item.item_name} available`
+      };
+    }
+
+    return { allowed: true };
+  }
+
+  function addItem(item: POSItem): { success: boolean; message?: string } {
+    // Check stock availability before adding
+    const stockCheck = canAddItem(item);
+    if (!stockCheck.allowed && !isReturnMode.value) {
+      return { success: false, message: stockCheck.message };
+    }
+
     const existing = items.value.find(
       (i: CartItem) =>
         i.item_code === item.item_code && !i.serial_no && !i.batch_no
@@ -148,6 +314,50 @@ export const useCartStore = defineStore("cart", () => {
         conversion_factor: (item as CartItem).conversion_factor || 1,
       });
     }
+
+    return { success: true };
+  }
+
+  /**
+   * Check if item with specific details can be added
+   */
+  function canAddItemWithDetails(
+    item: POSItem,
+    qty: number,
+    batchNo?: string
+  ): { allowed: boolean; message?: string } {
+    const posStore = usePosStore();
+    const allowNegativeStock = posStore.stockSettings?.allow_negative_stock;
+
+    if (allowNegativeStock) {
+      return { allowed: true };
+    }
+
+    const actualQty = item.actual_qty ?? 0;
+    if (actualQty <= 0) {
+      return {
+        allowed: false,
+        message: `${item.item_name} is out of stock`
+      };
+    }
+
+    // For batch items, the qty check should be against actual_qty
+    // For regular items, sum up existing qty in cart
+    const existingItems = items.value.filter(
+      (i: CartItem) =>
+        i.item_code === item.item_code &&
+        (!batchNo || i.batch_no === batchNo)
+    );
+    const currentQtyInCart = existingItems.reduce((sum, i) => sum + i.qty, 0);
+
+    if (currentQtyInCart + qty > actualQty) {
+      return {
+        allowed: false,
+        message: `Only ${actualQty - currentQtyInCart} ${item.uom || item.stock_uom} of ${item.item_name} available`
+      };
+    }
+
+    return { allowed: true };
   }
 
   function addItemWithDetails(
@@ -158,7 +368,15 @@ export const useCartStore = defineStore("cart", () => {
     serialNo?: string,
     batchNo?: string,
     conversionFactor?: number
-  ): void {
+  ): { success: boolean; message?: string } {
+    // Check stock availability before adding (skip for return mode and serial items)
+    if (!isReturnMode.value && !serialNo) {
+      const stockCheck = canAddItemWithDetails(item, qty, batchNo);
+      if (!stockCheck.allowed) {
+        return { success: false, message: stockCheck.message };
+      }
+    }
+
     // For items with serial numbers, always add as new line (unique serial)
     if (!serialNo) {
       const existing = items.value.find(
@@ -172,7 +390,7 @@ export const useCartStore = defineStore("cart", () => {
         const addQty = isReturnMode.value ? -Math.abs(qty) : qty;
         existing.qty += addQty;
         if (rate) existing.rate = rate;
-        return;
+        return { success: true };
       }
     }
 
@@ -193,18 +411,41 @@ export const useCartStore = defineStore("cart", () => {
       has_batch_no: item.has_batch_no,
       conversion_factor: conversionFactor || 1,
     });
+
+    return { success: true };
   }
 
   function removeItem(index: number): void {
     items.value.splice(index, 1);
   }
 
-  function updateItemQty(index: number, qty: number): void {
+  function updateItemQty(index: number, qty: number): { success: boolean; message?: string } {
     if (qty === 0) {
       removeItem(index);
-      return;
+      return { success: true };
     }
+
+    const item = items.value[index];
+    if (!item) return { success: false, message: "Item not found" };
+
+    // Validate stock when increasing quantity (not in return mode)
+    if (!isReturnMode.value && qty > item.qty) {
+      const posStore = usePosStore();
+      const allowNegativeStock = posStore.stockSettings?.allow_negative_stock;
+
+      if (!allowNegativeStock) {
+        const actualQty = item.actual_qty ?? 0;
+        if (qty > actualQty) {
+          return {
+            success: false,
+            message: `Only ${actualQty} ${item.uom || item.stock_uom} of ${item.item_name} available`
+          };
+        }
+      }
+    }
+
     items.value[index].qty = qty;
+    return { success: true };
   }
 
   function updateItemRate(index: number, rate: number): void {
@@ -241,6 +482,22 @@ export const useCartStore = defineStore("cart", () => {
 
   function setCustomer(cust: { name: string; customer_name?: string } | null): void {
     customer.value = cust;
+  }
+
+  /**
+   * Set item-level tax template and tax map for a cart item.
+   * Called after the backend resolves the applicable tax template.
+   */
+  function setItemTax(
+    itemCode: string,
+    taxTemplate: string,
+    taxMap: Record<string, number>
+  ): void {
+    const item = items.value.find((i: CartItem) => i.item_code === itemCode);
+    if (item) {
+      item.item_tax_template = taxTemplate;
+      item.item_tax_map = taxMap;
+    }
   }
 
   function setDiscount(type: "percentage" | "amount", value: number): void {
@@ -377,6 +634,7 @@ export const useCartStore = defineStore("cart", () => {
           discount_amount: item.discount_amount,
           serial_no: item.serial_no,
           batch_no: item.batch_no,
+          item_tax_template: item.item_tax_template,
           posa_notes: item.posa_notes,
           posa_delivery_date: item.posa_delivery_date,
           posa_offers: item.posa_offers,
@@ -467,8 +725,10 @@ export const useCartStore = defineStore("cart", () => {
     // Computed
     itemCount,
     subtotal,
-    taxRate,
+    calculatedTaxes,
     taxAmount,
+    includedTaxAmount,
+    totalTaxAmount,
     grandTotal,
     isEmpty,
     customerName,
@@ -476,6 +736,8 @@ export const useCartStore = defineStore("cart", () => {
     remainingPayment,
     hasOffers,
     // Actions
+    canAddItem,
+    canAddItemWithDetails,
     addItem,
     addItemWithDetails,
     removeItem,
@@ -487,6 +749,7 @@ export const useCartStore = defineStore("cart", () => {
     updateItemDeliveryDate,
     setCustomer,
     setDiscount,
+    setItemTax,
     enterReturnMode,
     exitReturnMode,
     setLoyalty,

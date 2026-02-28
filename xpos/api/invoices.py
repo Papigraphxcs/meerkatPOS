@@ -71,6 +71,10 @@ def create_invoice(data):
 		invoice_doc.is_return = 1
 		if return_against:
 			invoice_doc.return_against = return_against
+			# Validate return against original invoice
+			_validate_return_invoice(return_against, customer, items)
+		else:
+			frappe.throw(_("Return Against invoice is required for returns"))
 
 	if additional_discount_percentage:
 		invoice_doc.additional_discount_percentage = additional_discount_percentage
@@ -175,6 +179,8 @@ def create_invoice(data):
 			item.serial_no = item_data.get("serial_no")
 		if item_data.get("batch_no"):
 			item.batch_no = item_data.get("batch_no")
+		if item_data.get("item_tax_template"):
+			item.item_tax_template = item_data.get("item_tax_template")
 
 		# POS Awesome item-level fields
 		if item_data.get("posa_notes"):
@@ -189,6 +195,7 @@ def create_invoice(data):
 				pass
 
 	# Apply taxes from POS profile
+	existing_account_heads = set()
 	if pos.taxes_and_charges:
 		invoice_doc.taxes_and_charges = pos.taxes_and_charges
 		tax_template = frappe.get_doc("Sales Taxes and Charges Template", pos.taxes_and_charges)
@@ -201,6 +208,17 @@ def create_invoice(data):
 				"cost_center": tax.cost_center,
 				"included_in_print_rate": tax.included_in_print_rate,
 			})
+			existing_account_heads.add(tax.account_head)
+
+	# Add any additional tax accounts from item-level tax templates
+	# that are not already present in the POS profile's tax template
+	from xpos.x_pos.api.utilities import add_taxes_from_tax_template
+	for item_row in invoice_doc.items:
+		if getattr(item_row, "item_tax_template", None):
+			add_taxes_from_tax_template(
+				{"item_tax_template": item_row.item_tax_template},
+				invoice_doc,
+			)
 
 	# Validate and add payments
 	total_payment = 0
@@ -444,10 +462,35 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 
 
 @frappe.whitelist()
-def get_past_orders(pos_profile="", from_date="", to_date="", search_term="", page=0, limit=20):
-	"""Get past submitted invoices."""
+def get_past_orders(
+	pos_profile="",
+	from_date="",
+	to_date="",
+	search_term="",
+	page=0,
+	limit=20,
+	filters=None,
+	order_by="posting_date desc, posting_time desc"
+):
+	"""Get past submitted invoices with advanced filtering and pagination.
+	
+	Args:
+		pos_profile: POS Profile name
+		from_date: Start date for filter
+		to_date: End date for filter
+		search_term: Search in invoice name, customer name, customer
+		page: Page number (0-indexed)
+		limit: Number of records per page
+		filters: JSON array of filter conditions like Frappe's query builder
+			Format: [["fieldname", "operator", "value"], ...]
+			Operators: =, !=, >, <, >=, <=, like, not like, in, not in, between, is, is not
+		order_by: Order by clause (default: posting_date desc, posting_time desc)
+	
+	Returns:
+		dict with 'data' (list of orders) and 'total' (total count)
+	"""
 	conditions = "si.docstatus = 1 AND si.is_pos = 1"
-	values = {"page": cint(page) * cint(limit), "limit": cint(limit)}
+	values = {"offset": cint(page) * cint(limit), "limit": cint(limit)}
 
 	if pos_profile:
 		conditions += " AND si.pos_profile = %(pos_profile)s"
@@ -470,6 +513,103 @@ def get_past_orders(pos_profile="", from_date="", to_date="", search_term="", pa
 		)"""
 		values["search"] = f"%{search_term}%"
 
+	# Parse advanced filters
+	if filters:
+		if isinstance(filters, str):
+			filters = json.loads(filters)
+		
+		valid_fields = {
+			"status", "customer", "customer_name", "is_return", "return_against",
+			"grand_total", "net_total", "paid_amount", "outstanding_amount",
+			"posting_date", "posting_time", "currency", "owner", "modified_by"
+		}
+		
+		for idx, f in enumerate(filters):
+			if len(f) < 3:
+				continue
+			
+			fieldname, operator, value = f[0], f[1].lower(), f[2]
+			
+			# Security: only allow whitelisted fields
+			if fieldname not in valid_fields:
+				continue
+			
+			param_name = f"filter_{idx}"
+			operator = operator.strip()
+			
+			if operator == "=":
+				conditions += f" AND si.{fieldname} = %({param_name})s"
+				values[param_name] = value
+			elif operator == "!=":
+				conditions += f" AND si.{fieldname} != %({param_name})s"
+				values[param_name] = value
+			elif operator == ">":
+				conditions += f" AND si.{fieldname} > %({param_name})s"
+				values[param_name] = value
+			elif operator == "<":
+				conditions += f" AND si.{fieldname} < %({param_name})s"
+				values[param_name] = value
+			elif operator == ">=":
+				conditions += f" AND si.{fieldname} >= %({param_name})s"
+				values[param_name] = value
+			elif operator == "<=":
+				conditions += f" AND si.{fieldname} <= %({param_name})s"
+				values[param_name] = value
+			elif operator == "like":
+				conditions += f" AND si.{fieldname} LIKE %({param_name})s"
+				values[param_name] = f"%{value}%"
+			elif operator == "not like":
+				conditions += f" AND si.{fieldname} NOT LIKE %({param_name})s"
+				values[param_name] = f"%{value}%"
+			elif operator == "in":
+				if isinstance(value, list) and value:
+					placeholders = ", ".join([f"%({param_name}_{i})s" for i in range(len(value))])
+					conditions += f" AND si.{fieldname} IN ({placeholders})"
+					for i, v in enumerate(value):
+						values[f"{param_name}_{i}"] = v
+			elif operator == "not in":
+				if isinstance(value, list) and value:
+					placeholders = ", ".join([f"%({param_name}_{i})s" for i in range(len(value))])
+					conditions += f" AND si.{fieldname} NOT IN ({placeholders})"
+					for i, v in enumerate(value):
+						values[f"{param_name}_{i}"] = v
+			elif operator == "between":
+				if isinstance(value, list) and len(value) == 2:
+					conditions += f" AND si.{fieldname} BETWEEN %({param_name}_0)s AND %({param_name}_1)s"
+					values[f"{param_name}_0"] = value[0]
+					values[f"{param_name}_1"] = value[1]
+			elif operator in ("is", "is not"):
+				if value is None or str(value).lower() in ("null", "none", "set", "not set"):
+					null_check = "IS NULL" if operator == "is" or str(value).lower() in ("null", "none", "not set") else "IS NOT NULL"
+					if str(value).lower() == "set":
+						null_check = "IS NOT NULL"
+					elif str(value).lower() == "not set":
+						null_check = "IS NULL"
+					conditions += f" AND si.{fieldname} {null_check}"
+
+	# Validate order_by to prevent SQL injection
+	allowed_order_fields = {"posting_date", "posting_time", "grand_total", "name", "customer_name", "status", "modified"}
+	order_parts = []
+	for part in order_by.split(","):
+		part = part.strip()
+		if not part:
+			continue
+		tokens = part.split()
+		field = tokens[0].lower()
+		direction = tokens[1].upper() if len(tokens) > 1 else "DESC"
+		if field in allowed_order_fields and direction in ("ASC", "DESC"):
+			order_parts.append(f"si.{field} {direction}")
+	
+	order_clause = ", ".join(order_parts) if order_parts else "si.posting_date DESC, si.posting_time DESC"
+
+	# Get total count
+	total = frappe.db.sql(
+		f"""SELECT COUNT(*) FROM `tabSales Invoice` si WHERE {conditions}""",
+		values,
+		as_list=True
+	)[0][0]
+
+	# Get paginated data
 	orders = frappe.db.sql(
 		"""
 		SELECT
@@ -485,17 +625,22 @@ def get_past_orders(pos_profile="", from_date="", to_date="", search_term="", pa
 			si.currency,
 			si.status,
 			si.is_return,
-			si.return_against
+			si.return_against,
+			si.owner,
+			si.modified
 		FROM `tabSales Invoice` si
 		WHERE {conditions}
-		ORDER BY si.posting_date DESC, si.posting_time DESC
-		LIMIT %(page)s, %(limit)s
-		""".format(conditions=conditions),
+		ORDER BY {order_clause}
+		LIMIT %(offset)s, %(limit)s
+		""".format(conditions=conditions, order_clause=order_clause),
 		values,
 		as_dict=True,
 	)
 
-	return orders
+	return {
+		"data": orders,
+		"total": total
+	}
 
 
 @frappe.whitelist()
@@ -519,6 +664,24 @@ def get_invoice_details(invoice_name, doctype="Sales Invoice"):
 		"status": doc.status,
 		"is_return": doc.is_return,
 		"return_against": getattr(doc, "return_against", None),
+		# Additional fields
+		"discount_amount": getattr(doc, "discount_amount", 0),
+		"additional_discount_percentage": getattr(doc, "additional_discount_percentage", 0),
+		"base_discount_amount": getattr(doc, "base_discount_amount", 0),
+		"total_qty": getattr(doc, "total_qty", 0),
+		"total": getattr(doc, "total", 0),
+		"sales_partner": getattr(doc, "sales_partner", None),
+		"commission_rate": getattr(doc, "commission_rate", 0),
+		"total_commission": getattr(doc, "total_commission", 0),
+		"loyalty_program": getattr(doc, "loyalty_program", None),
+		"loyalty_points": getattr(doc, "loyalty_points", 0),
+		"loyalty_amount": getattr(doc, "loyalty_amount", 0),
+		"redeem_loyalty_points": getattr(doc, "redeem_loyalty_points", 0),
+		"loyalty_redemption_account": getattr(doc, "loyalty_redemption_account", None),
+		"owner": doc.owner,
+		"pos_profile": getattr(doc, "pos_profile", None),
+		"coupon_code": getattr(doc, "coupon_code", None),
+		"remarks": getattr(doc, "remarks", None),
 		"items": [
 			{
 				"item_code": i.item_code,
@@ -940,3 +1103,57 @@ def _build_invoice_response(invoice_doc):
 			for i in invoice_doc.items
 		],
 	}
+
+def _validate_return_invoice(return_against, customer, items):
+	"""Validate return invoice data against the original invoice."""
+	# Check if original invoice exists
+	doctype = "Sales Invoice"
+	if not frappe.db.exists(doctype, return_against):
+		# Try POS Invoice
+		doctype = "POS Invoice"
+		if not frappe.db.exists(doctype, return_against):
+			frappe.throw(_("Original invoice {0} not found").format(return_against))
+
+	original = frappe.get_doc(doctype, return_against)
+
+	# Validate customer matches
+	if original.customer != customer:
+		frappe.throw(_(
+			"Customer mismatch: Return must be for the same customer ({0}) as the original invoice"
+		).format(original.customer_name or original.customer))
+
+	# Validate items being returned exist in original invoice
+	original_items = {item.item_code: item for item in original.items}
+	
+	for item in items:
+		item_code = item.get("item_code")
+		return_qty = abs(flt(item.get("qty", 0)))
+
+		if item_code not in original_items:
+			frappe.throw(_("Item {0} was not in the original invoice {1}").format(
+				item_code, return_against
+			))
+
+		orig_item = original_items[item_code]
+		
+		# Get already returned qty for this item
+		already_returned = frappe.db.sql("""
+			SELECT COALESCE(SUM(ABS(si_item.qty)), 0) as returned_qty
+			FROM `tabSales Invoice Item` si_item
+			JOIN `tabSales Invoice` si ON si.name = si_item.parent
+			WHERE si.return_against = %s
+				AND si.docstatus = 1
+				AND si_item.item_code = %s
+		""", (return_against, item_code), as_dict=True)
+		
+		total_returned = flt(already_returned[0].returned_qty) if already_returned else 0
+		remaining_returnable = flt(orig_item.qty) - total_returned
+
+		if return_qty > remaining_returnable:
+			frappe.throw(_(
+				"Item {0}: Cannot return {1} units. Only {2} units remaining for return "
+				"(Original: {3}, Already returned: {4})"
+			).format(
+				item_code, return_qty, remaining_returnable,
+				orig_item.qty, total_returned
+			))

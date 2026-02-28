@@ -2,32 +2,15 @@
 	<div class="relative">
 		<div class="relative flex items-center">
 			<Search class="absolute left-3.5 w-5 h-5 text-muted-foreground pointer-events-none" />
-			<input
-				ref="searchInput"
-				v-model="localSearch"
-				type="text"
-				:placeholder="'Search items, scan barcode...'"
-			class="w-full rounded-lg border border-input bg-background pl-10 pr-20 py-3
-						 text-sm text-foreground placeholder:text-muted-foreground
-						 focus:outline-none focus:ring-2 focus:ring-ring/30
-						 focus:border-primary
-						 transition-all duration-200
-						 dark:bg-card dark:border-border"
-				@input="onInput"
-				@keydown.enter="onEnter"
-			/>
-			<Button
-				v-if="localSearch"
-				variant="ghost"
-				size="icon-sm"
-				class="absolute right-3"
-				@click="clearSearch"
-			>
+			<Input ref="searchInput" v-model="localSearch" class="pl-10" :placeholder="'Search items, scan barcode...'"
+				@input="onInput" @keydown.enter="onEnter" />
+			<Button v-if="localSearch" variant="ghost" size="icon-sm" class="absolute right-3" @click="clearSearch">
 				<X class="w-4 h-4 text-muted-foreground" />
 			</Button>
 		</div>
 		<div class="absolute right-14 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1">
-			<kbd class="px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-muted rounded border border-border">/</kbd>
+			<kbd
+				class="px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-muted rounded border border-border">/</kbd>
 		</div>
 	</div>
 </template>
@@ -36,6 +19,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-vue-next";
+import Input from "../ui/input/Input.vue";
 
 const emit = defineEmits(["search", "barcode"]);
 

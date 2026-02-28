@@ -28,7 +28,14 @@
                     <button v-for="cust in customerStore.customers" :key="cust.name" @click="selectCustomer(cust)"
                         class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-accent transition-colors text-left group">
                         <Avatar class="shrink-0">
-                            <AvatarFallback class="bg-primary/10 text-primary text-sm font-bold">
+                            <img
+                                v-if="cust.image"
+                                :src="cust.image as string"
+                                :alt="cust.customer_name"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                loading="lazy"
+                            />
+                            <AvatarFallback v-else class="bg-primary/10 text-primary text-sm font-bold">
                                 {{ getInitials(cust.customer_name) }}
                             </AvatarFallback>
                         </Avatar>
@@ -55,7 +62,7 @@
             <!-- Footer -->
             <div class="shrink-0 border-t border-border px-5 py-4">
                 <div v-if="!showNewForm">
-                    <Button variant="outline" class="w-full justify-center gap-2" @click="showNewForm = true">
+                    <Button variant="default" class="w-full justify-center gap-2" @click="showNewForm = true">
                         <UserPlus class="w-4 h-4" />
                         Create New Customer
                     </Button>
@@ -124,7 +131,7 @@ function debouncedSearch() {
     }, 300);
 }
 
-function selectCustomer(cust: { name: string; customer_name?: string }) {
+function selectCustomer(cust: { name: string; customer_name?: string, image?: string }) {
     cartStore.setCustomer(cust);
     close();
 }

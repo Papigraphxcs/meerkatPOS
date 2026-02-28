@@ -13,6 +13,8 @@ import type {
   PrintFormat,
   CurrencyCode,
   CurrencySymbolMap,
+  TaxDetail,
+  PrintSettings,
 } from "@/types/pos.types";
 
 export const usePosStore = defineStore("pos", () => {
@@ -26,6 +28,13 @@ export const usePosStore = defineStore("pos", () => {
   const posProfile: Ref<POSProfile | null> = ref(null);
   const company: Ref<Company | null> = ref(null);
   const stockSettings: Ref<StockSettings> = ref({});
+
+  // Tax data
+  const taxes: Ref<TaxDetail[]> = ref([]);
+  const taxInclusiveMode: Ref<boolean> = ref(false);
+
+  // Print settings
+  const printSettings: Ref<PrintSettings | null> = ref(null);
 
   // Opening dialog
   const showOpeningDialog: Ref<boolean> = ref(false);
@@ -239,6 +248,11 @@ export const usePosStore = defineStore("pos", () => {
         posProfile.value = result.pos_profile;
         company.value = result.company;
         stockSettings.value = result.stock_settings || {};
+        // Store tax details
+        taxes.value = result.taxes || [];
+        taxInclusiveMode.value = !!(result.tax_inclusive);
+        // Store print settings
+        printSettings.value = result.print_settings || null;
         isReady.value = true;
         // Fetch print formats in background
         fetchPrintFormats();
@@ -286,6 +300,11 @@ export const usePosStore = defineStore("pos", () => {
       posProfile.value = result.pos_profile;
       company.value = result.company;
       stockSettings.value = result.stock_settings || {};
+      // Store tax details
+      taxes.value = result.taxes || [];
+      taxInclusiveMode.value = !!(result.tax_inclusive);
+      // Store print settings
+      printSettings.value = result.print_settings || null;
       showOpeningDialog.value = false;
       isReady.value = true;
       // Fetch print formats in background
@@ -331,6 +350,9 @@ export const usePosStore = defineStore("pos", () => {
       posProfile.value = null;
       company.value = null;
       stockSettings.value = {};
+      taxes.value = [];
+      taxInclusiveMode.value = false;
+      printSettings.value = null;
       isReady.value = false;
       showClosingDialog.value = false;
       showOpeningDialog.value = true;
@@ -363,6 +385,9 @@ export const usePosStore = defineStore("pos", () => {
     posProfile,
     company,
     stockSettings,
+    taxes,
+    taxInclusiveMode,
+    printSettings,
     showOpeningDialog,
     openingData,
     showClosingDialog,

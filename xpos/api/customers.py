@@ -461,6 +461,189 @@ def get_loyalty_points(customer):
 		return 0
 
 
+@frappe.whitelist()
+def get_loyalty_programs(company=None):
+	"""Get all active loyalty programs for the given company."""
+	filters = {}
+	if company:
+		filters["company"] = company
+
+	programs = frappe.get_all(
+		"Loyalty Program",
+		filters=filters,
+		fields=["name", "loyalty_program_name", "company", "conversion_factor", "expiry_duration"],
+		order_by="loyalty_program_name asc",
+	)
+
+	# Get tiers for each program
+	for program in programs:
+		tiers = frappe.get_all(
+			"Loyalty Program Collection",
+			filters={"parent": program["name"]},
+			fields=["tier_name", "min_spent", "collection_factor"],
+			order_by="min_spent asc",
+		)
+		program["tiers"] = tiers
+
+	return programs
+
+
+@frappe.whitelist()
+def register_customer_loyalty(customer, loyalty_program):
+	"""Register a customer for a loyalty program.
+
+	Args:
+		customer: Customer name/ID
+		loyalty_program: Loyalty Program name
+
+	Returns:
+		Updated customer info with loyalty details
+	"""
+	if not customer:
+		frappe.throw(_("Customer is required"))
+	if not loyalty_program:
+		frappe.throw(_("Loyalty Program is required"))
+
+	# Validate customer exists
+	if not frappe.db.exists("Customer", customer):
+		frappe.throw(_("Customer {0} not found").format(customer))
+
+	# Validate loyalty program exists
+	if not frappe.db.exists("Loyalty Program", loyalty_program):
+		frappe.throw(_("Loyalty Program {0} not found").format(loyalty_program))
+
+	# Get customer doc
+	cust_doc = frappe.get_doc("Customer", customer)
+
+	# Check if customer is already enrolled in a loyalty program
+	if cust_doc.loyalty_program:
+		if cust_doc.loyalty_program == loyalty_program:
+			frappe.throw(_("Customer is already enrolled in {0}").format(loyalty_program))
+		else:
+			frappe.throw(_(
+				"Customer is already enrolled in {0}. "
+				"Please unenroll from the current program first."
+			).format(cust_doc.loyalty_program))
+
+	# Enroll customer in loyalty program
+	cust_doc.loyalty_program = loyalty_program
+	cust_doc.loyalty_program_tier = None  # Reset tier, will be calculated based on spending
+	cust_doc.save(ignore_permissions=True)
+
+	# Get loyalty program details
+	lp = frappe.get_cached_doc("Loyalty Program", loyalty_program)
+
+	return {
+		"name": cust_doc.name,
+		"customer_name": cust_doc.customer_name,
+		"loyalty_program": loyalty_program,
+		"loyalty_program_name": lp.loyalty_program_name or loyalty_program,
+		"conversion_factor": lp.conversion_factor,
+		"loyalty_points": 0,  # New enrollment starts with 0 points
+		"message": _("Successfully enrolled {0} in {1}").format(
+			cust_doc.customer_name, lp.loyalty_program_name or loyalty_program
+		),
+	}
+
+
+@frappe.whitelist()
+def unenroll_customer_loyalty(customer):
+	"""Remove a customer from their loyalty program.
+
+	Args:
+		customer: Customer name/ID
+
+	Returns:
+		Updated customer info
+	"""
+	if not customer:
+		frappe.throw(_("Customer is required"))
+
+	if not frappe.db.exists("Customer", customer):
+		frappe.throw(_("Customer {0} not found").format(customer))
+
+	cust_doc = frappe.get_doc("Customer", customer)
+
+	if not cust_doc.loyalty_program:
+		frappe.throw(_("Customer is not enrolled in any loyalty program"))
+
+	old_program = cust_doc.loyalty_program
+	cust_doc.loyalty_program = None
+	cust_doc.loyalty_program_tier = None
+	cust_doc.save(ignore_permissions=True)
+
+	return {
+		"name": cust_doc.name,
+		"customer_name": cust_doc.customer_name,
+		"loyalty_program": None,
+		"message": _("Successfully unenrolled {0} from {1}").format(
+			cust_doc.customer_name, old_program
+		),
+	}
+
+
+@frappe.whitelist()
+def get_customer_loyalty_info(customer):
+	"""Get detailed loyalty information for a customer.
+
+	Args:
+		customer: Customer name/ID
+
+	Returns:
+		Loyalty program details, points balance, and tier info
+	"""
+	if not customer:
+		return None
+
+	if not frappe.db.exists("Customer", customer):
+		return None
+
+	cust_doc = frappe.get_cached_doc("Customer", customer)
+
+	if not cust_doc.loyalty_program:
+		return {
+			"enrolled": False,
+			"customer": customer,
+			"customer_name": cust_doc.customer_name,
+			"loyalty_program": None,
+		}
+
+	# Get loyalty program details
+	lp = frappe.get_cached_doc("Loyalty Program", cust_doc.loyalty_program)
+
+	# Get current points balance
+	points = get_loyalty_points(customer)
+
+	# Calculate points value
+	conversion_factor = flt(lp.conversion_factor) or 1
+	points_value = flt(points) / conversion_factor if conversion_factor else 0
+
+	# Get current tier
+	current_tier = cust_doc.loyalty_program_tier
+
+	# Get all tiers
+	tiers = frappe.get_all(
+		"Loyalty Program Collection",
+		filters={"parent": lp.name},
+		fields=["tier_name", "min_spent", "collection_factor"],
+		order_by="min_spent asc",
+	)
+
+	return {
+		"enrolled": True,
+		"customer": customer,
+		"customer_name": cust_doc.customer_name,
+		"loyalty_program": lp.name,
+		"loyalty_program_name": lp.loyalty_program_name or lp.name,
+		"conversion_factor": conversion_factor,
+		"loyalty_points": points,
+		"points_value": points_value,
+		"current_tier": current_tier,
+		"tiers": tiers,
+		"expiry_duration": lp.expiry_duration,
+	}
+
+
 def _get_child_groups(group_type, root):
 	"""Get all child groups including self."""
 	if not root:

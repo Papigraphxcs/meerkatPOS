@@ -1,8 +1,13 @@
 <template>
 	<div>
-		<!-- Loading Skeleton -->
-		<div v-if="isLoading && items.length === 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+		<!-- Loading Skeleton - Grid -->
+		<div v-if="isLoading && items.length === 0 && viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
 			<div v-for="i in 12" :key="i" class="xpos-skeleton h-40 rounded-xl"></div>
+		</div>
+
+		<!-- Loading Skeleton - List -->
+		<div v-else-if="isLoading && items.length === 0 && viewMode === 'list'" class="space-y-2">
+			<div v-for="i in 8" :key="i" class="xpos-skeleton h-16 rounded-lg"></div>
 		</div>
 
 		<!-- Empty State -->
@@ -12,9 +17,21 @@
 			<p class="text-sm mt-1">Try a different search or category</p>
 		</div>
 
-		<!-- Items Grid -->
-		<div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+		<!-- Items Grid View -->
+		<div v-else-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
 			<ItemCard
+				v-for="item in items"
+				:key="item.item_code"
+				:item="item"
+				:currency-symbol="currencySymbol"
+				@click="$emit('selectItem', item)"
+				@show-detail="$emit('showDetail', item)"
+			/>
+		</div>
+
+		<!-- Items List View -->
+		<div v-else class="space-y-1">
+			<ItemListRow
 				v-for="item in items"
 				:key="item.item_code"
 				:item="item"
@@ -37,6 +54,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import ItemCard from "./ItemCard.vue";
+import ItemListRow from "./ItemListRow.vue";
 import { Package, Loader2 } from "lucide-vue-next";
 import type { POSItem } from "@/types/pos.types";
 
@@ -44,6 +62,7 @@ const props = defineProps({
 	items: { type: Array as () => POSItem[], default: () => [] },
 	isLoading: { type: Boolean, default: false },
 	currencySymbol: { type: String, default: "$" },
+	viewMode: { type: String as () => 'grid' | 'list', default: 'grid' },
 });
 
 const emit = defineEmits(["selectItem", "showDetail", "loadMore"]);

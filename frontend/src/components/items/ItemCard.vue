@@ -1,7 +1,13 @@
 <template>
 	<Card
-		class="group relative overflow-hidden select-none cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 dark:border-border dark:hover:border-primary/40"
-		@click="$emit('click', item)"
+		class="group relative overflow-hidden select-none transition-all duration-200"
+		:class="[
+			isOutOfStock && !allowNegativeStock
+				? 'cursor-not-allowed opacity-60 grayscale-[30%]'
+				: 'cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5',
+			'dark:border-border dark:hover:border-primary/40'
+		]"
+		@click="handleClick"
 	>
 		<!-- Image / Placeholder -->
 		<div class="relative aspect-[4/3] bg-muted overflow-hidden rounded-t-xl">
@@ -25,15 +31,31 @@
 				{{ stockLabel }}
 			</Badge>
 
-			<!-- Quick Add Overlay -->
-			<div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2">
+			<!-- Out of Stock Overlay -->
+			<div
+				v-if="isOutOfStock && !allowNegativeStock"
+				class="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center"
+			>
+				<div class="bg-destructive/90 text-destructive-foreground px-3 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">
+					<AlertCircle class="w-3.5 h-3.5" />
+					Out of Stock
+				</div>
+			</div>
+
+			<!-- Quick Action Overlay - always show info button, add button only when in stock -->
+			<div
+				class="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2"
+			>
+				<!-- Add to Cart button - only when in stock or negative stock allowed -->
 				<div
+					v-if="!isOutOfStock || allowNegativeStock"
 					class="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center
 							opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100
 							transition-all duration-300 shadow-lg"
 				>
 					<Plus class="w-5 h-5" />
 				</div>
+				<!-- Info button - always available -->
 				<div
 					class="w-10 h-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center
 							opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100
@@ -70,25 +92,31 @@ import { computed } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Plus, Info } from "lucide-vue-next";
+import { Package, Plus, Info, AlertCircle } from "lucide-vue-next";
 
 const props = defineProps({
 	item: { type: Object, required: true },
 	currencySymbol: { type: String, default: "$" },
 });
 
-defineEmits(["click", "showDetail"]);
+const emit = defineEmits(["click", "showDetail"]);
 
 const posStore = usePosStore();
 
 const showStock = computed(() => posStore.displayItemsInStock);
 const showItemCode = computed(() => posStore.displayItemCode);
+const allowNegativeStock = computed(() => posStore.stockSettings?.allow_negative_stock);
+
+const isOutOfStock = computed(() => {
+	const qty = props.item.actual_qty;
+	return qty !== undefined && qty <= 0;
+});
 
 const stockVariant = computed(() => {
 	const qty = props.item.actual_qty || 0;
 	if (qty <= 0) return "destructive" as const;
 	if (qty <= 5) return "warning" as const;
-	return "success" as const;
+	return "secondary" as const;
 });
 
 const stockLabel = computed(() => {
@@ -96,6 +124,14 @@ const stockLabel = computed(() => {
 	if (qty <= 0) return "Out";
 	return qty > 999 ? "999+" : qty;
 });
+
+function handleClick() {
+	// Prevent adding to cart if out of stock and negative stock not allowed
+	if (isOutOfStock.value && !allowNegativeStock.value) {
+		return;
+	}
+	emit("click", props.item);
+}
 
 function formatPrice(price: number | string) {
 	return parseFloat(String(price) || "0").toFixed(2);

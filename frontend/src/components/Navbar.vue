@@ -71,17 +71,38 @@
 
 		<!-- Dark Mode Toggle -->
 		<Button variant="ghost" size="icon-sm" @click="toggleDarkMode"
-			:title="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
-			<Sun v-if="isDark" class="w-4 h-4 text-amber-400" />
-			<Moon v-else class="w-4 h-4" />
+			:title="themeTooltip"
+			:class="{ 'text-amber-400': theme === 'dark', 'text-blue-400': theme === 'system' }">
+			<component :is="themeIcon" class="w-4 h-4" />
 		</Button>
 
-		<!-- User Avatar -->
-		<Avatar size="sm">
-			<AvatarFallback>
-				<User class="w-3.5 h-3.5" />
-			</AvatarFallback>
-		</Avatar>
+		<!-- User Menu -->
+		<Popover>
+			<PopoverTrigger as-child>
+				<Button variant="ghost" size="icon-sm" class="rounded-full">
+					<Avatar size="sm">
+						<AvatarFallback>
+							<User class="w-3.5 h-3.5" />
+						</AvatarFallback>
+					</Avatar>
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent class="w-56 p-2" align="end">
+				<div class="px-2 py-1.5 border-b border-border mb-1">
+					<p class="text-sm font-medium">{{ authStore.userFullName || 'User' }}</p>
+					<p class="text-xs text-muted-foreground">{{ authStore.userEmail }}</p>
+				</div>
+				<Button
+					variant="ghost"
+					size="sm"
+					class="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+					@click="handleSignOut"
+				>
+					<Power class="w-4 h-4" />
+					Sign Out
+				</Button>
+			</PopoverContent>
+		</Popover>
 
 		<!-- Close Shift Button -->
 		<Button v-if="!posStore.hideClosingShift" variant="ghost" size="sm"
@@ -97,18 +118,20 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, type Ref } from "vue";
+import { computed, inject, ref, type Ref } from "vue";
 import { useRoute } from "vue-router";
 import { usePosStore } from "@/stores/posStore";
 import { usePaymentStore } from "@/stores/paymentStore";
+import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import ReturnDialog from "@/components/cart/ReturnDialog.vue";
 import {
-	LayoutGrid, FileText, Building2, Sun, Moon, User, LogOut,
-	ArrowDownCircle, ArrowUpCircle, RotateCcw, Printer,
+	LayoutGrid, FileText, Building2, Sun, Moon, Monitor, User, LogOut,
+	ArrowDownCircle, ArrowUpCircle, RotateCcw, Printer, Power,
 } from "lucide-vue-next";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
@@ -117,9 +140,23 @@ import LogoLight from "@/assets/images/xpos-logo-light.svg";
 const route = useRoute();
 const posStore = usePosStore();
 const paymentStore = usePaymentStore();
+const authStore = useAuthStore();
 
 const isDark = inject<Ref<boolean>>("isDark")!;
+const theme = inject<Ref<"light" | "dark" | "system">>("theme")!;
 const toggleDarkMode = inject<() => void>("toggleDarkMode")!;
+
+// Compute which icon and tooltip to show
+const themeIcon = computed(() => {
+	if (theme.value === "system") return Monitor;
+	if (theme.value === "dark") return Moon;
+	return Sun;
+});
+const themeTooltip = computed(() => {
+	if (theme.value === "light") return "Theme: Light (click to switch to Dark)";
+	if (theme.value === "dark") return "Theme: Dark (click to switch to System)";
+	return `Theme: System (${isDark.value ? 'Dark' : 'Light'}) (click to switch to Light)`;
+});
 
 const showReturnDialog = ref(false);
 
@@ -132,5 +169,9 @@ function printLastInvoice() {
 		);
 		window.open(url, "_blank");
 	}
+}
+
+function handleSignOut() {
+	authStore.logout();
 }
 </script>
