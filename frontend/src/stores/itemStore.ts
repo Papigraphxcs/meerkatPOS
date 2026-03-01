@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed, type Ref, type ComputedRef } from "vue";
 import { call } from "@/services/api";
+import { usePosStore } from "@/stores/posStore";
 import type {
   POSItem,
   ItemGroup,
@@ -14,6 +15,145 @@ import type {
 interface ItemGroupsResult {
   groups: ItemGroup[];
   parent_groups: ItemGroup[];
+}
+
+// ─── IndexedDB cache for offline items (with in-memory fallback) ───
+const ITEM_DB_NAME = "xpos_items_cache";
+const ITEM_DB_VERSION = 1;
+const ITEMS_STORE = "items";
+const GROUPS_STORE = "item_groups";
+
+/** Whether IndexedDB is available on this browser/session */
+let itemIdbAvailable: boolean | null = null;
+let memItemCache: POSItem[] = [];
+let memGroupCache: { groups: ItemGroup[]; parentGroups: ItemGroup[] } = { groups: [], parentGroups: [] };
+
+async function checkItemIDB(): Promise<boolean> {
+  if (itemIdbAvailable !== null) return itemIdbAvailable;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const req = indexedDB.open("__xpos_item_idb_test__", 1);
+      req.onsuccess = () => { req.result.close(); resolve(); };
+      req.onerror = () => reject(req.error);
+      req.onblocked = () => reject(new Error("blocked"));
+    });
+    indexedDB.deleteDatabase("__xpos_item_idb_test__");
+    itemIdbAvailable = true;
+  } catch {
+    console.warn("[XPOS Offline] IndexedDB unavailable for item cache – using in-memory fallback");
+    itemIdbAvailable = false;
+  }
+  return itemIdbAvailable;
+}
+
+function openItemDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(ITEM_DB_NAME, ITEM_DB_VERSION);
+    req.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains(ITEMS_STORE)) {
+        const store = db.createObjectStore(ITEMS_STORE, { keyPath: "item_code" });
+        store.createIndex("item_name", "item_name", { unique: false });
+        store.createIndex("item_group", "item_group", { unique: false });
+        store.createIndex("barcode", "barcode", { unique: false });
+      }
+      if (!db.objectStoreNames.contains(GROUPS_STORE)) {
+        db.createObjectStore(GROUPS_STORE, { keyPath: "name" });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+    req.onblocked = () => reject(new Error("IndexedDB blocked"));
+  });
+}
+
+async function cacheItems(allItems: POSItem[]): Promise<void> {
+  if (!(await checkItemIDB())) {
+    memItemCache = [...allItems];
+    return;
+  }
+  const db = await openItemDB();
+  try {
+    const tx = db.transaction(ITEMS_STORE, "readwrite");
+    const store = tx.objectStore(ITEMS_STORE);
+    store.clear();
+    for (const item of allItems) {
+      store.put(item);
+    }
+    return await new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function cacheGroups(groups: ItemGroup[], parentGroups: ItemGroup[]): Promise<void> {
+  if (!(await checkItemIDB())) {
+    memGroupCache = { groups: [...groups], parentGroups: [...parentGroups] };
+    return;
+  }
+  const db = await openItemDB();
+  try {
+    const tx = db.transaction(GROUPS_STORE, "readwrite");
+    const store = tx.objectStore(GROUPS_STORE);
+    store.clear();
+    store.put({ name: "__parent_groups__", data: parentGroups });
+    store.put({ name: "__groups__", data: groups });
+    return await new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function getCachedItems(): Promise<POSItem[]> {
+  if (!(await checkItemIDB())) {
+    return memItemCache;
+  }
+  const db = await openItemDB();
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(ITEMS_STORE, "readonly");
+      const store = tx.objectStore(ITEMS_STORE);
+      const req = store.getAll();
+      tx.oncomplete = () => resolve(req.result);
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function getCachedGroups(): Promise<{ groups: ItemGroup[]; parentGroups: ItemGroup[] }> {
+  if (!(await checkItemIDB())) {
+    return memGroupCache;
+  }
+  const db = await openItemDB();
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(GROUPS_STORE, "readonly");
+      const store = tx.objectStore(GROUPS_STORE);
+      const g = store.get("__groups__");
+      const pg = store.get("__parent_groups__");
+      tx.oncomplete = () => {
+        resolve({
+          groups: g.result?.data || [],
+          parentGroups: pg.result?.data || [],
+        });
+      };
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 
 export const useItemStore = defineStore("items", () => {
@@ -44,12 +184,92 @@ export const useItemStore = defineStore("items", () => {
   // ─── Computed ──────────────────────────────────
   const filteredItems: ComputedRef<POSItem[]> = computed(() => items.value);
 
+  // ─── Offline helpers ───────────────────────────
+  function isOfflineEnabled(): boolean {
+    const posStore = usePosStore();
+    return !!posStore.posProfile?.posa_local_storage;
+  }
+
+  /** Search cached items locally (client-side filter) */
+  function localSearch(allItems: POSItem[], term: string, group: string): POSItem[] {
+    let result = allItems;
+
+    // Filter by group
+    if (group && group !== "All Item Groups") {
+      result = result.filter((i) => i.item_group === group);
+    }
+
+    // Filter by search term (match item_code, item_name, barcode)
+    if (term) {
+      const lower = term.toLowerCase();
+      result = result.filter(
+        (i) =>
+          i.item_code.toLowerCase().includes(lower) ||
+          i.item_name.toLowerCase().includes(lower) ||
+          (i.barcode && i.barcode.toLowerCase().includes(lower)) ||
+          (i.description && i.description.toLowerCase().includes(lower))
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Pre-load ALL items from server into IndexedDB cache.
+   * Called once after POS profile is ready when posa_local_storage is enabled.
+   */
+  async function cacheAllItems(posProfile: string): Promise<void> {
+    try {
+      const batchSize = 200;
+      let start = 0;
+      let allItems: POSItem[] = [];
+      let batch: POSItem[];
+
+      do {
+        batch = await call<POSItem[]>(
+          "xpos.api.items.get_pos_items",
+          {
+            pos_profile: posProfile,
+            search_term: "",
+            item_group: "",
+            start,
+            page_length: batchSize,
+          }
+        );
+        allItems = [...allItems, ...batch];
+        start += batchSize;
+      } while (batch.length === batchSize);
+
+      await cacheItems(allItems);
+      console.log(`[XPOS Offline] Cached ${allItems.length} items`);
+    } catch (error) {
+      console.warn("[XPOS Offline] Failed to cache items:", error);
+    }
+  }
+
   // ─── Actions ───────────────────────────────────
   async function fetchItems(posProfile: string, append = false): Promise<void> {
     if (isLoading.value) return;
     isLoading.value = true;
 
     try {
+      // Offline mode: search from IndexedDB cache
+      if (!navigator.onLine && isOfflineEnabled()) {
+        const cached = await getCachedItems();
+        const filtered = localSearch(cached, searchTerm.value, selectedGroup.value);
+
+        if (append) {
+          const sliced = filtered.slice(items.value.length, items.value.length + pageLength.value);
+          items.value = [...items.value, ...sliced];
+          hasMore.value = items.value.length < filtered.length;
+        } else {
+          items.value = filtered.slice(0, pageLength.value);
+          currentPage.value = 0;
+          hasMore.value = filtered.length > pageLength.value;
+        }
+        return;
+      }
+
       const result = await call<POSItem[]>(
         "xpos.api.items.get_pos_items",
         {
@@ -72,7 +292,25 @@ export const useItemStore = defineStore("items", () => {
       }
 
       hasMore.value = result.length === pageLength.value;
+
+      // Cache items when online + offline mode enabled (first page, no search = full load trigger)
+      if (isOfflineEnabled() && !searchTerm.value && !append && selectedGroup.value === "All Item Groups") {
+        cacheAllItems(posProfile).catch(() => { });
+      }
     } catch (error) {
+      // If fetch fails and we have a cache, fall back to it
+      if (isOfflineEnabled()) {
+        try {
+          const cached = await getCachedItems();
+          if (cached.length > 0) {
+            const filtered = localSearch(cached, searchTerm.value, selectedGroup.value);
+            items.value = filtered.slice(0, pageLength.value);
+            hasMore.value = filtered.length > pageLength.value;
+            console.log("[XPOS Offline] Serving items from cache");
+            return;
+          }
+        } catch { /* ignore */ }
+      }
       console.error("Error fetching items:", error);
     } finally {
       isLoading.value = false;
@@ -81,12 +319,36 @@ export const useItemStore = defineStore("items", () => {
 
   async function fetchItemGroups(): Promise<void> {
     try {
+      // Offline: load from cache
+      if (!navigator.onLine && isOfflineEnabled()) {
+        const cached = await getCachedGroups();
+        itemGroups.value = cached.groups;
+        parentGroups.value = cached.parentGroups;
+        return;
+      }
+
       const result = await call<ItemGroupsResult>(
         "xpos.api.items.get_item_groups"
       );
       itemGroups.value = result.groups || [];
       parentGroups.value = result.parent_groups || [];
+
+      // Cache groups when online
+      if (isOfflineEnabled()) {
+        cacheGroups(itemGroups.value, parentGroups.value).catch(() => { });
+      }
     } catch (error) {
+      // Fall back to cache
+      if (isOfflineEnabled()) {
+        try {
+          const cached = await getCachedGroups();
+          if (cached.groups.length > 0) {
+            itemGroups.value = cached.groups;
+            parentGroups.value = cached.parentGroups;
+            return;
+          }
+        } catch { /* ignore */ }
+      }
       console.error("Error fetching item groups:", error);
     }
   }
@@ -96,14 +358,38 @@ export const useItemStore = defineStore("items", () => {
     _posProfile?: string
   ): Promise<POSItem | null> {
     try {
+      // Offline: search barcode from cache
+      if (!navigator.onLine && isOfflineEnabled()) {
+        const cached = await getCachedItems();
+        const lower = barcode.toLowerCase();
+        return cached.find(
+          (i) =>
+            (i.barcode && i.barcode.toLowerCase() === lower) ||
+            i.item_code.toLowerCase() === lower
+        ) || null;
+      }
+
       const result = await call<POSItem | null>(
         "xpos.api.items.search_barcode",
         {
           barcode: barcode,
+          pos_profile: _posProfile || "",
         }
       );
       return result;
     } catch (error) {
+      // Fall back to cache on error
+      if (isOfflineEnabled()) {
+        try {
+          const cached = await getCachedItems();
+          const lower = barcode.toLowerCase();
+          return cached.find(
+            (i) =>
+              (i.barcode && i.barcode.toLowerCase() === lower) ||
+              i.item_code.toLowerCase() === lower
+          ) || null;
+        } catch { /* ignore */ }
+      }
       console.error("Error searching barcode:", error);
       return null;
     }
@@ -316,6 +602,7 @@ export const useItemStore = defineStore("items", () => {
     fetchStockAvailability,
     fetchPriceForUOM,
     fetchBundleComponents,
+    cacheAllItems,
     setSearchTerm,
     setSelectedGroup,
     loadMore,

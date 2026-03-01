@@ -360,6 +360,8 @@ export interface InvoiceData {
   posa_delivery_date?: string;
   posa_offers?: string;
   posa_coupons?: string;
+  posa_offers_detail?: Array<Record<string, unknown>>;
+  posa_coupons_detail?: Array<Record<string, unknown>>;
   loyalty_points?: number;
   loyalty_amount?: number;
   redeem_loyalty_points?: boolean;
@@ -624,6 +626,7 @@ export interface ShiftCheckResult {
   taxes?: TaxDetail[];
   tax_inclusive?: number;
   print_settings?: PrintSettings;
+  disable_rounded_total?: number;
 }
 
 export interface OpeningData {

@@ -1,9 +1,11 @@
 <template>
-	<div class="relative">
+	<div ref="rootEl" class="relative">
 		<div class="relative flex items-center">
 			<Search class="absolute left-3.5 w-5 h-5 text-muted-foreground pointer-events-none" />
-			<Input ref="searchInput" v-model="localSearch" class="pl-10" :placeholder="'Search items, scan barcode...'"
-				@input="onInput" @keydown.enter="onEnter" />
+			<Input v-model="localSearch" class="pl-10" :placeholder="'Search items, scan barcode...'"
+				@input="onInput" @keydown.enter.prevent="onEnter"
+				@keydown.down.prevent="emit('navigate', 'down')"
+				@keydown.up.prevent="emit('navigate', 'up')" />
 			<Button v-if="localSearch" variant="ghost" size="icon-sm" class="absolute right-3" @click="clearSearch">
 				<X class="w-4 h-4 text-muted-foreground" />
 			</Button>
@@ -21,11 +23,15 @@ import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-vue-next";
 import Input from "../ui/input/Input.vue";
 
-const emit = defineEmits(["search", "barcode"]);
+const emit = defineEmits(["search", "navigate", "enter"]);
 
-const searchInput = ref<HTMLInputElement | null>(null);
+const rootEl = ref<HTMLElement | null>(null);
 const localSearch = ref("");
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+function getInputEl(): HTMLInputElement | null {
+	return rootEl.value?.querySelector("input") || null;
+}
 
 function onInput() {
 	if (debounceTimer) clearTimeout(debounceTimer);
@@ -37,28 +43,43 @@ function onInput() {
 function onEnter() {
 	if (debounceTimer) clearTimeout(debounceTimer);
 	const val = localSearch.value.trim();
-	if (val && /^\d{6,}$/.test(val)) {
-		emit("barcode", val);
-		localSearch.value = "";
-	} else {
-		emit("search", val);
-	}
+	emit("enter", val);
 }
 
 function clearSearch() {
 	localSearch.value = "";
 	emit("search", "");
-	searchInput.value?.focus();
+	getInputEl()?.focus();
+}
+
+function focus() {
+	getInputEl()?.focus();
+}
+
+function blur() {
+	getInputEl()?.blur();
+}
+
+function clear() {
+	localSearch.value = "";
+}
+
+function isFocused(): boolean {
+	return document.activeElement === getInputEl();
+}
+
+function setValue(val: string) {
+	localSearch.value = val;
 }
 
 function handleKeyboard(e: KeyboardEvent) {
-	if (e.key === "/" && document.activeElement !== searchInput.value) {
+	if (e.key === "/" && !isFocused()) {
 		e.preventDefault();
-		searchInput.value?.focus();
+		focus();
 	}
-	if (e.key === "Escape" && document.activeElement === searchInput.value) {
+	if (e.key === "Escape" && isFocused()) {
 		clearSearch();
-		searchInput.value?.blur();
+		blur();
 	}
 }
 
@@ -69,4 +90,6 @@ onMounted(() => {
 onUnmounted(() => {
 	document.removeEventListener("keydown", handleKeyboard);
 });
+
+defineExpose({ focus, blur, clear, isFocused, setValue });
 </script>

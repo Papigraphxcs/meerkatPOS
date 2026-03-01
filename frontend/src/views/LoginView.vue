@@ -6,14 +6,14 @@
 				<Store class="w-8 h-8 text-primary-foreground" />
 			</div>
 			<h1 class="text-2xl font-bold text-foreground">X POS</h1>
-			<p class="text-muted-foreground text-sm mt-1">Point of Sale System</p>
+			<p class="text-muted-foreground text-sm mt-1">{{ __('Point of Sale System') }}</p>
 		</div>
 
 		<!-- Login Card -->
 		<Card class="w-full max-w-md">
 			<CardHeader class="text-center">
-				<CardTitle class="text-xl">Welcome back</CardTitle>
-				<CardDescription>Sign in to your account to continue</CardDescription>
+				<CardTitle class="text-xl">{{ __('Welcome back') }}</CardTitle>
+				<CardDescription>{{ __('Sign in to your account to continue') }}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<form @submit.prevent="handleLogin" class="space-y-4">
@@ -29,7 +29,7 @@
 					<!-- Username/Email Field -->
 					<div class="space-y-2">
 						<label for="username" class="text-sm font-medium text-foreground">
-							Email or Username
+							{{ __('Email or Username') }}
 						</label>
 						<div class="relative">
 							<User class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -37,7 +37,7 @@
 								id="username"
 								v-model="username"
 								type="text"
-								placeholder="Enter your email or username"
+								:placeholder="__('Enter your email or username')"
 								class="pl-10"
 								:disabled="authStore.isLoading"
 								required
@@ -49,7 +49,7 @@
 					<!-- Password Field -->
 					<div class="space-y-2">
 						<label for="password" class="text-sm font-medium text-foreground">
-							Password
+							{{ __('Password') }}
 						</label>
 						<div class="relative">
 							<Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -57,7 +57,7 @@
 								id="password"
 								v-model="password"
 								:type="showPassword ? 'text' : 'password'"
-								placeholder="Enter your password"
+								:placeholder="__('Enter your password')"
 								class="pl-10 pr-10"
 								:disabled="authStore.isLoading"
 								required
@@ -80,7 +80,7 @@
 							to="/reset-password"
 							class="text-sm text-primary hover:underline"
 						>
-							Forgot password?
+							{{ __('Forgot password?') }}
 						</RouterLink>
 					</div>
 
@@ -93,7 +93,7 @@
 					>
 						<Loader2 v-if="authStore.isLoading" class="w-4 h-4 animate-spin" />
 						<LogIn v-else class="w-4 h-4" />
-						{{ authStore.isLoading ? "Signing in..." : "Sign In" }}
+						{{ authStore.isLoading ? __('Signing in...') : __('Sign In') }}
 					</Button>
 				</form>
 			</CardContent>
@@ -101,7 +101,7 @@
 
 		<!-- Footer -->
 		<p class="mt-8 text-center text-sm text-muted-foreground">
-			Secure login powered by Frappe Framework
+			{{ __('Secure login powered by Frappe Framework') }}
 		</p>
 	</div>
 </template>
@@ -113,6 +113,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { __ } from "@/lib/translate";
 import {
 	Store,
 	User,

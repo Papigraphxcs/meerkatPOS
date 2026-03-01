@@ -17,3 +17,4 @@ xpos.patches.add_pos_cash_movement_settings
 xpos.patches.add_cash_movement_to_workspace
 xpos.patches.reorganize_pos_profile_sections
 xpos.patches.add_customer_display_settings
+xpos.patches.create_thermal_receipt_print_format

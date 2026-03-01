@@ -6,17 +6,17 @@
 				<Store class="w-8 h-8 text-primary-foreground" />
 			</div>
 			<h1 class="text-2xl font-bold text-foreground">X POS</h1>
-			<p class="text-muted-foreground text-sm mt-1">Point of Sale System</p>
+			<p class="text-muted-foreground text-sm mt-1">{{ __('Point of Sale System') }}</p>
 		</div>
 
 		<!-- Reset Password Card -->
 		<Card class="w-full max-w-md">
 			<CardHeader class="text-center">
-				<CardTitle class="text-xl">Reset Password</CardTitle>
+				<CardTitle class="text-xl">{{ __('Reset Password') }}</CardTitle>
 				<CardDescription>
 					{{ authStore.resetEmailSent
-						? "Check your email for reset instructions"
-						: "Enter your email to receive a password reset link"
+						? __('Check your email for reset instructions')
+						: __('Enter your email to receive a password reset link')
 					}}
 				</CardDescription>
 			</CardHeader>
@@ -27,23 +27,22 @@
 						<div class="flex items-start gap-3">
 							<CheckCircle class="w-5 h-5 mt-0.5 shrink-0" />
 							<div class="space-y-1">
-								<p class="font-medium">Email Sent Successfully</p>
+								<p class="font-medium">{{ __('Email Sent Successfully') }}</p>
 								<p class="text-sm opacity-90">
-									We've sent a password reset link to your email address. 
-									Please check your inbox and follow the instructions.
+									{{ __('We\'ve sent a password reset link to your email address. Please check your inbox and follow the instructions.') }}
 								</p>
 							</div>
 						</div>
 					</div>
 
 					<div class="text-center text-sm text-muted-foreground">
-						<p>Didn't receive the email?</p>
+						<p>{{ __('Didn\'t receive the email?') }}</p>
 						<button
 							type="button"
 							class="text-primary hover:underline mt-1"
 							@click="resetForm"
 						>
-							Try again
+							{{ __('Try again') }}
 						</button>
 					</div>
 
@@ -54,7 +53,7 @@
 						@click="goToLogin"
 					>
 						<ArrowLeft class="w-4 h-4" />
-						Back to Sign In
+						{{ __('Back to Sign In') }}
 					</Button>
 				</div>
 
@@ -72,7 +71,7 @@
 					<!-- Email Field -->
 					<div class="space-y-2">
 						<label for="email" class="text-sm font-medium text-foreground">
-							Email Address
+							{{ __('Email Address') }}
 						</label>
 						<div class="relative">
 							<Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -80,7 +79,7 @@
 								id="email"
 								v-model="email"
 								type="email"
-								placeholder="Enter your email address"
+								:placeholder="__('Enter your email address')"
 								class="pl-10"
 								:disabled="authStore.isLoading"
 								required
@@ -88,7 +87,7 @@
 							/>
 						</div>
 						<p class="text-xs text-muted-foreground">
-							Enter the email address associated with your account
+							{{ __('Enter the email address associated with your account') }}
 						</p>
 					</div>
 
@@ -101,7 +100,7 @@
 					>
 						<Loader2 v-if="authStore.isLoading" class="w-4 h-4 animate-spin" />
 						<Send v-else class="w-4 h-4" />
-						{{ authStore.isLoading ? "Sending..." : "Send Reset Link" }}
+						{{ authStore.isLoading ? __('Sending...') : __('Send Reset Link') }}
 					</Button>
 
 					<!-- Back to Login Link -->
@@ -111,7 +110,7 @@
 							class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
 						>
 							<ArrowLeft class="w-4 h-4" />
-							Back to Sign In
+							{{ __('Back to Sign In') }}
 						</RouterLink>
 					</div>
 				</form>
@@ -127,6 +126,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { __ } from "@/lib/translate";
 import {
 	Store,
 	Mail,

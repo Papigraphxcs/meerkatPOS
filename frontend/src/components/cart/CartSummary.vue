@@ -3,7 +3,7 @@
 		<!-- Totals -->
 		<div class="space-y-1.5">
 			<div class="flex items-center justify-between text-sm">
-				<span class="text-muted-foreground">Subtotal</span>
+				<span class="text-muted-foreground">{{ __('Subtotal') }}</span>
 				<span class="font-medium text-foreground">
 					{{ posStore.currencySymbol }}{{ formatPrice(cartStore.subtotal) }}
 				</span>
@@ -12,7 +12,7 @@
 			<!-- Item Discounts Total -->
 			<div v-if="itemDiscountTotal > 0" class="flex items-center justify-between text-sm">
 				<span class="text-muted-foreground flex items-center gap-1">
-					<Percent class="w-3 h-3" /> Item Discounts
+					<Percent class="w-3 h-3" /> {{ __('Item Discounts') }}
 				</span>
 				<span class="font-medium text-emerald-600 dark:text-emerald-400">
 					-{{ posStore.currencySymbol }}{{ formatPrice(itemDiscountTotal) }}
@@ -28,8 +28,8 @@
 				>
 					<span class="text-muted-foreground flex items-center gap-1">
 						{{ tax.description }}
-						<span class="text-xs text-muted-foreground/70">({{ tax.rate }}%)</span>
-						<span v-if="tax.included_in_print_rate" class="text-[10px] text-blue-500">incl.</span>
+						<span v-if="tax.rate" class="text-xs text-muted-foreground/70">({{ tax.rate }}%)</span>
+						<span v-if="tax.included_in_print_rate" class="text-[10px] text-blue-500">{{ __('incl.') }}</span>
 					</span>
 					<span class="font-medium" :class="tax.included_in_print_rate ? 'text-blue-600 dark:text-blue-400' : 'text-foreground'">
 						{{ tax.included_in_print_rate ? '' : '+' }}{{ posStore.currencySymbol }}{{ formatPrice(tax.amount) }}
@@ -44,7 +44,7 @@
 			>
 				<span class="text-muted-foreground flex items-center gap-1">
 					<Tag class="w-3 h-3" />
-					Additional Discount
+					{{ __('Additional Discount') }}
 					<span v-if="cartStore.discountPercentage > 0" class="text-xs text-emerald-600 dark:text-emerald-400">
 						({{ cartStore.discountPercentage }}%)
 					</span>
@@ -59,7 +59,7 @@
 				class="flex items-center justify-between text-sm"
 			>
 				<span class="text-violet-600 dark:text-violet-400 flex items-center gap-1">
-					<Gift class="w-3.5 h-3.5" /> Loyalty
+					<Gift class="w-3.5 h-3.5" /> {{ __('Loyalty') }}
 				</span>
 				<span class="font-medium text-violet-600 dark:text-violet-400">
 					-{{ posStore.currencySymbol }}{{ formatPrice(cartStore.loyaltyAmount) }}
@@ -68,7 +68,7 @@
 
 			<!-- Write-off -->
 			<div v-if="cartStore.writeOffAmount > 0" class="flex items-center justify-between text-sm">
-				<span class="text-muted-foreground">Write Off</span>
+				<span class="text-muted-foreground">{{ __('Write Off') }}</span>
 				<span class="font-medium text-amber-600 dark:text-amber-400">
 					-{{ posStore.currencySymbol }}{{ formatPrice(cartStore.writeOffAmount) }}
 				</span>
@@ -77,7 +77,7 @@
 			<Separator class="!my-2" />
 
 			<div class="flex items-center justify-between">
-				<span class="text-base font-bold text-foreground">Total</span>
+				<span class="text-base font-bold text-foreground">{{ __('Total') }}</span>
 				<span class="text-xl font-extrabold"
 					:class="cartStore.isReturnMode ? 'text-amber-600 dark:text-amber-400' : 'text-primary dark:text-primary'"
 				>
@@ -98,7 +98,7 @@
 				@click="showDiscount = !showDiscount"
 			>
 				<Tag class="w-4 h-4" />
-				Discount
+				{{ __('Discount') }}
 			</Button>
 
 			<!-- Coupon button -->
@@ -112,14 +112,14 @@
 				@click="showCoupon = !showCoupon"
 			>
 				<Ticket class="w-4 h-4" />
-				Coupon
+				{{ __('Coupon') }}
 			</Button>
 
-			<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground" :disabled="cartStore.isEmpty" @click="holdOrder" title="Save as draft">
+			<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground" :disabled="cartStore.isEmpty" @click="holdOrder" :title="__('Save as draft')">
 				<Clock class="w-4 h-4" />
 			</Button>
 
-			<Button variant="outline" size="sm" class="text-destructive hover:text-destructive dark:border-border" :disabled="cartStore.isEmpty" @click="cartStore.clearCart()" title="Clear cart">
+			<Button variant="outline" size="sm" class="text-destructive hover:text-destructive dark:border-border" :disabled="cartStore.isEmpty" @click="cartStore.clearCart()" :title="__('Clear cart')">
 				<Trash2 class="w-4 h-4" />
 			</Button>
 		</div>
@@ -150,7 +150,7 @@
 						min="0"
 						:max="discountType === 'percentage' ? 100 : undefined"
 						class="flex-1"
-						:placeholder="discountType === 'percentage' ? 'Discount %' : 'Discount amount'"
+						:placeholder="discountType === 'percentage' ? __('Discount %') : __('Discount amount')"
 						@input="applyDiscount"
 					/>
 				</div>
@@ -164,15 +164,15 @@
 					<Input
 						v-model="couponInput"
 						type="text"
-						placeholder="Enter coupon code..."
-						class="flex-1"
-						@keydown.enter="applyCouponCode"
-					/>
-					<Button size="sm" :disabled="!couponInput || isApplyingCoupon" @click="applyCouponCode">
-						<template v-if="isApplyingCoupon">
-							<Loader2 class="w-4 h-4 animate-spin" />
-						</template>
-						<template v-else>Apply</template>
+					:placeholder="__('Enter coupon code...')"
+					class="flex-1"
+					@keydown.enter="applyCouponCode"
+				/>
+				<Button size="sm" :disabled="!couponInput || isApplyingCoupon" @click="applyCouponCode">
+					<template v-if="isApplyingCoupon">
+						<Loader2 class="w-4 h-4 animate-spin" />
+					</template>
+					<template v-else>{{ __('Apply') }}</template>
 					</Button>
 				</div>
 				<p v-if="couponError" class="text-xs text-destructive">{{ couponError }}</p>
@@ -201,6 +201,7 @@ import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useOfferStore } from "@/stores/offerStore";
 import { call, showSuccess, showError } from "@/services/api";
+import { __ } from "@/lib/translate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -241,10 +242,10 @@ const discountValue = computed(() => {
 });
 
 const payButtonLabel = computed(() => {
-	if (cartStore.isEmpty) return "Add items to pay";
-	if (!cartStore.customer) return "Select customer first";
+	if (cartStore.isEmpty) return __('Add items to pay');
+	if (!cartStore.customer) return __('Select customer first');
 	const amt = `${posStore.currencySymbol}${formatPrice(Math.abs(cartStore.grandTotal))}`;
-	return cartStore.isReturnMode ? `Process Return ${amt}` : `Pay ${amt}`;
+	return cartStore.isReturnMode ? __('Process Return {0}', [amt]) : __('Pay {0}', [amt]);
 });
 
 function applyDiscount() {
@@ -263,17 +264,17 @@ async function applyCouponCode() {
 			showCoupon.value = false;
 			couponInput.value = "";
 		} else {
-			couponError.value = "Invalid or expired coupon code";
+			couponError.value = __('Invalid or expired coupon code');
 		}
 	} catch (error) {
-		couponError.value = "Failed to validate coupon";
+		couponError.value = __('Failed to validate coupon');
 	} finally {
 		isApplyingCoupon.value = false;
 	}
 }
 
 function extractErrorMessage(error: unknown): string {
-	if (!error) return "Unknown error";
+	if (!error) return __('Unknown error');
 	if (typeof error === "string") return error;
 	const err = error as Record<string, unknown>;
 	if (err._server_messages) {
@@ -298,12 +299,12 @@ async function holdOrder() {
 	const shiftName = posStore.posOpeningShift?.name || "";
 	
 	if (!profileName) {
-		showError("POS Profile is not set. Please close and reopen the shift.");
+		showError(__('POS Profile is not set. Please close and reopen the shift.'));
 		return;
 	}
 	
 	if (!shiftName) {
-		showError("No open shift found. Please open a shift first.");
+		showError(__('No open shift found. Please open a shift first.'));
 		return;
 	}
 
@@ -318,12 +319,12 @@ async function holdOrder() {
 		}
 		
 		if (!data.customer) {
-			showError("Please select a customer before holding the order.");
+			showError(__('Please select a customer before holding the order.'));
 			return;
 		}
 		
 		if (!data.items || data.items.length === 0) {
-			showError("No items in cart to save.");
+			showError(__('No items in cart to save.'));
 			return;
 		}
 
@@ -331,9 +332,9 @@ async function holdOrder() {
 			data: JSON.stringify(data),
 		});
 		cartStore.clearAll();
-		showSuccess("Order saved as draft");
+		showSuccess(__('Order saved as draft'));
 	} catch (error: unknown) {
-		showError("Failed to save draft: " + extractErrorMessage(error));
+		showError(__('Failed to save draft: {0}', [extractErrorMessage(error)]));
 	}
 }
 

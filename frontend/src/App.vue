@@ -75,6 +75,7 @@ import CustomerSelect from "@/components/customer/CustomerSelect.vue";
 import LoyaltyDialog from "@/components/customer/LoyaltyDialog.vue";
 import ItemDetailDialog from "@/components/items/ItemDetailDialog.vue";
 import CashMovementDialog from "@/components/shift/CashMovementDialog.vue";
+import { useOfflineStore } from "@/stores/offlineStore";
 
 const route = useRoute();
 const posStore = usePosStore();
@@ -83,6 +84,7 @@ const customerStore = useCustomerStore();
 const itemStore = useItemStore();
 const paymentStore = usePaymentStore();
 const authStore = useAuthStore();
+const offlineStore = useOfflineStore();
 
 // Check if current route is an auth page (login, reset-password)
 const isAuthPage = computed(() => route.meta.isAuthPage === true);
@@ -167,6 +169,9 @@ onMounted(() => {
 	if (!isAuthPage.value) {
 		posStore.checkExistingShift();
 	}
+
+	// Initialize offline store (online/offline listeners)
+	offlineStore.init();
 });
 
 // Watch for route changes to initialize POS when navigating from auth to protected pages
@@ -181,5 +186,6 @@ onUnmounted(() => {
 	if (mediaQuery) {
 		mediaQuery.removeEventListener("change", handleSystemThemeChange);
 	}
+	offlineStore.destroy();
 });
 </script>

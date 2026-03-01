@@ -23,7 +23,7 @@ export interface CalculatedTax {
 export const useCartStore = defineStore("cart", () => {
   // ─── State ─────────────────────────────────────
   const items: Ref<CartItem[]> = ref([]);
-  const customer: Ref<{ name: string; customer_name?: string, image?: string } | null> = ref(null);
+  const customer: Ref<{ name: string; customer_name?: string; image?: string; mobile_no?: string; email_id?: string } | null> = ref(null);
   const discountPercentage: Ref<number> = ref(0);
   const discountAmount: Ref<number> = ref(0);
   const showPaymentDialog: Ref<boolean> = ref(false);
@@ -203,6 +203,7 @@ export const useCartStore = defineStore("cart", () => {
   });
 
   const grandTotal: ComputedRef<number> = computed(() => {
+    const posStore = usePosStore();
     let total = subtotal.value + taxAmount.value;
     if (discountPercentage.value > 0) {
       total -= (total * discountPercentage.value) / 100;
@@ -218,7 +219,12 @@ export const useCartStore = defineStore("cart", () => {
       total -= writeOffAmount.value;
     }
     // For returns, allow negative total; for regular sales, ensure non-negative
-    return isReturnMode.value ? total : Math.max(0, total);
+    total = isReturnMode.value ? total : Math.max(0, total);
+    // Apply rounding unless disabled in Global Defaults
+    if (!posStore.disableRoundedTotal && total !== 0) {
+      total = Math.round(total);
+    }
+    return total;
   });
 
   const isEmpty: ComputedRef<boolean> = computed(() => items.value.length === 0);
@@ -480,7 +486,7 @@ export const useCartStore = defineStore("cart", () => {
     items.value[index].posa_delivery_date = date;
   }
 
-  function setCustomer(cust: { name: string; customer_name?: string } | null): void {
+  function setCustomer(cust: { name: string; customer_name?: string; image?: string; mobile_no?: string; email_id?: string } | null): void {
     customer.value = cust;
   }
 
@@ -616,6 +622,52 @@ export const useCartStore = defineStore("cart", () => {
     showPaymentDialog.value = false;
   }
 
+  /**
+   * Load items from an existing invoice into the cart (repeat invoice).
+   * Clears the current cart first, then adds all items from the invoice.
+   */
+  function loadFromInvoice(invoiceData: {
+    customer: string;
+    customer_name: string;
+    items: Array<{
+      item_code: string;
+      item_name: string;
+      qty: number;
+      rate: number;
+      uom: string;
+      stock_uom?: string;
+      discount_percentage?: number;
+      discount_amount?: number;
+      serial_no?: string;
+      batch_no?: string;
+    }>;
+  }): void {
+    clearCart();
+    customer.value = {
+      name: invoiceData.customer,
+      customer_name: invoiceData.customer_name,
+    };
+    for (const item of invoiceData.items) {
+      items.value.push({
+        item_code: item.item_code,
+        item_name: item.item_name,
+        rate: item.rate || 0,
+        qty: item.qty || 1,
+        uom: item.uom || item.stock_uom || "",
+        stock_uom: item.stock_uom || item.uom || "",
+        image: "",
+        discount_percentage: item.discount_percentage || 0,
+        discount_amount: item.discount_amount || 0,
+        serial_no: item.serial_no || "",
+        batch_no: item.batch_no || "",
+        actual_qty: 0,
+        has_serial_no: false,
+        has_batch_no: false,
+        conversion_factor: 1,
+      } as CartItem);
+    }
+  }
+
   function getInvoiceData(
     posProfile: string,
     posOpeningShift: string
@@ -684,14 +736,29 @@ export const useCartStore = defineStore("cart", () => {
       data.conversion_rate = conversionRate.value;
     }
 
-    // Coupons
+    // Coupons — send both legacy JSON and structured detail rows
     if (appliedCoupon.value) {
       data.posa_coupons = JSON.stringify([appliedCoupon.value.name]);
+      data.posa_coupons_detail = [{
+        coupon: appliedCoupon.value.name,
+        coupon_code: appliedCoupon.value.coupon_code || couponCode.value,
+        type: (appliedCoupon.value as Record<string, unknown>).coupon_type || "Promotional",
+        pos_offer: (appliedCoupon.value as Record<string, unknown>).pos_offer || "",
+        applied: 1,
+        customer: customer.value?.name || "",
+      }];
     }
 
-    // Offers
+    // Offers — send both legacy JSON and structured detail rows
     if (appliedOffers.value.length > 0) {
       data.posa_offers = JSON.stringify(appliedOffers.value.map((o) => o.name));
+      data.posa_offers_detail = appliedOffers.value.map((o) => ({
+        offer_name: o.name,
+        offer: (o as Record<string, unknown>).offer || (o as Record<string, unknown>).offer_type || "",
+        apply_on: o.apply_on || "",
+        offer_applied: 1,
+        coupon_based: (o as Record<string, unknown>).coupon_based ? 1 : 0,
+      }));
     }
 
     return data;
@@ -767,5 +834,6 @@ export const useCartStore = defineStore("cart", () => {
     openPaymentDialog,
     closePaymentDialog,
     getInvoiceData,
+    loadFromInvoice,
   };
 });

@@ -20,10 +20,12 @@
 		<!-- Items Grid View -->
 		<div v-else-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
 			<ItemCard
-				v-for="item in items"
+				v-for="(item, index) in items"
 				:key="item.item_code"
 				:item="item"
 				:currency-symbol="currencySymbol"
+				:highlighted="index === highlightedIndex"
+				:data-item-index="index"
 				@click="$emit('selectItem', item)"
 				@show-detail="$emit('showDetail', item)"
 			/>
@@ -32,10 +34,12 @@
 		<!-- Items List View -->
 		<div v-else class="space-y-1">
 			<ItemListRow
-				v-for="item in items"
+				v-for="(item, index) in items"
 				:key="item.item_code"
 				:item="item"
 				:currency-symbol="currencySymbol"
+				:highlighted="index === highlightedIndex"
+				:data-item-index="index"
 				@click="$emit('selectItem', item)"
 				@show-detail="$emit('showDetail', item)"
 			/>
@@ -63,6 +67,7 @@ const props = defineProps({
 	isLoading: { type: Boolean, default: false },
 	currencySymbol: { type: String, default: "$" },
 	viewMode: { type: String as () => 'grid' | 'list', default: 'grid' },
+	highlightedIndex: { type: Number, default: -1 },
 });
 
 const emit = defineEmits(["selectItem", "showDetail", "loadMore"]);

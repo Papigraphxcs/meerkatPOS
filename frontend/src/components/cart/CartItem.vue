@@ -1,30 +1,32 @@
 <template>
 	<div
-		class="group flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-muted/50 transition-colors duration-150 dark:hover:bg-accent/50"
+		class="group flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors duration-150 dark:hover:bg-accent/50"
+		:data-cart-index="index"
 	>
 		<!-- Item Image / Icon -->
-		<div class="w-10 h-10 rounded-lg bg-muted overflow-hidden shrink-0 flex items-center justify-center">
+		<div class="w-9 h-9 rounded-md bg-muted overflow-hidden shrink-0 flex items-center justify-center">
 			<img
 				v-if="item.image"
 				:src="item.image"
 				:alt="item.item_name"
 				class="w-full h-full object-cover"
 			/>
-			<Package v-else class="w-5 h-5 text-muted-foreground/40" />
+			<Package v-else class="w-4 h-4 text-muted-foreground/40" />
 		</div>
 
 		<!-- Item Info -->
 		<div class="flex-1 min-w-0">
-			<p class="text-xs font-medium text-foreground leading-tight truncate">
+			<p class="text-[11px] font-medium text-foreground leading-tight truncate">
 				{{ item.item_name }}
 			</p>
 
 			<!-- Rate & UOM Row -->
-			<div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+			<div class="flex items-center gap-1 mt-0.5 flex-wrap">
 				<!-- Editable Rate -->
 				<template v-if="posStore.allowEditRate">
 					<span class="text-[11px] text-muted-foreground">{{ currencySymbol }}</span>
 					<input
+						ref="rateInput"
 						:value="item.rate"
 						type="number"
 						min="0"
@@ -33,6 +35,8 @@
 								 focus:outline-none focus:border-primary dark:border-muted-foreground/40
 								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 						@change="onRateChange"
+						@keydown.up.prevent="focusAdjacentItem(-1, 'rate')"
+						@keydown.down.prevent="focusAdjacentItem(1, 'rate')"
 					/>
 				</template>
 				<p v-else class="text-[11px] text-muted-foreground">
@@ -75,22 +79,25 @@
 			</div>
 
 			<!-- Qty Controls -->
-			<div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-				<Button variant="secondary" size="icon-sm" class="w-6 h-6" @click="decrementQty">
-					<Minus class="w-3 h-3" />
+			<div class="flex items-center gap-1 mt-1 flex-wrap">
+				<Button variant="secondary" size="icon-sm" class="w-5 h-5" @click="decrementQty">
+					<Minus class="w-2.5 h-2.5" />
 				</Button>
 				<input
+					ref="qtyInput"
 					:value="item.qty"
 					type="number"
 					min="0"
-					class="w-10 h-6 text-center text-xs font-semibold text-foreground bg-muted/50 rounded-md
+					class="w-9 h-5 text-center text-[10px] font-semibold text-foreground bg-muted/50 rounded
 								 border border-border focus:outline-none focus:ring-1 focus:ring-ring
 								 dark:bg-accent/50 dark:border-muted-foreground/30
 								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 					@change="onQtyChange"
+					@keydown.up.prevent="focusAdjacentItem(-1, 'qty')"
+					@keydown.down.prevent="focusAdjacentItem(1, 'qty')"
 				/>
-				<Button variant="secondary" size="icon-sm" class="w-6 h-6 bg-primary/10 text-primary hover:bg-primary/20" @click="incrementQty">
-					<Plus class="w-3 h-3" />
+				<Button variant="secondary" size="icon-sm" class="w-5 h-5 bg-primary/10 text-primary hover:bg-primary/20" @click="incrementQty">
+					<Plus class="w-2.5 h-2.5" />
 				</Button>
 
 				<!-- Discount Toggle Button -->
@@ -147,17 +154,17 @@
 		</div>
 
 		<!-- Amount & Delete -->
-		<div class="flex flex-col items-end gap-1 shrink-0">
-			<span class="text-sm font-bold text-foreground tabular-nums">
+		<div class="flex flex-col items-end gap-0.5 shrink-0">
+			<span class="text-xs font-bold text-foreground tabular-nums">
 				{{ currencySymbol }}{{ formatPrice(lineTotal) }}
 			</span>
-			<span v-if="hasItemDiscount" class="text-[10px] text-emerald-600 dark:text-emerald-400">
+			<span v-if="hasItemDiscount" class="text-[9px] text-emerald-600 dark:text-emerald-400">
 				-{{ currencySymbol }}{{ formatPrice(discountAmount) }}
 			</span>
 			<Button
 				variant="ghost"
 				size="icon-sm"
-				class="opacity-0 group-hover:opacity-100 w-5 h-5 hover:text-destructive transition-all"
+				class="opacity-0 group-hover:opacity-100 w-4 h-4 hover:text-destructive transition-all"
 				@click="$emit('remove', index)"
 			>
 				<Trash2 class="w-3.5 h-3.5" />
@@ -184,6 +191,10 @@ const emit = defineEmits(["update-qty", "update-rate", "update-discount", "updat
 
 const posStore = usePosStore();
 const itemStore = useItemStore();
+
+// Template refs for focusable inputs
+const qtyInput = ref<HTMLInputElement | null>(null);
+const rateInput = ref<HTMLInputElement | null>(null);
 
 // Local state
 const showUOMSelector = ref(false);
@@ -299,6 +310,40 @@ function applyDiscount() {
 		val = Math.min(val, max);
 	}
 	emit("update-discount", props.index, discountType.value, val);
+}
+
+/**
+ * Navigate to the same field (qty or rate) on an adjacent cart item.
+ * direction: -1 for previous item, +1 for next item
+ * field: 'qty' or 'rate'
+ */
+function focusAdjacentItem(direction: number, field: 'qty' | 'rate') {
+	const targetIndex = props.index + direction;
+	// Find the adjacent cart item container by data-cart-index
+	const container = qtyInput.value?.closest('[data-cart-index]')?.parentElement;
+	if (!container) return;
+
+	const targetEl = container.querySelector(`[data-cart-index="${targetIndex}"]`);
+	if (!targetEl) return;
+
+	// Find the matching input in the target item
+	if (field === 'qty') {
+		// Qty input is the one inside the qty controls div with w-9 class
+		const inputs = targetEl.querySelectorAll('input[type="number"]');
+		// Last number input is qty (if rate editing is enabled, first is rate)
+		const qtyEl = inputs.length > 1 ? inputs[1] : inputs[0];
+		if (qtyEl) {
+			(qtyEl as HTMLInputElement).focus();
+			(qtyEl as HTMLInputElement).select();
+		}
+	} else {
+		// Rate input is the first number input
+		const rateEl = targetEl.querySelector('input[type="number"]');
+		if (rateEl) {
+			(rateEl as HTMLInputElement).focus();
+			(rateEl as HTMLInputElement).select();
+		}
+	}
 }
 
 function formatPrice(price: number | string) {

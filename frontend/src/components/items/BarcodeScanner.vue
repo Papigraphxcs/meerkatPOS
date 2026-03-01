@@ -1,0 +1,130 @@
+<template>
+	<div class="relative flex items-center">
+		<ScanBarcode class="absolute left-3 w-4 h-4 text-muted-foreground pointer-events-none" />
+		<Input
+			ref="inputRef"
+			v-model="barcodeValue"
+			class="pl-9 pr-9 h-9 font-mono text-sm"
+			:class="{ 'ring-2 ring-green-500/50 border-green-500': flashSuccess, 'ring-2 ring-red-500/50 border-red-500': flashError }"
+			placeholder="Scan barcode..."
+			autocomplete="off"
+			@keydown.enter.prevent="onScan"
+			@paste="onPaste"
+		/>
+		<Loader2
+			v-if="isScanning"
+			class="absolute right-3 w-4 h-4 text-muted-foreground animate-spin"
+		/>
+		<Button
+			v-else-if="barcodeValue"
+			variant="ghost"
+			size="icon"
+			class="absolute right-1 h-7 w-7"
+			@click="clearInput"
+		>
+			<X class="w-3.5 h-3.5 text-muted-foreground" />
+		</Button>
+	</div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from "vue";
+import { ScanBarcode, X, Loader2 } from "lucide-vue-next";
+import Input from "@/components/ui/input/Input.vue";
+import { Button } from "@/components/ui/button";
+
+const emit = defineEmits<{
+	(e: "scanned", barcode: string): void;
+}>();
+
+const inputRef = ref<InstanceType<typeof Input> | null>(null);
+const barcodeValue = ref("");
+const isScanning = ref(false);
+const flashSuccess = ref(false);
+const flashError = ref(false);
+
+let flashTimer: ReturnType<typeof setTimeout> | null = null;
+
+function getInputEl(): HTMLInputElement | null {
+	if (!inputRef.value) return null;
+	const el = (inputRef.value as any)?.$el;
+	return el instanceof HTMLInputElement ? el : el?.querySelector?.("input") || null;
+}
+
+function onScan() {
+	const val = barcodeValue.value.trim();
+	if (!val) return;
+	emit("scanned", val);
+}
+
+function onPaste(e: ClipboardEvent) {
+	// After paste, auto-trigger scan on next tick
+	setTimeout(() => {
+		const val = barcodeValue.value.trim();
+		if (val) {
+			emit("scanned", val);
+		}
+	}, 50);
+}
+
+function clearInput() {
+	barcodeValue.value = "";
+	getInputEl()?.focus();
+}
+
+/** Flash green briefly to indicate success */
+function showSuccess() {
+	flashError.value = false;
+	flashSuccess.value = true;
+	barcodeValue.value = "";
+	if (flashTimer) clearTimeout(flashTimer);
+	flashTimer = setTimeout(() => {
+		flashSuccess.value = false;
+	}, 600);
+	getInputEl()?.focus();
+}
+
+/** Flash red briefly to indicate not found */
+function showError() {
+	flashSuccess.value = false;
+	flashError.value = true;
+	if (flashTimer) clearTimeout(flashTimer);
+	flashTimer = setTimeout(() => {
+		flashError.value = false;
+	}, 600);
+	// Select text so user can re-scan easily
+	getInputEl()?.select();
+}
+
+function setScanning(val: boolean) {
+	isScanning.value = val;
+}
+
+function focus() {
+	getInputEl()?.focus();
+}
+
+function clear() {
+	barcodeValue.value = "";
+}
+
+// Handle F2 global shortcut to focus barcode input
+function handleGlobalKey(e: KeyboardEvent) {
+	if (e.key === "F2") {
+		e.preventDefault();
+		getInputEl()?.focus();
+		getInputEl()?.select();
+	}
+}
+
+onMounted(() => {
+	document.addEventListener("keydown", handleGlobalKey);
+});
+
+onUnmounted(() => {
+	document.removeEventListener("keydown", handleGlobalKey);
+	if (flashTimer) clearTimeout(flashTimer);
+});
+
+defineExpose({ focus, clear, showSuccess, showError, setScanning });
+</script>

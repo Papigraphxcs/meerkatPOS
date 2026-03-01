@@ -33,6 +33,9 @@ export const usePosStore = defineStore("pos", () => {
   const taxes: Ref<TaxDetail[]> = ref([]);
   const taxInclusiveMode: Ref<boolean> = ref(false);
 
+  // Rounding
+  const disableRoundedTotal: Ref<boolean> = ref(false);
+
   // Print settings
   const printSettings: Ref<PrintSettings | null> = ref(null);
 
@@ -251,6 +254,8 @@ export const usePosStore = defineStore("pos", () => {
         // Store tax details
         taxes.value = result.taxes || [];
         taxInclusiveMode.value = !!(result.tax_inclusive);
+        // Rounding
+        disableRoundedTotal.value = !!(result.disable_rounded_total);
         // Store print settings
         printSettings.value = result.print_settings || null;
         isReady.value = true;
@@ -303,6 +308,8 @@ export const usePosStore = defineStore("pos", () => {
       // Store tax details
       taxes.value = result.taxes || [];
       taxInclusiveMode.value = !!(result.tax_inclusive);
+      // Rounding
+      disableRoundedTotal.value = !!(result.disable_rounded_total);
       // Store print settings
       printSettings.value = result.print_settings || null;
       showOpeningDialog.value = false;
@@ -352,6 +359,7 @@ export const usePosStore = defineStore("pos", () => {
       stockSettings.value = {};
       taxes.value = [];
       taxInclusiveMode.value = false;
+      disableRoundedTotal.value = false;
       printSettings.value = null;
       isReady.value = false;
       showClosingDialog.value = false;
@@ -387,6 +395,7 @@ export const usePosStore = defineStore("pos", () => {
     stockSettings,
     taxes,
     taxInclusiveMode,
+    disableRoundedTotal,
     printSettings,
     showOpeningDialog,
     openingData,

@@ -143,12 +143,9 @@ const canSubmit = computed(() => {
 });
 
 onMounted(async () => {
-    const company = posStore.companyName;
-    if (company) {
-        await paymentStore.fetchCashMovementContext(posStore.profileName, company);
-    }
     const shift = posStore.posOpeningShift?.name;
     if (shift) {
+        await paymentStore.fetchCashMovementContext(posStore.profileName, shift);
         await paymentStore.fetchShiftCashMovements(posStore.profileName, shift);
     }
 });

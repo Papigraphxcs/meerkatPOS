@@ -2,7 +2,7 @@
 	<header class="h-14 bg-background border-b border-border flex items-center px-4 gap-3 shrink-0 z-30">
 		<!-- Logo / Brand -->
 		<div class="flex items-center gap-2.5">
-			<img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-6 h-6" />
+			<img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-8 h-8" />
 			<span
 				class="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent hidden sm:inline">
 				X POS
@@ -17,7 +17,7 @@
 				route.name === 'pos' && 'bg-primary/10 text-primary hover:bg-primary/15'
 			)">
 				<LayoutGrid class="w-4 h-4" />
-				<span>POS</span>
+				<span>{{ __('POS') }}</span>
 			</router-link>
 			<router-link to="/orders" :class="cn(
 				buttonVariants({ variant: route.name === 'orders' ? 'secondary' : 'ghost', size: 'sm' }),
@@ -25,7 +25,7 @@
 				route.name === 'orders' && 'bg-primary/10 text-primary hover:bg-primary/15'
 			)">
 				<FileText class="w-4 h-4" />
-				<span>Orders</span>
+				<span>{{ __('Orders') }}</span>
 			</router-link>
 		</nav>
 
@@ -35,37 +35,62 @@
 		<div v-if="posStore.enableCashMovement" class="hidden md:flex items-center gap-1">
 			<Button v-if="posStore.allowPosExpense" variant="ghost" size="sm"
 				class="text-muted-foreground hover:text-red-500 gap-1" @click="paymentStore.openCashMovement('expense')"
-				title="POS Expense">
+				:title="__('POS Expense')">
 				<ArrowDownCircle class="w-4 h-4" />
-				<span class="hidden lg:inline text-xs">Expense</span>
+				<span class="hidden lg:inline text-xs">{{ __('Expense') }}</span>
 			</Button>
 			<Button v-if="posStore.allowCashDeposit" variant="ghost" size="sm"
 				class="text-muted-foreground hover:text-emerald-500 gap-1"
-				@click="paymentStore.openCashMovement('deposit')" title="Cash Deposit">
+				@click="paymentStore.openCashMovement('deposit')" :title="__('Cash Deposit')">
 				<ArrowUpCircle class="w-4 h-4" />
-				<span class="hidden lg:inline text-xs">Deposit</span>
+				<span class="hidden lg:inline text-xs">{{ __('Deposit') }}</span>
 			</Button>
 		</div>
 
+		<!-- Repeat Invoice Button -->
+		<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-blue-500 gap-1"
+			@click="showRepeatDialog = true" :title="__('Repeat Invoice (Ctrl+G)')">
+			<Repeat class="w-4 h-4" />
+			<span class="hidden lg:inline text-xs">{{ __('Repeat') }}</span>
+		</Button>
+
 		<!-- Return Button -->
 		<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-amber-500 gap-1"
-			@click="showReturnDialog = true" title="Process Return">
+			@click="showReturnDialog = true" :title="__('Process Return')">
 			<RotateCcw class="w-4 h-4" />
-			<span class="hidden lg:inline text-xs">Return</span>
+			<span class="hidden lg:inline text-xs">{{ __('Return') }}</span>
 		</Button>
 
 		<!-- Print Last Invoice -->
 		<Button v-if="posStore.allowPrintLastInvoice && posStore.lastInvoiceName" variant="ghost" size="sm"
 			class="text-muted-foreground hover:text-foreground gap-1" @click="printLastInvoice"
-			title="Print Last Invoice">
+			:title="__('Print Last Invoice')">
 			<Printer class="w-4 h-4" />
 		</Button>
+
+		<!-- Offline Status Indicator -->
+		<div v-if="offlineStore.offlineModeEnabled" class="flex items-center gap-1">
+			<Button variant="ghost" size="sm" :class="['gap-1.5', offlineStore.statusColor]" @click="handleOfflineAction"
+				:title="offlineStore.statusLabel">
+				<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />
+				<WifiOff v-else-if="!offlineStore.isOnline" class="w-4 h-4" />
+				<CloudUpload v-else-if="offlineStore.hasPending" class="w-4 h-4" />
+				<Wifi v-else class="w-4 h-4" />
+				<Badge v-if="offlineStore.pendingCount > 0" variant="destructive" class="h-4 min-w-4 px-1 text-[10px] leading-none">
+					{{ offlineStore.pendingCount }}
+				</Badge>
+				<span class="hidden lg:inline text-xs">{{ offlineStore.statusLabel }}</span>
+			</Button>
+		</div>
+
+		<!-- Offline Pending Panel -->
+		<OfflinePendingPanel :open="showOfflinePanel" @close="showOfflinePanel = false" />
 
 		<!-- Profile Info -->
 		<div class="hidden md:flex items-center">
 			<Badge variant="secondary" class="gap-1.5">
 				<Building2 class="w-3.5 h-3.5" />
-				{{ posStore.profileName }}
+				{{ posStore.warehouse }}
 			</Badge>
 		</div>
 
@@ -89,7 +114,7 @@
 			</PopoverTrigger>
 			<PopoverContent class="w-56 p-2" align="end">
 				<div class="px-2 py-1.5 border-b border-border mb-1">
-					<p class="text-sm font-medium">{{ authStore.userFullName || 'User' }}</p>
+					<p class="text-sm font-medium">{{ authStore.userFullName || __('User') }}</p>
 					<p class="text-xs text-muted-foreground">{{ authStore.userEmail }}</p>
 				</div>
 				<Button
@@ -99,7 +124,7 @@
 					@click="handleSignOut"
 				>
 					<Power class="w-4 h-4" />
-					Sign Out
+					{{ __('Sign Out') }}
 				</Button>
 			</PopoverContent>
 		</Popover>
@@ -107,32 +132,40 @@
 		<!-- Close Shift Button -->
 		<Button v-if="!posStore.hideClosingShift" variant="ghost" size="sm"
 			class="text-muted-foreground hover:text-destructive gap-1.5"
-			@click="posStore.showClosingDialog = true; posStore.fetchClosingData()" title="Close Shift">
+			@click="posStore.showClosingDialog = true; posStore.fetchClosingData()" :title="__('Close Shift')">
 			<LogOut class="w-4 h-4" />
-			<span class="hidden sm:inline">Close Shift</span>
+			<span class="hidden sm:inline">{{ __('Close Shift') }}</span>
 		</Button>
 
 		<!-- Return Dialog -->
 		<ReturnDialog :open="showReturnDialog" @close="showReturnDialog = false" />
+
+		<!-- Repeat Invoice Dialog -->
+		<RepeatInvoiceDialog :open="showRepeatDialog" @close="showRepeatDialog = false" />
 	</header>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, type Ref } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref, type Ref } from "vue";
 import { useRoute } from "vue-router";
 import { usePosStore } from "@/stores/posStore";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
+import { __ } from "@/lib/translate";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import ReturnDialog from "@/components/cart/ReturnDialog.vue";
+import RepeatInvoiceDialog from "@/components/cart/RepeatInvoiceDialog.vue";
 import {
 	LayoutGrid, FileText, Building2, Sun, Moon, Monitor, User, LogOut,
-	ArrowDownCircle, ArrowUpCircle, RotateCcw, Printer, Power,
+	ArrowDownCircle, ArrowUpCircle, RotateCcw, Repeat, Printer, Power,
+	Wifi, WifiOff, CloudUpload, Loader2,
 } from "lucide-vue-next";
+import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
+import { useOfflineStore } from "@/stores/offlineStore";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
@@ -153,12 +186,33 @@ const themeIcon = computed(() => {
 	return Sun;
 });
 const themeTooltip = computed(() => {
-	if (theme.value === "light") return "Theme: Light (click to switch to Dark)";
-	if (theme.value === "dark") return "Theme: Dark (click to switch to System)";
-	return `Theme: System (${isDark.value ? 'Dark' : 'Light'}) (click to switch to Light)`;
+	if (theme.value === "light") return __('Theme: Light (click to switch to Dark)');
+	if (theme.value === "dark") return __('Theme: Dark (click to switch to System)');
+	return __('Theme: System ({0}) (click to switch to Light)', [isDark.value ? __('Dark') : __('Light')]);
 });
+const offlineStore = useOfflineStore();
 
 const showReturnDialog = ref(false);
+const showRepeatDialog = ref(false);
+const showOfflinePanel = ref(false);
+
+function handleOfflineAction() {
+	if (offlineStore.hasPending) {
+		showOfflinePanel.value = true;
+	} else if (!offlineStore.isOnline) {
+		showOfflinePanel.value = true;
+	}
+}
+
+// Ctrl+G shortcut for Repeat Invoice
+function handleKeyboard(e: KeyboardEvent) {
+	if (e.ctrlKey && e.key.toLowerCase() === "g") {
+		e.preventDefault();
+		showRepeatDialog.value = true;
+	}
+}
+onMounted(() => window.addEventListener("keydown", handleKeyboard));
+onUnmounted(() => window.removeEventListener("keydown", handleKeyboard));
 
 function printLastInvoice() {
 	const name = posStore.lastInvoiceName;

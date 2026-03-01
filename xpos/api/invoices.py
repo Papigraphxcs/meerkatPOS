@@ -243,6 +243,36 @@ def create_invoice(data):
 		except Exception:
 			pass
 
+	# Coupon child table (posa_coupons)
+	posa_coupons_data = data.get("posa_coupons_detail") or []
+	for coupon_row in posa_coupons_data:
+		try:
+			invoice_doc.append("posa_coupons", {
+				"coupon": coupon_row.get("coupon"),
+				"coupon_code": coupon_row.get("coupon_code"),
+				"type": coupon_row.get("type"),
+				"pos_offer": coupon_row.get("pos_offer"),
+				"applied": cint(coupon_row.get("applied", 1)),
+				"customer": coupon_row.get("customer") or customer,
+			})
+		except Exception:
+			pass
+
+	# Offer child table (posa_offers)
+	posa_offers_data = data.get("posa_offers_detail") or []
+	for offer_row in posa_offers_data:
+		try:
+			invoice_doc.append("posa_offers", {
+				"offer_name": offer_row.get("offer_name"),
+				"offer": offer_row.get("offer"),
+				"apply_on": offer_row.get("apply_on"),
+				"offer_applied": cint(offer_row.get("offer_applied", 1)),
+				"coupon_based": cint(offer_row.get("coupon_based", 0)),
+				"coupon": offer_row.get("coupon"),
+			})
+		except Exception:
+			pass
+
 	# Return validity date
 	try:
 		enforce_return_validity = cint(pos.get("posa_enable_return_validity"))
@@ -752,69 +782,88 @@ def search_invoices_for_return(
 	page_length = 50
 	start = (page - 1) * page_length
 
-	filters = {
-		"company": company,
-		"docstatus": 1,
-		"is_return": 0,
-	}
+	# Build conditions and params for raw SQL to support OR logic
+	# between invoice name and customer name searches
+	table = f"`tab{doctype}`"
 
-	if invoice_name:
-		filters["name"] = ["like", f"%{invoice_name}%"]
+	conditions = [
+		f"{table}.company = %(company)s",
+		f"{table}.docstatus = 1",
+		f"{table}.is_return = 0",
+	]
+	params: dict = {"company": company}
 
 	# Date filters
 	if from_date and to_date:
-		filters["posting_date"] = ["between", [from_date, to_date]]
+		conditions.append(f"{table}.posting_date BETWEEN %(from_date)s AND %(to_date)s")
+		params["from_date"] = from_date
+		params["to_date"] = to_date
 	elif from_date:
-		filters["posting_date"] = [">=", from_date]
+		conditions.append(f"{table}.posting_date >= %(from_date)s")
+		params["from_date"] = from_date
 	elif to_date:
-		filters["posting_date"] = ["<=", to_date]
+		conditions.append(f"{table}.posting_date <= %(to_date)s")
+		params["to_date"] = to_date
 
 	# Amount filters
 	if min_amount and max_amount:
-		filters["grand_total"] = ["between", [flt(min_amount), flt(max_amount)]]
+		conditions.append(f"{table}.grand_total BETWEEN %(min_amount)s AND %(max_amount)s")
+		params["min_amount"] = flt(min_amount)
+		params["max_amount"] = flt(max_amount)
 	elif min_amount:
-		filters["grand_total"] = [">=", flt(min_amount)]
+		conditions.append(f"{table}.grand_total >= %(min_amount)s")
+		params["min_amount"] = flt(min_amount)
 	elif max_amount:
-		filters["grand_total"] = ["<=", flt(max_amount)]
+		conditions.append(f"{table}.grand_total <= %(max_amount)s")
+		params["max_amount"] = flt(max_amount)
 
-	# Customer search
-	if any([customer_name, customer_id, mobile_no]):
-		customer_conditions = []
-		customer_params = {}
-		if customer_name:
-			customer_conditions.append("customer_name LIKE %(cname)s")
-			customer_params["cname"] = f"%{customer_name}%"
-		if customer_id:
-			customer_conditions.append("name LIKE %(cid)s")
-			customer_params["cid"] = f"%{customer_id}%"
-		if mobile_no:
-			customer_conditions.append("mobile_no LIKE %(mob)s")
-			customer_params["mob"] = f"%{mobile_no}%"
+	# Build OR condition for invoice_name / customer search
+	or_parts = []
+	if invoice_name:
+		or_parts.append(f"{table}.name LIKE %(inv_name)s")
+		params["inv_name"] = f"%{invoice_name}%"
 
-		where = " OR ".join(customer_conditions)
-		customers = frappe.db.sql(
-			f"SELECT name FROM `tabCustomer` WHERE {where} LIMIT 100",
-			customer_params,
+	if customer_name:
+		or_parts.append(f"{table}.customer_name LIKE %(cust_name)s")
+		params["cust_name"] = f"%{customer_name}%"
+
+	if customer_id:
+		or_parts.append(f"{table}.customer LIKE %(cust_id)s")
+		params["cust_id"] = f"%{customer_id}%"
+
+	if mobile_no:
+		# Search customer by mobile_no, then match by customer id
+		cust_by_mobile = frappe.db.sql(
+			"SELECT name FROM `tabCustomer` WHERE mobile_no LIKE %(mob)s LIMIT 100",
+			{"mob": f"%{mobile_no}%"},
 			as_dict=True,
 		)
-		customer_ids = [c.name for c in customers]
-		if customer_ids:
-			filters["customer"] = ["in", customer_ids]
-		else:
-			return {"invoices": [], "has_more": False, "total_count": 0}
+		if cust_by_mobile:
+			mob_ids = [c.name for c in cust_by_mobile]
+			mob_placeholders = ", ".join([f"%(mob_{i})s" for i in range(len(mob_ids))])
+			or_parts.append(f"{table}.customer IN ({mob_placeholders})")
+			for i, mid in enumerate(mob_ids):
+				params[f"mob_{i}"] = mid
 
-	invoices = frappe.get_list(
-		doctype,
-		filters=filters,
-		fields=[
-			"name", "company", "customer", "customer_name",
-			"posting_date", "posting_time", "grand_total", "currency",
-			"discount_amount", "additional_discount_percentage",
-			"is_return",
-		],
-		limit_start=start,
-		limit_page_length=page_length + 1,
-		order_by="posting_date desc, name desc",
+	if or_parts:
+		conditions.append(f"({' OR '.join(or_parts)})")
+
+	where_clause = " AND ".join(conditions)
+
+	invoices = frappe.db.sql(
+		f"""
+		SELECT
+			{table}.name, {table}.company, {table}.customer, {table}.customer_name,
+			{table}.posting_date, {table}.posting_time, {table}.grand_total, {table}.currency,
+			{table}.discount_amount, {table}.additional_discount_percentage,
+			{table}.is_return
+		FROM {table}
+		WHERE {where_clause}
+		ORDER BY {table}.posting_date DESC, {table}.name DESC
+		LIMIT %(limit)s OFFSET %(offset)s
+		""",
+		{**params, "limit": page_length + 1, "offset": start},
+		as_dict=True,
 	)
 
 	has_more = len(invoices) > page_length
@@ -1157,3 +1206,129 @@ def _validate_return_invoice(return_against, customer, items):
 				item_code, return_qty, remaining_returnable,
 				orig_item.qty, total_returned
 			))
+
+
+# ─── Repeat Invoice Feature ────────────────────────
+
+
+@frappe.whitelist()
+def search_invoices_for_repeat(
+	company,
+	search_term="",
+	customer="",
+	from_date="",
+	to_date="",
+	pos_profile="",
+	page=1,
+	doctype="Sales Invoice",
+):
+	"""Search submitted invoices to repeat/duplicate.
+
+	Returns a paginated list of submitted invoices matching the filters.
+	"""
+	page = max(cint(page), 1)
+	page_length = 20
+	start = (page - 1) * page_length
+
+	filters = {
+		"company": company,
+		"docstatus": 1,
+		"is_return": 0,
+	}
+
+	if search_term:
+		filters["name"] = ["like", f"%{search_term}%"]
+	if customer:
+		filters["customer"] = ["like", f"%{customer}%"]
+	if from_date and to_date:
+		filters["posting_date"] = ["between", [from_date, to_date]]
+	elif from_date:
+		filters["posting_date"] = [">=", from_date]
+	elif to_date:
+		filters["posting_date"] = ["<=", to_date]
+
+	invoices = frappe.get_list(
+		doctype,
+		filters=filters,
+		fields=[
+			"name", "customer", "customer_name",
+			"posting_date", "grand_total", "currency",
+			"total_qty",
+		],
+		limit_start=start,
+		limit_page_length=page_length + 1,
+		order_by="posting_date desc, name desc",
+	)
+
+	has_more = len(invoices) > page_length
+	if has_more:
+		invoices = invoices[:page_length]
+
+	return {"invoices": invoices, "has_more": has_more}
+
+
+@frappe.whitelist()
+def get_invoice_for_repeat(invoice_name, pos_profile="", doctype="Sales Invoice"):
+	"""Fetch invoice details for repeating/duplicating into a new cart.
+
+	Returns item details with current stock prices so the repeated
+	invoice uses up-to-date pricing.
+	"""
+	if not frappe.db.exists(doctype, invoice_name):
+		# Try alternate doctype
+		alt = "POS Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
+		if frappe.db.exists(alt, invoice_name):
+			doctype = alt
+		else:
+			frappe.throw(_("Invoice {0} not found").format(invoice_name))
+
+	doc = frappe.get_doc(doctype, invoice_name)
+
+	# Get selling price list from POS profile
+	price_list = None
+	if pos_profile:
+		price_list = frappe.db.get_value("POS Profile", pos_profile, "selling_price_list")
+
+	items = []
+	for item in doc.items:
+		# Skip free/offer items — they'll be re-applied by the offers engine
+		if getattr(item, "posa_is_offer", False):
+			continue
+
+		item_data = {
+			"item_code": item.item_code,
+			"item_name": item.item_name,
+			"qty": abs(item.qty),
+			"rate": item.rate,
+			"uom": item.uom,
+			"stock_uom": item.stock_uom or item.uom,
+			"discount_percentage": flt(item.discount_percentage),
+			"discount_amount": flt(item.discount_amount),
+			"serial_no": getattr(item, "serial_no", None),
+			"batch_no": getattr(item, "batch_no", None),
+		}
+
+		# Try to get current price from price list
+		if price_list:
+			current_rate = frappe.db.get_value(
+				"Item Price",
+				{"item_code": item.item_code, "price_list": price_list, "selling": 1},
+				"price_list_rate",
+			)
+			if current_rate is not None:
+				item_data["rate"] = flt(current_rate)
+				# Clear discount since price may have changed
+				item_data["discount_percentage"] = 0
+				item_data["discount_amount"] = 0
+
+		items.append(item_data)
+
+	return {
+		"name": doc.name,
+		"customer": doc.customer,
+		"customer_name": doc.customer_name,
+		"posting_date": str(doc.posting_date),
+		"grand_total": doc.grand_total,
+		"currency": doc.currency,
+		"items": items,
+	}

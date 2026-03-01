@@ -11,14 +11,14 @@
 					</div>
 					<div>
 						<DialogTitle class="text-base">
-							{{ cartStore.isReturnMode ? 'Return Payment' : 'Payment' }}
+						{{ cartStore.isReturnMode ? __('Return Payment') : __('Payment') }}
 						</DialogTitle>
 						<DialogDescription class="text-xs">{{ cartStore.customerName }}</DialogDescription>
 					</div>
 				</div>
 				<div class="flex items-center gap-2">
 					<Badge v-if="cartStore.isReturnMode" variant="warning" class="text-[10px]">
-						<RotateCcw class="w-3 h-3" /> Return
+						<RotateCcw class="w-3 h-3" /> {{ __('Return') }}
 					</Badge>
 					<kbd
 						class="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-muted rounded border border-border">Esc</kbd>
@@ -39,7 +39,7 @@
 						<div class="text-center py-3">
 							<p class="text-xs font-medium mb-0.5"
 								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary/70'">
-								{{ cartStore.isReturnMode ? 'Refund Amount' : 'Amount Due' }}
+							{{ cartStore.isReturnMode ? __('Refund Amount') : __('Amount Due') }}
 							</p>
 							<p class="text-3xl font-extrabold tabular-nums"
 								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary'">
@@ -49,7 +49,7 @@
 						<!-- Tax Summary (collapsed) -->
 						<div v-if="cartStore.calculatedTaxes.length > 0" class="px-4 pb-3 pt-1 border-t border-border/50">
 							<div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
-								<span>Subtotal</span>
+							<span>{{ __('Subtotal') }}</span>
 								<span>{{ posStore.currencySymbol }}{{ formatPrice(cartStore.subtotal) }}</span>
 							</div>
 							<div v-for="(tax, idx) in cartStore.calculatedTaxes" :key="idx"
@@ -57,7 +57,7 @@
 								<span class="flex items-center gap-1">
 									{{ tax.description }}
 									<span class="text-[10px]">({{ tax.rate }}%)</span>
-									<span v-if="tax.included_in_print_rate" class="text-[9px] text-blue-500">incl.</span>
+									<span v-if="tax.included_in_print_rate" class="text-[9px] text-blue-500">{{ __('incl.') }}</span>
 								</span>
 								<span :class="tax.included_in_print_rate ? 'text-blue-500' : ''">
 									{{ tax.included_in_print_rate ? '' : '+' }}{{ posStore.currencySymbol }}{{ formatPrice(tax.amount) }}
@@ -69,7 +69,7 @@
 					<!-- Payment Methods -->
 					<div>
 						<div class="flex items-center justify-between mb-2">
-							<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Method</h3>
+							<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Method') }}</h3>
 							<div class="flex items-center gap-1">
 								<kbd
 									class="px-1 py-0.5 text-[9px] font-mono text-muted-foreground bg-muted rounded border border-border">&larr;</kbd>
@@ -97,10 +97,10 @@
 					<div>
 						<div class="flex items-center justify-between mb-1.5">
 							<label
-								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tendered</label>
+								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Tendered') }}</label>
 							<Button v-if="!isSplitPayment" variant="link" size="sm" class="text-xs h-auto p-0"
 								@click="enableSplitPayment">
-								Split Payment
+								{{ __('Split Payment') }}
 							</Button>
 						</div>
 						<Input ref="amountInput" v-model.number="tenderedAmount" type="number" step="0.01" min="0"
@@ -136,7 +136,7 @@
 								</div>
 							</div>
 							<div class="flex justify-between text-sm font-semibold px-3 pt-1">
-								<span class="text-muted-foreground">Total Paid</span>
+									<span class="text-muted-foreground">{{ __('Total Paid') }}</span>
 								<span class="text-primary">{{ posStore.currencySymbol }}{{ formatPrice(splitTotal)
 									}}</span>
 							</div>
@@ -161,21 +161,21 @@
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
 								<Gift class="w-4 h-4 text-violet-500" />
-								<span class="text-sm font-medium text-foreground">Loyalty Points</span>
+								<span class="text-sm font-medium text-foreground">{{ __('Loyalty Points') }}</span>
 							</div>
-							<Badge variant="secondary" class="text-[10px]">{{ customerLoyaltyPoints }} pts</Badge>
+							<Badge variant="secondary" class="text-[10px]">{{ customerLoyaltyPoints }} {{ __('pts') }}</Badge>
 						</div>
 						<p class="text-xs text-muted-foreground mt-1">
-							Worth {{ posStore.currencySymbol }}{{ formatPrice(customerLoyaltyAmount) }}
+							{{ __('Worth {0}', [posStore.currencySymbol + formatPrice(customerLoyaltyAmount)]) }}
 						</p>
 						<div class="flex items-center gap-2 mt-2">
 							<Button v-if="!cartStore.redeemLoyaltyPoints" variant="outline" size="sm"
 								class="text-violet-600 border-violet-300 hover:bg-violet-50" @click="redeemLoyalty">
-								Redeem Points
+								{{ __('Redeem Points') }}
 							</Button>
 							<Button v-else variant="outline" size="sm" class="text-destructive"
 								@click="cartStore.clearLoyalty()">
-								Remove Loyalty
+								{{ __('Remove Loyalty') }}
 							</Button>
 						</div>
 					</div>
@@ -183,9 +183,8 @@
 					<!-- Write-off -->
 					<div v-if="posStore.allowWriteOffChange && !cartStore.isReturnMode" class="space-y-1">
 						<div class="flex items-center justify-between">
-							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Write
-								Off</label>
-							<span class="text-xs text-muted-foreground">Small remaining amounts</span>
+							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Write Off') }}</label>
+							<span class="text-xs text-muted-foreground">{{ __('Small remaining amounts') }}</span>
 						</div>
 						<Input v-model.number="writeOffInput" type="number" min="0" step="0.01" placeholder="0.00"
 							class="text-sm" @input="cartStore.writeOffAmount = writeOffInput || 0" />
@@ -195,14 +194,14 @@
 					<div class="flex gap-2 mt-auto">
 						<div v-if="changeAmount > 0"
 							class="flex-1 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 text-center">
-							<p class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mb-0.5">Change</p>
+							<p class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mb-0.5">{{ __('Change') }}</p>
 							<p class="text-lg font-extrabold text-emerald-700 dark:text-emerald-300 tabular-nums">
 								{{ posStore.currencySymbol }}{{ formatPrice(changeAmount) }}
 							</p>
 						</div>
 						<div v-if="remainingAmount > 0"
 							class="flex-1 bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-center">
-							<p class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mb-0.5">Remaining</p>
+							<p class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mb-0.5">{{ __('Remaining') }}</p>
 							<p class="text-lg font-extrabold text-amber-700 dark:text-amber-300 tabular-nums">
 								{{ posStore.currencySymbol }}{{ formatPrice(remainingAmount) }}
 							</p>
@@ -212,7 +211,7 @@
 
 				<!-- Right: Numpad -->
 				<div class="hidden lg:flex flex-col w-64 border-l border-border p-4 gap-3">
-					<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Numpad</h3>
+					<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Numpad') }}</h3>
 					<div class="grid grid-cols-3 gap-1.5 flex-1">
 						<Button v-for="(key, idx) in numpadKeys" :key="key"
 							:ref="el => { if (el) numpadRefs[idx] = (el as any).$el || el }"
@@ -231,16 +230,16 @@
 				class="shrink-0 border-t border-border px-5 py-3 bg-muted/30 justify-between sm:justify-between">
 				<div class="hidden sm:flex items-center gap-2 text-[10px] text-muted-foreground">
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Enter</kbd>
-					<span>Save & Print</span>
+					<span>{{ __('Save & Print') }}</span>
 					<span class="mx-1">|</span>
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Shift+Enter</kbd>
-					<span>Save Only</span>
+					<span>{{ __('Save Only') }}</span>
 					<span class="mx-1">|</span>
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Esc</kbd>
-					<span>Cancel</span>
+					<span>{{ __('Cancel') }}</span>
 				</div>
 				<div class="flex items-center gap-2">
-					<Button variant="outline" @click="close" tabindex="-1">Cancel</Button>
+					<Button variant="outline" @click="close" tabindex="-1">{{ __('Cancel') }}</Button>
 					<Button
 						variant="outline"
 						class="font-medium"
@@ -253,7 +252,7 @@
 						<template v-else>
 							<Save class="w-4 h-4" />
 						</template>
-						Save Only
+						{{ __('Save Only') }}
 					</Button>
 					<Button
 						ref="submitBtn"
@@ -264,11 +263,11 @@
 					>
 						<template v-if="isSubmitting && printAfterSave">
 							<Loader2 class="w-4 h-4 animate-spin" />
-							Processing...
+							{{ __('Processing...') }}
 						</template>
 						<template v-else>
 							<Printer class="w-4 h-4" />
-							{{ cartStore.isReturnMode ? 'Return & Print' : 'Save & Print' }}
+							{{ cartStore.isReturnMode ? __('Return & Print') : __('Save & Print') }}
 						</template>
 					</Button>
 				</div>
@@ -282,7 +281,9 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { usePaymentStore } from "@/stores/paymentStore";
-import { call, showSuccess, showError } from "@/services/api";
+import { call, showSuccess, showError, showInfo } from "@/services/api";
+import { useOfflineStore } from "@/stores/offlineStore";
+import { __ } from "@/lib/translate";
 import {
 	Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -296,6 +297,7 @@ import type { InvoicePayment } from "@/types/pos.types";
 const posStore = usePosStore();
 const cartStore = useCartStore();
 const paymentStore = usePaymentStore();
+const offlineStore = useOfflineStore();
 
 const amountInput = ref<InstanceType<typeof Input> | null>(null);
 const submitBtn = ref<InstanceType<typeof Button> | null>(null);
@@ -608,6 +610,22 @@ async function submitPayment(withPrint: boolean = true) {
 			];
 		}
 
+		// ─── Offline check: save locally if offline & enabled ───
+		if (!offlineStore.isOnline && offlineStore.offlineModeEnabled) {
+			const saved = await offlineStore.saveOffline(
+				invoiceData,
+				cartStore.customerName,
+				cartStore.grandTotal
+			);
+			if (saved.success) {
+				showInfo(`Invoice saved offline (#${saved.localId}). It will sync when you're back online.`);
+				cartStore.clearAll();
+			} else {
+				showError("Failed to save invoice offline");
+			}
+			return;
+		}
+
 		const result = await call<{ name: string }>("xpos.api.invoices.create_invoice", {
 			data: JSON.stringify(invoiceData),
 		});
@@ -627,6 +645,33 @@ async function submitPayment(withPrint: boolean = true) {
 
 		cartStore.clearAll();
 	} catch (error: unknown) {
+		// ─── Fallback: if API call fails due to network & offline mode enabled, save locally ───
+		if (offlineStore.offlineModeEnabled && !navigator.onLine) {
+			const invoiceData = cartStore.getInvoiceData(
+				posStore.profileName,
+				posStore.posOpeningShift?.name || ""
+			);
+			if (isSplitPayment.value) {
+				invoiceData.payments = splitPayments.value.map(p => ({ ...p }));
+			} else {
+				invoiceData.payments = [
+					{
+						mode_of_payment: selectedMethod.value,
+						amount: roundCurrency(cartStore.grandTotal),
+					},
+				];
+			}
+			const saved = await offlineStore.saveOffline(
+				invoiceData,
+				cartStore.customerName,
+				cartStore.grandTotal
+			);
+			if (saved.success) {
+				showInfo(`Invoice saved offline (#${saved.localId}). It will sync when you're back online.`);
+				cartStore.clearAll();
+				return;
+			}
+		}
 		showError("Payment failed: " + extractErrorMessage(error));
 		console.error("Payment error:", error);
 	} finally {

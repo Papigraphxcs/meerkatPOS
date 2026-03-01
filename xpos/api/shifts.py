@@ -332,6 +332,11 @@ def _enrich_shift_data(data, pos_profile):
 	)
 	data["stock_settings"] = {"allow_negative_stock": bool(allow_negative_stock)}
 
+	# Rounding settings from Global Defaults
+	data["disable_rounded_total"] = cint(
+		frappe.db.get_single_value("Global Defaults", "disable_rounded_total") or 0
+	)
+
 	# Add tax template details if configured
 	if profile.taxes_and_charges:
 		try:

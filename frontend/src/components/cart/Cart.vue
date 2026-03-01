@@ -61,13 +61,23 @@
 				</Avatar>
 				<div class="text-left flex-1 min-w-0">
 					<p class="text-sm font-medium text-foreground truncate">{{ cartStore.customerName }}</p>
-					<p class="text-[11px] text-muted-foreground">
-						<template v-if="cartStore.isReturnMode">
-							Customer locked for return
-						</template>
-						<template v-else>
-							{{ cartStore.customer ? 'Click to change' : 'Click to select customer' }}
-						</template>
+					<template v-if="cartStore.customer">
+						<div class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+							<template v-if="cartStore.customer.mobile_no">
+								<Phone class="w-3 h-3 shrink-0" />
+								<span class="truncate">{{ cartStore.customer.mobile_no }}</span>
+							</template>
+							<template v-if="cartStore.customer.email_id">
+								<Mail class="w-3 h-3 shrink-0" :class="{ 'ml-1': cartStore.customer.mobile_no }" />
+								<span class="truncate">{{ cartStore.customer.email_id }}</span>
+							</template>
+						</div>
+						<p v-if="!cartStore.customer.mobile_no && !cartStore.customer.email_id" class="text-[11px] text-muted-foreground">
+							{{ cartStore.isReturnMode ? 'Customer locked for return' : 'Click to change' }}
+						</p>
+					</template>
+					<p v-else class="text-[11px] text-muted-foreground">
+						Click to select customer
 					</p>
 				</div>
 				<Lock v-if="cartStore.isReturnMode" class="w-4 h-4 text-muted-foreground/50" />
@@ -78,7 +88,7 @@
 		<Separator class="mx-4" />
 
 		<!-- Cart Items -->
-		<div class="flex-1 overflow-y-auto px-4 xpos-scrollbar">
+		<div ref="cartScrollContainer" class="flex-1 overflow-y-auto px-4 xpos-scrollbar">
 			<!-- Empty Cart -->
 			<div v-if="cartStore.isEmpty" class="flex flex-col items-center justify-center h-full text-center py-8">
 				<div class="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -89,7 +99,7 @@
 			</div>
 
 			<!-- Cart Item List -->
-			<TransitionGroup v-else name="list" tag="div" class="space-y-1 py-1">
+			<TransitionGroup v-else name="list" tag="div" class="space-y-0.5 py-0.5">
 				<CartItem
 					v-for="(item, index) in cartStore.items"
 					:key="item.item_code + '-' + index"
@@ -153,6 +163,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, nextTick } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useCustomerStore } from "@/stores/customerStore";
@@ -164,11 +175,42 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, User, ChevronDown, RotateCcw, X, Lock, Gift } from "lucide-vue-next";
+import { ShoppingCart, User, ChevronDown, RotateCcw, X, Lock, Gift, Phone, Mail } from "lucide-vue-next";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
 const customerStore = useCustomerStore();
+
+// Ref for the scrollable cart items container
+const cartScrollContainer = ref<HTMLElement | null>(null);
+
+// Watch for new items added → scroll to bottom and highlight last item
+watch(
+	() => cartStore.items.length,
+	(newLen, oldLen) => {
+		if (newLen > oldLen) {
+			nextTick(() => {
+				const container = cartScrollContainer.value;
+				if (!container) return;
+
+				// Scroll to bottom
+				container.scrollTo({
+					top: container.scrollHeight,
+					behavior: "smooth",
+				});
+
+				// Flash-highlight the last cart item
+				const lastChild = container.querySelector(".space-y-1 > :last-child") as HTMLElement | null;
+				if (lastChild) {
+					lastChild.classList.add("ring-2", "ring-primary/50", "rounded-xl");
+					setTimeout(() => {
+						lastChild.classList.remove("ring-2", "ring-primary/50", "rounded-xl");
+					}, 800);
+				}
+			});
+		}
+	}
+);
 
 // Handle customer selection click - disabled in return mode
 function handleCustomerClick() {

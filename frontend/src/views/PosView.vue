@@ -4,7 +4,10 @@
 			<div class="shrink-0 p-4 pb-2 space-y-3">
 				<div class="flex items-center gap-2">
 					<div class="flex-1">
-						<SearchBar @search="onSearch" @barcode="onBarcodeScan" />
+					<SearchBar ref="searchBarRef" @search="onSearch" @enter="onSearchEnter" @navigate="onNavigate" />
+					</div>
+					<div class="w-52 shrink-0">
+						<BarcodeScanner ref="barcodeScannerRef" @scanned="onBarcodeScan" />
 					</div>
 					<div class="flex items-center gap-1 border rounded-lg p-1">
 						<Button :variant="viewMode === 'grid' ? 'default' : 'ghost'" size="icon"
@@ -33,6 +36,7 @@
 				<div class="flex-1 overflow-y-auto p-4 pt-2 xpos-scrollbar">
 				<ItemGrid :items="itemStore.items" :is-loading="itemStore.isLoading"
 					:currency-symbol="posStore.currencySymbol" :view-mode="viewMode"
+					:highlighted-index="highlightedIndex"
 					@select-item="handleAddItem" @show-detail="handleShowDetail" @load-more="handleLoadMore" />
 			</div>
 		</div>
@@ -44,13 +48,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useItemStore } from "@/stores/itemStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useOfferStore } from "@/stores/offerStore";
 import { call, showError } from "@/services/api";
 import SearchBar from "@/components/items/SearchBar.vue";
+import BarcodeScanner from "@/components/items/BarcodeScanner.vue";
 import ItemGrid from "@/components/items/ItemGrid.vue";
 import Cart from "@/components/cart/Cart.vue";
 import { Button } from "@/components/ui/button";
@@ -64,6 +69,9 @@ const cartStore = useCartStore();
 const offerStore = useOfferStore();
 
 const viewMode = ref<'grid' | 'list'>('grid');
+const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null);
+const barcodeScannerRef = ref<InstanceType<typeof BarcodeScanner> | null>(null);
+const highlightedIndex = ref(-1);
 
 const topGroups = computed(() => {
 	const groups = itemStore.parentGroups.filter(
@@ -76,10 +84,22 @@ onMounted(() => {
 	if (posStore.isReady) {
 		loadInitialData();
 	}
+	document.addEventListener("keydown", handleGlobalKeydown);
+	// Auto-focus barcode scanner
+	nextTick(() => barcodeScannerRef.value?.focus());
+});
+
+onUnmounted(() => {
+	document.removeEventListener("keydown", handleGlobalKeydown);
 });
 
 watch(() => posStore.isReady, (ready) => {
 	if (ready) loadInitialData();
+});
+
+// Reset highlight when items change
+watch(() => itemStore.items, () => {
+	highlightedIndex.value = -1;
 });
 
 async function loadInitialData() {
@@ -87,6 +107,8 @@ async function loadInitialData() {
 		itemStore.fetchItems(posStore.profileName),
 		itemStore.fetchItemGroups(),
 	]);
+	// Focus barcode scanner after data loads
+	nextTick(() => barcodeScannerRef.value?.focus());
 }
 
 function onSearch(term: string) {
@@ -94,17 +116,121 @@ function onSearch(term: string) {
 	itemStore.fetchItems(posStore.profileName);
 }
 
+/**
+ * Handle Enter key from search bar.
+ * If an item is highlighted, add it to cart.
+ * Otherwise try barcode lookup first, then fall back to text search.
+ */
+async function onSearchEnter(val: string) {
+	// If an item is highlighted by arrow keys, select it
+	if (highlightedIndex.value >= 0 && highlightedIndex.value < itemStore.items.length) {
+		handleAddItem(itemStore.items[highlightedIndex.value]);
+		highlightedIndex.value = -1;
+		return;
+	}
+
+	if (!val) return;
+
+	// Fall back to text search (barcode scanning is handled by the dedicated input)
+	onSearch(val);
+}
+
+/**
+ * Handle barcode scan from the dedicated barcode input.
+ * Looks up the barcode and auto-adds the item to cart.
+ */
 async function onBarcodeScan(barcode: string) {
-	const result = await itemStore.searchByBarcode(barcode, posStore.profileName);
-	if (result) {
-		handleAddItem({
-			item_code: result.item_code,
-			item_name: result.item_name,
-			rate: 0,
-			stock_uom: result.uom,
-			uom: result.uom,
-		} as POSItem);
-		await itemStore.fetchItems(posStore.profileName);
+	if (!barcode) return;
+
+	barcodeScannerRef.value?.setScanning(true);
+	try {
+		const result = await itemStore.searchByBarcode(barcode, posStore.profileName);
+		if (result) {
+			handleAddItem({
+				item_code: result.item_code,
+				item_name: result.item_name,
+				rate: result.rate || 0,
+				stock_uom: result.stock_uom || result.uom,
+				uom: result.uom,
+				image: result.image,
+				has_batch_no: result.has_batch_no,
+				has_serial_no: result.has_serial_no,
+				actual_qty: result.actual_qty ?? 9999,
+			} as POSItem);
+			barcodeScannerRef.value?.showSuccess();
+		} else {
+			showError(`Item not found for barcode: ${barcode}`);
+			barcodeScannerRef.value?.showError();
+		}
+	} catch (err) {
+		showError("Barcode lookup failed");
+		barcodeScannerRef.value?.showError();
+	} finally {
+		barcodeScannerRef.value?.setScanning(false);
+	}
+}
+
+/**
+ * Handle ArrowUp/Down navigation from search bar.
+ * Moves the highlight through the item list.
+ */
+function onNavigate(direction: 'up' | 'down') {
+	const items = itemStore.items;
+	if (items.length === 0) return;
+
+	if (direction === 'down') {
+		highlightedIndex.value = Math.min(highlightedIndex.value + 1, items.length - 1);
+	} else {
+		highlightedIndex.value = Math.max(highlightedIndex.value - 1, -1);
+		if (highlightedIndex.value === -1) {
+			searchBarRef.value?.focus();
+		}
+	}
+
+	// Scroll highlighted item into view
+	nextTick(() => {
+		const el = document.querySelector(`[data-item-index="${highlightedIndex.value}"]`);
+		el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+	});
+}
+
+/**
+ * Global keydown handler for when focus is NOT in an input.
+ * - Alpha/digit key → focus search bar with that key
+ * - ArrowDown/Up → navigate items
+ * - Enter → add highlighted item
+ */
+function handleGlobalKeydown(e: KeyboardEvent) {
+	// Don't intercept when in an input, textarea, select, or dialog
+	const tag = (document.activeElement?.tagName || "").toLowerCase();
+	if (tag === "input" || tag === "textarea" || tag === "select") return;
+	if (document.activeElement?.closest("[role='dialog']")) return;
+
+	// Single printable character → focus search and type
+	if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+		e.preventDefault();
+		searchBarRef.value?.setValue(e.key);
+		searchBarRef.value?.focus();
+		itemStore.setSearchTerm(e.key);
+		itemStore.fetchItems(posStore.profileName);
+		return;
+	}
+
+	// ArrowDown/Up when not in input
+	if (e.key === "ArrowDown") {
+		e.preventDefault();
+		onNavigate('down');
+	}
+	if (e.key === "ArrowUp") {
+		e.preventDefault();
+		onNavigate('up');
+	}
+
+	// Enter when not in input → add highlighted item
+	if (e.key === "Enter" && highlightedIndex.value >= 0) {
+		e.preventDefault();
+		handleAddItem(itemStore.items[highlightedIndex.value]);
+		highlightedIndex.value = -1;
 	}
 }
 

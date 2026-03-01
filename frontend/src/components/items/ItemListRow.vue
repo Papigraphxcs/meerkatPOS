@@ -4,7 +4,9 @@
 		:class="[
 			isOutOfStock && !allowNegativeStock
 				? 'cursor-not-allowed opacity-60 bg-muted/30 border-border'
-				: 'cursor-pointer hover:bg-muted/50 border-transparent hover:border-border'
+				: highlighted
+					? 'cursor-pointer bg-primary/10 border-primary/40 ring-1 ring-primary/30'
+					: 'cursor-pointer hover:bg-muted/50 border-transparent hover:border-border'
 		]"
 		@click="handleClick"
 	>
@@ -99,6 +101,7 @@ import { Package, Plus, AlertCircle, Ban, Info } from "lucide-vue-next";
 const props = defineProps({
 	item: { type: Object, required: true },
 	currencySymbol: { type: String, default: "$" },
+	highlighted: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["click", "showDetail"]);

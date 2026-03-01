@@ -1,0 +1,578 @@
+{% set company_doc = frappe.get_cached_doc("Company", doc.company) %}
+{% set company_name = company_doc.company_name or doc.company %}
+{% set company_phone = company_doc.phone_no or "" %}
+{% set company_email = company_doc.email or "" %}
+{% set company_website = company_doc.website or "" %}
+{% set company_address = "" %}
+{% if company_doc.get("company_address") %}
+{% set addr = frappe.get_doc("Address", company_doc.company_address) %}
+{% set company_address = [addr.address_line1 or "", addr.address_line2 or "", addr.city or "", addr.state or "",
+addr.pincode or ""] | select | join(", ") %}
+{% endif %}
+{% set company_tax_id = company_doc.tax_id or "" %}
+{% set currency = doc.currency or frappe.db.get_value("Company", doc.company, "default_currency") or "USD" %}
+{% set is_return = doc.get("is_return") or (doc.get("grand_total") and doc.grand_total < 0) %} <style>
+    @page {
+    size: 80mm auto;
+    margin: 0;
+    }
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    }
+    body, .print-format {
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #1a1a1a;
+    background: #fff;
+    width: 72mm;
+    margin: 0 auto;
+    padding: 3mm;
+    }
+    .receipt-container {
+    width: 100%;
+    padding: 0;
+    }
+
+    /* ── Header ── */
+    .receipt-header {
+    text-align: center;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #000;
+    }
+    .store-logo {
+    max-height: 52px;
+    max-width: 52px;
+    margin: 0 auto 6px;
+    display: block;
+    border-radius: 6px;
+    }
+    .store-name {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    }
+    .store-detail {
+    font-size: 9px;
+    color: #444;
+    line-height: 1.55;
+    }
+    .store-tax-id {
+    font-size: 9px;
+    font-weight: 700;
+    color: #333;
+    margin-top: 2px;
+    }
+
+    /* ── Return Banner ── */
+    .return-banner {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 0;
+    margin: 6px 0;
+    border: 3px double #000;
+    }
+
+    /* ── Dividers ── */
+    .div-dashed {
+    border: none;
+    border-top: 1px dashed #999;
+    margin: 5px 0;
+    }
+    .div-solid {
+    border: none;
+    border-top: 1px solid #000;
+    margin: 5px 0;
+    }
+    .div-double {
+    border: none;
+    border-top: 3px double #000;
+    margin: 5px 0;
+    }
+
+    /* ── Invoice Meta ── */
+    .invoice-meta {
+    font-size: 10px;
+    padding: 4px 0;
+    }
+    .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    }
+    .meta-label {
+    color: #666;
+    font-weight: 400;
+    }
+    .meta-value {
+    font-weight: 600;
+    text-align: right;
+    }
+    .invoice-number {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    }
+
+    /* ── Items Table ── */
+    .items-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 0;
+    border-bottom: 1px solid #000;
+    color: #333;
+    }
+    .items-header .col-desc { flex: 1; }
+    .items-header .col-qty { width: 32px; text-align: center; }
+    .items-header .col-rate { width: 52px; text-align: right; }
+    .items-header .col-amt { width: 60px; text-align: right; }
+
+    .item-row {
+    padding: 3px 0;
+    border-bottom: 1px dotted #ddd;
+    }
+    .item-row:last-child {
+    border-bottom: none;
+    }
+    .item-name {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 1px;
+    word-break: break-word;
+    }
+    .item-detail-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #333;
+    }
+    .item-detail-line .col-qty { width: 32px; text-align: center; }
+    .item-detail-line .col-rate { width: 52px; text-align: right; }
+    .item-detail-line .col-amt { width: 60px; text-align: right; font-weight: 700; }
+
+    .item-extras {
+    font-size: 8px;
+    color: #777;
+    padding-left: 6px;
+    }
+    .item-discount {
+    font-size: 9px;
+    color: #c0392b;
+    padding-left: 6px;
+    }
+
+    /* ── Totals ── */
+    .totals-section {
+    padding: 4px 0 2px;
+    }
+    .total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    padding: 1px 0;
+    }
+    .total-row.highlight {
+    font-size: 14px;
+    font-weight: 900;
+    padding: 4px 0;
+    letter-spacing: 0.5px;
+    }
+    .total-label { color: #333; }
+    .total-value { font-weight: 700; text-align: right; }
+    .total-row.discount .total-value { color: #c0392b; }
+    .total-row.tax .total-label { font-size: 9px; color: #666; }
+
+    /* ── Payments ── */
+    .payments-section {
+    padding: 2px 0;
+    }
+    .payment-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    padding: 1px 0;
+    }
+    .change-row {
+    font-weight: 900;
+    font-size: 12px;
+    }
+
+    /* ── Customer ── */
+    .customer-section {
+    font-size: 9px;
+    padding: 3px 0;
+    color: #555;
+    }
+    .customer-name {
+    font-weight: 700;
+    font-size: 10px;
+    color: #222;
+    }
+
+    /* ── Return Info ── */
+    .return-info {
+    text-align: center;
+    font-size: 9px;
+    color: #c0392b;
+    font-weight: 700;
+    padding: 3px 0;
+    }
+
+    /* ── QR / Barcode placeholder ── */
+    .barcode-section {
+    text-align: center;
+    padding: 6px 0 2px;
+    }
+    .barcode-section .invoice-barcode {
+    font-family: 'Libre Barcode 39', 'Courier New', monospace;
+    font-size: 30px;
+    letter-spacing: 2px;
+    display: block;
+    margin: 0 auto;
+    line-height: 1;
+    }
+    .barcode-section .invoice-id-text {
+    font-size: 8px;
+    color: #999;
+    margin-top: 2px;
+    }
+
+    /* ── Footer ── */
+    .receipt-footer {
+    text-align: center;
+    padding-top: 5px;
+    border-top: 2px solid #000;
+    }
+    .thank-you {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    }
+    .footer-msg {
+    font-size: 8px;
+    line-height: 1.5;
+    color: #666;
+    }
+    .footer-policy {
+    font-size: 7.5px;
+    color: #999;
+    margin-top: 4px;
+    line-height: 1.45;
+    }
+    .powered-by {
+    font-size: 7px;
+    color: #bbb;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+    }
+
+    /* ── Print tweaks ── */
+    @media print {
+    body, .print-format {
+    width: 72mm;
+    margin: 0;
+    padding: 2mm;
+    }
+    .page-break { display: none; }
+    }
+    </style>
+
+    <div class="receipt-container">
+        <!-- ═══════════════════ HEADER ═══════════════════ -->
+        <div class="receipt-header">
+            {% if company_doc.get("company_logo") %}
+            <img class="store-logo" src="{{ company_doc.company_logo }}" alt="{{ company_name }}" />
+            {% endif %}
+            <div class="store-name">{{ company_name }}</div>
+            <div class="store-detail">
+                {% if company_address %}{{ company_address }}<br>{% endif %}
+                {% if company_phone %}Tel: {{ company_phone }}{% endif %}
+                {% if company_phone and company_email %} &bull; {% endif %}
+                {% if company_email %}{{ company_email }}{% endif %}
+                {% if company_website %}<br>{{ company_website }}{% endif %}
+            </div>
+            {% if company_tax_id %}
+            <div class="store-tax-id">Tax ID: {{ company_tax_id }}</div>
+            {% endif %}
+        </div>
+
+        <!-- ═══════════════ RETURN BANNER ═══════════════ -->
+        {% if is_return %}
+        <div class="return-banner">&#x21A9; RETURN / REFUND</div>
+        {% endif %}
+
+        <hr class="div-dashed">
+
+        <!-- ═══════════════ INVOICE META ═══════════════ -->
+        <div class="invoice-meta">
+            <div class="meta-row">
+                <span class="meta-label">Invoice:</span>
+                <span class="meta-value invoice-number">{{ doc.name }}</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Date:</span>
+                <span class="meta-value">{{ frappe.utils.formatdate(doc.posting_date, "dd-MM-yyyy") }}</span>
+            </div>
+            {% if doc.get("posting_time") %}
+            {% set _time = doc.posting_time | string %}
+            <div class="meta-row">
+                <span class="meta-label">Time:</span>
+                <span class="meta-value">{{ _time[:5] if _time|length > 5 else _time }}</span>
+            </div>
+            {% endif %}
+            {% if doc.get("pos_profile") %}
+            <div class="meta-row">
+                <span class="meta-label">Terminal:</span>
+                <span class="meta-value">{{ doc.pos_profile }}</span>
+            </div>
+            {% endif %}
+            {% if doc.get("owner") %}
+            <div class="meta-row">
+                <span class="meta-label">Cashier:</span>
+                <span class="meta-value">{{ frappe.db.get_value("User", doc.owner, "full_name") or doc.owner
+                    }}</span>
+            </div>
+            {% endif %}
+            {% if is_return and doc.get("return_against") %}
+            <div class="meta-row return-info" style="text-align:left;">
+                <span class="meta-label">Against:</span>
+                <span class="meta-value">{{ doc.return_against }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ═══════════════ CUSTOMER ═══════════════ -->
+        {% if doc.customer and doc.customer_name %}
+        <div class="customer-section">
+            <div class="meta-row">
+                <span class="meta-label">Customer:</span>
+                <span class="customer-name">{{ doc.customer_name }}</span>
+            </div>
+            {% if doc.get("contact_mobile") or doc.get("contact_phone") %}
+            <div class="meta-row">
+                <span class="meta-label">Phone:</span>
+                <span class="meta-value">{{ doc.contact_mobile or doc.contact_phone }}</span>
+            </div>
+            {% endif %}
+            {% if doc.get("tax_id") %}
+            <div class="meta-row">
+                <span class="meta-label">Tax ID:</span>
+                <span class="meta-value">{{ doc.tax_id }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <hr class="div-solid">
+
+        <!-- ═══════════════ ITEMS ═══════════════ -->
+        <div class="items-header">
+            <span class="col-desc">Item</span>
+            <span class="col-qty">Qty</span>
+            <span class="col-rate">Price</span>
+            <span class="col-amt">Total</span>
+        </div>
+
+        {% for item in doc.items %}
+        <div class="item-row">
+            <div class="item-name">{{ item.item_name }}</div>
+            <div class="item-detail-line">
+                <span class="col-desc" style="flex:1;">
+                    {% if item.item_code != item.item_name %}
+                    <span style="font-size:8px;color:#999;">{{ item.item_code }}</span>
+                    {% endif %}
+                </span>
+                <span class="col-qty">{{ item.qty }}</span>
+                <span class="col-rate">{{ frappe.utils.fmt_money(item.rate, currency=currency) }}</span>
+                <span class="col-amt">{{ frappe.utils.fmt_money(item.amount, currency=currency) }}</span>
+            </div>
+            {% if item.uom and item.uom != "Nos" and item.uom != "Unit" %}
+            <div class="item-extras">UOM: {{ item.uom }}{% if item.conversion_factor and item.conversion_factor != 1 %}
+                (×{{ item.conversion_factor }}){% endif %}</div>
+            {% endif %}
+            {% if item.serial_no %}
+            <div class="item-extras">S/N: {{ item.serial_no }}</div>
+            {% endif %}
+            {% if item.batch_no %}
+            <div class="item-extras">Batch: {{ item.batch_no }}</div>
+            {% endif %}
+            {% if item.discount_percentage %}
+            <div class="item-discount">Disc: -{{ item.discount_percentage }}%</div>
+            {% elif item.discount_amount %}
+            <div class="item-discount">Disc: -{{ frappe.utils.fmt_money(item.discount_amount, currency=currency) }}
+            </div>
+            {% endif %}
+            {% if item.get("posa_notes") %}
+            <div class="item-extras" style="font-style:italic;">&#9998; {{ item.posa_notes }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <hr class="div-double">
+
+        <!-- ═══════════════ TOTALS ═══════════════ -->
+        <div class="totals-section">
+            {% set total_items = doc.items | length %}
+            {% set total_qty = doc.total_qty or (doc.items | sum(attribute='qty')) %}
+            <div class="total-row" style="font-size:9px;color:#888;">
+                <span class="total-label">{{ total_items }} item{{ 's' if total_items != 1 else '' }} &bull; {{
+                    total_qty }} unit{{ 's' if total_qty != 1 else '' }}</span>
+            </div>
+
+            <div class="total-row">
+                <span class="total-label">Subtotal</span>
+                <span class="total-value">{{ frappe.utils.fmt_money(doc.total or doc.net_total, currency=currency)
+                    }}</span>
+            </div>
+
+            {% if doc.discount_amount and doc.discount_amount > 0 %}
+            <div class="total-row discount">
+                <span class="total-label">
+                    Discount
+                    {% if doc.additional_discount_percentage %} ({{ doc.additional_discount_percentage }}%){% endif %}
+                </span>
+                <span class="total-value">-{{ frappe.utils.fmt_money(doc.discount_amount, currency=currency) }}</span>
+            </div>
+            {% endif %}
+
+            {% if doc.net_total != doc.total %}
+            <div class="total-row">
+                <span class="total-label">Net Total</span>
+                <span class="total-value">{{ frappe.utils.fmt_money(doc.net_total, currency=currency) }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Tax Lines -->
+            {% for tax in doc.taxes %}
+            <div class="total-row tax">
+                <span class="total-label">
+                    {{ tax.description or "Tax" }}
+                    {% if tax.rate %} ({{ tax.rate }}%){% endif %}
+                    {% if tax.included_in_print_rate %} <span style="font-size:7px;">incl.</span>{% endif %}
+                </span>
+                <span class="total-value">{{ frappe.utils.fmt_money(tax.tax_amount, currency=currency) }}</span>
+            </div>
+            {% endfor %}
+
+            {% if doc.get("write_off_amount") and doc.write_off_amount > 0 %}
+            <div class="total-row">
+                <span class="total-label">Write Off</span>
+                <span class="total-value">-{{ frappe.utils.fmt_money(doc.write_off_amount, currency=currency) }}</span>
+            </div>
+            {% endif %}
+
+            {% if doc.get("rounding_adjustment") and doc.rounding_adjustment != 0 %}
+            <div class="total-row" style="font-size:9px;">
+                <span class="total-label">Rounding</span>
+                <span class="total-value">{{ frappe.utils.fmt_money(doc.rounding_adjustment, currency=currency)
+                    }}</span>
+            </div>
+            {% endif %}
+
+            <hr class="div-solid">
+
+            <div class="total-row highlight">
+                <span class="total-label">{{ "REFUND" if is_return else "TOTAL" }}</span>
+                <span class="total-value">{{ frappe.utils.fmt_money((doc.rounded_total or doc.grand_total) | abs,
+                    currency=currency) }}</span>
+            </div>
+        </div>
+
+        <!-- ═══════════════ PAYMENTS ═══════════════ -->
+        {% if doc.payments and doc.payments | length > 0 %}
+        <hr class="div-dashed">
+        <div class="payments-section">
+            <div class="total-row"
+                style="font-size:9px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:2px;">
+                <span>Payment Details</span>
+            </div>
+            {% set paid_total = {"value": 0} %}
+            {% for payment in doc.payments %}
+            {% if payment.amount and payment.amount != 0 %}
+            <div class="payment-row">
+                <span>{{ payment.mode_of_payment }}</span>
+                <span style="font-weight:700;">{{ frappe.utils.fmt_money(payment.amount | abs, currency=currency)
+                    }}</span>
+            </div>
+            {% set _ = paid_total.update({"value": paid_total.value + (payment.amount or 0)}) %}
+            {% endif %}
+            {% endfor %}
+
+            {% set invoice_total = (doc.rounded_total or doc.grand_total) | abs %}
+            {% set change = (paid_total.value | abs) - invoice_total %}
+            {% if change > 0.01 and not is_return %}
+            <hr class="div-dashed">
+            <div class="payment-row change-row">
+                <span>Change</span>
+                <span>{{ frappe.utils.fmt_money(change, currency=currency) }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ═══════════════ LOYALTY ═══════════════ -->
+        {% if doc.get("loyalty_points") and doc.loyalty_points > 0 %}
+        <hr class="div-dashed">
+        <div class="total-row" style="font-size:9px;">
+            <span class="total-label">&#9733; Loyalty Points Earned</span>
+            <span class="total-value" style="color:#8e44ad;">{{ doc.loyalty_points }}</span>
+        </div>
+        {% endif %}
+
+        <!-- ═══════════════ NOTES ═══════════════ -->
+        {% if doc.get("posa_notes") %}
+        <hr class="div-dashed">
+        <div style="font-size:9px;color:#555;padding:2px 0;">
+            <strong>Notes:</strong> {{ doc.posa_notes }}
+        </div>
+        {% endif %}
+
+        <!-- ═══════════════ BARCODE ═══════════════ -->
+        <div class="barcode-section">
+            <span class="invoice-barcode">*{{ doc.name }}*</span>
+            <div class="invoice-id-text">{{ doc.name }}</div>
+        </div>
+
+        <!-- ═══════════════ FOOTER ═══════════════ -->
+        <div class="receipt-footer">
+            {% if is_return %}
+            <div class="thank-you">Refund Processed</div>
+            <div class="footer-msg">
+                This receipt confirms your return has been processed.<br>
+                Please retain this receipt for your records.
+            </div>
+            {% else %}
+            <div class="thank-you">Thank You!</div>
+            <div class="footer-msg">
+                We appreciate your business.<br>
+                Please visit us again soon!
+            </div>
+            {% endif %}
+            <div class="footer-policy">
+                {% if is_return %}
+                Refund issued to original payment method.<br>
+                Please allow 3-5 business days for credit card refunds.
+                {% else %}
+                Items may be returned within 7 days with this receipt.<br>
+                Sale items are final. No exchanges on opened products.<br>
+                For support contact us at the details above.
+                {% endif %}
+            </div>
+            <div class="powered-by">
+                Powered by XPOS &bull; {{ frappe.utils.formatdate(frappe.utils.nowdate(), "yyyy") }}
+            </div>
+        </div>
+    </div>

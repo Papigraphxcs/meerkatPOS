@@ -112,12 +112,12 @@ export const usePaymentStore = defineStore("payment", () => {
   // ─── Cash Movement Actions ─────────────────────
   async function fetchCashMovementContext(
     posProfile: string,
-    company: string
+    posOpeningShift: string
   ): Promise<CashMovementContext | null> {
     try {
       const result = await call<CashMovementContext>(
         "xpos.api.cash_movements.get_cash_movement_context",
-        { pos_profile: posProfile, company }
+        { pos_profile: posProfile, pos_opening_shift: posOpeningShift }
       );
       cashMovementContext.value = result;
       return result;
@@ -167,8 +167,7 @@ export const usePaymentStore = defineStore("payment", () => {
       const result = await call<POSCashMovement[]>(
         "xpos.api.cash_movements.get_shift_cash_movements",
         {
-          pos_profile: posProfile,
-          opening_shift: openingShift,
+          pos_opening_shift: openingShift,
         }
       );
       shiftCashMovements.value = result || [];
