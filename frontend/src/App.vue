@@ -1,6 +1,5 @@
 <template>
 	<div id="xpos-app" :class="['h-screen w-screen overflow-hidden font-sans', isDark ? 'dark' : '']">
-		<!-- Auth Pages (Login, Reset Password) - No layout wrapper -->
 		<template v-if="isAuthPage">
 			<router-view v-slot="{ Component }">
 				<transition name="fade" mode="out-in">
@@ -9,26 +8,22 @@
 			</router-view>
 		</template>
 
-		<!-- Protected App Content -->
 		<template v-else>
-			<!-- Loading State -->
 			<div v-if="posStore.isLoading" class="flex items-center justify-center h-full bg-background">
 				<div class="text-center">
 					<div class="relative w-16 h-16 mx-auto mb-4">
 						<div class="absolute inset-0 rounded-full border-4 border-muted"></div>
-						<div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+						<div
+							class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin">
+						</div>
 					</div>
 					<h2 class="text-xl font-semibold text-foreground">Loading X POS</h2>
 					<p class="text-muted-foreground mt-1">Preparing your workspace...</p>
 				</div>
 			</div>
 
-			<!-- Opening Shift Dialog -->
-			<OpeningDialog
-				v-else-if="posStore.showOpeningDialog"
-			/>
+			<OpeningDialog v-else-if="posStore.showOpeningDialog" />
 
-			<!-- Main POS App -->
 			<DefaultLayout v-else-if="posStore.isReady">
 				<router-view v-slot="{ Component }">
 					<transition name="fade" mode="out-in">
@@ -37,22 +32,16 @@
 				</router-view>
 			</DefaultLayout>
 
-			<!-- Closing Shift Dialog -->
 			<ClosingDialog v-if="posStore.showClosingDialog" />
 
-			<!-- Payment Dialog -->
 			<PaymentDialog v-if="cartStore.showPaymentDialog" />
 
-			<!-- Customer Select Dialog -->
 			<CustomerSelect v-if="customerStore.showCustomerDialog" />
 
-			<!-- Loyalty Program Dialog -->
 			<LoyaltyDialog v-if="customerStore.showLoyaltyDialog" />
 
-			<!-- Item Detail Dialog (batch/serial/UOM picker) -->
 			<ItemDetailDialog v-if="itemStore.showItemDetail" />
 
-			<!-- Cash Movement Dialog -->
 			<CashMovementDialog v-if="paymentStore.showCashMovementDialog" />
 		</template>
 	</div>
@@ -86,14 +75,11 @@ const paymentStore = usePaymentStore();
 const authStore = useAuthStore();
 const offlineStore = useOfflineStore();
 
-// Check if current route is an auth page (login, reset-password)
 const isAuthPage = computed(() => route.meta.isAuthPage === true);
 
-// Theme state: "light" | "dark" | "system"
 const theme = ref<"light" | "dark" | "system">("system");
 const systemPrefersDark = ref(window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-// Computed: is the effective theme dark?
 const isDark = computed(() => {
 	if (theme.value === "system") {
 		return systemPrefersDark.value;
@@ -101,7 +87,6 @@ const isDark = computed(() => {
 	return theme.value === "dark";
 });
 
-// Apply theme classes to both html element and app container
 function applyThemeToDocument(dark: boolean) {
 	const html = document.documentElement;
 	if (dark) {
@@ -113,13 +98,11 @@ function applyThemeToDocument(dark: boolean) {
 	}
 }
 
-// Watch for theme changes and update document
 watch(isDark, (dark) => {
 	applyThemeToDocument(dark);
 }, { immediate: true });
 
 function toggleDarkMode() {
-	// Cycle: light -> dark -> system -> light
 	if (theme.value === "light") {
 		theme.value = "dark";
 	} else if (theme.value === "dark") {
@@ -130,54 +113,43 @@ function toggleDarkMode() {
 	localStorage.setItem("xpos-theme", theme.value);
 }
 
-// Provide dark mode to child components
 provide("isDark", isDark);
 provide("theme", theme);
 provide("toggleDarkMode", toggleDarkMode);
 
-// Listen for system theme changes
 let mediaQuery: MediaQueryList | null = null;
 function handleSystemThemeChange(e: MediaQueryListEvent) {
 	systemPrefersDark.value = e.matches;
 }
 
 onMounted(() => {
-	// Restore theme preference (use same key as index.html)
 	const saved = localStorage.getItem("xpos-theme") as "light" | "dark" | "system" | null;
 	if (saved && ["light", "dark", "system"].includes(saved)) {
 		theme.value = saved;
 	} else {
-		// Migrate from old key if exists
 		const oldSaved = localStorage.getItem("xpos-dark-mode");
 		if (oldSaved === "1") {
 			theme.value = "dark";
 		} else if (oldSaved === "0") {
 			theme.value = "light";
 		}
-		// Save to new key
 		localStorage.setItem("xpos-theme", theme.value);
 	}
 
-	// Apply theme immediately
 	applyThemeToDocument(isDark.value);
 
-	// Listen for system preference changes
 	mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 	mediaQuery.addEventListener("change", handleSystemThemeChange);
 
-	// Only initialize POS shift check if not on auth page
 	if (!isAuthPage.value) {
 		posStore.checkExistingShift();
 	}
 
-	// Initialize offline store (online/offline listeners)
 	offlineStore.init();
 });
 
-// Watch for route changes to initialize POS when navigating from auth to protected pages
 watch(isAuthPage, (isAuth, wasAuth) => {
 	if (wasAuth && !isAuth && authStore.isAuthenticated) {
-		// Just navigated from auth page to protected page
 		posStore.checkExistingShift();
 	}
 });

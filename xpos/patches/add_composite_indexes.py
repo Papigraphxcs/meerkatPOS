@@ -48,7 +48,7 @@ def execute():
                 "valid_from",
                 "valid_upto",
             ],
-            "pricelist_currency_selling_item_uom_validfrom_upto",
+            "pricelist_currency_selling_item_uom_valid_from_upto",
         ),
     ]
 

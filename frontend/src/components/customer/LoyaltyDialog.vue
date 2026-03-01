@@ -58,7 +58,7 @@
                             class="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
                             @click="handleUnenroll" :disabled="isProcessing">
                             <UserMinus class="w-4 h-4" />
-                            {{ isProcessing ? 'Processing...' : 'Unenroll from Program' }}
+                            {{ isProcessing ? 'Processing...' : __('Unenroll from Program') }}
                         </Button>
                     </div>
 
@@ -104,6 +104,11 @@
                                             variant="outline" class="text-[10px]">
                                             {{ tier.tier_name }}
                                         </Badge>
+                                        <div class="flex items-center gap-3 text-xs text-muted-foreground">
+                                            <span v-for="tier in program.tiers.slice(0, 3)">
+                                                Collection factor: {{ tier.collection_factor }}
+                                            </span>
+                                        </div>
                                         <Badge v-if="program.tiers.length > 3" variant="outline" class="text-[10px]">
                                             +{{ program.tiers.length - 3 }} {{ __("more") }}
                                         </Badge>

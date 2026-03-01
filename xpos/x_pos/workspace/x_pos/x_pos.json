@@ -1,7 +1,7 @@
 {
  "charts": [],
  "content": "[{\"id\":\"xpos_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">X POS</span>\",\"col\":12}},{\"id\":\"xpos_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"X POS App\",\"col\":3}},{\"id\":\"xpos_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"xpos_pos_card\",\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"id\":\"xpos_profile_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"id\":\"xpos_shift_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"id\":\"xpos_cash_movement_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Cash Movement\",\"col\":4}},{\"id\":\"xpos_delivery_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"id\":\"xpos_offers_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
- "creation": "2026-02-27 00:00:00.000000",
+ "creation": "2026-02-27 00:00:00",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -99,24 +99,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Cash Movement",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Cash Movement",
-   "link_count": 0,
-   "link_to": "POS Cash Movement",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Delivery Charges",
    "link_count": 1,
    "onboard": 0,
@@ -179,9 +161,29 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "description": "Cash flow tracking",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cash Movement",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Cash Movement",
+   "link_count": 0,
+   "link_to": "POS Cash Movement",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-02-27 00:00:00.000000",
+ "modified": "2026-03-01 19:59:32.320695",
  "modified_by": "Administrator",
  "module": "X POS",
  "name": "X POS",
@@ -189,16 +191,18 @@
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 1,
+ "sequence_id": 1.0,
  "shortcuts": [
   {
    "color": "Blue",
    "format": "{} Active",
    "label": "X POS App",
-   "link_to": "xpos",
-   "type": "Page"
+   "link_to": "",
+   "type": "URL",
+   "url": "/xpos/pos"
   }
  ],
  "title": "X POS"
