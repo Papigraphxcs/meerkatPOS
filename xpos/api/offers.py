@@ -4,7 +4,6 @@
 """
 POS Offers, Coupons, and Delivery Charges API.
 
-Provides the same offer/coupon features as POS Awesome:
 - Active POS Offers retrieval (including Promotional Scheme offers)
 - Coupon validation (gift cards, discount coupons)
 - Active gift coupons per customer
@@ -18,26 +17,23 @@ from frappe.utils import flt, cstr, getdate, nowdate
 
 @frappe.whitelist()
 def get_offers(pos_profile):
-	"""Return all active POS Offers + promotional scheme offers for a profile.
+    """Return all active POS Offers + promotional scheme offers for a profile."""
+    pos = frappe.get_cached_doc("POS Profile", pos_profile)
+    company = pos.company
+    warehouse = pos.warehouse
+    date = nowdate()
 
-	Same as POS Awesome's get_offers.
-	"""
-	pos = frappe.get_cached_doc("POS Profile", pos_profile)
-	company = pos.company
-	warehouse = pos.warehouse
-	date = nowdate()
+    values = {
+        "company": company,
+        "pos_profile": pos_profile,
+        "warehouse": warehouse,
+        "valid_from": date,
+        "valid_upto": date,
+    }
 
-	values = {
-		"company": company,
-		"pos_profile": pos_profile,
-		"warehouse": warehouse,
-		"valid_from": date,
-		"valid_upto": date,
-	}
-
-	# Fetch POS Offers
-	data = frappe.db.sql(
-		"""
+    data = (
+        frappe.db.sql(
+            """
 		SELECT *
 		FROM `tabPOS Offer`
 		WHERE
@@ -48,192 +44,189 @@ def get_offers(pos_profile):
 			AND (valid_from IS NULL OR valid_from = '' OR valid_from <= %(valid_from)s)
 			AND (valid_upto IS NULL OR valid_upto = '' OR valid_upto >= %(valid_upto)s)
 		""",
-		values=values,
-		as_dict=True,
-	) or []
+            values=values,
+            as_dict=True,
+        )
+        or []
+    )
 
-	for offer in data:
-		offer["row_id"] = cstr(offer.get("row_id") or offer.get("name"))
-		offer["offer_applied"] = flt(offer.get("offer_applied") or 0)
-		offer["auto"] = flt(offer.get("auto") or 0)
-		offer["min_qty"] = flt(offer.get("min_qty") or 0)
-		offer["max_qty"] = flt(offer.get("max_qty") or 0)
-		offer["min_amt"] = flt(offer.get("min_amt") or 0)
-		offer["max_amt"] = flt(offer.get("max_amt") or 0)
-		_normalize_discount_fields(offer)
+    for offer in data:
+        offer["row_id"] = cstr(offer.get("row_id") or offer.get("name"))
+        offer["offer_applied"] = flt(offer.get("offer_applied") or 0)
+        offer["auto"] = flt(offer.get("auto") or 0)
+        offer["min_qty"] = flt(offer.get("min_qty") or 0)
+        offer["max_qty"] = flt(offer.get("max_qty") or 0)
+        offer["min_amt"] = flt(offer.get("min_amt") or 0)
+        offer["max_amt"] = flt(offer.get("max_amt") or 0)
+        _normalize_discount_fields(offer)
 
-	# Fetch promotional scheme offers
-	promo_offers = _get_promotional_scheme_offers(pos) or []
-	data.extend(promo_offers)
+    promo_offers = _get_promotional_scheme_offers(pos) or []
+    data.extend(promo_offers)
 
-	return data
+    return data
 
 
 @frappe.whitelist()
 def get_pos_coupon(coupon, customer, company):
-	"""Validate and return a POS coupon.
+    """Validate and return a POS coupon."""
+    try:
+        from xpos.x_pos.doctype.pos_coupon.pos_coupon import check_coupon_code
 
-	Same as POS Awesome's get_pos_coupon.
-	"""
-	try:
-		from xpos.x_pos.doctype.pos_coupon.pos_coupon import check_coupon_code
-		return check_coupon_code(coupon, customer, company)
-	except ImportError:
-		# Fallback: validate manually
-		coupon_doc = frappe.db.get_value(
-			"POS Coupon",
-			{"coupon_code": coupon, "company": company, "used": 0},
-			["name", "coupon_code", "coupon_type", "discount_percentage",
-			 "discount_amount", "valid_from", "valid_upto", "customer"],
-			as_dict=True,
-		)
+        return check_coupon_code(coupon, customer, company)
+    except ImportError:
+        coupon_doc = frappe.db.get_value(
+            "POS Coupon",
+            {"coupon_code": coupon, "company": company, "used": 0},
+            [
+                "name",
+                "coupon_code",
+                "coupon_type",
+                "discount_percentage",
+                "discount_amount",
+                "valid_from",
+                "valid_upto",
+                "customer",
+            ],
+            as_dict=True,
+        )
 
-		if not coupon_doc:
-			frappe.throw(_("Invalid or already used coupon code"))
+        if not coupon_doc:
+            frappe.throw(_("Invalid or already used coupon code"))
 
-		today = getdate(nowdate())
-		if coupon_doc.valid_from and getdate(coupon_doc.valid_from) > today:
-			frappe.throw(_("Coupon is not yet valid"))
-		if coupon_doc.valid_upto and getdate(coupon_doc.valid_upto) < today:
-			frappe.throw(_("Coupon has expired"))
-		if coupon_doc.customer and coupon_doc.customer != customer:
-			frappe.throw(_("Coupon is not valid for this customer"))
+        today = getdate(nowdate())
+        if coupon_doc.valid_from and getdate(coupon_doc.valid_from) > today:
+            frappe.throw(_("Coupon is not yet valid"))
+        if coupon_doc.valid_upto and getdate(coupon_doc.valid_upto) < today:
+            frappe.throw(_("Coupon has expired"))
+        if coupon_doc.customer and coupon_doc.customer != customer:
+            frappe.throw(_("Coupon is not valid for this customer"))
 
-		return coupon_doc
+        return coupon_doc
 
 
 @frappe.whitelist()
 def get_active_gift_coupons(customer, company):
-	"""Returns all active gift card coupons for a customer.
+    """Returns all active gift card coupons for a customer."""
+    
+    today = getdate(nowdate())
+    coupons_data = frappe.get_all(
+        "POS Coupon",
+        filters={
+            "company": company,
+            "coupon_type": "Gift Card",
+            "customer": customer,
+            "used": 0,
+        },
+        fields=["coupon_code", "valid_from", "valid_upto"],
+    )
 
-	Same as POS Awesome's get_active_gift_coupons.
-	"""
-	today = getdate(nowdate())
-	coupons_data = frappe.get_all(
-		"POS Coupon",
-		filters={
-			"company": company,
-			"coupon_type": "Gift Card",
-			"customer": customer,
-			"used": 0,
-		},
-		fields=["coupon_code", "valid_from", "valid_upto"],
-	)
-
-	return [
-		c.coupon_code for c in coupons_data
-		if _is_coupon_active(c, today)
-	]
+    return [c.coupon_code for c in coupons_data if _is_coupon_active(c, today)]
 
 
 @frappe.whitelist()
-def get_applicable_delivery_charges(company, pos_profile, customer=None, shipping_address_name=None):
-	"""Returns applicable delivery charges.
+def get_applicable_delivery_charges(
+    company, pos_profile, customer=None, shipping_address_name=None
+):
+    """Returns applicable delivery charges"""
+    try:
+        from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
+            get_applicable_delivery_charges as _get_applicable_delivery_charges,
+        )
 
-	Same as POS Awesome's get_applicable_delivery_charges.
-	"""
-	try:
-		from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
-			get_applicable_delivery_charges as _get_applicable_delivery_charges,
-		)
-		return _get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name)
-	except (ImportError, AttributeError):
-		# Fallback: basic query
-		charges = frappe.get_all(
-			"Delivery Charges",
-			filters={"company": company, "disabled": 0},
-			fields=["name", "label", "charge_type", "amount"],
-		)
-		return charges
-
-
-# ─── Internal Helpers ───────────────────────────────
+        return _get_applicable_delivery_charges(
+            company, pos_profile, customer, shipping_address_name
+        )
+    except (ImportError, AttributeError):
+        charges = frappe.get_all(
+            "Delivery Charges",
+            filters={"company": company, "disabled": 0},
+            fields=["name", "label", "charge_type", "amount"],
+        )
+        return charges
 
 
 def _is_coupon_active(coupon_data, today):
-	"""Return True if the coupon is valid for the provided date."""
-	if coupon_data.valid_from and getdate(coupon_data.valid_from) > today:
-		return False
-	if coupon_data.valid_upto and getdate(coupon_data.valid_upto) < today:
-		return False
-	return True
+    """Return True if the coupon is valid for the provided date."""
+    if coupon_data.valid_from and getdate(coupon_data.valid_from) > today:
+        return False
+    if coupon_data.valid_upto and getdate(coupon_data.valid_upto) < today:
+        return False
+    return True
 
 
 def _normalize_discount_fields(offer):
-	"""Ensure discount fields are numeric."""
-	for field in ("discount_percentage", "discount_amount", "rate"):
-		if field in offer:
-			offer[field] = flt(offer[field])
+    """Ensure discount fields are numeric."""
+    for field in ("discount_percentage", "discount_amount", "rate"):
+        if field in offer:
+            offer[field] = flt(offer[field])
 
 
 def _get_promotional_scheme_offers(pos_profile_doc):
-	"""Convert Promotional Scheme records into POS Offer-compatible dicts."""
-	company = pos_profile_doc.company
-	today = nowdate()
+    """Convert Promotional Scheme records into POS Offer-compatible dicts."""
+    company = pos_profile_doc.company
+    today = nowdate()
 
-	try:
-		schemes = frappe.get_all(
-			"Promotional Scheme",
-			filters={
-				"company": company,
-				"disable": 0,
-				"selling": 1,
-			},
-			fields=["name", "valid_from", "valid_upto"],
-		)
-	except Exception:
-		return []
+    try:
+        schemes = frappe.get_all(
+            "Promotional Scheme",
+            filters={
+                "company": company,
+                "disable": 0,
+                "selling": 1,
+            },
+            fields=["name", "valid_from", "valid_upto"],
+        )
+    except Exception:
+        return []
 
-	offers = []
-	for scheme in schemes:
-		if scheme.valid_from and getdate(scheme.valid_from) > getdate(today):
-			continue
-		if scheme.valid_upto and getdate(scheme.valid_upto) < getdate(today):
-			continue
+    offers = []
+    for scheme in schemes:
+        if scheme.valid_from and getdate(scheme.valid_from) > getdate(today):
+            continue
+        if scheme.valid_upto and getdate(scheme.valid_upto) < getdate(today):
+            continue
 
-		try:
-			doc = frappe.get_doc("Promotional Scheme", scheme.name)
-			# Convert product discount rules to offer format
-			for rule in doc.get("product_discount_rules") or []:
-				offer = {
-					"name": f"{scheme.name}-{rule.name}",
-					"row_id": f"{scheme.name}-{rule.name}",
-					"offer_type": "Product Discount",
-					"apply_on": rule.get("apply_on", ""),
-					"item_code": rule.get("item_code", ""),
-					"item_group": rule.get("item_group", ""),
-					"min_qty": flt(rule.get("min_qty", 0)),
-					"max_qty": flt(rule.get("max_qty", 0)),
-					"min_amt": flt(rule.get("min_amount", 0)),
-					"max_amt": flt(rule.get("max_amount", 0)),
-					"free_item": rule.get("free_item", ""),
-					"free_qty": flt(rule.get("free_qty", 0)),
-					"auto": 1,
-					"promotional_scheme": scheme.name,
-				}
-				offers.append(offer)
+        try:
+            doc = frappe.get_doc("Promotional Scheme", scheme.name)
+            for rule in doc.get("product_discount_rules") or []:
+                offer = {
+                    "name": f"{scheme.name}-{rule.name}",
+                    "row_id": f"{scheme.name}-{rule.name}",
+                    "offer_type": "Product Discount",
+                    "apply_on": rule.get("apply_on", ""),
+                    "item_code": rule.get("item_code", ""),
+                    "item_group": rule.get("item_group", ""),
+                    "min_qty": flt(rule.get("min_qty", 0)),
+                    "max_qty": flt(rule.get("max_qty", 0)),
+                    "min_amt": flt(rule.get("min_amount", 0)),
+                    "max_amt": flt(rule.get("max_amount", 0)),
+                    "free_item": rule.get("free_item", ""),
+                    "free_qty": flt(rule.get("free_qty", 0)),
+                    "auto": 1,
+                    "promotional_scheme": scheme.name,
+                }
+                offers.append(offer)
 
-			# Convert price discount rules
-			for rule in doc.get("price_discount_rules") or []:
-				offer = {
-					"name": f"{scheme.name}-{rule.name}",
-					"row_id": f"{scheme.name}-{rule.name}",
-					"offer_type": "Price Discount",
-					"apply_on": rule.get("apply_on", ""),
-					"item_code": rule.get("item_code", ""),
-					"item_group": rule.get("item_group", ""),
-					"min_qty": flt(rule.get("min_qty", 0)),
-					"max_qty": flt(rule.get("max_qty", 0)),
-					"min_amt": flt(rule.get("min_amount", 0)),
-					"max_amt": flt(rule.get("max_amount", 0)),
-					"discount_percentage": flt(rule.get("discount_percentage", 0)),
-					"discount_amount": flt(rule.get("discount_amount", 0)),
-					"rate": flt(rule.get("rate", 0)),
-					"auto": 1,
-					"promotional_scheme": scheme.name,
-				}
-				offers.append(offer)
-		except Exception:
-			continue
+            for rule in doc.get("price_discount_rules") or []:
+                offer = {
+                    "name": f"{scheme.name}-{rule.name}",
+                    "row_id": f"{scheme.name}-{rule.name}",
+                    "offer_type": "Price Discount",
+                    "apply_on": rule.get("apply_on", ""),
+                    "item_code": rule.get("item_code", ""),
+                    "item_group": rule.get("item_group", ""),
+                    "min_qty": flt(rule.get("min_qty", 0)),
+                    "max_qty": flt(rule.get("max_qty", 0)),
+                    "min_amt": flt(rule.get("min_amount", 0)),
+                    "max_amt": flt(rule.get("max_amount", 0)),
+                    "discount_percentage": flt(rule.get("discount_percentage", 0)),
+                    "discount_amount": flt(rule.get("discount_amount", 0)),
+                    "rate": flt(rule.get("rate", 0)),
+                    "auto": 1,
+                    "promotional_scheme": scheme.name,
+                }
+                offers.append(offer)
+        except Exception:
+            continue
 
-	return offers
+    return offers

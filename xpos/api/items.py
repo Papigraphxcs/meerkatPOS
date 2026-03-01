@@ -32,7 +32,6 @@ def get_pos_items(
         "Selling Settings", "selling_price_list"
     )
 
-    # Show template items if setting enabled
     show_templates = include_templates or cint(pos.get("posa_show_template_items"))
     hide_variants = cint(pos.get("posa_hide_variants_items"))
 
@@ -44,7 +43,6 @@ def get_pos_items(
     elif hide_variants:
         conditions += " AND (i.variant_of IS NULL OR i.variant_of = '')"
 
-    # Only show in-stock items if setting enabled
     if cint(pos.get("posa_display_items_in_stock")) and warehouse:
         conditions += """ AND (
 			i.is_stock_item = 0
@@ -55,7 +53,6 @@ def get_pos_items(
 		)"""
         values["warehouse_filter"] = warehouse
 
-    # Item group filter
     if item_group and item_group != "All Item Groups":
         ig = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"], as_dict=True)
         if ig:
@@ -63,7 +60,6 @@ def get_pos_items(
             values["lft"] = ig.lft
             values["rgt"] = ig.rgt
 
-    # Restrict to POS item groups if configured
     if pos.get("item_groups"):
         allowed_groups = [d.item_group for d in pos.item_groups]
         if allowed_groups:
@@ -85,7 +81,6 @@ def get_pos_items(
                     ", ".join([frappe.db.escape(g) for g in all_groups])
                 )
 
-    # Search conditions – includes serial no search like POS Awesome
     if search_term:
         search_term = search_term.strip()
         search_conds = """(
@@ -96,7 +91,7 @@ def get_pos_items(
 				SELECT 1 FROM `tabItem Barcode` ib
 				WHERE ib.parent = i.name AND ib.barcode LIKE %(barcode_search)s
 			)"""
-        # Serial no search
+
         if cint(pos.get("posa_search_serial_no")):
             search_conds += """
 			OR EXISTS (
@@ -143,7 +138,6 @@ def get_pos_items(
         as_dict=True,
     )
 
-    # Enrich items with stock qty and UOMs
     for item in items:
         item["actual_qty"] = (
             get_stock_qty(item.item_code, warehouse) if warehouse else 0
@@ -197,7 +191,6 @@ def get_item_groups():
         order_by="name asc",
         limit_page_length=0,
     )
-    # Also get parent groups
     parent_groups = frappe.get_all(
         "Item Group",
         filters={"is_group": 1},
@@ -217,7 +210,6 @@ def search_barcode(barcode, pos_profile=None):
     if not barcode:
         return None
 
-    # Resolve price list from POS Profile
     price_list = None
     pos = None
     warehouse = None
@@ -264,7 +256,6 @@ def search_barcode(barcode, pos_profile=None):
             "actual_qty": get_stock_qty(item.name, warehouse) if warehouse else 0,
         }
 
-    # Try matching item code directly
     if frappe.db.exists("Item", barcode):
         item = frappe.get_cached_doc("Item", barcode)
         return {
@@ -280,7 +271,6 @@ def search_barcode(barcode, pos_profile=None):
             "actual_qty": get_stock_qty(item.name, warehouse) if warehouse else 0,
         }
 
-    # Try scale barcode parsing (weighted items)
     if pos_profile:
         result = _parse_scale_barcode(barcode, pos_profile)
         if result:
@@ -294,10 +284,7 @@ def search_barcode(barcode, pos_profile=None):
 def get_item_detail(
     item_code, pos_profile, warehouse=None, price_list=None, customer=None
 ):
-    """Get detailed info for a single item including batches, serial nos, UOMs, and pricing.
-
-    Provides the same level of detail as POS Awesome's get_item_detail.
-    """
+    """Get detailed info for a single item including batches, serial nos, UOMs, and pricing."""
     pos = frappe.get_cached_doc("POS Profile", pos_profile)
     warehouse = warehouse or pos.warehouse
     price_list = price_list or pos.selling_price_list
@@ -320,7 +307,6 @@ def get_item_detail(
         "allow_negative_stock": item.allow_negative_stock,
     }
 
-    # --- Price ---
     rate = frappe.db.get_value(
         "Item Price",
         {
@@ -332,16 +318,13 @@ def get_item_detail(
     )
     result["rate"] = flt(rate)
 
-    # --- Stock ---
     result["actual_qty"] = get_stock_qty(item_code, warehouse) if warehouse else 0
 
-    # --- Batch data ---
     batch_no_data = []
     if item.has_batch_no and warehouse:
         batch_no_data = _get_batch_data(item_code, warehouse, today)
     result["batch_no_data"] = batch_no_data
 
-    # --- Serial no data ---
     serial_no_data = []
     if item.has_serial_no and warehouse:
         serial_no_data = frappe.get_all(
@@ -355,19 +338,16 @@ def get_item_detail(
         )
     result["serial_no_data"] = serial_no_data
 
-    # --- UOM conversions ---
     uoms = frappe.get_all(
         "UOM Conversion Detail",
         filters={"parent": item_code},
         fields=["uom", "conversion_factor"],
     )
-    # Ensure stock UOM is included
     stock_uom_exists = any(u.get("uom") == item.stock_uom for u in uoms)
     if not stock_uom_exists:
         uoms.append({"uom": item.stock_uom, "conversion_factor": 1.0})
     result["item_uoms"] = uoms
 
-    # --- Item barcodes ---
     barcodes = frappe.get_all(
         "Item Barcode",
         filters={"parent": item_code},
@@ -380,10 +360,7 @@ def get_item_detail(
 
 @frappe.whitelist()
 def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=None):
-    """Return all variants of a template item with attribute metadata.
-
-    Same as POS Awesome's variant selection feature.
-    """
+    """Return all variants of a template item with attribute metadata."""
     pos = frappe.get_cached_doc("POS Profile", pos_profile)
     price_list = price_list or pos.selling_price_list
     warehouse = pos.warehouse
@@ -410,7 +387,6 @@ def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=N
     if not variants:
         return {"variants": [], "attributes_meta": {}}
 
-    # Enrich with price and stock
     for v in variants:
         rate = frappe.db.get_value(
             "Item Price",
@@ -420,7 +396,6 @@ def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=N
         v["rate"] = flt(rate)
         v["actual_qty"] = get_stock_qty(v["item_code"], warehouse) if warehouse else 0
 
-    # Build per-variant attributes and attribute metadata
     from collections import defaultdict
 
     variant_codes = [v["item_code"] for v in variants]
@@ -506,10 +481,7 @@ def get_stock_availability(items):
 
 @frappe.whitelist()
 def update_price_list_rate(item_code, price_list, rate, uom=None):
-    """Create or update an Item Price record.
-
-    Same as POS Awesome's price editing feature.
-    """
+    """Create or update an Item Price record."""
     filters = {"item_code": item_code, "price_list": price_list, "selling": 1}
     if uom:
         filters["uom"] = uom
@@ -542,9 +514,6 @@ def get_price_for_uom(item_code, price_list, uom):
         "price_list_rate",
     )
     return flt(rate) if rate else None
-
-
-# ─── Internal helpers ──────────────────────────────
 
 
 def get_stock_qty(item_code, warehouse):
@@ -597,7 +566,8 @@ def _get_batch_data(item_code, warehouse, today=None):
     result = []
     for batch in batches:
         if batch.expiry_date and getdate(batch.expiry_date) < getdate(today):
-            continue  # skip expired
+            continue
+        
         result.append(
             {
                 "batch_no": batch.batch_no,
@@ -645,7 +615,6 @@ def _parse_scale_barcode(barcode, pos_profile):
         item_barcode = barcode[ic_start:ic_end]
         qty_str = barcode[qty_start:qty_end]
 
-        # Find item by extracted barcode
         barcode_data = frappe.db.get_value(
             "Item Barcode",
             {"barcode": item_barcode},

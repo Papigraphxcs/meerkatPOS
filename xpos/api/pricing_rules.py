@@ -4,7 +4,6 @@
 """
 Pricing Rules API.
 
-Provides the same pricing rules features as POS Awesome:
 - Fetch active selling pricing rules for the POS context
 - Reconcile line prices with ERPNext's pricing rule engine
 """
@@ -17,44 +16,40 @@ from frappe.utils import flt, getdate, nowdate, cint
 
 @frappe.whitelist()
 def get_active_pricing_rules(params):
-	"""Return active selling pricing rules for POS context.
+    """Return active selling pricing rules for POS context.
 
-	Same as POS Awesome's get_active_pricing_rules.
+    Args:
+            params: dict with company, price_list, currency, customer,
+                            customer_group, territory, date
 
-	Args:
-		params: dict with company, price_list, currency, customer,
-				customer_group, territory, date
+    Returns:
+            list of normalized pricing rule dicts with discount details,
+            applicable items/groups/brands, margins, free items, etc.
+    """
+    if isinstance(params, str):
+        params = json.loads(params)
 
-	Returns:
-		list of normalized pricing rule dicts with discount details,
-		applicable items/groups/brands, margins, free items, etc.
-	"""
-	if isinstance(params, str):
-		params = json.loads(params)
+    company = params.get("company")
+    price_list = params.get("price_list")
+    customer = params.get("customer")
+    customer_group = params.get("customer_group")
+    territory = params.get("territory")
+    date = params.get("date") or nowdate()
 
-	company = params.get("company")
-	price_list = params.get("price_list")
-	customer = params.get("customer")
-	customer_group = params.get("customer_group")
-	territory = params.get("territory")
-	date = params.get("date") or nowdate()
+    if not company:
+        return []
 
-	if not company:
-		return []
-
-	# Build filters for active pricing rules
-	conditions = """
+    conditions = """
 		pr.disable = 0
 		AND pr.selling = 1
 		AND pr.company = %(company)s
 		AND (pr.valid_from IS NULL OR pr.valid_from <= %(date)s)
 		AND (pr.valid_upto IS NULL OR pr.valid_upto >= %(date)s)
 	"""
-	values = {"company": company, "date": date}
+    values = {"company": company, "date": date}
 
-	# Optionally filter by applicable_for
-	rules = frappe.db.sql(
-		"""
+    rules = frappe.db.sql(
+        """
 		SELECT
 			pr.name,
 			pr.title,
@@ -92,156 +87,163 @@ def get_active_pricing_rules(params):
 		FROM `tabPricing Rule` pr
 		WHERE {conditions}
 		ORDER BY pr.priority DESC, pr.name ASC
-		""".format(conditions=conditions),
-		values,
-		as_dict=True,
-	)
+		""".format(
+            conditions=conditions
+        ),
+        values,
+        as_dict=True,
+    )
 
-	result = []
-	for rule in rules:
-		# Check applicability
-		if rule.applicable_for == "Customer" and rule.customer and customer:
-			if rule.customer != customer:
-				continue
-		if rule.applicable_for == "Customer Group" and rule.customer_group and customer_group:
-			if rule.customer_group != customer_group:
-				continue
-		if rule.applicable_for == "Territory" and rule.territory and territory:
-			if rule.territory != territory:
-				continue
+    result = []
+    for rule in rules:
+        if rule.applicable_for == "Customer" and rule.customer and customer:
+            if rule.customer != customer:
+                continue
+        if (
+            rule.applicable_for == "Customer Group"
+            and rule.customer_group
+            and customer_group
+        ):
+            if rule.customer_group != customer_group:
+                continue
+        if rule.applicable_for == "Territory" and rule.territory and territory:
+            if rule.territory != territory:
+                continue
 
-		# Check price list
-		if rule.for_price_list and price_list and rule.for_price_list != price_list:
-			continue
+        if rule.for_price_list and price_list and rule.for_price_list != price_list:
+            continue
 
-		# Get applicable items/groups/brands
-		rule["items"] = _get_pricing_rule_items(rule.name, rule.apply_on)
+        rule["items"] = _get_pricing_rule_items(rule.name, rule.apply_on)
 
-		result.append(rule)
+        result.append(rule)
 
-	return result
+    return result
 
 
 @frappe.whitelist()
 def reconcile_line_prices(cart_payload):
-	"""Recalculate line prices with ERPNext's pricing rule engine.
+    """Recalculate line prices with ERPNext's pricing rule engine.
+    
+    Validates cross-item rules, returns updated rates and free items.
 
-	Same as POS Awesome's reconcile_line_prices.
-	Validates cross-item rules, returns updated rates and free items.
+    Args:
+            cart_payload: dict with context, lines, and free_lines
 
-	Args:
-		cart_payload: dict with context, lines, and free_lines
+    Returns:
+            dict with updates (per-line rates), free_lines, invoice_updates
+    """
+    if isinstance(cart_payload, str):
+        cart_payload = json.loads(cart_payload)
 
-	Returns:
-		dict with updates (per-line rates), free_lines, invoice_updates
-	"""
-	if isinstance(cart_payload, str):
-		cart_payload = json.loads(cart_payload)
+    context = cart_payload.get("context", {})
+    lines = cart_payload.get("lines", [])
 
-	context = cart_payload.get("context", {})
-	lines = cart_payload.get("lines", [])
+    if not lines:
+        return {"updates": [], "free_lines": [], "invoice_updates": {}}
 
-	if not lines:
-		return {"updates": [], "free_lines": [], "invoice_updates": {}}
+    company = context.get("company")
+    customer = context.get("customer")
+    price_list = context.get("price_list")
+    currency = context.get("currency")
+    pos_profile = context.get("pos_profile")
 
-	company = context.get("company")
-	customer = context.get("customer")
-	price_list = context.get("price_list")
-	currency = context.get("currency")
-	pos_profile = context.get("pos_profile")
+    if not company or not customer:
+        return {"updates": [], "free_lines": [], "invoice_updates": {}}
 
-	if not company or not customer:
-		return {"updates": [], "free_lines": [], "invoice_updates": {}}
+    try:
+        from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
+            apply_pricing_rule,
+        )
 
-	# Build a temporary doc-like structure for ERPNext pricing rule engine
-	try:
-		from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
+        args_list = []
+        for line in lines:
+            args = frappe._dict(
+                {
+                    "item_code": line.get("item_code"),
+                    "qty": flt(line.get("qty", 1)),
+                    "rate": flt(line.get("rate", 0)),
+                    "price_list_rate": flt(
+                        line.get("price_list_rate") or line.get("rate", 0)
+                    ),
+                    "stock_qty": flt(line.get("qty", 1)),
+                    "uom": line.get("uom"),
+                    "stock_uom": line.get("stock_uom") or line.get("uom"),
+                    "conversion_factor": 1,
+                    "warehouse": line.get("warehouse"),
+                    "item_group": line.get("item_group"),
+                    "brand": line.get("brand"),
+                    "company": company,
+                    "customer": customer,
+                    "currency": currency,
+                    "price_list": price_list,
+                    "posting_date": nowdate(),
+                    "transaction_date": nowdate(),
+                    "doctype": "Sales Invoice",
+                    "name": None,
+                    "child_docname": line.get("name"),
+                    "parenttype": "Sales Invoice",
+                }
+            )
+            args_list.append(args)
 
-		args_list = []
-		for line in lines:
-			args = frappe._dict({
-				"item_code": line.get("item_code"),
-				"qty": flt(line.get("qty", 1)),
-				"rate": flt(line.get("rate", 0)),
-				"price_list_rate": flt(line.get("price_list_rate") or line.get("rate", 0)),
-				"stock_qty": flt(line.get("qty", 1)),
-				"uom": line.get("uom"),
-				"stock_uom": line.get("stock_uom") or line.get("uom"),
-				"conversion_factor": 1,
-				"warehouse": line.get("warehouse"),
-				"item_group": line.get("item_group"),
-				"brand": line.get("brand"),
-				"company": company,
-				"customer": customer,
-				"currency": currency,
-				"price_list": price_list,
-				"posting_date": nowdate(),
-				"transaction_date": nowdate(),
-				"doctype": "Sales Invoice",
-				"name": None,
-				"child_docname": line.get("name"),
-				"parenttype": "Sales Invoice",
-			})
-			args_list.append(args)
+        results = apply_pricing_rule(args_list, None)
 
-		# Apply pricing rules
-		results = apply_pricing_rule(args_list, None)
+        updates = []
+        free_lines = []
+        for i, result in enumerate(results or []):
+            if isinstance(result, dict):
+                update = {
+                    "idx": i,
+                    "item_code": lines[i].get("item_code"),
+                }
+                if "rate" in result:
+                    update["rate"] = flt(result["rate"])
+                if "discount_percentage" in result:
+                    update["discount_percentage"] = flt(result["discount_percentage"])
+                if "discount_amount" in result:
+                    update["discount_amount"] = flt(result["discount_amount"])
+                if result.get("free_item"):
+                    free_lines.append(
+                        {
+                            "item_code": result["free_item"],
+                            "qty": flt(result.get("free_qty", 1)),
+                            "rate": flt(result.get("free_item_rate", 0)),
+                            "is_free_item": True,
+                        }
+                    )
+                updates.append(update)
 
-		updates = []
-		free_lines = []
-		for i, result in enumerate(results or []):
-			if isinstance(result, dict):
-				update = {
-					"idx": i,
-					"item_code": lines[i].get("item_code"),
-				}
-				if "rate" in result:
-					update["rate"] = flt(result["rate"])
-				if "discount_percentage" in result:
-					update["discount_percentage"] = flt(result["discount_percentage"])
-				if "discount_amount" in result:
-					update["discount_amount"] = flt(result["discount_amount"])
-				if result.get("free_item"):
-					free_lines.append({
-						"item_code": result["free_item"],
-						"qty": flt(result.get("free_qty", 1)),
-						"rate": flt(result.get("free_item_rate", 0)),
-						"is_free_item": True,
-					})
-				updates.append(update)
+        return {
+            "updates": updates,
+            "free_lines": free_lines,
+            "invoice_updates": {},
+        }
 
-		return {
-			"updates": updates,
-			"free_lines": free_lines,
-			"invoice_updates": {},
-		}
-
-	except (ImportError, Exception) as e:
-		frappe.log_error(f"Pricing rule reconciliation failed: {e}", "X POS Pricing Rules")
-		return {"updates": [], "free_lines": [], "invoice_updates": {}}
-
-
-# ─── Internal Helpers ───────────────────────────────
+    except (ImportError, Exception) as e:
+        frappe.log_error(
+            f"Pricing rule reconciliation failed: {e}", "X POS Pricing Rules"
+        )
+        return {"updates": [], "free_lines": [], "invoice_updates": {}}
 
 
 def _get_pricing_rule_items(rule_name, apply_on):
-	"""Get the items/groups/brands a pricing rule applies to."""
-	if apply_on == "Item Code":
-		return frappe.get_all(
-			"Pricing Rule Item Code",
-			filters={"parent": rule_name},
-			fields=["item_code", "uom"],
-		)
-	elif apply_on == "Item Group":
-		return frappe.get_all(
-			"Pricing Rule Item Group",
-			filters={"parent": rule_name},
-			fields=["item_group"],
-		)
-	elif apply_on == "Brand":
-		return frappe.get_all(
-			"Pricing Rule Brand",
-			filters={"parent": rule_name},
-			fields=["brand"],
-		)
-	return []
+    """Get the items/groups/brands a pricing rule applies to."""
+    if apply_on == "Item Code":
+        return frappe.get_all(
+            "Pricing Rule Item Code",
+            filters={"parent": rule_name},
+            fields=["item_code", "uom"],
+        )
+    elif apply_on == "Item Group":
+        return frappe.get_all(
+            "Pricing Rule Item Group",
+            filters={"parent": rule_name},
+            fields=["item_group"],
+        )
+    elif apply_on == "Brand":
+        return frappe.get_all(
+            "Pricing Rule Brand",
+            filters={"parent": rule_name},
+            fields=["brand"],
+        )
+    return []

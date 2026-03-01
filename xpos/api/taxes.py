@@ -33,12 +33,8 @@ def get_item_tax_template(item_code, company, tax_category=None):
     today = nowdate()
     tax_category = cstr(tax_category or "")
 
-    # 1. Try item-level taxes
-    item_tax_template = _resolve_tax_template(
-        item.taxes, company, tax_category, today
-    )
+    item_tax_template = _resolve_tax_template(item.taxes, company, tax_category, today)
 
-    # 2. Walk up item group hierarchy
     if not item_tax_template:
         item_group = item.item_group
         while item_group and not item_tax_template:
@@ -48,7 +44,6 @@ def get_item_tax_template(item_code, company, tax_category=None):
             )
             item_group = item_group_doc.parent_item_group
 
-    # Build tax map from the resolved template
     item_tax_map = {}
     if item_tax_template:
         template = frappe.get_cached_doc("Item Tax Template", item_tax_template)
@@ -112,12 +107,10 @@ def _resolve_tax_template(taxes, company, tax_category, today):
     if not candidate_taxes:
         return None
 
-    # Match by tax_category
     for tax in candidate_taxes:
         if cstr(getattr(tax, "tax_category", "")) == cstr(tax_category):
             return tax.item_tax_template
 
-    # If no category match and tax_category is empty, return first
     if not tax_category and candidate_taxes:
         return candidate_taxes[0].item_tax_template
 
