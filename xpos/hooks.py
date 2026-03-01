@@ -1,5 +1,3 @@
-from xpos.utils import get_build_version
-
 app_name = "xpos"
 app_title = "X POS"
 app_publisher = "Ali Raza"
@@ -25,12 +23,6 @@ website_route_rules = [
     {"from_route": "/xpos", "to_route": "xpos"},
     {"from_route": "/xpos/<path:app_path>", "to_route": "xpos"},
 ]
-
-# Includes in <head>
-# ------------------
-# Note: Removed app_include_js and app_include_css as X POS is now a standalone SPA
-
-_asset_version = get_build_version()
 
 # include js in doctype views
 doctype_js = {
