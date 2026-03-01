@@ -4,7 +4,7 @@
 		<Input
 			ref="inputRef"
 			v-model="barcodeValue"
-			class="pl-9 pr-9 h-9 font-mono text-sm"
+			class="pl-9 pr-9 h-9 text-sm"
 			:class="{ 'ring-2 ring-green-500/50 border-green-500': flashSuccess, 'ring-2 ring-red-500/50 border-red-500': flashError }"
 			placeholder="Scan barcode..."
 			autocomplete="off"
@@ -58,7 +58,6 @@ function onScan() {
 }
 
 function onPaste(e: ClipboardEvent) {
-	// After paste, auto-trigger scan on next tick
 	setTimeout(() => {
 		const val = barcodeValue.value.trim();
 		if (val) {
@@ -72,7 +71,6 @@ function clearInput() {
 	getInputEl()?.focus();
 }
 
-/** Flash green briefly to indicate success */
 function showSuccess() {
 	flashError.value = false;
 	flashSuccess.value = true;
@@ -84,7 +82,6 @@ function showSuccess() {
 	getInputEl()?.focus();
 }
 
-/** Flash red briefly to indicate not found */
 function showError() {
 	flashSuccess.value = false;
 	flashError.value = true;
@@ -92,7 +89,6 @@ function showError() {
 	flashTimer = setTimeout(() => {
 		flashError.value = false;
 	}, 600);
-	// Select text so user can re-scan easily
 	getInputEl()?.select();
 }
 
@@ -108,7 +104,6 @@ function clear() {
 	barcodeValue.value = "";
 }
 
-// Handle F2 global shortcut to focus barcode input
 function handleGlobalKey(e: KeyboardEvent) {
 	if (e.key === "F2") {
 		e.preventDefault();

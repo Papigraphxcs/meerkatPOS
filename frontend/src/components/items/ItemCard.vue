@@ -7,7 +7,6 @@
 				: 'cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5',
 		'dark:border-border dark:hover:border-primary/50'
 	]" @click="handleClick">
-		<!-- Image / Placeholder -->
 		<div class="relative aspect-[4/3] bg-muted overflow-hidden rounded-t-xl">
 			<img v-if="item.image" :src="item.image" :alt="item.item_name"
 				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -16,32 +15,27 @@
 				<Package class="w-10 h-10 text-muted-foreground/40" />
 			</div>
 
-			<!-- Stock Badge -->
 			<Badge v-if="showStock && item.actual_qty !== undefined" :variant="stockVariant"
 				class="absolute top-2 right-2 text-[10px]">
 				{{ stockLabel }}
 			</Badge>
 
-			<!-- Out of Stock Overlay -->
 			<div v-if="isOutOfStock && !allowNegativeStock"
 				class="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center">
 				<div
 					class="bg-destructive/90 text-destructive-foreground px-3 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">
 					<AlertCircle class="w-3.5 h-3.5" />
-					Out of Stock
+					{{ __("Out of Stock") }}
 				</div>
 			</div>
 
-			<!-- Quick Action Overlay - always show info button, add button only when in stock -->
 			<div
 				class="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2">
-				<!-- Add to Cart button - only when in stock or negative stock allowed -->
 				<div v-if="!isOutOfStock || allowNegativeStock" class="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center
 							opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100
 							transition-all duration-300 shadow-lg">
 					<Plus class="w-5 h-5" />
 				</div>
-				<!-- Info button - always available -->
 				<div class="w-10 h-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center
 							opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100
 							transition-all duration-300 shadow-lg delay-75" @click.stop="$emit('showDetail', item)">
@@ -50,7 +44,6 @@
 			</div>
 		</div>
 
-		<!-- Info -->
 		<CardContent class="p-2.5">
 			<p class="text-xs font-medium text-foreground leading-tight line-clamp-2 mb-1">
 				{{ item.item_name }}
@@ -76,6 +69,7 @@ import { usePosStore } from "@/stores/posStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Package, Plus, Info, AlertCircle } from "lucide-vue-next";
+import __ from "@/lib/translate";
 
 const props = defineProps({
 	item: { type: Object, required: true },
@@ -110,7 +104,6 @@ const stockLabel = computed(() => {
 });
 
 function handleClick() {
-	// Prevent adding to cart if out of stock and negative stock not allowed
 	if (isOutOfStock.value && !allowNegativeStock.value) {
 		return;
 	}

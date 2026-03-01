@@ -2,9 +2,8 @@
 	<div ref="rootEl" class="relative">
 		<div class="relative flex items-center">
 			<Search class="absolute left-3.5 w-5 h-5 text-muted-foreground pointer-events-none" />
-			<Input v-model="localSearch" class="pl-10" :placeholder="'Search items, scan barcode...'"
-				@input="onInput" @keydown.enter.prevent="onEnter"
-				@keydown.down.prevent="emit('navigate', 'down')"
+			<Input v-model="localSearch" class="pl-10" :placeholder="'Search items, scan barcode...'" @input="onInput"
+				@keydown.enter.prevent="onEnter" @keydown.down.prevent="emit('navigate', 'down')"
 				@keydown.up.prevent="emit('navigate', 'up')" />
 			<Button v-if="localSearch" variant="ghost" size="icon-sm" class="absolute right-3" @click="clearSearch">
 				<X class="w-4 h-4 text-muted-foreground" />

@@ -1,21 +1,17 @@
 <template>
     <Dialog :open="itemStore.showItemDetail" @update:open="(val: boolean) => { if (!val) close() }">
         <DialogContent class="max-w-lg max-h-[80vh] flex flex-col p-0 gap-0">
-            <!-- Header -->
             <DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
                 <DialogTitle class="text-base">{{ itemForDetail?.item_name }}</DialogTitle>
                 <DialogDescription class="text-xs font-mono">{{ itemForDetail?.item_code }}</DialogDescription>
             </DialogHeader>
 
-            <!-- Body -->
             <div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
-                <!-- Loading -->
                 <div v-if="itemStore.isLoadingDetail" class="flex items-center justify-center py-8">
                     <Loader2 class="w-8 h-8 text-primary animate-spin" />
                 </div>
 
                 <template v-else-if="detail">
-                    <!-- UOM Selection -->
                     <div v-if="detail.uoms && detail.uoms.length > 1">
                         <label class="text-sm font-semibold text-foreground mb-1.5 block">Unit of Measure</label>
                         <div class="flex flex-wrap gap-2">
@@ -31,7 +27,6 @@
                         </div>
                     </div>
 
-                    <!-- Batch Selection -->
                     <div v-if="detail.has_batch_no && detail.batches.length > 0">
                         <label class="text-sm font-semibold text-foreground mb-1.5 block">
                             Batch
@@ -58,7 +53,6 @@
                         </div>
                     </div>
 
-                    <!-- Serial Number Selection -->
                     <div v-if="detail.has_serial_no && detail.serial_numbers.length > 0">
                         <label class="text-sm font-semibold text-foreground mb-1.5 block">
                             Serial Number
@@ -86,7 +80,6 @@
                         </div>
                     </div>
 
-                    <!-- Quantity -->
                     <div>
                         <label class="text-sm font-semibold text-foreground mb-1.5 block">Quantity</label>
                         <Input v-model.number="selectedQty" type="number" min="1" step="1" class="w-32" />
@@ -94,12 +87,11 @@
                 </template>
             </div>
 
-            <!-- Footer -->
             <DialogFooter class="shrink-0 border-t border-border px-5 py-4">
                 <Button variant="outline" class="flex-1" @click="close">Cancel</Button>
                 <Button class="flex-1 font-bold" :disabled="!canAdd" @click="addToCart">
                     <Plus class="w-4 h-4" />
-                    Add to Cart
+                    {{ __("Add to Cart") }}
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -119,6 +111,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Check, Plus } from "lucide-vue-next";
+import __ from "@/lib/translate";
 
 const itemStore = useItemStore();
 const cartStore = useCartStore();
@@ -134,7 +127,6 @@ const uomConversionFactor = ref(1);
 const itemForDetail = computed(() => itemStore.selectedItemForDetail);
 const detail = computed(() => itemStore.selectedItemDetail);
 
-// Auto-select defaults
 watch(detail, (d) => {
     if (d) {
         selectedUOM.value = d.uom || d.stock_uom;
