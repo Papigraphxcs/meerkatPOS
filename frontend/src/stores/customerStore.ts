@@ -11,38 +11,32 @@ import type {
 } from "@/types/pos.types";
 
 export const useCustomerStore = defineStore("customers", () => {
-  // ─── State ─────────────────────────────────────
-  const customers: Ref<Customer[]> = ref([]);
-  const isLoading: Ref<boolean> = ref(false);
-  const searchTerm: Ref<string> = ref("");
-  const showCustomerDialog: Ref<boolean> = ref(false);
-  const showNewCustomerForm: Ref<boolean> = ref(false);
-  const showLoyaltyDialog: Ref<boolean> = ref(false);
+  const customers = ref<Customer[]>([]);
+  const isLoading = ref(false);
+  const searchTerm = ref("");
+  const showCustomerDialog = ref(false);
+  const showNewCustomerForm = ref(false);
+  const showLoyaltyDialog = ref(false);
 
-  // Customer detail state
-  const selectedCustomerInfo: Ref<Customer | null> = ref(null);
-  const customerAddresses: Ref<CustomerAddress[]> = ref([]);
-  const customerCredit: Ref<CustomerCredit | null> = ref(null);
-  const isLoadingDetail: Ref<boolean> = ref(false);
+  const selectedCustomerInfo = ref<Customer | null>(null);
+  const customerAddresses = ref<CustomerAddress[]>([]);
+  const customerCredit = ref<CustomerCredit | null>(null);
+  const isLoadingDetail = ref(false);
 
-  // Loyalty program state
-  const loyaltyPrograms: Ref<LoyaltyProgram[]> = ref([]);
-  const customerLoyaltyInfo: Ref<CustomerLoyaltyInfo | null> = ref(null);
-  const isLoadingLoyalty: Ref<boolean> = ref(false);
+  const loyaltyPrograms = ref<LoyaltyProgram[]>([]);
+  const customerLoyaltyInfo = ref<CustomerLoyaltyInfo | null>(null);
+  const isLoadingLoyalty = ref(false);
 
-  // Sales persons
   const salesPersons: Ref<SalesPerson[]> = ref([]);
 
-  // ─── Computed ──────────────────────────────────
-  const filteredCustomers: ComputedRef<Customer[]> = computed(
+  const filteredCustomers = computed(
     () => customers.value
   );
 
-  const hasCredit: ComputedRef<boolean> = computed(
+  const hasCredit = computed(
     () => (customerCredit.value?.total_credit || 0) > 0
   );
 
-  // ─── Actions ───────────────────────────────────
   async function searchCustomers(term = "", posProfile?: string): Promise<void> {
     isLoading.value = true;
     try {
@@ -179,7 +173,6 @@ export const useCustomerStore = defineStore("customers", () => {
     customerCredit.value = null;
   }
 
-  // ─── Loyalty Program Actions ─────────────────────
   async function fetchLoyaltyPrograms(company?: string): Promise<LoyaltyProgram[]> {
     try {
       const result = await call<LoyaltyProgram[]>(
@@ -223,7 +216,7 @@ export const useCustomerStore = defineStore("customers", () => {
           loyalty_program: loyaltyProgram,
         }
       );
-      // Refresh customer loyalty info
+
       await fetchCustomerLoyaltyInfo(customerName);
       return { success: true, message: result?.message, data: result };
     } catch (error) {
@@ -253,7 +246,7 @@ export const useCustomerStore = defineStore("customers", () => {
         "xpos.api.customers.unenroll_customer_loyalty",
         { customer: customerName }
       );
-      // Clear customer loyalty info
+      
       customerLoyaltyInfo.value = null;
       return { success: true, message: result?.message };
     } catch (error) {
@@ -296,7 +289,6 @@ export const useCustomerStore = defineStore("customers", () => {
     fetchCredit,
     fetchSalesPersons,
     clearDetail,
-    // Loyalty Actions
     fetchLoyaltyPrograms,
     fetchCustomerLoyaltyInfo,
     registerCustomerLoyalty,
