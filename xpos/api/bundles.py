@@ -5,7 +5,6 @@
 Product Bundles API.
 
 Returns component items for Product Bundles used in POS.
-Same as POS Awesome's bundles.py.
 """
 
 import json

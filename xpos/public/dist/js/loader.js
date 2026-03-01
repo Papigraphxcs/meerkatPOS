@@ -1,1 +1,0 @@
-const t="/app/xpos",n="/assets/xpos/dist/js/xpos.js";if(typeof window<"u"){const o=window.location.pathname;(o===t||o.startsWith(t+"/"))&&(window.__xposBundlePromise=import(n).catch(s=>{throw console.error("X POS bundle failed to load:",s),s}))}
