@@ -62,7 +62,6 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       isLoading.value = true;
       error.value = "";
-      debugger
       const response = await call("login", {
         usr: username,
         pwd: password,

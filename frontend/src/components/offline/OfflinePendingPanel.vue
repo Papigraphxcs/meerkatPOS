@@ -6,16 +6,16 @@
 				class="shrink-0 flex-row items-center justify-between space-y-0 px-5 py-3 border-b border-border">
 				<div class="flex items-center gap-3">
 					<div class="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
-						:class="offlineStore.isOnline
+						:class="isOnline()
 							? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
 							: 'bg-gradient-to-br from-red-500 to-red-600'">
-						<WifiOff v-if="!offlineStore.isOnline" class="w-4 h-4 text-white" />
+						<WifiOff v-if="!isOnline()" class="w-4 h-4 text-white" />
 						<Wifi v-else class="w-4 h-4 text-white" />
 					</div>
 					<div>
 						<DialogTitle class="text-base">Offline Invoices</DialogTitle>
 						<DialogDescription class="text-xs">
-							{{ offlineStore.isOnline ? 'Online' : 'Offline' }} &mdash;
+							{{ isOnline() ? 'Online' : 'Offline' }} &mdash;
 							{{ offlineStore.pendingCount }} pending
 						</DialogDescription>
 					</div>
@@ -33,7 +33,7 @@
 						variant="default"
 						size="sm"
 						class="flex-1 gap-1.5"
-						:disabled="!offlineStore.isOnline || offlineStore.isSyncing"
+						:disabled="!isOnline() || offlineStore.isSyncing"
 						@click="offlineStore.syncPendingInvoices()">
 						<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />
 						<CloudUpload v-else class="w-4 h-4" />
@@ -75,8 +75,8 @@
 
 					<!-- Item count -->
 					<p class="text-xs text-muted-foreground">
-						{{ inv.data.items?.length || 0 }} item(s) &bull;
-						{{ inv.data.payments?.map(p => p.mode_of_payment).join(', ') || 'N/A' }}
+						{{ getItemCount(inv.data) }} item(s) &bull;
+						{{ getPaymentMethods(inv.data) }}
 					</p>
 
 					<!-- Error -->
@@ -87,7 +87,7 @@
 					<!-- Actions -->
 					<div class="flex gap-2 pt-1">
 						<Button variant="outline" size="sm" class="flex-1 gap-1 text-xs"
-							:disabled="!offlineStore.isOnline || offlineStore.isSyncing"
+							:disabled="!isOnline() || offlineStore.isSyncing"
 							@click="inv.id && offlineStore.retrySingle(inv.id)">
 							<RefreshCw class="w-3.5 h-3.5" />
 							Retry
@@ -121,6 +121,7 @@ import {
 	X, Wifi, WifiOff, CloudUpload, Loader2, Trash2,
 	CheckCircle2, RefreshCw,
 } from "lucide-vue-next";
+import { isOnline } from "@/utils";
 
 defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: [] }>();
@@ -153,6 +154,24 @@ function formatTime(isoString: string) {
 function formatAmount(val?: number) {
 	if (val == null) return "—";
 	return val.toFixed(2);
+}
+
+function getItemCount(data: unknown): number {
+	if (data && typeof data === 'object' && 'items' in data) {
+		const items = (data as { items?: unknown[] }).items;
+		return Array.isArray(items) ? items.length : 0;
+	}
+	return 0;
+}
+
+function getPaymentMethods(data: unknown): string {
+	if (data && typeof data === 'object' && 'payments' in data) {
+		const payments = (data as { payments?: { mode_of_payment?: string }[] }).payments;
+		if (Array.isArray(payments)) {
+			return payments.map(p => p.mode_of_payment).filter(Boolean).join(', ') || 'N/A';
+		}
+	}
+	return 'N/A';
 }
 
 function confirmClearAll() {

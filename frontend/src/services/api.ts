@@ -4,6 +4,10 @@
  */
 
 import { showSuccess as toastSuccess, showError as toastError, showInfo as toastInfo } from "@/composables/useToast";
+import { isOnline, isNetworkError } from "@/utils";
+
+// Re-export isNetworkError for backwards compatibility
+export { isNetworkError } from "@/utils";
 
 function getCsrfToken(): string {
   // Try multiple sources for CSRF token
@@ -15,15 +19,10 @@ function getCsrfToken(): string {
 }
 
 /**
- * Check if browser is online
- */
-export function isOnline(): boolean {
-  return navigator.onLine;
-}
-
-/**
  * Make an API call using native fetch (standalone mode).
- * Throws immediately when offline so callers can fall back to cache.
+ * Throws with message "__offline__" when the browser is offline
+ * **or** when the fetch itself fails due to a network error,
+ * so callers can catch and fall back to cache.
  */
 async function fetchCall<T = unknown>(
   method: string,
@@ -34,26 +33,32 @@ async function fetchCall<T = unknown>(
   }
 
   const csrfToken = getCsrfToken();
-  
+
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     "Accept": "application/json",
     "X-Frappe-CSRF-Token": csrfToken,
   };
 
-  const response = await fetch(`/api/method/${method}`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(args),
-    credentials: "same-origin",
-  });
+  let response: Response;
+  try {
+    response = await fetch(`/api/method/${method}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(args),
+      credentials: "same-origin",
+    });
+  } catch (fetchError) {
+    // fetch() itself threw — network failure, DNS issue, server down, etc.
+    throw new Error("__offline__");
+  }
 
   const data = await response.json();
 
   // Handle various error status codes
   if (!response.ok || data.exc) {
     let errorMsg: string;
-    
+
     if (data._server_messages) {
       try {
         const serverMessages = JSON.parse(data._server_messages);
@@ -68,7 +73,7 @@ async function fetchCall<T = unknown>(
     } else {
       errorMsg = data.message || `HTTP error! status: ${response.status}`;
     }
-    
+
     throw new Error(errorMsg);
   }
 

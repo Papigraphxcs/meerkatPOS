@@ -27,6 +27,14 @@
 				<FileText class="w-4 h-4" />
 				<span>{{ __('Orders') }}</span>
 			</router-link>
+			<router-link to="/purchase" :class="cn(
+				buttonVariants({ variant: route.name === 'purchase' ? 'secondary' : 'ghost', size: 'sm' }),
+				'gap-1.5 no-underline',
+				route.name === 'purchase' && 'bg-primary/10 text-primary hover:bg-primary/15'
+			)">
+				<ShoppingBag class="w-4 h-4" />
+				<span>{{ __('Purchase') }}</span>
+			</router-link>
 		</nav>
 
 		<div class="flex-1"></div>
@@ -73,7 +81,7 @@
 			<Button variant="ghost" size="sm" :class="['gap-1.5', offlineStore.statusColor]" @click="handleOfflineAction"
 				:title="offlineStore.statusLabel">
 				<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />
-				<WifiOff v-else-if="!offlineStore.isOnline" class="w-4 h-4" />
+				<WifiOff v-else-if="!isOnline()" class="w-4 h-4" />
 				<CloudUpload v-else-if="offlineStore.hasPending" class="w-4 h-4" />
 				<Wifi v-else class="w-4 h-4" />
 				<Badge v-if="offlineStore.pendingCount > 0" variant="destructive" class="h-4 min-w-4 px-1 text-[10px] leading-none">
@@ -162,13 +170,14 @@ import RepeatInvoiceDialog from "@/components/cart/RepeatInvoiceDialog.vue";
 import {
 	LayoutGrid, FileText, Building2, Sun, Moon, Monitor, User, LogOut,
 	ArrowDownCircle, ArrowUpCircle, RotateCcw, Repeat, Printer, Power,
-	Wifi, WifiOff, CloudUpload, Loader2,
+	Wifi, WifiOff, CloudUpload, Loader2, ShoppingBag,
 } from "lucide-vue-next";
 import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
+import { isOnline } from "@/utils";
 
 const route = useRoute();
 const posStore = usePosStore();
@@ -199,7 +208,7 @@ const showOfflinePanel = ref(false);
 function handleOfflineAction() {
 	if (offlineStore.hasPending) {
 		showOfflinePanel.value = true;
-	} else if (!offlineStore.isOnline) {
+	} else if (!isOnline()) {
 		showOfflinePanel.value = true;
 	}
 }

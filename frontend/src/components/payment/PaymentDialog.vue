@@ -281,7 +281,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { usePaymentStore } from "@/stores/paymentStore";
-import { call, showSuccess, showError, showInfo } from "@/services/api";
+import { call, showSuccess, showError, showInfo, isNetworkError } from "@/services/api";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { __ } from "@/lib/translate";
 import {
@@ -293,6 +293,7 @@ import { Badge } from "@/components/ui/badge";
 import { Wallet, X, Check, Loader2, Delete, Gift, RotateCcw, Plus, Save, Printer } from "lucide-vue-next";
 
 import type { InvoicePayment } from "@/types/pos.types";
+import { isOnline } from "@/utils";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
@@ -609,16 +610,14 @@ async function submitPayment(withPrint: boolean = true) {
 				},
 			];
 		}
-
-		// ─── Offline check: save locally if offline & enabled ───
-		if (!offlineStore.isOnline && offlineStore.offlineModeEnabled) {
-			const saved = await offlineStore.saveOffline(
+		if (!isOnline()) {
+			const result = await offlineStore.saveOffline(
 				invoiceData,
 				cartStore.customerName,
 				cartStore.grandTotal
 			);
-			if (saved.success) {
-				showInfo(`Invoice saved offline (#${saved.localId}). It will sync when you're back online.`);
+			if (result.success) {
+				showInfo(`Invoice saved offline (#${result.localId}). It will sync when you're back online.`);
 				cartStore.clearAll();
 			} else {
 				showError("Failed to save invoice offline");
@@ -645,8 +644,7 @@ async function submitPayment(withPrint: boolean = true) {
 
 		cartStore.clearAll();
 	} catch (error: unknown) {
-		// ─── Fallback: if API call fails due to network & offline mode enabled, save locally ───
-		if (offlineStore.offlineModeEnabled && !navigator.onLine) {
+		if (isNetworkError(error)) {
 			const invoiceData = cartStore.getInvoiceData(
 				posStore.profileName,
 				posStore.posOpeningShift?.name || ""
@@ -661,18 +659,20 @@ async function submitPayment(withPrint: boolean = true) {
 					},
 				];
 			}
-			const saved = await offlineStore.saveOffline(
+			const result = await offlineStore.saveOffline(
 				invoiceData,
 				cartStore.customerName,
 				cartStore.grandTotal
 			);
-			if (saved.success) {
-				showInfo(`Invoice saved offline (#${saved.localId}). It will sync when you're back online.`);
+			if (result.success) {
+				showInfo(`Invoice saved offline (#${result.localId}). It will sync when you're back online.`);
 				cartStore.clearAll();
 				return;
 			}
+			showError("You are offline. Invoice could not be saved locally.");
+		} else {
+			showError("Payment failed: " + extractErrorMessage(error));
 		}
-		showError("Payment failed: " + extractErrorMessage(error));
 		console.error("Payment error:", error);
 	} finally {
 		isSubmitting.value = false;

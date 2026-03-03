@@ -18,6 +18,7 @@ import type {
   TaxDetail,
   PrintSettings,
 } from "@/types/pos.types";
+import { isOnline } from "@/utils";
 
 export const usePosStore = defineStore("pos", () => {
   const isLoading = ref(true);
@@ -266,14 +267,10 @@ export const usePosStore = defineStore("pos", () => {
     () => posProfile.value?.cash_mode_of_payment || "Cash"
   );
   
-  function isOnline(): boolean {
-    return navigator.onLine;
-  }
-  
   async function checkExistingShift(): Promise<void> {
     isLoading.value = true;
     try {
-      // Check if offline first
+      debugger
       if (!isOnline()) {
         console.log("[XPOS Offline] System is offline, loading from cache");
         const cachedData = await getCachedPOSData() as ShiftCheckResult | null;
@@ -297,7 +294,6 @@ export const usePosStore = defineStore("pos", () => {
         }
       }
       
-      // Online - fetch from API
       const result = await call<ShiftCheckResult | null>(
         "xpos.api.shifts.check_open_shift"
       );

@@ -582,23 +582,38 @@ def create_purchase_order(data):
 
 @frappe.whitelist()
 def search_items(search_text=None, limit=20):
-    filters = {"disabled": 0}
-    or_filters = None
+    limit = cint(limit) or 20
+    search_text = (search_text or "").strip()
+
     if search_text:
         like_value = f"%{search_text}%"
-        or_filters = {
-            "name": ["like", like_value],
-            "item_name": ["like", like_value],
-        }
+        # Search by item_code, item_name and barcode using SQL for reliable OR logic
+        items = frappe.db.sql(
+            """
+            SELECT DISTINCT i.name, i.item_name, i.stock_uom, i.standard_rate
+            FROM `tabItem` i
+            LEFT JOIN `tabItem Barcode` ib ON ib.parent = i.name
+            WHERE i.disabled = 0
+              AND (
+                i.name LIKE %(like)s
+                OR i.item_name LIKE %(like)s
+                OR ib.barcode LIKE %(like)s
+              )
+            ORDER BY i.item_name ASC
+            LIMIT %(limit)s
+            """,
+            {"like": like_value, "limit": limit},
+            as_dict=True,
+        )
+    else:
+        items = frappe.get_all(
+            "Item",
+            filters={"disabled": 0},
+            fields=["name", "item_name", "stock_uom", "standard_rate"],
+            limit_page_length=limit,
+            order_by="item_name asc",
+        )
 
-    items = frappe.get_all(
-        "Item",
-        filters=filters,
-        or_filters=or_filters,
-        fields=["name", "item_name", "stock_uom", "standard_rate"],
-        limit_page_length=limit,
-        order_by="name asc",
-    )
     item_codes = [it.get("name") for it in items if it.get("name")]
     uom_rows = []
     if item_codes:
@@ -613,6 +628,17 @@ def search_items(search_text=None, limit=20):
             {"uom": row.uom, "conversion_factor": row.conversion_factor}
         )
 
+    # Also fetch barcodes for each item
+    barcode_map = {}
+    if item_codes:
+        barcode_rows = frappe.get_all(
+            "Item Barcode",
+            filters={"parent": ["in", item_codes]},
+            fields=["parent", "barcode"],
+        )
+        for row in barcode_rows:
+            barcode_map.setdefault(row.parent, []).append(row.barcode)
+
     results = []
     for it in items:
         item_code = it.get("name")
@@ -620,6 +646,7 @@ def search_items(search_text=None, limit=20):
         uoms = uom_map.get(item_code, [])
         if stock_uom and not any(u.get("uom") == stock_uom for u in uoms):
             uoms.append({"uom": stock_uom, "conversion_factor": 1})
+        barcodes = barcode_map.get(item_code, [])
         results.append(
             {
                 "item_code": item_code,
@@ -627,9 +654,65 @@ def search_items(search_text=None, limit=20):
                 "stock_uom": stock_uom,
                 "item_uoms": uoms,
                 "standard_rate": it.get("standard_rate"),
+                "barcode": barcodes[0] if barcodes else None,
+                "barcodes": barcodes,
             }
         )
     return results
+
+
+@frappe.whitelist()
+def search_item_by_barcode(barcode, pos_profile=None):
+    """Search item specifically by barcode for purchasing."""
+    if not barcode:
+        return None
+
+    price_list = _resolve_buying_price_list()
+
+    def _get_buying_rate(item_code):
+        rate = 0
+        if price_list:
+            rate = frappe.db.get_value(
+                "Item Price",
+                {"item_code": item_code, "price_list": price_list, "buying": 1},
+                "price_list_rate",
+            )
+        if not rate:
+            rate = frappe.db.get_value("Item", item_code, "standard_rate")
+        return flt(rate)
+
+    # Check Item Barcode table
+    barcode_data = frappe.db.get_value(
+        "Item Barcode",
+        {"barcode": barcode},
+        ["parent as item_code", "barcode", "uom"],
+        as_dict=True,
+    )
+
+    if barcode_data:
+        item = frappe.get_cached_doc("Item", barcode_data.item_code)
+        return {
+            "item_code": item.name,
+            "item_name": item.item_name,
+            "barcode": barcode_data.barcode,
+            "uom": barcode_data.uom or item.stock_uom,
+            "stock_uom": item.stock_uom,
+            "standard_rate": _get_buying_rate(item.name),
+        }
+
+    # Check if barcode matches item_code directly
+    if frappe.db.exists("Item", barcode):
+        item = frappe.get_cached_doc("Item", barcode)
+        return {
+            "item_code": item.name,
+            "item_name": item.item_name,
+            "barcode": barcode,
+            "uom": item.stock_uom,
+            "stock_uom": item.stock_uom,
+            "standard_rate": _get_buying_rate(item.name),
+        }
+
+    return None
 
 
 def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_date, receipt_doc=None):
@@ -683,3 +766,202 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
     invoice.insert()
     invoice.submit()
     return invoice.name
+
+
+# ─── Stock Receiving APIs ─────────────────────────────────
+
+@frappe.whitelist()
+def get_pending_receipts(warehouse=None, limit=50):
+    """Get Purchase Orders that are pending stock receipt."""
+    filters = {
+        "docstatus": 1,
+        "status": ["in", ["To Receive and Bill", "To Receive"]],
+        "per_received": ["<", 100],
+    }
+    if warehouse:
+        # Filter POs that have items for this warehouse
+        po_names = frappe.db.sql_list(
+            """
+            SELECT DISTINCT parent FROM `tabPurchase Order Item`
+            WHERE warehouse = %s AND docstatus = 1
+            """,
+            warehouse,
+        )
+        if po_names:
+            filters["name"] = ["in", po_names]
+        else:
+            return []
+
+    orders = frappe.get_all(
+        "Purchase Order",
+        filters=filters,
+        fields=[
+            "name", "supplier", "supplier_name", "company",
+            "transaction_date", "grand_total", "status",
+            "per_received", "per_billed",
+        ],
+        order_by="transaction_date desc",
+        limit_page_length=cint(limit) or 50,
+    )
+
+    # Get items for each order
+    for order in orders:
+        order["items"] = frappe.get_all(
+            "Purchase Order Item",
+            filters={"parent": order["name"], "docstatus": 1},
+            fields=[
+                "name as po_detail", "item_code", "item_name",
+                "qty", "received_qty", "rate", "uom", "stock_uom",
+                "conversion_factor", "warehouse",
+            ],
+        )
+        for item in order["items"]:
+            item["pending_qty"] = flt(item["qty"]) - flt(item["received_qty"])
+
+    return orders
+
+
+@frappe.whitelist()
+def get_purchase_order_detail(purchase_order):
+    """Get a single Purchase Order with its items for receiving."""
+    if not purchase_order or not frappe.db.exists("Purchase Order", purchase_order):
+        frappe.throw(_("Purchase Order {0} does not exist.").format(purchase_order))
+
+    po = frappe.get_doc("Purchase Order", purchase_order)
+    items = []
+    for item in po.items:
+        items.append({
+            "po_detail": item.name,
+            "item_code": item.item_code,
+            "item_name": item.item_name,
+            "qty": flt(item.qty),
+            "received_qty": flt(item.received_qty),
+            "pending_qty": flt(item.qty) - flt(item.received_qty),
+            "rate": flt(item.rate),
+            "uom": item.uom,
+            "stock_uom": item.stock_uom,
+            "conversion_factor": flt(item.conversion_factor) or 1,
+            "warehouse": item.warehouse,
+        })
+
+    return {
+        "name": po.name,
+        "supplier": po.supplier,
+        "supplier_name": po.supplier_name,
+        "company": po.company,
+        "transaction_date": str(po.transaction_date),
+        "grand_total": flt(po.grand_total),
+        "status": po.status,
+        "per_received": flt(po.per_received),
+        "per_billed": flt(po.per_billed),
+        "items": items,
+    }
+
+
+@frappe.whitelist()
+def receive_stock(data):
+    """
+    Create a Purchase Receipt from a Purchase Order.
+    Supports partial receipt and rejection.
+
+    data = {
+        "purchase_order": "PO-00001",
+        "warehouse": "Stores - R",
+        "items": [
+            {
+                "po_detail": "row-id",
+                "item_code": "ITEM-001",
+                "accept_qty": 10,
+                "reject_qty": 2,
+                "rejected_warehouse": "Rejected - R"  // optional
+            }
+        ],
+        "remarks": "Some items damaged"
+    }
+    """
+    payload = json.loads(data) if isinstance(data, str) else data
+
+    po_name = payload.get("purchase_order")
+    if not po_name:
+        frappe.throw(_("Purchase Order is required."))
+
+    po = frappe.get_doc("Purchase Order", po_name)
+    if po.docstatus != 1:
+        frappe.throw(_("Purchase Order {0} is not submitted.").format(po_name))
+
+    warehouse = payload.get("warehouse") or get_default_warehouse()
+    items_data = payload.get("items", [])
+    remarks = payload.get("remarks", "")
+
+    if not items_data:
+        frappe.throw(_("No items to receive."))
+
+    receipt = frappe.get_doc({
+        "doctype": "Purchase Receipt",
+        "supplier": po.supplier,
+        "company": po.company,
+        "posting_date": nowdate(),
+        "purchase_order": po_name,
+    })
+
+    if remarks:
+        receipt.remarks = remarks
+
+    po_items_map = {item.name: item for item in po.items}
+
+    has_rejections = False
+    for row in items_data:
+        po_detail = row.get("po_detail")
+        po_item = po_items_map.get(po_detail)
+        if not po_item:
+            continue
+
+        accept_qty = flt(row.get("accept_qty", 0))
+        reject_qty = flt(row.get("reject_qty", 0))
+
+        if accept_qty <= 0 and reject_qty <= 0:
+            continue
+
+        total_qty = accept_qty + reject_qty
+        item_warehouse = row.get("warehouse") or po_item.warehouse or warehouse
+
+        receipt_item = {
+            "item_code": po_item.item_code,
+            "item_name": po_item.item_name,
+            "qty": total_qty,
+            "uom": po_item.uom,
+            "stock_uom": po_item.stock_uom,
+            "conversion_factor": po_item.conversion_factor or 1,
+            "rate": po_item.rate,
+            "warehouse": item_warehouse,
+            "purchase_order": po_name,
+            "purchase_order_item": po_detail,
+            "schedule_date": str(po_item.schedule_date) if po_item.schedule_date else nowdate(),
+        }
+
+        if reject_qty > 0:
+            has_rejections = True
+            receipt_item["rejected_qty"] = reject_qty
+            receipt_item["qty"] = accept_qty
+            rejected_wh = row.get("rejected_warehouse")
+            if rejected_wh:
+                receipt_item["rejected_warehouse"] = rejected_wh
+
+        receipt.append("items", receipt_item)
+
+    if not receipt.items:
+        frappe.throw(_("No valid items to receive."))
+
+    receipt.flags.ignore_permissions = True
+    receipt.insert()
+    receipt.submit()
+
+    result = {
+        "purchase_receipt": receipt.name,
+        "purchase_order": po_name,
+        "status": "completed",
+        "has_rejections": has_rejections,
+        "items_received": len(receipt.items),
+    }
+
+    return result

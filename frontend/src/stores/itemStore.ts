@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { call } from "@/services/api";
+import { call, isNetworkError } from "@/services/api";
 import { usePosStore } from "@/stores/posStore";
 import {
   cacheItems as idbCacheItems,
@@ -10,6 +10,7 @@ import {
   getCachedItemGroups as idbGetCachedGroups,
   cacheStockForWarehouse,
   getCachedStock,
+  getCachedItemByCode,
 } from "@/services/idbService";
 import type {
   POSItem,
@@ -20,6 +21,7 @@ import type {
   StockAvailability,
   BundleComponent,
 } from "@/types/pos.types";
+import { isOnline } from "@/utils";
 
 interface ItemGroupsResult {
   groups: ItemGroup[];
@@ -61,11 +63,6 @@ export const useItemStore = defineStore("items", () => {
 
     return filtered;
   });
-
-  function isOfflineEnabled(): boolean {
-    const posStore = usePosStore();
-    return !!posStore.useOfflineMode;
-  } function isOnline(): boolean { return navigator.onLine; }
 
   /**
    * Pre-load ALL items from server into IndexedDB cache.
@@ -166,7 +163,7 @@ export const useItemStore = defineStore("items", () => {
 
     try {
       // Check connectivity first - serve from cache if offline
-      if (!isOnline() && isOfflineEnabled()) {
+      if (!isOnline()) {
         console.log("[XPOS Offline] System is offline, serving items from cache");
         const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
 
@@ -219,25 +216,23 @@ export const useItemStore = defineStore("items", () => {
 
         hasMore.value = result.length === pageLength.value;
 
-        // Cache items when online + offline mode enabled (first page, no search = full load trigger)
-        if (isOfflineEnabled() && !searchTerm.value && !append && selectedGroup.value === "All Item Groups") {
+        // Cache items when online (first page, no search = full load trigger)
+        if (!searchTerm.value && !append && selectedGroup.value === "All Item Groups") {
           cacheAllItems(posProfile).catch(() => { });
         }
       } // End isOnline() check
     } catch (error) {
-      // If fetch fails and we have a cache, fall back to it
-      if (isOfflineEnabled()) {
-        try {
-          const cached = await idbGetCachedItems();
-          if (cached.length > 0) {
-            const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
-            items.value = filtered.slice(0, pageLength.value);
-            hasMore.value = filtered.length > pageLength.value;
-            console.log("[XPOS Offline] Serving items from idb cache");
-            return;
-          }
-        } catch { /* ignore */ }
-      }
+      // If fetch fails (e.g. network error), fall back to cache
+      try {
+        const cached = await idbGetCachedItems();
+        if (cached.length > 0) {
+          const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
+          items.value = filtered.slice(0, pageLength.value);
+          hasMore.value = filtered.length > pageLength.value;
+          console.log("[XPOS Offline] Serving items from idb cache after fetch failure");
+          return;
+        }
+      } catch { /* ignore */ }
       console.error("Error fetching items:", error);
     } finally {
       isLoading.value = false;
@@ -247,7 +242,7 @@ export const useItemStore = defineStore("items", () => {
   async function fetchItemGroups(): Promise<void> {
     try {
       // Check connectivity first - serve from cache if offline
-      if (!isOnline() && isOfflineEnabled()) {
+      if (!isOnline()) {
         console.log("[XPOS Offline] System is offline, serving item groups from cache");
         const cached = await idbGetCachedGroups();
         itemGroups.value = cached.groups;
@@ -263,23 +258,19 @@ export const useItemStore = defineStore("items", () => {
         itemGroups.value = result.groups || [];
         parentGroups.value = result.parent_groups || [];
 
-        // Cache groups when online and offline mode enabled
-        if (isOfflineEnabled()) {
-          idbCacheGroups(itemGroups.value, parentGroups.value).catch(() => { });
-        }
+        // Always cache groups when online
+        idbCacheGroups(itemGroups.value, parentGroups.value).catch(() => { });
       }
     } catch (error) {
       // Fall back to idb cache
-      if (isOfflineEnabled()) {
-        try {
-          const cached = await idbGetCachedGroups();
-          if (cached.groups.length > 0) {
-            itemGroups.value = cached.groups;
-            parentGroups.value = cached.parentGroups;
-            return;
-          }
-        } catch { /* ignore */ }
-      }
+      try {
+        const cached = await idbGetCachedGroups();
+        if (cached.groups.length > 0) {
+          itemGroups.value = cached.groups;
+          parentGroups.value = cached.parentGroups;
+          return;
+        }
+      } catch { /* ignore */ }
       console.error("Error fetching item groups:", error);
     }
   }
@@ -290,7 +281,7 @@ export const useItemStore = defineStore("items", () => {
   ): Promise<POSItem | null> {
     try {
       // Offline: search barcode from idb cache
-      if (!navigator.onLine && isOfflineEnabled()) {
+      if (!isOnline()) {
         const cached = await idbGetCachedItems();
         const lower = barcode.toLowerCase();
         return cached.find(
@@ -310,17 +301,15 @@ export const useItemStore = defineStore("items", () => {
       return result;
     } catch (error) {
       // Fall back to idb cache on error
-      if (isOfflineEnabled()) {
-        try {
-          const cached = await idbGetCachedItems();
-          const lower = barcode.toLowerCase();
-          return cached.find(
-            (i) =>
-              (i.barcode && i.barcode.toLowerCase() === lower) ||
-              i.item_code.toLowerCase() === lower
-          ) || null;
-        } catch { /* ignore */ }
-      }
+      try {
+        const cached = await idbGetCachedItems();
+        const lower = barcode.toLowerCase();
+        return cached.find(
+          (i) =>
+            (i.barcode && i.barcode.toLowerCase() === lower) ||
+            i.item_code.toLowerCase() === lower
+        ) || null;
+      } catch { /* ignore */ }
       console.error("Error searching barcode:", error);
       return null;
     }
@@ -345,6 +334,26 @@ export const useItemStore = defineStore("items", () => {
       selectedItemDetail.value = result;
       return result;
     } catch (error) {
+      // Offline fallback: build basic detail from cached item
+      if (isNetworkError(error)) {
+        try {
+          const cached = await getCachedItemByCode(itemCode);
+          if (cached) {
+            const basicDetail = {
+              item_code: cached.item_code,
+              item_name: cached.item_name,
+              description: cached.description || "",
+              stock_uom: cached.stock_uom || "Nos",
+              image: cached.image || "",
+              item_group: cached.item_group || "",
+              rate: cached.rate || 0,
+              actual_qty: cached.actual_qty || 0,
+            } as unknown as ItemDetail;
+            selectedItemDetail.value = basicDetail;
+            return basicDetail;
+          }
+        } catch { /* ignore cache errors */ }
+      }
       console.error("Error fetching item detail:", error);
       return null;
     } finally {

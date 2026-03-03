@@ -15,6 +15,7 @@ import type {
   LoyaltyProgram,
   CustomerLoyaltyInfo,
 } from "@/types/pos.types";
+import { isOnline } from "@/utils";
 
 export const useCustomerStore = defineStore("customers", () => {
   const customers = ref<Customer[]>([]);
@@ -39,15 +40,6 @@ export const useCustomerStore = defineStore("customers", () => {
     () => customers.value
   );
 
-  function isOfflineEnabled(): boolean {
-    const posStore = usePosStore();
-    return !!posStore.useOfflineMode;
-  }
-
-  function isOnline(): boolean {
-    return navigator.onLine;
-  }
-
   const hasCredit = computed(
     () => (customerCredit.value?.total_credit || 0) > 0
   );
@@ -59,8 +51,8 @@ export const useCustomerStore = defineStore("customers", () => {
     try {
       const searchText = term || searchTerm.value;
       
-      // Check if offline and offline mode is enabled
-      if (!isOnline() && isOfflineEnabled()) {
+      // Check if offline — serve from cache
+      if (!isOnline()) {
         const cached = await searchCachedCustomers(searchText);
         customers.value = cached;
         console.log("[XPOS Offline] Serving customers from cache");
@@ -74,16 +66,15 @@ export const useCustomerStore = defineStore("customers", () => {
           {
             search_term: searchText,
             pos_profile: posProfile || "",
-            limit: 100, // Increased limit for better caching
+            limit: 100,
           }
         );
         customers.value = result || [];
         
-        // Cache customers for offline use when offline mode is enabled
-        if (isOfflineEnabled() && customers.value.length > 0) {
+        // Always cache customers for offline use
+        if (customers.value.length > 0) {
           try {
             await cacheCustomers(customers.value);
-            console.log(`[XPOS Offline] Cached ${customers.value.length} customers`);
           } catch (error) {
             console.warn("[XPOS Offline] Failed to cache customers:", error);
           }
@@ -92,18 +83,16 @@ export const useCustomerStore = defineStore("customers", () => {
     } catch (error) {
       console.error("Error searching customers:", error);
       
-      // Fallback to cache if available and offline mode is enabled
-      if (isOfflineEnabled()) {
-        try {
-          const cached = await searchCachedCustomers(term || searchTerm.value);
-          if (cached.length > 0) {
-            customers.value = cached;
-            console.log("[XPOS Offline] Fallback to cached customers after API error");
-            return;
-          }
-        } catch (cacheError) {
-          console.warn("[XPOS Offline] Failed to load cached customers:", cacheError);
+      // Fallback to cache on any failure
+      try {
+        const cached = await searchCachedCustomers(term || searchTerm.value);
+        if (cached.length > 0) {
+          customers.value = cached;
+          console.log("[XPOS Offline] Fallback to cached customers after API error");
+          return;
         }
+      } catch (cacheError) {
+        console.warn("[XPOS Offline] Failed to load cached customers:", cacheError);
       }
       customers.value = [];
     } finally {
@@ -115,7 +104,7 @@ export const useCustomerStore = defineStore("customers", () => {
    * Cache all customers for offline use
    */
   async function cacheAllCustomers(posProfile?: string): Promise<void> {
-    if (!isOnline() || !isOfflineEnabled()) return;
+    if (!isOnline()) return;
     
     try {
       const result = await call<Customer[]>(
@@ -174,7 +163,7 @@ export const useCustomerStore = defineStore("customers", () => {
     isLoadingDetail.value = true;
     try {
       // Check connectivity first
-      if (!isOnline() && isOfflineEnabled()) {
+      if (!isOnline()) {
         // Try to find in cached customers
         const cached = await getCachedCustomers();
         const customer = cached.find(c => c.name === customerName || c.customer_name === customerName);

@@ -681,3 +681,177 @@ export interface CalculatedTax {
   amount: number;
   included_in_print_rate: boolean;
 }
+
+// ─── Purchase Types ────────────────────────────────
+
+export interface Supplier {
+  name: string;
+  supplier_name: string;
+  supplier_group?: string;
+  supplier_type?: string;
+  default_currency?: string;
+  mobile_no?: string;
+  email_id?: string;
+  tax_id?: string;
+  disabled?: boolean;
+  [key: string]: unknown;
+}
+
+export interface PurchaseItem {
+  item_code: string;
+  item_name: string;
+  qty: number;
+  rate: number;
+  amount?: number;
+  uom?: string;
+  stock_uom?: string;
+  conversion_factor?: number;
+  warehouse?: string;
+  serial_no?: string;
+  batch_no?: string;
+  schedule_date?: string;
+  received_qty?: number;
+}
+
+export interface PurchaseOrder {
+  name: string;
+  supplier: string;
+  supplier_name?: string;
+  company: string;
+  transaction_date: string;
+  schedule_date?: string;
+  grand_total: number;
+  status: string;
+  docstatus: number;
+  currency?: string;
+  items: PurchaseItem[];
+  per_received?: number;
+  per_billed?: number;
+  [key: string]: unknown;
+}
+
+export interface PurchaseReceipt {
+  name: string;
+  supplier: string;
+  supplier_name?: string;
+  company: string;
+  posting_date: string;
+  grand_total: number;
+  status: string;
+  docstatus: number;
+  currency?: string;
+  items: PurchaseItem[];
+  purchase_order?: string;
+  [key: string]: unknown;
+}
+
+export interface PurchaseInvoice {
+  name: string;
+  supplier: string;
+  supplier_name?: string;
+  company: string;
+  posting_date: string;
+  grand_total: number;
+  outstanding_amount: number;
+  status: string;
+  docstatus: number;
+  currency?: string;
+  items: PurchaseItem[];
+  purchase_order?: string;
+  purchase_receipt?: string;
+  is_paid?: boolean;
+  [key: string]: unknown;
+}
+
+export interface PurchaseOrderData {
+  pos_profile?: string;
+  supplier: string;
+  company?: string;
+  warehouse?: string;
+  transaction_date?: string;
+  schedule_date?: string;
+  items: PurchaseItem[];
+  receive?: boolean;
+  create_invoice?: boolean;
+  payments?: { mode_of_payment: string; amount: number }[];
+  submit?: boolean;
+}
+
+export interface PurchaseOrderResult {
+  purchase_order?: string;
+  purchase_receipt?: string;
+  purchase_invoice?: string;
+}
+
+export interface ItemUOMDetail {
+  uom: string;
+  conversion_factor: number;
+}
+
+export interface SearchItem {
+  item_code: string;
+  item_name: string;
+  stock_uom: string;
+  item_uoms?: ItemUOMDetail[];
+  standard_rate?: number;
+  selling_price?: number;
+  buying_price?: number;
+  barcode?: string;
+}
+
+export interface NewItemData {
+  item_code?: string;
+  item_name: string;
+  item_group?: string;
+  stock_uom: string;
+  barcode?: string;
+  selling_price?: number;
+  buying_price?: number;
+  pos_profile?: string;
+}
+
+// ─── Stock Receiving Types ──────────────────────────
+
+export interface PendingReceiptItem {
+  po_detail: string;
+  item_code: string;
+  item_name: string;
+  qty: number;
+  received_qty: number;
+  pending_qty: number;
+  rate: number;
+  uom: string;
+  stock_uom: string;
+  conversion_factor: number;
+  warehouse: string;
+}
+
+export interface PendingReceiptOrder {
+  name: string;
+  supplier: string;
+  supplier_name: string;
+  company: string;
+  transaction_date: string;
+  grand_total: number;
+  status: string;
+  per_received: number;
+  per_billed: number;
+  items: PendingReceiptItem[];
+}
+
+export interface ReceiveStockItem {
+  po_detail: string;
+  item_code: string;
+  accept_qty: number;
+  reject_qty: number;
+  warehouse?: string;
+  rejected_warehouse?: string;
+}
+
+export interface ReceiveStockResult {
+  purchase_receipt: string;
+  purchase_order: string;
+  status: string;
+  has_rejections: boolean;
+  items_received: number;
+}

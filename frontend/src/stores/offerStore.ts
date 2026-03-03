@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, type Ref } from "vue";
-import { call } from "@/services/api";
+import { call, isNetworkError } from "@/services/api";
+import { cacheOffers, getCachedOffers } from "@/services/idbService";
 import type {
   POSOffer,
   POSCoupon,
@@ -31,8 +32,22 @@ export const useOfferStore = defineStore("offers", () => {
         }
       );
       offers.value = result || [];
+      // Cache offers for offline use
+      if (offers.value.length > 0) {
+        cacheOffers(posProfile, offers.value).catch(() => {});
+      }
       return offers.value;
     } catch (error) {
+      // Offline fallback: serve from cache
+      if (isNetworkError(error)) {
+        try {
+          const cached = await getCachedOffers(posProfile);
+          if (cached && cached.length > 0) {
+            offers.value = cached as POSOffer[];
+            return offers.value;
+          }
+        } catch { /* ignore */ }
+      }
       console.error("Error fetching offers:", error);
       return [];
     } finally {

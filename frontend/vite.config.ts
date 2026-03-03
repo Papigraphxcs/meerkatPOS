@@ -92,8 +92,12 @@ export default defineConfig({
             },
           },
           {
+            // Note: Frappe API uses POST requests which are not cacheable by service worker.
+            // Offline API data is handled by IndexedDB (idbService) instead.
+            // Cache Frappe GET endpoints (e.g. /api/method/ for GET-based calls if any)
             urlPattern: /^https?:\/\/.*\/api\/method\//,
             handler: "NetworkFirst",
+            method: "GET",
             options: {
               cacheName: "xpos-api-cache",
               expiration: {

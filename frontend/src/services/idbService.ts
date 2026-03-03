@@ -1,153 +1,140 @@
 /**
- * X POS IndexedDB Service
- * Centralised database layer for offline support.
+ * X POS IndexedDB Service using Dexie
+ * Centralized database layer for offline support.
+ * 
+ * This service provides:
+ * - Local caching of items, customers, and item groups
+ * - Pending invoice queue for offline operations
+ * - Stock data caching per warehouse
+ * - POS profile and metadata storage
+ * - Automatic sync support
  */
-import { openDB, type IDBPDatabase, type DBSchema } from "idb";
+import Dexie, { type Table } from "dexie";
 import type { POSItem, ItemGroup, Customer } from "@/types/pos.types";
 
-export interface XPosDB extends DBSchema {
-  items: {
-    key: string; // item_code
-    value: POSItem;
-    indexes: {
-      item_name: string;
-      item_group: string;
-      barcode: string;
-    };
-  };
-  item_groups: {
-    key: string;
-    value: { name: string; data: ItemGroup[] };
-  };
-  customers: {
-    key: string; // customer name
-    value: Customer;
-    indexes: {
-      customer_name: string;
-      mobile_no: string;
-      email_id: string;
-    };
-  };
-  pending_invoices: {
-    key: number;
-    value: {
-      id?: number;
-      data: unknown;
-      status: "pending" | "syncing" | "failed";
-      created_at: string;
-      error?: string;
-      retry_count: number;
-      customer_name?: string;
-      grand_total?: number;
-    };
-    indexes: {
-      created_at: string;
-    };
-  };
-  stock_cache: {
-    key: string; // "warehouse::item_code"
-    value: {
-      cache_key: string;
-      warehouse: string;
-      item_code: string;
-      actual_qty: number;
-      updated_at: string;
-    };
-    indexes: {
-      warehouse: string;
-    };
-  };
-  meta: {
-    key: string;
-    value: { key: string; value: unknown; updated_at: string };
-  };
+// ─── Database Schema Interfaces ────────────────────
+
+export interface PendingInvoice {
+  id?: number;
+  data: unknown;
+  status: "pending" | "syncing" | "failed";
+  created_at: string;
+  error?: string;
+  retry_count: number;
+  customer_name?: string;
+  grand_total?: number;
 }
 
-const DB_NAME = "xpos_offline_v2";
-const DB_VERSION = 1;
+export interface StockEntry {
+  cache_key: string;
+  warehouse: string;
+  item_code: string;
+  actual_qty: number;
+  updated_at: string;
+}
 
-let dbPromise: Promise<IDBPDatabase<XPosDB>> | null = null;
+export interface MetaEntry {
+  key: string;
+  value: unknown;
+  updated_at: string;
+}
 
-function getDB(): Promise<IDBPDatabase<XPosDB>> {
-  if (!dbPromise) {
-    dbPromise = openDB<XPosDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains("items")) {
-          const itemStore = db.createObjectStore("items", { keyPath: "item_code" });
-          itemStore.createIndex("item_name", "item_name", { unique: false });
-          itemStore.createIndex("item_group", "item_group", { unique: false });
-          itemStore.createIndex("barcode", "barcode", { unique: false });
-        }
+export interface ItemGroupEntry {
+  name: string;
+  data: ItemGroup[];
+}
 
-        if (!db.objectStoreNames.contains("item_groups")) {
-          db.createObjectStore("item_groups", { keyPath: "name" });
-        }
+export interface CachedItemTax {
+  item_tax_template: string | null;
+  item_tax_map: Record<string, number>;
+}
 
-        if (!db.objectStoreNames.contains("customers")) {
-          const custStore = db.createObjectStore("customers", { keyPath: "name" });
-          custStore.createIndex("customer_name", "customer_name", { unique: false });
-          custStore.createIndex("mobile_no", "mobile_no", { unique: false });
-          custStore.createIndex("email_id", "email_id", { unique: false });
-        }
+export interface PendingPurchase {
+  id?: number;
+  type: "purchase_order" | "purchase_receipt" | "purchase_invoice";
+  data: unknown;
+  status: "pending" | "syncing" | "failed";
+  created_at: string;
+  error?: string;
+  retry_count: number;
+  supplier_name?: string;
+  grand_total?: number;
+}
 
-        if (!db.objectStoreNames.contains("pending_invoices")) {
-          const invoiceStore = db.createObjectStore("pending_invoices", {
-            keyPath: "id",
-            autoIncrement: true,
-          });
-          invoiceStore.createIndex("created_at", "created_at", { unique: false });
-        }
+export interface CachedSupplier {
+  name: string;
+  supplier_name: string;
+  supplier_group?: string;
+  supplier_type?: string;
+  default_currency?: string;
+  mobile_no?: string;
+  email_id?: string;
+}
 
-        if (!db.objectStoreNames.contains("stock_cache")) {
-          const stockStore = db.createObjectStore("stock_cache", { keyPath: "cache_key" });
-          stockStore.createIndex("warehouse", "warehouse", { unique: false });
-        }
+// ─── Dexie Database Class ──────────────────────────
 
-        if (!db.objectStoreNames.contains("meta")) {
-          db.createObjectStore("meta", { keyPath: "key" });
-        }
-      },
+class XPosDB extends Dexie {
+  items!: Table<POSItem, string>;
+  itemGroups!: Table<ItemGroupEntry, string>;
+  customers!: Table<Customer, string>;
+  suppliers!: Table<CachedSupplier, string>;
+  pendingInvoices!: Table<PendingInvoice, number>;
+  pendingPurchases!: Table<PendingPurchase, number>;
+  stockCache!: Table<StockEntry, string>;
+  meta!: Table<MetaEntry, string>;
+
+  constructor() {
+    super("xpos_offline_v3");
+
+    this.version(1).stores({
+      items: "item_code, item_name, item_group, barcode",
+      itemGroups: "name",
+      customers: "name, customer_name, mobile_no, email_id",
+      suppliers: "name, supplier_name, mobile_no, email_id",
+      pendingInvoices: "++id, status, created_at",
+      pendingPurchases: "++id, type, status, created_at",
+      stockCache: "cache_key, warehouse, item_code",
+      meta: "key",
     });
   }
-  return dbPromise;
 }
 
-export async function cacheItems(allItems: POSItem[]): Promise<void> {
-  const db = await getDB();
-  const tx = db.transaction("items", "readwrite");
-  await tx.store.clear();
-  for (const item of allItems) {
-    await tx.store.put(item);
-  }
-  await tx.done;
+// Singleton database instance
+const db = new XPosDB();
 
+// ─── Items Cache ───────────────────────────────────
+
+export async function cacheItems(allItems: POSItem[]): Promise<void> {
+  await db.transaction("rw", db.items, async () => {
+    await db.items.clear();
+    await db.items.bulkAdd(allItems);
+  });
   await setMeta("items_cached_at", new Date().toISOString());
 }
 
 export async function getCachedItems(): Promise<POSItem[]> {
-  const db = await getDB();
-  return db.getAll("items");
+  return db.items.toArray();
 }
 
 export async function getCachedItemByCode(itemCode: string): Promise<POSItem | undefined> {
-  const db = await getDB();
-  return db.get("items", itemCode);
+  return db.items.get(itemCode);
 }
 
 export async function searchCachedItems(
   term: string,
   group: string
 ): Promise<POSItem[]> {
-  const all = await getCachedItems();
-  let result = all;
+  let results: POSItem[];
 
   if (group && group !== "All Item Groups") {
-    result = result.filter((i) => i.item_group === group);
+    results = await db.items.where("item_group").equals(group).toArray();
+  } else {
+    results = await db.items.toArray();
   }
 
   if (term) {
     const lower = term.toLowerCase();
-    result = result.filter(
+    results = results.filter(
       (i) =>
         i.item_code.toLowerCase().includes(lower) ||
         i.item_name.toLowerCase().includes(lower) ||
@@ -156,52 +143,62 @@ export async function searchCachedItems(
     );
   }
 
-  return result;
+  return results;
 }
+
+export async function updateCachedItem(item: POSItem): Promise<void> {
+  await db.items.put(item);
+}
+
+// ─── Item Groups Cache ─────────────────────────────
 
 export async function cacheItemGroups(
   groups: ItemGroup[],
   parentGroups: ItemGroup[]
 ): Promise<void> {
-  const db = await getDB();
-  const tx = db.transaction("item_groups", "readwrite");
-  await tx.store.clear();
-  await tx.store.put({ name: "__groups__", data: groups });
-  await tx.store.put({ name: "__parent_groups__", data: parentGroups });
-  await tx.done;
+  await db.transaction("rw", db.itemGroups, async () => {
+    await db.itemGroups.clear();
+    await db.itemGroups.bulkAdd([
+      { name: "__groups__", data: groups },
+      { name: "__parent_groups__", data: parentGroups },
+    ]);
+  });
 }
 
 export async function getCachedItemGroups(): Promise<{
   groups: ItemGroup[];
   parentGroups: ItemGroup[];
 }> {
-  const db = await getDB();
-  const g = await db.get("item_groups", "__groups__");
-  const pg = await db.get("item_groups", "__parent_groups__");
+  const [g, pg] = await Promise.all([
+    db.itemGroups.get("__groups__"),
+    db.itemGroups.get("__parent_groups__"),
+  ]);
   return {
     groups: g?.data || [],
     parentGroups: pg?.data || [],
   };
 }
 
+// ─── Customers Cache ───────────────────────────────
+
 export async function cacheCustomers(customers: Customer[]): Promise<void> {
-  const db = await getDB();
-  const tx = db.transaction("customers", "readwrite");
-  await tx.store.clear();
-  for (const cust of customers) {
-    await tx.store.put(cust);
-  }
-  await tx.done;
+  await db.transaction("rw", db.customers, async () => {
+    await db.customers.clear();
+    await db.customers.bulkAdd(customers);
+  });
   await setMeta("customers_cached_at", new Date().toISOString());
 }
 
 export async function getCachedCustomers(): Promise<Customer[]> {
-  const db = await getDB();
-  return db.getAll("customers");
+  return db.customers.toArray();
+}
+
+export async function getCachedCustomerByName(name: string): Promise<Customer | undefined> {
+  return db.customers.get(name);
 }
 
 export async function searchCachedCustomers(term: string): Promise<Customer[]> {
-  const all = await getCachedCustomers();
+  const all = await db.customers.toArray();
   if (!term) return all.slice(0, 20);
 
   const lower = term.toLowerCase();
@@ -216,103 +213,180 @@ export async function searchCachedCustomers(term: string): Promise<Customer[]> {
     .slice(0, 20);
 }
 
-export interface StockEntry {
-  warehouse: string;
-  item_code: string;
-  actual_qty: number;
-  updated_at: string;
+export async function addCachedCustomer(customer: Customer): Promise<void> {
+  await db.customers.put(customer);
 }
+
+// ─── Suppliers Cache ───────────────────────────────
+
+export async function cacheSuppliers(suppliers: CachedSupplier[]): Promise<void> {
+  await db.transaction("rw", db.suppliers, async () => {
+    await db.suppliers.clear();
+    await db.suppliers.bulkAdd(suppliers);
+  });
+  await setMeta("suppliers_cached_at", new Date().toISOString());
+}
+
+export async function getCachedSuppliers(): Promise<CachedSupplier[]> {
+  return db.suppliers.toArray();
+}
+
+export async function searchCachedSuppliers(term: string): Promise<CachedSupplier[]> {
+  const all = await db.suppliers.toArray();
+  if (!term) return all.slice(0, 20);
+
+  const lower = term.toLowerCase();
+  return all
+    .filter(
+      (s) =>
+        s.supplier_name.toLowerCase().includes(lower) ||
+        (s.mobile_no && s.mobile_no.toLowerCase().includes(lower)) ||
+        s.name.toLowerCase().includes(lower)
+    )
+    .slice(0, 20);
+}
+
+export async function addCachedSupplier(supplier: CachedSupplier): Promise<void> {
+  await db.suppliers.put(supplier);
+}
+
+// ─── Stock Cache ───────────────────────────────────
 
 export async function cacheStockForWarehouse(
   warehouse: string,
   stockEntries: { item_code: string; actual_qty: number }[]
 ): Promise<void> {
-  const db = await getDB();
-  const tx = db.transaction("stock_cache", "readwrite");
-
-  const idx = tx.store.index("warehouse");
-  let cursor = await idx.openCursor(warehouse);
-  while (cursor) {
-    await cursor.delete();
-    cursor = await cursor.continue();
-  }
-
   const now = new Date().toISOString();
-  for (const entry of stockEntries) {
-    await tx.store.put({
+
+  await db.transaction("rw", db.stockCache, async () => {
+    // Delete existing entries for this warehouse
+    await db.stockCache.where("warehouse").equals(warehouse).delete();
+
+    // Add new entries
+    const entries: StockEntry[] = stockEntries.map((entry) => ({
       cache_key: `${warehouse}::${entry.item_code}`,
       warehouse,
       item_code: entry.item_code,
       actual_qty: entry.actual_qty,
       updated_at: now,
-    });
-  }
-  await tx.done;
+    }));
+
+    await db.stockCache.bulkAdd(entries);
+  });
+
   await setMeta(`stock_cached_at_${warehouse}`, now);
 }
 
-export async function getCachedStock(
-  warehouse: string
-): Promise<StockEntry[]> {
-  const db = await getDB();
-  const idx = db.transaction("stock_cache", "readonly").store.index("warehouse");
-  const results = await idx.getAll(warehouse);
-  return results.map((r) => ({
-    warehouse: r.warehouse,
-    item_code: r.item_code,
-    actual_qty: r.actual_qty,
-    updated_at: r.updated_at,
-  }));
+export async function getCachedStock(warehouse: string): Promise<StockEntry[]> {
+  return db.stockCache.where("warehouse").equals(warehouse).toArray();
 }
 
 export async function getCachedStockForItem(
   warehouse: string,
   itemCode: string
 ): Promise<StockEntry | undefined> {
-  const db = await getDB();
-  const result = await db.get("stock_cache", `${warehouse}::${itemCode}`);
-  return result ? { warehouse: result.warehouse, item_code: result.item_code, actual_qty: result.actual_qty, updated_at: result.updated_at } : undefined;
+  return db.stockCache.get(`${warehouse}::${itemCode}`);
 }
 
-export type PendingInvoice = XPosDB["pending_invoices"]["value"];
+export async function updateStockForItem(
+  warehouse: string,
+  itemCode: string,
+  actualQty: number
+): Promise<void> {
+  const cacheKey = `${warehouse}::${itemCode}`;
+  await db.stockCache.put({
+    cache_key: cacheKey,
+    warehouse,
+    item_code: itemCode,
+    actual_qty: actualQty,
+    updated_at: new Date().toISOString(),
+  });
+}
+
+// ─── Pending Invoices (Sales) ──────────────────────
 
 export async function addPendingInvoice(
   record: Omit<PendingInvoice, "id">
 ): Promise<number> {
-  const db = await getDB();
-  return db.add("pending_invoices", record as PendingInvoice);
+  return db.pendingInvoices.add(record as PendingInvoice);
 }
 
 export async function getAllPendingInvoices(): Promise<PendingInvoice[]> {
-  const db = await getDB();
-  return db.getAll("pending_invoices");
+  return db.pendingInvoices.toArray();
+}
+
+export async function getPendingInvoicesByStatus(
+  status: PendingInvoice["status"]
+): Promise<PendingInvoice[]> {
+  return db.pendingInvoices.where("status").equals(status).toArray();
 }
 
 export async function updatePendingInvoice(record: PendingInvoice): Promise<void> {
-  const db = await getDB();
-  await db.put("pending_invoices", record);
+  if (record.id !== undefined) {
+    await db.pendingInvoices.put(record);
+  }
 }
 
 export async function deletePendingInvoice(id: number): Promise<void> {
-  const db = await getDB();
-  await db.delete("pending_invoices", id);
+  await db.pendingInvoices.delete(id);
 }
 
 export async function countPendingInvoices(): Promise<number> {
-  const db = await getDB();
-  return db.count("pending_invoices");
+  return db.pendingInvoices.count();
 }
 
+// ─── Pending Purchases ─────────────────────────────
+
+export async function addPendingPurchase(
+  record: Omit<PendingPurchase, "id">
+): Promise<number> {
+  return db.pendingPurchases.add(record as PendingPurchase);
+}
+
+export async function getAllPendingPurchases(): Promise<PendingPurchase[]> {
+  return db.pendingPurchases.toArray();
+}
+
+export async function getPendingPurchasesByType(
+  type: PendingPurchase["type"]
+): Promise<PendingPurchase[]> {
+  return db.pendingPurchases.where("type").equals(type).toArray();
+}
+
+export async function updatePendingPurchase(record: PendingPurchase): Promise<void> {
+  if (record.id !== undefined) {
+    await db.pendingPurchases.put(record);
+  }
+}
+
+export async function deletePendingPurchase(id: number): Promise<void> {
+  await db.pendingPurchases.delete(id);
+}
+
+export async function countPendingPurchases(): Promise<number> {
+  return db.pendingPurchases.count();
+}
+
+// ─── Metadata Storage ──────────────────────────────
+
 export async function setMeta(key: string, value: unknown): Promise<void> {
-  const db = await getDB();
-  await db.put("meta", { key, value, updated_at: new Date().toISOString() });
+  await db.meta.put({
+    key,
+    value,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 export async function getMeta(key: string): Promise<unknown> {
-  const db = await getDB();
-  const entry = await db.get("meta", key);
+  const entry = await db.meta.get(key);
   return entry?.value;
 }
+
+export async function deleteMeta(key: string): Promise<void> {
+  await db.meta.delete(key);
+}
+
+// ─── POS Profile Cache ─────────────────────────────
 
 export async function cachePOSProfile(profileData: unknown): Promise<void> {
   await setMeta("pos_profile", profileData);
@@ -328,8 +402,8 @@ export async function cachePOSData(data: {
   company?: unknown;
   stock_settings?: unknown;
   taxes?: unknown;
-  tax_inclusive?: boolean;
-  disable_rounded_total?: boolean;
+  tax_inclusive?: boolean | number;
+  disable_rounded_total?: boolean | number;
   print_settings?: unknown;
 }): Promise<void> {
   await setMeta("pos_complete_data", data);
@@ -339,18 +413,60 @@ export async function getCachedPOSData(): Promise<unknown | null> {
   return await getMeta("pos_complete_data");
 }
 
-export async function clearAllData(): Promise<void> {
-  const db = await getDB();
-  const storeNames = [
-    "items",
-    "item_groups",
-    "customers",
-    "stock_cache",
-    "meta",
-  ] as const;
-  for (const store of storeNames) {
-    const tx = db.transaction(store, "readwrite");
-    await tx.store.clear();
-    await tx.done;
-  }
+// ─── Item Tax Template Cache ───────────────────────
+
+export async function cacheItemTax(
+  itemCode: string,
+  company: string,
+  data: CachedItemTax
+): Promise<void> {
+  await setMeta(`item_tax::${company}::${itemCode}`, data);
 }
+
+export async function getCachedItemTax(
+  itemCode: string,
+  company: string
+): Promise<CachedItemTax | null> {
+  const val = await getMeta(`item_tax::${company}::${itemCode}`);
+  return val ? (val as CachedItemTax) : null;
+}
+
+// ─── Offers Cache ──────────────────────────────────
+
+export async function cacheOffers(
+  posProfile: string,
+  offers: unknown[]
+): Promise<void> {
+  await setMeta(`offers::${posProfile}`, offers);
+}
+
+export async function getCachedOffers(
+  posProfile: string
+): Promise<unknown[] | null> {
+  const val = await getMeta(`offers::${posProfile}`);
+  return val ? (val as unknown[]) : null;
+}
+
+// ─── Clear All Data ────────────────────────────────
+
+export async function clearAllData(): Promise<void> {
+  await db.transaction("rw", [db.items, db.itemGroups, db.customers, db.suppliers, db.stockCache, db.meta], async () => {
+    await db.items.clear();
+    await db.itemGroups.clear();
+    await db.customers.clear();
+    await db.suppliers.clear();
+    await db.stockCache.clear();
+    await db.meta.clear();
+  });
+}
+
+export async function clearPendingData(): Promise<void> {
+  await db.transaction("rw", [db.pendingInvoices, db.pendingPurchases], async () => {
+    await db.pendingInvoices.clear();
+    await db.pendingPurchases.clear();
+  });
+}
+
+// ─── Database Instance Export ──────────────────────
+
+export { db };

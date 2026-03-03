@@ -53,7 +53,8 @@ import { usePosStore } from "@/stores/posStore";
 import { useItemStore } from "@/stores/itemStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useOfferStore } from "@/stores/offerStore";
-import { call, showError } from "@/services/api";
+import { call, showError, isNetworkError } from "@/services/api";
+import { cacheItemTax, getCachedItemTax } from "@/services/idbService";
 import SearchBar from "@/components/items/SearchBar.vue";
 import BarcodeScanner from "@/components/items/BarcodeScanner.vue";
 import ItemGrid from "@/components/items/ItemGrid.vue";
@@ -301,9 +302,27 @@ async function fetchAndApplyItemTax(item: POSItem) {
 				taxData.item_tax_template,
 				taxData.item_tax_map || {}
 			);
+			// Cache for offline use
+			cacheItemTax(item.item_code, posStore.companyName, {
+				item_tax_template: taxData.item_tax_template,
+				item_tax_map: taxData.item_tax_map || {},
+			}).catch(() => {});
 		}
 	} catch (e) {
-		// Tax template fetch failed — continue without item-level tax
+		// Offline fallback: try cached tax data
+		if (isNetworkError(e)) {
+			try {
+				const cached = await getCachedItemTax(item.item_code, posStore.companyName);
+				if (cached && cached.item_tax_template) {
+					cartStore.setItemTax(
+						item.item_code,
+						cached.item_tax_template,
+						cached.item_tax_map || {}
+					);
+					return;
+				}
+			} catch { /* ignore cache errors */ }
+		}
 		console.warn("Failed to fetch item tax template for", item.item_code, e);
 	}
 }

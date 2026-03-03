@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 // Lazy load views
 const PosView = () => import("@/views/PosView.vue");
 const OrdersView = () => import("@/views/OrdersView.vue");
+const PurchaseView = () => import("@/views/PurchaseView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
 const ResetPasswordView = () => import("@/views/ResetPasswordView.vue");
 
@@ -37,6 +38,12 @@ const routes: RouteRecordRaw[] = [
     name: "orders",
     component: OrdersView,
     meta: { title: "Orders", requiresAuth: true },
+  },
+  {
+    path: "/purchase",
+    name: "purchase",
+    component: PurchaseView,
+    meta: { title: "Purchasing", requiresAuth: true },
   },
 ];
 

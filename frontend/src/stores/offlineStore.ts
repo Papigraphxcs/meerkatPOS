@@ -11,11 +11,11 @@ import {
   type PendingInvoice,
 } from "@/services/idbService";
 import type { InvoiceData } from "@/types/pos.types";
+import { isOnline } from "@/utils";
 
 export type OfflineInvoice = PendingInvoice;
 
 export const useOfflineStore = defineStore("offline", () => {
-    const isOnline = ref(navigator.onLine);
     const isSyncing = ref(false);
     const pendingCount = ref(0);
     const pendingInvoices = ref<OfflineInvoice[]>([]);
@@ -35,14 +35,14 @@ export const useOfflineStore = defineStore("offline", () => {
 
     const statusLabel = computed(() => {
         if (isSyncing.value) return "Syncing...";
-        if (!isOnline.value) return "Offline";
+        if (!isOnline()) return "Offline";
         if (pendingCount.value > 0) return `${pendingCount.value} pending`;
         return "Online";
     });
 
     const statusColor = computed(() => {
         if (isSyncing.value) return "text-blue-500";
-        if (!isOnline.value) return "text-red-500";
+        if (!isOnline()) return "text-red-500";
         if (pendingCount.value > 0) return "text-amber-500";
         return "text-emerald-500";
     });
@@ -62,7 +62,6 @@ export const useOfflineStore = defineStore("offline", () => {
     }
 
     function handleOnline() {
-        isOnline.value = true;
         showSuccess("Internet connection restored");
         
         if (offlineModeEnabled.value && pendingCount.value > 0) {
@@ -71,7 +70,6 @@ export const useOfflineStore = defineStore("offline", () => {
     }
 
     function handleOffline() {
-        isOnline.value = false;
         showError("You are offline. Check your internet connection.");
     }
 
@@ -123,7 +121,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
     // ─── Sync all pending invoices ─────────────────
     async function syncPendingInvoices(): Promise<void> {
-        if (isSyncing.value || !isOnline.value) return;
+        if (isSyncing.value || !isOnline()) return;
 
         isSyncing.value = true;
         syncErrors.value = [];
@@ -139,7 +137,7 @@ export const useOfflineStore = defineStore("offline", () => {
             let failed = 0;
 
             for (const invoice of invoices) {
-                if (!isOnline.value) {
+                if (!isOnline()) {
                     // Lost connection mid-sync
                     break;
                 }
@@ -193,7 +191,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
     // ─── Retry a single failed invoice ─────────────
     async function retrySingle(id: number): Promise<boolean> {
-        if (!isOnline.value) {
+        if (!isOnline()) {
             showError("Cannot sync while offline");
             return false;
         }
@@ -262,7 +260,7 @@ export const useOfflineStore = defineStore("offline", () => {
     }
 
     async function syncOfflineData(): Promise<void> {
-        if (!isOnline.value) return;
+        if (!isOnline()) return;
 
         const posStore = usePosStore();
         if (!posStore.isReady || !posStore.profileName) return;
@@ -294,8 +292,6 @@ export const useOfflineStore = defineStore("offline", () => {
     }
 
     return {
-        // State
-        isOnline,
         isSyncing,
         pendingCount,
         pendingInvoices,
