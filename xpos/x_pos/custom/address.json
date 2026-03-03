@@ -42,7 +42,7 @@
    "modified": "2026-03-02 22:01:14.096134",
    "modified_by": "Administrator",
    "module": "X POS",
-   "name": "Address-custom_delivery_charges",
+   "name": "Address-delivery_charges",
    "no_copy": 0,
    "non_negative": 0,
    "options": "Delivery Charges",

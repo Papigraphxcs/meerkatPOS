@@ -30,14 +30,14 @@ def validate(doc, method):
 def create_customer_referral_code(doc):
     if doc.referral_company:
         company = frappe.get_cached_doc("Company", doc.referral_company)
-        if not company.custom_auto_referral:
+        if not company.auto_referral:
             return
         create_referral_code(
             doc.referral_company,
             doc.name,
-            company.custom_final_customer_offer,
-            company.custom_primary_customer_offer,
-            company.custom_referral_campaign,
+            company.final_customer_offer,
+            company.primary_customer_offer,
+            company.referral_campaign,
         )
 
 

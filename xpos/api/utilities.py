@@ -34,7 +34,7 @@ def get_pos_profile_tax_inclusive(pos_profile):
     
     try:
         return cint(
-            frappe.db.get_value("POS Profile", pos_profile, "custom_tax_inclusive")
+            frappe.db.get_value("POS Profile", pos_profile, "tax_inclusive")
         )
     except Exception:
         return 0

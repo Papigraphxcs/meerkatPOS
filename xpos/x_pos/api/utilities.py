@@ -382,7 +382,7 @@ def get_pos_profile_tax_inclusive(pos_profile: str):
     """Return the 'pos_tax_inclusive' setting for the given POS Profile."""
     if not pos_profile:
         return None
-    return frappe.get_cached_value("POS Profile", pos_profile, "custom_tax_inclusive")
+    return frappe.get_cached_value("POS Profile", pos_profile, "tax_inclusive")
 
 
 @frappe.whitelist()

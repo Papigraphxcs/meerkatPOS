@@ -85,7 +85,7 @@ def get_customer_balance(customer):
 @frappe.whitelist()
 def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
     _pos_profile = json.loads(pos_profile)
-    ttl = _pos_profile.get("custom_server_cache_duration")
+    ttl = _pos_profile.get("server_cache_duration")
     if ttl:
         ttl = int(ttl) * 60
 
@@ -128,7 +128,7 @@ def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, m
         )
         return customers
 
-    if _pos_profile.get("custom_use_server_cache") and not (limit or offset or start_after or modified_after):
+    if _pos_profile.get("use_server_cache") and not (limit or offset or start_after or modified_after):
         return __get_customer_names(pos_profile, limit, offset, start_after, modified_after)
     else:
         return _get_customer_names(pos_profile, limit, offset, start_after, modified_after)
@@ -269,7 +269,7 @@ def create_customer(
 
     if method == "create":
         is_exist = frappe.db.exists("Customer", {"customer_name": customer_name})
-        if pos_profile.get("custom_allow_duplicate_customer_names") or not is_exist:
+        if pos_profile.get("allow_duplicate_customer_names") or not is_exist:
             customer = frappe.get_doc(
                 {
                     "doctype": "Customer",

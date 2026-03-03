@@ -20,7 +20,7 @@ def get_pos_invoices(pos_opening_shift, doctype=None):
         use_pos_invoice = frappe.db.get_value(
             "POS Profile",
             pos_profile,
-            "custom_create_pos_invoice_instead_of_sales_invoice",
+            "create_pos_invoice_instead_of_sales_invoice",
         )
         doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
     submit_printed_invoices(pos_opening_shift, doctype)
@@ -32,7 +32,7 @@ def get_pos_invoices(pos_opening_shift, doctype=None):
 	from
 		`tab{doctype}`
 	where
-		docstatus = 1 and custom_pos_opening_shift = %s{cond}
+		docstatus = 1 and pos_opening_shift = %s{cond}
 	""",
         (pos_opening_shift),
         as_dict=1,

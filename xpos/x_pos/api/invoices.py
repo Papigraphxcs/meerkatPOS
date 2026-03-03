@@ -48,11 +48,11 @@ from xpos.x_pos.api.utils import log_perf_event
 def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
     started_at = time.perf_counter()
     filters = {
-        "custom_pos_opening_shift": pos_opening_shift,
+        "pos_opening_shift": pos_opening_shift,
         "docstatus": 0,
     }
-    if frappe.db.has_column(doctype, "custom_is_printed"):
-        filters["custom_is_printed"] = 0
+    if frappe.db.has_column(doctype, "is_printed"):
+        filters["is_printed"] = 0
 
     invoices_list = frappe.get_list(
         doctype,

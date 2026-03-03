@@ -242,7 +242,7 @@ const get_cash_mode_of_payment = async (frm) => {
 	const profile = frm.doc.pos_profile;
 
 	if (!frm.__cashModeCache || frm.__cashModeCache.profile !== profile) {
-		const value = await get_value("POS Profile", profile, "custom_cash_mode_of_payment");
+		const value = await get_value("POS Profile", profile, "cash_mode_of_payment");
 		frm.__cashModeCache = {
 			profile,
 			value: value || "Cash",

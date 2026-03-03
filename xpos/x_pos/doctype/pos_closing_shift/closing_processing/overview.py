@@ -50,7 +50,7 @@ def get_closing_shift_overview(pos_opening_shift):
     use_pos_invoice = frappe.db.get_value(
         "POS Profile",
         pos_profile,
-        "custom_create_pos_invoice_instead_of_sales_invoice",
+        "create_pos_invoice_instead_of_sales_invoice",
     )
     doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
     invoices = get_pos_invoices(opening_shift_doc.name, doctype)
@@ -77,7 +77,7 @@ def get_closing_shift_overview(pos_opening_shift):
     cash_movement_totals_by_type = {}
     cash_movement_totals_by_currency = {}
 
-    cash_mode_of_payment = frappe.db.get_value("POS Profile", pos_profile, "custom_cash_mode_of_payment")
+    cash_mode_of_payment = frappe.db.get_value("POS Profile", pos_profile, "cash_mode_of_payment")
     if not cash_mode_of_payment:
         cash_mode_of_payment = "Cash"
 
@@ -719,7 +719,7 @@ def get_payment_reconciliation_details(closing_shift_doc):
             row["currencies"][currency] += flt(amount)
 
     cash_mode_of_payment = (
-        frappe.db.get_value("POS Profile", closing_shift_doc.pos_profile, "custom_cash_mode_of_payment") or "Cash"
+        frappe.db.get_value("POS Profile", closing_shift_doc.pos_profile, "cash_mode_of_payment") or "Cash"
     )
 
     for row in closing_shift_doc.get("pos_transactions", []):

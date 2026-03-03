@@ -11,13 +11,13 @@ class CustomPOSInvoice(ERPNextPOSInvoice):
     def validate_pos_opening_entry(self):
         """Allow POS invoices when a POS Awesome shift is open.
 
-        If the invoice references ``custom_pos_opening_shift`` we validate that
+        If the invoice references ``pos_opening_shift`` we validate that
         shift using POS Awesome's rules and skip the standard ERPNext
         validation for ``POS Opening Entry``. Otherwise, fall back to the
         default ERPNext behaviour.
         """
 
-        if getattr(self, "custom_pos_opening_shift", None):
+        if getattr(self, "pos_opening_shift", None):
             # Use existing shift validation from POS Awesome
             validate_shift(self)
             return

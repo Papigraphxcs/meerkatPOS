@@ -290,7 +290,7 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                     "paid_to": payment.account,
                     "company": invoice_doc.company,
                     "mode_of_payment": payment.mode_of_payment,
-                    "reference_no": invoice_doc.custom_pos_opening_shift,
+                    "reference_no": invoice_doc.pos_opening_shift,
                     "reference_date": today,
                 }
             )

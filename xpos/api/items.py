@@ -32,8 +32,8 @@ def get_pos_items(
         "Selling Settings", "selling_price_list"
     )
 
-    show_templates = include_templates or cint(pos.get("custom_show_template_items"))
-    hide_variants = cint(pos.get("custom_hide_variants_items"))
+    show_templates = include_templates or cint(pos.get("show_template_items"))
+    hide_variants = cint(pos.get("hide_variants_items"))
 
     conditions = "i.disabled = 0 AND i.is_sales_item = 1"
     values = {"start": cint(start), "page_length": cint(page_length)}
@@ -92,7 +92,7 @@ def get_pos_items(
 				WHERE ib.parent = i.name AND ib.barcode LIKE %(barcode_search)s
 			)"""
 
-        if cint(pos.get("custom_search_serial_no")):
+        if cint(pos.get("search_serial_no")):
             search_conds += """
 			OR EXISTS (
 				SELECT 1 FROM `tabSerial No` sn

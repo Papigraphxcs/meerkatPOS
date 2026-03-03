@@ -155,13 +155,11 @@ export const useItemStore = defineStore("items", () => {
     }
   }
 
-  // ─── Actions ───────────────────────────────────
   async function fetchItems(posProfile: string, append = false): Promise<void> {
     if (isLoading.value) return;
     isLoading.value = true;
 
     try {
-      // Offline mode: search from IndexedDB cache via idb
       if (!navigator.onLine && isOfflineEnabled()) {
         const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
 

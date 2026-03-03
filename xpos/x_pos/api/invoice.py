@@ -73,7 +73,7 @@ def cancel_pos_credit_journal_entries(doc):
 
 
 def add_loyalty_point(invoice_doc):
-    for offer in getattr(invoice_doc, "custom_offers", []):
+    for offer in getattr(invoice_doc, "offers", []):
         if offer.offer == "Loyalty Point":
             original_offer = frappe.get_doc("POS Offer", offer.offer_name)
             if original_offer.loyalty_points > 0:
@@ -99,16 +99,16 @@ def add_loyalty_point(invoice_doc):
 
 def create_sales_order(doc):
     if (
-        getattr(doc, "custom_pos_opening_shift", None)
+        getattr(doc, "pos_opening_shift", None)
         and doc.pos_profile
         and doc.is_pos
-        and getattr(doc, "custom_pos_delivery_date", None)
+        and getattr(doc, "pos_delivery_date", None)
         and not doc.update_stock
-        and frappe.get_value("POS Profile", doc.pos_profile, "custom_allow_sales_order")
+        and frappe.get_value("POS Profile", doc.pos_profile, "allow_sales_order")
     ):
         sales_order_doc = make_sales_order(doc.name)
         if sales_order_doc:
-            sales_order_doc.custom_pos_additional_notes = getattr(doc, "custom_pos_notes", None)
+            sales_order_doc.pos_additional_notes = getattr(doc, "pos_notes", None)
             sales_order_doc.flags.ignore_permissions = True
             sales_order_doc.flags.ignore_account_permission = True
             sales_order_doc.save()
@@ -132,8 +132,8 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 
     def update_item(obj, target, source_parent):
         target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
-        target.delivery_date = getattr(obj, "custom_delivery_date", None) or getattr(
-            source_parent, "custom_pos_delivery_date", None
+        target.delivery_date = getattr(obj, "delivery_date", None) or getattr(
+            source_parent, "pos_delivery_date", None
         )
 
     doclist = get_mapped_doc(
@@ -148,8 +148,8 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
                 "field_map": {
                     "cost_center": "cost_center",
                     "Warehouse": "warehouse",
-                    "custom_delivery_date": "delivery_date",
-                    "custom_additional_notes": "custom_pos_additional_notes",
+                    "delivery_date": "delivery_date",
+                    "additional_notes": "pos_additional_notes",
                 },
                 "postprocess": update_item,
             },
@@ -169,7 +169,7 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
 
 
 def update_coupon(doc, transaction_type):
-    for coupon in getattr(doc, "custom_coupons", []):
+    for coupon in getattr(doc, "coupons", []):
         if not coupon.applied:
             continue
         update_coupon_code_count(coupon.coupon, transaction_type)
@@ -187,7 +187,7 @@ def set_patient(doc):
 def auto_set_delivery_charges(doc):
     if not doc.pos_profile:
         return
-    if not frappe.get_cached_value("POS Profile", doc.pos_profile, "custom_auto_set_delivery_charges"):
+    if not frappe.get_cached_value("POS Profile", doc.pos_profile, "auto_set_delivery_charges"):
         return
 
     delivery_charges = get_applicable_delivery_charges(
@@ -195,23 +195,23 @@ def auto_set_delivery_charges(doc):
         doc.pos_profile,
         doc.customer,
         doc.shipping_address_name,
-        doc.custom_pos_delivery_charges,
+        doc.pos_delivery_charges,
         restrict=True,
     )
 
-    if doc.custom_pos_delivery_charges:
-        if doc.custom_pos_delivery_charges_rate:
+    if doc.pos_delivery_charges:
+        if doc.pos_delivery_charges_rate:
             return
         else:
             if len(delivery_charges) > 0:
-                doc.custom_pos_delivery_charges_rate = delivery_charges[0].rate
+                doc.pos_delivery_charges_rate = delivery_charges[0].rate
     else:
         if len(delivery_charges) > 0:
-            doc.custom_pos_delivery_charges = delivery_charges[0].name
-            doc.custom_pos_delivery_charges_rate = delivery_charges[0].rate
+            doc.pos_delivery_charges = delivery_charges[0].name
+            doc.pos_delivery_charges_rate = delivery_charges[0].rate
         else:
-            doc.custom_pos_delivery_charges = None
-            doc.custom_pos_delivery_charges_rate = None
+            doc.pos_delivery_charges = None
+            doc.pos_delivery_charges_rate = None
 
 
 def calc_delivery_charges(doc):
@@ -222,33 +222,33 @@ def calc_delivery_charges(doc):
     calculate_taxes_and_totals = False
     if not doc.is_new():
         old_doc = doc.get_doc_before_save()
-        if not doc.custom_pos_delivery_charges and not old_doc.custom_pos_delivery_charges:
+        if not doc.pos_delivery_charges and not old_doc.pos_delivery_charges:
             return
     else:
-        if not doc.custom_pos_delivery_charges:
+        if not doc.pos_delivery_charges:
             return
-    if not doc.custom_pos_delivery_charges:
-        doc.custom_pos_delivery_charges_rate = 0
+    if not doc.pos_delivery_charges:
+        doc.pos_delivery_charges_rate = 0
 
     charges_doc = None
-    if doc.custom_pos_delivery_charges:
-        charges_doc = frappe.get_cached_doc("Delivery Charges", doc.custom_pos_delivery_charges)
-        doc.custom_pos_delivery_charges_rate = charges_doc.default_rate
+    if doc.pos_delivery_charges:
+        charges_doc = frappe.get_cached_doc("Delivery Charges", doc.pos_delivery_charges)
+        doc.pos_delivery_charges_rate = charges_doc.default_rate
         charges_profile = next((i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None)
         if charges_profile:
-            doc.custom_pos_delivery_charges_rate = charges_profile.rate
+            doc.pos_delivery_charges_rate = charges_profile.rate
         conversion_rate = doc.conversion_rate or 1
-        doc.custom_pos_delivery_charges_rate = flt(
-            doc.custom_pos_delivery_charges_rate / conversion_rate,
-            doc.precision("custom_pos_delivery_charges_rate"),
+        doc.pos_delivery_charges_rate = flt(
+            doc.pos_delivery_charges_rate / conversion_rate,
+            doc.precision("pos_delivery_charges_rate"),
         )
 
-    if old_doc and old_doc.custom_pos_delivery_charges:
+    if old_doc and old_doc.pos_delivery_charges:
         old_charges = next(
             (
                 i
                 for i in doc.taxes
-                if i.charge_type == "Actual" and i.description == old_doc.custom_pos_delivery_charges
+                if i.charge_type == "Actual" and i.description == old_doc.pos_delivery_charges
             ),
             None,
         )
@@ -256,13 +256,13 @@ def calc_delivery_charges(doc):
             doc.taxes.remove(old_charges)
             calculate_taxes_and_totals = True
 
-    if doc.custom_pos_delivery_charges:
+    if doc.pos_delivery_charges:
         doc.append(
             "taxes",
             {
                 "charge_type": "Actual",
-                "description": doc.custom_pos_delivery_charges,
-                "tax_amount": doc.custom_pos_delivery_charges_rate,
+                "description": doc.pos_delivery_charges,
+                "tax_amount": doc.pos_delivery_charges_rate,
                 "cost_center": charges_doc.cost_center,
                 "account_head": charges_doc.shipping_account,
             },
@@ -278,7 +278,7 @@ def apply_tax_inclusive(doc):
     if not doc.pos_profile:
         return
     try:
-        tax_inclusive = frappe.get_cached_value("POS Profile", doc.pos_profile, "custom_tax_inclusive")
+        tax_inclusive = frappe.get_cached_value("POS Profile", doc.pos_profile, "tax_inclusive")
     except Exception:
         tax_inclusive = 0
 
@@ -300,9 +300,9 @@ def apply_tax_inclusive(doc):
 
 
 def validate_shift(doc):
-    if getattr(doc, "custom_pos_opening_shift", None) and doc.pos_profile and doc.is_pos:
+    if getattr(doc, "pos_opening_shift", None) and doc.pos_profile and doc.is_pos:
         # check if shift is open
-        shift = frappe.get_cached_doc("POS Opening Shift", doc.custom_pos_opening_shift)
+        shift = frappe.get_cached_doc("POS Opening Shift", doc.pos_opening_shift)
         if shift.status != "Open":
             frappe.throw(_("POS Shift {0} is not open").format(shift.name))
         # check if shift is for the same profile

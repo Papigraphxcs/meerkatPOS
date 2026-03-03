@@ -45,14 +45,14 @@ def validate_amount(amount, profile_doc):
     if value <= 0:
         frappe.throw(_("Amount must be greater than zero."))
 
-    max_amount = flt(profile_doc.get("custom_cash_movement_max_amount") or 0)
+    max_amount = flt(profile_doc.get("cash_movement_max_amount") or 0)
     if max_amount > 0 and value > max_amount:
         frappe.throw(_("Amount exceeds POS Profile cash movement max amount."))
     return value
 
 
 def validate_remarks(remarks, profile_doc):
-    if profile_doc.get("custom_require_cash_movement_remarks") and not (remarks or "").strip():
+    if profile_doc.get("require_cash_movement_remarks") and not (remarks or "").strip():
         frappe.throw(_("Remarks are required for cash movement in this POS Profile."))
 
 
@@ -75,11 +75,11 @@ def extract_allowed_accounts(rows):
 
 def _resolve_default_source_cash_account(profile_doc):
     company = profile_doc.company
-    configured_default = (profile_doc.get("custom_default_source_account") or "").strip()
+    configured_default = (profile_doc.get("default_source_account") or "").strip()
     if configured_default:
         return configured_default
 
-    mode_of_payment = profile_doc.get("custom_cash_mode_of_payment") or "Cash"
+    mode_of_payment = profile_doc.get("cash_mode_of_payment") or "Cash"
 
     account = frappe.db.get_value(
         "Mode of Payment Account",
@@ -103,8 +103,8 @@ def _resolve_default_source_cash_account(profile_doc):
 def resolve_source_cash_account(payload, profile_doc):
     payload = payload or {}
     selected_source = (payload.get("source_account") or "").strip()
-    allow_override = bool(profile_doc.get("custom_allow_source_account_override"))
-    allowed_sources = extract_allowed_accounts(profile_doc.get("custom_allowed_source_accounts"))
+    allow_override = bool(profile_doc.get("allow_source_account_override"))
+    allowed_sources = extract_allowed_accounts(profile_doc.get("allowed_source_accounts"))
 
     if selected_source and not allow_override:
         frappe.throw(_("Source account override is disabled for this POS Profile."))
@@ -129,7 +129,7 @@ def resolve_source_cash_account(payload, profile_doc):
 def resolve_target_account(payload, profile_doc, movement_type):
     movement_type = (movement_type or "").strip()
     if movement_type == "Expense":
-        account = (payload.get("expense_account") or profile_doc.get("custom_default_pos_expense_account") or "").strip()
+        account = (payload.get("expense_account") or profile_doc.get("default_pos_expense_account") or "").strip()
         allowed_expense_accounts = extract_allowed_accounts(profile_doc.get("allowed_expense_accounts"))
 
         if not account and allowed_expense_accounts:
@@ -145,7 +145,7 @@ def resolve_target_account(payload, profile_doc, movement_type):
         return account, account
 
     if movement_type == "Deposit":
-        configured_default = profile_doc.get("custom_back_office_cash_account")
+        configured_default = profile_doc.get("back_office_cash_account")
         payload_account = payload.get("target_account") or payload.get("back_office_cash_account")
 
         if configured_default:

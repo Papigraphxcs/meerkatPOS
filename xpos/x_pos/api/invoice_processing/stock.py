@@ -101,7 +101,7 @@ def _should_block(pos_profile):
     block_sale = 1
     if pos_profile:
         block_sale = cint(
-            frappe.db.get_value("POS Profile", pos_profile, "custom_block_sale_beyond_available_qty") or 1
+            frappe.db.get_value("POS Profile", pos_profile, "block_sale_beyond_available_qty") or 1
         )
 
     return bool(block_sale)
@@ -134,12 +134,12 @@ def _auto_set_return_batches(invoice_doc):
 
     profile = invoice_doc.get("pos_profile")
     allow_without_invoice = profile and frappe.db.get_value(
-        "POS Profile", profile, "custom_allow_return_without_invoice"
+        "POS Profile", profile, "allow_return_without_invoice"
     )
     if not cint(allow_without_invoice):
         return
 
-    allow_free = cint(frappe.db.get_value("POS Profile", profile, "custom_allow_free_batch_return") or 0)
+    allow_free = cint(frappe.db.get_value("POS Profile", profile, "allow_free_batch_return") or 0)
     today = getdate(nowdate())
 
     items_to_process = []

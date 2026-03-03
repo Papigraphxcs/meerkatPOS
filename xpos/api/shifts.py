@@ -385,7 +385,7 @@ def _enrich_shift_data(data, pos_profile):
                 }
                 for tax in tax_template.taxes
             ]
-            data["tax_inclusive"] = cint(profile.get("custom_tax_inclusive")) or 0
+            data["tax_inclusive"] = cint(profile.get("tax_inclusive")) or 0
         except Exception:
             data["taxes"] = []
             data["tax_inclusive"] = 0
@@ -396,7 +396,7 @@ def _enrich_shift_data(data, pos_profile):
     data["print_settings"] = {
         "print_format": profile.get("print_format") or "POS Invoice",
         "print_format_for_online": profile.get("print_format_for_online"),
-        "allow_print_before_pay": cint(profile.get("custom_allow_print_draft_invoices"))
+        "allow_print_before_pay": cint(profile.get("allow_print_draft_invoices"))
         or 0,
         "auto_print_receipt": cint(profile.get("auto_print_receipt")) or 0,
         "letter_head": profile.get("letter_head") or "",

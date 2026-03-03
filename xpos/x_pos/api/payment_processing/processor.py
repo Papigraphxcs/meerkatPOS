@@ -13,8 +13,8 @@ from xpos.x_pos.api.payment_processing.data import get_outstanding_invoices
 def process_pos_payment(payload):
     data = json.loads(payload)
     data = frappe._dict(data)
-    if not data.pos_profile.get("custom_use_pos_payments"):
-        frappe.throw(_("POS Awesome Payments is not enabled for this POS Profile"))
+    if not data.pos_profile.get("use_pos_payments"):
+        frappe.throw(_("X POS Payments is not enabled for this POS Profile"))
 
     # Log short summary only to avoid truncation
     frappe.log_error(
@@ -38,9 +38,9 @@ def process_pos_payment(payload):
     currency = data.currency
     customer = data.customer
     pos_opening_shift_name = data.pos_opening_shift_name
-    allow_make_new_payments = data.pos_profile.get("custom_allow_make_new_payments")
-    allow_reconcile_payments = data.pos_profile.get("custom_allow_reconcile_payments")
-    allow_mpesa_reconcile_payments = data.pos_profile.get("custom_allow_mpesa_reconcile_payments")
+    allow_make_new_payments = data.pos_profile.get("allow_make_new_payments")
+    allow_reconcile_payments = data.pos_profile.get("allow_reconcile_payments")
+    allow_mpesa_reconcile_payments = data.pos_profile.get("allow_mpesa_reconcile_payments")
     today = nowdate()
 
     # prepare invoice list once so allocations can update remaining amounts

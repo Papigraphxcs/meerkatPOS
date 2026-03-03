@@ -34,7 +34,7 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
     configured_cash_mode_of_payment = None
     if pos_profile:
         configured_cash_mode_of_payment = frappe.db.get_value(
-            "POS Profile", pos_profile, "custom_cash_mode_of_payment"
+            "POS Profile", pos_profile, "cash_mode_of_payment"
         )
 
     cash_mode_of_payment = configured_cash_mode_of_payment
@@ -75,7 +75,7 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
         frappe.throw(_("Unable to determine customer receivable account for change payment entry."))
 
     posting_date = invoice_doc.get("posting_date") or nowdate()
-    reference_no = invoice_doc.get("custom_pos_opening_shift")
+    reference_no = invoice_doc.get("pos_opening_shift")
 
     def _using_only_configured_cash_mode():
         """Return True when every paid row matches the configured cash mode and account."""

@@ -29,15 +29,15 @@ def _get_return_validity_settings(pos_profile: str | None = None):
         except frappe.DoesNotExistError:
             profile = None
         if profile:
-            enable_validity = cint(getattr(profile, "custom_enable_return_validity", 0))
+            enable_validity = cint(getattr(profile, "enable_return_validity", 0))
             if enable_validity:
-                default_days = cint(getattr(profile, "custom_return_validity_days", 0))
+                default_days = cint(getattr(profile, "return_validity_days", 0))
 
     if not enable_validity:
         settings = frappe.get_cached_doc("POS Settings")
-        enable_validity = cint(getattr(settings, "custom_enable_return_validity", 0))
+        enable_validity = cint(getattr(settings, "enable_return_validity", 0))
         if enable_validity:
-            default_days = cint(getattr(settings, "custom_return_validity_days", 0))
+            default_days = cint(getattr(settings, "return_validity_days", 0))
 
     return enable_validity, default_days
 
@@ -46,14 +46,14 @@ def _set_return_valid_upto(invoice_doc, enabled, default_days):
     if not enabled or invoice_doc.is_return:
         return
 
-    if invoice_doc.get("custom_return_valid_upto"):
+    if invoice_doc.get("return_valid_upto"):
         return
 
     posting_date = getdate(invoice_doc.get("posting_date") or nowdate())
     if default_days:
-        invoice_doc.custom_return_valid_upto = add_days(posting_date, default_days)
+        invoice_doc.return_valid_upto = add_days(posting_date, default_days)
     else:
-        invoice_doc.custom_return_valid_upto = posting_date
+        invoice_doc.return_valid_upto = posting_date
 
 
 def _validate_return_window(invoice_doc, doctype, enabled):
@@ -61,7 +61,7 @@ def _validate_return_window(invoice_doc, doctype, enabled):
         return
 
     original_invoice = frappe.get_doc(doctype, invoice_doc.return_against)
-    validity_date = original_invoice.get("custom_return_valid_upto")
+    validity_date = original_invoice.get("return_valid_upto")
     return_date = getdate(invoice_doc.get("posting_date") or nowdate())
     if validity_date and return_date > getdate(validity_date):
         frappe.throw(_("Returns are only allowed until {0}").format(formatdate(validity_date)))

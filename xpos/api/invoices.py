@@ -33,7 +33,7 @@ def create_invoice(data):
 
     pos = frappe.get_cached_doc("POS Profile", pos_profile)
 
-    use_pos_invoice = cint(pos.get("custom_create_pos_invoice_instead_of_sales_invoice"))
+    use_pos_invoice = cint(pos.get("create_pos_invoice_instead_of_sales_invoice"))
     doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
 
     debit_to = None
@@ -85,20 +85,20 @@ def create_invoice(data):
         invoice_doc.discount_amount = discount_amount
         invoice_doc.apply_discount_on = data.get("apply_discount_on") or "Grand Total"
 
-    if data.get("custom_pos_notes"):
+    if data.get("pos_notes"):
         try:
-            invoice_doc.custom_pos_notes = data["custom_pos_notes"]
+            invoice_doc.pos_notes = data["pos_notes"]
         except Exception:
             pass
-    if data.get("custom_authorization_code"):
+    if data.get("authorization_code"):
         try:
-            invoice_doc.custom_authorization_code = data["custom_authorization_code"]
+            invoice_doc.authorization_code = data["authorization_code"]
         except Exception:
             pass
 
-    if data.get("custom_pos_delivery_date"):
+    if data.get("pos_delivery_date"):
         try:
-            invoice_doc.custom_pos_delivery_date = data["custom_pos_delivery_date"]
+            invoice_doc.pos_delivery_date = data["pos_delivery_date"]
         except Exception:
             pass
 
@@ -175,7 +175,7 @@ def create_invoice(data):
         disc_amt = flt(item_data.get("discount_amount", 0), 2)
 
         # Validate max discount allowed
-        max_discount = flt(pos.get("custom_max_discount_percentage_allowed", 0))
+        max_discount = flt(pos.get("max_discount_percentage_allowed", 0))
         if max_discount > 0 and disc_pct > max_discount:
             frappe.throw(
                 _("Item {0}: Discount {1}% exceeds maximum allowed {2}%").format(
@@ -194,14 +194,14 @@ def create_invoice(data):
         if item_data.get("item_tax_template"):
             item.item_tax_template = item_data.get("item_tax_template")
 
-        if item_data.get("custom_additional_notes"):
+        if item_data.get("additional_notes"):
             try:
-                item.custom_additional_notes = item_data["custom_additional_notes"]
+                item.additional_notes = item_data["additional_notes"]
             except Exception:
                 pass
-        if item_data.get("custom_delivery_date"):
+        if item_data.get("delivery_date"):
             try:
-                item.custom_delivery_date = item_data["custom_delivery_date"]
+                item.delivery_date = item_data["delivery_date"]
             except Exception:
                 pass
 
@@ -253,21 +253,21 @@ def create_invoice(data):
     if (
         not is_return
         and total_payment <= 0
-        and not cint(pos.get("custom_allow_credit_sale"))
+        and not cint(pos.get("allow_credit_sale"))
     ):
         frappe.throw(_("Payment amount must be greater than zero"))
 
     if pos_opening_shift:
         try:
-            invoice_doc.custom_pos_opening_shift = pos_opening_shift
+            invoice_doc.pos_opening_shift = pos_opening_shift
         except Exception:
             pass
 
-    pos_coupons_data = data.get("custom_coupons_detail") or []
+    pos_coupons_data = data.get("coupons_detail") or []
     for coupon_row in pos_coupons_data:
         try:
             invoice_doc.append(
-                "custom_coupons",
+                "coupons",
                 {
                     "coupon": coupon_row.get("coupon"),
                     "coupon_code": coupon_row.get("coupon_code"),
@@ -280,11 +280,11 @@ def create_invoice(data):
         except Exception:
             pass
 
-    pos_offers_data = data.get("custom_offers_detail") or []
+    pos_offers_data = data.get("offers_detail") or []
     for offer_row in pos_offers_data:
         try:
             invoice_doc.append(
-                "custom_offers",
+                "offers",
                 {
                     "offer_name": offer_row.get("offer_name"),
                     "offer": offer_row.get("offer"),
@@ -298,13 +298,13 @@ def create_invoice(data):
             pass
 
     try:
-        enforce_return_validity = cint(pos.get("custom_enable_return_validity"))
+        enforce_return_validity = cint(pos.get("enable_return_validity"))
         if enforce_return_validity and not is_return:
-            return_days = cint(pos.get("custom_return_validity_days")) or 0
+            return_days = cint(pos.get("return_validity_days")) or 0
             if return_days > 0:
                 from datetime import timedelta
 
-                invoice_doc.custom_return_valid_upto = getdate(nowdate()) + timedelta(
+                invoice_doc.return_valid_upto = getdate(nowdate()) + timedelta(
                     days=return_days
                 )
     except Exception:
@@ -435,7 +435,7 @@ def save_draft_invoice(data):
 
     pos = frappe.get_cached_doc("POS Profile", pos_profile)
 
-    use_pos_invoice = cint(pos.get("custom_create_pos_invoice_instead_of_sales_invoice"))
+    use_pos_invoice = cint(pos.get("create_pos_invoice_instead_of_sales_invoice"))
     doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
 
     debit_to = None
@@ -478,7 +478,7 @@ def save_draft_invoice(data):
 
     if pos_opening_shift:
         try:
-            invoice_doc.custom_pos_opening_shift = pos_opening_shift
+            invoice_doc.pos_opening_shift = pos_opening_shift
         except Exception:
             pass
 
@@ -499,7 +499,7 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 
     if pos_opening_shift:
         try:
-            filters["custom_pos_opening_shift"] = pos_opening_shift
+            filters["pos_opening_shift"] = pos_opening_shift
         except Exception:
             filters["owner"] = frappe.session.user
 
@@ -927,10 +927,10 @@ def search_invoices_for_return(
 
     if pos_profile:
         pos = frappe.get_cached_doc("POS Profile", pos_profile)
-        enforce_return_validity = cint(pos.get("custom_enable_return_validity"))
+        enforce_return_validity = cint(pos.get("enable_return_validity"))
         if enforce_return_validity:
             for inv in invoices:
-                validity_date = inv.get("custom_return_valid_upto")
+                validity_date = inv.get("return_valid_upto")
                 inv["return_expired"] = (
                     1
                     if (validity_date and getdate(nowdate()) > getdate(validity_date))
@@ -995,8 +995,8 @@ def get_invoice_for_return(invoice_name, pos_profile="", doctype="Sales Invoice"
     return_expired = False
     if pos_profile:
         pos = frappe.get_cached_doc("POS Profile", pos_profile)
-        if cint(pos.get("custom_enable_return_validity")):
-            validity_date = getattr(doc, "custom_return_valid_upto", None)
+        if cint(pos.get("enable_return_validity")):
+            validity_date = getattr(doc, "return_valid_upto", None)
             if validity_date and getdate(nowdate()) > getdate(validity_date):
                 return_expired = True
 
@@ -1347,7 +1347,7 @@ def get_invoice_for_repeat(invoice_name, pos_profile="", doctype="Sales Invoice"
 
     items = []
     for item in doc.items:
-        if getattr(item, "custom_is_offer", False):
+        if getattr(item, "is_offer", False):
             continue
 
         item_data = {
