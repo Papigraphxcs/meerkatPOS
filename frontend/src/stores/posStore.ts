@@ -122,6 +122,10 @@ export const usePosStore = defineStore("pos", () => {
     () => posProfile.value?.back_office_cash_account
   );
 
+  const useOfflineMode = computed(
+    () => !!posProfile.value?.use_offline_mode
+  );
+
   const allowEditItemDiscount = computed(
     () => !!posProfile.value?.allow_discount_change
   );
@@ -279,6 +283,15 @@ export const usePosStore = defineStore("pos", () => {
         isReady.value = true;
         
         fetchPrintFormats();
+        
+        if (result.pos_profile?.use_offline_mode) {
+          import("@/stores/itemStore").then(({ useItemStore }) => {
+            const itemStore = useItemStore();
+            itemStore.cacheAllItems(result.pos_profile.name).catch(error => {
+              console.warn("[XPOS] Failed to initialize offline cache:", error);
+            });
+          });
+        }
       } else {
         showOpeningDialog.value = true;
       }
@@ -334,6 +347,15 @@ export const usePosStore = defineStore("pos", () => {
       isReady.value = true;
       
       fetchPrintFormats();
+      
+      if (result.pos_profile?.use_offline_mode) {
+        import("@/stores/itemStore").then(({ useItemStore }) => {
+          const itemStore = useItemStore();
+          itemStore.cacheAllItems(profileName).catch(error => {
+            console.warn("[XPOS] Failed to initialize offline cache:", error);
+          });
+        });
+      }
       return result;
     } catch (error) {
       console.error("Error opening shift:", error);
@@ -474,6 +496,7 @@ export const usePosStore = defineStore("pos", () => {
     defaultView,
     defaultPosExpenseAccount,
     backOfficeCashAccount,
+    useOfflineMode,
     // Actions
     checkExistingShift,
     fetchOpeningData,

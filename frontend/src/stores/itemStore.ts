@@ -64,7 +64,7 @@ export const useItemStore = defineStore("items", () => {
 
   function isOfflineEnabled(): boolean {
     const posStore = usePosStore();
-    return !!posStore.posProfile?.use_offline_mode;
+    return !!posStore.useOfflineMode;
   }
 
   /**
