@@ -1,11 +1,10 @@
 /**
- * X POS IndexedDB Service using idb library
+ * X POS IndexedDB Service
  * Centralised database layer for offline support.
  */
 import { openDB, type IDBPDatabase, type DBSchema } from "idb";
 import type { POSItem, ItemGroup, Customer } from "@/types/pos.types";
 
-// ─── Schema ──────────────────────────────────────
 export interface XPosDB extends DBSchema {
   items: {
     key: string; // item_code
@@ -73,7 +72,6 @@ function getDB(): Promise<IDBPDatabase<XPosDB>> {
   if (!dbPromise) {
     dbPromise = openDB<XPosDB>(DB_NAME, DB_VERSION, {
       upgrade(db) {
-        // Items store
         if (!db.objectStoreNames.contains("items")) {
           const itemStore = db.createObjectStore("items", { keyPath: "item_code" });
           itemStore.createIndex("item_name", "item_name", { unique: false });
@@ -81,12 +79,10 @@ function getDB(): Promise<IDBPDatabase<XPosDB>> {
           itemStore.createIndex("barcode", "barcode", { unique: false });
         }
 
-        // Item groups store
         if (!db.objectStoreNames.contains("item_groups")) {
           db.createObjectStore("item_groups", { keyPath: "name" });
         }
 
-        // Customers store
         if (!db.objectStoreNames.contains("customers")) {
           const custStore = db.createObjectStore("customers", { keyPath: "name" });
           custStore.createIndex("customer_name", "customer_name", { unique: false });
@@ -94,7 +90,6 @@ function getDB(): Promise<IDBPDatabase<XPosDB>> {
           custStore.createIndex("email_id", "email_id", { unique: false });
         }
 
-        // Pending invoices store
         if (!db.objectStoreNames.contains("pending_invoices")) {
           const invoiceStore = db.createObjectStore("pending_invoices", {
             keyPath: "id",
@@ -103,13 +98,11 @@ function getDB(): Promise<IDBPDatabase<XPosDB>> {
           invoiceStore.createIndex("created_at", "created_at", { unique: false });
         }
 
-        // Stock cache store
         if (!db.objectStoreNames.contains("stock_cache")) {
           const stockStore = db.createObjectStore("stock_cache", { keyPath: "cache_key" });
           stockStore.createIndex("warehouse", "warehouse", { unique: false });
         }
 
-        // Meta store (for timestamps, config, etc.)
         if (!db.objectStoreNames.contains("meta")) {
           db.createObjectStore("meta", { keyPath: "key" });
         }
@@ -118,8 +111,6 @@ function getDB(): Promise<IDBPDatabase<XPosDB>> {
   }
   return dbPromise;
 }
-
-// ─── Items ───────────────────────────────────────
 
 export async function cacheItems(allItems: POSItem[]): Promise<void> {
   const db = await getDB();
@@ -130,7 +121,6 @@ export async function cacheItems(allItems: POSItem[]): Promise<void> {
   }
   await tx.done;
 
-  // Save timestamp
   await setMeta("items_cached_at", new Date().toISOString());
 }
 
@@ -169,8 +159,6 @@ export async function searchCachedItems(
   return result;
 }
 
-// ─── Item Groups ─────────────────────────────────
-
 export async function cacheItemGroups(
   groups: ItemGroup[],
   parentGroups: ItemGroup[]
@@ -195,8 +183,6 @@ export async function getCachedItemGroups(): Promise<{
     parentGroups: pg?.data || [],
   };
 }
-
-// ─── Customers ───────────────────────────────────
 
 export async function cacheCustomers(customers: Customer[]): Promise<void> {
   const db = await getDB();
@@ -230,8 +216,6 @@ export async function searchCachedCustomers(term: string): Promise<Customer[]> {
     .slice(0, 20);
 }
 
-// ─── Stock Cache ─────────────────────────────────
-
 export interface StockEntry {
   warehouse: string;
   item_code: string;
@@ -246,7 +230,6 @@ export async function cacheStockForWarehouse(
   const db = await getDB();
   const tx = db.transaction("stock_cache", "readwrite");
 
-  // Clear old entries for this warehouse
   const idx = tx.store.index("warehouse");
   let cursor = await idx.openCursor(warehouse);
   while (cursor) {
@@ -291,8 +274,6 @@ export async function getCachedStockForItem(
   return result ? { warehouse: result.warehouse, item_code: result.item_code, actual_qty: result.actual_qty, updated_at: result.updated_at } : undefined;
 }
 
-// ─── Pending Invoices ────────────────────────────
-
 export type PendingInvoice = XPosDB["pending_invoices"]["value"];
 
 export async function addPendingInvoice(
@@ -322,8 +303,6 @@ export async function countPendingInvoices(): Promise<number> {
   return db.count("pending_invoices");
 }
 
-// ─── Meta helpers ────────────────────────────────
-
 export async function setMeta(key: string, value: unknown): Promise<void> {
   const db = await getDB();
   await db.put("meta", { key, value, updated_at: new Date().toISOString() });
@@ -333,6 +312,31 @@ export async function getMeta(key: string): Promise<unknown> {
   const db = await getDB();
   const entry = await db.get("meta", key);
   return entry?.value;
+}
+
+export async function cachePOSProfile(profileData: unknown): Promise<void> {
+  await setMeta("pos_profile", profileData);
+}
+
+export async function getCachedPOSProfile(): Promise<unknown | null> {
+  return await getMeta("pos_profile");
+}
+
+export async function cachePOSData(data: {
+  pos_opening_shift?: unknown;
+  pos_profile?: unknown;
+  company?: unknown;
+  stock_settings?: unknown;
+  taxes?: unknown;
+  tax_inclusive?: boolean;
+  disable_rounded_total?: boolean;
+  print_settings?: unknown;
+}): Promise<void> {
+  await setMeta("pos_complete_data", data);
+}
+
+export async function getCachedPOSData(): Promise<unknown | null> {
+  return await getMeta("pos_complete_data");
 }
 
 export async function clearAllData(): Promise<void> {

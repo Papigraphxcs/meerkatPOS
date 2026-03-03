@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_days, flt
 
-from xpos.x_pos.api.utilities import get_company_domain  # Updated import
+from xpos.x_pos.api.utilities import get_company_domain
 from xpos.x_pos.api.payments import get_pos_credit_redeem_remark
 from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,

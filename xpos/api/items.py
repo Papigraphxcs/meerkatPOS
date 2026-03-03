@@ -446,35 +446,44 @@ def get_item_attributes(item_code):
 
 
 @frappe.whitelist()
-def get_stock_availability(items):
+def get_stock_availability(items, warehouse=None):
     """Bulk-fetch stock for multiple items.
 
-    Args:
-            items: JSON list of dicts with item_code, warehouse, and optional batch_no.
+    Accepts two calling conventions:
+    1. items = JSON list of item-code strings + warehouse as a separate param.
+    2. items = JSON list of dicts with item_code, warehouse, and optional batch_no.
 
     Returns:
-            dict keyed by (item_code, warehouse, batch_no) -> qty
+            list of {"item_code": str, "actual_qty": float}
     """
     if isinstance(items, str):
         items = json.loads(items)
     if not items:
-        return {}
+        return []
 
-    results = {}
+    results = []
     for d in items:
-        item_code = d.get("item_code")
-        warehouse = d.get("warehouse")
-        batch_no = d.get("batch_no", "")
-        if not item_code or not warehouse:
+        # Support both plain strings and dicts
+        if isinstance(d, str):
+            item_code = d
+            item_warehouse = warehouse
+            batch_no = ""
+        else:
+            item_code = d.get("item_code")
+            item_warehouse = d.get("warehouse") or warehouse
+            batch_no = d.get("batch_no", "")
+
+        if not item_code or not item_warehouse:
             continue
+
         if batch_no:
             from erpnext.stock.doctype.batch.batch import get_batch_qty
 
-            results[f"{item_code}|{warehouse}|{batch_no}"] = flt(
-                get_batch_qty(batch_no, warehouse)
-            )
+            qty = flt(get_batch_qty(batch_no, item_warehouse))
         else:
-            results[f"{item_code}|{warehouse}|"] = get_stock_qty(item_code, warehouse)
+            qty = flt(get_stock_qty(item_code, item_warehouse))
+
+        results.append({"item_code": item_code, "actual_qty": qty})
 
     return results
 

@@ -15,8 +15,8 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
 from xpos.x_pos.api.utilities import ensure_child_doctype
 
 
-def get_posawesome_credit_redeem_remark(invoice_name):
-    return _("POS Awesome credit redemption for Sales Invoice {0}").format(invoice_name)
+def get_pos_credit_redeem_remark(invoice_name):
+    return _("POS credit redemption for Sales Invoice {0}").format(invoice_name)
 
 
 @frappe.whitelist()

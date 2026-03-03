@@ -118,7 +118,9 @@
 			<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground" :disabled="cartStore.isEmpty" @click="holdOrder" :title="__('Save as draft')">
 				<Clock class="w-4 h-4" />
 			</Button>
-
+			<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground" @click="cartStore.openDraftDialog()" :title="__('Restore draft')">
+				<FileText class="w-4 h-4" />
+			</Button>
 			<Button variant="outline" size="sm" class="text-destructive hover:text-destructive dark:border-border" :disabled="cartStore.isEmpty" @click="cartStore.clearCart()" :title="__('Clear cart')">
 				<Trash2 class="w-4 h-4" />
 			</Button>
@@ -205,7 +207,7 @@ import { __ } from "@/lib/translate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2, Percent } from "lucide-vue-next";
+import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2, Percent, FileText } from "lucide-vue-next";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();

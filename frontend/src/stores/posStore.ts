@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { call } from "@/services/api";
+import {
+  cachePOSData,
+  getCachedPOSData,
+} from "@/services/idbService";
 import type {
   POSOpeningShift,
   POSProfile,
@@ -262,12 +266,42 @@ export const usePosStore = defineStore("pos", () => {
     () => posProfile.value?.cash_mode_of_payment || "Cash"
   );
   
+  function isOnline(): boolean {
+    return navigator.onLine;
+  }
+  
   async function checkExistingShift(): Promise<void> {
     isLoading.value = true;
     try {
+      // Check if offline first
+      if (!isOnline()) {
+        console.log("[XPOS Offline] System is offline, loading from cache");
+        const cachedData = await getCachedPOSData() as ShiftCheckResult | null;
+        
+        if (cachedData) {
+          posOpeningShift.value = cachedData.pos_opening_shift;
+          posProfile.value = cachedData.pos_profile;
+          company.value = cachedData.company;
+          stockSettings.value = cachedData.stock_settings || {};
+          taxes.value = cachedData.taxes || [];
+          taxInclusiveMode.value = !!(cachedData.tax_inclusive);
+          disableRoundedTotal.value = !!(cachedData.disable_rounded_total);
+          printSettings.value = cachedData.print_settings || null;
+          isReady.value = true;
+          console.log("[XPOS Offline] Loaded POS data from cache");
+          return;
+        } else {
+          console.warn("[XPOS Offline] No cached POS data available");
+          showOpeningDialog.value = true;
+          return;
+        }
+      }
+      
+      // Online - fetch from API
       const result = await call<ShiftCheckResult | null>(
         "xpos.api.shifts.check_open_shift"
       );
+      
       if (result) {
         posOpeningShift.value = result.pos_opening_shift;
         posProfile.value = result.pos_profile;
@@ -284,19 +318,55 @@ export const usePosStore = defineStore("pos", () => {
         
         fetchPrintFormats();
         
+        // Cache POS data for offline use
         if (result.pos_profile?.use_offline_mode) {
-          import("@/stores/itemStore").then(({ useItemStore }) => {
-            const itemStore = useItemStore();
-            itemStore.cacheAllItems(result.pos_profile.name).catch(error => {
-              console.warn("[XPOS] Failed to initialize offline cache:", error);
+          try {
+            await cachePOSData(result);
+            
+            // Initialize offline caches
+            import("@/stores/itemStore").then(async ({ useItemStore }) => {
+              const itemStore = useItemStore();
+              itemStore.cacheAllItems(result.pos_profile.name).catch(error => {
+                console.warn("[XPOS] Failed to initialize offline item cache:", error);
+              });
             });
-          });
+            
+            import("@/stores/customerStore").then(async ({ useCustomerStore }) => {
+              const customerStore = useCustomerStore();
+              customerStore.cacheAllCustomers(result.pos_profile.name).catch(error => {
+                console.warn("[XPOS] Failed to initialize offline customer cache:", error);
+              });
+            });
+          } catch (error) {
+            console.warn("[XPOS] Failed to cache POS data:", error);
+          }
         }
       } else {
         showOpeningDialog.value = true;
       }
     } catch (error) {
       console.error("Error checking shift:", error);
+      
+      // Fallback to cache if available
+      try {
+        const cachedData = await getCachedPOSData() as ShiftCheckResult | null;
+        if (cachedData && cachedData.pos_profile?.use_offline_mode) {
+          posOpeningShift.value = cachedData.pos_opening_shift;
+          posProfile.value = cachedData.pos_profile;
+          company.value = cachedData.company;
+          stockSettings.value = cachedData.stock_settings || {};
+          taxes.value = cachedData.taxes || [];
+          taxInclusiveMode.value = !!(cachedData.tax_inclusive);
+          disableRoundedTotal.value = !!(cachedData.disable_rounded_total);
+          printSettings.value = cachedData.print_settings || null;
+          isReady.value = true;
+          console.log("[XPOS Offline] Fallback to cached POS data after API error");
+          return;
+        }
+      } catch {
+        console.warn("[XPOS Offline] Failed to load cached POS data");
+      }
+      
       showOpeningDialog.value = true;
     } finally {
       isLoading.value = false;
@@ -349,12 +419,27 @@ export const usePosStore = defineStore("pos", () => {
       fetchPrintFormats();
       
       if (result.pos_profile?.use_offline_mode) {
-        import("@/stores/itemStore").then(({ useItemStore }) => {
-          const itemStore = useItemStore();
-          itemStore.cacheAllItems(profileName).catch(error => {
-            console.warn("[XPOS] Failed to initialize offline cache:", error);
+        // Cache POS data for offline use
+        try {
+          await cachePOSData(result);
+          
+          // Initialize offline caches
+          import("@/stores/itemStore").then(({ useItemStore }) => {
+            const itemStore = useItemStore();
+            itemStore.cacheAllItems(profileName).catch(error => {
+              console.warn("[XPOS] Failed to initialize offline item cache:", error);
+            });
           });
-        });
+          
+          import("@/stores/customerStore").then(({ useCustomerStore }) => {
+            const customerStore = useCustomerStore();
+            customerStore.cacheAllCustomers(profileName).catch(error => {
+              console.warn("[XPOS] Failed to initialize offline customer cache:", error);
+            });
+          });
+        } catch (error) {
+          console.warn("[XPOS] Failed to cache POS data:", error);
+        }
       }
       return result;
     } catch (error) {

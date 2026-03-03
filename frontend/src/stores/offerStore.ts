@@ -9,18 +9,16 @@ import type {
 } from "@/types/pos.types";
 
 export const useOfferStore = defineStore("offers", () => {
-  // ─── State ─────────────────────────────────────
-  const offers: Ref<POSOffer[]> = ref([]);
-  const isLoading: Ref<boolean> = ref(false);
+  const offers = ref<POSOffer[]>([]);
+  const isLoading = ref(false);
 
-  const coupon: Ref<POSCoupon | null> = ref(null);
-  const isLoadingCoupon: Ref<boolean> = ref(false);
+  const coupon = ref<POSCoupon | null>(null);
+  const isLoadingCoupon = ref(false);
 
-  const giftCoupons: Ref<GiftCoupon[]> = ref([]);
+  const giftCoupons = ref<GiftCoupon[]>([]);
 
-  const deliveryCharges: Ref<DeliveryCharge[]> = ref([]);
-
-  // ─── Actions ───────────────────────────────────
+  const deliveryCharges = ref<DeliveryCharge[]>([]);
+  
   async function fetchOffers(posProfile: string, itemCodes?: string[], customer?: string): Promise<POSOffer[]> {
     isLoading.value = true;
     try {

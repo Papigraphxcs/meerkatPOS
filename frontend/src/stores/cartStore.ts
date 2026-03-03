@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { call } from "@/services/api";
 import { usePosStore } from "./posStore";
 import type {
   CartItem,
@@ -19,6 +20,7 @@ export const useCartStore = defineStore("cart", () => {
   const discountPercentage = ref(0);
   const discountAmount = ref(0);
   const showPaymentDialog = ref(false);
+  const posStore = usePosStore();
 
   // Return mode
   const isReturnMode = ref(false);
@@ -53,6 +55,8 @@ export const useCartStore = defineStore("cart", () => {
   // Draft tracking
   const currentDraftName = ref("");
   const isSavingDraft = ref(false);
+  const showDraftDialog = ref(false);
+  const isLoadingDrafts = ref(false);
 
   // Currency
   const currency = ref("");
@@ -607,8 +611,117 @@ export const useCartStore = defineStore("cart", () => {
   }
 
   /**
-   * Load items from an existing invoice into the cart (repeat invoice).
-   * Clears the current cart first, then adds all items from the invoice.
+   * Fetch available draft invoices from the backend
+   */
+  async function fetchDraftInvoices(): Promise<any[]> {
+    try {
+      isLoadingDrafts.value = true;
+      const result = await call<any[]>(
+        "xpos.api.invoices.get_draft_invoices",
+        {
+          pos_opening_shift: posStore.posOpeningShift?.name || ""
+        }
+      );
+      return result || [];
+    } catch (error) {
+      console.error("Error fetching draft invoices:", error);
+      return [];
+    } finally {
+      isLoadingDrafts.value = false;
+    }
+  }
+
+  /**
+   * Load a draft invoice into the cart
+   */
+  async function loadDraftInvoice(draftName: string): Promise<boolean> {
+    try {
+      const result = await call<any>(
+        "xpos.x_pos.api.invoices.get_draft_invoice",
+        {
+          name: draftName
+        }
+      );
+      
+      if (!result) {
+        return false;
+      }
+
+      // Clear current cart
+      clearCart();
+      
+      // Set customer if available
+      if (result.customer) {
+        customer.value = {
+          name: result.customer,
+          customer_name: result.customer_name || result.customer,
+        };
+      }
+      
+      // Load items
+      if (result.items && Array.isArray(result.items)) {
+        for (const item of result.items) {
+          items.value.push({
+            item_code: item.item_code,
+            item_name: item.item_name,
+            rate: item.rate || 0,
+            qty: item.qty || 1,
+            uom: item.uom || item.stock_uom || "",
+            stock_uom: item.stock_uom || item.uom || "",
+            image: "",
+            discount_percentage: item.discount_percentage || 0,
+            discount_amount: item.discount_amount || 0,
+            serial_no: item.serial_no || "",
+            batch_no: item.batch_no || "",
+            actual_qty: 0,
+            has_serial_no: item.has_serial_no || false,
+            has_batch_no: item.has_batch_no || false,
+            conversion_factor: 1,
+            pos_notes: item.additional_notes || "",
+            pos_delivery_date: item.delivery_date || "",
+          } as CartItem);
+        }
+      }
+      
+      // Load discounts
+      if (result.additional_discount_percentage) {
+        discountPercentage.value = result.additional_discount_percentage;
+      }
+      if (result.discount_amount) {
+        discountAmount.value = result.discount_amount;
+      }
+      
+      // Load other fields
+      if (result.pos_notes) {
+        orderNotes.value = result.pos_notes;
+      }
+      if (result.pos_delivery_date) {
+        deliveryDate.value = result.pos_delivery_date;
+      }
+      if (result.authorization_code) {
+        authorizationCode.value = result.authorization_code;
+      }
+      
+      // Set current draft name
+      currentDraftName.value = draftName;
+      
+      return true;
+    } catch (error) {
+      console.error("Error loading draft invoice:", error);
+      return false;
+    }
+  }
+
+  function openDraftDialog(): void {
+    showDraftDialog.value = true;
+  }
+
+  function closeDraftDialog(): void {
+    showDraftDialog.value = false;
+  }
+
+  /**
+   * Load items from an existing invoice into the cart (repeat invoice).   * Clears the current cart first, then adds all items from the invoice.
    */
   function loadFromInvoice(invoiceData: {
     customer: string;
@@ -720,7 +833,6 @@ export const useCartStore = defineStore("cart", () => {
       data.conversion_rate = conversionRate.value;
     }
 
-    // Coupons — send both legacy JSON and structured detail rows
     if (appliedCoupon.value) {
       data.coupons = JSON.stringify([appliedCoupon.value.name]);
       data.coupons_detail = [{
@@ -733,7 +845,6 @@ export const useCartStore = defineStore("cart", () => {
       }];
     }
 
-    // Offers — send both legacy JSON and structured detail rows
     if (appliedOffers.value.length > 0) {
       data.offers = JSON.stringify(appliedOffers.value.map((o) => o.name));
       data.offers_detail = appliedOffers.value.map((o) => ({
@@ -771,6 +882,8 @@ export const useCartStore = defineStore("cart", () => {
     payments,
     currentDraftName,
     isSavingDraft,
+    showDraftDialog,
+    isLoadingDrafts,
     currency,
     conversionRate,
     // Computed
@@ -819,5 +932,9 @@ export const useCartStore = defineStore("cart", () => {
     closePaymentDialog,
     getInvoiceData,
     loadFromInvoice,
+    fetchDraftInvoices,
+    loadDraftInvoice,
+    openDraftDialog,
+    closeDraftDialog,
   };
 });

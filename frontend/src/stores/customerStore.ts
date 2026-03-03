@@ -1,6 +1,12 @@
 import { defineStore } from "pinia";
 import { ref, computed, type Ref, type ComputedRef } from "vue";
 import { call } from "@/services/api";
+import { usePosStore } from "@/stores/posStore";
+import {
+  cacheCustomers,
+  getCachedCustomers,
+  searchCachedCustomers,
+} from "@/services/idbService";
 import type {
   Customer,
   CustomerAddress,
@@ -33,27 +39,100 @@ export const useCustomerStore = defineStore("customers", () => {
     () => customers.value
   );
 
+  function isOfflineEnabled(): boolean {
+    const posStore = usePosStore();
+    return !!posStore.useOfflineMode;
+  }
+
+  function isOnline(): boolean {
+    return navigator.onLine;
+  }
+
   const hasCredit = computed(
     () => (customerCredit.value?.total_credit || 0) > 0
   );
 
   async function searchCustomers(term = "", posProfile?: string): Promise<void> {
+    if (isLoading.value) return;
     isLoading.value = true;
+    
+    try {
+      const searchText = term || searchTerm.value;
+      
+      // Check if offline and offline mode is enabled
+      if (!isOnline() && isOfflineEnabled()) {
+        const cached = await searchCachedCustomers(searchText);
+        customers.value = cached;
+        console.log("[XPOS Offline] Serving customers from cache");
+        return;
+      }
+      
+      // Online - fetch from API
+      if (isOnline()) {
+        const result = await call<Customer[]>(
+          "xpos.api.customers.get_customers",
+          {
+            search_term: searchText,
+            pos_profile: posProfile || "",
+            limit: 100, // Increased limit for better caching
+          }
+        );
+        customers.value = result || [];
+        
+        // Cache customers for offline use when offline mode is enabled
+        if (isOfflineEnabled() && customers.value.length > 0) {
+          try {
+            await cacheCustomers(customers.value);
+            console.log(`[XPOS Offline] Cached ${customers.value.length} customers`);
+          } catch (error) {
+            console.warn("[XPOS Offline] Failed to cache customers:", error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error searching customers:", error);
+      
+      // Fallback to cache if available and offline mode is enabled
+      if (isOfflineEnabled()) {
+        try {
+          const cached = await searchCachedCustomers(term || searchTerm.value);
+          if (cached.length > 0) {
+            customers.value = cached;
+            console.log("[XPOS Offline] Fallback to cached customers after API error");
+            return;
+          }
+        } catch (cacheError) {
+          console.warn("[XPOS Offline] Failed to load cached customers:", cacheError);
+        }
+      }
+      customers.value = [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
+   * Cache all customers for offline use
+   */
+  async function cacheAllCustomers(posProfile?: string): Promise<void> {
+    if (!isOnline() || !isOfflineEnabled()) return;
+    
     try {
       const result = await call<Customer[]>(
         "xpos.api.customers.get_customers",
         {
-          search_term: term || searchTerm.value,
+          search_term: "",
           pos_profile: posProfile || "",
-          limit: 20,
+          limit: 1000, // Large limit to get all customers
         }
       );
-      customers.value = result || [];
+      
+      if (result && result.length > 0) {
+        await cacheCustomers(result);
+        console.log(`[XPOS Offline] Pre-cached ${result.length} customers`);
+      }
     } catch (error) {
-      console.error("Error searching customers:", error);
-      customers.value = [];
-    } finally {
-      isLoading.value = false;
+      console.warn("[XPOS Offline] Failed to pre-cache customers:", error);
     }
   }
 
@@ -94,14 +173,29 @@ export const useCustomerStore = defineStore("customers", () => {
   ): Promise<Customer | null> {
     isLoadingDetail.value = true;
     try {
-      const result = await call<Customer>(
-        "xpos.api.customers.get_customer_info",
-        {
-          customer: customerName,
-        }
-      );
-      selectedCustomerInfo.value = result;
-      return result;
+      // Check connectivity first
+      if (!isOnline() && isOfflineEnabled()) {
+        // Try to find in cached customers
+        const cached = await getCachedCustomers();
+        const customer = cached.find(c => c.name === customerName || c.customer_name === customerName);
+        selectedCustomerInfo.value = customer || null;
+        console.log("[XPOS Offline] Serving customer info from cache");
+        return selectedCustomerInfo.value;
+      }
+      
+      // Online - fetch from API
+      if (isOnline()) {
+        const result = await call<Customer>(
+          "xpos.api.customers.get_customer_info",
+          {
+            customer: customerName,
+          }
+        );
+        selectedCustomerInfo.value = result;
+        return result;
+      }
+      
+      return null;
     } catch (error) {
       console.error("Error fetching customer info:", error);
       return null;
@@ -281,6 +375,7 @@ export const useCustomerStore = defineStore("customers", () => {
     hasCredit,
     // Actions
     searchCustomers,
+    cacheAllCustomers,
     createCustomer,
     updateCustomer,
     getCustomerInfo,

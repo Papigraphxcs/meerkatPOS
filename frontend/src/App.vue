@@ -43,8 +43,10 @@
 			<ItemDetailDialog v-if="itemStore.showItemDetail" />
 
 			<CashMovementDialog v-if="paymentStore.showCashMovementDialog" />
+
+			<DraftInvoiceDialog v-if="cartStore.showDraftDialog" />
 		</template>
-		
+
 		<Toaster
 			:theme="isDark ? 'dark' : 'light'"
 			position="bottom-right"
@@ -74,6 +76,7 @@ import CustomerSelect from "@/components/customer/CustomerSelect.vue";
 import LoyaltyDialog from "@/components/customer/LoyaltyDialog.vue";
 import ItemDetailDialog from "@/components/items/ItemDetailDialog.vue";
 import CashMovementDialog from "@/components/shift/CashMovementDialog.vue";
+import DraftInvoiceDialog from "@/components/cart/DraftInvoiceDialog.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
 
 const route = useRoute();

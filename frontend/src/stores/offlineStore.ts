@@ -14,9 +14,7 @@ import type { InvoiceData } from "@/types/pos.types";
 
 export type OfflineInvoice = PendingInvoice;
 
-// ─── Store ───────────────────────────────────────
 export const useOfflineStore = defineStore("offline", () => {
-    // State
     const isOnline = ref(navigator.onLine);
     const isSyncing = ref(false);
     const pendingCount = ref(0);
@@ -24,10 +22,8 @@ export const useOfflineStore = defineStore("offline", () => {
     const lastSyncTime = ref("");
     const syncErrors = ref<string[]>([]);
 
-    // Max retries before marking failed
     const MAX_RETRIES = 3;
 
-    // ─── Computed ──────────────────────────────────
     const hasPending = computed(() => pendingCount.value > 0);
 
     const offlineModeEnabled = computed(() => {
@@ -62,6 +58,7 @@ export const useOfflineStore = defineStore("offline", () => {
     }
 
     function handleOnline() {
+        debugger
         isOnline.value = true;
         showInfo("Internet connection restored");
         
