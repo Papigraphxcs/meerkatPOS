@@ -637,9 +637,9 @@ export const useCartStore = defineStore("cart", () => {
   async function loadDraftInvoice(draftName: string): Promise<boolean> {
     try {
       const result = await call<any>(
-        "xpos.x_pos.api.invoices.get_draft_invoice",
+        "xpos.api.invoices.get_invoice_details",
         {
-          name: draftName
+          invoice_name: draftName
         }
       );
       

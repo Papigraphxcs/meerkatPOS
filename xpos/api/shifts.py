@@ -136,26 +136,22 @@ def close_shift(opening_shift, closing_details):
 
     opening = frappe.get_doc("POS Opening Shift", opening_shift)
 
-    invoices = []
-    try:
-        invoices = frappe.get_all(
-            "Sales Invoice",
-            filters={
-                "pos_pos_opening_shift": opening.name,
-                "docstatus": 1,
-                "is_pos": 1,
-            },
-            fields=[
-                "name",
-                "grand_total",
-                "net_total",
-                "total_taxes_and_charges",
-                "customer",
-                "is_return",
-            ],
-        )
-    except Exception:
-        pass
+    invoices = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "pos_opening_shift": opening.name,
+            "docstatus": 1,
+            "is_pos": 1,
+        },
+        fields=[
+            "name",
+            "grand_total",
+            "net_total",
+            "total_taxes_and_charges",
+            "customer",
+            "is_return",
+        ],
+    )
 
     if not invoices:
         invoices = frappe.get_all(
@@ -258,28 +254,24 @@ def get_shift_summary(opening_shift):
     """
     opening = frappe.get_doc("POS Opening Shift", opening_shift)
 
-    invoices = []
-    try:
-        invoices = frappe.get_all(
-            "Sales Invoice",
-            filters={
-                "pos_pos_opening_shift": opening.name,
-                "docstatus": 1,
-                "is_pos": 1,
-            },
-            fields=[
-                "name",
-                "grand_total",
-                "net_total",
-                "paid_amount",
-                "change_amount",
-                "is_return",
-                "customer",
-                "customer_name",
-            ],
-        )
-    except Exception:
-        pass
+    invoices = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "pos_opening_shift": opening.name,
+            "docstatus": 1,
+            "is_pos": 1,
+        },
+        fields=[
+            "name",
+            "grand_total",
+            "net_total",
+            "paid_amount",
+            "change_amount",
+            "is_return",
+            "customer",
+            "customer_name",
+        ],
+    )
 
     if not invoices:
         invoices = frappe.get_all(
@@ -352,7 +344,11 @@ def get_shift_summary(opening_shift):
 
 def _enrich_shift_data(data, pos_profile):
     """Add profile, company, settings, and tax template data to shift response."""
-    profile = frappe.get_cached_doc("POS Profile", pos_profile)
+    try:
+        profile = frappe.get_cached_doc("POS Profile", pos_profile)
+    except (AttributeError, Exception):
+        frappe.clear_cache(doctype="POS Profile")
+        profile = frappe.get_doc("POS Profile", pos_profile)
     data["pos_profile"] = profile.as_dict()
     data["company"] = frappe.get_cached_doc("Company", profile.company).as_dict()
 

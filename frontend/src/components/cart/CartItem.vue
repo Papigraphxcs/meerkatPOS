@@ -19,7 +19,8 @@
 								 focus:outline-none focus:border-primary dark:border-muted-foreground/40
 								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" @change="onRateChange"
 						@keydown.up.prevent="focusAdjacentItem(-1, 'rate')"
-						@keydown.down.prevent="focusAdjacentItem(1, 'rate')" />
+						@keydown.down.prevent="focusAdjacentItem(1, 'rate')"
+						@keydown="blockInvalidNumericKeys" />
 				</template>
 				<p v-else class="text-[11px] text-muted-foreground">
 					{{ currencySymbol }}{{ formatPrice(item.rate) }}
@@ -60,7 +61,8 @@
 								 dark:bg-accent/50 dark:border-muted-foreground/30
 								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" @change="onQtyChange"
 					@keydown.up.prevent="focusAdjacentItem(-1, 'qty')"
-					@keydown.down.prevent="focusAdjacentItem(1, 'qty')" />
+					@keydown.down.prevent="focusAdjacentItem(1, 'qty')"
+					@keydown="blockInvalidNumericKeys" />
 				<Button variant="secondary" size="icon-sm"
 					class="w-5 h-5 bg-primary/10 text-primary hover:bg-primary/20" @click="incrementQty">
 					<Plus class="w-2.5 h-2.5" />
@@ -98,7 +100,7 @@
 						class="flex-1 h-6 text-center text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-white dark:bg-muted rounded
 								 border border-emerald-300 dark:border-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-400
 								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-						@blur="applyDiscount" @keydown.enter="applyDiscount" />
+						@blur="applyDiscount" @keydown.enter="applyDiscount" @keydown="blockInvalidNumericKeys" />
 				</div>
 			</div>
 		</div>
@@ -282,5 +284,12 @@ function focusAdjacentItem(direction: number, field: 'qty' | 'rate') {
 
 function formatPrice(price: number | string) {
 	return (Math.round((parseFloat(String(price) || "0") + Number.EPSILON) * 100) / 100).toFixed(2);
+}
+
+/** Block 'e', 'E', '+', '-' keys on numeric inputs to prevent scientific notation */
+function blockInvalidNumericKeys(event: KeyboardEvent) {
+	if (["e", "E", "+", "-"].includes(event.key)) {
+		event.preventDefault();
+	}
 }
 </script>

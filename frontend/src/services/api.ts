@@ -15,13 +15,24 @@ function getCsrfToken(): string {
 }
 
 /**
- * Make an API call using native fetch (standalone mode)
- * Mirrors desktop/desk implementation for consistency
+ * Check if browser is online
+ */
+export function isOnline(): boolean {
+  return navigator.onLine;
+}
+
+/**
+ * Make an API call using native fetch (standalone mode).
+ * Throws immediately when offline so callers can fall back to cache.
  */
 async function fetchCall<T = unknown>(
   method: string,
   args: Record<string, unknown> = {}
 ): Promise<T> {
+  if (!isOnline()) {
+    throw new Error("__offline__");
+  }
+
   const csrfToken = getCsrfToken();
   
   const headers: HeadersInit = {

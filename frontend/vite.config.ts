@@ -25,8 +25,11 @@ export default defineConfig({
         theme_color: "#f97316",
         background_color: "#ffffff",
         display: "standalone",
+        orientation: "any",
         scope: "/xpos/",
         start_url: "/xpos/",
+        id: "/xpos/",
+        categories: ["business", "finance"],
         icons: [
           {
             src: "pwa-192x192.svg",
@@ -45,19 +48,56 @@ export default defineConfig({
             purpose: "any maskable",
           },
         ],
+        screenshots: [
+          {
+            src: "pwa-512x512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            form_factor: "wide",
+            label: "X POS Dashboard",
+          },
+          {
+            src: "pwa-512x512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            form_factor: "narrow",
+            label: "X POS Mobile",
+          },
+        ],
+      },
+      devOptions: {
+        enabled: true,
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff,woff2,ttf,eot}"],
         navigateFallback: "index.html",
         navigateFallbackAllowlist: [/^\/xpos/],
+        // Increase limits for POS app
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         runtimeCaching: [
+          {
+            // Cache the xpos HTML page itself
+            urlPattern: /^https?:\/\/[^/]+\/xpos\/?$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "xpos-html-cache",
+              expiration: {
+                maxEntries: 5,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
           {
             urlPattern: /^https?:\/\/.*\/api\/method\//,
             handler: "NetworkFirst",
             options: {
               cacheName: "xpos-api-cache",
               expiration: {
-                maxEntries: 100,
+                maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 24, // 24 hours
               },
               networkTimeoutSeconds: 5,

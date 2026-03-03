@@ -68,8 +68,8 @@
 			<Printer class="w-4 h-4" />
 		</Button>
 
-		<!-- Offline Status Indicator -->
-		<div v-if="offlineStore.offlineModeEnabled" class="flex items-center gap-1">
+		<!-- Online/Offline Status Indicator (always visible) -->
+		<div class="flex items-center gap-1">
 			<Button variant="ghost" size="sm" :class="['gap-1.5', offlineStore.statusColor]" @click="handleOfflineAction"
 				:title="offlineStore.statusLabel">
 				<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />

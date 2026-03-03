@@ -23,6 +23,8 @@ export const useOfflineStore = defineStore("offline", () => {
     const syncErrors = ref<string[]>([]);
 
     const MAX_RETRIES = 3;
+    const SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+    let syncIntervalId: ReturnType<typeof setInterval> | null = null;
 
     const hasPending = computed(() => pendingCount.value > 0);
 
@@ -50,17 +52,18 @@ export const useOfflineStore = defineStore("offline", () => {
         window.addEventListener("offline", handleOffline);
 
         refreshPendingCount();
+        startPeriodicSync();
     }
 
     function destroy() {
         window.removeEventListener("online", handleOnline);
         window.removeEventListener("offline", handleOffline);
+        stopPeriodicSync();
     }
 
     function handleOnline() {
-        debugger
         isOnline.value = true;
-        showInfo("Internet connection restored");
+        showSuccess("Internet connection restored");
         
         if (offlineModeEnabled.value && pendingCount.value > 0) {
             syncPendingInvoices();
@@ -69,9 +72,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
     function handleOffline() {
         isOnline.value = false;
-        if (offlineModeEnabled.value) {
-            showInfo("You are offline. Invoices will be saved locally.");
-        }
+        showError("You are offline. Check your internet connection.");
     }
 
     async function refreshPendingCount() {
@@ -243,6 +244,55 @@ export const useOfflineStore = defineStore("offline", () => {
         pendingInvoices.value = [];
     }
 
+    // ─── Periodic background data sync ─────────────
+    function startPeriodicSync(): void {
+        if (syncIntervalId) return;
+        syncIntervalId = setInterval(() => {
+            syncOfflineData();
+        }, SYNC_INTERVAL_MS);
+        // Also run immediately on start
+        syncOfflineData();
+    }
+
+    function stopPeriodicSync(): void {
+        if (syncIntervalId) {
+            clearInterval(syncIntervalId);
+            syncIntervalId = null;
+        }
+    }
+
+    async function syncOfflineData(): Promise<void> {
+        if (!isOnline.value) return;
+
+        const posStore = usePosStore();
+        if (!posStore.isReady || !posStore.profileName) return;
+
+        try {
+            // Sync items cache
+            const { useItemStore } = await import("@/stores/itemStore");
+            const itemStore = useItemStore();
+            itemStore.cacheAllItems(posStore.profileName).catch((err) => {
+                console.warn("[XPOS Sync] Failed to sync items:", err);
+            });
+
+            // Sync customers cache
+            const { useCustomerStore } = await import("@/stores/customerStore");
+            const customerStore = useCustomerStore();
+            customerStore.cacheAllCustomers(posStore.profileName).catch((err) => {
+                console.warn("[XPOS Sync] Failed to sync customers:", err);
+            });
+
+            // Sync pending invoices if any
+            if (pendingCount.value > 0) {
+                syncPendingInvoices();
+            }
+
+            console.log("[XPOS Sync] Background data sync completed");
+        } catch (error) {
+            console.warn("[XPOS Sync] Background sync error:", error);
+        }
+    }
+
     return {
         // State
         isOnline,
@@ -266,5 +316,8 @@ export const useOfflineStore = defineStore("offline", () => {
         retrySingle,
         deletePending,
         clearAll,
+        startPeriodicSync,
+        stopPeriodicSync,
+        syncOfflineData,
     };
 });
