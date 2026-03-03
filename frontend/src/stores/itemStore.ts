@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed, type Ref, type ComputedRef } from "vue";
+import { ref, computed } from "vue";
 import { call } from "@/services/api";
 import { usePosStore } from "@/stores/posStore";
 import {
@@ -27,42 +27,49 @@ interface ItemGroupsResult {
 }
 
 export const useItemStore = defineStore("items", () => {
-  // ─── State ─────────────────────────────────────
-  const items: Ref<POSItem[]> = ref([]);
-  const isLoading: Ref<boolean> = ref(false);
-  const searchTerm: Ref<string> = ref("");
-  const selectedGroup: Ref<string> = ref("All Item Groups");
-  const currentPage: Ref<number> = ref(0);
-  const pageLength: Ref<number> = ref(40);
-  const hasMore: Ref<boolean> = ref(true);
-  const totalCount: Ref<number> = ref(0);
-  const itemGroups: Ref<ItemGroup[]> = ref([]);
-  const parentGroups: Ref<ItemGroup[]> = ref([]);
+  const items = ref<POSItem[]>([]);
+  const isLoading = ref(false);
+  const searchTerm = ref("");
+  const selectedGroup = ref("All Item Groups");
+  const currentPage = ref(0);
+  const pageLength = ref(40);
+  const hasMore = ref(true);
+  const totalCount = ref(0);
+  const itemGroups = ref<ItemGroup[]>([]);
+  const parentGroups = ref<ItemGroup[]>([]);
 
-  // Item detail dialog state
-  const showItemDetail: Ref<boolean> = ref(false);
-  const selectedItemDetail: Ref<ItemDetail | null> = ref(null);
-  const selectedItemForDetail: Ref<POSItem | null> = ref(null);
-  const isLoadingDetail: Ref<boolean> = ref(false);
+  const showItemDetail = ref(false);
+  const selectedItemDetail = ref<ItemDetail | null>(null);
+  const selectedItemForDetail = ref<POSItem | null>(null);
+  const isLoadingDetail = ref(false);
 
-  // Variant state
-  const showVariantPicker: Ref<boolean> = ref(false);
-  const variants: Ref<ItemVariant[]> = ref([]);
-  const variantAttributes: Ref<ItemAttribute[]> = ref([]);
-  const isLoadingVariants: Ref<boolean> = ref(false);
+  const showVariantPicker = ref(false);
+  const variants = ref<ItemVariant[]>([]);
+  const variantAttributes = ref<ItemAttribute[]>([]);
+  const isLoadingVariants = ref(false);
 
-  // ─── Computed ──────────────────────────────────
-  const filteredItems: ComputedRef<POSItem[]> = computed(() => items.value);
+  const filteredItems = computed(() => {
+    const posStore = usePosStore();
+    let filtered = items.value;
 
-  // ─── Offline helpers ───────────────────────────
+    if (posStore.posProfile?.hide_unavailable_items && posStore.posProfile?.block_sale_beyond_available_qty) {
+      filtered = filtered.filter(item => {
+        const qty = item.actual_qty ?? 0;
+        return qty > 0;
+      });
+    }
+    
+    return filtered;
+  });
+
   function isOfflineEnabled(): boolean {
     const posStore = usePosStore();
-    return !!posStore.posProfile?.custom_use_offline_mode;
+    return !!posStore.posProfile?.use_offline_mode;
   }
 
   /**
    * Pre-load ALL items from server into IndexedDB cache.
-   * Called once after POS profile is ready when custom_use_offline_mode is enabled.
+   * Called once after POS profile is ready when use_offline_mode is enabled.
    */
   async function cacheAllItems(posProfile: string): Promise<void> {
     try {

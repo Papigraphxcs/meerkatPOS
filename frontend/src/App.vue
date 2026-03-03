@@ -44,11 +44,10 @@
 
 			<CashMovementDialog v-if="paymentStore.showCashMovementDialog" />
 		</template>
-
-		<!-- Toast Notifications -->
+		
 		<Toaster
 			:theme="isDark ? 'dark' : 'light'"
-			position="top-right"
+			position="bottom-right"
 			:duration="4000"
 			:expand="true"
 			rich-colors

@@ -98,6 +98,30 @@ export const usePosStore = defineStore("pos", () => {
     () => !!posProfile.value?.allow_rate_change
   );
 
+  const hideImages = computed(
+    () => !!posProfile.value?.hide_images
+  );
+
+  const hideUnavailableItems = computed(
+    () => !!posProfile.value?.hide_unavailable_items
+  );
+
+  const blockSaleBeyondAvailableQty = computed(
+    () => !!posProfile.value?.block_sale_beyond_available_qty
+  );
+
+  const defaultView = computed(
+    () => posProfile.value?.default_view || "Card"
+  );
+
+  const defaultPosExpenseAccount = computed(
+    () => posProfile.value?.default_pos_expense_account
+  );
+
+  const backOfficeCashAccount = computed(
+    () => posProfile.value?.back_office_cash_account
+  );
+
   const allowEditItemDiscount = computed(
     () => !!posProfile.value?.allow_discount_change
   );
@@ -443,6 +467,13 @@ export const usePosStore = defineStore("pos", () => {
     applyCustomerDiscount,
     allowPrintDraftInvoices,
     cashModeOfPayment,
+    // New computed properties for requested features
+    hideImages,
+    hideUnavailableItems,
+    blockSaleBeyondAvailableQty,
+    defaultView,
+    defaultPosExpenseAccount,
+    backOfficeCashAccount,
     // Actions
     checkExistingShift,
     fetchOpeningData,

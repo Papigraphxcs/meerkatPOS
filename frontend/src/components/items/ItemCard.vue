@@ -7,7 +7,7 @@
 				: 'cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 dark:border-border dark:hover:border-primary/50'
 	]" @click="handleClick">
 		<div class="relative aspect-[4/3] bg-muted overflow-hidden rounded-t-xl">
-			<img v-if="item.image" :src="item.image" :alt="item.item_name"
+			<img v-if="item.image && !hideImages" :src="item.image" :alt="item.item_name"
 				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 				loading="lazy" />
 			<div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
@@ -83,6 +83,7 @@ const posStore = usePosStore();
 const showStock = computed(() => posStore.displayItemsInStock);
 const showItemCode = computed(() => posStore.displayItemCode);
 const allowNegativeStock = computed(() => posStore.stockSettings?.allow_negative_stock);
+const hideImages = computed(() => posStore.hideImages);
 
 const isOutOfStock = computed(() => {
 	const qty = props.item.actual_qty;

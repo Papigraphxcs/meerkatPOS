@@ -671,11 +671,11 @@ export const useCartStore = defineStore("cart", () => {
           serial_no: item.serial_no,
           batch_no: item.batch_no,
           item_tax_template: item.item_tax_template,
-          custom_additional_notes: item.pos_notes,
-          custom_delivery_date: item.pos_delivery_date,
-          custom_offers: item.pos_offers,
-          custom_is_offer: item.pos_is_offer,
-          custom_is_replace: item.pos_is_replace,
+          additional_notes: item.pos_notes,
+          delivery_date: item.pos_delivery_date,
+          offers: item.pos_offers,
+          is_offer: item.pos_is_offer,
+          is_replace: item.pos_is_replace,
         })
       ),
       pos_opening_shift: posOpeningShift,
@@ -689,9 +689,9 @@ export const useCartStore = defineStore("cart", () => {
     }
 
     // Notes, delivery date, auth code
-    if (orderNotes.value) data.custom_pos_notes = orderNotes.value;
-    if (deliveryDate.value) data.custom_pos_delivery_date = deliveryDate.value;
-    if (authorizationCode.value) data.custom_authorization_code = authorizationCode.value;
+    if (orderNotes.value) data.pos_notes = orderNotes.value;
+    if (deliveryDate.value) data.pos_delivery_date = deliveryDate.value;
+    if (authorizationCode.value) data.authorization_code = authorizationCode.value;
 
     // Sales person
     if (salesPerson.value) data.sales_person = salesPerson.value;
@@ -722,8 +722,8 @@ export const useCartStore = defineStore("cart", () => {
 
     // Coupons — send both legacy JSON and structured detail rows
     if (appliedCoupon.value) {
-      data.custom_coupons = JSON.stringify([appliedCoupon.value.name]);
-      data.custom_coupons_detail = [{
+      data.coupons = JSON.stringify([appliedCoupon.value.name]);
+      data.coupons_detail = [{
         coupon: appliedCoupon.value.name,
         coupon_code: appliedCoupon.value.coupon_code || couponCode.value,
         type: (appliedCoupon.value as Record<string, unknown>).coupon_type || "Promotional",
@@ -735,8 +735,8 @@ export const useCartStore = defineStore("cart", () => {
 
     // Offers — send both legacy JSON and structured detail rows
     if (appliedOffers.value.length > 0) {
-      data.custom_offers = JSON.stringify(appliedOffers.value.map((o) => o.name));
-      data.custom_offers_detail = appliedOffers.value.map((o) => ({
+      data.offers = JSON.stringify(appliedOffers.value.map((o) => o.name));
+      data.offers_detail = appliedOffers.value.map((o) => ({
         offer_name: o.name,
         offer: (o as Record<string, unknown>).offer || (o as Record<string, unknown>).offer_type || "",
         apply_on: o.apply_on || "",

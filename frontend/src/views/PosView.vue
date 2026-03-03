@@ -34,7 +34,7 @@
 			</div>
 
 				<div class="flex-1 overflow-y-auto p-4 pt-2 xpos-scrollbar">
-				<ItemGrid :items="itemStore.items" :is-loading="itemStore.isLoading"
+				<ItemGrid :items="itemStore.filteredItems" :is-loading="itemStore.isLoading"
 					:currency-symbol="posStore.currencySymbol" :view-mode="viewMode"
 					:highlighted-index="highlightedIndex"
 					@select-item="handleAddItem" @show-detail="handleShowDetail" @load-more="handleLoadMore" />
@@ -69,6 +69,13 @@ const cartStore = useCartStore();
 const offerStore = useOfferStore();
 
 const viewMode = ref<'grid' | 'list'>('grid');
+
+watch(() => posStore.defaultView, (defaultView) => {
+  if (defaultView) {
+    viewMode.value = defaultView.toLowerCase() === 'list' ? 'list' : 'grid';
+  }
+}, { immediate: true });
+
 const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null);
 const barcodeScannerRef = ref<InstanceType<typeof BarcodeScanner> | null>(null);
 const highlightedIndex = ref(-1);
@@ -97,8 +104,7 @@ watch(() => posStore.isReady, (ready) => {
 	if (ready) loadInitialData();
 });
 
-// Reset highlight when items change
-watch(() => itemStore.items, () => {
+watch(() => itemStore.filteredItems, () => {
 	highlightedIndex.value = -1;
 });
 
@@ -123,8 +129,8 @@ function onSearch(term: string) {
  */
 async function onSearchEnter(val: string) {
 	// If an item is highlighted by arrow keys, select it
-	if (highlightedIndex.value >= 0 && highlightedIndex.value < itemStore.items.length) {
-		handleAddItem(itemStore.items[highlightedIndex.value]);
+	if (highlightedIndex.value >= 0 && highlightedIndex.value < itemStore.filteredItems.length) {
+		handleAddItem(itemStore.filteredItems[highlightedIndex.value]);
 		highlightedIndex.value = -1;
 		return;
 	}
@@ -175,7 +181,7 @@ async function onBarcodeScan(barcode: string) {
  * Moves the highlight through the item list.
  */
 function onNavigate(direction: 'up' | 'down') {
-	const items = itemStore.items;
+	const items = itemStore.filteredItems;
 	if (items.length === 0) return;
 
 	if (direction === 'down') {

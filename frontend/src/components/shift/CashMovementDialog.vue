@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { showSuccess, showError } from "@/services/api";
@@ -147,6 +147,36 @@ onMounted(async () => {
     if (shift) {
         await paymentStore.fetchCashMovementContext(posStore.profileName, shift);
         await paymentStore.fetchShiftCashMovements(posStore.profileName, shift);
+
+        if (paymentStore.cashMovementType === "expense" && posStore.defaultPosExpenseAccount) {
+            const hasDefaultAccount = expenseAccounts.value.includes(posStore.defaultPosExpenseAccount);
+            if (hasDefaultAccount) {
+                expenseAccount.value = posStore.defaultPosExpenseAccount;
+            }
+        }
+        
+        if (paymentStore.cashMovementType === "deposit" && posStore.backOfficeCashAccount) {
+            const hasDefaultAccount = depositAccounts.value.includes(posStore.backOfficeCashAccount);
+            if (hasDefaultAccount) {
+                depositAccount.value = posStore.backOfficeCashAccount;
+            }
+        }
+    }
+});
+
+watch(() => paymentStore.cashMovementType, (newType) => {
+    if (newType === "expense" && posStore.defaultPosExpenseAccount) {
+        const hasDefaultAccount = expenseAccounts.value.includes(posStore.defaultPosExpenseAccount);
+        if (hasDefaultAccount && !expenseAccount.value) {
+            expenseAccount.value = posStore.defaultPosExpenseAccount;
+        }
+    }
+    
+    if (newType === "deposit" && posStore.backOfficeCashAccount) {
+        const hasDefaultAccount = depositAccounts.value.includes(posStore.backOfficeCashAccount);
+        if (hasDefaultAccount && !depositAccount.value) {
+            depositAccount.value = posStore.backOfficeCashAccount;
+        }
     }
 });
 

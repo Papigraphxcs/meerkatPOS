@@ -32,7 +32,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
     const offlineModeEnabled = computed(() => {
         const posStore = usePosStore();
-        return !!posStore.posProfile?.custom_use_offline_mode;
+        return !!posStore.posProfile?.use_offline_mode;
     });
 
     const statusLabel = computed(() => {
