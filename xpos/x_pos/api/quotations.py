@@ -15,14 +15,14 @@ def _map_delivery_dates(data):
         except Exception:
             return None
 
-    if not data.get("delivery_date") and data.get("posa_delivery_date"):
-        parsed = parse_date(data.get("posa_delivery_date"))
+    if not data.get("delivery_date") and data.get("custom_pos_delivery_date"):
+        parsed = parse_date(data.get("custom_pos_delivery_date"))
         if parsed:
             data["delivery_date"] = parsed
 
     for item in data.get("items", []):
         if not item.get("delivery_date"):
-            delivery = item.get("posa_delivery_date") or data.get("delivery_date")
+            delivery = item.get("custom_delivery_date") or item.get("custom_pos_delivery_date") or data.get("delivery_date")
             parsed = parse_date(delivery)
             if parsed:
                 item["delivery_date"] = parsed

@@ -66,10 +66,12 @@
 body[data-route="xpos"] .page-head {
   display: none !important;
 }
+
 .page-container[data-page-route="xpos"] .main-section {
   margin: 0 !important;
   padding: 0 !important;
 }
+
 .page-container[data-page-route="xpos"] .page-body {
   margin: 0 !important;
 }
@@ -94,6 +96,7 @@ body[data-route="xpos"] .page-head {
 .fade-leave-active {
   transition: opacity 0.2s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -103,6 +106,7 @@ body[data-route="xpos"] .page-head {
 .slide-up-leave-active {
   transition: all 0.3s ease-out;
 }
+
 .slide-up-enter-from,
 .slide-up-leave-to {
   opacity: 0;
@@ -113,11 +117,13 @@ body[data-route="xpos"] .page-head {
 .list-leave-active {
   transition: all 0.3s ease;
 }
+
 .list-enter-from,
 .list-leave-to {
   opacity: 0;
   transform: translateX(-20px);
 }
+
 .list-move {
   transition: transform 0.3s ease;
 }
@@ -127,12 +133,15 @@ body[data-route="xpos"] .page-head {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--border)) transparent;
 }
+
 .xpos-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
+
 .xpos-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .xpos-scrollbar::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
   border-radius: 9999px;
@@ -145,8 +154,8 @@ body[data-route="xpos"] .page-head {
 }
 
 /* Dialog overlay must cover entire viewport */
-[data-state="open"][role="dialog"] ~ [data-aria-hidden="true"],
-body > [data-radix-portal] {
+[data-state="open"][role="dialog"]~[data-aria-hidden="true"],
+body>[data-radix-portal] {
   position: fixed !important;
   inset: 0 !important;
 }

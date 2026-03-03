@@ -59,8 +59,8 @@ class SearchPlan:
     word_filter_active: bool
     include_description: bool
     include_image: bool
-    posa_display_items_in_stock: bool
-    posa_show_template_items: bool
+    display_items_in_stock: bool
+    custom_show_template_items: bool
 
 
 def normalize_brand(brand: str) -> str:
@@ -94,11 +94,11 @@ def _build_search_plan(
 ) -> SearchPlan:
     """Assemble filters, pagination rules and search metadata."""
 
-    use_limit_search = pos_profile.get("posa_use_limit_search")
-    search_serial_no = pos_profile.get("posa_search_serial_no")
-    search_batch_no = pos_profile.get("posa_search_batch_no")
-    posa_show_template_items = pos_profile.get("posa_show_template_items")
-    posa_display_items_in_stock = pos_profile.get("posa_display_items_in_stock")
+    use_limit_search = pos_profile.get("custom_use_limit_search")
+    search_serial_no = pos_profile.get("custom_search_serial_no")
+    search_batch_no = pos_profile.get("custom_search_batch_no")
+    custom_show_template_items = pos_profile.get("custom_show_template_items")
+    display_items_in_stock = pos_profile.get("display_items_in_stock")
 
     limit = _to_positive_int(limit)
     offset = _to_positive_int(offset)
@@ -162,15 +162,15 @@ def _build_search_plan(
     if item_group and item_group.upper() != "ALL":
         filters["item_group"] = ["like", f"%{item_group}%"]
 
-    if not posa_show_template_items:
+    if not custom_show_template_items:
         filters.update(HAS_VARIANTS_EXCLUSION)
 
-    if pos_profile.get("posa_hide_variants_items"):
+    if pos_profile.get("custom_hide_variants_items"):
         filters["variant_of"] = ["is", "not set"]
 
     search_limit = 0
     if use_limit_search:
-        raw_search_limit = pos_profile.get("posa_search_limit")
+        raw_search_limit = pos_profile.get("custom_item_search_limit")
         search_limit = _to_positive_int(raw_search_limit) or 500
 
     limit_page_length: Optional[int] = None
@@ -181,7 +181,7 @@ def _build_search_plan(
         limit_page_length = limit
         if offset and not start_after:
             limit_start = offset
-    elif use_limit_search and not pos_profile.get("posa_force_reload_items"):
+    elif use_limit_search and not pos_profile.get("custom_force_reload_items"):
         limit_page_length = search_limit
 
     if search_value and not use_limit_search and limit is None:
@@ -228,8 +228,8 @@ def _build_search_plan(
         word_filter_active=word_filter_active,
         include_description=include_description,
         include_image=include_image,
-        posa_display_items_in_stock=bool(posa_display_items_in_stock),
-        posa_show_template_items=bool(posa_show_template_items),
+        display_items_in_stock=bool(display_items_in_stock),
+        custom_show_template_items=bool(custom_show_template_items),
     )
 
 
@@ -314,15 +314,15 @@ def _shape_item_row(
         return None
 
     attributes = ""
-    if plan.posa_show_template_items and item.get("has_variants"):
+    if plan.custom_show_template_items and item.get("has_variants"):
         attributes = (template_attributes_map or {}).get(item.get("name"), [])
 
     item_attributes: Any = ""
-    if plan.posa_show_template_items and item.get("variant_of"):
+    if plan.custom_show_template_items and item.get("variant_of"):
         item_attributes = (variant_attributes_map or {}).get(item.get("name"), [])
 
     if (
-        plan.posa_display_items_in_stock
+        plan.display_items_in_stock
         and (not detail.get("actual_qty") or detail.get("actual_qty") < 0)
         and not item.get("has_variants")
     ):
@@ -341,7 +341,7 @@ def _build_attribute_maps(
 ) -> Tuple[Dict[str, List[Dict[str, Any]]], Dict[str, List[Dict[str, Any]]]]:
     """Build per-page template and variant attribute maps to avoid N+1 queries."""
 
-    if not plan.posa_show_template_items or not items_data:
+    if not plan.custom_show_template_items or not items_data:
         return {}, {}
 
     template_names = [item.get("name") for item in items_data if item.get("has_variants") and item.get("name")]
@@ -518,7 +518,7 @@ def _normalize_profile_context(pos_profile) -> ProfileContext:
     """Return the active profile metadata required by :func:`get_items`."""
 
     profile_dict, profile_json = _ensure_pos_profile(pos_profile)
-    ttl = profile_dict.get("posa_server_cache_duration")
+    ttl = profile_dict.get("custom_server_cache_duration")
     try:
         ttl = int(ttl) * 60 if ttl else None
     except (TypeError, ValueError):
@@ -527,7 +527,7 @@ def _normalize_profile_context(pos_profile) -> ProfileContext:
     return ProfileContext(
         pos_profile=profile_dict,
         pos_profile_json=profile_json,
-        use_price_list_cache=bool(profile_dict.get("posa_use_server_cache")),
+        use_price_list_cache=bool(profile_dict.get("custom_use_server_cache")),
         profile_name=profile_dict.get("name"),
         warehouse=profile_dict.get("warehouse"),
         cache_ttl=ttl,

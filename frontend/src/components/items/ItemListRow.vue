@@ -3,7 +3,7 @@
 		isOutOfStock && !allowNegativeStock
 			? 'cursor-not-allowed opacity-60 bg-muted/30 border-border'
 			: highlighted
-				? 'cursor-pointer bg-primary/10 border-primary/40 ring-1 ring-primary/30'
+				? 'cursor-pointer bg-orange-50 dark:bg-orange-500/10 border-orange-400 dark:border-orange-500 ring-2 ring-orange-400/50 dark:ring-orange-500/40'
 				: 'cursor-pointer hover:bg-muted/50 border-transparent hover:border-border'
 	]" @click="handleClick">
 		<div class="w-14 h-14 shrink-0 rounded-lg bg-muted overflow-hidden relative">

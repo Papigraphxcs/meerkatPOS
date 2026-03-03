@@ -115,7 +115,7 @@ def get_customer_info(customer):
             }
         )
 
-    posa_discount = flt(getattr(cust, "posa_discount", 0))
+    pos_discount = flt(getattr(cust, "discount", 0))
 
     default_price_list = cust.default_price_list
 
@@ -146,8 +146,8 @@ def get_customer_info(customer):
                 "conversion_factor": 0,
             }
 
-    referral_code = getattr(cust, "posa_referral_code", None)
-    birthday = getattr(cust, "posa_birthday", None)
+    referral_code = getattr(cust, "referral_code", None)
+    birthday = getattr(cust, "birthday", None)
 
     return {
         "name": cust.name,
@@ -165,9 +165,9 @@ def get_customer_info(customer):
         "balance": balance,
         "loyalty_points": loyalty,
         "loyalty_program": loyalty_program,
-        "posa_discount": posa_discount,
-        "posa_referral_code": referral_code,
-        "posa_birthday": birthday,
+        "discount": pos_discount,
+        "referral_code": referral_code,
+        "birthday": birthday,
         "addresses": address_list,
     }
 
@@ -226,12 +226,12 @@ def create_customer(
         customer.gender = gender
     if referral_code:
         try:
-            customer.posa_referral_code = referral_code
+            customer.referral_code = referral_code
         except Exception:
             pass
     if birthday:
         try:
-            customer.posa_birthday = birthday
+            customer.birthday = birthday
         except Exception:
             pass
     if company:
@@ -286,8 +286,8 @@ def update_customer(customer, data):
         if field in data:
             doc.set(field, data[field])
 
-    posa_fields = ["posa_referral_code", "posa_birthday", "posa_discount"]
-    for field in posa_fields:
+    pos_fields = ["referral_code", "birthday", "discount"]
+    for field in pos_fields:
         if field in data:
             try:
                 doc.set(field, data[field])
@@ -685,4 +685,39 @@ def _get_child_groups(group_type, root):
         group_type,
         filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
         pluck="name",
+    )
+
+
+@frappe.whitelist()
+def get_customer_groups():
+    """Return list of customer group names for dropdown."""
+    return frappe.get_all(
+        "Customer Group",
+        filters={"is_group": 0},
+        pluck="name",
+        order_by="name asc",
+        limit_page_length=0,
+    )
+
+
+@frappe.whitelist()
+def get_territories():
+    """Return list of territory names for dropdown."""
+    return frappe.get_all(
+        "Territory",
+        filters={"is_group": 0},
+        pluck="name",
+        order_by="name asc",
+        limit_page_length=0,
+    )
+
+
+@frappe.whitelist()
+def get_countries():
+    """Return list of country names for dropdown."""
+    return frappe.get_all(
+        "Country",
+        pluck="name",
+        order_by="name asc",
+        limit_page_length=0,
     )

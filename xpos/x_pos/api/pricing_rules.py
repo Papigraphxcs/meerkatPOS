@@ -365,7 +365,7 @@ def _build_pricing_args(line: frappe._dict, ctx: frappe._dict) -> frappe._dict:
         item_group=line.get("item_group"),
         brand=line.get("brand"),
         ignore_pricing_rule=0,
-        child_docname=line.get("posa_row_id") or line.get("name") or line.item_code,
+        child_docname=line.get("row_id") or line.get("name") or line.item_code,
         transaction_type="selling",
     )
 
@@ -572,7 +572,7 @@ def reconcile_line_prices(cart_payload: dict | str | None = None):
         
         updates.append(
             {
-                "row_id": line.get("posa_row_id") or line.get("name") or line.item_code,
+                "row_id": line.get("row_id") or line.get("name") or line.item_code,
                 "rate": rate,
                 "price_list_rate": price_list_rate,
                 "discount_amount": discount_amount,

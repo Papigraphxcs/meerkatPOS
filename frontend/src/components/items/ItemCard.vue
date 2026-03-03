@@ -3,9 +3,8 @@
 		isOutOfStock && !allowNegativeStock
 			? 'cursor-not-allowed opacity-60 grayscale-[30%]'
 			: highlighted
-				? 'cursor-pointer shadow-md border-primary ring-2 ring-primary/40 -translate-y-0.5 dark:bg-primary/10 dark:border-primary dark:ring-primary/50'
-				: 'cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5',
-		'dark:border-border dark:hover:border-primary/50'
+				? 'cursor-pointer shadow-md border-orange-400 ring-2 ring-orange-400/50 -translate-y-0.5 bg-orange-50/50 dark:bg-orange-500/10 dark:border-orange-500 dark:ring-orange-500/40'
+				: 'cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 dark:border-border dark:hover:border-primary/50'
 	]" @click="handleClick">
 		<div class="relative aspect-[4/3] bg-muted overflow-hidden rounded-t-xl">
 			<img v-if="item.image" :src="item.image" :alt="item.item_name"

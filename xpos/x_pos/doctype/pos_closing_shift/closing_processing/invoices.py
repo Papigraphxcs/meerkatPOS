@@ -73,13 +73,13 @@ def _is_consolidated_sales_invoice(sales_invoice):
     return bool(frappe.db.exists("POS Invoice Merge Log", {"consolidated_credit_note": sales_invoice}))
 
 def delete_draft_invoices(pos_opening_shift, pos_profile):
-    if frappe.get_value("POS Profile", pos_profile, "posa_allow_delete"):
+    if frappe.get_value("POS Profile", pos_profile, "custom_allow_delete"):
         doctype = (
             "POS Invoice"
             if frappe.db.get_value(
                 "POS Profile",
                 pos_profile,
-                "create_pos_invoice_instead_of_sales_invoice",
+                "custom_create_pos_invoice_instead_of_sales_invoice",
             )
             else "Sales Invoice"
         )
@@ -90,7 +90,7 @@ def delete_draft_invoices(pos_opening_shift, pos_profile):
         from
             `tab{doctype}`
         where
-            docstatus = 0 and posa_is_printed = 0 and posa_pos_opening_shift = %s
+            docstatus = 0 and custom_is_printed = 0 and custom_pos_opening_shift = %s
         """,
             (pos_opening_shift),
             as_dict=1,
@@ -103,9 +103,9 @@ def submit_printed_invoices(pos_opening_shift, doctype):
     invoices_list = frappe.get_all(
         doctype,
         filters={
-            "posa_pos_opening_shift": pos_opening_shift,
+            "custom_pos_opening_shift": pos_opening_shift,
             "docstatus": 0,
-            "posa_is_printed": 1,
+            "custom_is_printed": 1,
         },
     )
     for invoice in invoices_list:
@@ -116,7 +116,7 @@ def consolidate_closing_shift_invoices(closing_shift_doc):
     if frappe.db.get_value(
         "POS Profile",
         closing_shift_doc.pos_profile,
-        "create_pos_invoice_instead_of_sales_invoice",
+        "custom_create_pos_invoice_instead_of_sales_invoice",
     ):
         pos_invoices = []
         for d in closing_shift_doc.pos_transactions:

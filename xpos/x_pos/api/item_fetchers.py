@@ -169,7 +169,7 @@ def _fetch_barcodes(item_codes: Tuple[str, ...]):
         return []
     return frappe.get_all(
         "Item Barcode",
-        fields=["parent", "barcode", "posa_uom"],
+        fields=["parent", "barcode", "uom"],
         filters={"parent": ["in", item_codes]},
     )
 
@@ -233,7 +233,7 @@ def _fetch_batches(warehouse: str, item_codes: Tuple[str, ...]):
             "item as item_code",
             "expiry_date",
             "manufacturing_date",
-            "posa_batch_price",
+            "custom_batch_price",
         ],
         order_by="expiry_date asc, creation asc",
     )
@@ -307,7 +307,7 @@ def _fetch_batches(warehouse: str, item_codes: Tuple[str, ...]):
                     "batch_no": doc.batch_no,
                     "batch_qty": qty,
                     "expiry_date": doc.expiry_date,
-                    "batch_price": doc.posa_batch_price,
+                    "batch_price": doc.custom_batch_price,
                     "manufacturing_date": doc.manufacturing_date,
                 }
             )
@@ -463,7 +463,7 @@ class ItemDetailAggregator:
     def _resolve_ttl(self) -> Optional[int]:
         """Convert the POS profile cache duration to seconds."""
 
-        ttl = self.pos_profile.get("posa_server_cache_duration")
+        ttl = self.pos_profile.get("custom_server_cache_duration")
         if not ttl:
             return None
         try:
@@ -484,7 +484,7 @@ class ItemDetailAggregator:
         """Compute the price list to company currency exchange rate."""
 
         company = self.pos_profile.get("company")
-        allow_multi_currency = self.pos_profile.get("posa_allow_multi_currency") or 0
+        allow_multi_currency = self.pos_profile.get("custom_allow_multi_currency") or 0
         company_currency = frappe.db.get_value("Company", company, "default_currency") if company else None
         price_list_currency = self.price_list_currency or self.pos_profile.get("currency")
 
@@ -510,7 +510,7 @@ class ItemDetailAggregator:
         if not item_codes_tuple:
             return ItemLookupData({}, {}, {}, {}, {}, {}, {})
 
-        use_cache = bool(self.pos_profile.get("posa_use_server_cache"))
+        use_cache = bool(self.pos_profile.get("custom_use_server_cache"))
 
         price_rows = []
         if self.price_list:
@@ -575,7 +575,7 @@ class ItemDetailAggregator:
         barcode_map: Dict[str, List[Dict[str, object]]] = {}
         for row in barcode_rows:
             barcode_map.setdefault(row.parent, []).append(
-                {"barcode": row.barcode, "posa_uom": row.posa_uom}
+                {"barcode": row.barcode, "custom_uom": row.custom_uom}
             )
 
         batch_map: Dict[str, List[Dict[str, object]]] = {}

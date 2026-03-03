@@ -33,7 +33,7 @@ def create_invoice(data):
 
     pos = frappe.get_cached_doc("POS Profile", pos_profile)
 
-    use_pos_invoice = cint(pos.get("create_pos_invoice_instead_of_sales_invoice"))
+    use_pos_invoice = cint(pos.get("custom_create_pos_invoice_instead_of_sales_invoice"))
     doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
 
     debit_to = None
@@ -85,20 +85,20 @@ def create_invoice(data):
         invoice_doc.discount_amount = discount_amount
         invoice_doc.apply_discount_on = data.get("apply_discount_on") or "Grand Total"
 
-    if data.get("posa_notes"):
+    if data.get("custom_pos_notes"):
         try:
-            invoice_doc.posa_notes = data["posa_notes"]
+            invoice_doc.custom_pos_notes = data["custom_pos_notes"]
         except Exception:
             pass
-    if data.get("posa_authorization_code"):
+    if data.get("custom_authorization_code"):
         try:
-            invoice_doc.posa_authorization_code = data["posa_authorization_code"]
+            invoice_doc.custom_authorization_code = data["custom_authorization_code"]
         except Exception:
             pass
 
-    if data.get("posa_delivery_date"):
+    if data.get("custom_pos_delivery_date"):
         try:
-            invoice_doc.posa_delivery_date = data["posa_delivery_date"]
+            invoice_doc.custom_pos_delivery_date = data["custom_pos_delivery_date"]
         except Exception:
             pass
 
@@ -147,7 +147,7 @@ def create_invoice(data):
                 )
             )
 
-        if not cint(pos.get("posa_allow_user_to_edit_rate")):
+        if not cint(pos.get("custom_allow_user_to_edit_rate")):
             price_list = pos.get("selling_price_list")
             if price_list:
                 price_list_rate = frappe.db.get_value(
@@ -175,7 +175,7 @@ def create_invoice(data):
         disc_amt = flt(item_data.get("discount_amount", 0), 2)
 
         # Validate max discount allowed
-        max_discount = flt(pos.get("posa_max_discount_allowed", 0))
+        max_discount = flt(pos.get("custom_max_discount_percentage_allowed", 0))
         if max_discount > 0 and disc_pct > max_discount:
             frappe.throw(
                 _("Item {0}: Discount {1}% exceeds maximum allowed {2}%").format(
@@ -194,14 +194,14 @@ def create_invoice(data):
         if item_data.get("item_tax_template"):
             item.item_tax_template = item_data.get("item_tax_template")
 
-        if item_data.get("posa_notes"):
+        if item_data.get("custom_additional_notes"):
             try:
-                item.posa_notes = item_data["posa_notes"]
+                item.custom_additional_notes = item_data["custom_additional_notes"]
             except Exception:
                 pass
-        if item_data.get("posa_delivery_date"):
+        if item_data.get("custom_delivery_date"):
             try:
-                item.posa_delivery_date = item_data["posa_delivery_date"]
+                item.custom_delivery_date = item_data["custom_delivery_date"]
             except Exception:
                 pass
 
@@ -253,21 +253,21 @@ def create_invoice(data):
     if (
         not is_return
         and total_payment <= 0
-        and not cint(pos.get("posa_allow_credit_sale"))
+        and not cint(pos.get("custom_allow_credit_sale"))
     ):
         frappe.throw(_("Payment amount must be greater than zero"))
 
     if pos_opening_shift:
         try:
-            invoice_doc.posa_pos_opening_shift = pos_opening_shift
+            invoice_doc.custom_pos_opening_shift = pos_opening_shift
         except Exception:
             pass
 
-    posa_coupons_data = data.get("posa_coupons_detail") or []
-    for coupon_row in posa_coupons_data:
+    pos_coupons_data = data.get("custom_coupons_detail") or []
+    for coupon_row in pos_coupons_data:
         try:
             invoice_doc.append(
-                "posa_coupons",
+                "custom_coupons",
                 {
                     "coupon": coupon_row.get("coupon"),
                     "coupon_code": coupon_row.get("coupon_code"),
@@ -280,11 +280,11 @@ def create_invoice(data):
         except Exception:
             pass
 
-    posa_offers_data = data.get("posa_offers_detail") or []
-    for offer_row in posa_offers_data:
+    pos_offers_data = data.get("custom_offers_detail") or []
+    for offer_row in pos_offers_data:
         try:
             invoice_doc.append(
-                "posa_offers",
+                "custom_offers",
                 {
                     "offer_name": offer_row.get("offer_name"),
                     "offer": offer_row.get("offer"),
@@ -298,13 +298,13 @@ def create_invoice(data):
             pass
 
     try:
-        enforce_return_validity = cint(pos.get("posa_enable_return_validity"))
+        enforce_return_validity = cint(pos.get("custom_enable_return_validity"))
         if enforce_return_validity and not is_return:
-            return_days = cint(pos.get("posa_return_validity_days")) or 0
+            return_days = cint(pos.get("custom_return_validity_days")) or 0
             if return_days > 0:
                 from datetime import timedelta
 
-                invoice_doc.posa_return_valid_upto = getdate(nowdate()) + timedelta(
+                invoice_doc.custom_return_valid_upto = getdate(nowdate()) + timedelta(
                     days=return_days
                 )
     except Exception:
@@ -435,7 +435,7 @@ def save_draft_invoice(data):
 
     pos = frappe.get_cached_doc("POS Profile", pos_profile)
 
-    use_pos_invoice = cint(pos.get("create_pos_invoice_instead_of_sales_invoice"))
+    use_pos_invoice = cint(pos.get("custom_create_pos_invoice_instead_of_sales_invoice"))
     doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
 
     debit_to = None
@@ -478,7 +478,7 @@ def save_draft_invoice(data):
 
     if pos_opening_shift:
         try:
-            invoice_doc.posa_pos_opening_shift = pos_opening_shift
+            invoice_doc.custom_pos_opening_shift = pos_opening_shift
         except Exception:
             pass
 
@@ -499,7 +499,7 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 
     if pos_opening_shift:
         try:
-            filters["posa_pos_opening_shift"] = pos_opening_shift
+            filters["custom_pos_opening_shift"] = pos_opening_shift
         except Exception:
             filters["owner"] = frappe.session.user
 
@@ -927,11 +927,11 @@ def search_invoices_for_return(
 
     if pos_profile:
         pos = frappe.get_cached_doc("POS Profile", pos_profile)
-        enforce_return_validity = cint(pos.get("posa_enable_return_validity"))
+        enforce_return_validity = cint(pos.get("custom_enable_return_validity"))
         if enforce_return_validity:
             for inv in invoices:
-                validity_date = inv.get("posa_return_valid_upto")
-                inv["posa_return_expired"] = (
+                validity_date = inv.get("custom_return_valid_upto")
+                inv["return_expired"] = (
                     1
                     if (validity_date and getdate(nowdate()) > getdate(validity_date))
                     else 0
@@ -995,8 +995,8 @@ def get_invoice_for_return(invoice_name, pos_profile="", doctype="Sales Invoice"
     return_expired = False
     if pos_profile:
         pos = frappe.get_cached_doc("POS Profile", pos_profile)
-        if cint(pos.get("posa_enable_return_validity")):
-            validity_date = getattr(doc, "posa_return_valid_upto", None)
+        if cint(pos.get("custom_enable_return_validity")):
+            validity_date = getattr(doc, "custom_return_valid_upto", None)
             if validity_date and getdate(nowdate()) > getdate(validity_date):
                 return_expired = True
 
@@ -1009,7 +1009,7 @@ def get_invoice_for_return(invoice_name, pos_profile="", doctype="Sales Invoice"
         "currency": doc.currency,
         "items": items,
         "is_fully_returned": is_fully_returned,
-        "posa_return_expired": return_expired,
+        "return_expired": return_expired,
         "payments": [
             {"mode_of_payment": p.mode_of_payment, "amount": p.amount}
             for p in doc.payments
@@ -1347,7 +1347,7 @@ def get_invoice_for_repeat(invoice_name, pos_profile="", doctype="Sales Invoice"
 
     items = []
     for item in doc.items:
-        if getattr(item, "posa_is_offer", False):
+        if getattr(item, "custom_is_offer", False):
             continue
 
         item_data = {

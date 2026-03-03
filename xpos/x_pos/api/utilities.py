@@ -22,7 +22,6 @@ _PSUTIL_MISSING_LOGGED = False
 import functools
 
 from .utils import get_item_groups, fetch_sales_person_names
-from xpos.utils import get_build_version
 
 
 def get_version():
@@ -152,29 +151,8 @@ def get_selling_price_lists():
     )
 
 
-@frappe.whitelist()
-def get_app_info() -> Dict[str, List[Dict[str, str]]]:
-    """
-    Return a list of installed apps and their versions.
-    """
-    # Get installed apps using Frappe's built-in function
-    installed_apps = frappe.get_installed_apps()
 
-    # Get app versions
-    apps_info = []
-    for app_name in installed_apps:
-        try:
-            # Get app version from hooks or __init__.py
-            app_version = frappe.get_attr(f"{app_name}.__version__") or "Unknown"
-        except (AttributeError, ImportError):
-            app_version = "Unknown"
-
-        apps_info.append({"app_name": app_name, "installed_version": app_version})
-
-    return {"apps": apps_info, "build_version": get_build_version()}
-
-
-def _get_git_commit_info(app_name: str = "posawesome") -> Dict[str, Any]:
+def _get_git_commit_info(app_name: str = "xpos") -> Dict[str, Any]:
     """Best-effort git commit details for the given app."""
     try:
         app_path = frappe.get_app_path(app_name)
@@ -203,13 +181,6 @@ def _get_git_commit_info(app_name: str = "posawesome") -> Dict[str, Any]:
     except Exception:
         return {}
 
-
-@frappe.whitelist()
-def get_build_info() -> Dict[str, Any]:
-    """Return build version + latest git commit info for update prompts."""
-    data: Dict[str, Any] = {"build_version": get_build_version()}
-    data.update(_get_git_commit_info("posawesome"))
-    return data
 
 
 def _fetch_remote(app_path: str) -> None:
@@ -326,46 +297,6 @@ def _get_current_branch(app_path: str) -> str:
         return ""
 
 
-@frappe.whitelist()
-def get_remote_update_info() -> Dict[str, Any]:
-    data: Dict[str, Any] = {"build_version": get_build_version()}
-    base = _get_git_commit_info("posawesome")
-    if base:
-        data.update(base)
-
-    try:
-        app_path = frappe.get_app_path("posawesome")
-    except Exception:
-        return data
-
-    if not app_path or not os.path.exists(app_path):
-        return data
-
-    _fetch_remote(app_path)
-    heads = _get_remote_heads(app_path)
-    data["remote_heads"] = heads
-    current_branch = _get_current_branch(app_path)
-    if current_branch:
-        data["current_branch"] = current_branch
-
-    current_hash = base.get("commit_hash") if base else None
-    if heads and current_hash and current_branch:
-        remote_head = heads.get(current_branch)
-        if remote_head and remote_head != current_hash:
-            different = {current_branch: remote_head}
-            data["remote_ahead"] = different
-            ref = f"origin/{current_branch}"
-            details = _get_commit_details(app_path, ref)
-            if details:
-                data["remote_sample_branch"] = current_branch
-                data["remote_sample"] = details
-            data["remote_commits"] = _get_commit_list(
-                app_path, f"{current_hash}..{ref}"
-            )
-
-    return data
-
-
 def ensure_child_doctype(doc, table_field, child_doctype):
     """Ensure child rows have the correct doctype set."""
     for row in doc.get(table_field, []):
@@ -448,10 +379,10 @@ def get_translation_dict(lang: str) -> dict:
 
 @frappe.whitelist()
 def get_pos_profile_tax_inclusive(pos_profile: str):
-    """Return the 'posa_tax_inclusive' setting for the given POS Profile."""
+    """Return the 'pos_tax_inclusive' setting for the given POS Profile."""
     if not pos_profile:
         return None
-    return frappe.get_cached_value("POS Profile", pos_profile, "posa_tax_inclusive")
+    return frappe.get_cached_value("POS Profile", pos_profile, "custom_tax_inclusive")
 
 
 @frappe.whitelist()
@@ -717,7 +648,7 @@ def get_available_languages():
     languages = []
 
     try:
-        translations_path = frappe.get_app_path("posawesome", "translations")
+        translations_path = frappe.get_app_path("xpos", "translations")
         if os.path.exists(translations_path):
             # Use os.scandir for better performance
             with os.scandir(translations_path) as entries:
@@ -846,7 +777,7 @@ def get_language_info(lang_code):
         language = next((lang for lang in available_languages if lang["code"] == lang_code), None)
 
         # Check translation file
-        translations_path = frappe.get_app_path("posawesome", "translations", f"{lang_code}.csv")
+        translations_path = frappe.get_app_path("xpos", "translations", f"{lang_code}.csv")
         has_translations = os.path.exists(translations_path)
 
         translation_count = 0

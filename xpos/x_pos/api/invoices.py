@@ -48,11 +48,11 @@ from xpos.x_pos.api.utils import log_perf_event
 def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
     started_at = time.perf_counter()
     filters = {
-        "posa_pos_opening_shift": pos_opening_shift,
+        "custom_pos_opening_shift": pos_opening_shift,
         "docstatus": 0,
     }
-    if frappe.db.has_column(doctype, "posa_is_printed"):
-        filters["posa_is_printed"] = 0
+    if frappe.db.has_column(doctype, "custom_is_printed"):
+        filters["custom_is_printed"] = 0
 
     invoices_list = frappe.get_list(
         doctype,
@@ -102,8 +102,8 @@ def delete_invoice(invoice):
     elif not frappe.db.exists("Sales Invoice", invoice):
         frappe.throw(_("Invoice {0} does not exist").format(invoice))
 
-    if frappe.db.has_column(doctype, "posa_is_printed") and frappe.get_value(
-        doctype, invoice, "posa_is_printed"
+    if frappe.db.has_column(doctype, "pos_is_printed") and frappe.get_value(
+        doctype, invoice, "pos_is_printed"
     ):
         frappe.throw(_("This invoice {0} cannot be deleted").format(invoice))
 

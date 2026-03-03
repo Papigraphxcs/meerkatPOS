@@ -1,6 +1,6 @@
 <template>
-	<div class="fixed inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/95 z-50 flex items-center justify-center p-4">
-		<div class="w-full max-w-md animate-in fade-in zoom-in-95 duration-300">
+	<div class="fixed inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/95 z-50 flex flex-col items-center overflow-y-auto p-4">
+		<div class="w-full max-w-md animate-in fade-in zoom-in-95 duration-300 my-auto">
 			<!-- Logo & Title -->
 			<div class="text-center mb-8">
 				<div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 shadow-lg">

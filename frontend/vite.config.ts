@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -8,7 +9,95 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   base: "/xpos/",
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: [
+        "pwa-192x192.svg",
+        "pwa-512x512.svg",
+        "apple-touch-icon.svg",
+      ],
+      manifest: {
+        name: "X POS - Point of Sale",
+        short_name: "X POS",
+        description: "Modern Point of Sale application with offline support",
+        theme_color: "#f97316",
+        background_color: "#ffffff",
+        display: "standalone",
+        scope: "/xpos/",
+        start_url: "/xpos/",
+        icons: [
+          {
+            src: "pwa-192x192.svg",
+            sizes: "192x192",
+            type: "image/svg+xml",
+          },
+          {
+            src: "pwa-512x512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+          },
+          {
+            src: "pwa-512x512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            purpose: "any maskable",
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
+        navigateFallback: "index.html",
+        navigateFallbackAllowlist: [/^\/xpos/],
+        runtimeCaching: [
+          {
+            urlPattern: /^https?:\/\/.*\/api\/method\//,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "xpos-api-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^https?:\/\/.*\/assets\//,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "xpos-assets-cache",
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^https?:\/\/.*\/files\//,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "xpos-files-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
+      },
+    }),
+  ],
   css: {
     postcss: "./postcss.config.js",
   },

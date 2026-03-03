@@ -64,7 +64,6 @@ from .shifts import (
 )
 from .utilities import (
     get_app_branch,
-    get_app_info,
     get_language_options,
     get_pos_profile_tax_inclusive,
     get_selling_price_lists,

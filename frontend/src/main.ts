@@ -4,6 +4,28 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import { router } from "./router";
+import { registerSW } from "virtual:pwa-register";
+
+// Register PWA service worker with auto-update
+const updateSW = registerSW({
+  onNeedRefresh() {
+    // Auto-update when new version available
+    if (confirm("A new version of X POS is available. Reload to update?")) {
+      updateSW(true);
+    }
+  },
+  onOfflineReady() {
+    console.log("[XPOS PWA] App is ready for offline use");
+  },
+  onRegisteredSW(swUrl, r) {
+    // Check for SW updates every hour
+    if (r) {
+      setInterval(() => {
+        r.update();
+      }, 60 * 60 * 1000);
+    }
+  },
+});
 
 // Setup frappe-like API wrapper for standalone mode
 function initializeFrappeAPI(): void {

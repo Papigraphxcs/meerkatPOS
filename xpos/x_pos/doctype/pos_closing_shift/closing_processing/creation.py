@@ -16,7 +16,7 @@ def make_closing_shift_from_opening(opening_shift):
     use_pos_invoice = frappe.db.get_value(
         "POS Profile",
         opening_shift.get("pos_profile"),
-        "create_pos_invoice_instead_of_sales_invoice",
+        "custom_create_pos_invoice_instead_of_sales_invoice",
     )
     doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
     submit_printed_invoices(opening_shift.get("name"), doctype)
@@ -35,7 +35,7 @@ def make_closing_shift_from_opening(opening_shift):
     cash_mode_of_payment = frappe.get_value(
         "POS Profile",
         opening_shift.get("pos_profile"),
-        "posa_cash_mode_of_payment",
+        "custom_cash_mode_of_payment",
     ) or "Cash"
 
     invoices = get_pos_invoices(opening_shift.get("name"), doctype)

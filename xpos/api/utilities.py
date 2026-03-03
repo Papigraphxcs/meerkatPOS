@@ -29,38 +29,12 @@ def get_selling_price_lists():
 
 
 @frappe.whitelist()
-def get_app_info():
-    """Returns installed apps, versions, and build version."""
-    
-    from xpos.utils import get_build_version
-
-    apps = []
-    try:
-        installed_apps = frappe.get_installed_apps()
-        for app in installed_apps:
-            try:
-                version = frappe.get_attr(f"{app}.__version__")
-            except Exception:
-                version = "unknown"
-            apps.append({"app": app, "version": version})
-    except Exception:
-        pass
-
-    return {
-        "apps": apps,
-        "build_version": (
-            get_build_version() if hasattr(get_build_version, "__call__") else "0.0.1"
-        ),
-    }
-
-
-@frappe.whitelist()
 def get_pos_profile_tax_inclusive(pos_profile):
     """Returns tax inclusive flag for a POS Profile."""
     
     try:
         return cint(
-            frappe.db.get_value("POS Profile", pos_profile, "posa_tax_inclusive")
+            frappe.db.get_value("POS Profile", pos_profile, "custom_tax_inclusive")
         )
     except Exception:
         return 0

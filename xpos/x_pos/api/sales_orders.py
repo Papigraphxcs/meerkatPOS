@@ -61,7 +61,7 @@ def _map_delivery_dates(data):
     # Map order level delivery date with robust fallback.
     order_delivery_date = (
         parse_date(data.get("delivery_date"))
-        or parse_date(data.get("posa_delivery_date"))
+        or parse_date(data.get("custom_pos_delivery_date"))
         or parse_date(data.get("transaction_date"))
         or parse_date(data.get("posting_date"))
         or str(getdate(nowdate()))
@@ -75,12 +75,12 @@ def _map_delivery_dates(data):
 
         item_delivery = (
             parse_date(item.get("delivery_date"))
-            or parse_date(item.get("posa_delivery_date"))
+            or parse_date(item.get("custom_pos_delivery_date"))
             or order_delivery_date
         )
         if item_delivery:
             item["delivery_date"] = item_delivery
-            item.setdefault("posa_delivery_date", item_delivery)
+            item.setdefault("custom_delivery_date", item_delivery)
 
 
 @frappe.whitelist()
@@ -114,7 +114,7 @@ def _create_payment_entries(so_doc, payments):
             amount=pay.get("amount"),
             currency=pay.get("currency") or so_doc.currency,
             mode_of_payment=pay.get("mode_of_payment"),
-            reference_no=so_doc.get("posa_pos_opening_shift"),
+            reference_no=so_doc.get("custom_pos_opening_shift"),
             reference_date=nowdate(),
             posting_date=nowdate(),
             submit=0,

@@ -39,10 +39,10 @@ def _resolve_write_off_limit(pos_profile_doc):
 
     candidate_fields = (
         "write_off_limit",
-        "posa_max_write_off_amount",
+        "custom_max_write_off_amount",
         "max_write_off_amount",
         "write_off_amount",
-        "posa_write_off_limit",
+        "custom_write_off_limit",
     )
 
     for fieldname in candidate_fields:
@@ -81,7 +81,7 @@ def _apply_write_off_settings(invoice_doc, data):
     if write_off_limit is not None:
         effective_write_off = min(effective_write_off, write_off_limit)
 
-    allow_partial_payment = cint(profile_doc.get("posa_allow_partial_payment")) if profile_doc else 0
+    allow_partial_payment = cint(profile_doc.get("allow_partial_payment")) if profile_doc else 0
     is_credit_sale = cint(data.get("is_credit_sale"))
 
     settled_by_payments = 0
@@ -139,16 +139,16 @@ def _sanitize_delivery_dates(payload):
     if not isinstance(payload, dict):
         return
 
-    if "posa_delivery_date" in payload:
-        payload["posa_delivery_date"] = _safe_date_string(payload.get("posa_delivery_date"))
+    if "custom_pos_delivery_date" in payload:
+        payload["custom_pos_delivery_date"] = _safe_date_string(payload.get("custom_pos_delivery_date"))
 
     items = payload.get("items")
     if not isinstance(items, list):
         return
 
     for item in items:
-        if isinstance(item, dict) and "posa_delivery_date" in item:
-            item["posa_delivery_date"] = _safe_date_string(item.get("posa_delivery_date"))
+        if isinstance(item, dict) and "custom_delivery_date" in item:
+            item["custom_delivery_date"] = _safe_date_string(item.get("custom_delivery_date"))
 
 
 @frappe.whitelist()
@@ -161,7 +161,7 @@ def update_invoice(data):
     pos_profile = data.get("pos_profile")
     doctype = "Sales Invoice"
     if pos_profile and frappe.db.get_value(
-        "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
+        "POS Profile", pos_profile, "custom_create_pos_invoice_instead_of_sales_invoice"
     ):
         doctype = "POS Invoice"
 
@@ -343,7 +343,7 @@ def update_invoice(data):
         data["plc_conversion_rate"] = plc_conversion_rate
         data["exchange_rate_date"] = exchange_rate_date
 
-    inclusive = frappe.get_cached_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive")
+    inclusive = frappe.get_cached_value("POS Profile", invoice_doc.pos_profile, "custom_tax_inclusive")
     if invoice_doc.get("taxes"):
         for tax in invoice_doc.taxes:
             if tax.charge_type == "Actual":
@@ -384,7 +384,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
     pos_profile = invoice.get("pos_profile")
     doctype = "Sales Invoice"
     if pos_profile and frappe.db.get_value(
-        "POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
+        "POS Profile", pos_profile, "custom_create_pos_invoice_instead_of_sales_invoice"
     ):
         doctype = "POS Invoice"
 
@@ -418,7 +418,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
     # Ensure item name overrides are respected on submit
     _apply_item_name_overrides(invoice_doc)
-    if invoice.get("posa_delivery_date"):
+    if invoice.get("custom_pos_delivery_date"):
         invoice_doc.update_stock = 0
     mop_cash_list = [
         i.mode_of_payment
@@ -469,7 +469,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
     _auto_set_return_batches(invoice_doc)
 
-    # if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_auto_set_batch"):
+    # if frappe.get_value("POS Profile", invoice_doc.pos_profile, "pos_auto_set_batch"):
     #     set_batch_nos(invoice_doc, "warehouse", throw=True)
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
 
@@ -479,7 +479,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-    invoice_doc.posa_is_printed = 1
+    invoice_doc.printed = 1
     invoice_doc.save()
 
     if data.get("due_date"):
@@ -494,7 +494,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
     allow_background_submit = frappe.get_value(
         "POS Profile",
         invoice_doc.pos_profile,
-        "posa_allow_submissions_in_background_job",
+        "custom_allow_submissions_in_background_job",
     )
 
     if submit_in_background and allow_background_submit:

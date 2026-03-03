@@ -264,13 +264,13 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
 
                 jv_doc.flags.ignore_permissions = True
                 frappe.flags.ignore_account_permission = True
-                jv_doc.user_remark = get_posawesome_credit_redeem_remark(invoice_doc.name)
+                jv_doc.user_remark = get_pos_credit_redeem_remark(invoice_doc.name)
                 jv_doc.set_missing_values()
                 try:
                     jv_doc.save()
                     jv_doc.submit()
                 except Exception as e:
-                    frappe.log_error(frappe.get_traceback(), "POSAwesome JV Error")
+                    frappe.log_error(frappe.get_traceback(), "X POS JV Error")
                     frappe.throw(_("Unable to create Journal Entry for customer credit."))
 
     if is_payment_entry and total_cash > 0:
@@ -290,7 +290,7 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
                     "paid_to": payment.account,
                     "company": invoice_doc.company,
                     "mode_of_payment": payment.mode_of_payment,
-                    "reference_no": invoice_doc.posa_pos_opening_shift,
+                    "reference_no": invoice_doc.custom_pos_opening_shift,
                     "reference_date": today,
                 }
             )

@@ -119,7 +119,7 @@ def check_coupon_code(coupon_code, customer=None, company=None):
         count = frappe.db.count(
             "POS Coupon Detail",
             filters={
-                "parentfield": "posa_coupons",
+                "parentfield": "custom_coupons",
                 "parenttype": "Sales Invoice",
                 "docstatus": 1,
                 "customer": customer,

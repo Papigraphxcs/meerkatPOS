@@ -203,7 +203,7 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
 def create_supplier(data):
     payload = json.loads(data) if isinstance(data, str) else data
     profile = _resolve_pos_profile(payload.get("pos_profile"))
-    _ensure_allowed(profile, "posa_allow_create_purchase_suppliers", _("Create suppliers"))
+    _ensure_allowed(profile, "custom_allow_create_purchase_suppliers", _("Create suppliers"))
 
     supplier_name = payload.get("supplier_name") or payload.get("supplier")
     if not supplier_name:
@@ -265,7 +265,7 @@ def get_buying_price_list():
 def create_purchase_item(data):
     payload = json.loads(data) if isinstance(data, str) else data
     profile = _resolve_pos_profile(payload.get("pos_profile"))
-    _ensure_allowed(profile, "posa_allow_create_purchase_items", _("Create items"))
+    _ensure_allowed(profile, "custom_allow_create_purchase_items", _("Create items"))
 
     item_code = payload.get("item_code") or payload.get("item_name")
     item_name = payload.get("item_name") or item_code
@@ -429,11 +429,11 @@ def create_purchase_order(data):
 
     payload = json.loads(data) if isinstance(data, str) else data
     profile = _resolve_pos_profile(payload.get("pos_profile"))
-    _ensure_allowed(profile, "posa_allow_purchase_order", _("Purchase orders"))
+    _ensure_allowed(profile, "custom_allow_purchase_order", _("Purchase orders"))
 
     receive_now = cint(payload.get("receive"))
     if receive_now:
-        _ensure_allowed(profile, "posa_allow_purchase_receipt", _("Receive stock"))
+        _ensure_allowed(profile, "custom_allow_purchase_receipt", _("Receive stock"))
 
     supplier_input = payload.get("supplier")
     if not supplier_input:

@@ -1,17 +1,15 @@
 <template>
     <Dialog :open="customerStore.showCustomerDialog" @update:open="(val: boolean) => { if (!val) close() }">
         <DialogContent class="max-w-md max-h-[80vh] flex flex-col p-0 gap-0">
-            <!-- Header -->
             <DialogHeader class="shrink-0 px-5 pt-5 pb-3 space-y-3 border-b border-border">
                 <div class="flex items-center justify-between">
-                    <DialogTitle>Select Customer</DialogTitle>
+                    <DialogTitle>{{ __("Select Customer") }}</DialogTitle>
                 </div>
-                <DialogDescription class="sr-only">Search for or create a customer</DialogDescription>
+                <DialogDescription class="sr-only">{{ __("Search for or create a customer") }}</DialogDescription>
 
-                <!-- Search -->
                 <div class="relative">
                     <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input ref="searchInput" v-model="search" type="text" placeholder="Search by name, phone, email..."
+                    <Input ref="searchInput" v-model="search" type="text" :placeholder="__('Search by name, phone, email...')"
                         class="pl-9" @input="debouncedSearch"
                         @keydown.down.prevent="moveHighlight(1)"
                         @keydown.up.prevent="moveHighlight(-1)"
@@ -19,14 +17,11 @@
                 </div>
             </DialogHeader>
 
-            <!-- Customer List -->
             <div ref="listContainer" class="flex-1 overflow-y-auto xpos-scrollbar">
-                <!-- Loading -->
                 <div v-if="customerStore.isLoading" class="p-4 space-y-3">
                     <div v-for="i in 5" :key="i" class="skeleton h-14 w-full rounded-xl"></div>
                 </div>
 
-                <!-- List -->
                 <div v-else-if="customerStore.customers.length > 0" class="p-2">
                     <button v-for="(cust, idx) in customerStore.customers" :key="cust.name"
                         :ref="el => { if (el) customerRefs[idx] = el as HTMLButtonElement }"
@@ -34,8 +29,8 @@
                         @mouseenter="highlightedIndex = idx"
                         class="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left group"
                         :class="idx === highlightedIndex
-                            ? 'bg-primary/10 dark:bg-primary/20 ring-1 ring-primary/30'
-                            : 'hover:bg-accent'">
+                            ? 'bg-primary/10 dark:bg-primary/20 ring-1 ring-primary/30 border border-primary/40'
+                            : 'hover:bg-accent border border-transparent'">
                         <Avatar class="shrink-0">
                             <img
                                 v-if="cust.image"
@@ -78,12 +73,67 @@
                 </div>
 
                 <!-- New Customer Form -->
-                <div v-else class="space-y-3 animate-slide-up">
+                <div v-else class="space-y-3 animate-slide-up max-h-[50vh] overflow-y-auto xpos-scrollbar pr-1">
                     <h3 class="text-sm font-semibold text-foreground">New Customer</h3>
+
+                    <!-- Customer Name (required) -->
                     <Input v-model="newCustomer.customer_name" type="text" placeholder="Customer Name *" />
-                    <Input v-model="newCustomer.mobile_no" type="tel" placeholder="Mobile Number" />
-                    <Input v-model="newCustomer.email_id" type="email" placeholder="Email Address" />
-                    <div class="flex gap-2">
+
+                    <!-- Tax ID + Mobile No (side by side) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <Input v-model="newCustomer.tax_id" type="text" placeholder="Tax ID" />
+                        <Input v-model="newCustomer.mobile_no" type="tel" placeholder="Mobile No" />
+                    </div>
+
+                    <!-- Address Line 1 -->
+                    <Input v-model="newCustomer.address_line1" type="text" placeholder="Address Line 1" />
+
+                    <!-- City + Country (side by side) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <Input v-model="newCustomer.city" type="text" placeholder="City" />
+                        <select v-model="newCustomer.country"
+                            class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                            <option value="" disabled>Country</option>
+                            <option v-for="c in countries" :key="c" :value="c">{{ c }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Email + Gender (side by side) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <Input v-model="newCustomer.email_id" type="email" placeholder="Email Id" />
+                        <select v-model="newCustomer.gender"
+                            class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                            <option value="" disabled>Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+
+                    <!-- Referral Code + Birthday (side by side) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <Input v-model="newCustomer.referral_code" type="text" placeholder="Referral Code" />
+                        <Input v-model="newCustomer.birthday" type="text" placeholder="Birthday (DD-MM-YYYY)"
+                            @focus="(e: FocusEvent) => { (e.target as HTMLInputElement).type = 'date' }"
+                            @blur="(e: FocusEvent) => { if (!(e.target as HTMLInputElement).value) (e.target as HTMLInputElement).type = 'text' }" />
+                    </div>
+
+                    <!-- Customer Group + Territory (side by side) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <select v-model="newCustomer.customer_group"
+                            class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                            <option value="" disabled>Customer Group *</option>
+                            <option v-for="g in customerGroups" :key="g" :value="g">{{ g }}</option>
+                        </select>
+                        <select v-model="newCustomer.territory"
+                            class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                            <option value="" disabled>Territory *</option>
+                            <option v-for="t in territories" :key="t" :value="t">{{ t }}</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-2 pt-1">
                         <Button variant="outline" class="flex-1" size="sm" @click="showNewForm = false">Cancel</Button>
                         <Button class="flex-1" size="sm" :disabled="!newCustomer.customer_name || isCreating"
                             @click="createAndSelect">
@@ -101,7 +151,8 @@
 import { ref, watch, onMounted, nextTick } from "vue";
 import { useCartStore } from "@/stores/cartStore";
 import { useCustomerStore } from "@/stores/customerStore";
-import { showSuccess, showError } from "@/services/api";
+import { usePosStore } from "@/stores/posStore";
+import { showSuccess, showError, call } from "@/services/api";
 import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -109,9 +160,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, ChevronRight, Users, UserPlus, Loader2 } from "lucide-vue-next";
+import __ from "@/lib/translate";
 
 const cartStore = useCartStore();
 const customerStore = useCustomerStore();
+const posStore = usePosStore();
 
 const searchInput = ref<InstanceType<typeof Input> | null>(null);
 const listContainer = ref<HTMLElement | null>(null);
@@ -120,10 +173,25 @@ const search = ref("");
 const showNewForm = ref(false);
 const isCreating = ref(false);
 const highlightedIndex = ref(-1);
+
+// Dropdown options
+const customerGroups = ref<string[]>([]);
+const territories = ref<string[]>([]);
+const countries = ref<string[]>([]);
+
 const newCustomer = ref({
     customer_name: "",
+    tax_id: "",
     mobile_no: "",
+    address_line1: "",
+    city: "",
+    country: "",
     email_id: "",
+    gender: "",
+    referral_code: "",
+    birthday: "",
+    customer_group: "",
+    territory: "",
 });
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -139,7 +207,27 @@ onMounted(() => {
         const input = el?.querySelector?.("input") || el;
         (input as HTMLInputElement)?.focus();
     });
+
+    // Fetch dropdown options for the new customer form
+    fetchDropdownOptions();
 });
+
+async function fetchDropdownOptions() {
+    try {
+        const [groupsResult, territoriesResult, countriesResult] = await Promise.all([
+            call<string[]>("xpos.api.customers.get_customer_groups").catch(() => []),
+            call<string[]>("xpos.api.customers.get_territories").catch(() => []),
+            call<string[]>("xpos.api.customers.get_countries").catch(() => []),
+        ]);
+        customerGroups.value = groupsResult || ["All Customer Groups"];
+        territories.value = territoriesResult || ["All Territories"];
+        countries.value = countriesResult || ["Pakistan"];
+    } catch {
+        customerGroups.value = ["All Customer Groups"];
+        territories.value = ["All Territories"];
+        countries.value = ["Pakistan"];
+    }
+}
 
 function debouncedSearch() {
     if (searchTimeout) clearTimeout(searchTimeout);
@@ -184,7 +272,28 @@ async function createAndSelect() {
     isCreating.value = true;
 
     try {
-        const result = await customerStore.createCustomer(newCustomer.value);
+        // Build payload with all fields
+        const payload: Record<string, unknown> = {
+            customer_name: newCustomer.value.customer_name,
+            mobile_no: newCustomer.value.mobile_no || undefined,
+            email_id: newCustomer.value.email_id || undefined,
+            tax_id: newCustomer.value.tax_id || undefined,
+            gender: newCustomer.value.gender || undefined,
+            referral_code: newCustomer.value.referral_code || undefined,
+            birthday: newCustomer.value.birthday || undefined,
+            customer_group: newCustomer.value.customer_group || undefined,
+            territory: newCustomer.value.territory || undefined,
+            address_line1: newCustomer.value.address_line1 || undefined,
+            city: newCustomer.value.city || undefined,
+            country: newCustomer.value.country || undefined,
+        };
+
+        // Remove undefined values
+        Object.keys(payload).forEach((key) => {
+            if (payload[key] === undefined) delete payload[key];
+        });
+
+        const result = await customerStore.createCustomer(payload);
         cartStore.setCustomer(result);
         showSuccess("Customer created successfully!");
         close();
@@ -209,5 +318,20 @@ function close() {
     customerStore.showCustomerDialog = false;
     showNewForm.value = false;
     search.value = "";
+    // Reset form
+    newCustomer.value = {
+        customer_name: "",
+        tax_id: "",
+        mobile_no: "",
+        address_line1: "",
+        city: "",
+        country: "",
+        email_id: "",
+        gender: "",
+        referral_code: "",
+        birthday: "",
+        customer_group: "",
+        territory: "",
+    };
 }
 </script>

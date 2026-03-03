@@ -142,7 +142,7 @@ def fetch_sales_person_names():
         allowed = []
         if profile:
             allowed = [
-                d.get("sales_person") for d in profile.get("posa_sales_persons", []) if d.get("sales_person")
+                d.get("sales_person") for d in profile.get("custom_allowed_sales_persons", []) if d.get("sales_person")
             ]
 
         filters = {"enabled": 1}
@@ -175,7 +175,7 @@ def fetch_sales_person_names():
 def is_perf_logging_enabled() -> bool:
     """Return True when lightweight POS performance logging is enabled."""
 
-    return bool(frappe.conf.get("posa_perf_log_enabled"))
+    return bool(frappe.conf.get("pos_perf_log_enabled"))
 
 
 def log_perf_event(event: str, started_at: float, **context):
@@ -187,7 +187,7 @@ def log_perf_event(event: str, started_at: float, **context):
     elapsed_ms = round((time.perf_counter() - started_at) * 1000, 2)
     context_parts = [f"{key}={context[key]}" for key in sorted(context.keys())]
     context_str = " ".join(context_parts)
-    logger.info("[POSA_PERF] event=%s elapsed_ms=%s %s", event, elapsed_ms, context_str)
+    logger.info("[POS_PERF] event=%s elapsed_ms=%s %s", event, elapsed_ms, context_str)
 
 
 @cache

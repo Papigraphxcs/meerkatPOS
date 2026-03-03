@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Company", {
 	setup: function (frm) {
-		frm.set_query("posa_customer_offer", function () {
+		frm.set_query("pos_customer_offer", function () {
 			return {
 				filters: {
 					company: frm.doc.name,
@@ -12,7 +12,7 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
-		frm.set_query("posa_primary_offer", function () {
+		frm.set_query("pos_primary_offer", function () {
 			return {
 				filters: {
 					company: frm.doc.name,

@@ -2,163 +2,18 @@ import { defineStore } from "pinia";
 import { ref, computed, watch, type Ref, type ComputedRef } from "vue";
 import { call, showSuccess, showError, showInfo } from "@/services/api";
 import { usePosStore } from "@/stores/posStore";
+import {
+  addPendingInvoice,
+  getAllPendingInvoices,
+  updatePendingInvoice,
+  deletePendingInvoice as idbDeletePending,
+  countPendingInvoices,
+  type PendingInvoice,
+} from "@/services/idbService";
 import type { InvoiceData } from "@/types/pos.types";
 
-// ─── IndexedDB helpers (with in-memory fallback) ─
-const DB_NAME = "xpos_offline";
-const DB_VERSION = 1;
-const STORE_NAME = "pending_invoices";
-
-/** Whether IndexedDB is available on this browser/session */
-let idbAvailable: boolean | null = null;
-let nextMemId = 1;
-const memoryStore: Map<number, OfflineInvoice> = new Map();
-
-async function checkIDB(): Promise<boolean> {
-    if (idbAvailable !== null) return idbAvailable;
-    try {
-        await new Promise<void>((resolve, reject) => {
-            const req = indexedDB.open("__xpos_idb_test__", 1);
-            req.onsuccess = () => { req.result.close(); resolve(); };
-            req.onerror = () => reject(req.error);
-            req.onblocked = () => reject(new Error("blocked"));
-        });
-        // Clean up test DB
-        indexedDB.deleteDatabase("__xpos_idb_test__");
-        idbAvailable = true;
-    } catch {
-        console.warn("[XPOS Offline] IndexedDB unavailable – using in-memory fallback");
-        idbAvailable = false;
-    }
-    return idbAvailable;
-}
-
-function openDB(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (event) => {
-            const db = (event.target as IDBOpenDBRequest).result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                const store = db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
-                store.createIndex("created_at", "created_at", { unique: false });
-            }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-        request.onblocked = () => reject(new Error("IndexedDB blocked"));
-    });
-}
-
-async function dbAdd(record: OfflineInvoice): Promise<number> {
-    if (!(await checkIDB())) {
-        const id = nextMemId++;
-        memoryStore.set(id, { ...record, id });
-        return id;
-    }
-    const db = await openDB();
-    try {
-        return await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, "readwrite");
-            const store = tx.objectStore(STORE_NAME);
-            const req = store.add(record);
-            tx.oncomplete = () => resolve(req.result as number);
-            tx.onerror = () => reject(tx.error);
-            tx.onabort = () => reject(tx.error);
-        });
-    } finally {
-        db.close();
-    }
-}
-
-async function dbGetAll(): Promise<OfflineInvoice[]> {
-    if (!(await checkIDB())) {
-        return Array.from(memoryStore.values());
-    }
-    const db = await openDB();
-    try {
-        return await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, "readonly");
-            const store = tx.objectStore(STORE_NAME);
-            const req = store.getAll();
-            tx.oncomplete = () => resolve(req.result);
-            tx.onerror = () => reject(tx.error);
-            tx.onabort = () => reject(tx.error);
-        });
-    } finally {
-        db.close();
-    }
-}
-
-async function dbDelete(id: number): Promise<void> {
-    if (!(await checkIDB())) {
-        memoryStore.delete(id);
-        return;
-    }
-    const db = await openDB();
-    try {
-        return await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, "readwrite");
-            const store = tx.objectStore(STORE_NAME);
-            store.delete(id);
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-            tx.onabort = () => reject(tx.error);
-        });
-    } finally {
-        db.close();
-    }
-}
-
-async function dbUpdate(record: OfflineInvoice): Promise<void> {
-    if (!(await checkIDB())) {
-        if (record.id) memoryStore.set(record.id, { ...record });
-        return;
-    }
-    const db = await openDB();
-    try {
-        return await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, "readwrite");
-            const store = tx.objectStore(STORE_NAME);
-            store.put(record);
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-            tx.onabort = () => reject(tx.error);
-        });
-    } finally {
-        db.close();
-    }
-}
-
-async function dbCount(): Promise<number> {
-    if (!(await checkIDB())) {
-        return memoryStore.size;
-    }
-    const db = await openDB();
-    try {
-        return await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, "readonly");
-            const store = tx.objectStore(STORE_NAME);
-            const req = store.count();
-            tx.oncomplete = () => resolve(req.result);
-            tx.onerror = () => reject(tx.error);
-            tx.onabort = () => reject(tx.error);
-        });
-    } finally {
-        db.close();
-    }
-}
-
-// ─── Types ───────────────────────────────────────
-export interface OfflineInvoice {
-    id?: number;
-    data: InvoiceData;
-    status: "pending" | "syncing" | "failed";
-    created_at: string;
-    error?: string;
-    retry_count: number;
-    customer_name?: string;
-    grand_total?: number;
-}
+// Re-export for compatibility
+export type OfflineInvoice = PendingInvoice;
 
 // ─── Store ───────────────────────────────────────
 export const useOfflineStore = defineStore("offline", () => {
@@ -178,7 +33,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
     const offlineModeEnabled: ComputedRef<boolean> = computed(() => {
         const posStore = usePosStore();
-        return !!posStore.posProfile?.posa_local_storage;
+        return !!posStore.posProfile?.custom_use_offline_mode;
     });
 
     const statusLabel: ComputedRef<string> = computed(() => {
@@ -228,7 +83,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
     async function refreshPendingCount() {
         try {
-            pendingCount.value = await dbCount();
+            pendingCount.value = await countPendingInvoices();
         } catch {
             pendingCount.value = 0;
         }
@@ -241,16 +96,16 @@ export const useOfflineStore = defineStore("offline", () => {
         grandTotal?: number
     ): Promise<{ success: boolean; localId?: number }> {
         try {
-            const record: OfflineInvoice = {
-                data: invoiceData,
-                status: "pending",
+            const record = {
+                data: invoiceData as unknown,
+                status: "pending" as const,
                 created_at: new Date().toISOString(),
                 retry_count: 0,
                 customer_name: customerName || invoiceData.customer,
                 grand_total: grandTotal,
             };
 
-            const id = await dbAdd(record);
+            const id = await addPendingInvoice(record);
             await refreshPendingCount();
             await loadPendingInvoices();
 
@@ -264,7 +119,7 @@ export const useOfflineStore = defineStore("offline", () => {
     // ─── Load all pending invoices ─────────────────
     async function loadPendingInvoices() {
         try {
-            pendingInvoices.value = await dbGetAll();
+            pendingInvoices.value = await getAllPendingInvoices() as OfflineInvoice[];
             pendingCount.value = pendingInvoices.value.length;
         } catch {
             pendingInvoices.value = [];
@@ -280,7 +135,7 @@ export const useOfflineStore = defineStore("offline", () => {
         syncErrors.value = [];
 
         try {
-            const invoices = await dbGetAll();
+            const invoices = await getAllPendingInvoices() as OfflineInvoice[];
             if (invoices.length === 0) {
                 isSyncing.value = false;
                 return;
@@ -298,7 +153,7 @@ export const useOfflineStore = defineStore("offline", () => {
                 try {
                     // Mark as syncing
                     invoice.status = "syncing";
-                    if (invoice.id) await dbUpdate(invoice);
+                    if (invoice.id) await updatePendingInvoice(invoice as PendingInvoice);
 
                     const result = await call<{ name: string }>(
                         "xpos.api.invoices.create_invoice",
@@ -306,7 +161,7 @@ export const useOfflineStore = defineStore("offline", () => {
                     );
 
                     // Success — remove from IndexedDB
-                    if (invoice.id) await dbDelete(invoice.id);
+                    if (invoice.id) await idbDeletePending(invoice.id);
                     synced++;
                 } catch (error: unknown) {
                     failed++;
@@ -321,7 +176,7 @@ export const useOfflineStore = defineStore("offline", () => {
                         );
                     }
 
-                    if (invoice.id) await dbUpdate(invoice);
+                    if (invoice.id) await updatePendingInvoice(invoice as PendingInvoice);
                 }
             }
 
@@ -349,20 +204,20 @@ export const useOfflineStore = defineStore("offline", () => {
             return false;
         }
 
-        const invoices = await dbGetAll();
+        const invoices = await getAllPendingInvoices() as OfflineInvoice[];
         const invoice = invoices.find((i) => i.id === id);
         if (!invoice) return false;
 
         try {
             invoice.status = "syncing";
-            await dbUpdate(invoice);
+            await updatePendingInvoice(invoice as PendingInvoice);
 
             await call<{ name: string }>(
                 "xpos.api.invoices.create_invoice",
                 { data: JSON.stringify(invoice.data) }
             );
 
-            await dbDelete(id);
+            await idbDeletePending(id);
             await refreshPendingCount();
             await loadPendingInvoices();
             showSuccess("Invoice synced successfully");
@@ -371,7 +226,7 @@ export const useOfflineStore = defineStore("offline", () => {
             invoice.status = "failed";
             invoice.retry_count = (invoice.retry_count || 0) + 1;
             invoice.error = error instanceof Error ? error.message : String(error);
-            await dbUpdate(invoice);
+            await updatePendingInvoice(invoice as PendingInvoice);
             await loadPendingInvoices();
             showError("Sync failed: " + invoice.error);
             return false;
@@ -380,16 +235,16 @@ export const useOfflineStore = defineStore("offline", () => {
 
     // ─── Delete a pending invoice ──────────────────
     async function deletePending(id: number): Promise<void> {
-        await dbDelete(id);
+        await idbDeletePending(id);
         await refreshPendingCount();
         await loadPendingInvoices();
     }
 
     // ─── Clear all pending invoices ────────────────
     async function clearAll(): Promise<void> {
-        const invoices = await dbGetAll();
+        const invoices = await getAllPendingInvoices();
         for (const inv of invoices) {
-            if (inv.id) await dbDelete(inv.id);
+            if (inv.id) await idbDeletePending(inv.id);
         }
         await refreshPendingCount();
         pendingInvoices.value = [];

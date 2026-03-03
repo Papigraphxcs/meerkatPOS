@@ -2,6 +2,15 @@ import { defineStore } from "pinia";
 import { ref, computed, type Ref, type ComputedRef } from "vue";
 import { call } from "@/services/api";
 import { usePosStore } from "@/stores/posStore";
+import {
+  cacheItems as idbCacheItems,
+  getCachedItems as idbGetCachedItems,
+  searchCachedItems as idbSearchCachedItems,
+  cacheItemGroups as idbCacheGroups,
+  getCachedItemGroups as idbGetCachedGroups,
+  cacheStockForWarehouse,
+  getCachedStock,
+} from "@/services/idbService";
 import type {
   POSItem,
   ItemGroup,
@@ -15,145 +24,6 @@ import type {
 interface ItemGroupsResult {
   groups: ItemGroup[];
   parent_groups: ItemGroup[];
-}
-
-// ─── IndexedDB cache for offline items (with in-memory fallback) ───
-const ITEM_DB_NAME = "xpos_items_cache";
-const ITEM_DB_VERSION = 1;
-const ITEMS_STORE = "items";
-const GROUPS_STORE = "item_groups";
-
-/** Whether IndexedDB is available on this browser/session */
-let itemIdbAvailable: boolean | null = null;
-let memItemCache: POSItem[] = [];
-let memGroupCache: { groups: ItemGroup[]; parentGroups: ItemGroup[] } = { groups: [], parentGroups: [] };
-
-async function checkItemIDB(): Promise<boolean> {
-  if (itemIdbAvailable !== null) return itemIdbAvailable;
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const req = indexedDB.open("__xpos_item_idb_test__", 1);
-      req.onsuccess = () => { req.result.close(); resolve(); };
-      req.onerror = () => reject(req.error);
-      req.onblocked = () => reject(new Error("blocked"));
-    });
-    indexedDB.deleteDatabase("__xpos_item_idb_test__");
-    itemIdbAvailable = true;
-  } catch {
-    console.warn("[XPOS Offline] IndexedDB unavailable for item cache – using in-memory fallback");
-    itemIdbAvailable = false;
-  }
-  return itemIdbAvailable;
-}
-
-function openItemDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(ITEM_DB_NAME, ITEM_DB_VERSION);
-    req.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains(ITEMS_STORE)) {
-        const store = db.createObjectStore(ITEMS_STORE, { keyPath: "item_code" });
-        store.createIndex("item_name", "item_name", { unique: false });
-        store.createIndex("item_group", "item_group", { unique: false });
-        store.createIndex("barcode", "barcode", { unique: false });
-      }
-      if (!db.objectStoreNames.contains(GROUPS_STORE)) {
-        db.createObjectStore(GROUPS_STORE, { keyPath: "name" });
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-    req.onblocked = () => reject(new Error("IndexedDB blocked"));
-  });
-}
-
-async function cacheItems(allItems: POSItem[]): Promise<void> {
-  if (!(await checkItemIDB())) {
-    memItemCache = [...allItems];
-    return;
-  }
-  const db = await openItemDB();
-  try {
-    const tx = db.transaction(ITEMS_STORE, "readwrite");
-    const store = tx.objectStore(ITEMS_STORE);
-    store.clear();
-    for (const item of allItems) {
-      store.put(item);
-    }
-    return await new Promise((resolve, reject) => {
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
-  } finally {
-    db.close();
-  }
-}
-
-async function cacheGroups(groups: ItemGroup[], parentGroups: ItemGroup[]): Promise<void> {
-  if (!(await checkItemIDB())) {
-    memGroupCache = { groups: [...groups], parentGroups: [...parentGroups] };
-    return;
-  }
-  const db = await openItemDB();
-  try {
-    const tx = db.transaction(GROUPS_STORE, "readwrite");
-    const store = tx.objectStore(GROUPS_STORE);
-    store.clear();
-    store.put({ name: "__parent_groups__", data: parentGroups });
-    store.put({ name: "__groups__", data: groups });
-    return await new Promise((resolve, reject) => {
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
-  } finally {
-    db.close();
-  }
-}
-
-async function getCachedItems(): Promise<POSItem[]> {
-  if (!(await checkItemIDB())) {
-    return memItemCache;
-  }
-  const db = await openItemDB();
-  try {
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(ITEMS_STORE, "readonly");
-      const store = tx.objectStore(ITEMS_STORE);
-      const req = store.getAll();
-      tx.oncomplete = () => resolve(req.result);
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
-  } finally {
-    db.close();
-  }
-}
-
-async function getCachedGroups(): Promise<{ groups: ItemGroup[]; parentGroups: ItemGroup[] }> {
-  if (!(await checkItemIDB())) {
-    return memGroupCache;
-  }
-  const db = await openItemDB();
-  try {
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(GROUPS_STORE, "readonly");
-      const store = tx.objectStore(GROUPS_STORE);
-      const g = store.get("__groups__");
-      const pg = store.get("__parent_groups__");
-      tx.oncomplete = () => {
-        resolve({
-          groups: g.result?.data || [],
-          parentGroups: pg.result?.data || [],
-        });
-      };
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
-  } finally {
-    db.close();
-  }
 }
 
 export const useItemStore = defineStore("items", () => {
@@ -187,36 +57,12 @@ export const useItemStore = defineStore("items", () => {
   // ─── Offline helpers ───────────────────────────
   function isOfflineEnabled(): boolean {
     const posStore = usePosStore();
-    return !!posStore.posProfile?.posa_local_storage;
-  }
-
-  /** Search cached items locally (client-side filter) */
-  function localSearch(allItems: POSItem[], term: string, group: string): POSItem[] {
-    let result = allItems;
-
-    // Filter by group
-    if (group && group !== "All Item Groups") {
-      result = result.filter((i) => i.item_group === group);
-    }
-
-    // Filter by search term (match item_code, item_name, barcode)
-    if (term) {
-      const lower = term.toLowerCase();
-      result = result.filter(
-        (i) =>
-          i.item_code.toLowerCase().includes(lower) ||
-          i.item_name.toLowerCase().includes(lower) ||
-          (i.barcode && i.barcode.toLowerCase().includes(lower)) ||
-          (i.description && i.description.toLowerCase().includes(lower))
-      );
-    }
-
-    return result;
+    return !!posStore.posProfile?.custom_use_offline_mode;
   }
 
   /**
    * Pre-load ALL items from server into IndexedDB cache.
-   * Called once after POS profile is ready when posa_local_storage is enabled.
+   * Called once after POS profile is ready when custom_use_offline_mode is enabled.
    */
   async function cacheAllItems(posProfile: string): Promise<void> {
     try {
@@ -240,10 +86,65 @@ export const useItemStore = defineStore("items", () => {
         start += batchSize;
       } while (batch.length === batchSize);
 
-      await cacheItems(allItems);
-      console.log(`[XPOS Offline] Cached ${allItems.length} items`);
+      await idbCacheItems(allItems);
+      console.log(`[XPOS Offline] Cached ${allItems.length} items in IndexedDB (idb)`);
+
+      // Also cache stock data for the warehouse
+      const posStoreRef = usePosStore();
+      const warehouse = posStoreRef.warehouse;
+      if (warehouse && allItems.length > 0) {
+        await cacheAllStock(posProfile, warehouse, allItems);
+      }
     } catch (error) {
       console.warn("[XPOS Offline] Failed to cache items:", error);
+    }
+  }
+
+  /**
+   * Cache stock availability for all items in the warehouse
+   */
+  async function cacheAllStock(posProfile: string, warehouse: string, allItems?: POSItem[]): Promise<void> {
+    try {
+      const itemsToCache = allItems || await idbGetCachedItems();
+      if (itemsToCache.length === 0) return;
+
+      // Fetch stock in batches of 50
+      const batchSize = 50;
+      const stockEntries: { item_code: string; actual_qty: number }[] = [];
+
+      for (let i = 0; i < itemsToCache.length; i += batchSize) {
+        const batch = itemsToCache.slice(i, i + batchSize);
+        const itemCodes = batch.map((item) => item.item_code);
+
+        try {
+          const stockResult = await call<StockAvailability[]>(
+            "xpos.api.items.get_stock_availability",
+            {
+              items: JSON.stringify(itemCodes),
+              warehouse,
+            }
+          );
+
+          if (stockResult) {
+            for (const s of stockResult) {
+              stockEntries.push({
+                item_code: s.item_code,
+                actual_qty: s.actual_qty || 0,
+              });
+            }
+          }
+        } catch {
+          // If a batch fails, use 0 qty for those items
+          for (const code of itemCodes) {
+            stockEntries.push({ item_code: code, actual_qty: 0 });
+          }
+        }
+      }
+
+      await cacheStockForWarehouse(warehouse, stockEntries);
+      console.log(`[XPOS Offline] Cached stock for ${stockEntries.length} items in warehouse ${warehouse}`);
+    } catch (error) {
+      console.warn("[XPOS Offline] Failed to cache stock:", error);
     }
   }
 
@@ -253,10 +154,9 @@ export const useItemStore = defineStore("items", () => {
     isLoading.value = true;
 
     try {
-      // Offline mode: search from IndexedDB cache
+      // Offline mode: search from IndexedDB cache via idb
       if (!navigator.onLine && isOfflineEnabled()) {
-        const cached = await getCachedItems();
-        const filtered = localSearch(cached, searchTerm.value, selectedGroup.value);
+        const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
 
         if (append) {
           const sliced = filtered.slice(items.value.length, items.value.length + pageLength.value);
@@ -267,6 +167,18 @@ export const useItemStore = defineStore("items", () => {
           currentPage.value = 0;
           hasMore.value = filtered.length > pageLength.value;
         }
+
+        // Enrich items with cached stock data
+        const posStoreRef = usePosStore();
+        if (posStoreRef.warehouse) {
+          const stockData = await getCachedStock(posStoreRef.warehouse);
+          const stockMap = new Map(stockData.map((s) => [s.item_code, s.actual_qty]));
+          items.value = items.value.map((item) => ({
+            ...item,
+            actual_qty: stockMap.get(item.item_code) ?? item.actual_qty,
+          }));
+        }
+
         return;
       }
 
@@ -301,12 +213,12 @@ export const useItemStore = defineStore("items", () => {
       // If fetch fails and we have a cache, fall back to it
       if (isOfflineEnabled()) {
         try {
-          const cached = await getCachedItems();
+          const cached = await idbGetCachedItems();
           if (cached.length > 0) {
-            const filtered = localSearch(cached, searchTerm.value, selectedGroup.value);
+            const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
             items.value = filtered.slice(0, pageLength.value);
             hasMore.value = filtered.length > pageLength.value;
-            console.log("[XPOS Offline] Serving items from cache");
+            console.log("[XPOS Offline] Serving items from idb cache");
             return;
           }
         } catch { /* ignore */ }
@@ -319,9 +231,9 @@ export const useItemStore = defineStore("items", () => {
 
   async function fetchItemGroups(): Promise<void> {
     try {
-      // Offline: load from cache
+      // Offline: load from idb cache
       if (!navigator.onLine && isOfflineEnabled()) {
-        const cached = await getCachedGroups();
+        const cached = await idbGetCachedGroups();
         itemGroups.value = cached.groups;
         parentGroups.value = cached.parentGroups;
         return;
@@ -335,13 +247,13 @@ export const useItemStore = defineStore("items", () => {
 
       // Cache groups when online
       if (isOfflineEnabled()) {
-        cacheGroups(itemGroups.value, parentGroups.value).catch(() => { });
+        idbCacheGroups(itemGroups.value, parentGroups.value).catch(() => { });
       }
     } catch (error) {
-      // Fall back to cache
+      // Fall back to idb cache
       if (isOfflineEnabled()) {
         try {
-          const cached = await getCachedGroups();
+          const cached = await idbGetCachedGroups();
           if (cached.groups.length > 0) {
             itemGroups.value = cached.groups;
             parentGroups.value = cached.parentGroups;
@@ -358,9 +270,9 @@ export const useItemStore = defineStore("items", () => {
     _posProfile?: string
   ): Promise<POSItem | null> {
     try {
-      // Offline: search barcode from cache
+      // Offline: search barcode from idb cache
       if (!navigator.onLine && isOfflineEnabled()) {
-        const cached = await getCachedItems();
+        const cached = await idbGetCachedItems();
         const lower = barcode.toLowerCase();
         return cached.find(
           (i) =>
@@ -378,10 +290,10 @@ export const useItemStore = defineStore("items", () => {
       );
       return result;
     } catch (error) {
-      // Fall back to cache on error
+      // Fall back to idb cache on error
       if (isOfflineEnabled()) {
         try {
-          const cached = await getCachedItems();
+          const cached = await idbGetCachedItems();
           const lower = barcode.toLowerCase();
           return cached.find(
             (i) =>
@@ -603,6 +515,7 @@ export const useItemStore = defineStore("items", () => {
     fetchPriceForUOM,
     fetchBundleComponents,
     cacheAllItems,
+    cacheAllStock,
     setSearchTerm,
     setSelectedGroup,
     loadMore,

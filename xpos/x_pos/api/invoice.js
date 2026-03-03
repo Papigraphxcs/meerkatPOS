@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Sales Invoice", {
 	setup: function (frm) {
-		frm.set_query("posa_delivery_charges", function (doc) {
+		frm.set_query("pos_delivery_charges", function (doc) {
 			return {
 				filters: { company: doc.company, disabled: 0 },
 			};

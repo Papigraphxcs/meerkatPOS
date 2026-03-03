@@ -391,10 +391,10 @@ async function viewOrder(order: Invoice) {
 }
 
 function printInvoice(name: string) {
+    const url = `/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=XPOS+Thermal+Receipt&no_letterhead=0`;
     if (typeof frappe !== "undefined" && frappe.urllib) {
-        const url = frappe.urllib.get_full_url(
-            "/printview?doctype=Sales+Invoice&name=" + encodeURIComponent(name) + "&format=POS+Invoice&no_letterhead=0"
-        );
+        window.open(frappe.urllib.get_full_url(url), "_blank");
+    } else {
         window.open(url, "_blank");
     }
 }

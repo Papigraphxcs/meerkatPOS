@@ -85,7 +85,7 @@ def get_customer_balance(customer):
 @frappe.whitelist()
 def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
     _pos_profile = json.loads(pos_profile)
-    ttl = _pos_profile.get("posa_server_cache_duration")
+    ttl = _pos_profile.get("custom_server_cache_duration")
     if ttl:
         ttl = int(ttl) * 60
 
@@ -128,7 +128,7 @@ def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, m
         )
         return customers
 
-    if _pos_profile.get("posa_use_server_cache") and not (limit or offset or start_after or modified_after):
+    if _pos_profile.get("custom_use_server_cache") and not (limit or offset or start_after or modified_after):
         return __get_customer_names(pos_profile, limit, offset, start_after, modified_after)
     else:
         return _get_customer_names(pos_profile, limit, offset, start_after, modified_after)
@@ -162,10 +162,10 @@ def get_customer_info(customer=None):
     res["customer_group"] = customer.customer_group
     res["customer_type"] = customer.customer_type
     res["territory"] = customer.territory
-    res["birthday"] = customer.posa_birthday
+    res["birthday"] = customer.birthday
     res["gender"] = customer.gender
     res["tax_id"] = customer.tax_id
-    res["posa_discount"] = customer.posa_discount
+    res["discount"] = customer.pos_discount
     res["name"] = customer.name
     res["customer_name"] = customer.customer_name
     res["customer_group_price_list"] = frappe.get_value(
@@ -269,17 +269,17 @@ def create_customer(
 
     if method == "create":
         is_exist = frappe.db.exists("Customer", {"customer_name": customer_name})
-        if pos_profile.get("posa_allow_duplicate_customer_names") or not is_exist:
+        if pos_profile.get("custom_allow_duplicate_customer_names") or not is_exist:
             customer = frappe.get_doc(
                 {
                     "doctype": "Customer",
                     "customer_name": customer_name,
-                    "posa_referral_company": company,
+                    "referral_company": company,
                     "tax_id": tax_id,
                     "mobile_no": mobile_no,
                     "email_id": email_id,
-                    "posa_referral_code": referral_code,
-                    "posa_birthday": formatted_birthday,
+                    "referral_code": referral_code,
+                    "birthday": formatted_birthday,
                     "customer_type": customer_type,
                     "gender": gender,
                 }
@@ -319,8 +319,8 @@ def create_customer(
         customer_doc.tax_id = tax_id
         customer_doc.mobile_no = mobile_no
         customer_doc.email_id = email_id
-        customer_doc.posa_referral_code = referral_code
-        customer_doc.posa_birthday = formatted_birthday
+        customer_doc.referral_code = referral_code
+        customer_doc.birthday = formatted_birthday
         customer_doc.customer_type = customer_type
         customer_doc.gender = gender
         customer_doc.save()

@@ -100,127 +100,127 @@ export const usePosStore = defineStore("pos", () => {
 
   // ─── POS Profile Settings ─────────────────────
   const allowEditRate: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_user_to_edit_rate
+    () => !!posProfile.value?.custom_allow_user_to_edit_rate
   );
 
   const allowEditItemDiscount: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_user_to_edit_item_discount
+    () => !!posProfile.value?.custom_allow_user_to_edit_item_discount
   );
 
   const allowEditAdditionalDiscount: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_user_to_edit_additional_discount
+    () => !!posProfile.value?.custom_allow_user_to_edit_additional_discount
   );
 
   const displayItemsInStock: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_display_items_in_stock
+    () => !!posProfile.value?.display_items_in_stock
   );
 
   const allowPartialPayment: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_partial_payment
+    () => !!posProfile.value?.allow_partial_payment
   );
 
   const allowCreditSale: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_credit_sale
+    () => !!posProfile.value?.custom_allow_credit_sale
   );
 
   const allowReturn: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_return
+    () => !!posProfile.value?.custom_allow_return
   );
 
   const allowReturnWithoutInvoice: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_return_without_invoice
+    () => !!posProfile.value?.custom_allow_return_without_invoice
   );
 
   const allowSalesOrder: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_sales_order
+    () => !!posProfile.value?.custom_allow_sales_order
   );
 
   const allowDelete: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_delete
+    () => !!posProfile.value?.custom_allow_delete
   );
 
   const allowPrintLastInvoice: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_print_last_invoice
+    () => !!posProfile.value?.custom_allow_print_last_invoice
   );
 
   const displayAdditionalNotes: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_display_additional_notes
+    () => !!posProfile.value?.custom_display_additional_notes
   );
 
   const displayAuthorizationCode: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_display_authorization_code
+    () => !!posProfile.value?.custom_display_authorization_code
   );
 
   const allowWriteOffChange: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_write_off_change
+    () => !!posProfile.value?.custom_allow_write_off_change
   );
 
   const displayItemCode: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_display_item_code
+    () => !!posProfile.value?.custom_display_item_code
   );
 
   const allowZeroRatedItems: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_zero_rated_items
+    () => !!posProfile.value?.custom_allow_zero_rated_items
   );
 
   const maxDiscountAllowed: ComputedRef<number> = computed(
-    () => posProfile.value?.posa_max_discount_allowed || 0
+    () => posProfile.value?.custom_max_discount_percentage_allowed || 0
   );
 
   const inputQty: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_input_qty
+    () => !!posProfile.value?.custom_input_qty
   );
 
   const taxInclusive: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_tax_inclusive
+    () => !!posProfile.value?.custom_tax_inclusive
   );
 
   const hideClosingShift: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_hide_closing_shift
+    () => !!posProfile.value?.custom_hide_closing_shift
   );
 
   const usePercentageDiscount: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_use_percentage_discount
+    () => !!posProfile.value?.custom_use_percentage_discount
   );
 
   const enableCashMovement: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_enable_cash_movement
+    () => !!posProfile.value?.custom_enable_cash_movement
   );
 
   const allowPosExpense: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_pos_expense
+    () => !!posProfile.value?.custom_allow_pos_expense
   );
 
   const allowCashDeposit: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_cash_deposit
+    () => !!posProfile.value?.custom_allow_cash_deposit
   );
 
   const fetchCoupon: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_fetch_coupon
+    () => !!posProfile.value?.custom_auto_fetch_coupons_gifts
   );
 
   const showTemplateItems: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_show_template_items
+    () => !!posProfile.value?.custom_show_template_items
   );
 
   const hideVariantsItems: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_hide_variants_items
+    () => !!posProfile.value?.custom_hide_variants_items
   );
 
   const autoSetBatch: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_auto_set_batch
+    () => !!posProfile.value?.custom_auto_set_batch
   );
 
   const searchSerialNo: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_search_serial_no
+    () => !!posProfile.value?.custom_search_serial_no
   );
 
   const enableReturnValidity: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_enable_return_validity
+    () => !!posProfile.value?.custom_enable_return_validity
   );
 
   const returnValidityDays: ComputedRef<number> = computed(
-    () => posProfile.value?.posa_return_validity_days || 0
+    () => posProfile.value?.custom_return_validity_days || 0
   );
 
   const useCustomerCredit: ComputedRef<boolean> = computed(
@@ -228,15 +228,15 @@ export const usePosStore = defineStore("pos", () => {
   );
 
   const applyCustomerDiscount: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_apply_customer_discount
+    () => !!posProfile.value?.custom_apply_customer_discount
   );
 
   const allowPrintDraftInvoices: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.posa_allow_print_draft_invoices
+    () => !!posProfile.value?.custom_allow_print_draft_invoices
   );
 
   const cashModeOfPayment: ComputedRef<string> = computed(
-    () => posProfile.value?.posa_cash_mode_of_payment || "Cash"
+    () => posProfile.value?.custom_cash_mode_of_payment || "Cash"
   );
 
   // ─── Actions ───────────────────────────────────

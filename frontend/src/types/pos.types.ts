@@ -11,51 +11,51 @@ export interface POSProfile {
   write_off_cost_center?: string;
   selling_price_list?: string;
   customer?: string;
-  // POS Awesome custom fields
-  posa_allow_user_to_edit_rate?: boolean;
-  posa_allow_user_to_edit_additional_discount?: boolean;
-  posa_allow_user_to_edit_item_discount?: boolean;
-  posa_display_items_in_stock?: boolean;
-  posa_allow_partial_payment?: boolean;
-  posa_allow_credit_sale?: boolean;
-  posa_allow_return?: boolean;
-  posa_allow_return_without_invoice?: boolean;
-  posa_allow_sales_order?: boolean;
-  posa_allow_delete?: boolean;
-  posa_allow_print_last_invoice?: boolean;
-  posa_display_additional_notes?: boolean;
-  posa_display_authorization_code?: boolean;
-  posa_allow_write_off_change?: boolean;
-  posa_input_qty?: boolean;
-  posa_display_item_code?: boolean;
-  posa_allow_zero_rated_items?: boolean;
-  posa_allow_print_draft_invoices?: boolean;
-  posa_auto_set_batch?: boolean;
-  posa_search_serial_no?: boolean;
-  posa_tax_inclusive?: boolean;
-  posa_use_percentage_discount?: boolean;
-  posa_default_card_view?: boolean;
-  posa_default_sales_order?: boolean;
-  posa_enable_camera_scanning?: boolean;
-  posa_camera_scan_type?: string;
-  posa_language?: string;
-  posa_enable_return_validity?: boolean;
-  posa_return_validity_days?: number;
-  posa_enable_cash_movement?: boolean;
-  posa_allow_pos_expense?: boolean;
-  posa_allow_cash_deposit?: boolean;
-  posa_max_discount_allowed?: number;
-  posa_fetch_coupon?: boolean;
-  posa_hide_closing_shift?: boolean;
-  posa_local_storage?: boolean;
-  posa_force_server_items?: boolean;
-  posa_cash_mode_of_payment?: string;
-  use_customer_credit?: boolean;
-  use_cashback?: boolean;
-  posa_apply_customer_discount?: boolean;
-  posa_show_template_items?: boolean;
-  posa_hide_variants_items?: boolean;
-  create_pos_invoice_instead_of_sales_invoice?: boolean;
+  // XPOS custom fields
+  custom_allow_user_to_edit_rate?: boolean;
+  custom_allow_user_to_edit_additional_discount?: boolean;
+  custom_allow_user_to_edit_item_discount?: boolean;
+  display_items_in_stock?: boolean;
+  allow_partial_payment?: boolean;
+  custom_allow_credit_sale?: boolean;
+  custom_allow_return?: boolean;
+  custom_allow_return_without_invoice?: boolean;
+  custom_allow_sales_order?: boolean;
+  custom_allow_delete?: boolean;
+  custom_allow_print_last_invoice?: boolean;
+  custom_display_additional_notes?: boolean;
+  custom_display_authorization_code?: boolean;
+  custom_allow_write_off_change?: boolean;
+  custom_input_qty?: boolean;
+  custom_display_item_code?: boolean;
+  custom_allow_zero_rated_items?: boolean;
+  custom_allow_print_draft_invoices?: boolean;
+  custom_auto_set_batch?: boolean;
+  custom_search_serial_no?: boolean;
+  custom_tax_inclusive?: boolean;
+  custom_use_percentage_discount?: boolean;
+  custom_default_view?: string;
+  custom_default_sales_order?: boolean;
+  custom_enable_camera_scanning?: boolean;
+  custom_camera_scan_type?: string;
+  custom_language?: string;
+  custom_enable_return_validity?: boolean;
+  custom_return_validity_days?: number;
+  custom_enable_cash_movement?: boolean;
+  custom_allow_pos_expense?: boolean;
+  custom_allow_cash_deposit?: boolean;
+  custom_max_discount_percentage_allowed?: number;
+  custom_auto_fetch_coupons_gifts?: boolean;
+  custom_hide_closing_shift?: boolean;
+  custom_use_offline_mode?: boolean;
+  custom_fetch_items_directly_from_server?: boolean;
+  custom_cash_mode_of_payment?: string;
+  custom_use_customer_credit?: boolean;
+  custom_use_cashback?: boolean;
+  custom_apply_customer_discount?: boolean;
+  custom_show_template_items?: boolean;
+  custom_hide_variants_items?: boolean;
+  custom_create_pos_invoice_instead_of_sales_invoice?: boolean;
   [key: string]: unknown;
 }
 
@@ -156,17 +156,17 @@ export interface CartItem extends POSItem {
   qty: number;
   discount_percentage: number;
   discount_amount: number;
-  posa_notes?: string;
-  posa_delivery_date?: string;
-  posa_offers?: string;
-  posa_is_offer?: boolean;
-  posa_is_replace?: boolean;
+  pos_notes?: string;
+  pos_delivery_date?: string;
+  pos_offers?: string;
+  pos_is_offer?: boolean;
+  pos_is_replace?: boolean;
   conversion_factor?: number;
   // Item-level tax
   item_tax_template?: string;
   item_tax_map?: Record<string, number>;
   // loyalty
-  posa_offer_applied?: boolean;
+  pos_offer_applied?: boolean;
 }
 
 export interface ItemGroup {
@@ -235,9 +235,9 @@ export interface Customer {
   loyalty_program?: string;
   loyalty_points?: number;
   loyalty_amount?: number;
-  posa_discount?: number;
-  posa_referral_code?: string;
-  posa_birthday?: string;
+  discount?: number;
+  referral_code?: string;
+  birthday?: string;
   default_price_list?: string;
   gender?: string;
   tax_id?: string;
@@ -331,13 +331,13 @@ export interface InvoiceItem {
   serial_no?: string;
   batch_no?: string;
   item_tax_template?: string;
-  posa_notes?: string;
-  posa_delivery_date?: string;
-  posa_offers?: string;
-  posa_row_id?: string;
-  posa_offer_applied?: boolean;
-  posa_is_offer?: boolean;
-  posa_is_replace?: boolean;
+  custom_additional_notes?: string;
+  custom_delivery_date?: string;
+  custom_offers?: string;
+  custom_row_id?: string;
+  custom_offer_applied?: boolean;
+  custom_is_offer?: boolean;
+  custom_is_replace?: boolean;
 }
 
 export interface InvoicePayment {
@@ -356,12 +356,13 @@ export interface InvoiceData {
   additional_discount_percentage?: number;
   discount_amount?: number;
   payments?: InvoicePayment[];
-  posa_notes?: string;
-  posa_delivery_date?: string;
-  posa_offers?: string;
-  posa_coupons?: string;
-  posa_offers_detail?: Array<Record<string, unknown>>;
-  posa_coupons_detail?: Array<Record<string, unknown>>;
+  custom_pos_notes?: string;
+  custom_pos_delivery_date?: string;
+  custom_pos_opening_shift?: string;
+  custom_offers?: string;
+  custom_coupons?: string;
+  custom_offers_detail?: Array<Record<string, unknown>>;
+  custom_coupons_detail?: Array<Record<string, unknown>>;
   loyalty_points?: number;
   loyalty_amount?: number;
   redeem_loyalty_points?: boolean;
@@ -370,7 +371,7 @@ export interface InvoiceData {
   return_against?: string;
   write_off_amount?: number;
   write_off_account?: string;
-  posa_authorization_code?: string;
+  custom_authorization_code?: string;
   currency?: string;
   conversion_rate?: number;
 }

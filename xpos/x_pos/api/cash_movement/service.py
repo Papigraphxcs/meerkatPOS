@@ -111,8 +111,8 @@ def get_cash_movement_context(pos_profile=None, pos_opening_shift=None):
         frappe.throw(_("POS Profile is required."))
 
     profile_doc = get_pos_profile(profile_name)
-    allowed_expense_accounts = extract_allowed_accounts(profile_doc.get("posa_allowed_expense_accounts"))
-    allowed_source_accounts = extract_allowed_accounts(profile_doc.get("posa_allowed_source_accounts"))
+    allowed_expense_accounts = extract_allowed_accounts(profile_doc.get("allowed_expense_accounts"))
+    allowed_source_accounts = extract_allowed_accounts(profile_doc.get("allowed_source_accounts"))
     default_source_account = None
     try:
         default_source_account = resolve_source_cash_account({}, profile_doc)
@@ -123,24 +123,24 @@ def get_cash_movement_context(pos_profile=None, pos_opening_shift=None):
         "pos_profile": profile_doc.name,
         "company": profile_doc.company,
         "currency": profile_doc.currency,
-        "enable_cash_movement": bool(profile_doc.get("posa_enable_cash_movement")),
-        "allow_pos_expense": bool(profile_doc.get("posa_allow_pos_expense")),
-        "allow_cash_deposit": bool(profile_doc.get("posa_allow_cash_deposit")),
+        "enable_cash_movement": bool(profile_doc.get("custom_enable_cash_movement")),
+        "allow_pos_expense": bool(profile_doc.get("custom_allow_pos_expense")),
+        "allow_cash_deposit": bool(profile_doc.get("custom_allow_cash_deposit")),
         "allow_cancel_submitted_cash_movement": bool(
-            profile_doc.get("posa_allow_cancel_submitted_cash_movement")
+            profile_doc.get("custom_allow_cancel_submitted_cash_movement")
         ),
         "allow_delete_cancelled_cash_movement": bool(
-            profile_doc.get("posa_allow_delete_cancelled_cash_movement")
+            profile_doc.get("custom_allow_delete_cancelled_cash_movement")
         ),
-        "require_cash_movement_remarks": bool(profile_doc.get("posa_require_cash_movement_remarks")),
-        "cash_movement_max_amount": profile_doc.get("posa_cash_movement_max_amount"),
-        "default_expense_account": profile_doc.get("posa_default_expense_account"),
+        "require_cash_movement_remarks": bool(profile_doc.get("custom_require_cash_movement_remarks")),
+        "cash_movement_max_amount": profile_doc.get("custom_cash_movement_max_amount"),
+        "default_pos_expense_account": profile_doc.get("default_pos_expense_account"),
         "allowed_expense_accounts": allowed_expense_accounts,
         "default_source_account": default_source_account,
-        "allow_source_account_override": bool(profile_doc.get("posa_allow_source_account_override")),
+        "allow_source_account_override": bool(profile_doc.get("custom_allow_source_account_override")),
         "allowed_source_accounts": allowed_source_accounts,
-        "back_office_cash_account": profile_doc.get("posa_back_office_cash_account"),
-        "cash_mode_of_payment": profile_doc.get("posa_cash_mode_of_payment"),
+        "back_office_cash_account": profile_doc.get("custom_back_office_cash_account"),
+        "cash_mode_of_payment": profile_doc.get("custom_cash_mode_of_payment"),
         "cost_center": profile_doc.get("cost_center"),
     }
 

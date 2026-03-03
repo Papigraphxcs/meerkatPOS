@@ -160,7 +160,7 @@ def search_invoices_for_return(
             "currency",
             "discount_amount",
             "additional_discount_percentage",
-            "posa_return_valid_upto",
+            "custom_return_valid_upto",
             "is_return",
         ],
         limit_start=start,
@@ -189,11 +189,11 @@ def search_invoices_for_return(
         invoice["doctype"] = doctype
 
         # Validation checks logic
-        validity_date = invoice.get("posa_return_valid_upto")
+        validity_date = invoice.get("custom_return_valid_upto")
         expired = False
         if enforce_return_validity and validity_date:
             expired = getdate(nowdate()) > getdate(validity_date)
-        invoice["posa_return_expired"] = cint(expired)
+        invoice["custom_return_expired"] = cint(expired)
 
         data.append(invoice)
 
@@ -234,7 +234,7 @@ def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoic
         "currency": invoice_doc.currency,
         "discount_amount": invoice_doc.discount_amount,
         "additional_discount_percentage": invoice_doc.additional_discount_percentage,
-        "posa_return_valid_upto": invoice_doc.get("posa_return_valid_upto"),
+        "custom_return_valid_upto": invoice_doc.get("custom_return_valid_upto"),
         "payments": [
             {
                 "mode_of_payment": payment.get("mode_of_payment"),
@@ -321,11 +321,11 @@ def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoic
     invoice["items"] = filtered_items
     invoice["is_fully_returned"] = 1 if (invoice_doc.items and not filtered_items) else 0
 
-    validity_date = invoice.get("posa_return_valid_upto")
+    validity_date = invoice.get("custom_return_valid_upto")
     expired = False
     if enforce_return_validity and validity_date:
         expired = getdate(nowdate()) > getdate(validity_date)
-    invoice["posa_return_expired"] = cint(expired)
+    invoice["custom_return_expired"] = cint(expired)
 
     log_perf_event(
         "get_invoice_for_return",

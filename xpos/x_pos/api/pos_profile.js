@@ -3,13 +3,13 @@
 
 frappe.ui.form.on("POS Profile", {
 	setup: function (frm) {
-		frm.set_query("posa_cash_mode_of_payment", function (doc) {
+		frm.set_query("cash_mode_of_payment", function (doc) {
 			return {
 				filters: { type: "Cash" },
 			};
 		});
 
-		frm.set_query("posa_default_expense_account", function (doc) {
+		frm.set_query("default_pos_expense_account", function (doc) {
 			return {
 				filters: {
 					company: doc.company,
@@ -19,7 +19,7 @@ frappe.ui.form.on("POS Profile", {
 			};
 		});
 
-		frm.set_query("posa_back_office_cash_account", function (doc) {
+		frm.set_query("back_office_cash_account", function (doc) {
 			return {
 				filters: {
 					company: doc.company,
@@ -29,7 +29,7 @@ frappe.ui.form.on("POS Profile", {
 			};
 		});
 
-		frm.set_query("posa_default_source_account", function (doc) {
+		frm.set_query("default_source_account", function (doc) {
 			return {
 				filters: {
 					company: doc.company,
@@ -39,34 +39,24 @@ frappe.ui.form.on("POS Profile", {
 			};
 		});
 
-		frm.set_query("account", "posa_allowed_expense_accounts", function (doc) {
-			return {
-				filters: {
-					company: doc.company,
-					is_group: 0,
-					root_type: "Expense",
-				},
-			};
-		});
+		// frm.set_query("account", "allowed_expense_accounts", function (doc) {
+		// 	return {
+		// 		filters: {
+		// 			company: doc.company,
+		// 			is_group: 0,
+		// 			root_type: "Expense",
+		// 		},
+		// 	};
+		// });
 
-		frm.set_query("account", "posa_allowed_source_accounts", function (doc) {
-			return {
-				filters: {
-					company: doc.company,
-					is_group: 0,
-					account_type: "Cash",
-				},
-			};
-		});
-
-		frappe.call({
-			method: "xpos.x_pos.api.utilities.get_language_options",
-			callback: function (r) {
-				if (!r.exc) {
-					frm.fields_dict["posa_language"].df.options = r.message;
-					frm.refresh_field("posa_language");
-				}
-			},
-		});
+		// frm.set_query("account", "allowed_source_accounts", function (doc) {
+		// 	return {
+		// 		filters: {
+		// 			company: doc.company,
+		// 			is_group: 0,
+		// 			account_type: "Cash",
+		// 		},
+		// 	};
+		// });
 	},
 });

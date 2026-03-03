@@ -22,7 +22,7 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
             started_at,
             profile=pos_profile.get("name"),
             items=0,
-            cache_enabled=int(bool(pos_profile.get("posa_use_server_cache"))),
+            cache_enabled=int(bool(pos_profile.get("custom_use_server_cache"))),
         )
         return []
 
@@ -34,7 +34,7 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
         profile=pos_profile.get("name"),
         items=len(items_data),
         rows=len(result or []),
-        cache_enabled=int(bool(pos_profile.get("posa_use_server_cache"))),
+        cache_enabled=int(bool(pos_profile.get("custom_use_server_cache"))),
     )
     return result
 
@@ -84,7 +84,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
     allow_multi_currency = False
     if item.get("pos_profile"):
         allow_multi_currency = (
-            frappe.db.get_value("POS Profile", item.get("pos_profile"), "posa_allow_multi_currency") or 0
+            frappe.db.get_value("POS Profile", item.get("pos_profile"), "custom_allow_multi_currency") or 0
         )
 
     # Ensure conversion rate exists when price list currency differs from

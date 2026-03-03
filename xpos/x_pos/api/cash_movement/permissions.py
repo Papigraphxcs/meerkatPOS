@@ -7,25 +7,25 @@ def is_manager():
 
 
 def ensure_feature_enabled(profile_doc):
-    if not profile_doc.get("posa_enable_cash_movement"):
+    if not profile_doc.get("custom_enable_cash_movement"):
         frappe.throw(_("Cash Movement is disabled for this POS Profile."))
 
 
 def ensure_movement_allowed(profile_doc, movement_type):
     movement_type = (movement_type or "").strip()
-    if movement_type == "Expense" and not profile_doc.get("posa_allow_pos_expense"):
+    if movement_type == "Expense" and not profile_doc.get("custom_allow_pos_expense"):
         frappe.throw(_("POS Expense is disabled for this POS Profile."))
-    if movement_type == "Deposit" and not profile_doc.get("posa_allow_cash_deposit"):
+    if movement_type == "Deposit" and not profile_doc.get("custom_allow_cash_deposit"):
         frappe.throw(_("Cash Deposit is disabled for this POS Profile."))
 
 
 def ensure_cancel_allowed(profile_doc):
-    if not profile_doc.get("posa_allow_cancel_submitted_cash_movement"):
+    if not profile_doc.get("custom_allow_cancel_submitted_cash_movement"):
         frappe.throw(_("Cancelling submitted cash movements is disabled for this POS Profile."))
 
 
 def ensure_delete_allowed(profile_doc):
-    if not profile_doc.get("posa_allow_delete_cancelled_cash_movement"):
+    if not profile_doc.get("custom_allow_delete_cancelled_cash_movement"):
         frappe.throw(_("Deleting cancelled cash movements is disabled for this POS Profile."))
 
 

@@ -23,9 +23,9 @@ def get_cash_movement_context(pos_profile, pos_opening_shift):
     """
     pos = frappe.get_cached_doc("POS Profile", pos_profile)
 
-    enable_cash_movement = cint(pos.get("posa_enable_cash_movement"))
-    allow_pos_expense = cint(pos.get("posa_allow_pos_expense"))
-    allow_cash_deposit = cint(pos.get("posa_allow_cash_deposit"))
+    enable_cash_movement = cint(pos.get("custom_enable_cash_movement"))
+    allow_pos_expense = cint(pos.get("custom_allow_pos_expense"))
+    allow_cash_deposit = cint(pos.get("custom_allow_cash_deposit"))
 
     expense_accounts = []
     try:
@@ -50,7 +50,7 @@ def get_cash_movement_context(pos_profile, pos_opening_shift):
         pass
 
     cash_account = None
-    cash_mop = pos.get("posa_cash_mode_of_payment") or "Cash"
+    cash_mop = pos.get("custom_cash_mode_of_payment") or "Cash"
     try:
         from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
             get_bank_cash_account,
@@ -106,7 +106,7 @@ def create_pos_expense(payload):
         cash_mop = "Cash"
         try:
             pos = frappe.get_cached_doc("POS Profile", opening.pos_profile)
-            cash_mop = pos.get("posa_cash_mode_of_payment") or "Cash"
+            cash_mop = pos.get("custom_cash_mode_of_payment") or "Cash"
         except Exception:
             pass
         from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -186,7 +186,7 @@ def create_cash_deposit(payload):
         cash_mop = "Cash"
         try:
             pos = frappe.get_cached_doc("POS Profile", opening.pos_profile)
-            cash_mop = pos.get("posa_cash_mode_of_payment") or "Cash"
+            cash_mop = pos.get("custom_cash_mode_of_payment") or "Cash"
         except Exception:
             pass
         from erpnext.accounts.doctype.sales_invoice.sales_invoice import (

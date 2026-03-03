@@ -479,11 +479,11 @@ export const useCartStore = defineStore("cart", () => {
   }
 
   function updateItemNotes(index: number, notes: string): void {
-    items.value[index].posa_notes = notes;
+    items.value[index].pos_notes = notes;
   }
 
   function updateItemDeliveryDate(index: number, date: string): void {
-    items.value[index].posa_delivery_date = date;
+    items.value[index].pos_delivery_date = date;
   }
 
   function setCustomer(cust: { name: string; customer_name?: string; image?: string; mobile_no?: string; email_id?: string } | null): void {
@@ -687,11 +687,11 @@ export const useCartStore = defineStore("cart", () => {
           serial_no: item.serial_no,
           batch_no: item.batch_no,
           item_tax_template: item.item_tax_template,
-          posa_notes: item.posa_notes,
-          posa_delivery_date: item.posa_delivery_date,
-          posa_offers: item.posa_offers,
-          posa_is_offer: item.posa_is_offer,
-          posa_is_replace: item.posa_is_replace,
+          custom_additional_notes: item.pos_notes,
+          custom_delivery_date: item.pos_delivery_date,
+          custom_offers: item.pos_offers,
+          custom_is_offer: item.pos_is_offer,
+          custom_is_replace: item.pos_is_replace,
         })
       ),
       pos_opening_shift: posOpeningShift,
@@ -705,9 +705,9 @@ export const useCartStore = defineStore("cart", () => {
     }
 
     // Notes, delivery date, auth code
-    if (orderNotes.value) data.posa_notes = orderNotes.value;
-    if (deliveryDate.value) data.posa_delivery_date = deliveryDate.value;
-    if (authorizationCode.value) data.posa_authorization_code = authorizationCode.value;
+    if (orderNotes.value) data.custom_pos_notes = orderNotes.value;
+    if (deliveryDate.value) data.custom_pos_delivery_date = deliveryDate.value;
+    if (authorizationCode.value) data.custom_authorization_code = authorizationCode.value;
 
     // Sales person
     if (salesPerson.value) data.sales_person = salesPerson.value;
@@ -738,8 +738,8 @@ export const useCartStore = defineStore("cart", () => {
 
     // Coupons — send both legacy JSON and structured detail rows
     if (appliedCoupon.value) {
-      data.posa_coupons = JSON.stringify([appliedCoupon.value.name]);
-      data.posa_coupons_detail = [{
+      data.custom_coupons = JSON.stringify([appliedCoupon.value.name]);
+      data.custom_coupons_detail = [{
         coupon: appliedCoupon.value.name,
         coupon_code: appliedCoupon.value.coupon_code || couponCode.value,
         type: (appliedCoupon.value as Record<string, unknown>).coupon_type || "Promotional",
@@ -751,8 +751,8 @@ export const useCartStore = defineStore("cart", () => {
 
     // Offers — send both legacy JSON and structured detail rows
     if (appliedOffers.value.length > 0) {
-      data.posa_offers = JSON.stringify(appliedOffers.value.map((o) => o.name));
-      data.posa_offers_detail = appliedOffers.value.map((o) => ({
+      data.custom_offers = JSON.stringify(appliedOffers.value.map((o) => o.name));
+      data.custom_offers_detail = appliedOffers.value.map((o) => ({
         offer_name: o.name,
         offer: (o as Record<string, unknown>).offer || (o as Record<string, unknown>).offer_type || "",
         apply_on: o.apply_on || "",
