@@ -44,12 +44,23 @@
 
 			<CashMovementDialog v-if="paymentStore.showCashMovementDialog" />
 		</template>
+
+		<!-- Toast Notifications -->
+		<Toaster
+			:theme="isDark ? 'dark' : 'light'"
+			position="top-right"
+			:duration="4000"
+			:expand="true"
+			rich-colors
+			close-button
+		/>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, provide, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { Toaster } from "vue-sonner";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useCustomerStore } from "@/stores/customerStore";

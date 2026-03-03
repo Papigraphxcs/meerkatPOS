@@ -116,7 +116,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, "/api"),
         configure: (proxy) => {
           proxy.on("proxyReq", (_proxyReq, req) => {
-            console.log("[Proxy] API Request:", req.method, req.url);
+            console.log("Request:", req.method, req.url);
           });
         },
       },

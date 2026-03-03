@@ -3,6 +3,8 @@
  * Works in both standalone SPA mode and embedded Frappe desk mode
  */
 
+import { showSuccess as toastSuccess, showError as toastError, showInfo as toastInfo } from "@/composables/useToast";
+
 function getCsrfToken(): string {
   // Try multiple sources for CSRF token
   return (
@@ -131,34 +133,22 @@ export function formatCurrency(value: number, currency?: string): string {
 }
 
 /**
- * Show a success message
+ * Show a success message using vue-sonner
  */
 export function showSuccess(message: string): void {
-  if (typeof frappe !== "undefined" && frappe.show_alert) {
-    frappe.show_alert({ message, indicator: "green" }, 3);
-  } else {
-    console.log("[Success]", message);
-  }
+  toastSuccess(message);
 }
 
 /**
- * Show an error message
+ * Show an error message using vue-sonner
  */
 export function showError(message: string): void {
-  if (typeof frappe !== "undefined" && frappe.show_alert) {
-    frappe.show_alert({ message, indicator: "red" }, 5);
-  } else {
-    console.error("[Error]", message);
-  }
+  toastError(message);
 }
 
 /**
- * Show an info message
+ * Show an info message using vue-sonner
  */
 export function showInfo(message: string): void {
-  if (typeof frappe !== "undefined" && frappe.show_alert) {
-    frappe.show_alert({ message, indicator: "blue" }, 3);
-  } else {
-    console.info("[Info]", message);
-  }
+  toastInfo(message);
 }

@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed, type Ref, type ComputedRef } from "vue";
+import { ref, computed } from "vue";
 import { call } from "@/services/api";
 import type {
   POSOpeningShift,
@@ -9,63 +9,59 @@ import type {
   ShiftCheckResult,
   OpeningData,
   ShiftSummary,
-  POSPaymentMethod,
   PrintFormat,
-  CurrencyCode,
   CurrencySymbolMap,
   TaxDetail,
   PrintSettings,
 } from "@/types/pos.types";
 
 export const usePosStore = defineStore("pos", () => {
-  // ─── State ─────────────────────────────────────
-  const isLoading: Ref<boolean> = ref(true);
-  const isReady: Ref<boolean> = ref(false);
-  const currentView: Ref<string> = ref("pos"); // pos | orders
+  const isLoading = ref(true);
+  const isReady = ref(false);
+  const currentView = ref("pos");
 
   // Shift data
-  const posOpeningShift: Ref<POSOpeningShift | null> = ref(null);
-  const posProfile: Ref<POSProfile | null> = ref(null);
-  const company: Ref<Company | null> = ref(null);
-  const stockSettings: Ref<StockSettings> = ref({});
+  const posOpeningShift = ref<POSOpeningShift | null>(null);
+  const posProfile = ref<POSProfile | null>(null);
+  const company = ref<Company | null>(null);
+  const stockSettings = ref<StockSettings>({});
 
   // Tax data
-  const taxes: Ref<TaxDetail[]> = ref([]);
-  const taxInclusiveMode: Ref<boolean> = ref(false);
+  const taxes = ref<TaxDetail[]>([]);
+  const taxInclusiveMode = ref(false);
 
   // Rounding
-  const disableRoundedTotal: Ref<boolean> = ref(false);
+  const disableRoundedTotal = ref(false);
 
   // Print settings
-  const printSettings: Ref<PrintSettings | null> = ref(null);
+  const printSettings = ref<PrintSettings | null>(null);
 
   // Opening dialog
-  const showOpeningDialog: Ref<boolean> = ref(false);
-  const openingData: Ref<OpeningData | null> = ref(null);
+  const showOpeningDialog = ref(false);
+  const openingData = ref<OpeningData | null>(null);
 
   // Closing dialog
-  const showClosingDialog: Ref<boolean> = ref(false);
-  const closingData: Ref<ShiftSummary | null> = ref(null);
+  const showClosingDialog = ref(false);
+  const closingData = ref<ShiftSummary | null>(null);
 
   // Print formats
-  const printFormats: Ref<PrintFormat[]> = ref([]);
+  const printFormats = ref<PrintFormat[]>([]);
 
   // Last invoice (for print last)
-  const lastInvoiceName: Ref<string> = ref("");
+  const lastInvoiceName = ref("");
 
-  // ─── Computed ──────────────────────────────────
-  const isShiftOpen: ComputedRef<boolean> = computed(() => !!posOpeningShift.value);
+  const isShiftOpen = computed(() => !!posOpeningShift.value);
 
-  const profileName: ComputedRef<string> = computed(
+  const profileName = computed(
     () => posProfile.value?.name || ""
   );
 
-  const warehouse: ComputedRef<string> = computed(
+  const warehouse = computed(
     () => posProfile.value?.warehouse || ""
   );
 
-  const currency: ComputedRef<CurrencyCode> = computed(
-    () => posProfile.value?.currency || company.value?.default_currency || "USD"
+  const currency = computed(
+    () => posProfile.value?.currency
   );
 
   const currencySymbols: CurrencySymbolMap = {
@@ -74,11 +70,11 @@ export const usePosStore = defineStore("pos", () => {
     BDT: "৳", LKR: "Rs", NPR: "Rs", CAD: "C$", AUD: "A$",
   };
 
-  const currencySymbol: ComputedRef<string> = computed(
-    () => currencySymbols[currency.value] || currency.value + " "
+  const currencySymbol = computed(
+    () => currencySymbols[currency.value ?? ""] || currency.value + " "
   );
 
-  const paymentMethods: ComputedRef<POSPaymentMethod[]> = computed(() => {
+  const paymentMethods = computed(() => {
     if (!posProfile.value?.payments) return [];
     return posProfile.value.payments.map((p) => ({
       mode_of_payment: p.mode_of_payment,
@@ -86,160 +82,158 @@ export const usePosStore = defineStore("pos", () => {
     }));
   });
 
-  const companyName: ComputedRef<string> = computed(
+  const companyName = computed(
     () => company.value?.name || ""
   );
 
-  const sellingPriceList: ComputedRef<string> = computed(
+  const sellingPriceList = computed(
     () => posProfile.value?.selling_price_list || ""
   );
 
-  const defaultCustomer: ComputedRef<string> = computed(
-    () => posProfile.value?.customer || ""
+  const defaultCustomer = computed(
+    () => posProfile.value?.default_customer || ""
   );
 
-  // ─── POS Profile Settings ─────────────────────
-  const allowEditRate: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_user_to_edit_rate
+  const allowEditRate = computed(
+    () => !!posProfile.value?.allow_rate_change
   );
 
-  const allowEditItemDiscount: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_user_to_edit_item_discount
+  const allowEditItemDiscount = computed(
+    () => !!posProfile.value?.allow_discount_change
   );
 
-  const allowEditAdditionalDiscount: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_user_to_edit_additional_discount
+  const allowEditAdditionalDiscount = computed(
+    () => !!posProfile.value?.allow_user_to_edit_additional_discount
   );
 
-  const displayItemsInStock: ComputedRef<boolean> = computed(
+  const displayItemsInStock = computed(
     () => !!posProfile.value?.display_items_in_stock
   );
 
-  const allowPartialPayment: ComputedRef<boolean> = computed(
+  const allowPartialPayment = computed(
     () => !!posProfile.value?.allow_partial_payment
   );
 
-  const allowCreditSale: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_credit_sale
+  const allowCreditSale = computed(
+    () => !!posProfile.value?.allow_credit_sale
   );
 
-  const allowReturn: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_return
+  const allowReturn = computed(
+    () => !!posProfile.value?.allow_return
   );
 
-  const allowReturnWithoutInvoice: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_return_without_invoice
+  const allowReturnWithoutInvoice = computed(
+    () => !!posProfile.value?.allow_return_without_invoice
   );
 
-  const allowSalesOrder: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_sales_order
+  const allowSalesOrder = computed(
+    () => !!posProfile.value?.allow_sales_order
   );
 
-  const allowDelete: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_delete
+  const allowDelete = computed(
+    () => !!posProfile.value?.allow_delete
   );
 
-  const allowPrintLastInvoice: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_print_last_invoice
+  const allowPrintLastInvoice = computed(
+    () => !!posProfile.value?.allow_print_last_invoice
   );
 
-  const displayAdditionalNotes: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_display_additional_notes
+  const displayAdditionalNotes = computed(
+    () => !!posProfile.value?.display_additional_notes
   );
 
-  const displayAuthorizationCode: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_display_authorization_code
+  const displayAuthorizationCode = computed(
+    () => !!posProfile.value?.display_authorization_code
   );
 
-  const allowWriteOffChange: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_write_off_change
+  const allowWriteOffChange = computed(
+    () => !!posProfile.value?.allow_write_off_change
   );
 
-  const displayItemCode: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_display_item_code
+  const displayItemCode = computed(
+    () => !!posProfile.value?.display_item_code
   );
 
-  const allowZeroRatedItems: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_zero_rated_items
+  const allowZeroRatedItems = computed(
+    () => !!posProfile.value?.allow_zero_rated_items
   );
 
-  const maxDiscountAllowed: ComputedRef<number> = computed(
-    () => posProfile.value?.custom_max_discount_percentage_allowed || 0
+  const maxDiscountAllowed = computed(
+    () => posProfile.value?.max_discount_percentage_allowed || 0
   );
 
-  const inputQty: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_input_qty
+  const inputQty = computed(
+    () => !!posProfile.value?.input_qty
   );
 
-  const taxInclusive: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_tax_inclusive
+  const taxInclusive = computed(
+    () => !!posProfile.value?.tax_inclusive
   );
 
-  const hideClosingShift: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_hide_closing_shift
+  const hideClosingShift = computed(
+    () => !!posProfile.value?.hide_closing_shift
   );
 
-  const usePercentageDiscount: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_use_percentage_discount
+  const usePercentageDiscount = computed(
+    () => !!posProfile.value?.use_percentage_discount
   );
 
-  const enableCashMovement: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_enable_cash_movement
+  const enableCashMovement = computed(
+    () => !!posProfile.value?.enable_cash_movement
   );
 
-  const allowPosExpense: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_pos_expense
+  const allowPosExpense = computed(
+    () => !!posProfile.value?.allow_pos_expense
   );
 
-  const allowCashDeposit: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_cash_deposit
+  const allowCashDeposit = computed(
+    () => !!posProfile.value?.allow_cash_deposit
   );
 
-  const fetchCoupon: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_auto_fetch_coupons_gifts
+  const fetchCoupon = computed(
+    () => !!posProfile.value?.auto_fetch_coupons_gifts
   );
 
-  const showTemplateItems: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_show_template_items
+  const showTemplateItems = computed(
+    () => !!posProfile.value?.show_template_items
   );
 
-  const hideVariantsItems: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_hide_variants_items
+  const hideVariantsItems = computed(
+    () => !!posProfile.value?.hide_variants_items
   );
 
-  const autoSetBatch: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_auto_set_batch
+  const autoSetBatch = computed(
+    () => !!posProfile.value?.auto_set_batch
   );
 
-  const searchSerialNo: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_search_serial_no
+  const searchSerialNo = computed(
+    () => !!posProfile.value?.search_serial_no
   );
 
-  const enableReturnValidity: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_enable_return_validity
+  const enableReturnValidity = computed(
+    () => !!posProfile.value?.enable_return_validity
   );
 
-  const returnValidityDays: ComputedRef<number> = computed(
-    () => posProfile.value?.custom_return_validity_days || 0
+  const returnValidityDays = computed(
+    () => posProfile.value?.return_validity_days || 0
   );
 
-  const useCustomerCredit: ComputedRef<boolean> = computed(
+  const useCustomerCredit = computed(
     () => !!posProfile.value?.use_customer_credit
   );
 
-  const applyCustomerDiscount: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_apply_customer_discount
+  const applyCustomerDiscount = computed(
+    () => !!posProfile.value?.apply_customer_discount
   );
 
-  const allowPrintDraftInvoices: ComputedRef<boolean> = computed(
-    () => !!posProfile.value?.custom_allow_print_draft_invoices
+  const allowPrintDraftInvoices = computed(
+    () => !!posProfile.value?.allow_print_draft_invoices
   );
 
-  const cashModeOfPayment: ComputedRef<string> = computed(
-    () => posProfile.value?.custom_cash_mode_of_payment || "Cash"
+  const cashModeOfPayment = computed(
+    () => posProfile.value?.cash_mode_of_payment || "Cash"
   );
-
-  // ─── Actions ───────────────────────────────────
+  
   async function checkExistingShift(): Promise<void> {
     isLoading.value = true;
     try {
@@ -251,15 +245,15 @@ export const usePosStore = defineStore("pos", () => {
         posProfile.value = result.pos_profile;
         company.value = result.company;
         stockSettings.value = result.stock_settings || {};
-        // Store tax details
+        
         taxes.value = result.taxes || [];
         taxInclusiveMode.value = !!(result.tax_inclusive);
-        // Rounding
+        
         disableRoundedTotal.value = !!(result.disable_rounded_total);
-        // Store print settings
+        
         printSettings.value = result.print_settings || null;
         isReady.value = true;
-        // Fetch print formats in background
+        
         fetchPrintFormats();
       } else {
         showOpeningDialog.value = true;
@@ -305,16 +299,16 @@ export const usePosStore = defineStore("pos", () => {
       posProfile.value = result.pos_profile;
       company.value = result.company;
       stockSettings.value = result.stock_settings || {};
-      // Store tax details
+      
       taxes.value = result.taxes || [];
       taxInclusiveMode.value = !!(result.tax_inclusive);
-      // Rounding
+      
       disableRoundedTotal.value = !!(result.disable_rounded_total);
-      // Store print settings
+      
       printSettings.value = result.print_settings || null;
       showOpeningDialog.value = false;
       isReady.value = true;
-      // Fetch print formats in background
+      
       fetchPrintFormats();
       return result;
     } catch (error) {
@@ -352,7 +346,7 @@ export const usePosStore = defineStore("pos", () => {
           closing_details: JSON.stringify(closingDetails),
         }
       );
-      // Reset state
+      
       posOpeningShift.value = null;
       posProfile.value = null;
       company.value = null;

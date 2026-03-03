@@ -1,27 +1,19 @@
+import { call } from "@/services/api";
+import { UserSession } from "@/types/pos.types";
 import { defineStore } from "pinia";
-import { ref, computed, type Ref, type ComputedRef } from "vue";
-
-interface UserSession {
-  user: string;
-  user_email?: string;
-  user_fullname?: string;
-}
+import { ref, computed } from "vue";
 
 export const useAuthStore = defineStore("auth", () => {
-  // ─── State ─────────────────────────────────────
-  const isLoading: Ref<boolean> = ref(false);
-  const isAuthenticated: Ref<boolean> = ref(false);
-  const user: Ref<UserSession | null> = ref(null);
-  const error: Ref<string> = ref("");
-  const resetEmailSent: Ref<boolean> = ref(false);
+  const isLoading = ref(false);
+  const isAuthenticated = ref(false);
+  const user = ref<UserSession | null>(null);
+  const error = ref("");
+  const resetEmailSent = ref(false);
 
-  // ─── Computed ──────────────────────────────────
-  const userName: ComputedRef<string> = computed(() => user.value?.user || "Guest");
-  const userEmail: ComputedRef<string> = computed(() => user.value?.user_email || "");
-  const userFullName: ComputedRef<string> = computed(() => user.value?.user_fullname || "");
-  const isGuest: ComputedRef<boolean> = computed(() => !user.value || user.value.user === "Guest");
-
-  // ─── Actions ───────────────────────────────────
+  const userName = computed(() => user.value?.user || "Guest");
+  const userEmail = computed(() => user.value?.user_email || "");
+  const userFullName = computed(() => user.value?.user_fullname || "");
+  const isGuest = computed(() => !user.value || user.value.user === "Guest");
 
   /**
    * Check if user is currently authenticated
@@ -30,23 +22,14 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       isLoading.value = true;
       error.value = "";
+      const response = await call("frappe.auth.get_logged_user");
 
-      const response = await fetch("/api/method/frappe.auth.get_logged_user", {
-        method: "GET",
-        headers: {
-          "Accept": "application/json",
-        },
-        credentials: "same-origin",
-      });
-
-      if (!response.ok) {
+      if (!response) {
         isAuthenticated.value = false;
         user.value = null;
         return false;
       }
-
-      const data = await response.json();
-      const loggedUser = data.message;
+      const loggedUser = response as string;
 
       if (loggedUser && loggedUser !== "Guest") {
         isAuthenticated.value = true;
@@ -79,48 +62,16 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       isLoading.value = true;
       error.value = "";
-
-      const response = await fetch("/api/method/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Accept": "application/json",
-        },
-        body: new URLSearchParams({
-          usr: username,
-          pwd: password,
-        }),
-        credentials: "same-origin",
+      debugger
+      const response = await call("login", {
+        usr: username,
+        pwd: password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        let errorMsg = "Login failed";
-
-        if (data._server_messages) {
-          try {
-            const serverMessages = JSON.parse(data._server_messages);
-            const firstMessage = serverMessages[0];
-            const parsed = typeof firstMessage === "string" ? JSON.parse(firstMessage) : firstMessage;
-            errorMsg = parsed.message || parsed.title || String(parsed);
-          } catch {
-            errorMsg = data._server_messages;
-          }
-        } else if (data.message) {
-          errorMsg = data.message;
-        }
-
-        error.value = errorMsg;
-        return false;
-      }
-
-      // Login successful
       isAuthenticated.value = true;
       user.value = {
-        user: data.full_name || username,
+        user: username,
         user_email: username,
-        user_fullname: data.full_name || username,
       };
 
       return true;
@@ -142,43 +93,7 @@ export const useAuthStore = defineStore("auth", () => {
       error.value = "";
       resetEmailSent.value = false;
 
-      const csrfToken =
-        window.xpos?.csrf_token ||
-        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ||
-        "";
-
-      const response = await fetch("/api/method/frappe.core.doctype.user.user.reset_password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "X-Frappe-CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({ user: email }),
-        credentials: "same-origin",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || data.exc) {
-        let errorMsg = "Failed to send reset email";
-
-        if (data._server_messages) {
-          try {
-            const serverMessages = JSON.parse(data._server_messages);
-            const firstMessage = serverMessages[0];
-            const parsed = typeof firstMessage === "string" ? JSON.parse(firstMessage) : firstMessage;
-            errorMsg = parsed.message || parsed.title || String(parsed);
-          } catch {
-            errorMsg = data._server_messages;
-          }
-        } else if (data.message) {
-          errorMsg = typeof data.message === "string" ? data.message : "Failed to send reset email";
-        }
-
-        error.value = errorMsg;
-        return false;
-      }
+      await call("frappe.core.doctype.user.user.reset_password", { user: email });
 
       resetEmailSent.value = true;
       return true;
@@ -198,15 +113,11 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       isLoading.value = true;
 
-      await fetch("/api/method/logout", {
-        method: "GET",
-        credentials: "same-origin",
-      });
+      await call("logout");
 
       isAuthenticated.value = false;
       user.value = null;
-
-      // Redirect to login
+      
       window.location.href = "/xpos/login";
     } catch (err) {
       console.error("Logout failed:", err);

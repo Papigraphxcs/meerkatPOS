@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, type Ref } from "vue";
+import { ref } from "vue";
 import { call } from "@/services/api";
 import type {
   OutstandingInvoice,
@@ -10,18 +10,15 @@ import type {
 } from "@/types/pos.types";
 
 export const usePaymentStore = defineStore("payment", () => {
-  // ─── Credit State ──────────────────────────────
-  const availableCredit: Ref<CustomerCredit | null> = ref(null);
-  const isLoadingCredit: Ref<boolean> = ref(false);
+  const availableCredit = ref<CustomerCredit | null>(null);
+  const isLoadingCredit = ref(false);
 
-  // ─── Cash Movement State ───────────────────────
-  const showCashMovementDialog: Ref<boolean> = ref(false);
-  const cashMovementType: Ref<"expense" | "deposit"> = ref("expense");
-  const cashMovementContext: Ref<CashMovementContext | null> = ref(null);
-  const shiftCashMovements: Ref<POSCashMovement[]> = ref([]);
-  const isLoadingCashMovement: Ref<boolean> = ref(false);
+  const showCashMovementDialog = ref(false);
+  const cashMovementType = ref<"expense" | "deposit">("expense");
+  const cashMovementContext = ref<CashMovementContext | null>(null);
+  const shiftCashMovements = ref<POSCashMovement[]>([]);
+  const isLoadingCashMovement = ref(false);
 
-  // ─── Credit Actions ────────────────────────────
   async function fetchAvailableCredit(
     customer: string,
     company?: string
@@ -109,7 +106,6 @@ export const usePaymentStore = defineStore("payment", () => {
     }
   }
 
-  // ─── Cash Movement Actions ─────────────────────
   async function fetchCashMovementContext(
     posProfile: string,
     posOpeningShift: string

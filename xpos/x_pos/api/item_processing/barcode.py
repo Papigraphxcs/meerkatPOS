@@ -128,7 +128,7 @@ def _find_item_scale_template(item_code: str, uom: Optional[str] = None) -> str:
     rows = frappe.get_all(
         "Item Barcode",
         filters={"parent": item_code_value},
-        fields=["barcode", "custom_uom"],
+        fields=["barcode", "uom"],
     )
     if not rows:
         return ""
@@ -139,12 +139,12 @@ def _find_item_scale_template(item_code: str, uom: Optional[str] = None) -> str:
         matched = [
             row
             for row in rows
-            if cstr(row.get("custom_uom") or "").strip() == requested_uom
+            if cstr(row.get("uom") or "").strip() == requested_uom
         ]
         unmatched = [
             row
             for row in rows
-            if cstr(row.get("custom_uom") or "").strip() != requested_uom
+            if cstr(row.get("uom") or "").strip() != requested_uom
         ]
         ordered_rows = matched + unmatched
 
@@ -401,13 +401,13 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
         search_item = frappe.db.get_value(
             "Item Barcode",
             {"barcode": barcode},
-            ["parent as item_code", "custom_uom"],
+            ["parent as item_code", "uom"],
             as_dict=1,
         )
         if not search_item:
             return None
         item_code = search_item.item_code
-        item_uom = search_item.custom_uom
+        item_uom = search_item.uom
     else:
         item_uom = None
 

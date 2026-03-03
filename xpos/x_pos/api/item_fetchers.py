@@ -575,7 +575,7 @@ class ItemDetailAggregator:
         barcode_map: Dict[str, List[Dict[str, object]]] = {}
         for row in barcode_rows:
             barcode_map.setdefault(row.parent, []).append(
-                {"barcode": row.barcode, "custom_uom": row.custom_uom}
+                {"barcode": row.barcode, "uom": row.uom}
             )
 
         batch_map: Dict[str, List[Dict[str, object]]] = {}

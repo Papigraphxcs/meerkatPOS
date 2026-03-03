@@ -10,15 +10,14 @@ export interface POSProfile {
   write_off_account?: string;
   write_off_cost_center?: string;
   selling_price_list?: string;
-  customer?: string;
-  // XPOS custom fields
-  custom_allow_user_to_edit_rate?: boolean;
-  custom_allow_user_to_edit_additional_discount?: boolean;
-  custom_allow_user_to_edit_item_discount?: boolean;
+  default_customer?: string;
+  allow_rate_change?: boolean;
+  allow_user_to_edit_additional_discount?: boolean;
+  allow_discount_change?: boolean;
   display_items_in_stock?: boolean;
   allow_partial_payment?: boolean;
-  custom_allow_credit_sale?: boolean;
-  custom_allow_return?: boolean;
+  allow_credit_sale?: boolean;
+  allow_return?: boolean;
   custom_allow_return_without_invoice?: boolean;
   custom_allow_sales_order?: boolean;
   custom_allow_delete?: boolean;
@@ -667,4 +666,17 @@ export type CurrencySymbolMap = Record<CurrencyCode, string>;
 
 export interface FrappeCallResponse<T = unknown> {
   message: T;
+}
+
+export interface UserSession {
+  user: string;
+  user_email?: string;
+  user_fullname?: string;
+}
+
+export interface CalculatedTax {
+  description: string;
+  rate: number;
+  amount: number;
+  included_in_print_rate: boolean;
 }

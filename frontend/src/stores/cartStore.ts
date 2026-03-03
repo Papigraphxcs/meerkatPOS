@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed, type Ref, type ComputedRef } from "vue";
+import { ref, computed } from "vue";
 import { usePosStore } from "./posStore";
 import type {
   CartItem,
@@ -10,68 +10,59 @@ import type {
   POSOffer,
   POSCoupon,
   TaxDetail,
+  CalculatedTax,
 } from "@/types/pos.types";
 
-// Tax breakdown for display
-export interface CalculatedTax {
-  description: string;
-  rate: number;
-  amount: number;
-  included_in_print_rate: boolean;
-}
-
 export const useCartStore = defineStore("cart", () => {
-  // ─── State ─────────────────────────────────────
-  const items: Ref<CartItem[]> = ref([]);
-  const customer: Ref<{ name: string; customer_name?: string; image?: string; mobile_no?: string; email_id?: string } | null> = ref(null);
-  const discountPercentage: Ref<number> = ref(0);
-  const discountAmount: Ref<number> = ref(0);
-  const showPaymentDialog: Ref<boolean> = ref(false);
+  const items = ref<CartItem[]>([]);
+  const customer = ref<{ name: string; customer_name?: string; image?: string; mobile_no?: string; email_id?: string } | null>(null);
+  const discountPercentage = ref(0);
+  const discountAmount = ref(0);
+  const showPaymentDialog = ref(false);
 
   // Return mode
-  const isReturnMode: Ref<boolean> = ref(false);
-  const returnAgainst: Ref<string> = ref("");
+  const isReturnMode = ref(false);
+  const returnAgainst = ref("");
 
   // Notes & delivery date
-  const orderNotes: Ref<string> = ref("");
-  const deliveryDate: Ref<string> = ref("");
+  const orderNotes = ref("");
+  const deliveryDate = ref("");
 
   // Authorization code
-  const authorizationCode: Ref<string> = ref("");
+  const authorizationCode = ref("");
 
   // Write-off
-  const writeOffAmount: Ref<number> = ref(0);
+  const writeOffAmount = ref(0);
 
   // Sales person
-  const salesPerson: Ref<string> = ref("");
+  const salesPerson = ref("");
 
   // Loyalty
-  const redeemLoyaltyPoints: Ref<boolean> = ref(false);
-  const loyaltyPoints: Ref<number> = ref(0);
-  const loyaltyAmount: Ref<number> = ref(0);
+  const redeemLoyaltyPoints = ref(false);
+  const loyaltyPoints = ref(0);
+  const loyaltyAmount = ref(0);
 
   // Offers & coupons
-  const appliedOffers: Ref<POSOffer[]> = ref([]);
-  const appliedCoupon: Ref<POSCoupon | null> = ref(null);
-  const couponCode: Ref<string> = ref("");
+  const appliedOffers = ref<POSOffer[]>([]);
+  const appliedCoupon = ref<POSCoupon | null>(null);
+  const couponCode = ref("");
 
   // Multi-payment
-  const payments: Ref<InvoicePayment[]> = ref([]);
+  const payments = ref<InvoicePayment[]>([]);
 
   // Draft tracking
-  const currentDraftName: Ref<string> = ref("");
-  const isSavingDraft: Ref<boolean> = ref(false);
+  const currentDraftName = ref("");
+  const isSavingDraft = ref(false);
 
   // Currency
-  const currency: Ref<string> = ref("");
-  const conversionRate: Ref<number> = ref(1);
+  const currency = ref("");
+  const conversionRate = ref(1);
 
-  // ─── Computed ──────────────────────────────────
-  const itemCount: ComputedRef<number> = computed(() =>
+  const itemCount = computed(() =>
     items.value.reduce((sum: number, item: CartItem) => sum + Math.abs(item.qty), 0)
   );
 
-  const subtotal: ComputedRef<number> = computed(() =>
+  const subtotal = computed(() =>
     items.value.reduce((sum: number, item: CartItem) => {
       const itemTotal = item.qty * item.rate;
       let discount = 0;
@@ -90,7 +81,7 @@ export const useCartStore = defineStore("cart", () => {
   // Calculate individual tax amounts based on tax template
   // Supports item-level tax templates: when an item has an item_tax_map,
   // its tax rate overrides the global POS profile rate for matching account heads.
-  const calculatedTaxes: ComputedRef<CalculatedTax[]> = computed(() => {
+  const calculatedTaxes = computed(() => {
     const posStore = usePosStore();
     const taxDetails = posStore.taxes || [];
     const taxInclusive = posStore.taxInclusiveMode;
@@ -184,25 +175,25 @@ export const useCartStore = defineStore("cart", () => {
   });
 
   // Total tax that is NOT included in prices (to be added)
-  const taxAmount: ComputedRef<number> = computed(() => {
+  const taxAmount = computed(() => {
     return calculatedTaxes.value
       .filter((t) => !t.included_in_print_rate)
       .reduce((sum, t) => sum + t.amount, 0);
   });
 
   // Total tax that IS included in prices (for display only)
-  const includedTaxAmount: ComputedRef<number> = computed(() => {
+  const includedTaxAmount = computed(() => {
     return calculatedTaxes.value
       .filter((t) => t.included_in_print_rate)
       .reduce((sum, t) => sum + t.amount, 0);
   });
 
   // Total of all taxes (for display)
-  const totalTaxAmount: ComputedRef<number> = computed(() => {
+  const totalTaxAmount = computed(() => {
     return calculatedTaxes.value.reduce((sum, t) => sum + t.amount, 0);
   });
 
-  const grandTotal: ComputedRef<number> = computed(() => {
+  const grandTotal = computed(() => {
     const posStore = usePosStore();
     let total = subtotal.value + taxAmount.value;
     if (discountPercentage.value > 0) {
@@ -227,26 +218,25 @@ export const useCartStore = defineStore("cart", () => {
     return total;
   });
 
-  const isEmpty: ComputedRef<boolean> = computed(() => items.value.length === 0);
+  const isEmpty = computed(() => items.value.length === 0);
 
-  const customerName: ComputedRef<string> = computed(() => {
+  const customerName = computed(() => {
     if (!customer.value) return "Walk-in Customer";
     return customer.value.customer_name || customer.value.name;
   });
 
-  const totalPayments: ComputedRef<number> = computed(() =>
+  const totalPayments = computed(() =>
     payments.value.reduce((sum, p) => sum + (p.amount || 0), 0)
   );
 
-  const remainingPayment: ComputedRef<number> = computed(() =>
+  const remainingPayment = computed(() =>
     Math.max(0, grandTotal.value - totalPayments.value)
   );
 
-  const hasOffers: ComputedRef<boolean> = computed(
+  const hasOffers = computed(
     () => appliedOffers.value.length > 0 || !!appliedCoupon.value
   );
 
-  // ─── Actions ───────────────────────────────────
 
   /**
    * Check if item can be added to cart based on stock availability
@@ -516,7 +506,6 @@ export const useCartStore = defineStore("cart", () => {
     }
   }
 
-  // ── Return Mode ────────────────────────────────
   function enterReturnMode(invoiceName: string): void {
     isReturnMode.value = true;
     returnAgainst.value = invoiceName;
@@ -528,7 +517,6 @@ export const useCartStore = defineStore("cart", () => {
     clearCart();
   }
 
-  // ── Loyalty ────────────────────────────────────
   function setLoyalty(points: number, amount: number): void {
     redeemLoyaltyPoints.value = true;
     loyaltyPoints.value = points;
@@ -541,7 +529,6 @@ export const useCartStore = defineStore("cart", () => {
     loyaltyAmount.value = 0;
   }
 
-  // ── Offers & Coupons ──────────────────────────
   function applyOffer(offer: POSOffer): void {
     if (!appliedOffers.value.find((o) => o.name === offer.name)) {
       appliedOffers.value.push(offer);
@@ -562,7 +549,6 @@ export const useCartStore = defineStore("cart", () => {
     couponCode.value = "";
   }
 
-  // ── Multi-Payment ─────────────────────────────
   function addPayment(modeOfPayment: string, amount: number): void {
     const existing = payments.value.find((p) => p.mode_of_payment === modeOfPayment);
     if (existing) {
@@ -580,13 +566,11 @@ export const useCartStore = defineStore("cart", () => {
     payments.value = [];
   }
 
-  // ── Currency ──────────────────────────────────
   function setCurrency(curr: string, rate: number): void {
     currency.value = curr;
     conversionRate.value = rate;
   }
-
-  // ── Clear ──────────────────────────────────────
+  
   function clearCart(): void {
     items.value = [];
     discountPercentage.value = 0;

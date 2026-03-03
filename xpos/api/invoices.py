@@ -147,7 +147,7 @@ def create_invoice(data):
                 )
             )
 
-        if not cint(pos.get("custom_allow_user_to_edit_rate")):
+        if not cint(pos.get("allow_rate_change")):
             price_list = pos.get("selling_price_list")
             if price_list:
                 price_list_rate = frappe.db.get_value(

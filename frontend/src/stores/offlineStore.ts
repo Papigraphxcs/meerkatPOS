@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed, watch, type Ref, type ComputedRef } from "vue";
+import { ref, computed } from "vue";
 import { call, showSuccess, showError, showInfo } from "@/services/api";
 import { usePosStore } from "@/stores/posStore";
 import {
@@ -12,51 +12,47 @@ import {
 } from "@/services/idbService";
 import type { InvoiceData } from "@/types/pos.types";
 
-// Re-export for compatibility
 export type OfflineInvoice = PendingInvoice;
 
 // ─── Store ───────────────────────────────────────
 export const useOfflineStore = defineStore("offline", () => {
     // State
-    const isOnline: Ref<boolean> = ref(navigator.onLine);
-    const isSyncing: Ref<boolean> = ref(false);
-    const pendingCount: Ref<number> = ref(0);
-    const pendingInvoices: Ref<OfflineInvoice[]> = ref([]);
-    const lastSyncTime: Ref<string> = ref("");
-    const syncErrors: Ref<string[]> = ref([]);
+    const isOnline = ref(navigator.onLine);
+    const isSyncing = ref(false);
+    const pendingCount = ref(0);
+    const pendingInvoices = ref<OfflineInvoice[]>([]);
+    const lastSyncTime = ref("");
+    const syncErrors = ref<string[]>([]);
 
     // Max retries before marking failed
     const MAX_RETRIES = 3;
 
     // ─── Computed ──────────────────────────────────
-    const hasPending: ComputedRef<boolean> = computed(() => pendingCount.value > 0);
+    const hasPending = computed(() => pendingCount.value > 0);
 
-    const offlineModeEnabled: ComputedRef<boolean> = computed(() => {
+    const offlineModeEnabled = computed(() => {
         const posStore = usePosStore();
         return !!posStore.posProfile?.custom_use_offline_mode;
     });
 
-    const statusLabel: ComputedRef<string> = computed(() => {
+    const statusLabel = computed(() => {
         if (isSyncing.value) return "Syncing...";
         if (!isOnline.value) return "Offline";
         if (pendingCount.value > 0) return `${pendingCount.value} pending`;
         return "Online";
     });
 
-    const statusColor: ComputedRef<string> = computed(() => {
+    const statusColor = computed(() => {
         if (isSyncing.value) return "text-blue-500";
         if (!isOnline.value) return "text-red-500";
         if (pendingCount.value > 0) return "text-amber-500";
         return "text-emerald-500";
     });
 
-    // ─── Lifecycle ─────────────────────────────────
     function init() {
-        // Listen to browser online/offline events
         window.addEventListener("online", handleOnline);
         window.addEventListener("offline", handleOffline);
 
-        // Load pending count from IndexedDB
         refreshPendingCount();
     }
 
@@ -68,7 +64,7 @@ export const useOfflineStore = defineStore("offline", () => {
     function handleOnline() {
         isOnline.value = true;
         showInfo("Internet connection restored");
-        // Auto-sync when back online
+        
         if (offlineModeEnabled.value && pendingCount.value > 0) {
             syncPendingInvoices();
         }

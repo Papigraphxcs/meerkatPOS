@@ -5,6 +5,7 @@ import { createPinia } from "pinia";
 import App from "./App.vue";
 import { router } from "./router";
 import { registerSW } from "virtual:pwa-register";
+import { showError } from "@/services/api";
 
 // Register PWA service worker with auto-update
 const updateSW = registerSW({
@@ -99,8 +100,9 @@ function initializeFrappeAPI(): void {
       },
 
       show_alert: (options: { message: string; indicator: string }, duration?: number): void => {
+        // Legacy compatibility - use console logging as fallback
+        // Toast notifications are now handled directly by components using useToast
         console.log(`[${options.indicator}] ${options.message}`);
-        // Sonner toast will be handled by components
       },
 
       msgprint: (message: string | { title?: string; message: string; indicator?: string }): void => {
@@ -151,15 +153,7 @@ app.use(router);
 
 app.config.errorHandler = (err: unknown, _instance: unknown, info: string) => {
   console.error("X POS Error:", err, info);
-  if (typeof frappe !== "undefined" && frappe.show_alert) {
-    frappe.show_alert(
-      {
-        message: `Error: ${err instanceof Error ? err.message : String(err)}`,
-        indicator: "red",
-      },
-      5
-    );
-  }
+  showError(`Error: ${err instanceof Error ? err.message : String(err)}`);
 };
 
 app.mount("#app");
