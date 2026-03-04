@@ -7,6 +7,12 @@ from frappe import _
 from frappe.utils import flt, cint
 
 
+def _row_value(row, key, default=None):
+    if isinstance(row, dict):
+        return row.get(key, default)
+    return getattr(row, key, default)
+
+
 @frappe.whitelist()
 def get_customers(search_term="", limit=20, pos_profile=None):
     """Search customers by name, mobile, email, or tax ID.
@@ -20,10 +26,11 @@ def get_customers(search_term="", limit=20, pos_profile=None):
     if pos_profile:
         try:
             pos = frappe.get_cached_doc("POS Profile", pos_profile)
-            if pos.get("customer_groups"):
+            customer_groups = pos.get("customer_groups")
+            if customer_groups:
                 allowed_groups = []
-                for cg in pos.customer_groups:
-                    group_name = cg.get("customer_group")
+                for cg in customer_groups:
+                    group_name = _row_value(cg, "customer_group")
                     if group_name:
                         allowed_groups.extend(
                             _get_child_groups("Customer Group", group_name)
@@ -98,7 +105,10 @@ def get_customer_info(customer):
     )
     address_list = []
     for addr in addresses:
-        a = frappe.get_doc("Address", addr.parent)
+        address_name = _row_value(addr, "parent")
+        if not address_name:
+            continue
+        a = frappe.get_doc("Address", address_name)
         address_list.append(
             {
                 "name": a.name,
@@ -469,7 +479,15 @@ def get_customer_balance(customer):
         (customer,),
         as_dict=True,
     )
-    return flt(balance[0].get("balance", 0)) if balance else 0
+    if not balance:
+        return 0
+
+    first_row = balance[0]
+    if isinstance(first_row, dict):
+        return flt(first_row.get("balance", 0))
+    if isinstance(first_row, (list, tuple)) and first_row:
+        return flt(first_row[0])
+    return flt(first_row or 0)
 
 
 def get_loyalty_points(customer):

@@ -738,6 +738,36 @@ def get_past_orders(
 
 
 @frappe.whitelist()
+def get_invoices(pos_opening_shift=None, is_return=None, limit=50):
+    """Return POS invoices filtered by opening shift and optional return flag."""
+    filters = {"docstatus": 1, "is_pos": 1}
+    if pos_opening_shift:
+        filters["pos_opening_shift"] = pos_opening_shift
+    if is_return is not None:
+        filters["is_return"] = cint(is_return)
+
+    return frappe.get_all(
+        "Sales Invoice",
+        filters=filters,
+        fields=[
+            "name",
+            "customer",
+            "customer_name",
+            "posting_date",
+            "posting_time",
+            "grand_total",
+            "net_total",
+            "paid_amount",
+            "status",
+            "is_return",
+            "return_against",
+        ],
+        order_by="posting_date desc, posting_time desc, modified desc",
+        limit_page_length=cint(limit) if limit else 50,
+    )
+
+
+@frappe.whitelist()
 def get_invoice_details(invoice_name, doctype="Sales Invoice"):
     """Get full invoice details including items and payments."""
     doc = frappe.get_doc(doctype, invoice_name)

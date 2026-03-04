@@ -77,7 +77,7 @@ class TestGetCustomers(unittest.TestCase):
         result = customers.get_customers(limit=10)
 
         call_args = mock_frappe.db.sql.call_args
-        self.assertIn(10, str(call_args))
+        self.assertIn("10", str(call_args))
 
 
 class TestGetCustomerInfo(unittest.TestCase):

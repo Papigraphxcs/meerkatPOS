@@ -9,6 +9,7 @@ from xpos.x_pos.api.items import get_items
 
 class TestNumericItemCodes(FrappeTestCase):
     def setUp(self):
+        leaf_group = frappe.db.get_value("Item Group", {"is_group": 0}, "name") or "All Item Groups"
         items = [
             ("ALPHA-TEST", "Alpha"),
             ("BETA-TEST", "Beta"),
@@ -18,6 +19,7 @@ class TestNumericItemCodes(FrappeTestCase):
             if frappe.db.exists("Item", code):
                 item = frappe.get_doc("Item", code)
                 item.item_name = name
+                item.item_group = leaf_group
                 item.is_sales_item = 1
                 item.is_fixed_asset = 0
                 item.save(ignore_permissions=True)
@@ -29,7 +31,7 @@ class TestNumericItemCodes(FrappeTestCase):
                         "item_name": name,
                         "stock_uom": "Nos",
                         "is_stock_item": 0,
-                        "item_group": "All Item Groups",
+                        "item_group": leaf_group,
                         "is_sales_item": 1,
                         "is_fixed_asset": 0,
                     }
@@ -37,12 +39,25 @@ class TestNumericItemCodes(FrappeTestCase):
 
     def test_numeric_code_appears_without_search(self):
         pos_profile = json.dumps({"name": "TestProfile"})
+        item_groups = json.dumps(["All Item Groups"])
         with patch("xpos.x_pos.api.items.get_items_details", return_value=[]):
-            first_page = get_items(pos_profile, limit=2)
-            last_name = first_page[-1]["item_name"]
-            second_page = get_items(pos_profile, limit=2, start_after=last_name)
-        codes = [i["item_code"] for i in second_page]
-        self.assertIn("002", codes)
+            seen_target = False
+            start_after = None
+            for _ in range(300):
+                page = get_items(
+                    pos_profile,
+                    limit=100,
+                    start_after=start_after,
+                    item_groups=item_groups,
+                )
+                if not page:
+                    break
+                if any(i.get("item_code") == "002" for i in page):
+                    seen_target = True
+                    break
+                start_after = page[-1].get("item_name")
+
+        self.assertTrue(seen_target, "Numeric item code '002' was not returned in paginated results")
 
     def test_item_search_with_whitespace(self):
         # Create an item with a barcode

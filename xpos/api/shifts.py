@@ -7,6 +7,12 @@ from frappe import _
 from frappe.utils import flt, nowdate, now_datetime, cint
 
 
+def _row_value(row, key, default=None):
+    if isinstance(row, dict):
+        return row.get(key, default)
+    return getattr(row, key, default)
+
+
 @frappe.whitelist()
 def get_opening_data():
     """Get data needed for the shift opening dialog.
@@ -32,12 +38,13 @@ def get_opening_data():
     companies = []
     seen = set()
     for profile in pos_profiles:
-        if profile.company and profile.company not in seen:
-            companies.append({"name": profile.company})
-            seen.add(profile.company)
+        company = _row_value(profile, "company")
+        if company and company not in seen:
+            companies.append({"name": company})
+            seen.add(company)
     data["companies"] = companies
 
-    profile_names = [p.name for p in pos_profiles]
+    profile_names = [_row_value(p, "name") for p in pos_profiles if _row_value(p, "name")]
     if profile_names:
         payment_methods = frappe.get_list(
             "POS Payment Method",
@@ -112,10 +119,12 @@ def check_open_shift(user=None):
         return None
 
     shift = open_shifts[0]
+    shift_name = _row_value(shift, "name")
+    pos_profile = _row_value(shift, "pos_profile")
     data = {
-        "pos_opening_shift": frappe.get_doc("POS Opening Shift", shift.name).as_dict(),
+        "pos_opening_shift": frappe.get_doc("POS Opening Shift", shift_name).as_dict(),
     }
-    _enrich_shift_data(data, shift.pos_profile)
+    _enrich_shift_data(data, pos_profile)
 
     return data
 
@@ -173,8 +182,8 @@ def close_shift(opening_shift, closing_details):
             ],
         )
 
-    grand_total = sum(flt(inv.grand_total) for inv in invoices)
-    net_total = sum(flt(inv.net_total) for inv in invoices)
+    grand_total = sum(flt(_row_value(inv, "grand_total", 0)) for inv in invoices)
+    net_total = sum(flt(_row_value(inv, "net_total", 0)) for inv in invoices)
     total_qty = len(invoices)
 
     returns_count = sum(1 for inv in invoices if inv.get("is_return"))
@@ -227,10 +236,10 @@ def close_shift(opening_shift, closing_details):
         closing_shift.append(
             "pos_transactions",
             {
-                "pos_invoice": inv.name,
+                "pos_invoice": _row_value(inv, "name"),
                 "posting_date": nowdate(),
-                "grand_total": inv.grand_total,
-                "customer": inv.customer,
+                "grand_total": _row_value(inv, "grand_total", 0),
+                "customer": _row_value(inv, "customer"),
             },
         )
 
@@ -239,6 +248,7 @@ def close_shift(opening_shift, closing_details):
 
     return {
         "name": closing_shift.name,
+        "pos_closing_shift": closing_shift.name,
         "grand_total": grand_total,
         "net_total": net_total,
         "total_invoices": total_qty,
@@ -295,22 +305,22 @@ def get_shift_summary(opening_shift):
             ],
         )
 
-    grand_total = sum(flt(inv.grand_total) for inv in invoices)
-    net_total = sum(flt(inv.net_total) for inv in invoices)
+    grand_total = sum(flt(_row_value(inv, "grand_total", 0)) for inv in invoices)
+    net_total = sum(flt(_row_value(inv, "net_total", 0)) for inv in invoices)
     returns_count = sum(1 for inv in invoices if inv.get("is_return"))
 
     payment_summary = {}
     for inv in invoices:
         payments = frappe.get_all(
             "Sales Invoice Payment",
-            filters={"parent": inv.name},
+            filters={"parent": _row_value(inv, "name")},
             fields=["mode_of_payment", "amount"],
         )
         for p in payments:
-            mode = p.mode_of_payment
+            mode = _row_value(p, "mode_of_payment")
             if mode not in payment_summary:
                 payment_summary[mode] = 0
-            payment_summary[mode] += flt(p.amount)
+            payment_summary[mode] += flt(_row_value(p, "amount", 0))
 
     opening_balances = {}
     for detail in opening.balance_details:
@@ -331,11 +341,11 @@ def get_shift_summary(opening_shift):
         "company": opening.company,
         "invoices": [
             {
-                "name": inv.name,
-                "customer": inv.customer,
-                "customer_name": inv.customer_name,
-                "grand_total": inv.grand_total,
-                "is_return": inv.is_return,
+                "name": _row_value(inv, "name"),
+                "customer": _row_value(inv, "customer"),
+                "customer_name": _row_value(inv, "customer_name"),
+                "grand_total": _row_value(inv, "grand_total", 0),
+                "is_return": _row_value(inv, "is_return", 0),
             }
             for inv in invoices
         ],
@@ -404,7 +414,7 @@ def _get_shift_tax_summary(invoices):
     if not invoices:
         return []
 
-    inv_names = [inv.name for inv in invoices]
+    inv_names = [_row_value(inv, "name") for inv in invoices if _row_value(inv, "name")]
     if not inv_names:
         return []
 

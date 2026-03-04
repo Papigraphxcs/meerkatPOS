@@ -15,6 +15,12 @@ from frappe import _
 from frappe.utils import flt, cstr, getdate, nowdate
 
 
+def _row_value(row, key, default=None):
+    if isinstance(row, dict):
+        return row.get(key, default)
+    return getattr(row, key, default)
+
+
 @frappe.whitelist()
 def get_offers(pos_profile):
     """Return all active POS Offers + promotional scheme offers for a profile."""
@@ -69,45 +75,44 @@ def get_offers(pos_profile):
 @frappe.whitelist()
 def get_pos_coupon(coupon, customer, company):
     """Validate and return a POS coupon."""
-    try:
-        from xpos.x_pos.doctype.pos_coupon.pos_coupon import check_coupon_code
+    coupon_doc = frappe.db.get_value(
+        "POS Coupon",
+        {"coupon_code": coupon, "company": company, "used": 0},
+        [
+            "name",
+            "coupon_code",
+            "coupon_type",
+            "discount_percentage",
+            "discount_amount",
+            "valid_from",
+            "valid_upto",
+            "customer",
+        ],
+        as_dict=True,
+    )
 
-        return check_coupon_code(coupon, customer, company)
-    except ImportError:
-        coupon_doc = frappe.db.get_value(
-            "POS Coupon",
-            {"coupon_code": coupon, "company": company, "used": 0},
-            [
-                "name",
-                "coupon_code",
-                "coupon_type",
-                "discount_percentage",
-                "discount_amount",
-                "valid_from",
-                "valid_upto",
-                "customer",
-            ],
-            as_dict=True,
-        )
+    if not coupon_doc:
+        frappe.throw(_("Invalid or already used coupon code"))
 
-        if not coupon_doc:
-            frappe.throw(_("Invalid or already used coupon code"))
+    today = getdate(nowdate())
+    valid_from = _row_value(coupon_doc, "valid_from")
+    valid_upto = _row_value(coupon_doc, "valid_upto")
+    coupon_customer = _row_value(coupon_doc, "customer")
 
-        today = getdate(nowdate())
-        if coupon_doc.valid_from and getdate(coupon_doc.valid_from) > today:
-            frappe.throw(_("Coupon is not yet valid"))
-        if coupon_doc.valid_upto and getdate(coupon_doc.valid_upto) < today:
-            frappe.throw(_("Coupon has expired"))
-        if coupon_doc.customer and coupon_doc.customer != customer:
-            frappe.throw(_("Coupon is not valid for this customer"))
+    if valid_from and getdate(valid_from) > today:
+        frappe.throw(_("Coupon is not yet valid"))
+    if valid_upto and getdate(valid_upto) < today:
+        frappe.throw(_("Coupon has expired"))
+    if coupon_customer and coupon_customer != customer:
+        frappe.throw(_("Coupon is not valid for this customer"))
 
-        return coupon_doc
+    return coupon_doc
 
 
 @frappe.whitelist()
 def get_active_gift_coupons(customer, company):
     """Returns all active gift card coupons for a customer."""
-    
+
     today = getdate(nowdate())
     coupons_data = frappe.get_all(
         "POS Coupon",
@@ -120,7 +125,19 @@ def get_active_gift_coupons(customer, company):
         fields=["coupon_code", "valid_from", "valid_upto"],
     )
 
-    return [c.coupon_code for c in coupons_data if _is_coupon_active(c, today)]
+    return [
+        _row_value(c, "coupon_code") for c in coupons_data if _is_coupon_active(c, today)
+    ]
+
+
+@frappe.whitelist()
+def get_delivery_charges(pos_profile):
+    """Backward-compatible delivery charges API."""
+    return frappe.get_all(
+        "Delivery Charges",
+        filters={"pos_profile": ["in", [pos_profile, "", None]], "disabled": 0},
+        fields=["name", "label", "charge_type", "amount"],
+    )
 
 
 @frappe.whitelist()
@@ -147,9 +164,11 @@ def get_applicable_delivery_charges(
 
 def _is_coupon_active(coupon_data, today):
     """Return True if the coupon is valid for the provided date."""
-    if coupon_data.valid_from and getdate(coupon_data.valid_from) > today:
+    valid_from = _row_value(coupon_data, "valid_from")
+    valid_upto = _row_value(coupon_data, "valid_upto")
+    if valid_from and getdate(valid_from) > today:
         return False
-    if coupon_data.valid_upto and getdate(coupon_data.valid_upto) < today:
+    if valid_upto and getdate(valid_upto) < today:
         return False
     return True
 
