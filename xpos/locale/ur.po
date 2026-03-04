@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-03-04 14:57+0428\n"
+"POT-Creation-Date: 2026-03-04 16:12+0428\n"
 "PO-Revision-Date: 2026-03-04 14:57+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language: ur\n"
@@ -137,6 +137,7 @@ msgstr ""
 #. Label of a Currency field in DocType 'POS Closing Shift Taxes'
 #. Label of a Currency field in DocType 'POS Payment Entry Reference'
 #. Label of a Currency field in DocType 'Sales Invoice Reference'
+#: frontend/src/views/OrdersView.vue:136
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:59
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:97
@@ -350,6 +351,10 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
+#: frontend/src/views/OrdersView.vue:222
+msgid "Change Given"
+msgstr ""
+
 #: frontend/src/views/ResetPasswordView.vue:18
 msgid "Check your email for reset instructions"
 msgstr ""
@@ -376,6 +381,7 @@ msgid "Client Request ID"
 msgstr ""
 
 #: frontend/src/components/customer/LoyaltyDialog.vue:130
+#: frontend/src/views/OrdersView.vue:268
 msgid "Close"
 msgstr ""
 
@@ -459,6 +465,7 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Offer Detail'
 #: frontend/src/components/cart/Cart.vue:119
 #: frontend/src/components/cart/CartSummary.vue:115
+#: frontend/src/views/OrdersView.vue:114
 #: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Coupon"
@@ -522,11 +529,15 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:206
 msgid "Create suppliers"
-msgstr ""
+msgstr "فراہم کنندہ بنائں"
+
+#: frontend/src/views/OrdersView.vue:106
+msgid "Created By"
+msgstr "بنانے والا"
 
 #: frontend/src/components/purchase/SupplierSelector.vue:192
 msgid "Creating..."
-msgstr ""
+msgstr "بن رہا۔۔۔"
 
 #: xpos/x_pos/api/payment_processing/data.py:269
 #: xpos/x_pos/api/payment_processing/data.py:403
@@ -566,6 +577,7 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Payment Entry Reference'
 #. Label of a Link field in DocType 'Referral Code'
 #. Label of a Link field in DocType 'Sales Invoice Reference'
+#: frontend/src/views/OrdersView.vue:93
 #: xpos/x_pos/api/payment_processing/data.py:67
 #: xpos/x_pos/api/payment_processing/data.py:167
 #: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
@@ -642,6 +654,10 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
 msgid "Date"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:97
+msgid "Date & Time"
 msgstr ""
 
 #. Label of a Data field in DocType 'Mpesa Payment Register'
@@ -730,6 +746,7 @@ msgid "Disabled"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:101
+#: frontend/src/views/OrdersView.vue:146 frontend/src/views/OrdersView.vue:178
 msgid "Discount"
 msgstr ""
 
@@ -795,7 +812,7 @@ msgstr ""
 msgid "Email address"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:32
+#: frontend/src/views/LoginView.vue:27
 msgid "Email or Username"
 msgstr ""
 
@@ -839,7 +856,7 @@ msgstr ""
 msgid "Enter your email address"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:40
+#: frontend/src/views/LoginView.vue:35
 msgid "Enter your email or username"
 msgstr ""
 
@@ -847,7 +864,7 @@ msgstr ""
 msgid "Enter your email to receive a password reset link"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:60
+#: frontend/src/views/LoginView.vue:54
 msgid "Enter your password"
 msgstr ""
 
@@ -945,7 +962,7 @@ msgstr ""
 msgid "Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:83
+#: frontend/src/views/LoginView.vue:77
 msgid "Forgot password?"
 msgstr ""
 
@@ -981,6 +998,7 @@ msgstr ""
 
 #. Label of a Currency field in DocType 'POS Closing Shift'
 #. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
+#: frontend/src/views/OrdersView.vue:191
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:15
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -1079,6 +1097,10 @@ msgstr ""
 msgid "Invoice Number"
 msgstr ""
 
+#: frontend/src/views/OrdersView.vue:85
+msgid "Invoice details"
+msgstr ""
+
 #: xpos/api/invoices.py:356
 msgid "Invoice name is required for update"
 msgstr ""
@@ -1093,6 +1115,10 @@ msgstr ""
 
 #: xpos/api/invoices.py:1340
 msgid "Invoice {0} not found"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:127
+msgid "Item"
 msgstr ""
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
@@ -1181,6 +1207,7 @@ msgid "Item {0}: Rate cannot be negative"
 msgstr ""
 
 #. Label of a Small Text field in DocType 'POS Offer Detail'
+#: frontend/src/views/OrdersView.vue:120
 #: frontend/src/views/PurchaseView.vue:117
 #: frontend/src/views/PurchaseView.vue:152
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
@@ -1229,6 +1256,10 @@ msgstr ""
 msgid "Loyalty"
 msgstr ""
 
+#: frontend/src/views/OrdersView.vue:230
+msgid "Loyalty Information"
+msgstr ""
+
 #. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Loyalty Point"
@@ -1243,6 +1274,10 @@ msgstr ""
 #: frontend/src/components/payment/PaymentDialog.vue:157
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Loyalty Points"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:186
+msgid "Loyalty Points Redeemed"
 msgstr ""
 
 #: frontend/src/components/cart/Cart.vue:31
@@ -1375,6 +1410,7 @@ msgid "Mpesa Settings"
 msgstr ""
 
 #. Label of a Currency field in DocType 'POS Closing Shift'
+#: frontend/src/views/OrdersView.vue:166
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:28
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Net Total"
@@ -1450,6 +1486,10 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:310
 msgid "No open shift found. Please open a shift first."
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:19
+msgid "No orders found"
 msgstr ""
 
 #: xpos/x_pos/api/payment_processing/processor.py:133
@@ -1600,6 +1640,10 @@ msgstr ""
 #. Label of a Table field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Opening Balance Details"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:5
+msgid "Order History"
 msgstr ""
 
 #: frontend/src/views/PurchaseView.vue:173
@@ -1790,6 +1834,7 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'POS Opening Shift'
 #. Label of a Link in the X POS Workspace
+#: frontend/src/views/OrdersView.vue:102
 #: xpos/x_pos/api/payment_processing/data.py:70
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -1865,7 +1910,7 @@ msgstr ""
 msgid "POSA Sales Person Filter"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:52
+#: frontend/src/views/LoginView.vue:46
 msgid "Password"
 msgstr ""
 
@@ -1915,6 +1960,10 @@ msgstr ""
 
 #: xpos/x_pos/api/payment_processing/processor.py:228
 msgid "Payment {0} is already fully allocated"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:212
+msgid "Payments"
 msgstr ""
 
 #. Option for the 'Register Status' (Select) field in DocType 'Mpesa C2B
@@ -1971,9 +2020,17 @@ msgstr ""
 msgid "Please set default account for Mode of Payment {0} in company {1}"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:9
+#: frontend/src/views/LoginView.vue:8
 #: frontend/src/views/ResetPasswordView.vue:9
 msgid "Point of Sale System"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:237
+msgid "Points Earned"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:241
+msgid "Points Redeemed"
 msgstr ""
 
 #: frontend/src/components/customer/LoyaltyDialog.vue:46
@@ -2062,6 +2119,10 @@ msgstr ""
 msgid "Primary Customer Offer"
 msgstr ""
 
+#: frontend/src/views/OrdersView.vue:258
+msgid "Print"
+msgstr ""
+
 #. Label of a Link field in DocType 'POS Awesome Print Format Rule'
 #: xpos/x_pos/doctype/pos_awesome_print_format_rule/pos_awesome_print_format_rule.json
 msgid "Print Format"
@@ -2097,6 +2158,10 @@ msgstr ""
 #. Label of a Code field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "Profiles List"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:233
+msgid "Program"
 msgstr ""
 
 #. Label of a Select field in DocType 'POS Offer'
@@ -2182,6 +2247,10 @@ msgstr ""
 msgid "QZ certificate generated successfully."
 msgstr ""
 
+#: frontend/src/views/OrdersView.vue:130
+msgid "Qty"
+msgstr ""
+
 #. Label of a Select field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Qualifying Transaction / Item"
@@ -2200,6 +2269,7 @@ msgstr ""
 #. Label of a Percent field in DocType 'POS Closing Shift Taxes'
 #. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
 #. Label of a Float field in DocType 'POS Offer'
+#: frontend/src/views/OrdersView.vue:133
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:96
 #: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
@@ -2299,6 +2369,7 @@ msgid "Remaining outstanding: {0} across {1} invoice(s)."
 msgstr ""
 
 #. Label of a Small Text field in DocType 'POS Cash Movement'
+#: frontend/src/views/OrdersView.vue:248
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Remarks"
 msgstr ""
@@ -2351,6 +2422,7 @@ msgstr ""
 
 #: frontend/src/components/Navbar.vue:69
 #: frontend/src/components/payment/PaymentDialog.vue:20
+#: frontend/src/views/OrdersView.vue:265
 msgid "Return"
 msgstr ""
 
@@ -2420,6 +2492,10 @@ msgstr ""
 msgid "Sales Order name is required"
 msgstr ""
 
+#: frontend/src/views/OrdersView.vue:110
+msgid "Sales Partner"
+msgstr ""
+
 #. Label of a Link field in DocType 'POSA Sales Person Filter'
 #: xpos/x_pos/doctype/posa_sales_person_filter/posa_sales_person_filter.json
 msgid "Sales Person"
@@ -2474,7 +2550,7 @@ msgstr ""
 msgid "Search suppliers..."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:104
+#: frontend/src/views/LoginView.vue:98
 msgid "Secure login powered by Frappe Framework"
 msgstr ""
 
@@ -2538,7 +2614,7 @@ msgstr ""
 msgid "Shortage return from transit to source"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:96
+#: frontend/src/views/LoginView.vue:90
 msgid "Sign In"
 msgstr ""
 
@@ -2546,11 +2622,11 @@ msgstr ""
 msgid "Sign Out"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:16
+#: frontend/src/views/LoginView.vue:14
 msgid "Sign in to your account to continue"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:96
+#: frontend/src/views/LoginView.vue:90
 msgid "Signing in..."
 msgstr ""
 
@@ -2690,6 +2766,10 @@ msgstr ""
 msgid "Successfully unenrolled {0} from {1}"
 msgstr ""
 
+#: frontend/src/views/OrdersView.vue:163
+msgid "Summary"
+msgstr ""
+
 #: frontend/src/components/purchase/SupplierSelector.vue:152
 msgid "Supplier Name"
 msgstr ""
@@ -2760,6 +2840,14 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:90
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Taxes"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:171
+msgid "Taxes & Charges"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:200
+msgid "Taxes Breakdown"
 msgstr ""
 
 #: frontend/src/components/payment/PaymentDialog.vue:97
@@ -2853,6 +2941,10 @@ msgstr ""
 
 #: frontend/src/components/items/ItemGrid.vue:16
 msgid "Try a different search or category"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:20
+msgid "Try adjusting your filters"
 msgstr ""
 
 #: frontend/src/views/ResetPasswordView.vue:45
@@ -2990,7 +3082,7 @@ msgstr ""
 msgid "Weight value is parsed as: [weight digits].[weight decimals]."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:15
+#: frontend/src/views/LoginView.vue:13
 msgid "Welcome back"
 msgstr ""
 

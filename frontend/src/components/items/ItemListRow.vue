@@ -7,8 +7,8 @@
 				: 'cursor-pointer hover:bg-muted/50 border-transparent hover:border-border'
 	]" @click="handleClick">
 		<div class="w-14 h-14 shrink-0 rounded-lg bg-muted overflow-hidden relative">
-			<img v-if="item.image && !hideImages" :src="item.image" :alt="item.item_name" class="w-full h-full object-cover"
-				loading="lazy" />
+			<img v-if="item.image && !hideImages" :src="item.image" :alt="item.item_name"
+				class="w-full h-full object-cover" loading="lazy" />
 			<div v-else class="w-full h-full flex items-center justify-center">
 				<Package class="w-6 h-6 text-muted-foreground/40" />
 			</div>
@@ -30,7 +30,7 @@
 			</div>
 		</div>
 
-		<Badge v-if="showStock && item.actual_qty !== undefined" :variant="stockVariant" class="shrink-0 text-[10px]">
+		<Badge v-if="showStock && item.actual_qty !== undefined" :variant="stockVariant" class="shrink-0 text-[10px]" :title="isOutOfStock ? __('Out of Stock') : item.actual_qty">
 			<template v-if="isOutOfStock">
 				<AlertCircle class="w-3 h-3 mr-1" />
 				{{ __("Out of Stock") }}

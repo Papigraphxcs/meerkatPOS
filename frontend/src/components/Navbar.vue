@@ -1,15 +1,9 @@
 <template>
 	<header class="h-14 bg-background border-b border-border flex items-center px-4 gap-3 shrink-0 z-30">
-		<!-- Logo / Brand -->
 		<div class="flex items-center gap-2.5">
 			<img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-8 h-8" />
-			<span
-				class="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent hidden sm:inline">
-				X POS
-			</span>
 		</div>
 
-		<!-- Navigation Tabs -->
 		<nav class="flex items-center gap-1 ml-4">
 			<router-link to="/pos" :class="cn(
 				buttonVariants({ variant: route.name === 'pos' ? 'secondary' : 'ghost', size: 'sm' }),
@@ -35,11 +29,18 @@
 				<ShoppingBag class="w-4 h-4" />
 				<span>{{ __('Purchase') }}</span>
 			</router-link>
+			<router-link to="/barcode-print" :class="cn(
+				buttonVariants({ variant: route.name === 'barcode-print' ? 'secondary' : 'ghost', size: 'sm' }),
+				'gap-1.5 no-underline',
+				route.name === 'barcode-print' && 'bg-primary/10 text-primary hover:bg-primary/15'
+			)">
+				<Printer class="w-4 h-4" />
+				<span>{{ __('Barcodes') }}</span>
+			</router-link>
 		</nav>
 
 		<div class="flex-1"></div>
 
-		<!-- Cash Movement Buttons -->
 		<div v-if="posStore.enableCashMovement" class="hidden md:flex items-center gap-1">
 			<Button v-if="posStore.allowPosExpense" variant="ghost" size="sm"
 				class="text-muted-foreground hover:text-red-500 gap-1" @click="paymentStore.openCashMovement('expense')"
@@ -55,46 +56,41 @@
 			</Button>
 		</div>
 
-		<!-- Repeat Invoice Button -->
 		<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-blue-500 gap-1"
 			@click="showRepeatDialog = true" :title="__('Repeat Invoice (Ctrl+G)')">
 			<Repeat class="w-4 h-4" />
 			<span class="hidden lg:inline text-xs">{{ __('Repeat') }}</span>
 		</Button>
 
-		<!-- Return Button -->
 		<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-amber-500 gap-1"
 			@click="showReturnDialog = true" :title="__('Process Return')">
 			<RotateCcw class="w-4 h-4" />
 			<span class="hidden lg:inline text-xs">{{ __('Return') }}</span>
 		</Button>
 
-		<!-- Print Last Invoice -->
 		<Button v-if="posStore.allowPrintLastInvoice && posStore.lastInvoiceName" variant="ghost" size="sm"
 			class="text-muted-foreground hover:text-foreground gap-1" @click="printLastInvoice"
 			:title="__('Print Last Invoice')">
 			<Printer class="w-4 h-4" />
 		</Button>
 
-		<!-- Online/Offline Status Indicator (always visible) -->
 		<div class="flex items-center gap-1">
-			<Button variant="ghost" size="sm" :class="['gap-1.5', offlineStore.statusColor]" @click="handleOfflineAction"
-				:title="offlineStore.statusLabel">
+			<Button variant="ghost" size="sm" :class="['gap-1.5', offlineStore.statusColor]"
+				@click="handleOfflineAction" :title="offlineStore.statusLabel">
 				<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />
 				<WifiOff v-else-if="!isOnline()" class="w-4 h-4" />
 				<CloudUpload v-else-if="offlineStore.hasPending" class="w-4 h-4" />
 				<Wifi v-else class="w-4 h-4" />
-				<Badge v-if="offlineStore.pendingCount > 0" variant="destructive" class="h-4 min-w-4 px-1 text-[10px] leading-none">
+				<Badge v-if="offlineStore.pendingCount > 0" variant="destructive"
+					class="h-4 min-w-4 px-1 text-[10px] leading-none">
 					{{ offlineStore.pendingCount }}
 				</Badge>
 				<span class="hidden lg:inline text-xs">{{ offlineStore.statusLabel }}</span>
 			</Button>
 		</div>
 
-		<!-- Offline Pending Panel -->
 		<OfflinePendingPanel :open="showOfflinePanel" @close="showOfflinePanel = false" />
 
-		<!-- Profile Info -->
 		<div class="hidden md:flex items-center">
 			<Badge variant="secondary" class="gap-1.5">
 				<Building2 class="w-3.5 h-3.5" />
@@ -102,14 +98,11 @@
 			</Badge>
 		</div>
 
-		<!-- Dark Mode Toggle -->
-		<Button variant="ghost" size="icon-sm" @click="toggleDarkMode"
-			:title="themeTooltip"
+		<Button variant="ghost" size="icon-sm" @click="toggleDarkMode" :title="themeTooltip"
 			:class="{ 'text-amber-400': theme === 'dark', 'text-blue-400': theme === 'system' }">
 			<component :is="themeIcon" class="w-4 h-4" />
 		</Button>
-
-		<!-- User Menu -->
+		
 		<Popover>
 			<PopoverTrigger as-child>
 				<Button variant="ghost" size="icon-sm" class="rounded-full">
@@ -120,24 +113,20 @@
 					</Avatar>
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent class="w-56 p-2" align="end">
+			<PopoverContentStyled class="w-56 p-2" align="end">
 				<div class="px-2 py-1.5 border-b border-border mb-1">
 					<p class="text-sm font-medium">{{ authStore.userFullName || __('User') }}</p>
 					<p class="text-xs text-muted-foreground">{{ authStore.userEmail }}</p>
 				</div>
-				<Button
-					variant="ghost"
-					size="sm"
+				<Button variant="ghost" size="sm"
 					class="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-					@click="handleSignOut"
-				>
+					@click="handleSignOut">
 					<Power class="w-4 h-4" />
 					{{ __('Sign Out') }}
 				</Button>
-			</PopoverContent>
+			</PopoverContentStyled>
 		</Popover>
 
-		<!-- Close Shift Button -->
 		<Button v-if="!posStore.hideClosingShift" variant="ghost" size="sm"
 			class="text-muted-foreground hover:text-destructive gap-1.5"
 			@click="posStore.showClosingDialog = true; posStore.fetchClosingData()" :title="__('Close Shift')">
@@ -145,10 +134,8 @@
 			<span class="hidden sm:inline">{{ __('Close Shift') }}</span>
 		</Button>
 
-		<!-- Return Dialog -->
 		<ReturnDialog :open="showReturnDialog" @close="showReturnDialog = false" />
 
-		<!-- Repeat Invoice Dialog -->
 		<RepeatInvoiceDialog :open="showRepeatDialog" @close="showRepeatDialog = false" />
 	</header>
 </template>
@@ -164,7 +151,7 @@ import { __ } from "@/lib/translate";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContentStyled, PopoverTrigger } from "@/components/ui/popover";
 import ReturnDialog from "@/components/cart/ReturnDialog.vue";
 import RepeatInvoiceDialog from "@/components/cart/RepeatInvoiceDialog.vue";
 import {
@@ -188,12 +175,12 @@ const isDark = inject<Ref<boolean>>("isDark")!;
 const theme = inject<Ref<"light" | "dark" | "system">>("theme")!;
 const toggleDarkMode = inject<() => void>("toggleDarkMode")!;
 
-// Compute which icon and tooltip to show
 const themeIcon = computed(() => {
 	if (theme.value === "system") return Monitor;
 	if (theme.value === "dark") return Moon;
 	return Sun;
 });
+
 const themeTooltip = computed(() => {
 	if (theme.value === "light") return __('Theme: Light (click to switch to Dark)');
 	if (theme.value === "dark") return __('Theme: Dark (click to switch to System)');
@@ -213,13 +200,13 @@ function handleOfflineAction() {
 	}
 }
 
-// Ctrl+G shortcut for Repeat Invoice
 function handleKeyboard(e: KeyboardEvent) {
 	if (e.ctrlKey && e.key.toLowerCase() === "g") {
 		e.preventDefault();
 		showRepeatDialog.value = true;
 	}
 }
+
 onMounted(() => window.addEventListener("keydown", handleKeyboard));
 onUnmounted(() => window.removeEventListener("keydown", handleKeyboard));
 

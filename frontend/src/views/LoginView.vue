@@ -1,6 +1,5 @@
 <template>
 	<div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-		<!-- Logo/Brand -->
 		<div class="mb-8 text-center">
 			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary flex items-center justify-center">
 				<Store class="w-8 h-8 text-primary-foreground" />
@@ -9,7 +8,6 @@
 			<p class="text-muted-foreground text-sm mt-1">{{ __('Point of Sale System') }}</p>
 		</div>
 
-		<!-- Login Card -->
 		<Card class="w-full max-w-md">
 			<CardHeader class="text-center">
 				<CardTitle class="text-xl">{{ __('Welcome back') }}</CardTitle>
@@ -17,7 +15,6 @@
 			</CardHeader>
 			<CardContent>
 				<form @submit.prevent="handleLogin" class="space-y-4">
-					<!-- Error Alert -->
 					<div
 						v-if="authStore.error"
 						class="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-start gap-2"
@@ -25,8 +22,6 @@
 						<AlertCircle class="w-4 h-4 mt-0.5 shrink-0" />
 						<span>{{ authStore.error }}</span>
 					</div>
-
-					<!-- Username/Email Field -->
 					<div class="space-y-2">
 						<label for="username" class="text-sm font-medium text-foreground">
 							{{ __('Email or Username') }}
@@ -45,8 +40,7 @@
 							/>
 						</div>
 					</div>
-
-					<!-- Password Field -->
+					
 					<div class="space-y-2">
 						<label for="password" class="text-sm font-medium text-foreground">
 							{{ __('Password') }}
@@ -74,7 +68,6 @@
 						</div>
 					</div>
 
-					<!-- Forgot Password Link -->
 					<div class="flex justify-end">
 						<RouterLink
 							to="/reset-password"
@@ -84,7 +77,6 @@
 						</RouterLink>
 					</div>
 
-					<!-- Submit Button -->
 					<Button
 						type="submit"
 						class="w-full"
@@ -99,7 +91,6 @@
 			</CardContent>
 		</Card>
 
-		<!-- Footer -->
 		<p class="mt-8 text-center text-sm text-muted-foreground">
 			{{ __('Secure login powered by Frappe Framework') }}
 		</p>
@@ -137,13 +128,11 @@ async function handleLogin() {
 
 	const success = await authStore.login(username.value, password.value);
 	if (success) {
-		// Redirect to POS or originally requested page
 		const redirectTo = router.currentRoute.value.query.redirect as string || "/pos";
 		router.push(redirectTo);
 	}
 }
 
-// Clear error when user starts typing
 function clearError() {
 	if (authStore.error) {
 		authStore.clearError();
@@ -151,7 +140,6 @@ function clearError() {
 }
 
 onMounted(() => {
-	// Clear any previous errors
 	authStore.clearError();
 });
 

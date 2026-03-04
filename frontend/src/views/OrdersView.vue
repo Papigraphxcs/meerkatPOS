@@ -1,42 +1,35 @@
 <template>
     <div class="flex flex-col h-full overflow-hidden bg-background">
-        <!-- Header -->
         <div class="shrink-0 p-4 pb-3">
             <div class="flex items-center justify-between mb-4">
-                <h1 class="text-xl font-bold text-foreground">Order History</h1>
+                <h1 class="text-xl font-bold text-foreground">{{ __("Order History") }}</h1>
             </div>
 
-            <!-- Filters -->
-            <ListFilters :from-date="fromDate" :to-date="toDate" @update="handleFilterUpdate" @refresh="refreshOrders" />
+            <ListFilters :from-date="fromDate" :to-date="toDate" @update="handleFilterUpdate"
+                @refresh="refreshOrders" />
         </div>
 
-        <!-- Orders Table -->
         <div class="flex-1 overflow-y-auto px-4 xpos-scrollbar">
-            <!-- Loading -->
             <div v-if="isLoading && orders.length === 0" class="grid gap-3">
                 <div v-for="i in 5" :key="i" class="skeleton h-20 w-full rounded-xl"></div>
             </div>
-
-            <!-- Empty -->
             <div v-else-if="orders.length === 0"
                 class="flex flex-col items-center justify-center h-64 text-muted-foreground">
                 <FileText class="w-16 h-16 mb-4 text-muted-foreground/30" />
-                <p class="text-lg font-medium">No orders found</p>
-                <p class="text-sm">Try adjusting your filters</p>
+                <p class="text-lg font-medium">{{ __("No orders found") }}</p>
+                <p class="text-sm">{{ __("Try adjusting your filters") }}</p>
             </div>
 
-            <!-- Orders List -->
             <div v-else class="space-y-2" :class="{ 'opacity-50': isLoading }">
                 <Card v-for="order in orders" :key="order.name"
                     class="p-4 cursor-pointer transition-all duration-200 border-transparent hover:border-primary/40 hover:shadow-md dark:hover:bg-accent/50 dark:hover:shadow-primary/5"
                     @click="viewOrder(order)">
                     <div class="flex items-center gap-4">
-                        <!-- Invoice Info -->
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="font-semibold text-foreground">{{ order.name }}</span>
-                                <Badge v-if="order.is_return" variant="warning" class="text-[10px]">Return</Badge>
-                                <Badge :variant="statusVariant(order.status)" class="text-[10px]">{{ order.status }}</Badge>
+                                <Badge :variant="statusVariant(order.status)" class="text-[10px]">{{ __(order.status) }}
+                                </Badge>
                             </div>
                             <div class="flex items-center gap-3 text-xs text-muted-foreground">
                                 <span class="flex items-center gap-1">
@@ -54,7 +47,6 @@
                             </div>
                         </div>
 
-                        <!-- Amount Info -->
                         <div class="text-right shrink-0">
                             <div class="font-bold text-foreground text-lg">
                                 {{ posStore.currencySymbol }}{{ formatNumber(order.grand_total) }}
@@ -64,23 +56,20 @@
                                     Paid: {{ posStore.currencySymbol }}{{ formatNumber(order.paid_amount) }}
                                 </span>
                                 <span v-if="order.total_taxes_and_charges" class="text-muted-foreground">
-                                    Tax: {{ posStore.currencySymbol }}{{ formatNumber(Number(order.total_taxes_and_charges) || 0) }}
+                                    Tax: {{ posStore.currencySymbol }}{{
+                                        formatNumber(Number(order.total_taxes_and_charges) || 0) }}
                                 </span>
                             </div>
                         </div>
-
-                        <!-- Arrow -->
                         <ChevronRight class="w-5 h-5 text-muted-foreground/40 shrink-0" />
                     </div>
                 </Card>
             </div>
         </div>
 
-        <!-- Pagination -->
         <Pagination v-if="totalOrders > 0" :total="totalOrders" :page-size="pageSize" :current-page="currentPage"
             @update:current-page="handlePageChange" @update:page-size="handlePageSizeChange" />
-
-        <!-- Order Detail Dialog -->
+        
         <Dialog :open="!!selectedOrder" @update:open="(val: boolean) => { if (!val) selectedOrder = null }">
             <DialogScrollContent class="max-w-2xl p-0">
                 <DialogHeader class="p-6 pb-4 border-b border-border">
@@ -88,55 +77,63 @@
                         <div>
                             <DialogTitle class="text-lg">
                                 {{ selectedOrder?.name }}
-                                <Badge v-if="selectedOrder" :variant="statusVariant(selectedOrder.status)" class="text-xs">
+                                <Badge v-if="selectedOrder" :variant="statusVariant(selectedOrder.status)"
+                                    class="text-xs">
                                     {{ selectedOrder.status }}
                                 </Badge>
                             </DialogTitle>
-                            <DialogDescription>Invoice details</DialogDescription>
+                            <DialogDescription>{{ __("Invoice details") }}</DialogDescription>
                         </div>
                     </div>
                 </DialogHeader>
 
                 <div v-if="selectedOrder" class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-                    <!-- Basic Info Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         <div class="space-y-1">
-                            <span class="text-xs text-muted-foreground uppercase tracking-wide">Customer</span>
+                            <span class="text-xs text-muted-foreground uppercase tracking-wide">{{ __("Customer") }}</span>
                             <p class="font-medium text-foreground">{{ selectedOrder.customer_name }}</p>
                         </div>
                         <div class="space-y-1">
-                            <span class="text-xs text-muted-foreground uppercase tracking-wide">Date & Time</span>
-                            <p class="font-medium text-foreground">{{ formatDate(selectedOrder.posting_date) }} {{ formatTime(String(selectedOrder.posting_time || '')) }}</p>
+                            <span class="text-xs text-muted-foreground uppercase tracking-wide">{{ __("Date & Time") }}</span>
+                            <p class="font-medium text-foreground">{{ formatDate(selectedOrder.posting_date) }} {{
+                                formatTime(String(selectedOrder.posting_time || '')) }}</p>
                         </div>
                         <div class="space-y-1">
-                            <span class="text-xs text-muted-foreground uppercase tracking-wide">POS Profile</span>
+                            <span class="text-xs text-muted-foreground uppercase tracking-wide">{{ __("POS Profile") }}</span>
                             <p class="font-medium text-foreground">{{ selectedOrder.pos_profile || '-' }}</p>
                         </div>
                         <div class="space-y-1">
-                            <span class="text-xs text-muted-foreground uppercase tracking-wide">Created By</span>
+                            <span class="text-xs text-muted-foreground uppercase tracking-wide">{{ __("Created By") }}</span>
                             <p class="font-medium text-foreground">{{ selectedOrder.owner || '-' }}</p>
                         </div>
                         <div v-if="selectedOrder.sales_partner" class="space-y-1">
-                            <span class="text-xs text-muted-foreground uppercase tracking-wide">Sales Partner</span>
+                            <span class="text-xs text-muted-foreground uppercase tracking-wide">{{ __("Sales Partner") }}</span>
                             <p class="font-medium text-foreground">{{ selectedOrder.sales_partner }}</p>
                         </div>
                         <div v-if="selectedOrder.coupon_code" class="space-y-1">
-                            <span class="text-xs text-muted-foreground uppercase tracking-wide">Coupon</span>
+                            <span class="text-xs text-muted-foreground uppercase tracking-wide">{{ __("Coupon") }}</span>
                             <p class="font-medium text-foreground">{{ selectedOrder.coupon_code }}</p>
                         </div>
                     </div>
 
-                    <!-- Items -->
                     <div v-if="selectedOrder.items" class="space-y-2">
-                        <h3 class="text-sm font-semibold text-foreground">Items ({{ selectedOrder.items.length }})</h3>
+                        <h3 class="text-sm font-semibold text-foreground">{{ __("Items") }} ({{ selectedOrder.items.length }})</h3>
                         <div class="rounded-lg border border-border overflow-hidden">
                             <table class="w-full text-sm">
                                 <thead class="bg-muted/50">
                                     <tr>
-                                        <th class="text-left px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">Item</th>
-                                        <th class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">Qty</th>
-                                        <th class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">Rate</th>
-                                        <th class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">Amount</th>
+                                        <th
+                                            class="text-left px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
+                                            {{ __("Item") }}</th>
+                                        <th
+                                            class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
+                                            {{ __("Qty") }}</th>
+                                        <th
+                                            class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
+                                            {{ __("Rate") }}</th>
+                                        <th
+                                            class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
+                                            {{ __("Amount") }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">
@@ -144,99 +141,111 @@
                                         class="hover:bg-muted/30 transition-colors">
                                         <td class="px-4 py-3">
                                             <div class="text-foreground font-medium">{{ item.item_name }}</div>
-                                            <div v-if="item.discount_percentage || item.discount_amount" class="text-xs text-muted-foreground">
-                                                Discount: {{ item.discount_percentage ? item.discount_percentage + '%' : posStore.currencySymbol + formatNumber(item.discount_amount || 0) }}
+                                            <div v-if="item.discount_percentage || item.discount_amount"
+                                                class="text-xs text-muted-foreground">
+                                                {{ __("Discount") }}: {{ item.discount_percentage ? item.discount_percentage + '%' :
+                                                    posStore.currencySymbol + formatNumber(item.discount_amount || 0) }}
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3 text-right text-muted-foreground">{{ item.qty }} {{ item.uom }}</td>
-                                        <td class="px-4 py-3 text-right text-muted-foreground">{{ formatNumber(item.rate) }}</td>
-                                        <td class="px-4 py-3 text-right font-medium text-foreground">{{ formatNumber(item.amount ?? 0) }}</td>
+                                        <td class="px-4 py-3 text-right text-muted-foreground">{{ item.qty }} {{
+                                            item.uom }}</td>
+                                        <td class="px-4 py-3 text-right text-muted-foreground">{{
+                                            formatNumber(item.rate) }}</td>
+                                        <td class="px-4 py-3 text-right font-medium text-foreground">{{
+                                            formatNumber(item.amount ?? 0) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
-                    <!-- Totals Summary -->
+                    
                     <div class="space-y-2">
-                        <h3 class="text-sm font-semibold text-foreground">Summary</h3>
+                        <h3 class="text-sm font-semibold text-foreground">{{ __("Summary") }}</h3>
                         <div class="rounded-lg border border-border p-4 space-y-2">
                             <div class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Net Total</span>
-                                <span class="text-foreground">{{ posStore.currencySymbol }}{{ formatNumber(selectedOrder.net_total) }}</span>
+                                <span class="text-muted-foreground">{{ __("Net Total") }}</span>
+                                <span class="text-foreground">{{ posStore.currencySymbol }}{{
+                                    formatNumber(selectedOrder.net_total) }}</span>
                             </div>
                             <div v-if="selectedOrder.total_taxes_and_charges" class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Taxes & Charges</span>
-                                <span class="text-foreground">{{ posStore.currencySymbol }}{{ formatNumber(Number(selectedOrder.total_taxes_and_charges) || 0) }}</span>
+                                <span class="text-muted-foreground">{{ __("Taxes & Charges") }}</span>
+                                <span class="text-foreground">{{ posStore.currencySymbol }}{{
+                                    formatNumber(Number(selectedOrder.total_taxes_and_charges) || 0) }}</span>
                             </div>
-                            <div v-if="selectedOrder.discount_amount || selectedOrder.additional_discount_percentage" class="flex justify-between text-sm">
+                            <div v-if="selectedOrder.discount_amount || selectedOrder.additional_discount_percentage"
+                                class="flex justify-between text-sm">
                                 <span class="text-muted-foreground">
-                                    Discount
-                                    <span v-if="selectedOrder.additional_discount_percentage">({{ selectedOrder.additional_discount_percentage }}%)</span>
+                                    {{ __("Discount") }}
+                                    <span v-if="selectedOrder.additional_discount_percentage">({{
+                                        selectedOrder.additional_discount_percentage }}%)</span>
                                 </span>
-                                <span class="text-destructive">-{{ posStore.currencySymbol }}{{ formatNumber(Number(selectedOrder.discount_amount) || 0) }}</span>
+                                <span class="text-destructive">-{{ posStore.currencySymbol }}{{
+                                    formatNumber(Number(selectedOrder.discount_amount) || 0) }}</span>
                             </div>
                             <div v-if="selectedOrder.loyalty_amount" class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Loyalty Points Redeemed</span>
-                                <span class="text-destructive">-{{ posStore.currencySymbol }}{{ formatNumber(selectedOrder.loyalty_amount) }}</span>
+                                <span class="text-muted-foreground">{{ __("Loyalty Points Redeemed") }}</span>
+                                <span class="text-destructive">-{{ posStore.currencySymbol }}{{
+                                    formatNumber(selectedOrder.loyalty_amount) }}</span>
                             </div>
                             <div class="flex justify-between text-base font-bold pt-2 border-t border-border">
-                                <span class="text-foreground">Grand Total</span>
-                                <span class="text-foreground">{{ posStore.currencySymbol }}{{ formatNumber(selectedOrder.grand_total) }}</span>
+                                <span class="text-foreground">{{ __("Grand Total") }}</span>
+                                <span class="text-foreground">{{ posStore.currencySymbol }}{{
+                                    formatNumber(selectedOrder.grand_total) }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Taxes Breakdown -->
-                    <div v-if="selectedOrder.taxes && Array.isArray(selectedOrder.taxes) && selectedOrder.taxes.length > 0" class="space-y-2">
-                        <h3 class="text-sm font-semibold text-foreground">Taxes Breakdown</h3>
+                    <div v-if="selectedOrder.taxes && Array.isArray(selectedOrder.taxes) && selectedOrder.taxes.length > 0"
+                        class="space-y-2">
+                        <h3 class="text-sm font-semibold text-foreground">{{ __("Taxes Breakdown") }}</h3>
                         <div class="rounded-lg border border-border divide-y divide-border">
                             <div v-for="tax in (selectedOrder.taxes as any[])" :key="tax.description"
                                 class="flex justify-between px-4 py-2.5 text-sm">
                                 <span class="text-muted-foreground">{{ tax.description }} ({{ tax.rate }}%)</span>
-                                <span class="text-foreground font-medium">{{ posStore.currencySymbol }}{{ formatNumber(tax.tax_amount) }}</span>
+                                <span class="text-foreground font-medium">{{ posStore.currencySymbol }}{{
+                                    formatNumber(tax.tax_amount) }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Payments -->
                     <div v-if="selectedOrder.payments && selectedOrder.payments.length > 0" class="space-y-2">
-                        <h3 class="text-sm font-semibold text-foreground">Payments</h3>
+                        <h3 class="text-sm font-semibold text-foreground">{{ __("Payments") }}</h3>
                         <div class="rounded-lg border border-border divide-y divide-border">
                             <div v-for="p in selectedOrder.payments" :key="p.mode_of_payment"
                                 class="flex justify-between items-center px-4 py-2.5">
                                 <span class="text-muted-foreground text-sm">{{ p.mode_of_payment }}</span>
-                                <span class="font-medium text-foreground">{{ posStore.currencySymbol }}{{ formatNumber(p.amount) }}</span>
+                                <span class="font-medium text-foreground">{{ posStore.currencySymbol }}{{
+                                    formatNumber(p.amount) }}</span>
                             </div>
-                            <div v-if="selectedOrder.change_amount" class="flex justify-between items-center px-4 py-2.5 bg-muted/30">
-                                <span class="text-muted-foreground text-sm">Change Given</span>
-                                <span class="font-medium text-foreground">{{ posStore.currencySymbol }}{{ formatNumber(Number(selectedOrder.change_amount) || 0) }}</span>
+                            <div v-if="selectedOrder.change_amount"
+                                class="flex justify-between items-center px-4 py-2.5 bg-muted/30">
+                                <span class="text-muted-foreground text-sm">{{ __("Change Given") }}</span>
+                                <span class="font-medium text-foreground">{{ posStore.currencySymbol }}{{
+                                    formatNumber(Number(selectedOrder.change_amount) || 0) }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Loyalty Info -->
                     <div v-if="selectedOrder.loyalty_program || selectedOrder.loyalty_points" class="space-y-2">
-                        <h3 class="text-sm font-semibold text-foreground">Loyalty Information</h3>
+                        <h3 class="text-sm font-semibold text-foreground">{{ __("Loyalty Information") }}</h3>
                         <div class="rounded-lg border border-border p-4 space-y-2">
                             <div v-if="selectedOrder.loyalty_program" class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Program</span>
+                                <span class="text-muted-foreground">{{ __("Program") }}</span>
                                 <span class="text-foreground">{{ selectedOrder.loyalty_program }}</span>
                             </div>
                             <div v-if="selectedOrder.loyalty_points" class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Points Earned</span>
+                                <span class="text-muted-foreground">{{ __("Points Earned") }}</span>
                                 <span class="text-foreground font-medium">{{ selectedOrder.loyalty_points }}</span>
                             </div>
                             <div v-if="selectedOrder.redeem_loyalty_points" class="flex justify-between text-sm">
-                                <span class="text-muted-foreground">Points Redeemed</span>
+                                <span class="text-muted-foreground">{{ __("Points Redeemed") }}</span>
                                 <span class="text-foreground">{{ selectedOrder.redeem_loyalty_points }}</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Remarks -->
+                    
                     <div v-if="selectedOrder.remarks" class="space-y-2">
-                        <h3 class="text-sm font-semibold text-foreground">Remarks</h3>
+                        <h3 class="text-sm font-semibold text-foreground">{{ __("Remarks") }}</h3>
                         <div class="rounded-lg border border-border p-4 text-sm text-muted-foreground">
                             {{ selectedOrder.remarks }}
                         </div>
@@ -246,16 +255,17 @@
                 <DialogFooter class="p-6 pt-4 border-t border-border gap-2 sm:gap-2">
                     <Button variant="outline" size="sm" @click="printInvoice(selectedOrder!.name)">
                         <Printer class="w-4 h-4" />
-                        Print
+                        {{ __("Print") }}
                     </Button>
                     <Button v-if="selectedOrder && !selectedOrder.is_return && selectedOrder.status !== 'Cancelled'"
-                        variant="outline" size="sm" class="text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950"
+                        variant="outline" size="sm"
+                        class="text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950"
                         @click="returnFromOrder(selectedOrder!)">
                         <RotateCcw class="w-4 h-4" />
-                        Return
+                        {{ __("Return") }}
                     </Button>
                     <div class="flex-1"></div>
-                    <Button size="sm" @click="selectedOrder = null">Close</Button>
+                    <Button size="sm" @click="selectedOrder = null">{{ __("Close") }}</Button>
                 </DialogFooter>
             </DialogScrollContent>
         </Dialog>
@@ -278,6 +288,7 @@ import { Badge } from "@/components/ui/badge";
 import { FileText, ChevronRight, Printer, RotateCcw, User, Calendar as CalendarIcon, Clock } from "lucide-vue-next";
 import ListFilters from "@/components/orders/ListFilters.vue";
 import Pagination from "@/components/orders/Pagination.vue";
+import __ from "@/lib/translate";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
@@ -292,7 +303,6 @@ const pageSize = ref(20);
 const totalOrders = ref(0);
 const selectedOrder = ref<Invoice | null>(null);
 
-// Filter state
 const activeFilters = ref<{
     status: string;
     isReturn: string;
@@ -361,12 +371,10 @@ async function fetchOrders() {
             order_by: activeFilters.value.orderBy,
         });
 
-        // Handle both old and new API response formats
         if (result && typeof result === "object" && "data" in result) {
             orders.value = result.data || [];
             totalOrders.value = result.total || 0;
         } else {
-            // Fallback for old format
             orders.value = (result as unknown as Invoice[]) || [];
             totalOrders.value = orders.value.length;
         }
