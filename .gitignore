@@ -9,3 +9,4 @@ xpos/public/dist/
 xpos/public/xpos/
 xpos/www/xpos.html
 frontend/yarn.lock
+frontend/dev-dist/
