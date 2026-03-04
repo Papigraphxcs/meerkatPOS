@@ -54,11 +54,10 @@
 									class="flex items-center gap-3"
 								>
 									<span class="text-sm text-muted-foreground w-28 truncate">{{ method.mode_of_payment }}</span>
-									<Input
-										v-model.number="method.opening_amount"
-										type="number"
-										min="0"
-										step="0.01"
+									<NumberInput
+										v-model="method.opening_amount"
+										:min="0"
+										:precision="2"
 										class="flex-1"
 										placeholder="0.00"
 									/>
@@ -101,7 +100,7 @@ import { ref, onMounted } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { showError } from "@/services/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap, Loader2, Lock } from "lucide-vue-next";
 

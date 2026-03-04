@@ -1,4 +1,4 @@
-# Copyright (c) 2026, POS Awesome contributors
+# Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
 """QZ Tray certificate and signing endpoints for silent printing."""

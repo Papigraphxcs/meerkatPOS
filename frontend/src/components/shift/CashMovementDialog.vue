@@ -51,7 +51,7 @@
                     <!-- Amount -->
                     <div>
                         <label class="text-sm font-semibold text-foreground mb-1.5 block">Amount</label>
-                        <Input v-model.number="amount" type="number" min="0" step="0.01" class="text-lg font-bold"
+                        <NumberInput v-model="amount" :min="0" :precision="2" class="text-lg font-bold"
                             placeholder="0.00" />
                     </div>
 
@@ -113,7 +113,7 @@ import {
     Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Loader2, ArrowDownCircle, ArrowUpCircle } from "lucide-vue-next";
 
 const posStore = usePosStore();

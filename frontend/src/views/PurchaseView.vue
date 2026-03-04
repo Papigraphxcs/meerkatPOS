@@ -24,6 +24,7 @@ import {
     Truck,
 } from "lucide-vue-next";
 import { isOnline } from "@/utils";
+import __ from "@/lib/translate";
 
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
@@ -55,8 +56,7 @@ function goBack(): void {
 </script>
 
 <template>
-    <div class="h-screen flex flex-col bg-background">
-        <!-- Header -->
+    <div class="h-full min-h-0 flex flex-col bg-background overflow-hidden">
         <header class="bg-card border-b border-border px-4 py-3 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-4">
                 <Button @click="goBack" variant="ghost" size="icon">
@@ -69,26 +69,23 @@ function goBack(): void {
             </div>
 
             <div class="flex items-center gap-4">
-                <!-- Offline indicator -->
                 <div v-if="!isOnline()" class="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                     <CloudOff class="w-4 h-4" />
-                    <span class="text-sm">Offline</span>
+                    <span class="text-sm">{{ __("Offline") }}</span>
                 </div>
 
-                <!-- Pending purchases indicator -->
                 <div v-if="purchaseStore.hasPendingPurchases" class="flex items-center gap-2">
                     <Badge variant="secondary"
                         class="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
-                        {{ purchaseStore.pendingCount }} pending
+                        {{ purchaseStore.pendingCount }} {{ __("Pending") }}
                     </Badge>
                     <Button v-if="isOnline()" @click="purchaseStore.syncPendingPurchases()" variant="outline" size="sm"
                         :disabled="purchaseStore.isSyncing">
                         <RefreshCw class="w-4 h-4 mr-1" :class="{ 'animate-spin': purchaseStore.isSyncing }" />
-                        Sync
+                        {{ __("Sync") }}
                     </Button>
                 </div>
 
-                <!-- Current supplier -->
                 <div v-if="purchaseStore.selectedSupplier"
                     class="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-lg">
                     <Users class="w-4 h-4 text-primary" />
@@ -99,13 +96,9 @@ function goBack(): void {
             </div>
         </header>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex overflow-hidden min-h-0">
-            <!-- Normal purchase layout (Suppliers/Items + Cart) -->
+        <div class="flex-1 flex min-h-0 overflow-hidden">
             <template v-if="activeTab !== 'receive'">
-                <!-- Left Panel - Suppliers/Items -->
-                <div class="w-96 border-r border-border bg-card flex flex-col">
-                    <!-- Tab Buttons -->
+                <div class="w-96 border-r border-border bg-card flex flex-col min-h-0 overflow-hidden">
                     <div class="flex border-b border-border shrink-0">
                         <button @click="activeTab = 'suppliers'"
                             class="flex-1 px-3 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5"
@@ -113,7 +106,7 @@ function goBack(): void {
                                 ? 'text-primary border-b-2 border-primary bg-primary/10'
                                 : 'text-muted-foreground hover:bg-muted'">
                             <Users class="w-4 h-4" />
-                            Suppliers
+                            {{ __("Suppliers") }}
                         </button>
                         <button @click="activeTab = 'items'"
                             class="flex-1 px-3 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5"
@@ -121,12 +114,12 @@ function goBack(): void {
                                 ? 'text-primary border-b-2 border-primary bg-primary/10'
                                 : 'text-muted-foreground hover:bg-muted'">
                             <Package class="w-4 h-4" />
-                            Items
+                            {{ __("Items") }}
                         </button>
                         <button @click="activeTab = 'receive'"
                             class="flex-1 px-3 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 text-muted-foreground hover:bg-muted">
                             <Truck class="w-4 h-4" />
-                            Receive
+                            {{ __("Receive") }}
                         </button>
                     </div>
 
@@ -145,23 +138,23 @@ function goBack(): void {
 
             <!-- Full-width Stock Receiving layout -->
             <template v-else>
-                <div class="w-full flex flex-col">
+                <div class="w-full flex flex-col min-h-0 overflow-hidden">
                     <!-- Tab bar for navigation back -->
                     <div class="flex border-b border-border shrink-0 bg-card">
                         <button @click="activeTab = 'suppliers'"
                             class="px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 text-muted-foreground hover:bg-muted">
                             <Users class="w-4 h-4" />
-                            Suppliers
+                            {{ __("Suppliers") }}
                         </button>
                         <button @click="activeTab = 'items'"
                             class="px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 text-muted-foreground hover:bg-muted">
                             <Package class="w-4 h-4" />
-                            Items
+                            {{ __("Items") }}   
                         </button>
                         <button
                             class="px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 text-primary border-b-2 border-primary bg-primary/10">
                             <Truck class="w-4 h-4" />
-                            Receive
+                            {{ __("Receive") }}
                         </button>
                     </div>
 
@@ -173,22 +166,21 @@ function goBack(): void {
             </template>
         </div>
 
-        <!-- Quick Actions Footer -->
         <footer class="bg-card border-t border-border px-4 py-2 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
                 <FileText class="w-4 h-4" />
                 <span>
-                    {{ purchaseStore.receiveImmediately ? "Auto-receive" : "Order only" }}
-                    {{ purchaseStore.createInvoice ? "+ Invoice" : "" }}
+                    {{ purchaseStore.receiveImmediately ? __("Auto-receive") : __("Order only") }}
+                    {{ purchaseStore.createInvoice ? "+ " + __("Invoice") : "" }}
                 </span>
             </div>
 
             <div class="flex items-center gap-4">
                 <span class="text-sm text-muted-foreground">
-                    Warehouse: {{ posStore.warehouse }}
+                    {{ __("Warehouse") }}: {{ posStore.warehouse }}
                 </span>
                 <span class="text-sm text-muted-foreground">
-                    Company: {{ posStore.companyName }}
+                    {{ __("Company") }}: {{ posStore.companyName }}
                 </span>
             </div>
         </footer>

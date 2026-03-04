@@ -103,9 +103,9 @@
 											{{ formatPrice(detail.expected_amount) }}
 										</td>
 										<td class="px-4 py-2.5 text-right">
-											<Input v-model.number="closingDetails[index].closing_amount" type="number"
-												min="0" step="0.01" class="w-28 text-right text-sm ml-auto"
-												@input="calculateDifference(index)" />
+											<NumberInput v-model="closingDetails[index].closing_amount"
+												:min="0" :precision="2" class="w-28 text-right text-sm ml-auto"
+												@change="calculateDifference(index)" />
 										</td>
 										<td class="px-4 py-2.5 text-right font-bold"
 											:class="detail.difference >= 0 ? 'text-emerald-600' : 'text-destructive'">
@@ -142,7 +142,7 @@ import {
 	Dialog, DialogScrollContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-vue-next";
 

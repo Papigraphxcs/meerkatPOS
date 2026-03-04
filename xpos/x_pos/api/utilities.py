@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2020, Youssef Restom and contributors
+# Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
 import frappe
-from frappe.utils import cstr, add_to_date, get_datetime
+from frappe import _
+from frappe.utils import cstr, flt, add_to_date, get_datetime
 from typing import List, Dict, Any
 import time
 import os
 import re
 import json
-import subprocess
 
 try:
     import psutil
@@ -25,43 +22,42 @@ from .utils import get_item_groups, fetch_sales_person_names
 
 
 def get_version():
-    branch_name = get_app_branch("erpnext")
-    if "12" in branch_name:
-        return 12
-    elif "13" in branch_name:
-        return 13
-    else:
-        return 13
+    """Get the major version of the installed ERPNext."""
+    try:
+        import erpnext
+
+        version_str = getattr(erpnext, "__version__", "15.0.0")
+        return int(version_str.split(".")[0])
+    except Exception:
+        return 15
 
 
 def get_app_branch(app):
-    """Returns branch of an app"""
+    """Returns branch of an app."""
     import subprocess
 
     try:
         branch = subprocess.check_output(
-            "cd ../apps/{0} && git rev-parse --abbrev-ref HEAD".format(app), shell=True
+            ["git", "-C", f"../apps/{app}", "rev-parse", "--abbrev-ref", "HEAD"],
+            stderr=subprocess.DEVNULL,
         )
-        branch = branch.decode("utf-8")
-        branch = branch.strip()
-        return branch
+        return branch.decode("utf-8").strip()
     except Exception:
         return ""
 
 
 def get_root_of(doctype):
-    """Get root element of a DocType with a tree structure"""
-    # Security: Validate doctype to prevent SQL injection since it's used in FROM clause
+    """Get root element of a DocType with a tree structure."""
     if not re.match(r"^[a-zA-Z0-9 _-]+$", doctype):
+        return None
+    if not frappe.db.exists("DocType", doctype):
         return None
 
     result = frappe.db.sql(
-        """select t1.name from `tab{0}` t1 where
-		(select count(*) from `tab{1}` t2 where
-			t2.lft < t1.lft and t2.rgt > t1.rgt) = 0
-		and t1.rgt > t1.lft""".format(
-            doctype, doctype
-        )
+        """SELECT t1.name FROM `tab{doctype}` t1
+        WHERE (SELECT COUNT(*) FROM `tab{doctype}` t2
+               WHERE t2.lft < t1.lft AND t2.rgt > t1.rgt) = 0
+        AND t1.rgt > t1.lft""".format(doctype=doctype)
     )
     return result[0][0] if result else None
 
@@ -117,8 +113,10 @@ def add_taxes_from_tax_template(item, parent_doc):
                 tax_row.db_insert()
 
 
-def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
-    """Automatically select `batch_no` for outgoing items in item table"""
+def set_batch_nos_for_bundles(doc, warehouse_field, throw=False):
+    """Automatically select `batch_no` for outgoing items in item table."""
+    from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty
+
     for d in doc.packed_items:
         qty = d.get("stock_qty") or d.get("transfer_qty") or d.get("qty") or 0
         has_batch_no = frappe.db.get_value("Item", d.item_code, "has_batch_no")
@@ -134,6 +132,10 @@ def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
                             "Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches"
                         ).format(d.idx, d.batch_no, batch_qty, qty)
                     )
+
+
+# Keep backward compatibility alias
+set_batch_nos_for_bundels = set_batch_nos_for_bundles
 
 
 def get_company_domain(company):
@@ -763,6 +765,16 @@ def set_current_user_language(lang_code):
     except Exception as e:
         frappe.log_error(f"Error setting language: {str(e)}")
         return {"success": False, "message": "Failed to set language"}
+
+
+def _validate_language_code(lang_code):
+    """Validate a language code string. Returns (is_valid, error_message)."""
+    if not lang_code or not isinstance(lang_code, str):
+        return False, _("Invalid language code")
+    lang_code = lang_code.strip().lower()
+    if not re.match(r"^[a-z]{2}(-[a-z]{2,})?$", lang_code):
+        return False, _("Invalid language code format: {0}").format(lang_code)
+    return True, None
 
 
 @frappe.whitelist()

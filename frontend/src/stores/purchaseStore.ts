@@ -37,10 +37,14 @@ import type {
     PendingReceiptItem,
     ReceiveStockItem,
     ReceiveStockResult,
+    InTransitEntry,
+    InTransitItem,
+    ReceiveTransitItem,
+    ReceiveTransitResult,
+    ReturnShortageItem,
+    ReturnShortageResult,
 } from "@/types/pos.types";
 import { isOnline } from "@/utils";
-
-// ─── Cart Item Interface ───────────────────────────
 
 export interface PurchaseCartItem {
     item_code: string;
@@ -55,8 +59,6 @@ export interface PurchaseCartItem {
 }
 
 export const usePurchaseStore = defineStore("purchase", () => {
-    // ─── State ─────────────────────────────────────────
-
     // Suppliers
     const suppliers = ref<Supplier[]>([]);
     const isLoadingSuppliers = ref(false);
@@ -99,7 +101,12 @@ export const usePurchaseStore = defineStore("purchase", () => {
     const selectedReceipt = ref<PendingReceiptOrder | null>(null);
     const isReceiving = ref(false);
 
-    // ─── Computed ──────────────────────────────────────
+    // In-Transit Stock Transfers
+    const inTransitEntries = ref<InTransitEntry[]>([]);
+    const isLoadingTransits = ref(false);
+    const selectedTransit = ref<InTransitEntry | null>(null);
+    const isReceivingTransit = ref(false);
+    const isReturningShortage = ref(false);
 
     const cartTotal = computed(() =>
         cartItems.value.reduce((sum, item) => sum + item.qty * item.rate, 0)
@@ -116,8 +123,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
     );
 
     const hasPendingPurchases = computed(() => pendingCount.value > 0);
-
-    // ─── Supplier Methods ──────────────────────────────
 
     let supplierSearchAbort: AbortController | null = null;
 
@@ -143,11 +148,8 @@ export const usePurchaseStore = defineStore("purchase", () => {
                     mobile_no: s.mobile_no,
                     email_id: s.email_id,
                 }));
-                console.log("[XPOS Purchase] Serving suppliers from cache");
                 return;
             }
-
-            // Online: fetch from API
             const result = await call<Supplier[]>(
                 "xpos.x_pos.api.purchase_orders.search_suppliers",
                 {
@@ -157,7 +159,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
             );
             suppliers.value = result || [];
 
-            // Cache for offline use
             if (suppliers.value.length > 0) {
                 try {
                     const toCache: CachedSupplier[] = suppliers.value.map((s) => ({
@@ -176,8 +177,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
             }
         } catch (error) {
             console.error("Error searching suppliers:", error);
-
-            // Fallback to cache
             try {
                 const cached = await searchCachedSuppliers(term || supplierSearchTerm.value);
                 if (cached.length > 0) {
@@ -220,7 +219,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
             showNewSupplierForm.value = false;
             showSuccess(`Supplier "${result.supplier_name}" created`);
 
-            // Add to cache
             await addCachedSupplier({
                 name: result.name,
                 supplier_name: result.supplier_name,
@@ -229,7 +227,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
                 default_currency: result.default_currency,
             });
 
-            // Refresh list and select
             await searchSuppliers();
             selectedSupplier.value = result;
 
@@ -250,12 +247,9 @@ export const usePurchaseStore = defineStore("purchase", () => {
         selectedSupplier.value = null;
     }
 
-    // ─── Item Methods ──────────────────────────────────
-
     let itemSearchAbort: AbortController | null = null;
 
     async function searchItems(term = ""): Promise<void> {
-        // Cancel any in-flight search so the latest term always wins
         if (itemSearchAbort) {
             itemSearchAbort.abort();
         }
@@ -278,7 +272,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
                 error instanceof Error &&
                 (error.name === "AbortError" || error.message === "AbortError")
             ) {
-                return; // silently discard superseded requests
+                return;
             }
             console.error("Error searching items:", error);
             purchaseItems.value = [];
@@ -303,7 +297,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
             showNewItemForm.value = false;
             showSuccess(`Item "${result.item.item_name}" created`);
 
-            // Refresh list
             await searchItems();
 
             return result.item;
@@ -313,8 +306,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
             return null;
         }
     }
-
-    // ─── Cart Methods ──────────────────────────────────
 
     function addToCart(item: SearchItem, qty = 1): void {
         const existing = cartItems.value.find((i) => i.item_code === item.item_code);
@@ -360,8 +351,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
     function clearCart(): void {
         cartItems.value = [];
     }
-
-    // ─── Purchase Order Methods ────────────────────────
 
     async function createPurchaseOrder(): Promise<PurchaseOrderResult | null> {
         if (!canCreateOrder.value) {
@@ -434,8 +423,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
         showPurchaseDialog.value = false;
     }
 
-    // ─── Purchase Orders List ──────────────────────────
-
     async function fetchPurchaseOrders(filters?: {
         status?: string;
         supplier?: string;
@@ -480,8 +467,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
             isLoadingOrders.value = false;
         }
     }
-
-    // ─── Offline Purchase Handling ─────────────────────
 
     async function saveOfflinePurchase(data: PurchaseOrderData): Promise<number> {
         const record = {
@@ -612,13 +597,9 @@ export const usePurchaseStore = defineStore("purchase", () => {
         await loadPendingPurchases();
     }
 
-    // ─── Initialize ────────────────────────────────────
-
     function init(): void {
         refreshPendingCount();
     }
-
-    // ─── Barcode Search ────────────────────────────────
 
     async function searchByBarcode(barcode: string): Promise<SearchItem | null> {
         if (!barcode) return null;
@@ -634,8 +615,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
             return null;
         }
     }
-
-    // ─── Stock Receiving Methods ────────────────────────
 
     async function fetchPendingReceipts(): Promise<void> {
         isLoadingReceipts.value = true;
@@ -694,7 +673,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
             }
             showSuccess(message);
 
-            // Refresh pending list
             await fetchPendingReceipts();
             selectedReceipt.value = null;
 
@@ -712,7 +690,110 @@ export const usePurchaseStore = defineStore("purchase", () => {
         selectedReceipt.value = null;
     }
 
-    // ─── Return ────────────────────────────────────────
+    async function fetchInTransitTransfers(): Promise<void> {
+        isLoadingTransits.value = true;
+        try {
+            const posStore = usePosStore();
+            const result = await call<InTransitEntry[]>(
+                "xpos.x_pos.api.stock_transfer.get_in_transit_transfers",
+                { warehouse: posStore.warehouse, limit: 50 }
+            );
+            inTransitEntries.value = result || [];
+        } catch (error) {
+            console.error("Error fetching in-transit transfers:", error);
+            inTransitEntries.value = [];
+        } finally {
+            isLoadingTransits.value = false;
+        }
+    }
+
+    async function fetchTransitDetail(stockEntry: string): Promise<InTransitEntry | null> {
+        try {
+            const result = await call<InTransitEntry>(
+                "xpos.x_pos.api.stock_transfer.get_transfer_detail",
+                { stock_entry: stockEntry }
+            );
+            selectedTransit.value = result || null;
+            return result || null;
+        } catch (error) {
+            console.error("Error fetching transit detail:", error);
+            return null;
+        }
+    }
+
+    async function receiveTransitStock(
+        outgoingEntry: string,
+        items: ReceiveTransitItem[],
+        remarks = ""
+    ): Promise<ReceiveTransitResult | null> {
+        isReceivingTransit.value = true;
+        try {
+            const posStore = usePosStore();
+            const result = await call<ReceiveTransitResult>(
+                "xpos.x_pos.api.stock_transfer.receive_transit_stock",
+                {
+                    data: JSON.stringify({
+                        outgoing_stock_entry: outgoingEntry,
+                        target_warehouse: posStore.warehouse,
+                        items,
+                        remarks,
+                    }),
+                }
+            );
+
+            let message = `Stock Entry ${result.stock_entry} created`;
+            if (result.has_shortage) {
+                message += ` (shortage: ${result.total_shortage_qty})`;
+            }
+            showSuccess(message);
+
+            await fetchInTransitTransfers();
+
+            return result;
+        } catch (error) {
+            console.error("Error receiving transit stock:", error);
+            showError(error instanceof Error ? error.message : "Failed to receive transit stock");
+            return null;
+        } finally {
+            isReceivingTransit.value = false;
+        }
+    }
+
+    async function returnShortageToSource(
+        outgoingEntry: string,
+        items: ReturnShortageItem[],
+        remarks = ""
+    ): Promise<ReturnShortageResult | null> {
+        isReturningShortage.value = true;
+        try {
+            const result = await call<ReturnShortageResult>(
+                "xpos.x_pos.api.stock_transfer.return_shortage_to_source",
+                {
+                    data: JSON.stringify({
+                        outgoing_stock_entry: outgoingEntry,
+                        items,
+                        remarks,
+                    }),
+                }
+            );
+
+            showSuccess(`Return ${result.stock_entry} created - ${result.total_returned_qty} items returned to source`);
+
+            await fetchInTransitTransfers();
+
+            return result;
+        } catch (error) {
+            console.error("Error returning shortage:", error);
+            showError(error instanceof Error ? error.message : "Failed to return shortage");
+            return null;
+        } finally {
+            isReturningShortage.value = false;
+        }
+    }
+
+    function clearSelectedTransit(): void {
+        selectedTransit.value = null;
+    }
 
     return {
         // Supplier state
@@ -755,6 +836,13 @@ export const usePurchaseStore = defineStore("purchase", () => {
         selectedReceipt,
         isReceiving,
 
+        // In-transit stock transfer state
+        inTransitEntries,
+        isLoadingTransits,
+        selectedTransit,
+        isReceivingTransit,
+        isReturningShortage,
+
         // Computed
         cartTotal,
         cartItemCount,
@@ -790,6 +878,13 @@ export const usePurchaseStore = defineStore("purchase", () => {
         fetchReceiptDetail,
         receiveStock,
         clearSelectedReceipt,
+
+        // In-transit stock transfer methods
+        fetchInTransitTransfers,
+        fetchTransitDetail,
+        receiveTransitStock,
+        returnShortageToSource,
+        clearSelectedTransit,
 
         // Offline methods
         refreshPendingCount,

@@ -3,12 +3,12 @@ import { ref, computed } from "vue";
 import { call, showSuccess, showError, showInfo } from "@/services/api";
 import { usePosStore } from "@/stores/posStore";
 import {
-  addPendingInvoice,
-  getAllPendingInvoices,
-  updatePendingInvoice,
-  deletePendingInvoice as idbDeletePending,
-  countPendingInvoices,
-  type PendingInvoice,
+    addPendingInvoice,
+    getAllPendingInvoices,
+    updatePendingInvoice,
+    deletePendingInvoice as idbDeletePending,
+    countPendingInvoices,
+    type PendingInvoice,
 } from "@/services/idbService";
 import type { InvoiceData } from "@/types/pos.types";
 import { isOnline } from "@/utils";
@@ -63,7 +63,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
     function handleOnline() {
         showSuccess("Internet connection restored");
-        
+
         if (offlineModeEnabled.value && pendingCount.value > 0) {
             syncPendingInvoices();
         }
@@ -80,8 +80,7 @@ export const useOfflineStore = defineStore("offline", () => {
             pendingCount.value = 0;
         }
     }
-
-    // ─── Save invoice offline ─────────────────────
+    
     async function saveOffline(
         invoiceData: InvoiceData,
         customerName?: string,
@@ -108,7 +107,6 @@ export const useOfflineStore = defineStore("offline", () => {
         }
     }
 
-    // ─── Load all pending invoices ─────────────────
     async function loadPendingInvoices() {
         try {
             pendingInvoices.value = await getAllPendingInvoices() as OfflineInvoice[];
@@ -119,7 +117,6 @@ export const useOfflineStore = defineStore("offline", () => {
         }
     }
 
-    // ─── Sync all pending invoices ─────────────────
     async function syncPendingInvoices(): Promise<void> {
         if (isSyncing.value || !isOnline()) return;
 
@@ -138,12 +135,10 @@ export const useOfflineStore = defineStore("offline", () => {
 
             for (const invoice of invoices) {
                 if (!isOnline()) {
-                    // Lost connection mid-sync
                     break;
                 }
 
                 try {
-                    // Mark as syncing
                     invoice.status = "syncing";
                     if (invoice.id) await updatePendingInvoice(invoice as PendingInvoice);
 
@@ -151,8 +146,6 @@ export const useOfflineStore = defineStore("offline", () => {
                         "xpos.api.invoices.create_invoice",
                         { data: JSON.stringify(invoice.data) }
                     );
-
-                    // Success — remove from IndexedDB
                     if (invoice.id) await idbDeletePending(invoice.id);
                     synced++;
                 } catch (error: unknown) {
@@ -162,7 +155,6 @@ export const useOfflineStore = defineStore("offline", () => {
                     invoice.error = error instanceof Error ? error.message : String(error);
 
                     if (invoice.retry_count >= MAX_RETRIES) {
-                        // Keep in DB but mark as permanently failed
                         syncErrors.value.push(
                             `Invoice for ${invoice.customer_name || "Unknown"}: ${invoice.error}`
                         );
@@ -189,7 +181,6 @@ export const useOfflineStore = defineStore("offline", () => {
         }
     }
 
-    // ─── Retry a single failed invoice ─────────────
     async function retrySingle(id: number): Promise<boolean> {
         if (!isOnline()) {
             showError("Cannot sync while offline");
@@ -225,14 +216,12 @@ export const useOfflineStore = defineStore("offline", () => {
         }
     }
 
-    // ─── Delete a pending invoice ──────────────────
     async function deletePending(id: number): Promise<void> {
         await idbDeletePending(id);
         await refreshPendingCount();
         await loadPendingInvoices();
     }
 
-    // ─── Clear all pending invoices ────────────────
     async function clearAll(): Promise<void> {
         const invoices = await getAllPendingInvoices();
         for (const inv of invoices) {
@@ -242,13 +231,11 @@ export const useOfflineStore = defineStore("offline", () => {
         pendingInvoices.value = [];
     }
 
-    // ─── Periodic background data sync ─────────────
     function startPeriodicSync(): void {
         if (syncIntervalId) return;
         syncIntervalId = setInterval(() => {
             syncOfflineData();
         }, SYNC_INTERVAL_MS);
-        // Also run immediately on start
         syncOfflineData();
     }
 
@@ -266,26 +253,22 @@ export const useOfflineStore = defineStore("offline", () => {
         if (!posStore.isReady || !posStore.profileName) return;
 
         try {
-            // Sync items cache
+
             const { useItemStore } = await import("@/stores/itemStore");
             const itemStore = useItemStore();
             itemStore.cacheAllItems(posStore.profileName).catch((err) => {
                 console.warn("[XPOS Sync] Failed to sync items:", err);
             });
 
-            // Sync customers cache
             const { useCustomerStore } = await import("@/stores/customerStore");
             const customerStore = useCustomerStore();
             customerStore.cacheAllCustomers(posStore.profileName).catch((err) => {
                 console.warn("[XPOS Sync] Failed to sync customers:", err);
             });
 
-            // Sync pending invoices if any
             if (pendingCount.value > 0) {
                 syncPendingInvoices();
             }
-
-            console.log("[XPOS Sync] Background data sync completed");
         } catch (error) {
             console.warn("[XPOS Sync] Background sync error:", error);
         }

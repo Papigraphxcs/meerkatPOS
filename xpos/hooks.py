@@ -70,11 +70,13 @@ doc_events = {
         "validate": "xpos.x_pos.api.invoice.validate",
         "before_submit": "xpos.x_pos.api.invoice.before_submit",
         "before_cancel": "xpos.x_pos.api.invoice.before_cancel",
+        "on_cancel": "xpos.x_pos.api.invoice.on_cancel",
     },
     "POS Invoice": {
         "validate": "xpos.x_pos.api.invoice.validate",
         "before_submit": "xpos.x_pos.api.invoice.before_submit",
         "before_cancel": "xpos.x_pos.api.invoice.before_cancel",
+        "on_cancel": "xpos.x_pos.api.invoice.on_cancel",
     },
     "Customer": {
         "validate": "xpos.x_pos.api.customer.validate",

@@ -702,6 +702,7 @@ export interface PurchaseItem {
   item_name: string;
   qty: number;
   rate: number;
+  schdn?: number;
   amount?: number;
   uom?: string;
   stock_uom?: string;
@@ -854,4 +855,69 @@ export interface ReceiveStockResult {
   status: string;
   has_rejections: boolean;
   items_received: number;
+}
+
+// ─── In-Transit Stock Transfer Types ──────────────────
+
+export interface InTransitItem {
+  ste_detail: string;
+  parent: string;
+  item_code: string;
+  item_name: string;
+  qty: number;
+  received_qty: number;
+  pending_qty: number;
+  uom: string;
+  stock_uom: string;
+  conversion_factor: number;
+  basic_rate: number;
+  valuation_rate: number;
+  s_warehouse: string;
+  t_warehouse: string;
+}
+
+export interface InTransitEntry {
+  name: string;
+  company: string;
+  posting_date: string;
+  from_warehouse: string;
+  to_warehouse: string;
+  total_amount: number;
+  per_transferred: number;
+  remarks: string;
+  source_warehouse: string;
+  transit_warehouse: string;
+  total_pending_items: number;
+  items: InTransitItem[];
+}
+
+export interface ReceiveTransitItem {
+  ste_detail: string;
+  item_code: string;
+  receive_qty: number;
+}
+
+export interface ReceiveTransitResult {
+  stock_entry: string;
+  outgoing_stock_entry: string;
+  status: string;
+  items_received: number;
+  total_received_qty: number;
+  total_shortage_qty: number;
+  has_shortage: boolean;
+}
+
+export interface ReturnShortageItem {
+  ste_detail: string;
+  item_code: string;
+  return_qty: number;
+  reason?: string;
+}
+
+export interface ReturnShortageResult {
+  stock_entry: string;
+  outgoing_stock_entry: string;
+  status: string;
+  items_returned: number;
+  total_returned_qty: number;
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Youssef Restom and contributors
+# Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
 
@@ -114,13 +114,18 @@ def create_sales_order(doc):
             sales_order_doc.save()
             sales_order_doc.submit()
             url = frappe.utils.get_url_to_form(sales_order_doc.doctype, sales_order_doc.name)
-            msgprint = f"Sales Order Created at <a href='{url}'>{sales_order_doc.name}</a>"
-            frappe.msgprint(_(msgprint), title="Sales Order Created", indicator="green", alert=True)
-            i = 0
-            for item in sales_order_doc.items:
-                doc.items[i].sales_order = sales_order_doc.name
-                doc.items[i].so_detail = item.name
-                i += 1
+            frappe.msgprint(
+                _("Sales Order Created at <a href='{0}'>{1}</a>").format(url, sales_order_doc.name),
+                title=_("Sales Order Created"),
+                indicator="green",
+                alert=True,
+            )
+            so_items_map = {item.item_code: item for item in sales_order_doc.items}
+            for inv_item in doc.items:
+                so_item = so_items_map.get(inv_item.item_code)
+                if so_item:
+                    inv_item.sales_order = sales_order_doc.name
+                    inv_item.so_detail = so_item.name
 
 
 def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
@@ -288,7 +293,7 @@ def apply_tax_inclusive(doc):
             if tax.included_in_print_rate:
                 tax.included_in_print_rate = 0
                 has_changes = True
-        continue
+            continue
         if tax_inclusive and not tax.included_in_print_rate:
             tax.included_in_print_rate = 1
             has_changes = True

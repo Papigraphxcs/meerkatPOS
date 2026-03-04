@@ -12,6 +12,56 @@
 import Dexie, { type Table } from "dexie";
 import type { POSItem, ItemGroup, Customer } from "@/types/pos.types";
 
+function sanitizeForIdb<T>(value: T): T {
+  const visited = new WeakMap<object, unknown>();
+
+  const walk = (input: unknown): unknown => {
+    if (input === null || input === undefined) return input;
+
+    const inputType = typeof input;
+    if (inputType === "string" || inputType === "number" || inputType === "boolean") {
+      return input;
+    }
+
+    if (inputType === "bigint") return input.toString();
+    if (inputType === "function" || inputType === "symbol") return undefined;
+
+    if (input instanceof Date) return input.toISOString();
+
+    if (Array.isArray(input)) {
+      const result: unknown[] = [];
+      for (const entry of input) {
+        const safeEntry = walk(entry);
+        if (safeEntry !== undefined) result.push(safeEntry);
+      }
+      return result;
+    }
+
+    if (inputType === "object") {
+      const objectInput = input as Record<string, unknown>;
+      if (visited.has(objectInput)) {
+        return visited.get(objectInput);
+      }
+
+      const result: Record<string, unknown> = {};
+      visited.set(objectInput, result);
+
+      for (const [key, val] of Object.entries(objectInput)) {
+        const safeVal = walk(val);
+        if (safeVal !== undefined) {
+          result[key] = safeVal;
+        }
+      }
+
+      return result;
+    }
+
+    return input;
+  };
+
+  return walk(value) as T;
+}
+
 // ─── Database Schema Interfaces ────────────────────
 
 export interface PendingInvoice {
@@ -105,9 +155,10 @@ const db = new XPosDB();
 // ─── Items Cache ───────────────────────────────────
 
 export async function cacheItems(allItems: POSItem[]): Promise<void> {
+  const safeItems = sanitizeForIdb(allItems);
   await db.transaction("rw", db.items, async () => {
     await db.items.clear();
-    await db.items.bulkAdd(allItems);
+    await db.items.bulkAdd(safeItems);
   });
   await setMeta("items_cached_at", new Date().toISOString());
 }
@@ -147,7 +198,7 @@ export async function searchCachedItems(
 }
 
 export async function updateCachedItem(item: POSItem): Promise<void> {
-  await db.items.put(item);
+  await db.items.put(sanitizeForIdb(item));
 }
 
 // ─── Item Groups Cache ─────────────────────────────
@@ -156,11 +207,13 @@ export async function cacheItemGroups(
   groups: ItemGroup[],
   parentGroups: ItemGroup[]
 ): Promise<void> {
+  const safeGroups = sanitizeForIdb(groups);
+  const safeParentGroups = sanitizeForIdb(parentGroups);
   await db.transaction("rw", db.itemGroups, async () => {
     await db.itemGroups.clear();
     await db.itemGroups.bulkAdd([
-      { name: "__groups__", data: groups },
-      { name: "__parent_groups__", data: parentGroups },
+      { name: "__groups__", data: safeGroups },
+      { name: "__parent_groups__", data: safeParentGroups },
     ]);
   });
 }
@@ -182,9 +235,10 @@ export async function getCachedItemGroups(): Promise<{
 // ─── Customers Cache ───────────────────────────────
 
 export async function cacheCustomers(customers: Customer[]): Promise<void> {
+  const safeCustomers = sanitizeForIdb(customers);
   await db.transaction("rw", db.customers, async () => {
     await db.customers.clear();
-    await db.customers.bulkAdd(customers);
+    await db.customers.bulkAdd(safeCustomers);
   });
   await setMeta("customers_cached_at", new Date().toISOString());
 }
@@ -214,15 +268,16 @@ export async function searchCachedCustomers(term: string): Promise<Customer[]> {
 }
 
 export async function addCachedCustomer(customer: Customer): Promise<void> {
-  await db.customers.put(customer);
+  await db.customers.put(sanitizeForIdb(customer));
 }
 
 // ─── Suppliers Cache ───────────────────────────────
 
 export async function cacheSuppliers(suppliers: CachedSupplier[]): Promise<void> {
+  const safeSuppliers = sanitizeForIdb(suppliers);
   await db.transaction("rw", db.suppliers, async () => {
     await db.suppliers.clear();
-    await db.suppliers.bulkAdd(suppliers);
+    await db.suppliers.bulkAdd(safeSuppliers);
   });
   await setMeta("suppliers_cached_at", new Date().toISOString());
 }
@@ -247,7 +302,7 @@ export async function searchCachedSuppliers(term: string): Promise<CachedSupplie
 }
 
 export async function addCachedSupplier(supplier: CachedSupplier): Promise<void> {
-  await db.suppliers.put(supplier);
+  await db.suppliers.put(sanitizeForIdb(supplier));
 }
 
 // ─── Stock Cache ───────────────────────────────────
@@ -308,7 +363,7 @@ export async function updateStockForItem(
 export async function addPendingInvoice(
   record: Omit<PendingInvoice, "id">
 ): Promise<number> {
-  return db.pendingInvoices.add(record as PendingInvoice);
+  return db.pendingInvoices.add(sanitizeForIdb(record) as PendingInvoice);
 }
 
 export async function getAllPendingInvoices(): Promise<PendingInvoice[]> {
@@ -323,7 +378,7 @@ export async function getPendingInvoicesByStatus(
 
 export async function updatePendingInvoice(record: PendingInvoice): Promise<void> {
   if (record.id !== undefined) {
-    await db.pendingInvoices.put(record);
+    await db.pendingInvoices.put(sanitizeForIdb(record));
   }
 }
 
@@ -340,7 +395,7 @@ export async function countPendingInvoices(): Promise<number> {
 export async function addPendingPurchase(
   record: Omit<PendingPurchase, "id">
 ): Promise<number> {
-  return db.pendingPurchases.add(record as PendingPurchase);
+  return db.pendingPurchases.add(sanitizeForIdb(record) as PendingPurchase);
 }
 
 export async function getAllPendingPurchases(): Promise<PendingPurchase[]> {
@@ -355,7 +410,7 @@ export async function getPendingPurchasesByType(
 
 export async function updatePendingPurchase(record: PendingPurchase): Promise<void> {
   if (record.id !== undefined) {
-    await db.pendingPurchases.put(record);
+    await db.pendingPurchases.put(sanitizeForIdb(record));
   }
 }
 
@@ -372,7 +427,7 @@ export async function countPendingPurchases(): Promise<number> {
 export async function setMeta(key: string, value: unknown): Promise<void> {
   await db.meta.put({
     key,
-    value,
+    value: sanitizeForIdb(value),
     updated_at: new Date().toISOString(),
   });
 }

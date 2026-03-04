@@ -1,4 +1,4 @@
-# Copyright (c) 2022, Youssef Restom and contributors
+# Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
 # import frappe

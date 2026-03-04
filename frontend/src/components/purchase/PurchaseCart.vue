@@ -3,12 +3,11 @@
  * Purchase Cart Component
  * Displays and manages items in the purchase cart
  */
-import { computed } from "vue";
 import { usePurchaseStore, type PurchaseCartItem } from "@/stores/purchaseStore";
 import { usePosStore } from "@/stores/posStore";
 import { Minus, Plus, Trash2, ShoppingCart, Package } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -31,16 +30,14 @@ function decrementQty(index: number): void {
     }
 }
 
-function updateQty(index: number, event: Event): void {
-    const value = parseInt((event.target as HTMLInputElement).value);
-    if (!isNaN(value) && value > 0) {
+function updateQty(index: number, value: number): void {
+    if (value > 0) {
         purchaseStore.updateCartItemQty(index, value);
     }
 }
 
-function updateRate(index: number, event: Event): void {
-    const value = parseFloat((event.target as HTMLInputElement).value);
-    if (!isNaN(value) && value >= 0) {
+function updateRate(index: number, value: number): void {
+    if (value >= 0) {
         purchaseStore.updateCartItemRate(index, value);
     }
 }
@@ -86,7 +83,7 @@ function getItemTotal(item: PurchaseCartItem): number {
                         </Button>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-4 gap-3">
                         <!-- Quantity -->
                         <div>
                             <label class="text-xs text-muted-foreground mb-1 block">Qty</label>
@@ -95,8 +92,13 @@ function getItemTotal(item: PurchaseCartItem): number {
                                     :disabled="item.qty <= 1">
                                     <Minus class="w-3 h-3" />
                                 </Button>
-                                <Input type="number" :value="item.qty" @change="updateQty(index, $event)" min="1"
-                                    class="h-8 w-16 text-center" />
+                                <NumberInput
+                                    :model-value="item.qty"
+                                    @update:model-value="updateQty(index, $event)"
+                                    :min="1"
+                                    :precision="2"
+                                    class="h-8 w-16 text-center"
+                                />
                                 <Button @click="incrementQty(index)" variant="outline" size="icon" class="h-8 w-8">
                                     <Plus class="w-3 h-3" />
                                 </Button>
@@ -106,8 +108,13 @@ function getItemTotal(item: PurchaseCartItem): number {
                         <!-- Rate -->
                         <div>
                             <label class="text-xs text-muted-foreground mb-1 block">Rate</label>
-                            <Input type="number" :value="item.rate" @change="updateRate(index, $event)" min="0"
-                                step="0.01" class="h-8" />
+                            <NumberInput
+                                :model-value="item.rate"
+                                @update:model-value="updateRate(index, $event)"
+                                :min="0"
+                                :precision="2"
+                                class="h-8"
+                            />
                         </div>
 
                         <!-- Amount -->

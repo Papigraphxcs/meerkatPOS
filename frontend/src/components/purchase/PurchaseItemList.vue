@@ -9,6 +9,7 @@ import { usePosStore } from "@/stores/posStore";
 import { Search, Plus, Package, ShoppingCart, ScanBarcode, Loader2 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import {
     Dialog,
     DialogContent,
@@ -290,13 +291,13 @@ onUnmounted(() => {
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-medium mb-1 block text-foreground">Buying Price</label>
-                            <Input v-model.number="newItem.buying_price" type="number" min="0" step="0.01"
+                            <NumberInput v-model="newItem.buying_price" :min="0" :precision="2"
                                 placeholder="0.00" />
                         </div>
 
                         <div>
                             <label class="text-sm font-medium mb-1 block text-foreground">Selling Price</label>
-                            <Input v-model.number="newItem.selling_price" type="number" min="0" step="0.01"
+                            <NumberInput v-model="newItem.selling_price" :min="0" :precision="2"
                                 placeholder="0.00" />
                         </div>
                     </div>

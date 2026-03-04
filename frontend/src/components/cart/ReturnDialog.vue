@@ -76,8 +76,9 @@
                                     </td>
                                     <td class="px-3 py-2 text-center text-muted-foreground">{{ item.max_qty }}</td>
                                     <td class="px-3 py-2 text-center">
-                                        <Input v-model.number="item.return_qty" type="number" :min="0"
-                                            :max="item.max_qty" class="w-20 text-center text-sm mx-auto" />
+                                        <NumberInput v-model="item.return_qty"
+                                            :min="0" :max="item.max_qty" :precision="0"
+                                            class="w-20 text-center text-sm mx-auto" />
                                     </td>
                                     <td class="px-3 py-2 text-right font-medium text-foreground">
                                         {{ formatPrice(item.rate * (item.return_qty || 0)) }}
@@ -112,6 +113,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Search, RotateCcw, ArrowLeft, Loader2 } from "lucide-vue-next";
 
 const props = defineProps<{ open: boolean }>();

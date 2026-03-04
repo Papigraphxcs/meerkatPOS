@@ -1,4 +1,4 @@
-# Copyright (c) 2026, POS Awesome contributors
+# Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
 import json
@@ -150,7 +150,7 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
             "supplier": po_doc.supplier,
             "company": po_doc.company,
             "posting_date": receipt_date,
-			"currency": po_doc.currency,
+            "currency": po_doc.currency,
         }
     )
     if default_warehouse:
@@ -395,7 +395,7 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
         # Fetch party account
         pe.paid_to = get_party_account("Supplier", reference_doc.supplier, company)
         if not pe.paid_to:
-             frappe.throw(_("Please set Default Payable Account in Company {0}").format(company))
+            frappe.throw(_("Please set Default Payable Account in Company {0}").format(company))
 
         pe.paid_amount = amount
         pe.received_amount = amount 
@@ -539,10 +539,6 @@ def create_purchase_order(data):
     frappe.flags.ignore_account_permission = True
     po_doc.save()
 
-    # Persist a safe draft first so if any downstream step fails (submit/PR/PI/payment),
-    # the operator does not lose the created PO.
-    frappe.db.commit()
-
     try:
         if cint(payload.get("submit", 1)):
             po_doc.submit()
@@ -571,10 +567,9 @@ def create_purchase_order(data):
             "purchase_invoice": invoice_name,
         }
     except Exception as err:
-        frappe.db.rollback()
-        frappe.log_error(frappe.get_traceback(), "POS Awesome PO Submit Flow Failed")
+        frappe.log_error(frappe.get_traceback(), _("X POS Purchase Order Flow Failed"))
         frappe.throw(
-            _("Purchase Order {0} has been saved as Draft. Error: {1}").format(
+            _("Purchase Order {0} processing failed: {1}").format(
                 po_doc.name, str(err)
             )
         )
@@ -767,9 +762,6 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
     invoice.submit()
     return invoice.name
 
-
-# ─── Stock Receiving APIs ─────────────────────────────────
-
 @frappe.whitelist()
 def get_pending_receipts(warehouse=None, limit=50):
     """Get Purchase Orders that are pending stock receipt."""
@@ -803,8 +795,7 @@ def get_pending_receipts(warehouse=None, limit=50):
         order_by="transaction_date desc",
         limit_page_length=cint(limit) or 50,
     )
-
-    # Get items for each order
+    
     for order in orders:
         order["items"] = frappe.get_all(
             "Purchase Order Item",
@@ -824,6 +815,7 @@ def get_pending_receipts(warehouse=None, limit=50):
 @frappe.whitelist()
 def get_purchase_order_detail(purchase_order):
     """Get a single Purchase Order with its items for receiving."""
+    
     if not purchase_order or not frappe.db.exists("Purchase Order", purchase_order):
         frappe.throw(_("Purchase Order {0} does not exist.").format(purchase_order))
 

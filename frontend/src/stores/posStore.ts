@@ -266,15 +266,13 @@ export const usePosStore = defineStore("pos", () => {
   const cashModeOfPayment = computed(
     () => posProfile.value?.cash_mode_of_payment || "Cash"
   );
-  
+
   async function checkExistingShift(): Promise<void> {
     isLoading.value = true;
     try {
-      debugger
       if (!isOnline()) {
-        console.log("[XPOS Offline] System is offline, loading from cache");
         const cachedData = await getCachedPOSData() as ShiftCheckResult | null;
-        
+
         if (cachedData) {
           posOpeningShift.value = cachedData.pos_opening_shift;
           posProfile.value = cachedData.pos_profile;
@@ -285,7 +283,6 @@ export const usePosStore = defineStore("pos", () => {
           disableRoundedTotal.value = !!(cachedData.disable_rounded_total);
           printSettings.value = cachedData.print_settings || null;
           isReady.value = true;
-          console.log("[XPOS Offline] Loaded POS data from cache");
           return;
         } else {
           console.warn("[XPOS Offline] No cached POS data available");
@@ -293,40 +290,38 @@ export const usePosStore = defineStore("pos", () => {
           return;
         }
       }
-      
+
       const result = await call<ShiftCheckResult | null>(
         "xpos.api.shifts.check_open_shift"
       );
-      
+
       if (result) {
         posOpeningShift.value = result.pos_opening_shift;
         posProfile.value = result.pos_profile;
         company.value = result.company;
         stockSettings.value = result.stock_settings || {};
-        
+
         taxes.value = result.taxes || [];
         taxInclusiveMode.value = !!(result.tax_inclusive);
-        
+
         disableRoundedTotal.value = !!(result.disable_rounded_total);
-        
+
         printSettings.value = result.print_settings || null;
         isReady.value = true;
-        
+
         fetchPrintFormats();
-        
-        // Cache POS data for offline use
+
         if (result.pos_profile?.use_offline_mode) {
           try {
             await cachePOSData(result);
-            
-            // Initialize offline caches
+
             import("@/stores/itemStore").then(async ({ useItemStore }) => {
               const itemStore = useItemStore();
               itemStore.cacheAllItems(result.pos_profile.name).catch(error => {
                 console.warn("[XPOS] Failed to initialize offline item cache:", error);
               });
             });
-            
+
             import("@/stores/customerStore").then(async ({ useCustomerStore }) => {
               const customerStore = useCustomerStore();
               customerStore.cacheAllCustomers(result.pos_profile.name).catch(error => {
@@ -342,8 +337,7 @@ export const usePosStore = defineStore("pos", () => {
       }
     } catch (error) {
       console.error("Error checking shift:", error);
-      
-      // Fallback to cache if available
+
       try {
         const cachedData = await getCachedPOSData() as ShiftCheckResult | null;
         if (cachedData && cachedData.pos_profile?.use_offline_mode) {
@@ -356,13 +350,12 @@ export const usePosStore = defineStore("pos", () => {
           disableRoundedTotal.value = !!(cachedData.disable_rounded_total);
           printSettings.value = cachedData.print_settings || null;
           isReady.value = true;
-          console.log("[XPOS Offline] Fallback to cached POS data after API error");
           return;
         }
       } catch {
         console.warn("[XPOS Offline] Failed to load cached POS data");
       }
-      
+
       showOpeningDialog.value = true;
     } finally {
       isLoading.value = false;
@@ -382,7 +375,7 @@ export const usePosStore = defineStore("pos", () => {
     }
   }
 
-  interface OpenShiftResult extends ShiftCheckResult {}
+  interface OpenShiftResult extends ShiftCheckResult { }
 
   async function openShift(
     profileName: string,
@@ -402,23 +395,23 @@ export const usePosStore = defineStore("pos", () => {
       posProfile.value = result.pos_profile;
       company.value = result.company;
       stockSettings.value = result.stock_settings || {};
-      
+
       taxes.value = result.taxes || [];
       taxInclusiveMode.value = !!(result.tax_inclusive);
-      
+
       disableRoundedTotal.value = !!(result.disable_rounded_total);
-      
+
       printSettings.value = result.print_settings || null;
       showOpeningDialog.value = false;
       isReady.value = true;
-      
+
       fetchPrintFormats();
-      
+
       if (result.pos_profile?.use_offline_mode) {
         // Cache POS data for offline use
         try {
           await cachePOSData(result);
-          
+
           // Initialize offline caches
           import("@/stores/itemStore").then(({ useItemStore }) => {
             const itemStore = useItemStore();
@@ -426,7 +419,7 @@ export const usePosStore = defineStore("pos", () => {
               console.warn("[XPOS] Failed to initialize offline item cache:", error);
             });
           });
-          
+
           import("@/stores/customerStore").then(({ useCustomerStore }) => {
             const customerStore = useCustomerStore();
             customerStore.cacheAllCustomers(profileName).catch(error => {
@@ -473,7 +466,7 @@ export const usePosStore = defineStore("pos", () => {
           closing_details: JSON.stringify(closingDetails),
         }
       );
-      
+
       posOpeningShift.value = null;
       posProfile.value = null;
       company.value = null;

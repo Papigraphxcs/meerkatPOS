@@ -11,13 +11,13 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import __ from "@/lib/translate";
 
 const purchaseStore = usePurchaseStore();
 
 const searchTerm = ref("");
 const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
-// New supplier form
 const newSupplier = ref({
     supplier_name: "",
     supplier_group: "",
@@ -29,7 +29,6 @@ const newSupplier = ref({
 
 const isCreating = ref(false);
 
-// Debounced search
 function onSearchInput(): void {
     if (debounceTimer.value) {
         clearTimeout(debounceTimer.value);
@@ -67,7 +66,6 @@ async function handleCreateSupplier(): Promise<void> {
     }
 }
 
-// Load suppliers on mount
 onMounted(() => {
     purchaseStore.searchSuppliers();
 });
@@ -80,13 +78,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col overflow-hidden">
-        <!-- Search Header -->
+    <div class="h-full flex flex-col min-h-0 overflow-hidden">
         <div class="p-4 border-b border-border bg-muted">
             <div class="flex gap-2">
                 <div class="relative flex-1">
                     <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input v-model="searchTerm" type="text" placeholder="Search suppliers..." @input="onSearchInput"
+                    <Input v-model="searchTerm" type="text" :placeholder="__('Search suppliers...')" @input="onSearchInput"
                         class="pl-10" />
                 </div>
                 <Button @click="openNewSupplierForm" variant="outline" size="icon">
@@ -95,16 +92,15 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <!-- Suppliers List -->
         <div class="flex-1 min-h-0 overflow-y-auto purchase-scroll">
             <div v-if="purchaseStore.isLoadingSuppliers" class="p-4 text-center text-muted-foreground">
-                Loading suppliers...
+                {{ __("Loading suppliers...") }}
             </div>
             <div v-else-if="purchaseStore.suppliers.length === 0" class="p-4 text-center text-muted-foreground">
-                <p>No suppliers found</p>
+                <p>{{ __("No suppliers found") }}</p>
                 <Button @click="openNewSupplierForm" variant="link" class="mt-2">
                     <Plus class="w-4 h-4 mr-1" />
-                    Create new supplier
+                    {{ __("Add New Supplier") }}
                 </Button>
             </div>
             <div v-else class="divide-y divide-border">
@@ -125,7 +121,6 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <!-- Selected Supplier Display -->
         <div v-if="purchaseStore.selectedSupplier" class="p-4 border-t border-border bg-primary/10">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -143,59 +138,58 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <!-- New Supplier Dialog -->
         <Dialog v-model:open="purchaseStore.showNewSupplierForm">
             <DialogContent class="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Create New Supplier</DialogTitle>
+                    <DialogTitle>{{ __("Create New Supplier") }}</DialogTitle>
                     <DialogDescription>
-                        Add a new supplier to the system
+                        {{ __("Add a new supplier to the system") }}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form @submit.prevent="handleCreateSupplier" class="space-y-4 mt-4">
                     <div>
-                        <label class="text-sm font-medium mb-1 block text-foreground">Supplier Name *</label>
-                        <Input v-model="newSupplier.supplier_name" placeholder="Enter supplier name" required />
+                        <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Supplier Name") }} *</label>
+                        <Input v-model="newSupplier.supplier_name" :placeholder="__('Enter supplier name')" required />
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-sm font-medium mb-1 block text-foreground">Type</label>
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Type") }}</label>
                             <select v-model="newSupplier.supplier_type"
                                 class="w-full px-3 py-2 border border-border rounded-md text-sm bg-background text-foreground">
-                                <option value="Company">Company</option>
-                                <option value="Individual">Individual</option>
+                                <option value="Company">{{ __("Company") }}</option>
+                                <option value="Individual">{{ __("Individual") }}</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm font-medium mb-1 block text-foreground">Tax ID</label>
-                            <Input v-model="newSupplier.tax_id" placeholder="Tax ID" />
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Tax ID") }}</label>
+                            <Input v-model="newSupplier.tax_id" :placeholder="__('Tax ID')" />
                         </div>
                     </div>
 
                     <div>
                         <label class="text-sm font-medium mb-1 block text-foreground">
                             <Phone class="w-4 h-4 inline mr-1" />
-                            Mobile
+                            {{ __("Mobile") }}
                         </label>
-                        <Input v-model="newSupplier.mobile_no" placeholder="Phone number" />
+                        <Input v-model="newSupplier.mobile_no" :placeholder="__('Phone number')" />
                     </div>
 
                     <div>
                         <label class="text-sm font-medium mb-1 block text-foreground">
                             <Mail class="w-4 h-4 inline mr-1" />
-                            Email
+                            {{ __("Email") }}
                         </label>
-                        <Input v-model="newSupplier.email_id" type="email" placeholder="Email address" />
+                        <Input v-model="newSupplier.email_id" type="email" :placeholder="__('Email address')" />
                     </div>
 
                     <div class="flex justify-end gap-2 pt-4">
                         <Button type="button" variant="outline" @click="purchaseStore.showNewSupplierForm = false">
-                            Cancel
+                            {{ __("Cancel") }}
                         </Button>
                         <Button type="submit" :disabled="isCreating || !newSupplier.supplier_name.trim()">
-                            {{ isCreating ? "Creating..." : "Create Supplier" }}
+                            {{ isCreating ? __("Creating...") : __("Create Supplier") }}
                         </Button>
                     </div>
                 </form>

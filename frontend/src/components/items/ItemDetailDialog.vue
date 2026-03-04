@@ -82,7 +82,7 @@
 
                     <div>
                         <label class="text-sm font-semibold text-foreground mb-1.5 block">Quantity</label>
-                        <Input v-model.number="selectedQty" type="number" min="1" step="1" class="w-32" />
+                        <NumberInput v-model="selectedQty" :min="1" :allow-decimal="false" class="w-32" />
                     </div>
                 </template>
             </div>
@@ -109,6 +109,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Check, Plus } from "lucide-vue-next";
 import __ from "@/lib/translate";

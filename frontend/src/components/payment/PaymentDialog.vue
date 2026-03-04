@@ -1,7 +1,6 @@
 <template>
 	<Dialog :open="cartStore.showPaymentDialog" @update:open="(val: boolean) => { if (!val) close() }">
 		<DialogContent class="max-w-4xl h-[calc(100vh-2rem)] flex flex-col p-0 gap-0" :hide-close="true">
-			<!-- Compact Header -->
 			<DialogHeader
 				class="shrink-0 flex-row items-center justify-between space-y-0 px-5 py-3 border-b border-border">
 				<div class="flex items-center gap-3">
@@ -11,7 +10,7 @@
 					</div>
 					<div>
 						<DialogTitle class="text-base">
-						{{ cartStore.isReturnMode ? __('Return Payment') : __('Payment') }}
+							{{ cartStore.isReturnMode ? __('Return Payment') : __('Payment') }}
 						</DialogTitle>
 						<DialogDescription class="text-xs">{{ cartStore.customerName }}</DialogDescription>
 					</div>
@@ -28,28 +27,25 @@
 				</div>
 			</DialogHeader>
 
-			<!-- Main Content: Side-by-side -->
 			<div class="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
-				<!-- Left: Amount & Methods -->
 				<div class="flex-1 flex flex-col p-4 gap-3 min-w-0 overflow-y-auto xpos-scrollbar">
-					<!-- Grand Total with Tax Breakdown -->
 					<div class="rounded-xl border" :class="cartStore.isReturnMode
 						? 'bg-amber-500/5 border-amber-500/10'
 						: 'bg-primary/5 border-primary/10'">
 						<div class="text-center py-3">
 							<p class="text-xs font-medium mb-0.5"
 								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary/70'">
-							{{ cartStore.isReturnMode ? __('Refund Amount') : __('Amount Due') }}
+								{{ cartStore.isReturnMode ? __('Refund Amount') : __('Amount Due') }}
 							</p>
 							<p class="text-3xl font-extrabold tabular-nums"
 								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary'">
 								{{ posStore.currencySymbol }}{{ formatPrice(Math.abs(cartStore.grandTotal)) }}
 							</p>
 						</div>
-						<!-- Tax Summary (collapsed) -->
-						<div v-if="cartStore.calculatedTaxes.length > 0" class="px-4 pb-3 pt-1 border-t border-border/50">
+						<div v-if="cartStore.calculatedTaxes.length > 0"
+							class="px-4 pb-3 pt-1 border-t border-border/50">
 							<div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
-							<span>{{ __('Subtotal') }}</span>
+								<span>{{ __('Subtotal') }}</span>
 								<span>{{ posStore.currencySymbol }}{{ formatPrice(cartStore.subtotal) }}</span>
 							</div>
 							<div v-for="(tax, idx) in cartStore.calculatedTaxes" :key="idx"
@@ -57,19 +53,21 @@
 								<span class="flex items-center gap-1">
 									{{ tax.description }}
 									<span class="text-[10px]">({{ tax.rate }}%)</span>
-									<span v-if="tax.included_in_print_rate" class="text-[9px] text-blue-500">{{ __('incl.') }}</span>
+									<span v-if="tax.included_in_print_rate" class="text-[9px] text-blue-500">{{
+										__('incl.') }}</span>
 								</span>
 								<span :class="tax.included_in_print_rate ? 'text-blue-500' : ''">
-									{{ tax.included_in_print_rate ? '' : '+' }}{{ posStore.currencySymbol }}{{ formatPrice(tax.amount) }}
+									{{ tax.included_in_print_rate ? '' : '+' }}{{ posStore.currencySymbol }}{{
+										formatPrice(tax.amount) }}
 								</span>
 							</div>
 						</div>
 					</div>
 
-					<!-- Payment Methods -->
 					<div>
 						<div class="flex items-center justify-between mb-2">
-							<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Method') }}</h3>
+							<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{
+								__('Method') }}</h3>
 							<div class="flex items-center gap-1">
 								<kbd
 									class="px-1 py-0.5 text-[9px] font-mono text-muted-foreground bg-muted rounded border border-border">&larr;</kbd>
@@ -93,24 +91,21 @@
 						</div>
 					</div>
 
-					<!-- Amount Input -->
 					<div>
 						<div class="flex items-center justify-between mb-1.5">
-							<label
-								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Tendered') }}</label>
+							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{
+								__('Tendered') }}</label>
 							<Button v-if="!isSplitPayment" variant="link" size="sm" class="text-xs h-auto p-0"
 								@click="enableSplitPayment">
 								{{ __('Split Payment') }}
 							</Button>
 						</div>
-						<Input ref="amountInput" v-model.number="tenderedAmount" type="number" step="0.01" min="0"
-							class="text-center text-xl font-bold tracking-wider py-3"
-							@focus="($event.target as HTMLInputElement)?.select()"
+						<NumberInput ref="amountInput" v-model="tenderedAmount" :min="0" :precision="2"
+							class="text-center text-xl font-bold tracking-wider py-3" :select-on-focus="true"
 							@keydown.enter.prevent="isSplitPayment ? addSplitPayment() : submitPayment()"
 							@keydown.up.prevent="focusMethodByIndex" @keydown.down.prevent="focusFirstQuickAmount" />
 					</div>
 
-					<!-- Split Payment: Add button and list -->
 					<div v-if="isSplitPayment" class="space-y-2">
 						<Button variant="outline" size="sm" class="w-full" @click="addSplitPayment"
 							:disabled="!selectedMethod || tenderedAmount <= 0">
@@ -136,14 +131,13 @@
 								</div>
 							</div>
 							<div class="flex justify-between text-sm font-semibold px-3 pt-1">
-									<span class="text-muted-foreground">{{ __('Total Paid') }}</span>
+								<span class="text-muted-foreground">{{ __('Total Paid') }}</span>
 								<span class="text-primary">{{ posStore.currencySymbol }}{{ formatPrice(splitTotal)
-									}}</span>
+								}}</span>
 							</div>
 						</div>
 					</div>
 
-					<!-- Quick Amount Buttons -->
 					<div v-if="!isSplitPayment" class="grid grid-cols-4 gap-1.5">
 						<Button v-for="(amount, idx) in quickAmounts" :key="amount"
 							:ref="el => { if (el) quickAmountRefs[idx] = (el as any).$el || el }" variant="outline"
@@ -155,7 +149,6 @@
 						</Button>
 					</div>
 
-					<!-- Loyalty Points Redemption -->
 					<div v-if="cartStore.customer && !cartStore.isReturnMode && customerLoyaltyPoints > 0"
 						class="bg-violet-500/5 border border-violet-500/20 rounded-xl p-3">
 						<div class="flex items-center justify-between">
@@ -163,7 +156,8 @@
 								<Gift class="w-4 h-4 text-violet-500" />
 								<span class="text-sm font-medium text-foreground">{{ __('Loyalty Points') }}</span>
 							</div>
-							<Badge variant="secondary" class="text-[10px]">{{ customerLoyaltyPoints }} {{ __('pts') }}</Badge>
+							<Badge variant="secondary" class="text-[10px]">{{ customerLoyaltyPoints }} {{ __('pts') }}
+							</Badge>
 						</div>
 						<p class="text-xs text-muted-foreground mt-1">
 							{{ __('Worth {0}', [posStore.currencySymbol + formatPrice(customerLoyaltyAmount)]) }}
@@ -180,28 +174,29 @@
 						</div>
 					</div>
 
-					<!-- Write-off -->
 					<div v-if="posStore.allowWriteOffChange && !cartStore.isReturnMode" class="space-y-1">
 						<div class="flex items-center justify-between">
-							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Write Off') }}</label>
+							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{
+								__('Write Off') }}</label>
 							<span class="text-xs text-muted-foreground">{{ __('Small remaining amounts') }}</span>
 						</div>
-						<Input v-model.number="writeOffInput" type="number" min="0" step="0.01" placeholder="0.00"
-							class="text-sm" @input="cartStore.writeOffAmount = writeOffInput || 0" />
+						<NumberInput v-model="writeOffInput" :min="0" :precision="2" placeholder="0.00" class="text-sm"
+							@change="cartStore.writeOffAmount = writeOffInput || 0" />
 					</div>
 
-					<!-- Change / Remaining display -->
 					<div class="flex gap-2 mt-auto">
 						<div v-if="changeAmount > 0"
 							class="flex-1 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 text-center">
-							<p class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mb-0.5">{{ __('Change') }}</p>
+							<p class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mb-0.5">{{
+								__('Change') }}</p>
 							<p class="text-lg font-extrabold text-emerald-700 dark:text-emerald-300 tabular-nums">
 								{{ posStore.currencySymbol }}{{ formatPrice(changeAmount) }}
 							</p>
 						</div>
 						<div v-if="remainingAmount > 0"
 							class="flex-1 bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-center">
-							<p class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mb-0.5">{{ __('Remaining') }}</p>
+							<p class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mb-0.5">{{
+								__('Remaining') }}</p>
 							<p class="text-lg font-extrabold text-amber-700 dark:text-amber-300 tabular-nums">
 								{{ posStore.currencySymbol }}{{ formatPrice(remainingAmount) }}
 							</p>
@@ -209,9 +204,9 @@
 					</div>
 				</div>
 
-				<!-- Right: Numpad -->
 				<div class="hidden lg:flex flex-col w-64 border-l border-border p-4 gap-3">
-					<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Numpad') }}</h3>
+					<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Numpad') }}
+					</h3>
 					<div class="grid grid-cols-3 gap-1.5 flex-1">
 						<Button v-for="(key, idx) in numpadKeys" :key="key"
 							:ref="el => { if (el) numpadRefs[idx] = (el as any).$el || el }"
@@ -225,7 +220,6 @@
 				</div>
 			</div>
 
-			<!-- Footer -->
 			<DialogFooter
 				class="shrink-0 border-t border-border px-5 py-3 bg-muted/30 justify-between sm:justify-between">
 				<div class="hidden sm:flex items-center gap-2 text-[10px] text-muted-foreground">
@@ -240,12 +234,8 @@
 				</div>
 				<div class="flex items-center gap-2">
 					<Button variant="outline" @click="close" tabindex="-1">{{ __('Cancel') }}</Button>
-					<Button
-						variant="outline"
-						class="font-medium"
-						:disabled="isSubmitting || !canSubmit"
-						@click="submitPayment(false)"
-					>
+					<Button variant="outline" class="font-medium" :disabled="isSubmitting || !canSubmit"
+						@click="submitPayment(false)">
 						<template v-if="isSubmitting && !printAfterSave">
 							<Loader2 class="w-4 h-4 animate-spin" />
 						</template>
@@ -254,13 +244,9 @@
 						</template>
 						{{ __('Save Only') }}
 					</Button>
-					<Button
-						ref="submitBtn"
-						:variant="cartStore.isReturnMode ? 'destructive' : 'success'"
-						class="font-bold px-4 shadow-md"
-						:disabled="isSubmitting || !canSubmit"
-						@click="submitPayment(true)"
-					>
+					<Button ref="submitBtn" :variant="cartStore.isReturnMode ? 'destructive' : 'success'"
+						class="font-bold px-4 shadow-md" :disabled="isSubmitting || !canSubmit"
+						@click="submitPayment(true)">
 						<template v-if="isSubmitting && printAfterSave">
 							<Loader2 class="w-4 h-4 animate-spin" />
 							{{ __('Processing...') }}
@@ -288,7 +274,7 @@ import {
 	Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Badge } from "@/components/ui/badge";
 import { Wallet, X, Check, Loader2, Delete, Gift, RotateCcw, Plus, Save, Printer } from "lucide-vue-next";
 
@@ -300,7 +286,7 @@ const cartStore = useCartStore();
 const paymentStore = usePaymentStore();
 const offlineStore = useOfflineStore();
 
-const amountInput = ref<InstanceType<typeof Input> | null>(null);
+const amountInput = ref<InstanceType<typeof NumberInput> | null>(null);
 const submitBtn = ref<InstanceType<typeof Button> | null>(null);
 const methodRefs: Record<number, HTMLButtonElement> = {};
 const quickAmountRefs: Record<number, HTMLElement> = {};
@@ -392,19 +378,15 @@ function extractErrorMessage(error: unknown): string {
 	try { return JSON.stringify(error); } catch { return String(error); }
 }
 
-// ─── Lifecycle ───────────────────────────────────
 onMounted(async () => {
 	tenderedAmount.value = roundCurrency(Math.abs(cartStore.grandTotal));
 	if (availableMethods.value.length > 0) {
 		selectedMethod.value = availableMethods.value[0].mode_of_payment;
 	}
 	nextTick(() => {
-		const el = amountInput.value?.$el as HTMLElement | undefined;
-		const input = el?.querySelector?.("input") || el;
-		(input as HTMLInputElement)?.focus();
+		amountInput.value?.focus();
 	});
 
-	// Fetch loyalty info if customer is set
 	if (cartStore.customer) {
 		try {
 			const credit = await paymentStore.fetchAvailableCredit(
@@ -418,7 +400,6 @@ onMounted(async () => {
 		} catch { /* ignore */ }
 	}
 
-	// Add keyboard shortcut handler
 	document.addEventListener("keydown", handleGlobalKeydown);
 });
 
@@ -427,26 +408,21 @@ onUnmounted(() => {
 });
 
 function handleGlobalKeydown(e: KeyboardEvent) {
-	// Only handle if dialog is open and not already submitting
 	if (!cartStore.showPaymentDialog || isSubmitting.value) return;
 
-	// Enter key - submit with print (default)
 	if (e.key === "Enter" && !e.shiftKey && canSubmit.value) {
-		// Don't interfere with input fields
 		const target = e.target as HTMLElement;
 		if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
 		e.preventDefault();
 		submitPayment(true);
 	}
 
-	// Shift+Enter - submit without print
 	if (e.key === "Enter" && e.shiftKey && canSubmit.value) {
 		e.preventDefault();
 		submitPayment(false);
 	}
 }
 
-// ─── Keyboard Navigation ─────────────────────────
 function focusMethod(idx: number) {
 	const methods = availableMethods.value;
 	const clamped = Math.max(0, Math.min(idx, methods.length - 1));
@@ -460,9 +436,7 @@ function focusMethodByIndex() {
 }
 
 function focusAmountInput() {
-	const el = amountInput.value?.$el as HTMLElement | undefined;
-	const input = el?.querySelector?.("input") || el;
-	(input as HTMLInputElement)?.focus();
+	amountInput.value?.focus();
 }
 
 function focusFirstQuickAmount() {
@@ -479,7 +453,6 @@ function focusSubmitBtn() {
 	(el as HTMLButtonElement)?.focus();
 }
 
-// ─── Actions ─────────────────────────────────────
 function selectMethod(method: string) {
 	selectedMethod.value = method;
 }

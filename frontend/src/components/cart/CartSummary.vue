@@ -146,14 +146,14 @@
 					>
 						{{ posStore.currencySymbol }}
 					</Button>
-					<Input
-						v-model.number="discountInput"
-						type="number"
-						min="0"
+					<NumberInput
+						v-model="discountInput"
+						:min="0"
 						:max="discountType === 'percentage' ? 100 : undefined"
+						:precision="2"
 						class="flex-1"
 						:placeholder="discountType === 'percentage' ? __('Discount %') : __('Discount amount')"
-						@input="applyDiscount"
+						@change="applyDiscount"
 					/>
 				</div>
 			</div>
@@ -206,6 +206,7 @@ import { call, showSuccess, showError } from "@/services/api";
 import { __ } from "@/lib/translate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Separator } from "@/components/ui/separator";
 import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2, Percent, FileText } from "lucide-vue-next";
 
