@@ -131,6 +131,26 @@ const flatVisibleOptions = computed(() =>
   filteredOptions.value.slice(0, props.maxVisible),
 );
 
+const dropdownPosition = ref({ top: 0, left: 0, width: 0 });
+
+const dropdownStyle = computed(() => ({
+  top: `${dropdownPosition.value.top}px`,
+  left: `${dropdownPosition.value.left}px`,
+  width: `${dropdownPosition.value.width}px`,
+}));
+
+function updateDropdownPosition() {
+  const input = getInputEl();
+  if (input) {
+    const rect = input.getBoundingClientRect();
+    dropdownPosition.value = {
+      top: rect.bottom + window.scrollY + 4,
+      left: rect.left + window.scrollX,
+      width: rect.width,
+    };
+  }
+}
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 function onInput() {
@@ -160,6 +180,7 @@ function clearSelection() {
 }
 
 function onFocus() {
+  updateDropdownPosition();
   isOpen.value = true;
   query.value = "";
   emit("focus");
@@ -182,6 +203,7 @@ function onKeydown(e: KeyboardEvent) {
     case "ArrowDown":
       e.preventDefault();
       if (!isOpen.value) {
+        updateDropdownPosition();
         isOpen.value = true;
       }
       highlightedIndex.value = Math.min(highlightedIndex.value + 1, opts.length - 1);
@@ -223,17 +245,30 @@ function getInputEl(): HTMLInputElement | null {
 
 // Click outside
 function onClickOutside(e: MouseEvent) {
-  if (rootRef.value && !rootRef.value.contains(e.target as Node)) {
+  const target = e.target as Node;
+  const isInsideRoot = rootRef.value?.contains(target);
+  const isInsideDropdown = listRef.value?.contains(target);
+  if (!isInsideRoot && !isInsideDropdown) {
     isOpen.value = false;
+  }
+}
+
+function onScrollOrResize() {
+  if (isOpen.value) {
+    updateDropdownPosition();
   }
 }
 
 onMounted(() => {
   document.addEventListener("mousedown", onClickOutside);
+  window.addEventListener("scroll", onScrollOrResize, true);
+  window.addEventListener("resize", onScrollOrResize);
 });
 
 onUnmounted(() => {
   document.removeEventListener("mousedown", onClickOutside);
+  window.removeEventListener("scroll", onScrollOrResize, true);
+  window.removeEventListener("resize", onScrollOrResize);
   if (debounceTimer) clearTimeout(debounceTimer);
 });
 </script>
@@ -269,12 +304,14 @@ onUnmounted(() => {
       </div>
     </div>
     
-    <Transition enter-active-class="transition ease-out duration-100" enter-from-class="opacity-0 -translate-y-1"
-      enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-75"
-      leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-1">
-      <div v-if="isOpen" ref="listRef"
-        class="absolute z-99000 mt-1 w-full max-h-[280px] overflow-y-auto rounded-lg border border-border bg-popover text-popover-foreground shadow-lg"
-        role="listbox">
+    <Teleport to="body">
+      <Transition enter-active-class="transition ease-out duration-100" enter-from-class="opacity-0 -translate-y-1"
+        enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-75"
+        leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-1">
+        <div v-if="isOpen" ref="listRef"
+          class="fixed z-[99999] max-h-[280px] overflow-y-auto rounded-lg border border-border bg-popover text-popover-foreground shadow-lg"
+          :style="dropdownStyle"
+          role="listbox">
         <!-- Loading state -->
         <div v-if="loading && filteredOptions.length === 0" class="flex items-center justify-center py-6">
           <Loader2 class="h-5 w-5 text-primary animate-spin" />
@@ -341,5 +378,6 @@ onUnmounted(() => {
         </div>
       </div>
     </Transition>
+    </Teleport>
   </div>
 </template>
