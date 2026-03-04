@@ -1,3 +1,6 @@
+# Copyright (c) 2026, Ali Raza and contributors
+# For license information, please see license.txt
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -7,6 +10,32 @@ from xpos.x_pos.api.cash_movement.posting import cancel_journal_entry
 
 
 class POSCashMovement(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from frappe.types import DF
+
+        against_name: DF.Data | None
+        amended_from: DF.Link | None
+        amount: DF.Currency
+        client_request_id: DF.Data | None
+        company: DF.Link
+        expense_account: DF.Link | None
+        journal_entry: DF.Link | None
+        movement_type: DF.Literal["Expense", "Deposit"]
+        pos_opening_shift: DF.Link
+        pos_profile: DF.Link
+        posting_date: DF.Date
+        remarks: DF.SmallText | None
+        source_account: DF.Link
+        target_account: DF.Link
+        user: DF.Link
+    # end: auto-generated types
+    
+    
     def validate(self):
         self._validate_amount()
         self._validate_company_links()

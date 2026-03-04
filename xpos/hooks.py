@@ -262,3 +262,13 @@ export_python_type_annotations = True
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
+
+
+# Website Route Rules
+# -------------------
+# Serve the X POS SPA for deep links under /xpos
+
+website_route_rules = [
+    {"from_route": "/xpos", "to_route": "xpos"},
+    {"from_route": "/xpos/<path:app_path>", "to_route": "xpos"},
+]

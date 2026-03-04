@@ -1,12 +1,24 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
-
-from __future__ import unicode_literals
 
 # import frappe
 from frappe.model.document import Document
 
 
 class POSClosingShiftTaxes(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from frappe.types import DF
+
+        account_head: DF.Link | None
+        amount: DF.Currency
+        parent: DF.Data
+        parentfield: DF.Data
+        parenttype: DF.Data
+        rate: DF.Percent
+    # end: auto-generated types
     pass

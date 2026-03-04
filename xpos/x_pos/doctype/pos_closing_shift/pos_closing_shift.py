@@ -28,6 +28,34 @@ from xpos.x_pos.doctype.pos_closing_shift.closing_processing.invoices import (
 )
 
 class POSClosingShift(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from frappe.types import DF
+        from xpos.x_pos.doctype.pos_closing_shift_detail.pos_closing_shift_detail import POSClosingShiftDetail
+        from xpos.x_pos.doctype.pos_closing_shift_taxes.pos_closing_shift_taxes import POSClosingShiftTaxes
+        from xpos.x_pos.doctype.pos_payment_entry_reference.pos_payment_entry_reference import POSPaymentEntryReference
+        from xpos.x_pos.doctype.sales_invoice_reference.sales_invoice_reference import SalesInvoiceReference
+
+        amended_from: DF.Link | None
+        company: DF.Link
+        grand_total: DF.Currency
+        net_total: DF.Currency
+        payment_reconciliation: DF.Table[POSClosingShiftDetail]
+        period_end_date: DF.Datetime
+        period_start_date: DF.Datetime
+        pos_opening_shift: DF.Link
+        pos_payments: DF.Table[POSPaymentEntryReference]
+        pos_profile: DF.Link
+        pos_transactions: DF.Table[SalesInvoiceReference]
+        posting_date: DF.Date
+        taxes: DF.Table[POSClosingShiftTaxes]
+        total_quantity: DF.Float
+        user: DF.Link
+    # end: auto-generated types
     def validate(self):
         user = frappe.get_all(
             "POS Closing Shift",

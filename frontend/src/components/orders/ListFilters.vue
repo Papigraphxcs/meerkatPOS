@@ -1,24 +1,12 @@
 <template>
   <div class="flex flex-wrap items-center gap-2">
-    <!-- Date Range Filter -->
     <div class="flex items-center gap-2 bg-muted/50 rounded-lg px-2 py-1">
-      <Calendar class="h-4 w-4 text-muted-foreground" />
-      <Input
-        v-model="localFilters.fromDate"
-        type="date"
-        class="h-7 w-32 border-0 bg-transparent px-1 text-sm focus-visible:ring-0"
-        @change="emitFilters"
-      />
+      <DateTimePicker v-model="localFilters.fromDate" mode="date" placeholder="From date" :show-today="true"
+        :clearable="true" class="w-36" @change="emitFilters" />
       <span class="text-muted-foreground text-xs">to</span>
-      <Input
-        v-model="localFilters.toDate"
-        type="date"
-        class="h-7 w-32 border-0 bg-transparent px-1 text-sm focus-visible:ring-0"
-        @change="emitFilters"
-      />
+      <DateTimePicker v-model="localFilters.toDate" mode="date" placeholder="To date" :show-today="true"
+        :clearable="true" class="w-36" @change="emitFilters" />
     </div>
-
-    <!-- Status Filter -->
     <Select v-model="localFilters.status" @update:model-value="emitFilters">
       <SelectTriggerStyled class="h-8 w-[140px]">
         <SelectValue placeholder="Status" />
@@ -34,7 +22,6 @@
       </SelectContentStyled>
     </Select>
 
-    <!-- Is Return Filter -->
     <Select v-model="localFilters.isReturn" @update:model-value="emitFilters">
       <SelectTriggerStyled class="h-8 w-[130px]">
         <SelectValue placeholder="Type" />
@@ -67,26 +54,23 @@
     <!-- Query Filters Popover -->
     <Popover v-model:open="showQueryPopover">
       <PopoverTrigger as-child>
-        <Button
-          variant="outline"
-          size="sm"
-          class="h-8 gap-1"
-          :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': queryFilters.length > 0 }"
-        >
+        <Button variant="outline" size="sm" class="h-8 gap-1"
+          :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': queryFilters.length > 0 }">
           <Filter class="h-3.5 w-3.5" />
           Filters
-          <Badge v-if="queryFilters.length > 0" :variant="queryFilters.length > 0 ? 'secondary' : 'outline'" class="ml-1 h-5 min-w-5 px-1.5 bg-background text-foreground">
+          <Badge v-if="queryFilters.length > 0" :variant="queryFilters.length > 0 ? 'secondary' : 'outline'"
+            class="ml-1 h-5 min-w-5 px-1.5 bg-background text-foreground">
             {{ queryFilters.length }}
           </Badge>
         </Button>
       </PopoverTrigger>
-      <PopoverContentStyled class="w-[500px] p-0" align="end">
+      <PopoverContentStyled class="w-[500px] p-0 overflow-visible" align="end">
         <div class="p-3 border-b border-border">
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold text-foreground">Query Filters</span>
             <Button variant="outline" size="sm" class="h-7 text-xs" @click="addQueryFilter">
               <Plus class="h-3 w-3" />
-              Add Filter
+              {{ __('Add Filter') }}
             </Button>
           </div>
         </div>
@@ -94,17 +78,10 @@
         <div class="p-3 space-y-2 max-h-[300px] overflow-y-auto">
           <!-- Filter Rows -->
           <div v-for="(filter, index) in queryFilters" :key="index" class="flex items-center gap-2">
-            <!-- Field Select -->
-            <Select v-model="filter.field" @update:model-value="emitFilters">
-              <SelectTriggerStyled class="h-8 w-[130px]">
-                <SelectValue placeholder="Field" />
-              </SelectTriggerStyled>
-              <SelectContentStyled>
-                <SelectItemStyled v-for="field in filterFields" :key="field.value" :value="field.value">
-                  {{ field.label }}
-                </SelectItemStyled>
-              </SelectContentStyled>
-            </Select>
+            <!-- Field Autocomplete -->
+            <Autocomplete v-model="filter.field" :options="filterFieldOptions" placeholder="Search fields..."
+              :show-search-icon="false" :clearable="false" :max-visible="10" empty-text="No fields found"
+              class="w-[150px]" @update:model-value="emitFilters" />
 
             <!-- Operator Select -->
             <Select v-model="filter.operator" @update:model-value="emitFilters">
@@ -119,14 +96,8 @@
             </Select>
 
             <!-- Value Input -->
-            <Input
-              v-if="!['is', 'is not'].includes(filter.operator)"
-              v-model="filter.value"
-              type="text"
-              placeholder="Value"
-              class="h-8 flex-1"
-              @change="emitFilters"
-            />
+            <Input v-if="!['is', 'is not'].includes(filter.operator)" v-model="filter.value" type="text"
+              placeholder="Value" class="h-8 flex-1" @change="emitFilters" />
             <Select v-else v-model="filter.value" @update:model-value="emitFilters">
               <SelectTriggerStyled class="h-8 flex-1">
                 <SelectValue placeholder="Value" />
@@ -138,27 +109,23 @@
             </Select>
 
             <!-- Remove Button -->
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              class="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
-              @click="removeQueryFilter(index)"
-            >
+            <Button variant="ghost" size="icon-sm" class="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+              @click="removeQueryFilter(index)">
               <X class="h-3.5 w-3.5" />
             </Button>
           </div>
 
           <div v-if="queryFilters.length === 0" class="text-sm text-muted-foreground py-4 text-center">
-            No query filters. Click "Add Filter" to add one.
+            {{ __('No query filters. Click "Add Filter" to add one.') }}
           </div>
         </div>
 
         <div v-if="queryFilters.length > 0" class="p-3 border-t border-border flex justify-end gap-2">
           <Button variant="ghost" size="sm" class="h-7" @click="clearQueryFilters">
-            Clear All
+            {{ __('Clear All') }}
           </Button>
           <Button size="sm" class="h-7" @click="showQueryPopover = false">
-            Apply
+            {{ __('Apply') }}
           </Button>
         </div>
       </PopoverContentStyled>
@@ -170,13 +137,8 @@
     </Button>
 
     <!-- Clear Filters -->
-    <Button
-      v-if="hasActiveFilters"
-      variant="ghost"
-      size="sm"
-      class="h-8 text-muted-foreground hover:text-foreground"
-      @click="clearFilters"
-    >
+    <Button v-if="hasActiveFilters" variant="ghost" size="sm" class="h-8 text-muted-foreground hover:text-foreground"
+      @click="clearFilters">
       <X class="h-3.5 w-3.5" />
       Clear
     </Button>
@@ -187,10 +149,14 @@
 import { ref, reactive, computed, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { Autocomplete } from "@/components/ui/autocomplete";
+import type { AutocompleteOption } from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectTriggerStyled, SelectContentStyled, SelectItemStyled, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContentStyled } from "@/components/ui/popover";
 import { Calendar, Filter, Plus, X, RefreshCw } from "lucide-vue-next";
+import __ from "@/lib/translate";
 
 interface QueryFilter {
   field: string;
@@ -247,6 +213,10 @@ const filterFields: FilterField[] = [
   { label: "Return Against", value: "return_against", type: "text" },
   { label: "Owner", value: "owner", type: "text" },
 ];
+
+const filterFieldOptions = computed<AutocompleteOption[]>(() =>
+  filterFields.map((f) => ({ label: f.label, value: f.value, description: f.type }))
+);
 
 const textOperators = [
   { label: "equals", value: "=" },
@@ -310,24 +280,24 @@ function clearFilters() {
 function emitFilters() {
   // Build query filters array
   const builtFilters: [string, string, string][] = [];
-  
+
   // Add status filter
   if (localFilters.status !== "__all__") {
     builtFilters.push(["status", "=", localFilters.status]);
   }
-  
+
   // Add is_return filter
   if (localFilters.isReturn !== "__all__") {
     builtFilters.push(["is_return", "=", localFilters.isReturn]);
   }
-  
+
   // Add query filters
   for (const f of queryFilters.value) {
     if (f.field && f.operator && (f.value || ["is", "is not"].includes(f.operator))) {
       builtFilters.push([f.field, f.operator, f.value]);
     }
   }
-  
+
   emit("update", {
     fromDate: localFilters.fromDate,
     toDate: localFilters.toDate,

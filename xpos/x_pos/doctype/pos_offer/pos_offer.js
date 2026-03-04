@@ -1,4 +1,4 @@
-// Copyright (c) 2021, Youssef Restom and contributors
+// Copyright (c) 2026, Ali Raza and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on("POS Offer", {
@@ -15,18 +15,18 @@ frappe.ui.form.on("POS Offer", {
 	},
 	validate: function (frm) {
 		if (frm.doc.apply_on === "Transaction") {
-			if (!frm.doc.min_amt > 0) {
-				frappe.throw("Min Amount most be more then zero");
+			if (!(frm.doc.min_amt > 0)) {
+				frappe.throw("Min Amount must be more than zero");
 			}
 		}
 		if (frm.doc.offer === "Give Product") {
-			if (!frm.doc.given_qty > 0) {
-				frappe.throw("Given Quantity most be more then zero");
+			if (!(frm.doc.given_qty > 0)) {
+				frappe.throw("Given Quantity must be more than zero");
 			}
 		}
 		if (frm.doc.offer === "Loyalty Point") {
-			if (!frm.doc.loyalty_points > 0) {
-				frappe.throw("Loyalty Points most be more then zero");
+			if (!(frm.doc.loyalty_points > 0)) {
+				frappe.throw("Loyalty Points must be more than zero");
 			}
 		}
 		if (

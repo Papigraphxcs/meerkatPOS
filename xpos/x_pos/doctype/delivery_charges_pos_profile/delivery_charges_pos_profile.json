@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "pos_profile",
+  "column_break_zzqv",
   "rate"
  ],
  "fields": [
@@ -19,22 +20,29 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
    "options": "currency"
+  },
+  {
+   "fieldname": "column_break_zzqv",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-24 16:29:28.981655",
+ "modified": "2026-03-04 20:23:07.902057",
  "modified_by": "Administrator",
  "module": "X POS",
  "name": "Delivery Charges POS Profile",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

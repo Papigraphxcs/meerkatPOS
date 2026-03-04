@@ -1,7 +1,6 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -10,6 +9,33 @@ from frappe.utils import getdate, today
 
 
 class POSCoupon(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from frappe.types import DF
+
+        campaign: DF.Link | None
+        company: DF.Link
+        coupon_code: DF.Data | None
+        coupon_name: DF.Data
+        coupon_type: DF.Literal["Promotional", "Gift Card"]
+        customer: DF.Link | None
+        customer_name: DF.Data | None
+        description: DF.TextEditor | None
+        email_id: DF.Data | None
+        maximum_use: DF.Int
+        mobile_no: DF.Data | None
+        one_use: DF.Check
+        pos_offer: DF.Link
+        referral_code: DF.Link | None
+        used: DF.Int
+        valid_from: DF.Date | None
+        valid_upto: DF.Date | None
+    # end: auto-generated types
+    
     def autoname(self):
         self.coupon_name = strip(self.coupon_name)
         self.name = self.coupon_name
@@ -31,7 +57,7 @@ class POSCoupon(Document):
         if not pos_offer.coupon_based:
             frappe.throw(_("Please select Coupon Code Based POS Offer."))
         if pos_offer.disable:
-            frappe.throw(_("POS Offer is disable."))
+            frappe.throw(_("POS Offer is disabled."))
         if pos_offer.valid_from and pos_offer.valid_from > getdate(self.valid_from):
             self.valid_from = pos_offer.valid_from
         if pos_offer.valid_upto and pos_offer.valid_upto < getdate(self.valid_upto):
@@ -49,7 +75,7 @@ class POSCoupon(Document):
         else:
             ref_doc = frappe.get_doc("Referral Code", self.referral_code)
         if not ref_doc:
-            frappe.throw(_("Referral Code {0} is not exists").format(self.referral_code))
+            frappe.throw(_("Referral Code {0} does not exist").format(self.referral_code))
         if ref_doc.disabled:
             frappe.throw(_("Referral Code {0} is disabled").format(self.referral_code))
 

@@ -1,16 +1,36 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cint
-from frappe.model.document import Document
 from xpos.x_pos.api.status_updater import StatusUpdater
 
 
 class POSOpeningShift(StatusUpdater):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from frappe.types import DF
+        from xpos.x_pos.doctype.pos_opening_shift_detail.pos_opening_shift_detail import POSOpeningShiftDetail
+
+        amended_from: DF.Link | None
+        balance_details: DF.Table[POSOpeningShiftDetail]
+        company: DF.Link
+        period_end_date: DF.Date | None
+        period_start_date: DF.Datetime
+        pos_closing_shift: DF.Data | None
+        pos_profile: DF.Link
+        posting_date: DF.Date
+        set_posting_date: DF.Check
+        status: DF.Literal["Draft", "Open", "Closed", "Cancelled"]
+        user: DF.Link
+    # end: auto-generated types
+    
+    
     def validate(self):
         self.validate_pos_profile_and_cashier()
         self.set_status()

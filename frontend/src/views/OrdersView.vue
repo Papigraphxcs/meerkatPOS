@@ -3,6 +3,18 @@
         <div class="shrink-0 p-4 pb-3">
             <div class="flex items-center justify-between mb-4">
                 <h1 class="text-xl font-bold text-foreground">{{ __("Order History") }}</h1>
+                <Autocomplete
+                    v-model="customerFilter"
+                    :options="customerFilterOptions"
+                    placeholder="Filter by customer..."
+                    :show-search-icon="true"
+                    :clearable="true"
+                    :max-visible="6"
+                    empty-text="No customers found"
+                    class="w-56"
+                    @search="onCustomerSearch"
+                    @update:model-value="onCustomerFilterChange"
+                />
             </div>
 
             <ListFilters :from-date="fromDate" :to-date="toDate" @update="handleFilterUpdate"
@@ -95,8 +107,14 @@
                         </div>
                         <div class="space-y-1">
                             <span class="text-xs text-muted-foreground uppercase tracking-wide">{{ __("Date & Time") }}</span>
-                            <p class="font-medium text-foreground">{{ formatDate(selectedOrder.posting_date) }} {{
-                                formatTime(String(selectedOrder.posting_time || '')) }}</p>
+                            <DateTimePicker
+                                :model-value="orderDateTime(selectedOrder)"
+                                mode="datetime"
+                                :disabled="true"
+                                :clearable="false"
+                                placeholder="Posting date"
+                                class="w-full"
+                            />
                         </div>
                         <div class="space-y-1">
                             <span class="text-xs text-muted-foreground uppercase tracking-wide">{{ __("POS Profile") }}</span>
@@ -285,6 +303,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { Autocomplete } from "@/components/ui/autocomplete";
+import type { AutocompleteOption } from "@/components/ui/autocomplete";
 import { FileText, ChevronRight, Printer, RotateCcw, User, Calendar as CalendarIcon, Clock } from "lucide-vue-next";
 import ListFilters from "@/components/orders/ListFilters.vue";
 import Pagination from "@/components/orders/Pagination.vue";
@@ -302,6 +323,49 @@ const currentPage = ref(1);
 const pageSize = ref(20);
 const totalOrders = ref(0);
 const selectedOrder = ref<Invoice | null>(null);
+
+// Customer filter autocomplete
+const customerFilter = ref("");
+const customerFilterOptions = ref<AutocompleteOption[]>([]);
+
+function onCustomerSearch(query: string) {
+    if (!query || query.length < 2) {
+        customerFilterOptions.value = [];
+        return;
+    }
+    // Build options from existing orders for quick local filtering
+    const seen = new Set<string>();
+    const opts: AutocompleteOption[] = [];
+    for (const order of orders.value) {
+        const name = order.customer_name || order.customer || "";
+        if (name && !seen.has(name) && name.toLowerCase().includes(query.toLowerCase())) {
+            seen.add(name);
+            opts.push({ label: name, value: name });
+        }
+    }
+    customerFilterOptions.value = opts;
+}
+
+function onCustomerFilterChange(val: string) {
+    customerFilter.value = val;
+    if (val) {
+        activeFilters.value.queryFilters = [
+            ...activeFilters.value.queryFilters.filter(f => f[0] !== "customer_name"),
+            ["customer_name", "like", `%${val}%`],
+        ];
+    } else {
+        activeFilters.value.queryFilters = activeFilters.value.queryFilters.filter(f => f[0] !== "customer_name");
+    }
+    currentPage.value = 1;
+    fetchOrders();
+}
+
+function orderDateTime(order: Invoice): string {
+    const date = order.posting_date || "";
+    const time = order.posting_time ? String(order.posting_time) : "00:00:00";
+    if (!date) return "";
+    return `${date} ${time}`;
+}
 
 const activeFilters = ref<{
     status: string;

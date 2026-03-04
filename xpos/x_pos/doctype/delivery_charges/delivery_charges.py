@@ -8,6 +8,24 @@ from frappe.model.document import Document
 
 
 class DeliveryCharges(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from frappe.types import DF
+        from xpos.x_pos.doctype.delivery_charges_pos_profile.delivery_charges_pos_profile import DeliveryChargesPOSProfile
+
+        company: DF.Link
+        cost_center: DF.Link
+        default_rate: DF.Currency
+        disabled: DF.Check
+        label: DF.Data
+        profiles: DF.Table[DeliveryChargesPOSProfile]
+        profiles_list: DF.Code | None
+        shipping_account: DF.Link
+    # end: auto-generated types
     def validate(self):
         if not self.default_rate or self.default_rate <= 0:
             frappe.throw(_("Default Rate is required"))
