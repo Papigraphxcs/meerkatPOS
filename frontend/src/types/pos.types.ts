@@ -350,6 +350,8 @@ export interface InvoicePayment {
 }
 
 export interface InvoiceData {
+  name?: string;
+  doctype?: string;
   pos_profile: string;
   customer: string;
   items: InvoiceItem[];

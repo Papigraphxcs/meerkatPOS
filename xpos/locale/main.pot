@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-03-06 00:56+0428\n"
-"PO-Revision-Date: 2026-03-06 00:56+0428\n"
+"POT-Creation-Date: 2026-03-06 14:29+0428\n"
+"PO-Revision-Date: 2026-03-06 14:29+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -486,7 +486,7 @@ msgid "Cost Center"
 msgstr ""
 
 #: xpos/x_pos/api/payments.py:223
-msgid "Cost Center is not set in pos profile {}"
+msgid "Cost Center is not set in pos profile {0}"
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Coupon Detail'
@@ -656,7 +656,7 @@ msgstr ""
 msgid "Customer locked for return"
 msgstr ""
 
-#: xpos/api/invoices.py:1245
+#: xpos/api/invoices.py:1268
 msgid "Customer mismatch: Return must be for the same customer ({0}) as the original invoice"
 msgstr ""
 
@@ -1034,14 +1034,6 @@ msgstr ""
 msgid "Grand Total"
 msgstr ""
 
-#: frontend/src/lib/translate.ts:24
-msgid "Hello"
-msgstr ""
-
-#: frontend/src/lib/translate.ts:25
-msgid "Hello {0}"
-msgstr ""
-
 #: frontend/src/components/purchase/StockReceiving.vue:429
 #: frontend/src/components/purchase/StockReceiving.vue:601
 msgid "In Transit"
@@ -1129,7 +1121,7 @@ msgstr ""
 msgid "Invoice details"
 msgstr ""
 
-#: xpos/api/invoices.py:356
+#: xpos/api/invoices.py:379
 msgid "Invoice name is required for update"
 msgstr ""
 
@@ -1141,7 +1133,7 @@ msgstr ""
 msgid "Invoice {0} does not exist"
 msgstr ""
 
-#: xpos/api/invoices.py:1370
+#: xpos/api/invoices.py:1393
 msgid "Invoice {0} not found"
 msgstr ""
 
@@ -1206,32 +1198,28 @@ msgstr ""
 msgid "Item code starting position"
 msgstr ""
 
-#: frontend/src/lib/translate.ts:26
-msgid "Item {0} of {1}"
-msgstr ""
-
-#: xpos/api/invoices.py:1258
+#: xpos/api/invoices.py:1281
 msgid "Item {0} was not in the original invoice {1}"
 msgstr ""
 
-#: xpos/api/invoices.py:1285
+#: xpos/api/invoices.py:1308
 msgid "Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})"
 msgstr ""
 
-#: xpos/api/invoices.py:1092
+#: xpos/api/invoices.py:1115
 msgid "Item {0}: Cannot return {1}, maximum returnable is {2}"
 msgstr ""
 
-#: xpos/api/invoices.py:181
+#: xpos/api/invoices.py:201
 #, python-format
 msgid "Item {0}: Discount {1}% exceeds maximum allowed {2}%"
 msgstr ""
 
-#: xpos/api/invoices.py:138
+#: xpos/api/invoices.py:158
 msgid "Item {0}: Quantity must be greater than zero"
 msgstr ""
 
-#: xpos/api/invoices.py:145
+#: xpos/api/invoices.py:165
 msgid "Item {0}: Rate cannot be negative"
 msgstr ""
 
@@ -1627,12 +1615,16 @@ msgstr ""
 msgid "Only draft Sales Orders can be updated"
 msgstr ""
 
-#: xpos/api/invoices.py:848
+#: xpos/api/invoices.py:871
 msgid "Only draft invoices can be deleted"
 msgstr ""
 
-#: xpos/api/invoices.py:362
+#: xpos/api/invoices.py:385
 msgid "Only draft invoices can be updated"
+msgstr ""
+
+#: xpos/api/invoices.py:53
+msgid "Only draft invoices can be updated and submitted"
 msgstr ""
 
 #: xpos/x_pos/api/cash_movement/service.py:193
@@ -1684,7 +1676,7 @@ msgstr ""
 msgid "Orders"
 msgstr ""
 
-#: xpos/api/invoices.py:1239
+#: xpos/api/invoices.py:1262
 msgid "Original invoice {0} not found"
 msgstr ""
 
@@ -1901,7 +1893,7 @@ msgstr ""
 msgid "POS Profile {} does not belongs to company {}"
 msgstr ""
 
-#: xpos/api/invoices.py:434 xpos/api/sales_orders.py:68
+#: xpos/api/invoices.py:457 xpos/api/sales_orders.py:68
 #: xpos/api/sales_orders.py:171
 msgid "POS Profile, Customer, and Items are required"
 msgstr ""
@@ -1980,7 +1972,7 @@ msgstr ""
 msgid "Payment amount cannot be less than or equal to 0"
 msgstr ""
 
-#: xpos/api/invoices.py:258
+#: xpos/api/invoices.py:278
 msgid "Payment amount must be greater than zero"
 msgstr ""
 
@@ -2474,7 +2466,7 @@ msgstr ""
 msgid "Return & Print"
 msgstr ""
 
-#: xpos/api/invoices.py:79
+#: xpos/api/invoices.py:100
 msgid "Return Against invoice is required for returns"
 msgstr ""
 
@@ -3015,7 +3007,7 @@ msgstr ""
 msgid "Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again."
 msgstr ""
 
-#: xpos/x_pos/api/payments.py:274
+#: xpos/x_pos/api/payments.py:275
 msgid "Unable to create Journal Entry for customer credit."
 msgstr ""
 

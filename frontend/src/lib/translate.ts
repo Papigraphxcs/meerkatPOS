@@ -19,11 +19,6 @@ function getMessages(): Record<string, string> {
  * @param txt - The text to translate
  * @param args - Optional format arguments for string interpolation
  * @returns Translated string or original if no translation found
- * 
- * @example
- * __('Hello') // Returns translated 'Hello' or 'Hello'
- * __('Hello {0}', ['World']) // Returns 'مرحبا World' if translated
- * __('Item {0} of {1}', [5, 10]) // Returns 'Item 5 of 10' or translated version
  */
 export function __(txt: string, args?: TranslateArgs): string {
   if (!txt) return txt;

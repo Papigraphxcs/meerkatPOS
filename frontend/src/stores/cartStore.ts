@@ -796,6 +796,10 @@ export const useCartStore = defineStore("cart", () => {
       discount_amount: discountAmount.value,
     };
 
+    if (currentDraftName.value) {
+      data.name = currentDraftName.value;
+    }
+
     // Payments
     if (payments.value.length > 0) {
       data.payments = payments.value;

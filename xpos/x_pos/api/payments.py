@@ -220,7 +220,8 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
         if not cost_center:
             cost_center = frappe.get_value("Company", invoice_doc.company, "cost_center")
         if not cost_center:
-            frappe.throw(_("Cost Center is not set in pos profile {}").format(invoice_doc.pos_profile))
+            frappe.throw(_("Cost Center is not set in pos profile {0}").format(invoice_doc.pos_profile))
+            
         for row in data.get("customer_credit_dict"):
             if row["type"] == "Invoice" and row["credit_to_redeem"]:
                 outstanding_invoice = frappe.get_doc("Sales Invoice", row["credit_origin"])

@@ -44,7 +44,27 @@ def create_invoice(data):
             "Company", pos.company, "default_receivable_account"
         )
 
-    invoice_doc = frappe.new_doc(doctype)
+    invoice_name = data.get("name")
+    is_existing_draft = False
+
+    if invoice_name and frappe.db.exists(doctype, invoice_name):
+        invoice_doc = frappe.get_doc(doctype, invoice_name)
+        if invoice_doc.docstatus != 0:
+            frappe.throw(_("Only draft invoices can be updated and submitted"))
+
+        is_existing_draft = True
+        invoice_doc.set("items", [])
+        invoice_doc.set("payments", [])
+        invoice_doc.set("taxes", [])
+        if hasattr(invoice_doc, "sales_team"):
+            invoice_doc.set("sales_team", [])
+        if hasattr(invoice_doc, "coupons"):
+            invoice_doc.set("coupons", [])
+        if hasattr(invoice_doc, "offers"):
+            invoice_doc.set("offers", [])
+    else:
+        invoice_doc = frappe.new_doc(doctype)
+
     invoice_doc.is_pos = 1
     invoice_doc.pos_profile = pos_profile
     invoice_doc.customer = customer
@@ -70,6 +90,7 @@ def create_invoice(data):
     if data.get("plc_conversion_rate"):
         invoice_doc.plc_conversion_rate = flt(data["plc_conversion_rate"])
 
+    invoice_doc.is_return = 1 if is_return else 0
     if is_return:
         invoice_doc.is_return = 1
         if return_against:
@@ -77,6 +98,8 @@ def create_invoice(data):
             _validate_return_invoice(return_against, customer, items)
         else:
             frappe.throw(_("Return Against invoice is required for returns"))
+    else:
+        invoice_doc.return_against = None
 
     if additional_discount_percentage:
         invoice_doc.additional_discount_percentage = additional_discount_percentage
@@ -85,22 +108,19 @@ def create_invoice(data):
         invoice_doc.discount_amount = discount_amount
         invoice_doc.apply_discount_on = data.get("apply_discount_on") or "Grand Total"
 
-    if data.get("pos_notes"):
-        try:
-            invoice_doc.pos_notes = data["pos_notes"]
-        except Exception:
-            pass
-    if data.get("authorization_code"):
-        try:
-            invoice_doc.authorization_code = data["authorization_code"]
-        except Exception:
-            pass
+    try:
+        invoice_doc.pos_notes = data.get("pos_notes") or ""
+    except Exception:
+        pass
+    try:
+        invoice_doc.authorization_code = data.get("authorization_code") or ""
+    except Exception:
+        pass
 
-    if data.get("pos_delivery_date"):
-        try:
-            invoice_doc.pos_delivery_date = data["pos_delivery_date"]
-        except Exception:
-            pass
+    try:
+        invoice_doc.pos_delivery_date = data.get("pos_delivery_date") or None
+    except Exception:
+        pass
 
     if data.get("sales_person"):
         try:
@@ -310,7 +330,10 @@ def create_invoice(data):
     except Exception:
         pass
 
-    invoice_doc.insert(ignore_permissions=True)
+    if is_existing_draft:
+        invoice_doc.save(ignore_permissions=True)
+    else:
+        invoice_doc.insert(ignore_permissions=True)
 
     if submit_in_background:
         enqueue(
