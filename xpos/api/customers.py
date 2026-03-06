@@ -21,8 +21,7 @@ def get_customers(search_term="", limit=20, pos_profile=None):
     """
     conditions = "c.disabled = 0"
     values = {"limit": int(limit)}
-
-    # Respect POS Profile customer group restrictions
+    
     if pos_profile:
         try:
             pos = frappe.get_cached_doc("POS Profile", pos_profile)

@@ -39,24 +39,24 @@ frappe.ui.form.on("POS Profile", {
 			};
 		});
 
-		// frm.set_query("account", "allowed_expense_accounts", function (doc) {
-		// 	return {
-		// 		filters: {
-		// 			company: doc.company,
-		// 			is_group: 0,
-		// 			root_type: "Expense",
-		// 		},
-		// 	};
-		// });
+		frm.set_query("account", "allowed_expense_accounts", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					root_type: "Expense",
+				},
+			};
+		});
 
-		// frm.set_query("account", "allowed_source_accounts", function (doc) {
-		// 	return {
-		// 		filters: {
-		// 			company: doc.company,
-		// 			is_group: 0,
-		// 			account_type: "Cash",
-		// 		},
-		// 	};
-		// });
+		frm.set_query("account", "allowed_source_accounts", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					account_type: "Cash",
+				},
+			};
+		});
 	},
 });

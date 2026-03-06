@@ -154,6 +154,7 @@ def close_shift(opening_shift, closing_details):
         },
         fields=[
             "name",
+            "posting_date",
             "grand_total",
             "net_total",
             "total_taxes_and_charges",
@@ -236,10 +237,10 @@ def close_shift(opening_shift, closing_details):
         closing_shift.append(
             "pos_transactions",
             {
-                "pos_invoice": _row_value(inv, "name"),
-                "posting_date": nowdate(),
-                "grand_total": _row_value(inv, "grand_total", 0),
+                "sales_invoice": _row_value(inv, "name"),
+                "posting_date": _row_value(inv, "posting_date"),
                 "customer": _row_value(inv, "customer"),
+                "grand_total": _row_value(inv, "grand_total", 0),
             },
         )
 

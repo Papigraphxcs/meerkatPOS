@@ -113,7 +113,7 @@ export const usePaymentStore = defineStore("payment", () => {
     try {
       const result = await call<CashMovementContext>(
         "xpos.api.cash_movements.get_cash_movement_context",
-        { pos_profile: posProfile, pos_opening_shift: posOpeningShift }
+        { pos_profile: posProfile }
       );
       cashMovementContext.value = result;
       return result;
@@ -128,7 +128,9 @@ export const usePaymentStore = defineStore("payment", () => {
     try {
       const result = await call(
         "xpos.api.cash_movements.create_pos_expense",
-        data
+        {
+          payload: data
+        }
       );
       return result;
     } catch (error) {
@@ -144,7 +146,9 @@ export const usePaymentStore = defineStore("payment", () => {
     try {
       const result = await call(
         "xpos.api.cash_movements.create_cash_deposit",
-        data
+        {
+          payload: data
+        }
       );
       return result;
     } catch (error) {
@@ -156,14 +160,15 @@ export const usePaymentStore = defineStore("payment", () => {
   }
 
   async function fetchShiftCashMovements(
-    posProfile: string,
-    openingShift: string
+    openingShift: string,
+    movement_type: string,
   ): Promise<POSCashMovement[]> {
     try {
       const result = await call<POSCashMovement[]>(
         "xpos.api.cash_movements.get_shift_cash_movements",
         {
           pos_opening_shift: openingShift,
+          movement_type: movement_type
         }
       );
       shiftCashMovements.value = result || [];

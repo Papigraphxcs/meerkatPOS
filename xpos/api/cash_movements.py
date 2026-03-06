@@ -13,60 +13,52 @@ import json
 import frappe
 from frappe import _
 from frappe.utils import flt, nowdate, now_datetime, cint
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+    get_bank_cash_account,
+)
 
 
 @frappe.whitelist()
-def get_cash_movement_context(pos_profile, pos_opening_shift):
-    """Returns configuration context for cash movement dialogs.
-
-    Same as POS Awesome's get_cash_movement_context.
-    """
+def get_cash_movement_context(pos_profile):
+    """Returns configuration context for cash movement dialogs."""
     pos = frappe.get_cached_doc("POS Profile", pos_profile)
 
     enable_cash_movement = cint(pos.get("enable_cash_movement"))
     allow_pos_expense = cint(pos.get("allow_pos_expense"))
     allow_cash_deposit = cint(pos.get("allow_cash_deposit"))
 
-    expense_accounts = []
-    try:
-        expense_accounts = frappe.get_all(
-            "POS Allowed Expense Account",
-            filters={"parent": pos_profile},
-            fields=["expense_account"],
-            order_by="idx",
-        )
-    except Exception:
-        pass
+    expense_accounts = frappe.get_all(
+        "POS Allowed Expense Account",
+        filters={"parent": pos_profile},
+        fields=["account"],
+        order_by="idx",
+    )
+    
+    deposit_accounts = frappe.get_all(
+        "Account",
+        filters={"disabled": 0, "is_group": 0, "account_type": "Bank"},
+        fields=["name"],
+        order_by="idx"
+    )
 
-    source_accounts = []
-    try:
-        source_accounts = frappe.get_all(
-            "POS Allowed Source Account",
-            filters={"parent": pos_profile},
-            fields=["account"],
-            order_by="idx",
-        )
-    except Exception:
-        pass
-
+    source_accounts = frappe.get_all(
+        "POS Allowed Source Account",
+        filters={"parent": pos_profile},
+        fields=["account"],
+        order_by="idx",
+    )
     cash_account = None
     cash_mop = pos.get("cash_mode_of_payment") or "Cash"
-    try:
-        from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
-            get_bank_cash_account,
-        )
-
-        account_info = get_bank_cash_account(cash_mop, pos.company)
-        cash_account = account_info.get("account")
-    except Exception:
-        pass
+    account_info = get_bank_cash_account(cash_mop, pos.company)
+    cash_account = account_info.get("account")
 
     return {
         "enable_cash_movement": enable_cash_movement,
         "allow_pos_expense": allow_pos_expense,
         "allow_cash_deposit": allow_cash_deposit,
-        "expense_accounts": [e.expense_account for e in expense_accounts],
-        "source_accounts": [s.account for s in source_accounts],
+        "deposit_accounts": deposit_accounts,
+        "expense_accounts": expense_accounts,
+        "source_accounts": source_accounts,
         "cash_account": cash_account,
         "company": pos.company,
         "cost_center": pos.get("cost_center")
@@ -76,17 +68,15 @@ def get_cash_movement_context(pos_profile, pos_opening_shift):
 
 @frappe.whitelist()
 def create_pos_expense(payload):
-    """Creates a POS Expense cash movement with journal entry.
-
-    Same as POS Awesome's create_pos_expense.
-    """
+    """Creates a POS Expense cash movement with journal entry."""
+    
     if isinstance(payload, str):
         payload = json.loads(payload)
 
     pos_opening_shift = payload.get("pos_opening_shift")
     amount = flt(payload.get("amount"))
     expense_account = payload.get("expense_account")
-    remarks = payload.get("remarks", "")
+    remarks = payload.get("reason", "")
     cash_account = payload.get("cash_account")
     company = payload.get("company")
     cost_center = payload.get("cost_center")
@@ -128,26 +118,30 @@ def create_pos_expense(payload):
                     "account": expense_account,
                     "debit_in_account_currency": amount,
                     "cost_center": cost_center,
+                    "user_remark": remarks
                 },
                 {
                     "account": cash_account,
                     "credit_in_account_currency": amount,
                     "cost_center": cost_center,
+                    "user_remark": remarks
                 },
             ],
         }
     )
     je.insert(ignore_permissions=True)
     je.submit()
-
-    # Create POS Cash Movement record
+    
     movement = _create_cash_movement_record(
+        pos_profile=frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile"),
         pos_opening_shift=pos_opening_shift,
+        source_account=cash_account,
+        target_account=expense_account,
+        expense_account=expense_account,
         movement_type="Expense",
         amount=amount,
         remarks=remarks,
         journal_entry=je.name,
-        account=expense_account,
         company=company,
     )
 
@@ -156,17 +150,15 @@ def create_pos_expense(payload):
 
 @frappe.whitelist()
 def create_cash_deposit(payload):
-    """Creates a Cash Deposit movement with journal entry.
-
-    Same as POS Awesome's create_cash_deposit.
-    """
+    """Creates a Cash Deposit movement with journal entry."""
+    
     if isinstance(payload, str):
         payload = json.loads(payload)
 
     pos_opening_shift = payload.get("pos_opening_shift")
     amount = flt(payload.get("amount"))
     target_account = payload.get("target_account")
-    remarks = payload.get("remarks", "")
+    remarks = payload.get("reason", "")
     cash_account = payload.get("cash_account")
     company = payload.get("company")
     cost_center = payload.get("cost_center")
@@ -189,14 +181,10 @@ def create_cash_deposit(payload):
             cash_mop = pos.get("cash_mode_of_payment") or "Cash"
         except Exception:
             pass
-        from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
-            get_bank_cash_account,
-        )
-
+        
         account_info = get_bank_cash_account(cash_mop, company)
         cash_account = account_info.get("account")
-
-    # Create Journal Entry
+    
     je = frappe.get_doc(
         {
             "doctype": "Journal Entry",
@@ -210,11 +198,13 @@ def create_cash_deposit(payload):
                     "account": target_account,
                     "debit_in_account_currency": amount,
                     "cost_center": cost_center,
+                    "user_remark": remarks
                 },
                 {
                     "account": cash_account,
                     "credit_in_account_currency": amount,
                     "cost_center": cost_center,
+                    "user_remark": remarks
                 },
             ],
         }
@@ -223,12 +213,15 @@ def create_cash_deposit(payload):
     je.submit()
 
     movement = _create_cash_movement_record(
+        pos_profile=frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile"),
         pos_opening_shift=pos_opening_shift,
-        movement_type="Cash Deposit",
+        source_account=cash_account,
+        target_account=target_account,
+        expense_account="",
+        movement_type="Deposit",
         amount=amount,
         remarks=remarks,
         journal_entry=je.name,
-        account=target_account,
         company=company,
     )
 
@@ -251,32 +244,24 @@ def get_shift_cash_movements(
 
     if movement_type:
         filters["movement_type"] = movement_type
-    if status:
-        filters["status"] = status
 
-    try:
-        movements = frappe.get_list(
-            "POS Cash Movement",
-            filters=filters,
-            fields=[
-                "name",
-                "movement_type",
-                "amount",
-                "remarks",
-                "posting_date",
-                "posting_time",
-                "status",
-                "journal_entry",
-                "account",
-            ],
-            limit_start=cint(limit_start),
-            limit_page_length=cint(limit_page_length),
-            order_by="creation desc",
-        )
-        return movements
-    except Exception:
-        # DocType may not exist
-        return []
+    return frappe.get_list(
+        "POS Cash Movement",
+        filters=filters,
+        fields=[
+            "name",
+            "movement_type",
+            "amount",
+            "remarks",
+            "posting_date",
+            "posting_time",
+            "journal_entry",
+            "account",
+        ],
+        limit_start=cint(limit_start),
+        limit_page_length=cint(limit_page_length),
+        order_by="creation desc",
+    )
 
 
 @frappe.whitelist()
@@ -311,40 +296,27 @@ def cancel_cash_movement(name):
     return movement.as_dict()
 
 
-def _create_cash_movement_record(
-    pos_opening_shift,
-    movement_type,
-    amount,
-    remarks,
-    journal_entry,
-    account,
-    company,
-):
+def _create_cash_movement_record(**kwargs):
     """Create a POS Cash Movement record if the doctype exists."""
-    try:
-        movement = frappe.get_doc(
-            {
-                "doctype": "POS Cash Movement",
-                "pos_opening_shift": pos_opening_shift,
-                "movement_type": movement_type,
-                "amount": amount,
-                "remarks": remarks,
-                "journal_entry": journal_entry,
-                "account": account,
-                "company": company,
-                "posting_date": nowdate(),
-                "posting_time": now_datetime().strftime("%H:%M:%S"),
-                "user": frappe.session.user,
-                "status": "Submitted",
-            }
-        )
-        movement.insert(ignore_permissions=True)
-        return movement.as_dict()
-    except Exception:
-        # If POS Cash Movement doctype doesn't exist, return basic info
-        return {
-            "movement_type": movement_type,
-            "amount": amount,
-            "journal_entry": journal_entry,
+    movement = frappe.get_doc(
+        {
+            "doctype": "POS Cash Movement",
+            "docstatus": 1,
+            "pos_profile": kwargs.get("pos_profile"),
+            "pos_opening_shift": kwargs.get("pos_opening_shift"),
+            "user": frappe.session.user,
+            "against_name": kwargs.get("journal_entry"),
+            "movement_type": kwargs.get("movement_type"),
+            "amount": kwargs.get("amount"),
+            "source_account": kwargs.get("source_account"),
+            "target_account": kwargs.get("target_account"),
+            "expense_account": kwargs.get("expense_account"),
+            "remarks": kwargs.get("remarks"),
+            "company": kwargs.get("company"),
+            "posting_date": nowdate(),
+            "posting_time": now_datetime().strftime("%H:%M:%S"),
             "status": "Submitted",
         }
+    )
+    movement.insert(ignore_permissions=True)
+    return movement.as_dict()

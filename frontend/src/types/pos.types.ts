@@ -491,8 +491,8 @@ export interface POSCashMovement {
 }
 
 export interface CashMovementContext {
-  expense_accounts: string[];
-  deposit_accounts: string[];
+  expense_accounts: Record<string, any>[];
+  deposit_accounts: Record<string, any>[];
   cash_account: string;
   mode_of_payment: string;
 }

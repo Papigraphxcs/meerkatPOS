@@ -1,30 +1,28 @@
 <template>
 	<Dialog :open="posStore.showClosingDialog" @update:open="(val: boolean) => { if (!val) close() }">
-		<DialogScrollContent class="max-w-2xl">
-			<!-- Header -->
-			<DialogHeader class="border-b border-border pb-4">
-				<DialogTitle>Close Shift</DialogTitle>
-				<DialogDescription>Review and reconcile your shift</DialogDescription>
+		<DialogScrollContent class="max-w-2xl p-0 gap-0 overflow-hidden">
+			<DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
+				<DialogTitle>{{ __("Close Shift") }}</DialogTitle>
+				<DialogDescription>{{ __("Review and reconcile your shift") }}</DialogDescription>
 			</DialogHeader>
 
-			<div class="space-y-5 py-4">
-				<!-- Loading -->
+			<div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
 				<div v-if="isLoading" class="flex items-center justify-center py-12">
 					<Loader2 class="w-8 h-8 text-primary animate-spin" />
 				</div>
 
 				<template v-else-if="summary">
-					<!-- Shift Summary Cards -->
 					<div class="grid grid-cols-3 gap-3">
 						<Card class="bg-primary/5 border-primary/20">
 							<CardContent class="p-4 text-center">
-								<p class="text-xs font-medium text-primary/70 mb-1">Total Invoices</p>
+								<p class="text-xs font-medium text-primary/70 mb-1">{{ __("Total Invoices") }}</p>
 								<p class="text-2xl font-extrabold text-primary">{{ summary.total_invoices }}</p>
 							</CardContent>
 						</Card>
 						<Card class="bg-emerald-500/5 border-emerald-500/20">
 							<CardContent class="p-4 text-center">
-								<p class="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">Grand Total
+								<p class="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">
+									{{ __("Grand Total") }}
 								</p>
 								<p class="text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">
 									{{ posStore.currencySymbol }}{{ formatPrice(summary.grand_total ?? 0) }}
@@ -33,7 +31,9 @@
 						</Card>
 						<Card class="bg-blue-500/5 border-blue-500/20">
 							<CardContent class="p-4 text-center">
-								<p class="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">Net Total</p>
+								<p class="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">
+									{{ __("Net Total") }}
+								</p>
 								<p class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">
 									{{ posStore.currencySymbol }}{{ formatPrice(summary.net_total ?? 0) }}
 								</p>
@@ -41,11 +41,10 @@
 						</Card>
 					</div>
 
-					<!-- Additional Summary: Returns & Taxes -->
 					<div class="grid grid-cols-2 gap-3">
 						<Card v-if="(summary as any).returns_count > 0" class="bg-amber-500/5 border-amber-500/20">
 							<CardContent class="p-3 text-center">
-								<p class="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">Returns</p>
+								<p class="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">{{ __("Returns") }}</p>
 								<p class="text-lg font-bold text-amber-700 dark:text-amber-300">
 									{{ (summary as any).returns_count }}
 								</p>
@@ -53,7 +52,7 @@
 						</Card>
 						<Card v-if="(summary as any).total_taxes > 0" class="bg-violet-500/5 border-violet-500/20">
 							<CardContent class="p-3 text-center">
-								<p class="text-xs font-medium text-violet-600 dark:text-violet-400 mb-1">Total Taxes</p>
+								<p class="text-xs font-medium text-violet-600 dark:text-violet-400 mb-1">{{ __("Total Taxes") }}</p>
 								<p class="text-lg font-bold text-violet-700 dark:text-violet-300">
 									{{ posStore.currencySymbol }}{{ formatPrice((summary as any).total_taxes ?? 0) }}
 								</p>
@@ -61,9 +60,8 @@
 						</Card>
 					</div>
 
-					<!-- Tax Summary Breakdown -->
 					<div v-if="(summary as any).tax_summary && (summary as any).tax_summary.length > 0">
-						<h3 class="text-sm font-semibold text-foreground mb-2">Tax Breakdown</h3>
+						<h3 class="text-sm font-semibold text-foreground mb-2">{{ __("Tax Breakdown") }}</h3>
 						<div class="space-y-1">
 							<div v-for="tax in (summary as any).tax_summary" :key="tax.account_head || tax.description"
 								class="flex items-center justify-between text-sm bg-muted rounded-lg px-3 py-2">
@@ -74,21 +72,25 @@
 						</div>
 					</div>
 
-					<!-- Payment Reconciliation -->
 					<div>
-						<h3 class="text-sm font-semibold text-foreground mb-3">Payment Reconciliation</h3>
+						<h3 class="text-sm font-semibold text-foreground mb-3">{{ __("Payment Reconciliation") }}</h3>
 						<div class="border border-border rounded-lg overflow-hidden">
 							<table class="w-full text-sm">
 								<thead class="bg-muted">
 									<tr>
-										<th class="text-left px-4 py-2.5 text-muted-foreground font-medium">Method</th>
-										<th class="text-right px-4 py-2.5 text-muted-foreground font-medium">Opening
+										<th class="text-left px-4 py-2.5 text-muted-foreground font-medium">{{ __("Method") }}</th>
+										<th class="text-right px-4 py-2.5 text-muted-foreground font-medium">
+											{{ __("Opening") }}
 										</th>
-										<th class="text-right px-4 py-2.5 text-muted-foreground font-medium">Expected
+										<th class="text-right px-4 py-2.5 text-muted-foreground font-medium">
+											{{ __("Expected") }}
 										</th>
-										<th class="text-right px-4 py-2.5 text-muted-foreground font-medium">Closing
+										<th class="text-right px-4 py-2.5 text-muted-foreground font-medium">
+											{{ __("Closing") }}
 										</th>
-										<th class="text-right px-4 py-2.5 text-muted-foreground font-medium">Diff</th>
+										<th class="text-right px-4 py-2.5 text-muted-foreground font-medium">
+											{{ __("Difference") }}
+										</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -119,15 +121,14 @@
 				</template>
 			</div>
 
-			<!-- Footer -->
-			<DialogFooter class="border-t border-border pt-4">
-				<Button variant="outline" @click="close">Cancel</Button>
+			<DialogFooter class="shrink-0 border-t border-border px-5 py-4">
+				<Button variant="outline" @click="close">{{ __("Cancel") }}</Button>
 				<Button variant="destructive" class="font-bold" :disabled="isClosing" @click="handleCloseShift">
 					<template v-if="isClosing">
 						<Loader2 class="w-4 h-4 animate-spin" />
-						Closing...
+						{{ __("Closing...") }}
 					</template>
-					<span v-else>Close Shift</span>
+					<span v-else>{{ __("Close Shift") }}</span>
 				</Button>
 			</DialogFooter>
 		</DialogScrollContent>
@@ -145,6 +146,7 @@ import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-vue-next";
+import __ from "@/lib/translate";
 
 interface ClosingSummary {
 	total_invoices?: number;
@@ -232,7 +234,7 @@ async function handleCloseShift() {
 
 	try {
 		await posStore.closeShift(closingDetails.value);
-		showSuccess("Shift closed successfully!");
+		showSuccess(__("Shift closed successfully!"));
 	} catch (error: unknown) {
 		showError("Failed to close shift: " + ((error as Error)?.message || error));
 	} finally {

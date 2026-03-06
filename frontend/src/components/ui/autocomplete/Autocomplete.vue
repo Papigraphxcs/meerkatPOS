@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted, nextTick, type HTMLAttributes } from "vue";
 import { Search, X, ChevronDown, Loader2, Check } from "lucide-vue-next";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export interface AutocompleteOption {
@@ -14,31 +13,18 @@ export interface AutocompleteOption {
 }
 
 const props = withDefaults(defineProps<{
-  /** Currently selected value */
   modelValue?: string;
-  /** Static options list */
   options?: AutocompleteOption[];
-  /** Placeholder text when nothing is selected */
   placeholder?: string;
-  /** Whether the input is disabled */
   disabled?: boolean;
-  /** Show a loading spinner (useful for async/remote search) */
   loading?: boolean;
-  /** Allow clearing the current selection */
   clearable?: boolean;
-  /** Minimum characters before filter/search triggers */
   minChars?: number;
-  /** Maximum visible options in the dropdown */
   maxVisible?: number;
-  /** Label displayed above the input */
   label?: string;
-  /** Disable local filtering (for server-side search) */
   remoteSearch?: boolean;
-  /** Show search icon in input */
   showSearchIcon?: boolean;
-  /** Empty state message */
   emptyText?: string;
-  /** CSS class for root element */
   class?: HTMLAttributes["class"];
 }>(), {
   placeholder: "Search or select...",
@@ -275,12 +261,10 @@ onUnmounted(() => {
 
 <template>
   <div ref="rootRef" :class="cn('relative w-full', props.class)">
-    <!-- Label -->
     <label v-if="label" class="block text-sm font-medium text-foreground mb-1.5">
       {{ label }}
     </label>
 
-    <!-- Input Trigger -->
     <div class="relative">
       <Search v-if="showSearchIcon"
         class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -291,7 +275,7 @@ onUnmounted(() => {
           (clearable && modelValue) && 'pr-16',
           !(clearable && modelValue) && 'pr-8',
         )" @input="onInput" @focus="onFocus" @blur="onBlurDelayed" @keydown="onKeydown" />
-      <!-- Loading / Chevron -->
+
       <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
         <button v-if="clearable && modelValue" type="button" tabindex="-1"
           class="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -303,34 +287,50 @@ onUnmounted(() => {
           :class="{ 'rotate-180': isOpen }" />
       </div>
     </div>
-    
+
     <Teleport to="body">
       <Transition enter-active-class="transition ease-out duration-100" enter-from-class="opacity-0 -translate-y-1"
         enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-75"
         leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-1">
         <div v-if="isOpen" ref="listRef"
           class="fixed z-[99999] max-h-[280px] overflow-y-auto rounded-lg border border-border bg-popover text-popover-foreground shadow-lg"
-          :style="dropdownStyle"
-          role="listbox">
-        <!-- Loading state -->
-        <div v-if="loading && filteredOptions.length === 0" class="flex items-center justify-center py-6">
-          <Loader2 class="h-5 w-5 text-primary animate-spin" />
-          <span class="ml-2 text-sm text-muted-foreground">Searching...</span>
-        </div>
+          :style="dropdownStyle" role="listbox">
+          <div v-if="loading && filteredOptions.length === 0" class="flex items-center justify-center py-6">
+            <Loader2 class="h-5 w-5 text-primary animate-spin" />
+            <span class="ml-2 text-sm text-muted-foreground">Searching...</span>
+          </div>
 
-        <!-- Empty state -->
-        <div v-else-if="filteredOptions.length === 0" class="py-6 text-center text-sm text-muted-foreground">
-          {{ emptyText }}
-        </div>
+          <div v-else-if="filteredOptions.length === 0" class="py-6 text-center text-sm text-muted-foreground">
+            {{ emptyText }}
+          </div>
 
-        <!-- Options (ungrouped) -->
-        <template v-else>
-          <!-- Grouped options -->
-          <template v-for="(groupOptions, groupName) in groupedOptions.groups" :key="groupName">
-            <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
-              {{ groupName }}
-            </div>
-            <button v-for="(option, idx) in groupOptions" :key="option.value"
+          <template v-else>
+            <template v-for="(groupOptions, groupName) in groupedOptions.groups" :key="groupName">
+              <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
+                {{ groupName }}
+              </div>
+              <button v-for="(option, idx) in groupOptions" :key="option.value"
+                :data-index="flatVisibleOptions.indexOf(option)" type="button" :disabled="option.disabled"
+                class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors outline-none cursor-pointer"
+                :class="[
+                  flatVisibleOptions.indexOf(option) === highlightedIndex
+                    ? 'bg-accent text-accent-foreground'
+                    : 'hover:bg-accent/50',
+                  option.disabled && 'opacity-50 cursor-not-allowed',
+                  option.value === modelValue && 'font-medium',
+                ]" role="option" :aria-selected="option.value === modelValue" @mousedown.prevent="selectOption(option)"
+                @mouseenter="highlightedIndex = flatVisibleOptions.indexOf(option)">
+                <div class="flex-1 min-w-0 cursor-pointer">
+                  <div class="truncate">{{ option.label }}</div>
+                  <div v-if="option.description" class="text-xs text-muted-foreground truncate">
+                    {{ option.description }}
+                  </div>
+                </div>
+                <Check v-if="option.value === modelValue" class="h-4 w-4 text-primary shrink-0" />
+              </button>
+            </template>
+
+            <button v-for="option in groupedOptions.ungrouped" :key="option.value"
               :data-index="flatVisibleOptions.indexOf(option)" type="button" :disabled="option.disabled"
               class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors outline-none" :class="[
                 flatVisibleOptions.indexOf(option) === highlightedIndex
@@ -340,7 +340,7 @@ onUnmounted(() => {
                 option.value === modelValue && 'font-medium',
               ]" role="option" :aria-selected="option.value === modelValue" @mousedown.prevent="selectOption(option)"
               @mouseenter="highlightedIndex = flatVisibleOptions.indexOf(option)">
-              <div class="flex-1 min-w-0">
+              <div class="flex-1 min-w-0 cursor-pointer">
                 <div class="truncate">{{ option.label }}</div>
                 <div v-if="option.description" class="text-xs text-muted-foreground truncate">
                   {{ option.description }}
@@ -350,34 +350,12 @@ onUnmounted(() => {
             </button>
           </template>
 
-          <!-- Ungrouped options -->
-          <button v-for="option in groupedOptions.ungrouped" :key="option.value"
-            :data-index="flatVisibleOptions.indexOf(option)" type="button" :disabled="option.disabled"
-            class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors outline-none" :class="[
-              flatVisibleOptions.indexOf(option) === highlightedIndex
-                ? 'bg-accent text-accent-foreground'
-                : 'hover:bg-accent/50',
-              option.disabled && 'opacity-50 cursor-not-allowed',
-              option.value === modelValue && 'font-medium',
-            ]" role="option" :aria-selected="option.value === modelValue" @mousedown.prevent="selectOption(option)"
-            @mouseenter="highlightedIndex = flatVisibleOptions.indexOf(option)">
-            <div class="flex-1 min-w-0">
-              <div class="truncate">{{ option.label }}</div>
-              <div v-if="option.description" class="text-xs text-muted-foreground truncate">
-                {{ option.description }}
-              </div>
-            </div>
-            <Check v-if="option.value === modelValue" class="h-4 w-4 text-primary shrink-0" />
-          </button>
-        </template>
-
-        <!-- Max reached hint -->
-        <div v-if="filteredOptions.length > maxVisible"
-          class="px-3 py-2 text-xs text-center text-muted-foreground border-t border-border bg-muted/30">
-          {{ filteredOptions.length - maxVisible }} more results — refine your search
+          <div v-if="filteredOptions.length > maxVisible"
+            class="px-3 py-2 text-xs text-center text-muted-foreground border-t border-border bg-muted/30">
+            {{ filteredOptions.length - maxVisible }} more results — refine your search
+          </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
     </Teleport>
   </div>
 </template>

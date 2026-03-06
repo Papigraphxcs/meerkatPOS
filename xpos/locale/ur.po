@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-03-04 16:12+0428\n"
+"POT-Creation-Date: 2026-03-06 00:56+0428\n"
 "PO-Revision-Date: 2026-03-04 14:57+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language: ur\n"
@@ -37,7 +37,7 @@ msgstr ""
 
 #: frontend/src/components/purchase/StockReceiving.vue:342
 msgid "Accept Qty"
-msgstr ""
+msgstr "مقدار قبول کریں"
 
 #. Label of a Link field in DocType 'POS Allowed Expense Account'
 #. Label of a Link field in DocType 'POS Allowed Source Account'
@@ -45,7 +45,7 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_allowed_source_account/pos_allowed_source_account.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:95
 msgid "Account"
-msgstr ""
+msgstr "اکاؤنٹ"
 
 #. Label of a Link field in DocType 'POS Closing Shift Taxes'
 #: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
@@ -53,28 +53,28 @@ msgid "Account Head"
 msgstr ""
 
 #. Name of a role
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Accounts Manager"
 msgstr ""
 
 #. Name of a role
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 msgid "Accounts User"
 msgstr ""
 
+#: frontend/src/components/orders/ListFilters.vue:73
+msgid "Add Filter"
+msgstr "فلٹر لگائں"
+
 #: frontend/src/components/purchase/SupplierSelector.vue:103
 msgid "Add New Supplier"
-msgstr ""
+msgstr "نیا سپلائر بنائں"
 
 #: frontend/src/components/purchase/SupplierSelector.vue:146
 msgid "Add a new supplier to the system"
-msgstr ""
+msgstr "سسٹم میں نیاسپلائر داخل کریں"
 
 #: frontend/src/components/cart/CartSummary.vue:248
 msgid "Add items to pay"
@@ -110,6 +110,10 @@ msgstr ""
 msgid "All"
 msgstr ""
 
+#: frontend/src/views/PosView.vue:36 frontend/src/views/PosView.vue:104
+msgid "All Groups"
+msgstr ""
+
 #: frontend/src/components/purchase/StockReceiving.vue:523
 msgid "All orders have been received"
 msgstr ""
@@ -122,11 +126,9 @@ msgstr ""
 msgid "Allocation amount for payment {0} exceeds outstanding invoices"
 msgstr ""
 
-#. Label of a Link field in DocType 'Mpesa Payment Register'
 #. Label of a Link field in DocType 'POS Cash Movement'
 #. Label of a Link field in DocType 'POS Closing Shift'
 #. Label of a Link field in DocType 'POS Opening Shift'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
@@ -137,7 +139,8 @@ msgstr ""
 #. Label of a Currency field in DocType 'POS Closing Shift Taxes'
 #. Label of a Currency field in DocType 'POS Payment Entry Reference'
 #. Label of a Currency field in DocType 'Sales Invoice Reference'
-#: frontend/src/views/OrdersView.vue:136
+#: frontend/src/components/shift/CashMovementDialog.vue:60
+#: frontend/src/views/OrdersView.vue:154
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:59
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:97
@@ -155,13 +158,13 @@ msgstr ""
 msgid "Amount exceeds POS Profile cash movement max amount."
 msgstr ""
 
-#: xpos/api/cash_movements.py:97 xpos/api/cash_movements.py:177
+#: xpos/api/cash_movements.py:87 xpos/api/cash_movements.py:169
 msgid "Amount must be greater than zero"
 msgstr ""
 
 #: xpos/x_pos/api/cash_movement/posting.py:18
 #: xpos/x_pos/api/cash_movement/validation.py:46
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:26
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:55
 msgid "Amount must be greater than zero."
 msgstr ""
 
@@ -171,6 +174,7 @@ msgid "Applied"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:177
+#: frontend/src/components/orders/ListFilters.vue:128
 msgid "Apply"
 msgstr ""
 
@@ -247,34 +251,39 @@ msgstr ""
 msgid "Back to Sign In"
 msgstr ""
 
+#: frontend/src/views/BarcodePrintView.vue:132
+msgid "Barcode"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:6
+msgid "Barcode Printer"
+msgstr ""
+
 #. Label of a Section Break field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Barcode Structure"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:38
+msgid "Barcode Type"
+msgstr ""
+
+#: frontend/src/views/PosView.vue:181
+msgid "Barcode lookup failed"
 msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:290
 msgid "Barcode {0} already exists."
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Bill Ref Number"
+#: frontend/src/components/Navbar.vue:38
+msgid "Barcodes"
 msgstr ""
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
 #. 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Brand"
-msgstr ""
-
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Business Short Code"
-msgstr ""
-
-#. Label of a Data field in DocType 'Mpesa C2B Register URL'
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-msgid "Business Shortcode"
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Coupon'
@@ -290,6 +299,8 @@ msgstr ""
 #: frontend/src/components/purchase/StockReceiving.vue:379
 #: frontend/src/components/purchase/StockReceiving.vue:484
 #: frontend/src/components/purchase/SupplierSelector.vue:189
+#: frontend/src/components/shift/CashMovementDialog.vue:98
+#: frontend/src/components/shift/ClosingDialog.vue:125
 msgid "Cancel"
 msgstr ""
 
@@ -302,6 +313,10 @@ msgstr ""
 msgid "Cancelling submitted cash movements is disabled for this POS Profile."
 msgstr ""
 
+#: frontend/src/views/PosView.vue:255
+msgid "Cannot add item to cart"
+msgstr ""
+
 #: frontend/src/components/cart/Cart.vue:22
 msgid "Cart"
 msgstr ""
@@ -310,7 +325,8 @@ msgstr ""
 msgid "Cart is empty"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:52
+#: frontend/src/components/Navbar.vue:53
+#: frontend/src/components/shift/CashMovementDialog.vue:14
 msgid "Cash Deposit"
 msgstr ""
 
@@ -327,16 +343,20 @@ msgstr ""
 msgid "Cash Movement is disabled for this POS Profile."
 msgstr ""
 
+#: frontend/src/components/shift/CashMovementDialog.vue:251
+msgid "Cash deposit recorded"
+msgstr ""
+
 #. Description of a Card Break in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Cash flow tracking"
 msgstr ""
 
-#: xpos/api/cash_movements.py:294
+#: xpos/api/cash_movements.py:279
 msgid "Cash movement is already cancelled"
 msgstr ""
 
-#: xpos/api/cash_movements.py:291
+#: xpos/api/cash_movements.py:276
 msgid "Cash movement {0} not found"
 msgstr ""
 
@@ -351,12 +371,17 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:222
+#: frontend/src/views/OrdersView.vue:240
 msgid "Change Given"
 msgstr ""
 
 #: frontend/src/views/ResetPasswordView.vue:18
 msgid "Check your email for reset instructions"
+msgstr ""
+
+#: frontend/src/components/orders/ListFilters.vue:125
+#: frontend/src/views/BarcodePrintView.vue:14
+msgid "Clear All"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:124
@@ -381,12 +406,14 @@ msgid "Client Request ID"
 msgstr ""
 
 #: frontend/src/components/customer/LoyaltyDialog.vue:130
-#: frontend/src/views/OrdersView.vue:268
+#: frontend/src/views/OrdersView.vue:286
 msgid "Close"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:143
-#: frontend/src/components/Navbar.vue:145
+#: frontend/src/components/Navbar.vue:132
+#: frontend/src/components/Navbar.vue:134
+#: frontend/src/components/shift/ClosingDialog.vue:5
+#: frontend/src/components/shift/ClosingDialog.vue:131
 msgid "Close Shift"
 msgstr ""
 
@@ -395,14 +422,20 @@ msgstr ""
 msgid "Closed"
 msgstr ""
 
+#: frontend/src/components/shift/ClosingDialog.vue:89
+msgid "Closing"
+msgstr ""
+
 #. Label of a Currency field in DocType 'POS Closing Shift Detail'
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 msgid "Closing Amount"
 msgstr ""
 
+#: frontend/src/components/shift/ClosingDialog.vue:129
+msgid "Closing..."
+msgstr ""
+
 #. Label of a Link field in DocType 'Delivery Charges'
-#. Label of a Link field in DocType 'Mpesa C2B Register URL'
-#. Label of a Link field in DocType 'Mpesa Payment Register'
 #. Label of a Link field in DocType 'POS Cash Movement'
 #. Label of a Link field in DocType 'POS Closing Shift'
 #. Label of a Link field in DocType 'POS Coupon'
@@ -414,8 +447,6 @@ msgstr ""
 #: xpos/x_pos/api/payment_processing/data.py:68
 #: xpos/x_pos/api/payment_processing/data.py:168
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -428,7 +459,6 @@ msgstr ""
 #: xpos/api/taxes.py:30 xpos/x_pos/api/payment_processing/processor.py:29
 #: xpos/x_pos/api/payment_processing/reconciliation.py:25
 #: xpos/x_pos/api/pricing_rules.py:181
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.py:40
 msgid "Company is required"
 msgstr ""
 
@@ -436,11 +466,11 @@ msgstr ""
 msgid "Company is required."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:43
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:72
 msgid "Company must match the selected POS Opening Shift company."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:31
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:60
 msgid "Company must match the selected POS Profile company."
 msgstr ""
 
@@ -465,7 +495,7 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Offer Detail'
 #: frontend/src/components/cart/Cart.vue:119
 #: frontend/src/components/cart/CartSummary.vue:115
-#: frontend/src/views/OrdersView.vue:114
+#: frontend/src/views/OrdersView.vue:132
 #: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Coupon"
@@ -503,15 +533,15 @@ msgstr ""
 msgid "Coupon Type"
 msgstr ""
 
-#: xpos/api/offers.py:100
+#: xpos/api/offers.py:105
 msgid "Coupon has expired"
 msgstr ""
 
-#: xpos/api/offers.py:102
+#: xpos/api/offers.py:107
 msgid "Coupon is not valid for this customer"
 msgstr ""
 
-#: xpos/api/offers.py:98
+#: xpos/api/offers.py:103
 msgid "Coupon is not yet valid"
 msgstr ""
 
@@ -531,7 +561,7 @@ msgstr ""
 msgid "Create suppliers"
 msgstr "فراہم کنندہ بنائں"
 
-#: frontend/src/views/OrdersView.vue:106
+#: frontend/src/views/OrdersView.vue:124
 msgid "Created By"
 msgstr "بنانے والا"
 
@@ -556,10 +586,8 @@ msgstr ""
 msgid "Credit note {0} still has an unapplied balance of {1}"
 msgstr ""
 
-#. Label of a Link field in DocType 'Mpesa Payment Register'
 #: xpos/x_pos/api/payment_processing/data.py:69
 #: xpos/x_pos/api/payment_processing/data.py:169
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 msgid "Currency"
 msgstr ""
 
@@ -571,16 +599,14 @@ msgstr ""
 msgid "Currency is required"
 msgstr ""
 
-#. Label of a Link field in DocType 'Mpesa Payment Register'
 #. Label of a Link field in DocType 'POS Coupon'
 #. Label of a Link field in DocType 'POS Coupon Detail'
 #. Label of a Link field in DocType 'POS Payment Entry Reference'
 #. Label of a Link field in DocType 'Referral Code'
 #. Label of a Link field in DocType 'Sales Invoice Reference'
-#: frontend/src/views/OrdersView.vue:93
+#: frontend/src/views/OrdersView.vue:105
 #: xpos/x_pos/api/payment_processing/data.py:67
 #: xpos/x_pos/api/payment_processing/data.py:167
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
 #: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
@@ -589,8 +615,8 @@ msgstr ""
 msgid "Customer"
 msgstr ""
 
-#. Label of a Link field in DocType 'POS Awesome Print Format Rule'
-#: xpos/x_pos/doctype/pos_awesome_print_format_rule/pos_awesome_print_format_rule.json
+#. Label of a Link field in DocType 'POS Print Format Rule'
+#: xpos/x_pos/doctype/pos_print_format_rule/pos_print_format_rule.json
 msgid "Customer Group"
 msgstr ""
 
@@ -605,27 +631,26 @@ msgstr ""
 msgid "Customer already exists"
 msgstr ""
 
-#: xpos/api/customers.py:552
+#: xpos/api/customers.py:569
 msgid "Customer is already enrolled in {0}"
 msgstr ""
 
-#: xpos/api/customers.py:556
+#: xpos/api/customers.py:573
 msgid "Customer is already enrolled in {0}. Please unenroll from the current program first."
 msgstr ""
 
-#: xpos/api/customers.py:602
+#: xpos/api/customers.py:619
 msgid "Customer is not enrolled in any loyalty program"
 msgstr ""
 
-#: xpos/api/customers.py:537 xpos/api/customers.py:594 xpos/api/invoices.py:30
+#: xpos/api/customers.py:554 xpos/api/customers.py:611 xpos/api/invoices.py:30
 #: xpos/x_pos/api/payment_processing/processor.py:27
 #: xpos/x_pos/api/payment_processing/reconciliation.py:23
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.py:42
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:42
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:68
 msgid "Customer is required"
 msgstr ""
 
-#: xpos/api/customers.py:357
+#: xpos/api/customers.py:366
 msgid "Customer is required to create an address"
 msgstr ""
 
@@ -633,15 +658,15 @@ msgstr ""
 msgid "Customer locked for return"
 msgstr ""
 
-#: xpos/api/invoices.py:1215
+#: xpos/api/invoices.py:1245
 msgid "Customer mismatch: Return must be for the same customer ({0}) as the original invoice"
 msgstr ""
 
-#: xpos/api/customers.py:197
+#: xpos/api/customers.py:206
 msgid "Customer name is required"
 msgstr ""
 
-#: xpos/api/customers.py:542 xpos/api/customers.py:597
+#: xpos/api/customers.py:559 xpos/api/customers.py:614
 msgid "Customer {0} not found"
 msgstr ""
 
@@ -656,13 +681,8 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:97
+#: frontend/src/views/OrdersView.vue:109
 msgid "Date & Time"
-msgstr ""
-
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Default Currency"
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Offer'
@@ -675,7 +695,7 @@ msgstr ""
 msgid "Default Rate"
 msgstr ""
 
-#: xpos/x_pos/doctype/delivery_charges/delivery_charges.py:13
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.py:31
 msgid "Default Rate is required"
 msgstr ""
 
@@ -701,9 +721,13 @@ msgid "Delivery Charges POS Profile"
 msgstr ""
 
 #. Option for the 'Movement Type' (Select) field in DocType 'POS Cash Movement'
-#: frontend/src/components/Navbar.vue:54
+#: frontend/src/components/Navbar.vue:55
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Deposit"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:46
+msgid "Deposit To"
 msgstr ""
 
 #. Label of a Small Text field in DocType 'POS Offer'
@@ -717,6 +741,7 @@ msgid "Details"
 msgstr ""
 
 #. Label of a Currency field in DocType 'POS Closing Shift Detail'
+#: frontend/src/components/shift/ClosingDialog.vue:92
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 msgid "Difference"
 msgstr ""
@@ -746,7 +771,7 @@ msgid "Disabled"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:101
-#: frontend/src/views/OrdersView.vue:146 frontend/src/views/OrdersView.vue:178
+#: frontend/src/views/OrdersView.vue:164 frontend/src/views/OrdersView.vue:196
 msgid "Discount"
 msgstr ""
 
@@ -844,6 +869,10 @@ msgstr ""
 msgid "Enter coupon code..."
 msgstr ""
 
+#: frontend/src/components/shift/CashMovementDialog.vue:71
+msgid "Enter reason for this transaction..."
+msgstr ""
+
 #: frontend/src/components/purchase/SupplierSelector.vue:153
 msgid "Enter supplier name"
 msgstr ""
@@ -868,27 +897,32 @@ msgstr ""
 msgid "Enter your password"
 msgstr ""
 
+#: frontend/src/components/shift/ClosingDialog.vue:86
+msgid "Expected"
+msgstr ""
+
 #. Label of a Currency field in DocType 'POS Closing Shift Detail'
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 msgid "Expected Amount"
 msgstr ""
 
 #. Option for the 'Movement Type' (Select) field in DocType 'POS Cash Movement'
-#: frontend/src/components/Navbar.vue:48
+#: frontend/src/components/Navbar.vue:49
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Expense"
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Cash Movement'
+#: frontend/src/components/shift/CashMovementDialog.vue:31
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Expense Account"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:70
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:99
 msgid "Expense Account is required for expense entries."
 msgstr ""
 
-#: xpos/api/cash_movements.py:99
+#: xpos/api/cash_movements.py:89
 msgid "Expense account is required"
 msgstr ""
 
@@ -896,18 +930,12 @@ msgstr ""
 msgid "Expense account is required for POS Expense."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:72
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:101
 msgid "Expense target account must match Expense Account."
 msgstr ""
 
 #: frontend/src/components/customer/LoyaltyDialog.vue:97
 msgid "Expires"
-msgstr ""
-
-#. Option for the 'Register Status' (Select) field in DocType 'Mpesa C2B
-#. Register URL'
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-msgid "Failed"
 msgstr ""
 
 #: xpos/api/payments.py:281
@@ -939,6 +967,10 @@ msgstr ""
 msgid "Failed to reconcile Payment Entry {0}: {1}"
 msgstr ""
 
+#: frontend/src/components/shift/CashMovementDialog.vue:265
+msgid "Failed to record cash movement"
+msgstr ""
+
 #: frontend/src/components/cart/CartSummary.vue:340
 msgid "Failed to save draft: {0}"
 msgstr ""
@@ -952,23 +984,21 @@ msgstr ""
 msgid "Final Customer Offer"
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "First Name"
-msgstr ""
-
 #. Description of the 'Prefix' (Data) field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:77
+#: frontend/src/views/LoginView.vue:76
 msgid "Forgot password?"
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Full Name"
+#: frontend/src/views/BarcodePrintView.vue:8
+msgid "Generate and print barcode labels for items"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:18
+msgid "Generating..."
 msgstr ""
 
 #. Option for the 'Coupon Type' (Select) field in DocType 'POS Coupon'
@@ -998,7 +1028,8 @@ msgstr ""
 
 #. Label of a Currency field in DocType 'POS Closing Shift'
 #. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
-#: frontend/src/views/OrdersView.vue:191
+#: frontend/src/components/shift/ClosingDialog.vue:25
+#: frontend/src/views/OrdersView.vue:209
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:15
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -1026,11 +1057,15 @@ msgstr ""
 msgid "In-Transit Stock"
 msgstr ""
 
+#: frontend/src/views/BarcodePrintView.vue:70
+msgid "Include QR Code"
+msgstr ""
+
 #: frontend/src/components/purchase/SupplierSelector.vue:162
 msgid "Individual"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:55
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:83
 msgid "Invalid Opening Entry"
 msgstr ""
 
@@ -1038,7 +1073,7 @@ msgstr ""
 msgid "Invalid POS Opening Shift data provided."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:49
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:77
 msgid "Invalid Period"
 msgstr ""
 
@@ -1058,7 +1093,7 @@ msgstr ""
 msgid "Invalid movement type."
 msgstr ""
 
-#: xpos/api/offers.py:94
+#: xpos/api/offers.py:95
 msgid "Invalid or already used coupon code"
 msgstr ""
 
@@ -1092,12 +1127,7 @@ msgstr ""
 msgid "Invoice Currency"
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Invoice Number"
-msgstr ""
-
-#: frontend/src/views/OrdersView.vue:85
+#: frontend/src/views/OrdersView.vue:97
 msgid "Invoice details"
 msgstr ""
 
@@ -1113,11 +1143,12 @@ msgstr ""
 msgid "Invoice {0} does not exist"
 msgstr ""
 
-#: xpos/api/invoices.py:1340
+#: xpos/api/invoices.py:1370
 msgid "Invoice {0} not found"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:127
+#: frontend/src/views/BarcodePrintView.vue:129
+#: frontend/src/views/OrdersView.vue:145
 msgid "Item"
 msgstr ""
 
@@ -1181,15 +1212,15 @@ msgstr ""
 msgid "Item {0} of {1}"
 msgstr ""
 
-#: xpos/api/invoices.py:1228
+#: xpos/api/invoices.py:1258
 msgid "Item {0} was not in the original invoice {1}"
 msgstr ""
 
-#: xpos/api/invoices.py:1255
+#: xpos/api/invoices.py:1285
 msgid "Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})"
 msgstr ""
 
-#: xpos/api/invoices.py:1062
+#: xpos/api/invoices.py:1092
 msgid "Item {0}: Cannot return {1}, maximum returnable is {2}"
 msgstr ""
 
@@ -1207,7 +1238,7 @@ msgid "Item {0}: Rate cannot be negative"
 msgstr ""
 
 #. Label of a Small Text field in DocType 'POS Offer Detail'
-#: frontend/src/views/OrdersView.vue:120
+#: frontend/src/views/OrdersView.vue:138
 #: frontend/src/views/PurchaseView.vue:117
 #: frontend/src/views/PurchaseView.vue:152
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
@@ -1230,9 +1261,12 @@ msgstr ""
 msgid "Label"
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Last Name"
+#: frontend/src/views/BarcodePrintView.vue:52
+msgid "Label Size"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:58
+msgid "Large (60×40mm)"
 msgstr ""
 
 #. Label of a Section Break field in DocType 'POS Closing Shift'
@@ -1256,7 +1290,7 @@ msgstr ""
 msgid "Loyalty"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:230
+#: frontend/src/views/OrdersView.vue:248
 msgid "Loyalty Information"
 msgstr ""
 
@@ -1276,7 +1310,7 @@ msgstr ""
 msgid "Loyalty Points"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:186
+#: frontend/src/views/OrdersView.vue:204
 msgid "Loyalty Points Redeemed"
 msgstr ""
 
@@ -1284,17 +1318,12 @@ msgstr ""
 msgid "Loyalty Program"
 msgstr ""
 
-#: xpos/api/customers.py:539
+#: xpos/api/customers.py:556
 msgid "Loyalty Program is required"
 msgstr ""
 
-#: xpos/api/customers.py:545
+#: xpos/api/customers.py:562
 msgid "Loyalty Program {0} not found"
-msgstr ""
-
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "MSISDN"
 msgstr ""
 
 #: frontend/src/components/customer/LoyaltyDialog.vue:10
@@ -1320,13 +1349,13 @@ msgstr ""
 msgid "Maximum Use"
 msgstr ""
 
-#: frontend/src/components/payment/PaymentDialog.vue:70
-msgid "Method"
+#: frontend/src/views/BarcodePrintView.vue:57
+msgid "Medium (50×30mm)"
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Middle Name"
+#: frontend/src/components/payment/PaymentDialog.vue:70
+#: frontend/src/components/shift/ClosingDialog.vue:81
+msgid "Method"
 msgstr ""
 
 #. Label of a Float field in DocType 'POS Offer'
@@ -1359,21 +1388,13 @@ msgstr ""
 msgid "Mode Of Payment"
 msgstr ""
 
-#. Label of a Link field in DocType 'Mpesa C2B Register URL'
-#. Label of a Link field in DocType 'Mpesa Payment Register'
 #. Label of a Link field in DocType 'POS Closing Shift Detail'
 #. Label of a Link field in DocType 'POS Opening Shift Detail'
 #: xpos/x_pos/api/payment_processing/data.py:170
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:58
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 #: xpos/x_pos/doctype/pos_opening_shift_detail/pos_opening_shift_detail.json
 msgid "Mode of Payment"
-msgstr ""
-
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.py:44
-msgid "Mode of Payment is required"
 msgstr ""
 
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:53
@@ -1390,27 +1411,13 @@ msgstr ""
 msgid "Movement Type"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:66
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:95
 msgid "Movement Type must be Expense or Deposit."
 msgstr ""
 
-#. Name of a DocType
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-msgid "Mpesa C2B Register URL"
-msgstr ""
-
-#. Name of a DocType
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Mpesa Payment Register"
-msgstr ""
-
-#. Label of a Link field in DocType 'Mpesa C2B Register URL'
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-msgid "Mpesa Settings"
-msgstr ""
-
 #. Label of a Currency field in DocType 'POS Closing Shift'
-#: frontend/src/views/OrdersView.vue:166
+#: frontend/src/components/shift/ClosingDialog.vue:35
+#: frontend/src/views/OrdersView.vue:184
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:28
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Net Total"
@@ -1448,16 +1455,25 @@ msgstr ""
 msgid "No draft invoices found"
 msgstr ""
 
+#: frontend/src/views/PosView.vue:30
+msgid "No groups found"
+msgstr ""
+
 #: frontend/src/components/purchase/StockReceiving.vue:580
 msgid "No in-transit stock"
 msgstr ""
 
 #: frontend/src/components/items/ItemGrid.vue:15
+#: frontend/src/views/BarcodePrintView.vue:82
 msgid "No items found"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:330
 msgid "No items in cart to save."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:113
+msgid "No items selected"
 msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:757
@@ -1480,6 +1496,10 @@ msgstr ""
 msgid "No loyalty programs available"
 msgstr ""
 
+#: frontend/src/components/ui/link/LinkField.vue:37
+msgid "No matches found"
+msgstr ""
+
 #: frontend/src/components/purchase/StockReceiving.vue:581
 msgid "No material transfers pending receipt"
 msgstr ""
@@ -1488,7 +1508,7 @@ msgstr ""
 msgid "No open shift found. Please open a shift first."
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:19
+#: frontend/src/views/OrdersView.vue:31
 msgid "No orders found"
 msgstr ""
 
@@ -1518,6 +1538,10 @@ msgstr ""
 
 #: frontend/src/components/purchase/StockReceiving.vue:522
 msgid "No pending stock"
+msgstr ""
+
+#: frontend/src/components/orders/ListFilters.vue:119
+msgid "No query filters. Click \"Add Filter\" to add one."
 msgstr ""
 
 #: frontend/src/components/purchase/SupplierSelector.vue:100
@@ -1589,7 +1613,7 @@ msgstr ""
 msgid "Only One Use Per Customer"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:22
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:51
 msgid "Only cancelled POS Cash Movement records can be deleted."
 msgstr ""
 
@@ -1605,7 +1629,7 @@ msgstr ""
 msgid "Only draft Sales Orders can be updated"
 msgstr ""
 
-#: xpos/api/invoices.py:818
+#: xpos/api/invoices.py:848
 msgid "Only draft invoices can be deleted"
 msgstr ""
 
@@ -1628,6 +1652,10 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Open"
+msgstr ""
+
+#: frontend/src/components/shift/ClosingDialog.vue:83
+msgid "Opening"
 msgstr ""
 
 #. Label of a Currency field in DocType 'POS Closing Shift Detail'
@@ -1654,20 +1682,16 @@ msgstr ""
 msgid "Order saved as draft"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:28
+#: frontend/src/components/Navbar.vue:22
 msgid "Orders"
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Org Account Balance"
-msgstr ""
-
-#: xpos/api/invoices.py:1209
+#: xpos/api/invoices.py:1239
 msgid "Original invoice {0} not found"
 msgstr ""
 
 #: frontend/src/components/items/ItemCard.vue:27
+#: frontend/src/components/items/ItemListRow.vue:33
 #: frontend/src/components/items/ItemListRow.vue:36
 msgid "Out of Stock"
 msgstr ""
@@ -1677,7 +1701,7 @@ msgid "Outgoing Stock Entry is required."
 msgstr ""
 
 #. Label of a Card Break in the X POS Workspace
-#: frontend/src/components/Navbar.vue:20 xpos/x_pos/workspace/x_pos/x_pos.json
+#: frontend/src/components/Navbar.vue:14 xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "POS"
 msgstr ""
 
@@ -1689,11 +1713,6 @@ msgstr ""
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_allowed_source_account/pos_allowed_source_account.json
 msgid "POS Allowed Source Account"
-msgstr ""
-
-#. Name of a DocType
-#: xpos/x_pos/doctype/pos_awesome_print_format_rule/pos_awesome_print_format_rule.json
-msgid "POS Awesome Print Format Rule"
 msgstr ""
 
 #. Name of a DocType
@@ -1723,7 +1742,7 @@ msgstr ""
 msgid "POS Closing Shift Taxes"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:46
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:74
 msgid "POS Closing Shift {} against {} between selected period"
 msgstr ""
 
@@ -1739,7 +1758,8 @@ msgstr ""
 msgid "POS Coupon Detail"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:46
+#: frontend/src/components/Navbar.vue:47
+#: frontend/src/components/shift/CashMovementDialog.vue:14
 msgid "POS Expense"
 msgstr ""
 
@@ -1768,8 +1788,8 @@ msgstr ""
 msgid "POS Offer Detail"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:34
-msgid "POS Offer is disable."
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:60
+msgid "POS Offer is disabled."
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Cash Movement'
@@ -1788,7 +1808,7 @@ msgstr ""
 msgid "POS Opening Shift Detail"
 msgstr ""
 
-#: xpos/api/cash_movements.py:95 xpos/api/cash_movements.py:175
+#: xpos/api/cash_movements.py:85 xpos/api/cash_movements.py:167
 #: xpos/x_pos/api/payment_processing/processor.py:35
 msgid "POS Opening Shift is required"
 msgstr ""
@@ -1798,7 +1818,7 @@ msgid "POS Opening Shift is required to compute the overview."
 msgstr ""
 
 #: xpos/x_pos/api/cash_movement/validation.py:20
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:40
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:69
 msgid "POS Opening Shift is required."
 msgstr ""
 
@@ -1828,13 +1848,18 @@ msgstr ""
 msgid "POS Payments"
 msgstr ""
 
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_print_format_rule/pos_print_format_rule.json
+msgid "POS Print Format Rule"
+msgstr ""
+
 #. Label of a Link field in DocType 'Delivery Charges POS Profile'
 #. Label of a Link field in DocType 'POS Cash Movement'
 #. Label of a Link field in DocType 'POS Closing Shift'
 #. Label of a Link field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'POS Opening Shift'
 #. Label of a Link in the X POS Workspace
-#: frontend/src/views/OrdersView.vue:102
+#: frontend/src/views/OrdersView.vue:120
 #: xpos/x_pos/api/payment_processing/data.py:70
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -1870,11 +1895,11 @@ msgstr ""
 msgid "POS Profile must match the active POS Opening Shift profile."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:46
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:75
 msgid "POS Profile must match the selected POS Opening Shift profile."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.py:21
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.py:41
 msgid "POS Profile {} does not belongs to company {}"
 msgstr ""
 
@@ -1886,6 +1911,11 @@ msgstr ""
 #. Label of a Table field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "POS Profiles"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_sales_person_filter/pos_sales_person_filter.json
+msgid "POS Sales Person Filter"
 msgstr ""
 
 #: xpos/x_pos/api/invoice.py:312
@@ -1901,13 +1931,12 @@ msgstr ""
 msgid "POS credit redemption for Sales Invoice {0}"
 msgstr ""
 
-#: xpos/x_pos/api/utils.py:106
-msgid "POS profile data is missing or invalid."
+#: frontend/src/components/shift/CashMovementDialog.vue:241
+msgid "POS expense recorded"
 msgstr ""
 
-#. Name of a DocType
-#: xpos/x_pos/doctype/posa_sales_person_filter/posa_sales_person_filter.json
-msgid "POSA Sales Person Filter"
+#: xpos/x_pos/api/utils.py:106
+msgid "POS profile data is missing or invalid."
 msgstr ""
 
 #: frontend/src/views/LoginView.vue:46
@@ -1922,9 +1951,7 @@ msgstr ""
 msgid "Payment"
 msgstr ""
 
-#. Label of a Link field in DocType 'Mpesa Payment Register'
 #. Label of a Link field in DocType 'POS Payment Entry Reference'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
 msgid "Payment Entry"
 msgstr ""
@@ -1942,6 +1969,7 @@ msgid "Payment Gateway Account not found"
 msgstr ""
 
 #. Label of a Table field in DocType 'POS Closing Shift'
+#: frontend/src/components/shift/ClosingDialog.vue:76
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Payment Reconciliation"
 msgstr ""
@@ -1962,15 +1990,12 @@ msgstr ""
 msgid "Payment {0} is already fully allocated"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:212
+#: frontend/src/views/OrdersView.vue:230
 msgid "Payments"
 msgstr ""
 
-#. Option for the 'Register Status' (Select) field in DocType 'Mpesa C2B
-#. Register URL'
 #: frontend/src/components/purchase/StockReceiving.vue:333
 #: frontend/src/views/PurchaseView.vue:80
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
 msgid "Pending"
 msgstr ""
 
@@ -1996,19 +2021,23 @@ msgstr ""
 msgid "Please enter the phone number first"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:32
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:58
 msgid "Please select Coupon Code Based POS Offer."
 msgstr ""
+
+#: frontend/src/views/PosView.vue:244
+msgid "Please select a customer before adding items to the cart"
+msgstr "برائے مہربانی اشیا کو ٹوکری میں ڈالنے سے پہلے خریدار منتخب کریں"
 
 #: frontend/src/components/cart/CartSummary.vue:325
 msgid "Please select a customer before holding the order."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:30
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:56
 msgid "Please select the correct POS Offer with the same company."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:27
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:53
 msgid "Please select the customer."
 msgstr ""
 
@@ -2025,11 +2054,11 @@ msgstr ""
 msgid "Point of Sale System"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:237
+#: frontend/src/views/OrdersView.vue:255
 msgid "Points Earned"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:241
+#: frontend/src/views/OrdersView.vue:259
 msgid "Points Redeemed"
 msgstr ""
 
@@ -2043,20 +2072,13 @@ msgstr ""
 msgid "Positions are 1-indexed and counted on the full barcode. Example: 3310100010009 => prefix 331, item code 3310100, weight 1.000, check digit 9."
 msgstr ""
 
-#. Label of a Date field in DocType 'Mpesa Payment Register'
 #. Label of a Date field in DocType 'POS Cash Movement'
 #. Label of a Date field in DocType 'POS Closing Shift'
 #. Label of a Date field in DocType 'POS Opening Shift'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Posting Date"
-msgstr ""
-
-#. Label of a Time field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Posting Time"
 msgstr ""
 
 #. Label of a Data field in DocType 'Scale Barcode Settings'
@@ -2119,20 +2141,24 @@ msgstr ""
 msgid "Primary Customer Offer"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:258
+#: frontend/src/views/OrdersView.vue:276
 msgid "Print"
 msgstr ""
 
-#. Label of a Link field in DocType 'POS Awesome Print Format Rule'
-#: xpos/x_pos/doctype/pos_awesome_print_format_rule/pos_awesome_print_format_rule.json
+#. Label of a Link field in DocType 'POS Print Format Rule'
+#: xpos/x_pos/doctype/pos_print_format_rule/pos_print_format_rule.json
 msgid "Print Format"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:75
+#: frontend/src/views/BarcodePrintView.vue:18
+msgid "Print Labels"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:73
 msgid "Print Last Invoice"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:67
+#: frontend/src/components/Navbar.vue:66
 msgid "Process Return"
 msgstr ""
 
@@ -2160,7 +2186,7 @@ msgstr ""
 msgid "Profiles List"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:233
+#: frontend/src/views/OrdersView.vue:251
 msgid "Program"
 msgstr ""
 
@@ -2179,7 +2205,7 @@ msgstr ""
 msgid "Promotional Schemes"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:36
+#: frontend/src/components/Navbar.vue:30
 msgid "Purchase"
 msgstr ""
 
@@ -2247,7 +2273,8 @@ msgstr ""
 msgid "QZ certificate generated successfully."
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:130
+#: frontend/src/views/BarcodePrintView.vue:134
+#: frontend/src/views/OrdersView.vue:148
 msgid "Qty"
 msgstr ""
 
@@ -2269,12 +2296,16 @@ msgstr ""
 #. Label of a Percent field in DocType 'POS Closing Shift Taxes'
 #. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
 #. Label of a Float field in DocType 'POS Offer'
-#: frontend/src/views/OrdersView.vue:133
+#: frontend/src/views/OrdersView.vue:151
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:96
 #: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Rate"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:67
+msgid "Reason / Notes"
 msgstr ""
 
 #: frontend/src/views/PurchaseView.vue:122
@@ -2310,6 +2341,26 @@ msgstr ""
 msgid "Receiving..."
 msgstr ""
 
+#: frontend/src/components/shift/CashMovementDialog.vue:76
+msgid "Recent Movements"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:107
+msgid "Record Deposit"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:107
+msgid "Record Expense"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:17
+msgid "Record a cash deposit"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:17
+msgid "Record a cash withdrawal"
+msgstr ""
+
 #: frontend/src/components/payment/PaymentDialog.vue:168
 msgid "Redeem Points"
 msgstr ""
@@ -2324,16 +2375,16 @@ msgstr ""
 msgid "Referral Code"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:44
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:70
 msgid "Referral Code is required"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:54
-msgid "Referral Code {0} is disabled"
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:78
+msgid "Referral Code {0} does not exist"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:52
-msgid "Referral Code {0} is not exists"
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:80
+msgid "Referral Code {0} is disabled"
 msgstr ""
 
 #. Label of a Data field in DocType 'Referral Code'
@@ -2351,11 +2402,6 @@ msgstr ""
 msgid "Refund Amount"
 msgstr ""
 
-#. Label of a Select field in DocType 'Mpesa C2B Register URL'
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-msgid "Register Status"
-msgstr ""
-
 #: frontend/src/components/purchase/StockReceiving.vue:355
 msgid "Reject Qty"
 msgstr ""
@@ -2369,7 +2415,7 @@ msgid "Remaining outstanding: {0} across {1} invoice(s)."
 msgstr ""
 
 #. Label of a Small Text field in DocType 'POS Cash Movement'
-#: frontend/src/views/OrdersView.vue:248
+#: frontend/src/views/OrdersView.vue:266
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Remarks"
 msgstr ""
@@ -2420,9 +2466,9 @@ msgstr ""
 msgid "Restore draft"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:69
+#: frontend/src/components/Navbar.vue:68
 #: frontend/src/components/payment/PaymentDialog.vue:20
-#: frontend/src/views/OrdersView.vue:265
+#: frontend/src/views/OrdersView.vue:283
 msgid "Return"
 msgstr ""
 
@@ -2442,8 +2488,16 @@ msgstr ""
 msgid "Return Qty"
 msgstr ""
 
+#: frontend/src/components/shift/ClosingDialog.vue:47
+msgid "Returns"
+msgstr ""
+
 #: xpos/x_pos/api/invoice_processing/utils.py:67
 msgid "Returns are only allowed until {0}"
+msgstr ""
+
+#: frontend/src/components/shift/ClosingDialog.vue:6
+msgid "Review and reconcile your shift"
 msgstr ""
 
 #: xpos/x_pos/api/utilities.py:131
@@ -2492,12 +2546,12 @@ msgstr ""
 msgid "Sales Order name is required"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:110
+#: frontend/src/views/OrdersView.vue:128
 msgid "Sales Partner"
 msgstr ""
 
-#. Label of a Link field in DocType 'POSA Sales Person Filter'
-#: xpos/x_pos/doctype/posa_sales_person_filter/posa_sales_person_filter.json
+#. Label of a Link field in DocType 'POS Sales Person Filter'
+#: xpos/x_pos/doctype/pos_sales_person_filter/pos_sales_person_filter.json
 msgid "Sales Person"
 msgstr ""
 
@@ -2506,8 +2560,6 @@ msgid "Sales Summary"
 msgstr ""
 
 #. Name of a role
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Sales User"
@@ -2538,19 +2590,47 @@ msgstr ""
 msgid "Scale Barcode Settings"
 msgstr ""
 
+#: frontend/src/components/items/BarcodeScanner.vue:6
+msgid "Scan barcode..."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:114
+msgid "Search and add items from the left panel"
+msgstr ""
+
 #: frontend/src/components/customer/CustomerSelect.vue:12
 msgid "Search by name, phone, email..."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:86
+msgid "Search for items to add barcode labels"
 msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:8
 msgid "Search for or create a customer"
 msgstr ""
 
+#: frontend/src/views/PosView.vue:27
+msgid "Search item groups..."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:30
+msgid "Search items by name, code, or barcode..."
+msgstr ""
+
+#: frontend/src/components/items/SearchBar.vue:5
+msgid "Search items, scan barcode..."
+msgstr ""
+
 #: frontend/src/components/purchase/SupplierSelector.vue:86
 msgid "Search suppliers..."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:98
+#: frontend/src/components/ui/link/LinkField.vue:250
+msgid "Searching..."
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:95
 msgid "Secure login powered by Frappe Framework"
 msgstr ""
 
@@ -2574,7 +2654,7 @@ msgstr ""
 msgid "Selected"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:54
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:82
 msgid "Selected POS Opening Shift should be open."
 msgstr ""
 
@@ -2605,6 +2685,10 @@ msgstr ""
 msgid "Shift"
 msgstr ""
 
+#: frontend/src/components/shift/ClosingDialog.vue:237
+msgid "Shift closed successfully!"
+msgstr ""
+
 #. Label of a Link field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "Shipping Account"
@@ -2614,11 +2698,15 @@ msgstr ""
 msgid "Shortage return from transit to source"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:90
+#: frontend/src/views/BarcodePrintView.vue:66
+msgid "Show Price"
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:88
 msgid "Sign In"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:135
+#: frontend/src/components/Navbar.vue:125
 msgid "Sign Out"
 msgstr ""
 
@@ -2626,42 +2714,46 @@ msgstr ""
 msgid "Sign in to your account to continue"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:90
+#: frontend/src/views/LoginView.vue:88
 msgid "Signing in..."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:56
+msgid "Small (38×25mm)"
 msgstr ""
 
 #: frontend/src/components/payment/PaymentDialog.vue:181
 msgid "Small remaining amounts"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:115
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:141
 msgid "Sorry, this coupon code cannot be used by this company"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:111
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:137
 msgid "Sorry, this coupon code cannot be used by this customer"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:94
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:98
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:120
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:124
 msgid "Sorry, this coupon code is no longer valid"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:79
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:105
 msgid "Sorry, this coupon code not exists"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:91
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:106
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:117
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:132
 msgid "Sorry, this coupon code's validity has expired"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:87
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:102
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:113
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:128
 msgid "Sorry, this coupon code's validity has not started"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:129
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:155
 msgid "Sorry, {0} have used this coupon before"
 msgstr ""
 
@@ -2678,7 +2770,7 @@ msgstr ""
 msgid "Source account must be a Cash account."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:59
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:88
 msgid "Source account must belong to the selected company."
 msgstr ""
 
@@ -2686,12 +2778,12 @@ msgstr ""
 msgid "Source account override is disabled for this POS Profile."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:53
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:82
 msgid "Source and target accounts are required."
 msgstr ""
 
 #: xpos/x_pos/api/cash_movement/service.py:66
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:75
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:104
 msgid "Source and target accounts cannot be the same for cash deposit."
 msgstr ""
 
@@ -2742,31 +2834,20 @@ msgstr ""
 msgid "Stock UOM is required."
 msgstr ""
 
-#. Label of a Check field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Submit Payment "
-msgstr ""
-
 #: frontend/src/components/cart/CartSummary.vue:6
 #: frontend/src/components/payment/PaymentDialog.vue:48
 msgid "Subtotal"
 msgstr ""
 
-#. Option for the 'Register Status' (Select) field in DocType 'Mpesa C2B
-#. Register URL'
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-msgid "Success"
-msgstr ""
-
-#: xpos/api/customers.py:577
+#: xpos/api/customers.py:594
 msgid "Successfully enrolled {0} in {1}"
 msgstr ""
 
-#: xpos/api/customers.py:613
+#: xpos/api/customers.py:630
 msgid "Successfully unenrolled {0} from {1}"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:163
+#: frontend/src/views/OrdersView.vue:181
 msgid "Summary"
 msgstr ""
 
@@ -2797,9 +2878,6 @@ msgstr ""
 
 #. Name of a role
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-#: xpos/x_pos/doctype/pos_awesome_print_format_rule/pos_awesome_print_format_rule.json
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -2819,16 +2897,20 @@ msgstr ""
 msgid "Target account"
 msgstr ""
 
-#: xpos/api/cash_movements.py:179
+#: xpos/api/cash_movements.py:171
 msgid "Target account is required"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:61
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:90
 msgid "Target account must belong to the selected company."
 msgstr ""
 
 #: xpos/x_pos/api/stock_transfer.py:243
 msgid "Target warehouse is required."
+msgstr ""
+
+#: frontend/src/components/shift/ClosingDialog.vue:64
+msgid "Tax Breakdown"
 msgstr ""
 
 #: frontend/src/components/purchase/SupplierSelector.vue:166
@@ -2842,11 +2924,11 @@ msgstr ""
 msgid "Taxes"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:171
+#: frontend/src/views/OrdersView.vue:189
 msgid "Taxes & Charges"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:200
+#: frontend/src/views/OrdersView.vue:218
 msgid "Taxes Breakdown"
 msgstr ""
 
@@ -2854,21 +2936,16 @@ msgstr ""
 msgid "Tendered"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:199
+#: frontend/src/components/Navbar.vue:186
 msgid "Theme: Dark (click to switch to System)"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:198
+#: frontend/src/components/Navbar.vue:185
 msgid "Theme: Light (click to switch to Dark)"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:200
+#: frontend/src/components/Navbar.vue:187
 msgid "Theme: System ({0}) (click to switch to Light)"
-msgstr ""
-
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Third Party Trans ID"
 msgstr ""
 
 #: xpos/x_pos/api/customer.py:60
@@ -2879,11 +2956,6 @@ msgstr ""
 msgid "This invoice {0} cannot be deleted"
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa C2B Register URL'
-#: xpos/x_pos/doctype/mpesa_c2b_register_url/mpesa_c2b_register_url.json
-msgid "Till Number"
-msgstr ""
-
 #. Label of a Data field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Title"
@@ -2891,6 +2963,10 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:80
 msgid "Total"
+msgstr ""
+
+#: frontend/src/components/shift/ClosingDialog.vue:18
+msgid "Total Invoices"
 msgstr ""
 
 #: frontend/src/components/payment/PaymentDialog.vue:134
@@ -2903,29 +2979,14 @@ msgstr ""
 msgid "Total Quantity"
 msgstr ""
 
+#: frontend/src/components/shift/ClosingDialog.vue:55
+msgid "Total Taxes"
+msgstr ""
+
 #. Description of the 'Item code digits' (Int) field in DocType 'Scale Barcode
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Total item code digits to extract. Example: item code 3310100 => digits 7."
-msgstr ""
-
-#. Label of a Float field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Trans Amount"
-msgstr ""
-
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.py:38
-msgid "Trans Amount is required"
-msgstr ""
-
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Trans ID"
-msgstr ""
-
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Trans Time"
 msgstr ""
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
@@ -2934,16 +2995,11 @@ msgstr ""
 msgid "Transaction"
 msgstr ""
 
-#. Label of a Data field in DocType 'Mpesa Payment Register'
-#: xpos/x_pos/doctype/mpesa_payment_register/mpesa_payment_register.json
-msgid "Transaction Type"
-msgstr ""
-
 #: frontend/src/components/items/ItemGrid.vue:16
 msgid "Try a different search or category"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:20
+#: frontend/src/views/OrdersView.vue:32
 msgid "Try adjusting your filters"
 msgstr ""
 
@@ -3008,16 +3064,16 @@ msgid "Used"
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Cash Movement'
-#: frontend/src/components/Navbar.vue:125
+#: frontend/src/components/Navbar.vue:118
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "User"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:49
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:78
 msgid "User must match the selected POS Opening Shift user."
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.py:25
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.py:45
 msgid "User {} has been disabled. Please select valid user/cashier"
 msgstr ""
 
@@ -3154,10 +3210,22 @@ msgstr ""
 msgid "item"
 msgstr ""
 
+#: frontend/src/views/BarcodePrintView.vue:120
+msgid "item(s)"
+msgstr ""
+
 #: frontend/src/components/cart/DraftInvoiceDialog.vue:66
 #: frontend/src/components/purchase/StockReceiving.vue:537
 #: frontend/src/components/purchase/StockReceiving.vue:597
 msgid "items"
+msgstr ""
+
+#: xpos/x_pos/api/barcode_generator.py:333
+msgid "items must be a list"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:121
+msgid "label(s)"
 msgstr ""
 
 #: xpos/x_pos/api/customers.py:108 xpos/x_pos/api/item_processing/search.py:113
@@ -3199,7 +3267,7 @@ msgstr ""
 msgid "will be returned to"
 msgstr ""
 
-#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:151
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:177
 msgid "{0} Coupon used are {1}. Allowed quantity is exhausted"
 msgstr ""
 
