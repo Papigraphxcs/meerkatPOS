@@ -4,7 +4,7 @@
 			class="shrink-0 bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between">
 			<div class="flex items-center gap-2">
 				<RotateCcw class="w-4 h-4 text-amber-600" />
-				<span class="text-sm font-semibold text-amber-700 dark:text-amber-400">Return Mode</span>
+				<span class="text-sm font-semibold text-amber-700 dark:text-amber-400">{{ __('Return Mode') }}</span>
 				<span v-if="cartStore.returnAgainst" class="text-xs text-amber-600/70 dark:text-amber-400/70 font-mono">
 					{{ cartStore.returnAgainst }}
 				</span>

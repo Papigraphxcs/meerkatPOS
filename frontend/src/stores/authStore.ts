@@ -15,9 +15,6 @@ export const useAuthStore = defineStore("auth", () => {
   const userFullName = computed(() => user.value?.user_fullname || "");
   const isGuest = computed(() => !user.value || user.value.user === "Guest");
 
-  /**
-   * Check if user is currently authenticated
-   */
   async function checkAuth(): Promise<boolean> {
     try {
       isLoading.value = true;
@@ -55,9 +52,6 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  /**
-   * Login with username and password
-   */
   async function login(username: string, password: string): Promise<boolean> {
     try {
       isLoading.value = true;
@@ -82,10 +76,7 @@ export const useAuthStore = defineStore("auth", () => {
       isLoading.value = false;
     }
   }
-
-  /**
-   * Send password reset email
-   */
+  
   async function sendResetPasswordEmail(email: string): Promise<boolean> {
     try {
       isLoading.value = true;
@@ -105,9 +96,6 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  /**
-   * Logout current user
-   */
   async function logout(): Promise<void> {
     try {
       isLoading.value = true;
@@ -124,17 +112,11 @@ export const useAuthStore = defineStore("auth", () => {
       isLoading.value = false;
     }
   }
-
-  /**
-   * Clear error state
-   */
+  
   function clearError(): void {
     error.value = "";
   }
-
-  /**
-   * Reset the store state
-   */
+  
   function $reset(): void {
     isLoading.value = false;
     isAuthenticated.value = false;

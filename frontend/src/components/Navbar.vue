@@ -215,7 +215,7 @@ function printLastInvoice() {
 	if (!name) return;
 	if (typeof frappe !== "undefined" && frappe.urllib) {
 		const url = frappe.urllib.get_full_url(
-			`/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0`
+			`/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`
 		);
 		window.open(url, "_blank");
 	}

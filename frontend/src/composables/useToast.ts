@@ -92,7 +92,6 @@ export function useToast() {
 
 /**
  * Legacy API compatibility functions
- * These maintain the same signature as the old frappe-based functions
  */
 export function showSuccess(message: string): void {
   const { success } = useToast();

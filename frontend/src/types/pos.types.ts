@@ -1,5 +1,3 @@
-// ─── Core POS Types ────────────────────────────────
-
 export interface POSProfile {
   name: string;
   warehouse: string;
@@ -78,8 +76,6 @@ export interface StockSettings {
   [key: string]: unknown;
 }
 
-// ─── Shift Types ───────────────────────────────────
-
 export interface POSOpeningShift {
   name: string;
   status: "Draft" | "Open" | "Closed" | "Cancelled";
@@ -128,8 +124,6 @@ export interface POSClosingShiftTax {
   amount: number;
 }
 
-// ─── Item Types ────────────────────────────────────
-
 export interface POSItem {
   item_code: string;
   item_name: string;
@@ -163,10 +157,8 @@ export interface CartItem extends POSItem {
   pos_is_offer?: boolean;
   pos_is_replace?: boolean;
   conversion_factor?: number;
-  // Item-level tax
   item_tax_template?: string;
   item_tax_map?: Record<string, number>;
-  // loyalty
   pos_offer_applied?: boolean;
 }
 
@@ -175,8 +167,6 @@ export interface ItemGroup {
   parent_item_group?: string;
   is_group?: boolean;
 }
-
-// ─── Item Detail Types (from get_item_detail API) ──
 
 export interface ItemDetail {
   item_code: string;
@@ -222,8 +212,6 @@ export interface StockAvailability {
   actual_qty: number;
   warehouse: string;
 }
-
-// ─── Customer Types ────────────────────────────────
 
 export interface Customer {
   name: string;
@@ -287,8 +275,6 @@ export interface SalesPerson {
   sales_person_name?: string;
 }
 
-// ─── Loyalty Program Types ─────────────────────────
-
 export interface LoyaltyProgramTier {
   tier_name: string;
   min_spent: number;
@@ -317,8 +303,6 @@ export interface CustomerLoyaltyInfo {
   tiers?: LoyaltyProgramTier[];
   expiry_duration?: number;
 }
-
-// ─── Invoice Types ─────────────────────────────────
 
 export interface InvoiceItem {
   item_code: string;
@@ -403,7 +387,6 @@ export interface Invoice {
   return_against?: string;
   loyalty_points?: number;
   loyalty_amount?: number;
-  // Additional fields
   total_taxes_and_charges?: number;
   change_amount?: number;
   discount_amount?: number;
@@ -425,8 +408,6 @@ export interface Invoice {
   [key: string]: unknown;
 }
 
-// ─── Return Types ──────────────────────────────────
-
 export interface ReturnInvoice {
   name: string;
   customer: string;
@@ -436,8 +417,6 @@ export interface ReturnInvoice {
   items: InvoiceItem[];
   [key: string]: unknown;
 }
-
-// ─── Offer & Coupon Types ──────────────────────────
 
 export interface POSOffer {
   name: string;
@@ -475,8 +454,6 @@ export interface GiftCoupon {
   [key: string]: unknown;
 }
 
-// ─── Cash Movement Types ───────────────────────────
-
 export interface POSCashMovement {
   name: string;
   pos_profile: string;
@@ -499,8 +476,6 @@ export interface CashMovementContext {
   mode_of_payment: string;
 }
 
-// ─── Delivery Charges Types ────────────────────────
-
 export interface DeliveryCharge {
   name: string;
   label: string;
@@ -509,16 +484,12 @@ export interface DeliveryCharge {
   [key: string]: unknown;
 }
 
-// ─── Referral Code Types ───────────────────────────
-
 export interface ReferralCode {
   name: string;
   referral_name: string;
   customer: string;
   [key: string]: unknown;
 }
-
-// ─── Payment Types ─────────────────────────────────
 
 export interface OutstandingInvoice {
   name: string;
@@ -534,8 +505,6 @@ export interface PaymentRequest {
   [key: string]: unknown;
 }
 
-// ─── Pricing Rule Types ────────────────────────────
-
 export interface PricingRule {
   name: string;
   title?: string;
@@ -549,8 +518,6 @@ export interface PricingRule {
   items?: { item_code: string }[];
   [key: string]: unknown;
 }
-
-// ─── Sales Order / Quotation Types ─────────────────
 
 export interface SalesOrder {
   name: string;
@@ -583,16 +550,12 @@ export interface Quotation {
   [key: string]: unknown;
 }
 
-// ─── Print Format Types ────────────────────────────
-
 export interface PrintFormat {
   name: string;
   doc_type?: string;
   standard?: string;
   [key: string]: unknown;
 }
-
-// ─── Bundle Types ──────────────────────────────────
 
 export interface BundleComponent {
   item_code: string;
@@ -602,8 +565,6 @@ export interface BundleComponent {
   uom?: string;
   description?: string;
 }
-
-// ─── API Response Types ────────────────────────────
 
 export interface TaxDetail {
   description: string;
@@ -657,8 +618,6 @@ export interface ShiftSummary {
   }[];
 }
 
-// ─── Utility Types ─────────────────────────────────
-
 export type CurrencyCode =
   | "USD" | "EUR" | "GBP" | "JPY" | "INR"
   | "PKR" | "AED" | "SAR" | "CNY" | "KRW"
@@ -683,8 +642,6 @@ export interface CalculatedTax {
   amount: number;
   included_in_print_rate: boolean;
 }
-
-// ─── Purchase Types ────────────────────────────────
 
 export interface Supplier {
   name: string;
@@ -813,8 +770,6 @@ export interface NewItemData {
   pos_profile?: string;
 }
 
-// ─── Stock Receiving Types ──────────────────────────
-
 export interface PendingReceiptItem {
   po_detail: string;
   item_code: string;
@@ -858,8 +813,6 @@ export interface ReceiveStockResult {
   has_rejections: boolean;
   items_received: number;
 }
-
-// ─── In-Transit Stock Transfer Types ──────────────────
 
 export interface InTransitItem {
   ste_detail: string;

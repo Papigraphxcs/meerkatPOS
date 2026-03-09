@@ -1,22 +1,20 @@
 <template>
 	<Dialog :open="open" @update:open="(val: boolean) => { if (!val) emit('close') }">
 		<DialogContent class="max-w-lg max-h-[80vh] flex flex-col p-0 gap-0">
-			<!-- Header -->
 			<DialogHeader
 				class="shrink-0 flex-row items-center justify-between space-y-0 px-5 py-3 border-b border-border">
 				<div class="flex items-center gap-3">
-					<div class="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
-						:class="isOnline()
-							? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
-							: 'bg-gradient-to-br from-red-500 to-red-600'">
+					<div class="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm" :class="isOnline()
+						? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
+						: 'bg-gradient-to-br from-red-500 to-red-600'">
 						<WifiOff v-if="!isOnline()" class="w-4 h-4 text-white" />
 						<Wifi v-else class="w-4 h-4 text-white" />
 					</div>
 					<div>
-						<DialogTitle class="text-base">Offline Invoices</DialogTitle>
+						<DialogTitle class="text-base">{{ __("Offline Invoices") }}</DialogTitle>
 						<DialogDescription class="text-xs">
-							{{ isOnline() ? 'Online' : 'Offline' }} &mdash;
-							{{ offlineStore.pendingCount }} pending
+							{{ isOnline() ? __('Online') : __('Offline') }} &mdash;
+							{{ offlineStore.pendingCount }} {{ __("") }}
 						</DialogDescription>
 					</div>
 				</div>
@@ -25,40 +23,31 @@
 				</Button>
 			</DialogHeader>
 
-			<!-- Body -->
 			<div class="flex-1 overflow-y-auto p-4 space-y-3">
-				<!-- Sync All button -->
 				<div v-if="offlineStore.pendingCount > 0" class="flex gap-2">
-					<Button
-						variant="default"
-						size="sm"
-						class="flex-1 gap-1.5"
-						:disabled="!isOnline() || offlineStore.isSyncing"
-						@click="offlineStore.syncPendingInvoices()">
+					<Button variant="default" size="sm" class="flex-1 gap-1.5"
+						:disabled="!isOnline() || offlineStore.isSyncing" @click="offlineStore.syncPendingInvoices()">
 						<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />
 						<CloudUpload v-else class="w-4 h-4" />
-						Sync All ({{ offlineStore.pendingCount }})
+						{{ __("Sync All") }} ({{ offlineStore.pendingCount }})
 					</Button>
 					<Button variant="destructive" size="sm" class="gap-1.5" @click="confirmClearAll">
 						<Trash2 class="w-4 h-4" />
-						Clear All
+						{{ __("Clear All") }}
 					</Button>
 				</div>
-
-				<!-- Empty state -->
 				<div v-if="offlineStore.pendingCount === 0"
 					class="flex flex-col items-center justify-center py-10 text-muted-foreground">
 					<CheckCircle2 class="w-12 h-12 mb-3 text-emerald-400" />
-					<p class="text-sm font-medium">All caught up!</p>
-					<p class="text-xs mt-1">No pending offline invoices.</p>
+					<p class="text-sm font-medium">{{ __("All caught up") }}!</p>
+					<p class="text-xs mt-1">{{ __("No pending offline invoices.") }}</p>
 				</div>
 
-				<!-- Invoice cards -->
 				<div v-for="inv in offlineStore.pendingInvoices" :key="inv.id"
 					class="rounded-xl border border-border bg-card p-3 space-y-2">
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="text-sm font-medium">{{ inv.customer_name || 'Unknown Customer' }}</p>
+							<p class="text-sm font-medium">{{ inv.customer_name || __('Unknown Customer') }}</p>
 							<p class="text-xs text-muted-foreground">
 								{{ formatTime(inv.created_at) }}
 							</p>
@@ -73,36 +62,32 @@
 						</div>
 					</div>
 
-					<!-- Item count -->
 					<p class="text-xs text-muted-foreground">
 						{{ getItemCount(inv.data) }} item(s) &bull;
 						{{ getPaymentMethods(inv.data) }}
 					</p>
 
-					<!-- Error -->
 					<p v-if="inv.error" class="text-xs text-destructive">
 						Error: {{ inv.error }}
 					</p>
 
-					<!-- Actions -->
 					<div class="flex gap-2 pt-1">
 						<Button variant="outline" size="sm" class="flex-1 gap-1 text-xs"
 							:disabled="!isOnline() || offlineStore.isSyncing"
 							@click="inv.id && offlineStore.retrySingle(inv.id)">
 							<RefreshCw class="w-3.5 h-3.5" />
-							Retry
+							{{ __("Retry") }}
 						</Button>
 						<Button variant="ghost" size="sm" class="text-destructive gap-1 text-xs"
 							@click="inv.id && offlineStore.deletePending(inv.id)">
 							<Trash2 class="w-3.5 h-3.5" />
-							Delete
+							{{ __("Delete") }}
 						</Button>
 					</div>
 				</div>
 
-				<!-- Last sync time -->
 				<p v-if="offlineStore.lastSyncTime" class="text-xs text-center text-muted-foreground pt-2">
-					Last sync: {{ formatTime(offlineStore.lastSyncTime) }}
+					{{ __("Last sync") }}: {{ formatTime(offlineStore.lastSyncTime) }}
 				</p>
 			</div>
 		</DialogContent>
@@ -122,6 +107,7 @@ import {
 	CheckCircle2, RefreshCw,
 } from "lucide-vue-next";
 import { isOnline } from "@/utils";
+import __ from "@/lib/translate";
 
 defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: [] }>();
@@ -175,7 +161,7 @@ function getPaymentMethods(data: unknown): string {
 }
 
 function confirmClearAll() {
-	if (confirm("Delete all pending offline invoices? This cannot be undone.")) {
+	if (confirm(__("Delete all pending offline invoices? This cannot be undone."))) {
 		offlineStore.clearAll();
 	}
 }

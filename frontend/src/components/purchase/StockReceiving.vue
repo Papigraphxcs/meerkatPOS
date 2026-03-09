@@ -222,7 +222,6 @@ async function submitTransitReceive(): Promise<void> {
 
     isSubmittingTransit.value = true;
     try {
-        // First, receive the accepted items
         const receiveItems: ReceiveTransitItem[] = transitFormItems.value
             .filter(i => i.receive_qty > 0)
             .map(i => ({

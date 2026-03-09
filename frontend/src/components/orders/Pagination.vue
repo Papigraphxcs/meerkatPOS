@@ -5,7 +5,6 @@
     </div>
     
     <div class="flex items-center gap-1">
-      <!-- First Page -->
       <Button
         variant="ghost"
         size="icon-sm"
@@ -15,7 +14,6 @@
         <ChevronsLeft class="h-4 w-4" />
       </Button>
       
-      <!-- Previous Page -->
       <Button
         variant="ghost"
         size="icon-sm"
@@ -25,7 +23,6 @@
         <ChevronLeft class="h-4 w-4" />
       </Button>
       
-      <!-- Page Numbers -->
       <template v-for="page in visiblePages" :key="page">
         <Button
           v-if="page === '...'"
@@ -46,7 +43,6 @@
         </Button>
       </template>
       
-      <!-- Next Page -->
       <Button
         variant="ghost"
         size="icon-sm"
@@ -56,7 +52,6 @@
         <ChevronRight class="h-4 w-4" />
       </Button>
       
-      <!-- Last Page -->
       <Button
         variant="ghost"
         size="icon-sm"

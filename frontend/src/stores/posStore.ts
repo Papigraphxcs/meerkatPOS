@@ -24,39 +24,21 @@ export const usePosStore = defineStore("pos", () => {
   const isLoading = ref(true);
   const isReady = ref(false);
   const currentView = ref("pos");
-
-  // Shift data
   const posOpeningShift = ref<POSOpeningShift | null>(null);
   const posProfile = ref<POSProfile | null>(null);
   const company = ref<Company | null>(null);
   const stockSettings = ref<StockSettings>({});
-
-  // Tax data
   const taxes = ref<TaxDetail[]>([]);
   const taxInclusiveMode = ref(false);
-
-  // Rounding
   const disableRoundedTotal = ref(false);
-
-  // Print settings
   const printSettings = ref<PrintSettings | null>(null);
-
-  // Opening dialog
   const showOpeningDialog = ref(false);
   const openingData = ref<OpeningData | null>(null);
-
-  // Closing dialog
   const showClosingDialog = ref(false);
   const closingData = ref<ShiftSummary | null>(null);
-
-  // Print formats
   const printFormats = ref<PrintFormat[]>([]);
-
-  // Last invoice (for print last)
   const lastInvoiceName = ref("");
-
   const isShiftOpen = computed(() => !!posOpeningShift.value);
-
   const profileName = computed(
     () => posProfile.value?.name || ""
   );
@@ -408,11 +390,9 @@ export const usePosStore = defineStore("pos", () => {
       fetchPrintFormats();
 
       if (result.pos_profile?.use_offline_mode) {
-        // Cache POS data for offline use
         try {
           await cachePOSData(result);
-
-          // Initialize offline caches
+          
           import("@/stores/itemStore").then(({ useItemStore }) => {
             const itemStore = useItemStore();
             itemStore.cacheAllItems(profileName).catch(error => {

@@ -32,13 +32,11 @@ export const useOfferStore = defineStore("offers", () => {
         }
       );
       offers.value = result || [];
-      // Cache offers for offline use
       if (offers.value.length > 0) {
         cacheOffers(posProfile, offers.value).catch(() => {});
       }
       return offers.value;
     } catch (error) {
-      // Offline fallback: serve from cache
       if (isNetworkError(error)) {
         try {
           const cached = await getCachedOffers(posProfile);

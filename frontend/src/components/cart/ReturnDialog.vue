@@ -1,30 +1,26 @@
 <template>
     <Dialog :open="open" @update:open="(val: boolean) => { if (!val) close() }">
         <DialogContent class="max-w-2xl max-h-[80vh] flex flex-col p-0 gap-0">
-            <!-- Header -->
             <DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
                 <div class="flex items-center gap-2">
                     <RotateCcw class="w-5 h-5 text-amber-500" />
-                    <DialogTitle class="text-base">Return Invoice</DialogTitle>
+                    <DialogTitle class="text-base">{{ __("Return Invoice") }}</DialogTitle>
                 </div>
-                <DialogDescription class="text-xs">Search and select an invoice to return</DialogDescription>
+                <DialogDescription class="text-xs">{{ __("Search and select an invoice to return") }}</DialogDescription>
             </DialogHeader>
 
             <div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
-                <!-- Step 1: Search Invoices -->
                 <div v-if="!selectedInvoice">
                     <div class="relative mb-3">
                         <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input v-model="searchTerm" type="text" placeholder="Search by invoice number, customer..."
+                        <Input v-model="searchTerm" type="text" :placeholder="__('Search by invoice number, customer...')"
                             class="pl-9" @input="debouncedSearch" />
                     </div>
 
-                    <!-- Loading -->
                     <div v-if="isSearching" class="flex items-center justify-center py-8">
                         <Loader2 class="w-6 h-6 text-primary animate-spin" />
                     </div>
 
-                    <!-- Results -->
                     <div v-else-if="invoices.length > 0" class="space-y-2 max-h-60 overflow-y-auto xpos-scrollbar">
                         <button v-for="inv in invoices" :key="inv.name" @click="selectInvoice(inv.name)"
                             class="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary/40 transition-all text-left">
@@ -38,14 +34,13 @@
                     </div>
 
                     <p v-else-if="searchTerm.length >= 2" class="text-center text-sm text-muted-foreground py-8">
-                        No invoices found
+                        {{ __("No invoices found") }}
                     </p>
                     <p v-else class="text-center text-sm text-muted-foreground py-8">
-                        Enter an invoice number or customer name to search
+                        {{ __("Enter an invoice number or customer name to search") }}
                     </p>
                 </div>
 
-                <!-- Step 2: Select Items to Return -->
                 <div v-else>
                     <div class="flex items-center justify-between mb-3">
                         <div>
@@ -54,7 +49,7 @@
                         </div>
                         <Button variant="outline" size="sm" @click="selectedInvoice = null; returnItems = []">
                             <ArrowLeft class="w-4 h-4" />
-                            Back
+                            {{ __("Back") }}
                         </Button>
                     </div>
 
@@ -62,10 +57,10 @@
                         <table class="w-full text-sm">
                             <thead class="bg-muted">
                                 <tr>
-                                    <th class="text-left px-3 py-2 text-muted-foreground font-medium">Item</th>
-                                    <th class="text-center px-3 py-2 text-muted-foreground font-medium">Sold</th>
-                                    <th class="text-center px-3 py-2 text-muted-foreground font-medium">Return Qty</th>
-                                    <th class="text-right px-3 py-2 text-muted-foreground font-medium">Amount</th>
+                                    <th class="text-left px-3 py-2 text-muted-foreground font-medium">{{ __("Item") }}</th>
+                                    <th class="text-center px-3 py-2 text-muted-foreground font-medium">{{ __("Sold") }}</th>
+                                    <th class="text-center px-3 py-2 text-muted-foreground font-medium">{{ __("Return Qty") }}</th>
+                                    <th class="text-right px-3 py-2 text-muted-foreground font-medium">{{ __("Amount") }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,9 +71,8 @@
                                     </td>
                                     <td class="px-3 py-2 text-center text-muted-foreground">{{ item.max_qty }}</td>
                                     <td class="px-3 py-2 text-center">
-                                        <NumberInput v-model="item.return_qty"
-                                            :min="0" :max="item.max_qty" :precision="0"
-                                            class="w-20 text-center text-sm mx-auto" />
+                                        <NumberInput v-model="item.return_qty" :min="0" :max="item.max_qty"
+                                            :precision="0" class="w-20 text-center text-sm mx-auto" />
                                     </td>
                                     <td class="px-3 py-2 text-right font-medium text-foreground">
                                         {{ formatPrice(item.rate * (item.return_qty || 0)) }}
@@ -89,14 +83,12 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Footer -->
             <DialogFooter class="shrink-0 border-t border-border px-5 py-4">
-                <Button variant="outline" class="flex-1" @click="close">Cancel</Button>
+                <Button variant="outline" class="flex-1" @click="close">{{ __("Cancel") }}</Button>
                 <Button v-if="selectedInvoice" class="flex-1 font-bold bg-amber-500 hover:bg-amber-600 text-white"
                     :disabled="!hasReturnItems" @click="processReturn">
                     <RotateCcw class="w-4 h-4" />
-                    Process Return
+                    {{ __("Process Return") }}
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -212,8 +204,6 @@ async function selectInvoice(invoiceName: string) {
                 pos_profile: posStore.profileName,
             }
         );
-
-        // Update invoice customer from full API response
         if (result?.customer) {
             selectedInvoice.value = {
                 ...selectedInvoice.value!,

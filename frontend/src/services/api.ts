@@ -49,13 +49,11 @@ async function fetchCall<T = unknown>(
       credentials: "same-origin",
     });
   } catch (fetchError) {
-    // fetch() itself threw — network failure, DNS issue, server down, etc.
     throw new Error("__offline__");
   }
 
   const data = await response.json();
 
-  // Handle various error status codes
   if (!response.ok || data.exc) {
     let errorMsg: string;
 
@@ -85,7 +83,6 @@ export function call<T = unknown>(
   args: Record<string, unknown> = {},
   callback?: (r: { message: T }) => void
 ): Promise<T> {
-  // Use native fetch for standalone mode
   return fetchCall<T>(method, args).then((message) => {
     if (callback) callback({ message });
     return message;

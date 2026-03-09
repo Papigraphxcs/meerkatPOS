@@ -1,36 +1,30 @@
 <template>
     <Dialog :open="open" @update:open="(val: boolean) => { if (!val) close() }">
         <DialogContent class="max-w-2xl max-h-[80vh] flex flex-col p-0 gap-0">
-            <!-- Header -->
             <DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
                 <div class="flex items-center gap-2">
                     <Repeat class="w-5 h-5 text-blue-500" />
-                    <DialogTitle class="text-base">Repeat Invoice</DialogTitle>
+                    <DialogTitle class="text-base">{{ __("Repeat Invoice") }}</DialogTitle>
                     <Badge variant="outline" class="text-[10px] font-mono">Ctrl+G</Badge>
                 </div>
-                <DialogDescription class="text-xs">Search and select a past invoice to load into the cart</DialogDescription>
+                <DialogDescription class="text-xs">{{ __("Search and select a past invoice to load into the cart") }}</DialogDescription>
             </DialogHeader>
 
             <div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
-                <!-- Search Input -->
                 <div class="relative">
                     <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                         ref="searchInputRef"
                         v-model="searchTerm"
                         type="text"
-                        placeholder="Search by invoice number or customer name..."
+                        :placeholder="__('Search by invoice number or customer name...')"
                         class="pl-9"
                         @input="debouncedSearch"
                     />
                 </div>
-
-                <!-- Loading -->
                 <div v-if="isSearching" class="flex items-center justify-center py-8">
                     <Loader2 class="w-6 h-6 text-primary animate-spin" />
                 </div>
-
-                <!-- Results -->
                 <div v-else-if="invoices.length > 0" class="space-y-2">
                     <div class="max-h-80 overflow-y-auto space-y-2 xpos-scrollbar">
                         <button
@@ -59,26 +53,23 @@
                         </button>
                     </div>
 
-                    <!-- Load More -->
                     <div v-if="hasMore" class="flex justify-center pt-2">
                         <Button variant="outline" size="sm" @click="loadMore" :disabled="isSearching">
                             <Loader2 v-if="isSearching" class="w-4 h-4 animate-spin" />
-                            Load More
+                            {{ __("Load More") }}
                         </Button>
                     </div>
                 </div>
 
                 <p v-else-if="searchTerm.length >= 2" class="text-center text-sm text-muted-foreground py-8">
-                    No invoices found
+                    {{ __("No invoices found") }}
                 </p>
                 <p v-else class="text-center text-sm text-muted-foreground py-8">
-                    Enter an invoice number or customer name to search
+                    {{ __("Enter an invoice number or customer name to search") }}
                 </p>
             </div>
-
-            <!-- Footer -->
             <DialogFooter class="shrink-0 border-t border-border px-5 py-4">
-                <Button variant="outline" class="flex-1" @click="close">Cancel</Button>
+                <Button variant="outline" class="flex-1" @click="close">{{ __("Cancel") }}</Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
@@ -96,6 +87,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Repeat, FileText, Loader2 } from "lucide-vue-next";
+import __ from "@/lib/translate";
 
 interface SearchInvoice {
     name: string;
@@ -136,7 +128,6 @@ const currentPage = ref(1);
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-// Auto-focus search input when dialog opens
 watch(() => props.open, (val) => {
     if (val) {
         nextTick(() => {
@@ -213,8 +204,7 @@ async function selectInvoice(inv: SearchInvoice) {
             showError("No items found in this invoice");
             return;
         }
-
-        // Load into cart
+        
         cartStore.loadFromInvoice({
             customer: result.customer,
             customer_name: result.customer_name,

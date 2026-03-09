@@ -12,6 +12,7 @@ import {
 } from "@/services/idbService";
 import type { InvoiceData } from "@/types/pos.types";
 import { isOnline } from "@/utils";
+import __ from "@/lib/translate";
 
 export type OfflineInvoice = PendingInvoice;
 
@@ -62,7 +63,7 @@ export const useOfflineStore = defineStore("offline", () => {
     }
 
     function handleOnline() {
-        showSuccess("Internet connection restored");
+        showSuccess(__("Internet connection restored"));
 
         if (offlineModeEnabled.value && pendingCount.value > 0) {
             syncPendingInvoices();
@@ -70,7 +71,7 @@ export const useOfflineStore = defineStore("offline", () => {
     }
 
     function handleOffline() {
-        showError("You are offline. Check your internet connection.");
+        showError(__("You are offline. Check your internet connection."));
     }
 
     async function refreshPendingCount() {
@@ -183,7 +184,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
     async function retrySingle(id: number): Promise<boolean> {
         if (!isOnline()) {
-            showError("Cannot sync while offline");
+            showError(__("Cannot sync while offline"));
             return false;
         }
 
@@ -203,7 +204,7 @@ export const useOfflineStore = defineStore("offline", () => {
             await idbDeletePending(id);
             await refreshPendingCount();
             await loadPendingInvoices();
-            showSuccess("Invoice synced successfully");
+            showSuccess(__("Invoice synced successfully"));
             return true;
         } catch (error: unknown) {
             invoice.status = "failed";
@@ -211,7 +212,7 @@ export const useOfflineStore = defineStore("offline", () => {
             invoice.error = error instanceof Error ? error.message : String(error);
             await updatePendingInvoice(invoice as PendingInvoice);
             await loadPendingInvoices();
-            showError("Sync failed: " + invoice.error);
+            showError(__("Sync failed: ") + invoice.error);
             return false;
         }
     }

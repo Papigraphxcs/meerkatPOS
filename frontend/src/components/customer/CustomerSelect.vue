@@ -56,39 +56,29 @@
                     </button>
                 </div>
 
-                <!-- Empty -->
                 <div v-else class="flex flex-col items-center justify-center h-48 text-muted-foreground">
                     <Users class="w-12 h-12 mb-3 text-muted-foreground/30" />
-                    <p class="text-sm font-medium">No customers found</p>
+                    <p class="text-sm font-medium">{{ __("No customers found") }}</p>
                 </div>
             </div>
-
-            <!-- Footer -->
             <div class="shrink-0 border-t border-border px-5 py-4">
                 <div v-if="!showNewForm">
                     <Button variant="default" class="w-full justify-center gap-2" @click="showNewForm = true">
                         <UserPlus class="w-4 h-4" />
-                        Create New Customer
+                        {{ __("Create New Customer") }}
                     </Button>
                 </div>
-
-                <!-- New Customer Form -->
                 <div v-else class="space-y-3 animate-slide-up max-h-[50vh] overflow-y-auto xpos-scrollbar pr-1">
-                    <h3 class="text-sm font-semibold text-foreground">New Customer</h3>
+                    <h3 class="text-sm font-semibold text-foreground">{{ __("New Customer") }}</h3>
+                    <Input v-model="newCustomer.customer_name" type="text" :placeholder="__('Customer Name *')" />
 
-                    <!-- Customer Name (required) -->
-                    <Input v-model="newCustomer.customer_name" type="text" placeholder="Customer Name *" />
-
-                    <!-- Tax ID + Mobile No (side by side) -->
                     <div class="grid grid-cols-2 gap-2">
-                        <Input v-model="newCustomer.tax_id" type="text" placeholder="Tax ID" />
-                        <Input v-model="newCustomer.mobile_no" type="tel" placeholder="Mobile No" />
+                        <Input v-model="newCustomer.tax_id" type="text" :placeholder="__('Tax ID')" />
+                        <Input v-model="newCustomer.mobile_no" type="tel" :placeholder="__('Mobile No')" />
                     </div>
 
-                    <!-- Address Line 1 -->
-                    <Input v-model="newCustomer.address_line1" type="text" placeholder="Address Line 1" />
+                    <Input v-model="newCustomer.address_line1" type="text" :placeholder="__('Address Line 1')" />
 
-                    <!-- City + Country (side by side) -->
                     <div class="grid grid-cols-2 gap-2">
                         <Input v-model="newCustomer.city" type="text" placeholder="City" />
                         <select v-model="newCustomer.country"
@@ -98,9 +88,8 @@
                         </select>
                     </div>
 
-                    <!-- Email + Gender (side by side) -->
                     <div class="grid grid-cols-2 gap-2">
-                        <Input v-model="newCustomer.email_id" type="email" placeholder="Email Id" />
+                        <Input v-model="newCustomer.email_id" type="email" :placeholder="__('Email Id')" />
                         <select v-model="newCustomer.gender"
                             class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                             <option value="" disabled>Gender</option>
@@ -111,34 +100,32 @@
                         </select>
                     </div>
 
-                    <!-- Referral Code + Birthday (side by side) -->
                     <div class="grid grid-cols-2 gap-2">
-                        <Input v-model="newCustomer.referral_code" type="text" placeholder="Referral Code" />
-                        <Input v-model="newCustomer.birthday" type="text" placeholder="Birthday (DD-MM-YYYY)"
+                        <Input v-model="newCustomer.referral_code" type="text" :placeholder="__('Referral Code')" />
+                        <Input v-model="newCustomer.birthday" type="text" :placeholder="__('Birthday (DD-MM-YYYY)')"
                             @focus="(e: FocusEvent) => { (e.target as HTMLInputElement).type = 'date' }"
                             @blur="(e: FocusEvent) => { if (!(e.target as HTMLInputElement).value) (e.target as HTMLInputElement).type = 'text' }" />
                     </div>
-
-                    <!-- Customer Group + Territory (side by side) -->
+                    
                     <div class="grid grid-cols-2 gap-2">
                         <select v-model="newCustomer.customer_group"
                             class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                            <option value="" disabled>Customer Group *</option>
+                            <option value="" disabled>{{ __("Customer Group *") }}</option>
                             <option v-for="g in customerGroups" :key="g" :value="g">{{ g }}</option>
                         </select>
                         <select v-model="newCustomer.territory"
                             class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                            <option value="" disabled>Territory *</option>
+                            <option value="" disabled>{{ __("Territory *") }}</option>
                             <option v-for="t in territories" :key="t" :value="t">{{ t }}</option>
                         </select>
                     </div>
 
                     <div class="flex gap-2 pt-1">
-                        <Button variant="outline" class="flex-1" size="sm" @click="showNewForm = false">Cancel</Button>
+                        <Button variant="outline" class="flex-1" size="sm" @click="showNewForm = false">{{ __("Cancel") }}</Button>
                         <Button class="flex-1" size="sm" :disabled="!newCustomer.customer_name || isCreating"
                             @click="createAndSelect">
                             <Loader2 v-if="isCreating" class="w-4 h-4 animate-spin mr-1" />
-                            {{ isCreating ? 'Creating...' : 'Create & Select' }}
+                            {{ isCreating ? __('Creating...') : __('Create & Select') }}
                         </Button>
                     </div>
                 </div>

@@ -64,10 +64,6 @@ export const useItemStore = defineStore("items", () => {
     return filtered;
   });
 
-  /**
-   * Pre-load ALL items from server into IndexedDB cache.
-   * Called once after POS profile is ready when use_offline_mode is enabled.
-   */
   async function cacheAllItems(posProfile: string): Promise<void> {
     try {
       const batchSize = 200;
@@ -102,11 +98,7 @@ export const useItemStore = defineStore("items", () => {
     }
   }
 
-  /**
-   * Cache stock availability for all items in the warehouse using single optimized query
-   */
   async function cacheAllStock(posProfile: string, warehouse: string, allItems?: POSItem[]): Promise<void> {
-    // Check if online before attempting to fetch stock
     if (!isOnline()) {
       console.warn("[XPOS Offline] Cannot cache stock - system is offline");
       return;
@@ -116,12 +108,8 @@ export const useItemStore = defineStore("items", () => {
       const itemsToCache = allItems || await idbGetCachedItems();
       if (itemsToCache.length === 0) return;
 
-      console.log(`[XPOS Offline] Fetching stock for ${itemsToCache.length} items in single query`);
-
-      // Extract all item codes
       const itemCodes = itemsToCache.map((item) => item.item_code);
 
-      // Single API call for all items
       const stockResult = await call<StockAvailability[]>(
         "xpos.api.items.get_stock_availability",
         {
@@ -133,10 +121,8 @@ export const useItemStore = defineStore("items", () => {
       const stockEntries: { item_code: string; actual_qty: number }[] = [];
 
       if (stockResult && stockResult.length > 0) {
-        // Create a map for fast lookup
         const stockMap = new Map(stockResult.map(s => [s.item_code, s.actual_qty || 0]));
 
-        // Ensure all items have entries (defaulting to 0 if not found in API response)
         for (const item of itemsToCache) {
           stockEntries.push({
             item_code: item.item_code,
@@ -144,14 +130,12 @@ export const useItemStore = defineStore("items", () => {
           });
         }
       } else {
-        // If API returns no data, set all items to 0 qty
         for (const item of itemsToCache) {
           stockEntries.push({ item_code: item.item_code, actual_qty: 0 });
         }
       }
 
       await cacheStockForWarehouse(warehouse, stockEntries);
-      console.log(`[XPOS Offline] Cached stock for ${stockEntries.length} items in warehouse ${warehouse}`);
     } catch (error) {
       console.warn("[XPOS Offline] Failed to cache stock:", error);
     }
@@ -162,9 +146,7 @@ export const useItemStore = defineStore("items", () => {
     isLoading.value = true;
 
     try {
-      // Check connectivity first - serve from cache if offline
       if (!isOnline()) {
-        console.log("[XPOS Offline] System is offline, serving items from cache");
         const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
 
         if (append) {
@@ -177,7 +159,6 @@ export const useItemStore = defineStore("items", () => {
           hasMore.value = filtered.length > pageLength.value;
         }
 
-        // Enrich items with cached stock data
         const posStoreRef = usePosStore();
         if (posStoreRef.warehouse) {
           const stockData = await getCachedStock(posStoreRef.warehouse);
@@ -191,7 +172,6 @@ export const useItemStore = defineStore("items", () => {
         return;
       }
 
-      // Online - fetch from API only when online
       if (isOnline()) {
         const result = await call<POSItem[]>(
           "xpos.api.items.get_pos_items",
@@ -216,13 +196,11 @@ export const useItemStore = defineStore("items", () => {
 
         hasMore.value = result.length === pageLength.value;
 
-        // Cache items when online (first page, no search = full load trigger)
         if (!searchTerm.value && !append && selectedGroup.value === "All Item Groups") {
           cacheAllItems(posProfile).catch(() => { });
         }
-      } // End isOnline() check
+      }
     } catch (error) {
-      // If fetch fails (e.g. network error), fall back to cache
       try {
         const cached = await idbGetCachedItems();
         if (cached.length > 0) {
@@ -241,16 +219,13 @@ export const useItemStore = defineStore("items", () => {
 
   async function fetchItemGroups(): Promise<void> {
     try {
-      // Check connectivity first - serve from cache if offline
       if (!isOnline()) {
-        console.log("[XPOS Offline] System is offline, serving item groups from cache");
         const cached = await idbGetCachedGroups();
         itemGroups.value = cached.groups;
         parentGroups.value = cached.parentGroups;
         return;
       }
 
-      // Online - fetch from API
       if (isOnline()) {
         const result = await call<ItemGroupsResult>(
           "xpos.api.items.get_item_groups"
@@ -258,11 +233,9 @@ export const useItemStore = defineStore("items", () => {
         itemGroups.value = result.groups || [];
         parentGroups.value = result.parent_groups || [];
 
-        // Always cache groups when online
         idbCacheGroups(itemGroups.value, parentGroups.value).catch(() => { });
       }
     } catch (error) {
-      // Fall back to idb cache
       try {
         const cached = await idbGetCachedGroups();
         if (cached.groups.length > 0) {
@@ -280,7 +253,6 @@ export const useItemStore = defineStore("items", () => {
     _posProfile?: string
   ): Promise<POSItem | null> {
     try {
-      // Offline: search barcode from idb cache
       if (!isOnline()) {
         const cached = await idbGetCachedItems();
         const lower = barcode.toLowerCase();
@@ -300,7 +272,6 @@ export const useItemStore = defineStore("items", () => {
       );
       return result;
     } catch (error) {
-      // Fall back to idb cache on error
       try {
         const cached = await idbGetCachedItems();
         const lower = barcode.toLowerCase();
@@ -315,7 +286,6 @@ export const useItemStore = defineStore("items", () => {
     }
   }
 
-  // ── Item Detail (batch/serial/UOM) ─────────────
   async function fetchItemDetail(
     itemCode: string,
     posProfile: string,
@@ -334,7 +304,6 @@ export const useItemStore = defineStore("items", () => {
       selectedItemDetail.value = result;
       return result;
     } catch (error) {
-      // Offline fallback: build basic detail from cached item
       if (isNetworkError(error)) {
         try {
           const cached = await getCachedItemByCode(itemCode);
@@ -373,7 +342,6 @@ export const useItemStore = defineStore("items", () => {
     selectedItemForDetail.value = null;
   }
 
-  // ── Item Variants ──────────────────────────────
   async function fetchItemVariants(
     itemCode: string,
     posProfile?: string
@@ -426,7 +394,6 @@ export const useItemStore = defineStore("items", () => {
     variantAttributes.value = [];
   }
 
-  // ── Stock Availability ─────────────────────────
   async function fetchStockAvailability(
     itemCodes: string[],
     warehouse: string
@@ -446,7 +413,6 @@ export const useItemStore = defineStore("items", () => {
     }
   }
 
-  // ── Price for UOM ──────────────────────────────
   async function fetchPriceForUOM(
     itemCode: string,
     uom: string,
@@ -468,7 +434,6 @@ export const useItemStore = defineStore("items", () => {
     }
   }
 
-  // ── Product Bundles ────────────────────────────
   async function fetchBundleComponents(
     itemCode: string
   ): Promise<BundleComponent[]> {
@@ -483,8 +448,7 @@ export const useItemStore = defineStore("items", () => {
       return [];
     }
   }
-
-  // ── Utilities ──────────────────────────────────
+  
   function setSearchTerm(term: string): void {
     searchTerm.value = term;
   }

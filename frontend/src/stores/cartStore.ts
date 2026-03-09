@@ -10,7 +10,6 @@ import type {
   InvoicePayment,
   POSOffer,
   POSCoupon,
-  TaxDetail,
   CalculatedTax,
 } from "@/types/pos.types";
 
@@ -21,44 +20,24 @@ export const useCartStore = defineStore("cart", () => {
   const discountAmount = ref(0);
   const showPaymentDialog = ref(false);
   const posStore = usePosStore();
-
-  // Return mode
   const isReturnMode = ref(false);
   const returnAgainst = ref("");
-
-  // Notes & delivery date
   const orderNotes = ref("");
   const deliveryDate = ref("");
-
-  // Authorization code
   const authorizationCode = ref("");
-
-  // Write-off
   const writeOffAmount = ref(0);
-
-  // Sales person
   const salesPerson = ref("");
-
-  // Loyalty
   const redeemLoyaltyPoints = ref(false);
   const loyaltyPoints = ref(0);
   const loyaltyAmount = ref(0);
-
-  // Offers & coupons
   const appliedOffers = ref<POSOffer[]>([]);
   const appliedCoupon = ref<POSCoupon | null>(null);
   const couponCode = ref("");
-
-  // Multi-payment
   const payments = ref<InvoicePayment[]>([]);
-
-  // Draft tracking
   const currentDraftName = ref("");
   const isSavingDraft = ref(false);
   const showDraftDialog = ref(false);
   const isLoadingDrafts = ref(false);
-
-  // Currency
   const currency = ref("");
   const conversionRate = ref(1);
 

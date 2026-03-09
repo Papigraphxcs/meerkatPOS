@@ -25,26 +25,22 @@ import {
 } from "@/services/idbService";
 import type {
     Supplier,
-    PurchaseItem,
     PurchaseOrder,
-    PurchaseReceipt,
-    PurchaseInvoice,
     PurchaseOrderData,
     PurchaseOrderResult,
     SearchItem,
     NewItemData,
     PendingReceiptOrder,
-    PendingReceiptItem,
     ReceiveStockItem,
     ReceiveStockResult,
     InTransitEntry,
-    InTransitItem,
     ReceiveTransitItem,
     ReceiveTransitResult,
     ReturnShortageItem,
     ReturnShortageResult,
 } from "@/types/pos.types";
 import { isOnline } from "@/utils";
+import __ from "@/lib/translate";
 
 export interface PurchaseCartItem {
     item_code: string;
@@ -59,49 +55,32 @@ export interface PurchaseCartItem {
 }
 
 export const usePurchaseStore = defineStore("purchase", () => {
-    // Suppliers
     const suppliers = ref<Supplier[]>([]);
     const isLoadingSuppliers = ref(false);
     const selectedSupplier = ref<Supplier | null>(null);
     const showSupplierDialog = ref(false);
     const showNewSupplierForm = ref(false);
     const supplierSearchTerm = ref("");
-
-    // Items for purchase
     const purchaseItems = ref<SearchItem[]>([]);
     const isLoadingItems = ref(false);
     const itemSearchTerm = ref("");
     const showItemDialog = ref(false);
     const showNewItemForm = ref(false);
-
-    // Cart
     const cartItems = ref<PurchaseCartItem[]>([]);
-
-    // Purchase settings
     const receiveImmediately = ref(true);
     const createInvoice = ref(true);
     const selectedWarehouse = ref("");
-
-    // Dialogs
     const showPurchaseDialog = ref(false);
     const isProcessing = ref(false);
-
-    // Orders list
     const purchaseOrders = ref<PurchaseOrder[]>([]);
     const isLoadingOrders = ref(false);
-
-    // Pending (offline) purchases
     const pendingPurchases = ref<PendingPurchase[]>([]);
     const pendingCount = ref(0);
     const isSyncing = ref(false);
-
-    // Stock Receiving
     const pendingReceipts = ref<PendingReceiptOrder[]>([]);
     const isLoadingReceipts = ref(false);
     const selectedReceipt = ref<PendingReceiptOrder | null>(null);
     const isReceiving = ref(false);
-
-    // In-Transit Stock Transfers
     const inTransitEntries = ref<InTransitEntry[]>([]);
     const isLoadingTransits = ref(false);
     const selectedTransit = ref<InTransitEntry | null>(null);
@@ -136,7 +115,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
         const searchText = term !== undefined ? term : supplierSearchTerm.value;
 
         try {
-            // Offline: use cached suppliers
             if (!isOnline()) {
                 const cached = await searchCachedSuppliers(searchText);
                 suppliers.value = cached.map((s) => ({
@@ -354,7 +332,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 
     async function createPurchaseOrder(): Promise<PurchaseOrderResult | null> {
         if (!canCreateOrder.value) {
-            showError("Please select a supplier and add items");
+            showError(__("Please select a supplier and add items"));
             return null;
         }
 
@@ -383,11 +361,9 @@ export const usePurchaseStore = defineStore("purchase", () => {
                 submit: true,
             };
 
-            // Check if online
             if (!isOnline()) {
-                // Save offline
                 await saveOfflinePurchase(orderData);
-                showSuccess("Purchase order saved offline. Will sync when online.");
+                showSuccess(__("Purchase order saved offline. Will sync when online."));
                 clearAfterOrder();
                 return null;
             }
@@ -397,12 +373,12 @@ export const usePurchaseStore = defineStore("purchase", () => {
                 { data: JSON.stringify(orderData) }
             );
 
-            let message = `Purchase Order ${result.purchase_order} created`;
+            let message = __("Purchase Order {0} created", [result.purchase_order ?? ""]);
             if (result.purchase_receipt) {
-                message += `, Receipt: ${result.purchase_receipt}`;
+                message += __(", Receipt: {0}", [result.purchase_receipt ?? ""]);
             }
             if (result.purchase_invoice) {
-                message += `, Invoice: ${result.purchase_invoice}`;
+                message += __(", Invoice: {0}", [result.purchase_invoice ?? ""]);
             }
             showSuccess(message);
 
@@ -558,7 +534,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 
     async function retryPendingPurchase(id: number): Promise<boolean> {
         if (!isOnline()) {
-            showError("Cannot sync while offline");
+            showError(__("Cannot sync while offline"));
             return false;
         }
 
@@ -578,7 +554,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
             await deletePendingPurchase(id);
             await refreshPendingCount();
             await loadPendingPurchases();
-            showSuccess("Purchase order synced successfully");
+            showSuccess(__("Purchase order synced successfully"));
             return true;
         } catch (error) {
             purchase.status = "failed";
@@ -796,104 +772,72 @@ export const usePurchaseStore = defineStore("purchase", () => {
     }
 
     return {
-        // Supplier state
         suppliers,
         isLoadingSuppliers,
         selectedSupplier,
         showSupplierDialog,
         showNewSupplierForm,
         supplierSearchTerm,
-
-        // Item state
         purchaseItems,
         isLoadingItems,
         itemSearchTerm,
         showItemDialog,
         showNewItemForm,
-
-        // Cart state
         cartItems,
         receiveImmediately,
         createInvoice,
         selectedWarehouse,
-
-        // Dialog state
         showPurchaseDialog,
         isProcessing,
-
-        // Orders state
         purchaseOrders,
         isLoadingOrders,
-
-        // Offline state
         pendingPurchases,
         pendingCount,
         isSyncing,
-
-        // Stock receiving state
         pendingReceipts,
         isLoadingReceipts,
         selectedReceipt,
         isReceiving,
-
-        // In-transit stock transfer state
         inTransitEntries,
         isLoadingTransits,
         selectedTransit,
         isReceivingTransit,
         isReturningShortage,
-
-        // Computed
         cartTotal,
         cartItemCount,
         isEmpty,
         canCreateOrder,
         hasPendingPurchases,
 
-        // Supplier methods
         searchSuppliers,
         createSupplier,
         selectSupplier,
         clearSupplier,
-
-        // Item methods
         searchItems,
         createItem,
         searchByBarcode,
-
-        // Cart methods
         addToCart,
         updateCartItemQty,
         updateCartItemRate,
         updateCartItemUOM,
         removeFromCart,
         clearCart,
-
-        // Order methods
         createPurchaseOrder,
         fetchPurchaseOrders,
-
-        // Stock receiving methods
         fetchPendingReceipts,
         fetchReceiptDetail,
         receiveStock,
         clearSelectedReceipt,
-
-        // In-transit stock transfer methods
         fetchInTransitTransfers,
         fetchTransitDetail,
         receiveTransitStock,
         returnShortageToSource,
         clearSelectedTransit,
-
-        // Offline methods
         refreshPendingCount,
         loadPendingPurchases,
         syncPendingPurchases,
         retryPendingPurchase,
         deletePending,
-
-        // Init
         init,
     };
 });

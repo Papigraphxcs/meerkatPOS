@@ -1,8 +1,4 @@
 <script setup lang="ts">
-/**
- * Purchase Item List Component
- * Search and add items to purchase cart with barcode scanning
- */
 import { ref, onMounted, onUnmounted } from "vue";
 import { usePurchaseStore } from "@/stores/purchaseStore";
 import { usePosStore } from "@/stores/posStore";
@@ -19,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import type { SearchItem } from "@/types/pos.types";
 import { showError } from "@/services/api";
+import __ from "@/lib/translate";
 
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
@@ -26,13 +23,11 @@ const posStore = usePosStore();
 const searchTerm = ref("");
 const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
-// Barcode state
 const barcodeValue = ref("");
 const isBarcodeScan = ref(false);
 const barcodeFlash = ref<"" | "success" | "error">("");
 let barcodeFlashTimer: ReturnType<typeof setTimeout> | null = null;
 
-// New item form
 const newItem = ref({
     item_name: "",
     item_code: "",
@@ -45,7 +40,6 @@ const newItem = ref({
 
 const isCreating = ref(false);
 
-// Standard UOMs
 const standardUOMs = [
     "Nos",
     "Unit",
@@ -62,7 +56,6 @@ const standardUOMs = [
     "Feet",
 ];
 
-// Debounced search
 function onSearchInput(): void {
     if (debounceTimer.value) {
         clearTimeout(debounceTimer.value);
@@ -73,7 +66,6 @@ function onSearchInput(): void {
     }, 300);
 }
 
-// Barcode scanning
 async function onBarcodeScan(): Promise<void> {
     const code = barcodeValue.value.trim();
     if (!code) return;
@@ -86,7 +78,7 @@ async function onBarcodeScan(): Promise<void> {
             barcodeFlash.value = "success";
             barcodeValue.value = "";
         } else {
-            showError(`Item not found for barcode: ${code}`);
+            showError(`${__("Item not found for barcode")}: ${code}`);
             barcodeFlash.value = "error";
         }
     } catch {
@@ -138,7 +130,6 @@ async function handleCreateItem(): Promise<void> {
         });
 
         if (created) {
-            // Add to cart immediately
             purchaseStore.addToCart({
                 ...created,
                 standard_rate: newItem.value.buying_price,
@@ -153,7 +144,6 @@ function formatCurrency(value: number): string {
     return `${posStore.currencySymbol}${value.toFixed(2)}`;
 }
 
-// Load items on mount
 onMounted(() => {
     purchaseStore.searchItems();
 });
@@ -170,7 +160,6 @@ onUnmounted(() => {
 
 <template>
     <div class="h-full flex flex-col overflow-hidden">
-        <!-- Barcode Scanner -->
         <div class="px-4 pt-4 pb-2 border-b border-border bg-card">
             <div class="relative flex items-center">
                 <ScanBarcode class="absolute left-3 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -181,7 +170,7 @@ onUnmounted(() => {
                         'ring-2 ring-green-500/50 border-green-500': barcodeFlash === 'success',
                         'ring-2 ring-red-500/50 border-red-500': barcodeFlash === 'error'
                     }"
-                    placeholder="Scan barcode to add..."
+                    :placeholder="__('Scan barcode to add...')"
                     autocomplete="off"
                     @keydown.enter.prevent="onBarcodeScan"
                     @paste="onBarcodePaste"
@@ -193,31 +182,29 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <!-- Search Header -->
         <div class="p-4 border-b border-border bg-muted">
             <div class="flex gap-2">
                 <div class="relative flex-1">
                     <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input v-model="searchTerm" type="text" placeholder="Search items by name, code or barcode..."
+                    <Input v-model="searchTerm" type="text" :placeholder="__('Search items by name, code or barcode...')"
                         @input="onSearchInput" class="pl-10" />
                 </div>
-                <Button @click="openNewItemForm" variant="outline" size="icon" title="Create new item">
+                <Button @click="openNewItemForm" variant="outline" size="icon" :title="__('Create new item')">
                     <Plus class="w-4 h-4" />
                 </Button>
             </div>
         </div>
 
-        <!-- Items List -->
         <div class="flex-1 min-h-0 overflow-y-auto purchase-scroll">
             <div v-if="purchaseStore.isLoadingItems" class="p-4 text-center text-muted-foreground">
-                Loading items...
+                {{ __("Loading items...") }}
             </div>
             <div v-else-if="purchaseStore.purchaseItems.length === 0" class="p-8 text-center text-muted-foreground">
                 <Package class="w-12 h-12 mx-auto mb-4 text-muted-foreground/40" />
-                <p>No items found</p>
+                <p>{{ __("No items found") }}</p>
                 <Button @click="openNewItemForm" variant="link" class="mt-2">
                     <Plus class="w-4 h-4 mr-1" />
-                    Create new item
+                    {{ __("Create new item") }}
                 </Button>
             </div>
             <div v-else class="divide-y divide-border">
@@ -230,49 +217,48 @@ onUnmounted(() => {
                         <p class="font-medium truncate">{{ item.item_name }}</p>
                         <p class="text-sm text-muted-foreground truncate">{{ item.item_code }}</p>
                         <div class="flex gap-4 mt-1 text-xs text-muted-foreground/70">
-                            <span>UOM: {{ item.stock_uom }}</span>
-                            <span v-if="item.standard_rate">Rate: {{ formatCurrency(item.standard_rate) }}</span>
+                            <span>{{ __("UOM") }}: {{ item.stock_uom }}</span>
+                            <span v-if="item.standard_rate">{{ __("Rate") }}: {{ formatCurrency(item.standard_rate) }}</span>
                         </div>
                     </div>
                     <Button @click="addItem(item)" size="sm" variant="outline">
                         <ShoppingCart class="w-4 h-4 mr-1" />
-                        Add
+                        {{ __("Add") }}
                     </Button>
                 </div>
             </div>
         </div>
 
-        <!-- New Item Dialog -->
         <Dialog v-model:open="purchaseStore.showNewItemForm">
             <DialogContent class="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Create New Item</DialogTitle>
+                    <DialogTitle>{{ __("Create New Item") }}</DialogTitle>
                     <DialogDescription>
-                        Add a new item to the inventory
+                        {{ __("Add a new item to the inventory") }}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form @submit.prevent="handleCreateItem" class="space-y-4 mt-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2">
-                            <label class="text-sm font-medium mb-1 block text-foreground">Item Name *</label>
-                            <Input v-model="newItem.item_name" placeholder="Enter item name" required />
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Item Name") }} *</label>
+                            <Input v-model="newItem.item_name" :placeholder="__('Enter item name')" required />
                         </div>
 
                         <div>
-                            <label class="text-sm font-medium mb-1 block text-foreground">Item Code</label>
-                            <Input v-model="newItem.item_code" placeholder="Auto-generated if empty" />
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Item Code") }}</label>
+                            <Input v-model="newItem.item_code" :placeholder="__('Auto-generated if empty')" />
                         </div>
 
                         <div>
-                            <label class="text-sm font-medium mb-1 block text-foreground">Barcode</label>
-                            <Input v-model="newItem.barcode" placeholder="Barcode (optional)" />
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Barcode") }}</label>
+                            <Input v-model="newItem.barcode" :placeholder="__('Barcode (optional)')" />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-sm font-medium mb-1 block text-foreground">Stock UOM *</label>
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Stock UOM") }} *</label>
                             <select v-model="newItem.stock_uom"
                                 class="w-full px-3 py-2 border border-border rounded-md text-sm bg-background text-foreground"
                                 required>
@@ -283,20 +269,20 @@ onUnmounted(() => {
                         </div>
 
                         <div>
-                            <label class="text-sm font-medium mb-1 block text-foreground">Item Group</label>
-                            <Input v-model="newItem.item_group" placeholder="Item group" />
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Item Group") }}</label>
+                            <Input v-model="newItem.item_group" :placeholder="__('Item group')" />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-sm font-medium mb-1 block text-foreground">Buying Price</label>
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Buying Price") }}</label>
                             <NumberInput v-model="newItem.buying_price" :min="0" :precision="2"
                                 placeholder="0.00" />
                         </div>
 
                         <div>
-                            <label class="text-sm font-medium mb-1 block text-foreground">Selling Price</label>
+                            <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Selling Price") }}</label>
                             <NumberInput v-model="newItem.selling_price" :min="0" :precision="2"
                                 placeholder="0.00" />
                         </div>
@@ -307,7 +293,7 @@ onUnmounted(() => {
                             Cancel
                         </Button>
                         <Button type="submit" :disabled="isCreating || !newItem.item_name.trim()">
-                            {{ isCreating ? "Creating..." : "Create Item" }}
+                            {{ isCreating ? __("Creating...") : __("Create Item") }}
                         </Button>
                     </div>
                 </form>

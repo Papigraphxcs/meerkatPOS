@@ -24,12 +24,10 @@ export async function withOfflineFallback<T>(
     try {
         return await onlineOperation();
     } catch (error) {
-        // Check if it's a network error
         const isNetworkFailure = isNetworkError(error);
         if (isNetworkFailure) {
             return await offlineFallback();
         }
-        // Re-throw non-network errors
         throw error;
     }
 }

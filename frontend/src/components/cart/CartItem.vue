@@ -211,7 +211,6 @@ async function loadItemUOMs() {
 		if (detail?.uoms) {
 			itemUOMs.value = detail.uoms;
 		} else {
-			// Default to stock UOM if no UOMs returned
 			itemUOMs.value = [{ uom: props.item.stock_uom || props.item.uom, conversion_factor: 1 }];
 		}
 	} catch {
@@ -253,11 +252,6 @@ function applyDiscount() {
 	emit("update-discount", props.index, discountType.value, val);
 }
 
-/**
- * Navigate to the same field (qty or rate) on an adjacent cart item.
- * direction: -1 for previous item, +1 for next item
- * field: 'qty' or 'rate'
- */
 function focusAdjacentItem(direction: number, field: 'qty' | 'rate') {
 	const targetIndex = props.index + direction;
 	const container = qtyInput.value?.closest('[data-cart-index]')?.parentElement;
@@ -286,7 +280,6 @@ function formatPrice(price: number | string) {
 	return (Math.round((parseFloat(String(price) || "0") + Number.EPSILON) * 100) / 100).toFixed(2);
 }
 
-/** Block 'e', 'E', '+', '-' keys on numeric inputs to prevent scientific notation */
 function blockInvalidNumericKeys(event: KeyboardEvent) {
 	if (["e", "E", "+", "-"].includes(event.key)) {
 		event.preventDefault();

@@ -66,8 +66,9 @@
 
 					<div>
 						<div class="flex items-center justify-between mb-2">
-							<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{
-								__('Method') }}</h3>
+							<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+								{{ __('Method') }}
+							</h3>
 							<div class="flex items-center gap-1">
 								<kbd
 									class="px-1 py-0.5 text-[9px] font-mono text-muted-foreground bg-muted rounded border border-border">&larr;</kbd>
@@ -93,8 +94,8 @@
 
 					<div>
 						<div class="flex items-center justify-between mb-1.5">
-							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{
-								__('Tendered') }}</label>
+							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+								{{ __('Tendered') }}</label>
 							<Button v-if="!isSplitPayment" variant="link" size="sm" class="text-xs h-auto p-0"
 								@click="enableSplitPayment">
 								{{ __('Split Payment') }}
@@ -176,8 +177,9 @@
 
 					<div v-if="posStore.allowWriteOffChange && !cartStore.isReturnMode" class="space-y-1">
 						<div class="flex items-center justify-between">
-							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{
-								__('Write Off') }}</label>
+							<label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+								{{ __('Write Off') }}
+							</label>
 							<span class="text-xs text-muted-foreground">{{ __('Small remaining amounts') }}</span>
 						</div>
 						<NumberInput v-model="writeOffInput" :min="0" :precision="2" placeholder="0.00" class="text-sm"
@@ -195,8 +197,8 @@
 						</div>
 						<div v-if="remainingAmount > 0"
 							class="flex-1 bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-center">
-							<p class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mb-0.5">{{
-								__('Remaining') }}</p>
+							<p class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mb-0.5">
+								{{ __('Remaining') }}</p>
 							<p class="text-lg font-extrabold text-amber-700 dark:text-amber-300 tabular-nums">
 								{{ posStore.currencySymbol }}{{ formatPrice(remainingAmount) }}
 							</p>
@@ -298,11 +300,9 @@ const isSubmitting = ref(false);
 const writeOffInput = ref(0);
 const printAfterSave = ref(false);
 
-// Split payment state
 const isSplitPayment = ref(false);
 const splitPayments = ref<InvoicePayment[]>([]);
 
-// Customer loyalty
 const customerLoyaltyPoints = ref(0);
 const customerLoyaltyAmount = ref(0);
 
@@ -516,38 +516,32 @@ function handleNumpad(key: string) {
 	}
 }
 
-// ─── Validation ──────────────────────────────────
 function validateForSubmission(): { valid: boolean; message?: string } {
-	// Common validations
 	if (cartStore.isEmpty) {
-		return { valid: false, message: "Cart is empty" };
+		return { valid: false, message: __("Cart is empty") };
 	}
 
 	if (!cartStore.customer?.name) {
-		return { valid: false, message: "Customer is required" };
+		return { valid: false, message: __("Customer is required") };
 	}
 
-	// Return-specific validations
 	if (cartStore.isReturnMode) {
 		if (!cartStore.returnAgainst) {
-			return { valid: false, message: "Return against invoice is required for returns" };
+			return { valid: false, message: __("Return against invoice is required for returns") };
 		}
 
-		// Validate all items have negative quantities
 		const invalidItems = cartStore.items.filter(item => item.qty >= 0);
 		if (invalidItems.length > 0) {
-			return { valid: false, message: "Return items must have negative quantities" };
+			return { valid: false, message: __("Return items must have negative quantities") };
 		}
 
-		// Validate grand total is negative
 		if (cartStore.grandTotal >= 0) {
-			return { valid: false, message: "Return total must be negative (refund amount)" };
+			return { valid: false, message: __("Return total must be negative (refund amount)") };
 		}
 	} else {
-		// Regular sale validations
 		const invalidItems = cartStore.items.filter(item => item.qty <= 0);
 		if (invalidItems.length > 0) {
-			return { valid: false, message: "All items must have positive quantities" };
+			return { valid: false, message: __("All items must have positive quantities") };
 		}
 	}
 
@@ -557,7 +551,6 @@ function validateForSubmission(): { valid: boolean; message?: string } {
 async function submitPayment(withPrint: boolean = true) {
 	if (isSubmitting.value || !canSubmit.value) return;
 
-	// Run validation
 	const validation = validateForSubmission();
 	if (!validation.valid) {
 		showError(validation.message || "Validation failed");
@@ -590,10 +583,10 @@ async function submitPayment(withPrint: boolean = true) {
 				cartStore.grandTotal
 			);
 			if (result.success) {
-				showInfo(`Invoice saved offline (#${result.localId}). It will sync when you're back online.`);
+				showInfo(__(`Invoice saved offline (#${result.localId}). It will sync when you're back online.`));
 				cartStore.clearAll();
 			} else {
-				showError("Failed to save invoice offline");
+				showError(__("Failed to save invoice offline"));
 			}
 			return;
 		}
@@ -605,9 +598,9 @@ async function submitPayment(withPrint: boolean = true) {
 		posStore.lastInvoiceName = result.name;
 
 		if (cartStore.isReturnMode) {
-			showSuccess("Return " + result.name + " created successfully!");
+			showSuccess(__("Return {0} created successfully!", [result.name]));
 		} else {
-			showSuccess("Invoice " + result.name + " created successfully!");
+			showSuccess(__("Invoice {0} created successfully!", [result.name]));
 		}
 
 		// Print invoice if requested
@@ -638,13 +631,13 @@ async function submitPayment(withPrint: boolean = true) {
 				cartStore.grandTotal
 			);
 			if (result.success) {
-				showInfo(`Invoice saved offline (#${result.localId}). It will sync when you're back online.`);
+				showInfo(__(`Invoice saved offline (#${result.localId}). It will sync when you're back online.`));
 				cartStore.clearAll();
 				return;
 			}
-			showError("You are offline. Invoice could not be saved locally.");
+			showError(__("You are offline. Invoice could not be saved locally."));
 		} else {
-			showError("Payment failed: " + extractErrorMessage(error));
+			showError(__("Payment failed: {0}", [extractErrorMessage(error)]));
 		}
 		console.error("Payment error:", error);
 	} finally {
@@ -653,39 +646,31 @@ async function submitPayment(withPrint: boolean = true) {
 	}
 }
 
-/**
- * Print the invoice using the configured print format
- */
 async function printInvoice(invoiceName: string) {
 	try {
 		const printFormat = posStore.printSettings?.print_format || "POS Invoice";
 		const letterHead = posStore.printSettings?.letter_head || "";
 
-		// Determine doctype based on POS profile settings
 		const usePosInvoice = posStore.posProfile?.create_pos_invoice_instead_of_sales_invoice;
 		const doctype = usePosInvoice ? "POS Invoice" : "Sales Invoice";
 
-		// Build print URL
 		const baseUrl = window.location.origin;
-		const printUrl = `${baseUrl}/printview?doctype=${encodeURIComponent(doctype)}&name=${encodeURIComponent(invoiceName)}&format=${encodeURIComponent(printFormat)}&no_letterhead=${letterHead ? '0' : '1'}`;
+		const printUrl = `${baseUrl}/printview?doctype=${encodeURIComponent(doctype)}&name=${encodeURIComponent(invoiceName)}&format=${encodeURIComponent(printFormat)}&no_letterhead=${letterHead ? '0' : '1'}&trigger_print=1`;
 
-		// Open print window
 		const printWindow = window.open(printUrl, "_blank", "width=800,height=600");
 
 		if (printWindow) {
-			// Wait for content to load then trigger print
 			printWindow.onload = () => {
 				setTimeout(() => {
 					printWindow.print();
 				}, 500);
 			};
 		} else {
-			// Fallback: open in same tab if popup blocked
 			window.open(printUrl, "_blank");
 		}
 	} catch (error) {
 		console.error("Print error:", error);
-		showError("Failed to print invoice");
+		showError(__("Failed to print invoice"));
 	}
 }
 
@@ -693,7 +678,6 @@ function close() {
 	cartStore.closePaymentDialog();
 }
 
-// ─── Helpers ─────────────────────────────────────
 function roundCurrency(value: number): number {
 	return Math.round((value + Number.EPSILON) * 100) / 100;
 }

@@ -62,8 +62,6 @@ function sanitizeForIdb<T>(value: T): T {
   return walk(value) as T;
 }
 
-// ─── Database Schema Interfaces ────────────────────
-
 export interface PendingInvoice {
   id?: number;
   data: unknown;
@@ -121,8 +119,6 @@ export interface CachedSupplier {
   email_id?: string;
 }
 
-// ─── Dexie Database Class ──────────────────────────
-
 class XPosDB extends Dexie {
   items!: Table<POSItem, string>;
   itemGroups!: Table<ItemGroupEntry, string>;
@@ -149,10 +145,7 @@ class XPosDB extends Dexie {
   }
 }
 
-// Singleton database instance
 const db = new XPosDB();
-
-// ─── Items Cache ───────────────────────────────────
 
 export async function cacheItems(allItems: POSItem[]): Promise<void> {
   const safeItems = sanitizeForIdb(allItems);
@@ -201,8 +194,6 @@ export async function updateCachedItem(item: POSItem): Promise<void> {
   await db.items.put(sanitizeForIdb(item));
 }
 
-// ─── Item Groups Cache ─────────────────────────────
-
 export async function cacheItemGroups(
   groups: ItemGroup[],
   parentGroups: ItemGroup[]
@@ -231,8 +222,6 @@ export async function getCachedItemGroups(): Promise<{
     parentGroups: pg?.data || [],
   };
 }
-
-// ─── Customers Cache ───────────────────────────────
 
 export async function cacheCustomers(customers: Customer[]): Promise<void> {
   const safeCustomers = sanitizeForIdb(customers);
@@ -271,8 +260,6 @@ export async function addCachedCustomer(customer: Customer): Promise<void> {
   await db.customers.put(sanitizeForIdb(customer));
 }
 
-// ─── Suppliers Cache ───────────────────────────────
-
 export async function cacheSuppliers(suppliers: CachedSupplier[]): Promise<void> {
   const safeSuppliers = sanitizeForIdb(suppliers);
   await db.transaction("rw", db.suppliers, async () => {
@@ -305,8 +292,6 @@ export async function addCachedSupplier(supplier: CachedSupplier): Promise<void>
   await db.suppliers.put(sanitizeForIdb(supplier));
 }
 
-// ─── Stock Cache ───────────────────────────────────
-
 export async function cacheStockForWarehouse(
   warehouse: string,
   stockEntries: { item_code: string; actual_qty: number }[]
@@ -314,10 +299,8 @@ export async function cacheStockForWarehouse(
   const now = new Date().toISOString();
 
   await db.transaction("rw", db.stockCache, async () => {
-    // Delete existing entries for this warehouse
     await db.stockCache.where("warehouse").equals(warehouse).delete();
 
-    // Add new entries
     const entries: StockEntry[] = stockEntries.map((entry) => ({
       cache_key: `${warehouse}::${entry.item_code}`,
       warehouse,
@@ -358,8 +341,6 @@ export async function updateStockForItem(
   });
 }
 
-// ─── Pending Invoices (Sales) ──────────────────────
-
 export async function addPendingInvoice(
   record: Omit<PendingInvoice, "id">
 ): Promise<number> {
@@ -389,8 +370,6 @@ export async function deletePendingInvoice(id: number): Promise<void> {
 export async function countPendingInvoices(): Promise<number> {
   return db.pendingInvoices.count();
 }
-
-// ─── Pending Purchases ─────────────────────────────
 
 export async function addPendingPurchase(
   record: Omit<PendingPurchase, "id">
@@ -422,8 +401,6 @@ export async function countPendingPurchases(): Promise<number> {
   return db.pendingPurchases.count();
 }
 
-// ─── Metadata Storage ──────────────────────────────
-
 export async function setMeta(key: string, value: unknown): Promise<void> {
   await db.meta.put({
     key,
@@ -440,8 +417,6 @@ export async function getMeta(key: string): Promise<unknown> {
 export async function deleteMeta(key: string): Promise<void> {
   await db.meta.delete(key);
 }
-
-// ─── POS Profile Cache ─────────────────────────────
 
 export async function cachePOSProfile(profileData: unknown): Promise<void> {
   await setMeta("pos_profile", profileData);
@@ -468,8 +443,6 @@ export async function getCachedPOSData(): Promise<unknown | null> {
   return await getMeta("pos_complete_data");
 }
 
-// ─── Item Tax Template Cache ───────────────────────
-
 export async function cacheItemTax(
   itemCode: string,
   company: string,
@@ -486,8 +459,6 @@ export async function getCachedItemTax(
   return val ? (val as CachedItemTax) : null;
 }
 
-// ─── Offers Cache ──────────────────────────────────
-
 export async function cacheOffers(
   posProfile: string,
   offers: unknown[]
@@ -501,8 +472,6 @@ export async function getCachedOffers(
   const val = await getMeta(`offers::${posProfile}`);
   return val ? (val as unknown[]) : null;
 }
-
-// ─── Clear All Data ────────────────────────────────
 
 export async function clearAllData(): Promise<void> {
   await db.transaction("rw", [db.items, db.itemGroups, db.customers, db.suppliers, db.stockCache, db.meta], async () => {
@@ -521,7 +490,5 @@ export async function clearPendingData(): Promise<void> {
     await db.pendingPurchases.clear();
   });
 }
-
-// ─── Database Instance Export ──────────────────────
 
 export { db };

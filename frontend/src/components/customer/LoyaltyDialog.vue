@@ -4,7 +4,7 @@
             <DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
                 <div class="flex items-center gap-2">
                     <Gift class="w-5 h-5 text-violet-500" />
-                    <DialogTitle>Loyalty Program</DialogTitle>
+                    <DialogTitle>{{ __("Loyalty Program") }}</DialogTitle>
                 </div>
                 <DialogDescription v-if="customerName" class="text-xs">
                     {{ __("Manage loyalty for") }} {{ customerName }}
@@ -36,7 +36,7 @@
                                 <p class="text-2xl font-bold text-violet-600 dark:text-violet-400">
                                     {{ customerStore.customerLoyaltyInfo.loyalty_points || 0 }}
                                 </p>
-                                <p class="text-[11px] text-muted-foreground">Points Balance</p>
+                                <p class="text-[11px] text-muted-foreground">{{ __("Points Balance") }}</p>
                             </div>
                             <div class="bg-background rounded-lg p-2.5 text-center">
                                 <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
@@ -48,7 +48,7 @@
                         </div>
 
                         <div v-if="customerStore.customerLoyaltyInfo.current_tier" class="text-sm">
-                            <span class="text-muted-foreground">Current Tier:</span>
+                            <span class="text-muted-foreground">{{ __("Current Tier") }}:</span>
                             <Badge variant="outline" class="ml-2">
                                 {{ customerStore.customerLoyaltyInfo.current_tier }}
                             </Badge>
@@ -58,7 +58,7 @@
                             class="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
                             @click="handleUnenroll" :disabled="isProcessing">
                             <UserMinus class="w-4 h-4" />
-                            {{ isProcessing ? 'Processing...' : __('Unenroll from Program') }}
+                            {{ isProcessing ? __('Processing...') : __('Unenroll from Program') }}
                         </Button>
                     </div>
 
@@ -106,7 +106,7 @@
                                         </Badge>
                                         <div class="flex items-center gap-3 text-xs text-muted-foreground">
                                             <span v-for="tier in program.tiers.slice(0, 3)">
-                                                Collection factor: {{ tier.collection_factor }}
+                                                {{ __("Collection factor") }}: {{ tier.collection_factor }}
                                             </span>
                                         </div>
                                         <Badge v-if="program.tiers.length > 3" variant="outline" class="text-[10px]">
@@ -191,10 +191,10 @@ async function handleEnroll() {
             selectedProgram.value
         );
         if (result.success) {
-            showSuccess(result.message || "Customer enrolled successfully!");
+            showSuccess(result.message || __("Customer enrolled successfully"));
             selectedProgram.value = "";
         } else {
-            showError(result.message || "Failed to enroll customer");
+            showError(result.message || __("Failed to enroll customer"));
         }
     } finally {
         isProcessing.value = false;
@@ -208,9 +208,9 @@ async function handleUnenroll() {
     try {
         const result = await customerStore.unenrollCustomerLoyalty(cartStore.customer.name);
         if (result.success) {
-            showSuccess(result.message || "Customer unenrolled successfully!");
+            showSuccess(result.message || __("Customer unenrolled successfully"));
         } else {
-            showError(result.message || "Failed to unenroll customer");
+            showError(result.message || __("Failed to unenroll customer"));
         }
     } finally {
         isProcessing.value = false;

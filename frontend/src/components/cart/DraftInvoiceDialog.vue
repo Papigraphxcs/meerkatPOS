@@ -1,7 +1,6 @@
 <template>
     <Dialog :open="cartStore.showDraftDialog" @update:open="(val: boolean) => { if (!val) close() }">
         <DialogContent class="max-w-3xl max-h-[75vh] flex flex-col p-0 gap-0">
-            <!-- Header -->
             <DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
@@ -19,19 +18,16 @@
             </DialogHeader>
 
             <div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
-                <!-- Loading state -->
                 <div v-if="isLoading" class="flex items-center justify-center py-8">
                     <Loader2 class="w-6 h-6 text-primary animate-spin" />
                 </div>
 
-                <!-- No drafts -->
                 <div v-else-if="!drafts.length" class="flex flex-col items-center justify-center py-12 text-muted-foreground">
                     <FileText class="w-12 h-12 mb-3 text-muted-foreground/40" />
                     <p class="text-sm font-medium">{{ __("No draft invoices found") }}</p>
                     <p class="text-xs mt-1">{{ __("Save your current order to create a draft") }}</p>
                 </div>
 
-                <!-- Draft list -->
                 <div v-else class="space-y-2">
                     <div 
                         v-for="draft in drafts" 
@@ -95,7 +91,6 @@
                 </div>
             </div>
 
-            <!-- Footer -->
             <DialogFooter class="shrink-0 border-t border-border px-5 py-4">
                 <Button variant="outline" class="flex-1" @click="close">
                     {{ __("Cancel") }}
@@ -137,7 +132,6 @@ const isLoading = ref(false);
 
 const isDialogOpen = computed(() => cartStore.showDraftDialog);
 
-// Fetch drafts when dialog opens
 watch(isDialogOpen, (open) => {
     if (open) {
         fetchDrafts();
