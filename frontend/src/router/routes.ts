@@ -1,6 +1,10 @@
 const PosView = () => import("@/views/PosView.vue");
 const OrdersView = () => import("@/views/OrdersView.vue");
 const PurchaseView = () => import("@/views/PurchaseView.vue");
+const PurchaseOrderView = () => import("@/views/PurchaseOrderView.vue");
+const PurchaseOrderListView = () => import("@/views/PurchaseOrderListView.vue");
+const PurchaseInvoiceView = () => import("@/views/PurchaseInvoiceView.vue");
+const StockReceivingView = () => import("@/views/StockReceivingView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
 const ResetPasswordView = () => import("@/views/ResetPasswordView.vue");
 const BarcodePrintView = () => import("@/views/BarcodePrintView.vue");
@@ -46,6 +50,30 @@ const routes: RouteRecordRaw[] = [
     name: "barcode-print",
     component: BarcodePrintView,
     meta: { title: "Barcode Printer", requiresAuth: true },
+  },
+  {
+    path: "/purchase-order",
+    name: "purchase-order",
+    component: PurchaseOrderView,
+    meta: { title: "Purchase Order", requiresAuth: true },
+  },
+  {
+    path: "/purchase-orders",
+    name: "purchase-orders",
+    component: PurchaseOrderListView,
+    meta: { title: "Purchase Orders", requiresAuth: true },
+  },
+  {
+    path: "/purchase-invoice",
+    name: "purchase-invoice",
+    component: PurchaseInvoiceView,
+    meta: { title: "Purchase Invoice", requiresAuth: true },
+  },
+  {
+    path: "/stock-receiving",
+    name: "stock-receiving",
+    component: StockReceivingView,
+    meta: { title: "Stock Receiving", requiresAuth: true },
   },
 ];
 

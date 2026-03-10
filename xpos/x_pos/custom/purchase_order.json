@@ -1,0 +1,176 @@
+{
+ "custom_fields": [
+  {
+   "fieldname": "custom_xpos_section",
+   "fieldtype": "Section Break",
+   "label": "XPOS Purchase Order",
+   "insert_after": "naming_series",
+   "collapsible": 0,
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_xpos_section"
+  },
+  {
+   "fieldname": "custom_alias_name",
+   "fieldtype": "Data",
+   "label": "Alias Name",
+   "insert_after": "custom_xpos_section",
+   "in_list_view": 0,
+   "in_standard_filter": 0,
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_alias_name"
+  },
+  {
+   "fieldname": "custom_po_category",
+   "fieldtype": "Select",
+   "label": "P/O Category",
+   "options": "\nAgainst Purchase Quotation\nAgainst Sale Order\nProjection Period\nReorder Level",
+   "insert_after": "custom_alias_name",
+   "in_list_view": 0,
+   "in_standard_filter": 1,
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_po_category"
+  },
+  {
+   "fieldname": "custom_xpos_col1",
+   "fieldtype": "Column Break",
+   "insert_after": "custom_po_category",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_xpos_col1"
+  },
+  {
+   "fieldname": "custom_po_type",
+   "fieldtype": "Data",
+   "label": "Type",
+   "insert_after": "custom_xpos_col1",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_po_type"
+  },
+  {
+   "fieldname": "custom_po_department",
+   "fieldtype": "Link",
+   "label": "Dept",
+   "options": "Department",
+   "insert_after": "custom_po_type",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_po_department"
+  },
+  {
+   "fieldname": "custom_po_remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "insert_after": "custom_po_department",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_po_remarks"
+  },
+  {
+   "fieldname": "custom_xpos_col2",
+   "fieldtype": "Column Break",
+   "insert_after": "custom_po_remarks",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_xpos_col2"
+  },
+  {
+   "fieldname": "custom_zero_qty",
+   "fieldtype": "Select",
+   "label": "Zero Qty",
+   "options": "No\nYes",
+   "default": "No",
+   "insert_after": "custom_xpos_col2",
+   "description": "Show items with zero required quantity",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_zero_qty"
+  },
+  {
+   "fieldname": "custom_xpos_print_section",
+   "fieldtype": "Section Break",
+   "label": "Print Settings",
+   "insert_after": "letter_head",
+   "collapsible": 1,
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_xpos_print_section"
+  },
+  {
+   "fieldname": "custom_print_show_stock",
+   "fieldtype": "Check",
+   "label": "Show Stock in Hand on Print",
+   "default": "1",
+   "insert_after": "custom_xpos_print_section",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_print_show_stock"
+  },
+  {
+   "fieldname": "custom_print_show_transit",
+   "fieldtype": "Check",
+   "label": "Show Transit Stock on Print",
+   "default": "1",
+   "insert_after": "custom_print_show_stock",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_print_show_transit"
+  },
+  {
+   "fieldname": "custom_print_show_packing",
+   "fieldtype": "Check",
+   "label": "Show Packing Details on Print",
+   "default": "1",
+   "insert_after": "custom_print_show_transit",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_print_show_packing"
+  },
+  {
+   "fieldname": "custom_print_col1",
+   "fieldtype": "Column Break",
+   "insert_after": "custom_print_show_packing",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_print_col1"
+  },
+  {
+   "fieldname": "custom_print_show_discount",
+   "fieldtype": "Check",
+   "label": "Show Discount on Print",
+   "default": "1",
+   "insert_after": "custom_print_col1",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_print_show_discount"
+  },
+  {
+   "fieldname": "custom_print_show_category",
+   "fieldtype": "Check",
+   "label": "Show Category/Class on Print",
+   "default": "0",
+   "insert_after": "custom_print_show_discount",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_print_show_category"
+  },
+  {
+   "fieldname": "custom_print_show_generic",
+   "fieldtype": "Check",
+   "label": "Show Generic Item on Print",
+   "default": "0",
+   "insert_after": "custom_print_show_category",
+   "dt": "Purchase Order",
+   "module": "X POS",
+   "name": "Purchase Order-custom_print_show_generic"
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Purchase Order",
+ "links": [],
+ "property_setters": [],
+ "sync_on_migrate": 1
+}

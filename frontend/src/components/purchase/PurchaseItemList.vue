@@ -216,9 +216,11 @@ onUnmounted(() => {
                     <div class="flex-1 min-w-0">
                         <p class="font-medium truncate">{{ item.item_name }}</p>
                         <p class="text-sm text-muted-foreground truncate">{{ item.item_code }}</p>
-                        <div class="flex gap-4 mt-1 text-xs text-muted-foreground/70">
+                        <div class="flex gap-3 mt-1 text-xs text-muted-foreground/70 flex-wrap">
                             <span>{{ __("UOM") }}: {{ item.stock_uom }}</span>
                             <span v-if="item.standard_rate">{{ __("Rate") }}: {{ formatCurrency(item.standard_rate) }}</span>
+                            <span v-if="item.item_group">{{ item.item_group }}</span>
+                            <span v-if="item.custom_item_packing">{{ __("Packing") }}: {{ item.custom_item_packing }}</span>
                         </div>
                     </div>
                     <Button @click="addItem(item)" size="sm" variant="outline">

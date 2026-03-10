@@ -13,6 +13,7 @@ import PurchaseCart from "@/components/purchase/PurchaseCart.vue";
 import StockReceiving from "@/components/purchase/StockReceiving.vue";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
     ShoppingBag,
     ArrowLeft,
@@ -22,6 +23,8 @@ import {
     Package,
     Users,
     Truck,
+    ChevronDown,
+    ChevronUp,
 } from "lucide-vue-next";
 import { isOnline } from "@/utils";
 import __ from "@/lib/translate";
@@ -33,6 +36,17 @@ const offlineStore = useOfflineStore();
 // Active tab
 type TabType = "suppliers" | "items" | "receive";
 const activeTab = ref<TabType>("suppliers");
+
+// PO header collapsed state
+const poHeaderExpanded = ref(true);
+
+const poCategories = [
+    "",
+    "Against Purchase Quotation",
+    "Against Sale Order",
+    "Projection Period",
+    "Reorder Level",
+];
 
 // Online status listener
 function handleOnlineStatus(): void {
@@ -64,7 +78,7 @@ function goBack(): void {
                 </Button>
                 <div class="flex items-center gap-2">
                     <ShoppingBag class="w-6 h-6 text-primary" />
-                    <h1 class="text-xl font-semibold text-foreground">Purchasing</h1>
+                    <h1 class="text-xl font-semibold text-foreground">{{ __("Purchasing") }}</h1>
                 </div>
             </div>
 
@@ -96,9 +110,55 @@ function goBack(): void {
             </div>
         </header>
 
+        <!-- XPOS PO Header Fields -->
+        <div v-if="activeTab !== 'receive'" class="bg-card border-b border-border shrink-0">
+            <button @click="poHeaderExpanded = !poHeaderExpanded"
+                class="w-full px-4 py-2 flex items-center justify-between text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                <span>{{ __("Purchase Order Details") }}</span>
+                <ChevronUp v-if="poHeaderExpanded" class="w-4 h-4" />
+                <ChevronDown v-else class="w-4 h-4" />
+            </button>
+            <div v-show="poHeaderExpanded" class="px-4 pb-3 grid grid-cols-6 gap-3">
+                <div>
+                    <label class="text-xs text-muted-foreground mb-1 block">{{ __("Alias Name") }}</label>
+                    <Input v-model="purchaseStore.poAliasName" class="h-8 text-sm" :placeholder="__('Alias')" />
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground mb-1 block">{{ __("P/O Category") }}</label>
+                    <select v-model="purchaseStore.poCategory"
+                        class="w-full h-8 px-2 border border-border rounded-md text-sm bg-background text-foreground">
+                        <option v-for="cat in poCategories" :key="cat" :value="cat">
+                            {{ cat || __("-- Select --") }}
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground mb-1 block">{{ __("Type") }}</label>
+                    <Input v-model="purchaseStore.poType" class="h-8 text-sm" :placeholder="__('Type')" />
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground mb-1 block">{{ __("Dept") }}</label>
+                    <Input v-model="purchaseStore.poDepartment" class="h-8 text-sm"
+                        :placeholder="__('Department')" />
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground mb-1 block">{{ __("Zero Qty") }}</label>
+                    <select v-model="purchaseStore.poZeroQty"
+                        class="w-full h-8 px-2 border border-border rounded-md text-sm bg-background text-foreground">
+                        <option value="No">{{ __("No") }}</option>
+                        <option value="Yes">{{ __("Yes") }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground mb-1 block">{{ __("Remarks") }}</label>
+                    <Input v-model="purchaseStore.poRemarks" class="h-8 text-sm" :placeholder="__('Remarks')" />
+                </div>
+            </div>
+        </div>
+
         <div class="flex-1 flex min-h-0 overflow-hidden">
             <template v-if="activeTab !== 'receive'">
-                <div class="w-96 border-r border-border bg-card flex flex-col min-h-0 overflow-hidden">
+                <div class="w-80 border-r border-border bg-card flex flex-col min-h-0 overflow-hidden shrink-0">
                     <div class="flex border-b border-border shrink-0">
                         <button @click="activeTab = 'suppliers'"
                             class="flex-1 px-3 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5"
@@ -130,7 +190,7 @@ function goBack(): void {
                     </div>
                 </div>
 
-                <!-- Right Panel - Cart -->
+                <!-- Right Panel - Cart (wider for table) -->
                 <div class="flex-1 flex flex-col min-h-0">
                     <PurchaseCart class="h-full" />
                 </div>
@@ -149,7 +209,7 @@ function goBack(): void {
                         <button @click="activeTab = 'items'"
                             class="px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 text-muted-foreground hover:bg-muted">
                             <Package class="w-4 h-4" />
-                            {{ __("Items") }}   
+                            {{ __("Items") }}
                         </button>
                         <button
                             class="px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 text-primary border-b-2 border-primary bg-primary/10">

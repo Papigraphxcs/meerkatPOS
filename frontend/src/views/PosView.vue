@@ -6,6 +6,11 @@
 					<div class="flex-1">
 					<SearchBar ref="searchBarRef" @search="onSearch" @enter="onSearchEnter" @navigate="onNavigate" />
 					</div>
+					<Button variant="outline" size="icon" class="h-9 w-9 shrink-0"
+						@click="commandSearchRef?.open()"
+						:title="__('Search items (Ctrl+K)')">
+						<Search class="h-4 w-4" />
+					</Button>
 					<div class="w-52 shrink-0">
 						<BarcodeScanner ref="barcodeScannerRef" @scanned="onBarcodeScan" />
 					</div>
@@ -54,6 +59,9 @@
 		<div class="w-[560px] xl:w-[520px] flex flex-col bg-background dark:bg-card shrink-0">
 			<Cart />
 		</div>
+
+		<CommandSearch ref="commandSearchRef" :pos-profile="posStore.profileName"
+			:currency-symbol="posStore.currencySymbol" @select-item="handleAddItem" />
 	</div>
 </template>
 
@@ -68,10 +76,11 @@ import { cacheItemTax, getCachedItemTax } from "@/services/idbService";
 import SearchBar from "@/components/items/SearchBar.vue";
 import BarcodeScanner from "@/components/items/BarcodeScanner.vue";
 import ItemGrid from "@/components/items/ItemGrid.vue";
+import CommandSearch from "@/components/items/CommandSearch.vue";
 import Cart from "@/components/cart/Cart.vue";
 import { Button } from "@/components/ui/button";
 import { Autocomplete } from "@/components/ui/autocomplete";
-import { LayoutGrid, List } from "lucide-vue-next";
+import { LayoutGrid, List, Search } from "lucide-vue-next";
 
 import type { POSItem } from "@/types/pos.types";
 import __ from "@/lib/translate";
@@ -91,6 +100,7 @@ watch(() => posStore.defaultView, (defaultView) => {
 
 const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null);
 const barcodeScannerRef = ref<InstanceType<typeof BarcodeScanner> | null>(null);
+const commandSearchRef = ref<InstanceType<typeof CommandSearch> | null>(null);
 const highlightedIndex = ref(-1);
 
 const topGroups = computed(() => {

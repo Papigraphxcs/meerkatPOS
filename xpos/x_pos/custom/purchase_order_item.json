@@ -1,0 +1,129 @@
+{
+ "custom_fields": [
+  {
+   "fieldname": "custom_alias",
+   "fieldtype": "Data",
+   "label": "Alias",
+   "insert_after": "item_code",
+   "in_list_view": 1,
+   "columns": 1,
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_alias",
+   "fetch_from": "item_code.item_name"
+  },
+  {
+   "fieldname": "custom_stock_in_hand",
+   "fieldtype": "Float",
+   "label": "Stock in Hand",
+   "insert_after": "item_name",
+   "in_list_view": 1,
+   "columns": 1,
+   "read_only": 1,
+   "precision": "2",
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_stock_in_hand"
+  },
+  {
+   "fieldname": "custom_transit_stock",
+   "fieldtype": "Float",
+   "label": "Transit Stock",
+   "insert_after": "custom_stock_in_hand",
+   "in_list_view": 1,
+   "columns": 1,
+   "read_only": 1,
+   "precision": "2",
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_transit_stock"
+  },
+  {
+   "fieldname": "custom_required_loose",
+   "fieldtype": "Float",
+   "label": "Required (Loose)",
+   "insert_after": "custom_transit_stock",
+   "in_list_view": 1,
+   "columns": 1,
+   "precision": "2",
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_required_loose"
+  },
+  {
+   "fieldname": "custom_required_packs",
+   "fieldtype": "Float",
+   "label": "Required Pack(s)",
+   "insert_after": "custom_required_loose",
+   "in_list_view": 1,
+   "columns": 1,
+   "precision": "2",
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_required_packs"
+  },
+  {
+   "fieldname": "custom_generic_item",
+   "fieldtype": "Data",
+   "label": "Generic Item",
+   "insert_after": "amount",
+   "in_list_view": 1,
+   "columns": 1,
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_generic_item"
+  },
+  {
+   "fieldname": "custom_category",
+   "fieldtype": "Data",
+   "label": "Category",
+   "insert_after": "custom_generic_item",
+   "in_list_view": 1,
+   "columns": 1,
+   "fetch_from": "item_code.item_group",
+   "fetch_if_empty": 1,
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_category"
+  },
+  {
+   "fieldname": "custom_class",
+   "fieldtype": "Data",
+   "label": "Class",
+   "insert_after": "custom_category",
+   "in_list_view": 1,
+   "columns": 1,
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_class"
+  },
+  {
+   "fieldname": "custom_item_packing",
+   "fieldtype": "Data",
+   "label": "Item Packing",
+   "insert_after": "custom_class",
+   "in_list_view": 1,
+   "columns": 1,
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_item_packing"
+  },
+  {
+   "fieldname": "custom_pack_units",
+   "fieldtype": "Float",
+   "label": "Pack Units",
+   "insert_after": "custom_item_packing",
+   "in_list_view": 1,
+   "columns": 1,
+   "precision": "2",
+   "dt": "Purchase Order Item",
+   "module": "X POS",
+   "name": "Purchase Order Item-custom_pack_units"
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Purchase Order Item",
+ "links": [],
+ "property_setters": [],
+ "sync_on_migrate": 1
+}

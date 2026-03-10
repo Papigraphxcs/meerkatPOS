@@ -485,6 +485,13 @@ def create_purchase_order(data):
         "currency": supplier_currency,
         "buying_price_list": buying_price_list,
     })
+
+    # Set XPOS custom header fields
+    for cf in ("custom_alias_name", "custom_po_category", "custom_po_type",
+               "custom_po_department", "custom_po_remarks", "custom_zero_qty"):
+        val = payload.get(cf)
+        if val:
+            po_doc.set(cf, val)
     
     if warehouse:
         po_doc.set_warehouse = warehouse
@@ -529,6 +536,16 @@ def create_purchase_order(data):
                 "rate": flt(row.get("rate")),
                 "warehouse": row.get("warehouse") or warehouse,
                 "schedule_date": schedule_date,
+                "custom_alias": row.get("custom_alias") or item_name,
+                "custom_stock_in_hand": flt(row.get("custom_stock_in_hand")),
+                "custom_transit_stock": flt(row.get("custom_transit_stock")),
+                "custom_required_loose": flt(row.get("custom_required_loose")),
+                "custom_required_packs": flt(row.get("custom_required_packs")),
+                "custom_generic_item": row.get("custom_generic_item") or "",
+                "custom_category": row.get("custom_category") or "",
+                "custom_class": row.get("custom_class") or "",
+                "custom_item_packing": row.get("custom_item_packing") or "",
+                "custom_pack_units": flt(row.get("custom_pack_units")),
             },
         )
 
@@ -585,7 +602,8 @@ def search_items(search_text=None, limit=20):
         # Search by item_code, item_name and barcode using SQL for reliable OR logic
         items = frappe.db.sql(
             """
-            SELECT DISTINCT i.name, i.item_name, i.stock_uom, i.standard_rate
+            SELECT DISTINCT i.name, i.item_name, i.stock_uom, i.standard_rate,
+                   i.item_group
             FROM `tabItem` i
             LEFT JOIN `tabItem Barcode` ib ON ib.parent = i.name
             WHERE i.disabled = 0
@@ -604,7 +622,7 @@ def search_items(search_text=None, limit=20):
         items = frappe.get_all(
             "Item",
             filters={"disabled": 0},
-            fields=["name", "item_name", "stock_uom", "standard_rate"],
+            fields=["name", "item_name", "stock_uom", "standard_rate", "item_group"],
             limit_page_length=limit,
             order_by="item_name asc",
         )
@@ -651,6 +669,7 @@ def search_items(search_text=None, limit=20):
                 "standard_rate": it.get("standard_rate"),
                 "barcode": barcodes[0] if barcodes else None,
                 "barcodes": barcodes,
+                "item_group": it.get("item_group"),
             }
         )
     return results
@@ -957,3 +976,402 @@ def receive_stock(data):
     }
 
     return result
+
+
+@frappe.whitelist()
+def get_stock_and_transit(item_codes, warehouse=None):
+    """
+    Get stock in hand and transit stock for given item codes.
+
+    Args:
+        item_codes: list of item codes
+        warehouse: optional warehouse filter
+
+    Returns:
+        dict keyed by item_code with stock_in_hand and transit_stock
+    """
+    if isinstance(item_codes, str):
+        item_codes = json.loads(item_codes)
+
+    if not item_codes:
+        return {}
+
+    result = {}
+
+    # Get actual qty (stock in hand) from Bin
+    bin_filters = {"item_code": ["in", item_codes]}
+    if warehouse:
+        bin_filters["warehouse"] = warehouse
+
+    bins = frappe.get_all(
+        "Bin",
+        filters=bin_filters,
+        fields=["item_code", "actual_qty", "ordered_qty"],
+        group_by="item_code" if not warehouse else None,
+    )
+
+    # If no warehouse filter, aggregate across all warehouses
+    stock_map = {}
+    ordered_map = {}
+    for b in bins:
+        stock_map[b.item_code] = flt(stock_map.get(b.item_code, 0)) + flt(b.actual_qty)
+        ordered_map[b.item_code] = flt(ordered_map.get(b.item_code, 0)) + flt(b.ordered_qty)
+
+    # Get transit stock: qty from submitted POs not yet received
+    transit_data = frappe.db.sql(
+        """
+        SELECT poi.item_code,
+               SUM(poi.qty - poi.received_qty) as transit_qty
+        FROM `tabPurchase Order Item` poi
+        INNER JOIN `tabPurchase Order` po ON po.name = poi.parent
+        WHERE poi.item_code IN %(item_codes)s
+          AND po.docstatus = 1
+          AND po.status NOT IN ('Completed', 'Cancelled', 'Closed')
+          AND poi.qty > poi.received_qty
+        GROUP BY poi.item_code
+        """,
+        {"item_codes": item_codes},
+        as_dict=True,
+    )
+
+    transit_map = {}
+    for row in transit_data:
+        transit_map[row.item_code] = flt(row.transit_qty)
+
+    for code in item_codes:
+        result[code] = {
+            "stock_in_hand": flt(stock_map.get(code, 0)),
+            "transit_stock": flt(transit_map.get(code, 0)),
+        }
+
+    return result
+
+
+@frappe.whitelist()
+def get_category_items(supplier, po_category, warehouse=None):
+    """
+    Get items based on PO category and supplier.
+    
+    Categories:
+    - Against Purchase Quotation: Items from supplier's purchase quotations
+    - Against Sale Order: Items from pending sales orders
+    - Projection Period: Items based on sales projection
+    - Reorder Level: Items below reorder level
+    
+    Args:
+        supplier: Supplier name
+        po_category: PO Category string
+        warehouse: Optional warehouse filter
+        
+    Returns:
+        List of items with qty suggestions
+    """
+    if not supplier or not po_category:
+        frappe.throw(_("Supplier and PO Category are required."))
+    
+    items = []
+    
+    if po_category == "Against Purchase Quotation":
+        # Get items from supplier's pending purchase quotations
+        items = _get_items_from_purchase_quotations(supplier)
+        
+    elif po_category == "Against Sale Order":
+        # Get items from pending sales orders that need to be purchased
+        items = _get_items_from_sales_orders(supplier, warehouse)
+        
+    elif po_category == "Projection Period":
+        # Get items based on sales projection (last 30 days average * projection factor)
+        items = _get_items_from_projection(supplier, warehouse)
+        
+    elif po_category == "Reorder Level":
+        # Get items below reorder level for this supplier
+        items = _get_items_below_reorder(supplier, warehouse)
+    
+    # Enrich items with UOM data
+    if items:
+        item_codes = [i.get("item_code") for i in items]
+        uom_data = _get_item_uoms(item_codes)
+        for item in items:
+            item["item_uoms"] = uom_data.get(item.get("item_code"), [])
+    
+    return items
+
+
+def _get_items_from_purchase_quotations(supplier):
+    """Get items from supplier's pending purchase quotations."""
+    quotations = frappe.get_all(
+        "Supplier Quotation",
+        filters={
+            "supplier": supplier,
+            "docstatus": 1,
+            "status": ["not in", ["Cancelled", "Expired", "Ordered"]],
+        },
+        fields=["name"],
+        limit=10,
+    )
+    
+    items_map = {}
+    for sq in quotations:
+        sq_items = frappe.get_all(
+            "Supplier Quotation Item",
+            filters={"parent": sq.name},
+            fields=["item_code", "item_name", "qty", "rate", "stock_uom", "uom"],
+        )
+        for item in sq_items:
+            if item.item_code not in items_map:
+                items_map[item.item_code] = {
+                    "item_code": item.item_code,
+                    "item_name": item.item_name,
+                    "stock_uom": item.stock_uom or item.uom,
+                    "standard_rate": flt(item.rate),
+                    "qty": flt(item.qty),
+                    "item_group": frappe.get_value("Item", item.item_code, "item_group"),
+                }
+            else:
+                items_map[item.item_code]["qty"] += flt(item.qty)
+    
+    return list(items_map.values())
+
+
+def _get_items_from_sales_orders(supplier, warehouse=None):
+    """Get items from pending sales orders that this supplier can supply."""
+    # Get items that this supplier provides (from Item Supplier or Item Default)
+    supplier_items = set()
+    
+    # From Item Supplier child table
+    supplier_item_rows = frappe.get_all(
+        "Item Supplier",
+        filters={"supplier": supplier},
+        fields=["parent"],
+    )
+    for row in supplier_item_rows:
+        supplier_items.add(row.parent)
+    
+    # From Item Default child table
+    default_supplier_rows = frappe.get_all(
+        "Item Default",
+        filters={"default_supplier": supplier},
+        fields=["parent"],
+    )
+    for row in default_supplier_rows:
+        supplier_items.add(row.parent)
+    
+    if not supplier_items:
+        return []
+    
+    # Get pending sales order items for these items
+    filters = {
+        "docstatus": 1,
+        "status": ["not in", ["Completed", "Cancelled", "Closed"]],
+    }
+    
+    so_items = frappe.db.sql(
+        """
+        SELECT 
+            soi.item_code,
+            soi.item_name,
+            soi.stock_uom,
+            SUM(soi.qty - soi.delivered_qty) as pending_qty,
+            MAX(soi.rate) as rate
+        FROM `tabSales Order Item` soi
+        INNER JOIN `tabSales Order` so ON so.name = soi.parent
+        WHERE soi.item_code IN %(items)s
+          AND so.docstatus = 1
+          AND so.status NOT IN ('Completed', 'Cancelled', 'Closed')
+          AND soi.qty > soi.delivered_qty
+        GROUP BY soi.item_code
+        """,
+        {"items": list(supplier_items)},
+        as_dict=True,
+    )
+    
+    items = []
+    for row in so_items:
+        item = frappe.get_cached_doc("Item", row.item_code)
+        items.append({
+            "item_code": row.item_code,
+            "item_name": row.item_name,
+            "stock_uom": row.stock_uom,
+            "standard_rate": _get_buying_rate(row.item_code),
+            "qty": flt(row.pending_qty),
+            "item_group": item.item_group,
+        })
+    
+    return items
+
+
+def _get_items_from_projection(supplier, warehouse=None):
+    """Get items based on sales projection (last 30 days average)."""
+    # Get supplier's items
+    supplier_items = _get_supplier_item_codes(supplier)
+    if not supplier_items:
+        return []
+    
+    # Calculate average daily sales for last 30 days
+    from_date = frappe.utils.add_days(nowdate(), -30)
+    
+    sales_data = frappe.db.sql(
+        """
+        SELECT 
+            sii.item_code,
+            sii.item_name,
+            sii.stock_uom,
+            SUM(sii.qty) as total_qty
+        FROM `tabSales Invoice Item` sii
+        INNER JOIN `tabSales Invoice` si ON si.name = sii.parent
+        WHERE sii.item_code IN %(items)s
+          AND si.docstatus = 1
+          AND si.posting_date >= %(from_date)s
+        GROUP BY sii.item_code
+        """,
+        {"items": supplier_items, "from_date": from_date},
+        as_dict=True,
+    )
+    
+    items = []
+    for row in sales_data:
+        avg_daily = flt(row.total_qty) / 30
+        suggested_qty = max(1, int(avg_daily * 7))  # Suggest 1 week's worth
+        
+        item = frappe.get_cached_doc("Item", row.item_code)
+        items.append({
+            "item_code": row.item_code,
+            "item_name": row.item_name,
+            "stock_uom": row.stock_uom,
+            "standard_rate": _get_buying_rate(row.item_code),
+            "qty": suggested_qty,
+            "item_group": item.item_group,
+        })
+    
+    return items
+
+
+def _get_items_below_reorder(supplier, warehouse=None):
+    """Get items below reorder level for this supplier."""
+    supplier_items = _get_supplier_item_codes(supplier)
+    if not supplier_items:
+        return []
+    
+    # Get items with reorder level set
+    reorder_data = frappe.db.sql(
+        """
+        SELECT 
+            ir.parent as item_code,
+            ir.warehouse_reorder_level,
+            ir.warehouse_reorder_qty
+        FROM `tabItem Reorder` ir
+        WHERE ir.parent IN %(items)s
+          AND ir.warehouse_reorder_level > 0
+          %(warehouse_filter)s
+        """,
+        {
+            "items": supplier_items,
+            "warehouse_filter": f"AND ir.warehouse = '{warehouse}'" if warehouse else "",
+        },
+        as_dict=True,
+    )
+    
+    if not reorder_data:
+        return []
+    
+    # Get current stock for these items
+    reorder_items = {r.item_code: r for r in reorder_data}
+    stock_data = get_stock_and_transit(list(reorder_items.keys()), warehouse)
+    
+    items = []
+    for item_code, reorder_info in reorder_items.items():
+        current_stock = stock_data.get(item_code, {}).get("stock_in_hand", 0)
+        transit_stock = stock_data.get(item_code, {}).get("transit_stock", 0)
+        available = current_stock + transit_stock
+        
+        if available < reorder_info.warehouse_reorder_level:
+            item = frappe.get_cached_doc("Item", item_code)
+            shortage = reorder_info.warehouse_reorder_level - available
+            reorder_qty = max(shortage, reorder_info.warehouse_reorder_qty or shortage)
+            
+            items.append({
+                "item_code": item_code,
+                "item_name": item.item_name,
+                "stock_uom": item.stock_uom,
+                "standard_rate": _get_buying_rate(item_code),
+                "qty": int(reorder_qty),
+                "item_group": item.item_group,
+                "custom_stock_in_hand": current_stock,
+                "custom_transit_stock": transit_stock,
+            })
+    
+    return items
+
+
+def _get_supplier_item_codes(supplier):
+    """Get all item codes for a supplier."""
+    supplier_items = set()
+    
+    # From Item Supplier child table
+    supplier_item_rows = frappe.get_all(
+        "Item Supplier",
+        filters={"supplier": supplier},
+        fields=["parent"],
+    )
+    for row in supplier_item_rows:
+        supplier_items.add(row.parent)
+    
+    # From Item Default child table
+    default_supplier_rows = frappe.get_all(
+        "Item Default",
+        filters={"default_supplier": supplier},
+        fields=["parent"],
+    )
+    for row in default_supplier_rows:
+        supplier_items.add(row.parent)
+    
+    return list(supplier_items)
+
+
+def _get_buying_rate(item_code):
+    """Get buying rate for an item."""
+    price_list = _resolve_buying_price_list()
+    rate = 0
+    if price_list:
+        rate = frappe.db.get_value(
+            "Item Price",
+            {"item_code": item_code, "price_list": price_list, "buying": 1},
+            "price_list_rate",
+        )
+    if not rate:
+        rate = frappe.db.get_value("Item", item_code, "standard_rate")
+    return flt(rate)
+
+
+def _get_item_uoms(item_codes):
+    """Get UOM conversion details for items."""
+    if not item_codes:
+        return {}
+    
+    uom_rows = frappe.get_all(
+        "UOM Conversion Detail",
+        filters={"parent": ["in", item_codes]},
+        fields=["parent", "uom", "conversion_factor"],
+    )
+    
+    uom_map = {}
+    for row in uom_rows:
+        if row.parent not in uom_map:
+            uom_map[row.parent] = []
+        uom_map[row.parent].append({
+            "uom": row.uom,
+            "conversion_factor": row.conversion_factor
+        })
+    
+    # Add stock_uom with conversion_factor 1 if not present
+    for item_code in item_codes:
+        if item_code not in uom_map:
+            stock_uom = frappe.get_value("Item", item_code, "stock_uom")
+            uom_map[item_code] = [{"uom": stock_uom, "conversion_factor": 1}]
+        else:
+            stock_uom = frappe.get_value("Item", item_code, "stock_uom")
+            has_stock_uom = any(u["uom"] == stock_uom for u in uom_map[item_code])
+            if not has_stock_uom:
+                uom_map[item_code].append({"uom": stock_uom, "conversion_factor": 1})
+    
+    return uom_map

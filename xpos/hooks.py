@@ -48,6 +48,7 @@ doctype_js = {
     "POS Profile": "x_pos/api/pos_profile.js",
     "Sales Invoice": "x_pos/api/invoice.js",
     "Company": "x_pos/api/company.js",
+    "Purchase Order": "x_pos/api/purchase_order.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}

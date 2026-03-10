@@ -675,6 +675,16 @@ export interface PurchaseItem {
   batch_no?: string;
   schedule_date?: string;
   received_qty?: number;
+  custom_alias?: string;
+  custom_stock_in_hand?: number;
+  custom_transit_stock?: number;
+  custom_required_loose?: number;
+  custom_required_packs?: number;
+  custom_generic_item?: string;
+  custom_category?: string;
+  custom_class?: string;
+  custom_item_packing?: string;
+  custom_pack_units?: number;
 }
 
 export interface PurchaseOrder {
@@ -739,6 +749,12 @@ export interface PurchaseOrderData {
   create_invoice?: boolean;
   payments?: { mode_of_payment: string; amount: number }[];
   submit?: boolean;
+  custom_alias_name?: string;
+  custom_po_category?: string;
+  custom_po_type?: string;
+  custom_po_department?: string;
+  custom_po_remarks?: string;
+  custom_zero_qty?: string;
 }
 
 export interface PurchaseOrderResult {
@@ -761,6 +777,11 @@ export interface SearchItem {
   selling_price?: number;
   buying_price?: number;
   barcode?: string;
+  item_group?: string;
+  custom_item_packing?: string;
+  custom_pack_units?: number;
+  custom_generic_item?: string;
+  custom_class?: string;
 }
 
 export interface NewItemData {

@@ -2,43 +2,28 @@
 	<header class="h-14 bg-background border-b border-border flex items-center px-4 gap-3 shrink-0 z-30">
 		<div class="flex items-center gap-2.5">
 			<img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-8 h-8" />
+			<span>{{ __('X POS') }}</span>
 		</div>
-
 		<nav class="flex items-center gap-1 ml-4">
 			<router-link to="/pos" :class="cn(
-				buttonVariants({ variant: route.name === 'pos' ? 'secondary' : 'ghost', size: 'sm' }),
+				buttonVariants({ variant: $route.name === 'pos' ? 'secondary' : 'ghost', size: 'sm' }),
 				'gap-1.5 no-underline',
-				route.name === 'pos' && 'bg-primary/10 text-primary hover:bg-primary/15'
+				$route.name === 'pos' && 'bg-primary/10 text-primary hover:bg-primary/15'
 			)">
 				<LayoutGrid class="w-4 h-4" />
 				<span>{{ __('POS') }}</span>
 			</router-link>
 			<router-link to="/orders" :class="cn(
-				buttonVariants({ variant: route.name === 'orders' ? 'secondary' : 'ghost', size: 'sm' }),
+				buttonVariants({ variant: $route.name === 'orders' ? 'secondary' : 'ghost', size: 'sm' }),
 				'gap-1.5 no-underline',
-				route.name === 'orders' && 'bg-primary/10 text-primary hover:bg-primary/15'
+				$route.name === 'orders' && 'bg-primary/10 text-primary hover:bg-primary/15'
 			)">
 				<FileText class="w-4 h-4" />
 				<span>{{ __('Orders') }}</span>
 			</router-link>
-			<router-link to="/purchase" :class="cn(
-				buttonVariants({ variant: route.name === 'purchase' ? 'secondary' : 'ghost', size: 'sm' }),
-				'gap-1.5 no-underline',
-				route.name === 'purchase' && 'bg-primary/10 text-primary hover:bg-primary/15'
-			)">
-				<ShoppingBag class="w-4 h-4" />
-				<span>{{ __('Purchase') }}</span>
-			</router-link>
-			<router-link to="/barcode-print" :class="cn(
-				buttonVariants({ variant: route.name === 'barcode-print' ? 'secondary' : 'ghost', size: 'sm' }),
-				'gap-1.5 no-underline',
-				route.name === 'barcode-print' && 'bg-primary/10 text-primary hover:bg-primary/15'
-			)">
-				<Printer class="w-4 h-4" />
-				<span>{{ __('Barcodes') }}</span>
-			</router-link>
 		</nav>
 
+		<!-- Spacer to push actions to the right -->
 		<div class="flex-1"></div>
 
 		<div v-if="posStore.enableCashMovement" class="hidden md:flex items-center gap-1">
@@ -142,11 +127,9 @@
 
 <script setup lang="ts">
 import { computed, inject, onMounted, onUnmounted, ref, type Ref } from "vue";
-import { useRoute } from "vue-router";
 import { usePosStore } from "@/stores/posStore";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { useAuthStore } from "@/stores/authStore";
-import { cn } from "@/lib/utils";
 import { __ } from "@/lib/translate";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -155,9 +138,10 @@ import { Popover, PopoverContentStyled, PopoverTrigger } from "@/components/ui/p
 import ReturnDialog from "@/components/cart/ReturnDialog.vue";
 import RepeatInvoiceDialog from "@/components/cart/RepeatInvoiceDialog.vue";
 import {
-	LayoutGrid, FileText, Building2, Sun, Moon, Monitor, User, LogOut,
+	Building2, Sun, Moon, Monitor, User, LogOut,
 	ArrowDownCircle, ArrowUpCircle, RotateCcw, Repeat, Printer, Power,
-	Wifi, WifiOff, CloudUpload, Loader2, ShoppingBag,
+	Wifi, WifiOff, CloudUpload, Loader2,
+	LayoutGrid, FileText
 } from "lucide-vue-next";
 import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
@@ -165,8 +149,8 @@ import { useOfflineStore } from "@/stores/offlineStore";
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
 import { isOnline } from "@/utils";
+import { cn } from "@/lib/utils";
 
-const route = useRoute();
 const posStore = usePosStore();
 const paymentStore = usePaymentStore();
 const authStore = useAuthStore();

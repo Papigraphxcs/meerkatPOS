@@ -1,12 +1,3 @@
-/**
- * X POS Purchase Store
- * Handles purchasing functionality including:
- * - Supplier management
- * - Purchase orders
- * - Purchase receipts
- * - Purchase invoices
- * - Item creation
- */
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { call, showSuccess, showError } from "@/services/api";
@@ -52,12 +43,40 @@ export interface PurchaseCartItem {
     conversion_factor: number;
     warehouse?: string;
     received_qty?: number;
+    stock_in_hand?: number;
+    transit_stock?: number;
+    required_packs?: number;
+    item_group?: string;
+    class?: string;
+    pack_units?: number;
+    discount_percent?: number;
+    item_packing?: string;
+    item_uoms?: Array<{ uom: string; conversion_factor: number }>;
 }
+
+// Draft PO structure
+export interface DraftPurchaseOrder {
+    id: string;
+    data: {
+        supplier: string;
+        supplier_name?: string;
+        items: PurchaseCartItem[];
+        po_category?: string;
+        po_type?: string;
+        po_department?: string;
+        po_remarks?: string;
+        po_zero_qty?: string;
+    };
+    created_at: string;
+    updated_at: string;
+}
+
+const DRAFT_STORAGE_KEY = "xpos_po_drafts";
 
 export const usePurchaseStore = defineStore("purchase", () => {
     const suppliers = ref<Supplier[]>([]);
     const isLoadingSuppliers = ref(false);
-    const selectedSupplier = ref<Supplier | null>(null);
+    const selectedSupplier = ref("");
     const showSupplierDialog = ref(false);
     const showNewSupplierForm = ref(false);
     const supplierSearchTerm = ref("");
@@ -87,8 +106,24 @@ export const usePurchaseStore = defineStore("purchase", () => {
     const isReceivingTransit = ref(false);
     const isReturningShortage = ref(false);
 
+    // XPOS PO header custom fields
+    const poAliasName = ref("");
+    const poCategory = ref("");
+    const poType = ref("");
+    const poDepartment = ref("");
+    const poRemarks = ref("");
+    const poZeroQty = ref("No");
+    
+    // Draft management
+    const currentDraftId = ref<string | null>(null);
+    const isFetchingCategoryItems = ref(false);
+
     const cartTotal = computed(() =>
-        cartItems.value.reduce((sum, item) => sum + item.qty * item.rate, 0)
+        cartItems.value.reduce((sum, item) => {
+            const gross = item.qty * item.rate;
+            const disc = item.discount_percent || 0;
+            return sum + gross * (1 - disc / 100);
+        }, 0)
     );
 
     const cartItemCount = computed(() =>
@@ -206,7 +241,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
             });
 
             await searchSuppliers();
-            selectedSupplier.value = result;
+            selectedSupplier.value = result.name;
 
             return result;
         } catch (error) {
@@ -217,12 +252,12 @@ export const usePurchaseStore = defineStore("purchase", () => {
     }
 
     function selectSupplier(supplier: Supplier): void {
-        selectedSupplier.value = supplier;
+        selectedSupplier.value = supplier.name;
         showSupplierDialog.value = false;
     }
 
     function clearSupplier(): void {
-        selectedSupplier.value = null;
+        selectedSupplier.value = "";
     }
 
     let itemSearchAbort: AbortController | null = null;
@@ -285,11 +320,14 @@ export const usePurchaseStore = defineStore("purchase", () => {
         }
     }
 
-    function addToCart(item: SearchItem, qty = 1): void {
-        const existing = cartItems.value.find((i) => i.item_code === item.item_code);
+    const lastAddedIndex = ref(-1);
 
-        if (existing) {
-            existing.qty += qty;
+    function addToCart(item: SearchItem, qty = 1): void {
+        const existingIndex = cartItems.value.findIndex((i) => i.item_code === item.item_code);
+
+        if (existingIndex >= 0) {
+            cartItems.value[existingIndex].qty += qty;
+            lastAddedIndex.value = existingIndex;
         } else {
             const posStore = usePosStore();
             cartItems.value.push({
@@ -301,8 +339,49 @@ export const usePurchaseStore = defineStore("purchase", () => {
                 stock_uom: item.stock_uom,
                 conversion_factor: 1,
                 warehouse: posStore.warehouse,
+                stock_in_hand: 0,
+                transit_stock: 0,
+                required_packs: 0,
+                item_group: item.item_group || "",
+                class: item.custom_class || "",
+                pack_units: item.custom_pack_units || 0,
+                discount_percent: 0,
+                item_packing: item.custom_item_packing || "",
+                item_uoms: item.item_uoms || [{ uom: item.stock_uom, conversion_factor: 1 }],
             });
+            lastAddedIndex.value = cartItems.value.length - 1;
+            // Fetch stock data for newly added item
+            fetchStockForItems([item.item_code]);
         }
+    }
+
+    async function fetchStockForItems(itemCodes: string[]): Promise<void> {
+        if (!itemCodes.length) return;
+        try {
+            const posStore = usePosStore();
+            const result = await call<Record<string, { stock_in_hand: number; transit_stock: number }>>(
+                "xpos.x_pos.api.purchase_orders.get_stock_and_transit",
+                {
+                    item_codes: JSON.stringify(itemCodes),
+                    warehouse: posStore.warehouse,
+                }
+            );
+            if (result) {
+                for (const item of cartItems.value) {
+                    if (result[item.item_code]) {
+                        item.stock_in_hand = result[item.item_code].stock_in_hand;
+                        item.transit_stock = result[item.item_code].transit_stock;
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn("[XPOS Purchase] Failed to fetch stock data:", error);
+        }
+    }
+
+    async function refreshAllStock(): Promise<void> {
+        const codes = cartItems.value.map((i) => i.item_code);
+        if (codes.length) await fetchStockForItems(codes);
     }
 
     function updateCartItemQty(index: number, qty: number): void {
@@ -320,6 +399,27 @@ export const usePurchaseStore = defineStore("purchase", () => {
     function updateCartItemUOM(index: number, uom: string, conversionFactor: number): void {
         cartItems.value[index].uom = uom;
         cartItems.value[index].conversion_factor = conversionFactor;
+    }
+
+    function updateCartItemPacks(index: number, packs: number): void {
+        const item = cartItems.value[index];
+        item.required_packs = packs;
+        recalcQtyFromPacks(index);
+    }
+
+    function recalcQtyFromPacks(index: number): void {
+        const item = cartItems.value[index];
+        const packs = item.required_packs || 0;
+        const packUnits = item.pack_units || 1;
+        item.qty = packs * packUnits;
+    }
+
+    function updateCartItemDiscount(index: number, discount: number): void {
+        cartItems.value[index].discount_percent = discount;
+    }
+
+    function updateCartItemField(index: number, field: keyof PurchaseCartItem, value: unknown): void {
+        (cartItems.value[index] as Record<string, unknown>)[field] = value;
     }
 
     function removeFromCart(index: number): void {
@@ -343,7 +443,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 
             const orderData: PurchaseOrderData = {
                 pos_profile: posStore.profileName,
-                supplier: selectedSupplier.value!.name,
+                supplier: selectedSupplier.value,
                 company: posStore.companyName,
                 warehouse: selectedWarehouse.value || posStore.warehouse,
                 items: cartItems.value.map((item) => ({
@@ -355,10 +455,19 @@ export const usePurchaseStore = defineStore("purchase", () => {
                     stock_uom: item.stock_uom,
                     conversion_factor: item.conversion_factor,
                     warehouse: item.warehouse,
+                    stock_in_hand: item.stock_in_hand,
+                    transit_stock: item.transit_stock,
+                    required_packs: item.required_packs,
+                    class: item.class,
+                    pack_units: item.pack_units,
                 })),
                 receive: receiveImmediately.value,
                 create_invoice: createInvoice.value,
                 submit: true,
+                custom_po_category: poCategory.value || undefined,
+                custom_po_type: poType.value || undefined,
+                custom_po_remarks: poRemarks.value || undefined,
+                custom_zero_qty: poZeroQty.value || undefined,
             };
 
             if (!isOnline()) {
@@ -396,6 +505,12 @@ export const usePurchaseStore = defineStore("purchase", () => {
     function clearAfterOrder(): void {
         clearCart();
         clearSupplier();
+        poAliasName.value = "";
+        poCategory.value = "";
+        poType.value = "";
+        poDepartment.value = "";
+        poRemarks.value = "";
+        poZeroQty.value = "No";
         showPurchaseDialog.value = false;
     }
 
@@ -451,7 +566,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
             status: "pending" as const,
             created_at: new Date().toISOString(),
             retry_count: 0,
-            supplier_name: selectedSupplier.value?.supplier_name,
+            supplier_name: selectedSupplier.value,
             grand_total: cartTotal.value,
         };
 
@@ -771,6 +886,171 @@ export const usePurchaseStore = defineStore("purchase", () => {
         selectedTransit.value = null;
     }
 
+    // Draft management functions
+    function generateDraftId(): string {
+        return `draft_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    function getAllDrafts(): DraftPurchaseOrder[] {
+        try {
+            const stored = localStorage.getItem(DRAFT_STORAGE_KEY);
+            if (stored) {
+                return JSON.parse(stored);
+            }
+        } catch (e) {
+            console.warn("[XPOS Purchase] Failed to load drafts:", e);
+        }
+        return [];
+    }
+
+    function saveDraft(): string {
+        const drafts = getAllDrafts();
+        const now = new Date().toISOString();
+        
+        const draftData: DraftPurchaseOrder = {
+            id: currentDraftId.value || generateDraftId(),
+            data: {
+                supplier: selectedSupplier.value,
+                items: JSON.parse(JSON.stringify(cartItems.value)),
+                po_category: poCategory.value,
+                po_type: poType.value,
+                po_department: poDepartment.value,
+                po_remarks: poRemarks.value,
+                po_zero_qty: poZeroQty.value,
+            },
+            created_at: currentDraftId.value 
+                ? (drafts.find(d => d.id === currentDraftId.value)?.created_at || now)
+                : now,
+            updated_at: now,
+        };
+
+        // Update existing or add new
+        const existingIndex = drafts.findIndex(d => d.id === draftData.id);
+        if (existingIndex >= 0) {
+            drafts[existingIndex] = draftData;
+        } else {
+            drafts.push(draftData);
+        }
+
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
+        currentDraftId.value = draftData.id;
+        showSuccess(__("Draft saved successfully"));
+        return draftData.id;
+    }
+
+    function loadDraft(draftId: string): boolean {
+        const drafts = getAllDrafts();
+        const draft = drafts.find(d => d.id === draftId);
+        
+        if (!draft) {
+            showError(__("Draft not found"));
+            return false;
+        }
+
+        clearCart();
+        clearSupplier();
+
+        currentDraftId.value = draft.id;
+        selectedSupplier.value = draft.data.supplier || "";
+        cartItems.value = draft.data.items || [];
+        poCategory.value = draft.data.po_category || "";
+        poType.value = draft.data.po_type || "";
+        poDepartment.value = draft.data.po_department || "";
+        poRemarks.value = draft.data.po_remarks || "";
+        poZeroQty.value = draft.data.po_zero_qty || "No";
+
+        // Refresh stock for loaded items
+        if (cartItems.value.length > 0) {
+            const codes = cartItems.value.map(i => i.item_code);
+            fetchStockForItems(codes);
+        }
+
+        return true;
+    }
+
+    function deleteDraft(draftId: string): void {
+        const drafts = getAllDrafts().filter(d => d.id !== draftId);
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
+        
+        if (currentDraftId.value === draftId) {
+            currentDraftId.value = null;
+        }
+    }
+
+    function loadFromOrder(order: PurchaseOrder): void {
+        clearCart();
+        clearSupplier();
+        currentDraftId.value = null;
+
+        selectedSupplier.value = order.supplier;
+        
+        for (const item of order.items || []) {
+            cartItems.value.push({
+                item_code: item.item_code,
+                item_name: item.item_name,
+                qty: item.qty,
+                rate: item.rate,
+                uom: item.uom || item.stock_uom || "Nos",
+                stock_uom: item.stock_uom || "Nos",
+                conversion_factor: item.conversion_factor || 1,
+                warehouse: item.warehouse,
+                stock_in_hand: item.custom_stock_in_hand || 0,
+                transit_stock: item.custom_transit_stock || 0,
+                required_packs: item.custom_required_packs || 0,
+                item_group: "",
+                class: item.custom_class || "",
+                pack_units: item.custom_pack_units || 0,
+                discount_percent: 0,
+                item_packing: item.custom_item_packing || "",
+            });
+        }
+
+        if (cartItems.value.length > 0) {
+            const codes = cartItems.value.map(i => i.item_code);
+            fetchStockForItems(codes);
+        }
+    }
+
+    // Fetch items based on PO Category
+    async function fetchCategoryItems(): Promise<void> {
+        if (!poCategory.value || !selectedSupplier.value) {
+            showError(__("Please select a supplier and PO Category first"));
+            return;
+        }
+
+        isFetchingCategoryItems.value = true;
+
+        try {
+            const posStore = usePosStore();
+            const result = await call<Array<SearchItem & { qty?: number }>>(
+                "xpos.x_pos.api.purchase_orders.get_category_items",
+                {
+                    supplier: selectedSupplier.value,
+                    po_category: poCategory.value,
+                    warehouse: posStore.warehouse,
+                }
+            );
+
+            if (!result || result.length === 0) {
+                showError(__("No items found for this category and supplier"));
+                return;
+            }
+
+            // Clear current items and add new ones
+            cartItems.value = [];
+            for (const item of result) {
+                addToCart(item, item.qty || 1);
+            }
+
+            showSuccess(__("{0} items added", [result.length]));
+        } catch (error) {
+            console.error("Error fetching category items:", error);
+            showError(error instanceof Error ? error.message : "Failed to fetch items");
+        } finally {
+            isFetchingCategoryItems.value = false;
+        }
+    }
+
     return {
         suppliers,
         isLoadingSuppliers,
@@ -803,11 +1083,20 @@ export const usePurchaseStore = defineStore("purchase", () => {
         selectedTransit,
         isReceivingTransit,
         isReturningShortage,
+        poAliasName,
+        poCategory,
+        poType,
+        poDepartment,
+        poRemarks,
+        poZeroQty,
+        currentDraftId,
+        isFetchingCategoryItems,
         cartTotal,
         cartItemCount,
         isEmpty,
         canCreateOrder,
         hasPendingPurchases,
+        lastAddedIndex,
 
         searchSuppliers,
         createSupplier,
@@ -820,6 +1109,11 @@ export const usePurchaseStore = defineStore("purchase", () => {
         updateCartItemQty,
         updateCartItemRate,
         updateCartItemUOM,
+        updateCartItemPacks,
+        updateCartItemDiscount,
+        updateCartItemField,
+        fetchStockForItems,
+        refreshAllStock,
         removeFromCart,
         clearCart,
         createPurchaseOrder,
@@ -839,5 +1133,12 @@ export const usePurchaseStore = defineStore("purchase", () => {
         retryPendingPurchase,
         deletePending,
         init,
+        // Draft management
+        getAllDrafts,
+        saveDraft,
+        loadDraft,
+        deleteDraft,
+        loadFromOrder,
+        fetchCategoryItems,
     };
 });
