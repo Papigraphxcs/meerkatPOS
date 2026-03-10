@@ -283,6 +283,11 @@ def create_invoice(data):
         except Exception:
             pass
 
+    if data.get("pos_delivery_charges"):
+        invoice_doc.pos_delivery_charges = data["pos_delivery_charges"]
+        if data.get("pos_delivery_charges_rate"):
+            invoice_doc.pos_delivery_charges_rate = flt(data["pos_delivery_charges_rate"])
+
     pos_coupons_data = data.get("coupons_detail") or []
     for coupon_row in pos_coupons_data:
         try:
@@ -536,6 +541,11 @@ def save_draft_invoice(data):
             invoice_doc.pos_opening_shift = pos_opening_shift
         except Exception:
             pass
+
+    if data.get("pos_delivery_charges"):
+        invoice_doc.pos_delivery_charges = data["pos_delivery_charges"]
+        if data.get("pos_delivery_charges_rate"):
+            invoice_doc.pos_delivery_charges_rate = flt(data["pos_delivery_charges_rate"])
 
     if is_update:
         invoice_doc.save(ignore_permissions=True)

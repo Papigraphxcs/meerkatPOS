@@ -84,11 +84,15 @@ export const useOfferStore = defineStore("offers", () => {
     }
   }
 
-  async function fetchDeliveryCharges(posProfile: string): Promise<DeliveryCharge[]> {
+  async function fetchDeliveryCharges(posProfile: string, company: string, customer?: string): Promise<DeliveryCharge[]> {
     try {
       const result = await call<DeliveryCharge[]>(
         "xpos.api.offers.get_applicable_delivery_charges",
-        { pos_profile: posProfile }
+        {
+          pos_profile: posProfile,
+          company: company,
+          customer: customer || "",
+        }
       );
       deliveryCharges.value = result || [];
       return deliveryCharges.value;

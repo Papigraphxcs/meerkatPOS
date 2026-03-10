@@ -360,6 +360,8 @@ export interface InvoiceData {
   authorization_code?: string;
   currency?: string;
   conversion_rate?: number;
+  pos_delivery_charges?: string;
+  pos_delivery_charges_rate?: number;
 }
 
 export interface InvoiceTax {
@@ -479,8 +481,10 @@ export interface CashMovementContext {
 export interface DeliveryCharge {
   name: string;
   label: string;
-  charge_type: string;
-  amount: number;
+  default_rate: number;
+  rate: number;
+  shipping_account?: string;
+  cost_center?: string;
   [key: string]: unknown;
 }
 

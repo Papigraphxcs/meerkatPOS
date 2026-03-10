@@ -65,6 +65,15 @@
 				</span>
 			</div>
 
+			<div v-if="cartStore.selectedDeliveryCharge" class="flex items-center justify-between text-sm">
+				<span class="text-muted-foreground flex items-center gap-1">
+					<Truck class="w-3 h-3" /> {{ cartStore.selectedDeliveryCharge.label }}
+				</span>
+				<span class="font-medium text-foreground">
+					+{{ posStore.currencySymbol }}{{ formatPrice(cartStore.selectedDeliveryCharge.rate) }}
+				</span>
+			</div>
+
 			<Separator class="!my-2" />
 
 			<div class="flex items-center justify-between">
@@ -104,8 +113,40 @@
 				:disabled="cartStore.isEmpty" @click="cartStore.clearCart()" :title="__('Clear cart')">
 				<Trash2 class="w-4 h-4" />
 			</Button>
+			<Button variant="outline" size="sm" :disabled="cartStore.isEmpty"
+				:class="{ 'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20': !!cartStore.selectedDeliveryCharge }"
+				@click="toggleDelivery" :title="__('Delivery charge')">
+				<Truck class="w-4 h-4" />
+			</Button>
 		</div>
 
+		<transition name="slide-up">
+			<div v-if="showDelivery" class="bg-muted rounded-lg p-3 space-y-2">
+				<div class="flex items-center justify-between mb-1">
+					<span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{{ __('Delivery Charges') }}</span>
+					<button v-if="cartStore.selectedDeliveryCharge" class="text-xs text-destructive hover:underline" @click="cartStore.setDeliveryCharge(null)">
+						{{ __('Remove') }}
+					</button>
+				</div>
+				<div v-if="isLoadingDelivery" class="text-xs text-muted-foreground">{{ __('Loading...') }}</div>
+				<div v-else-if="!availableDeliveryCharges.length" class="text-xs text-muted-foreground">
+					{{ __('No delivery charges available for this profile') }}
+				</div>
+				<div v-else class="flex flex-wrap gap-2">
+					<button
+						v-for="charge in availableDeliveryCharges"
+						:key="charge.name"
+						@click="selectDeliveryCharge(charge)"
+						class="px-2.5 py-1.5 rounded-md text-xs font-medium border transition-all"
+						:class="cartStore.selectedDeliveryCharge?.name === charge.name
+							? 'bg-blue-600 text-white border-blue-600'
+							: 'bg-background border-border hover:border-blue-400 hover:text-blue-600'"
+					>
+						{{ charge.label }} &mdash; {{ posStore.currencySymbol }}{{ formatPrice(charge.rate) }}
+					</button>
+				</div>
+			</div>
+		</transition>
 		<transition name="slide-up">
 			<div v-if="showDiscount" class="bg-muted rounded-lg p-3 space-y-2">
 				<div class="flex items-center gap-2">
@@ -162,7 +203,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Separator } from "@/components/ui/separator";
-import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2, Percent, FileText } from "lucide-vue-next";
+import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2, Percent, FileText, Truck } from "lucide-vue-next";
+import type { DeliveryCharge } from "@/types/pos.types";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
@@ -170,6 +212,9 @@ const offerStore = useOfferStore();
 
 const showDiscount = ref(false);
 const showCoupon = ref(false);
+const showDelivery = ref(false);
+const isLoadingDelivery = ref(false);
+const availableDeliveryCharges = ref<DeliveryCharge[]>([]);
 const discountType = ref("percentage");
 const discountInput = ref(0);
 const couponInput = ref("");
@@ -206,6 +251,31 @@ const payButtonLabel = computed(() => {
 
 function applyDiscount() {
 	cartStore.setDiscount(discountType.value as "percentage" | "amount", discountInput.value || 0);
+}
+
+async function toggleDelivery() {
+	showDelivery.value = !showDelivery.value;
+	if (showDelivery.value && !availableDeliveryCharges.value.length) {
+		isLoadingDelivery.value = true;
+		try {
+			const charges = await offerStore.fetchDeliveryCharges(
+				posStore.profileName,
+				posStore.companyName,
+				cartStore.customer?.name || ""
+			);
+			availableDeliveryCharges.value = charges;
+		} finally {
+			isLoadingDelivery.value = false;
+		}
+	}
+}
+
+function selectDeliveryCharge(charge: DeliveryCharge) {
+	if (cartStore.selectedDeliveryCharge?.name === charge.name) {
+		cartStore.setDeliveryCharge(null);
+	} else {
+		cartStore.setDeliveryCharge(charge);
+	}
 }
 
 async function applyCouponCode() {

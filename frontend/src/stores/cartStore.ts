@@ -12,7 +12,9 @@ import type {
   POSOffer,
   POSCoupon,
   CalculatedTax,
+  DeliveryCharge,
 } from "@/types/pos.types";
+import __ from "@/lib/translate";
 
 export const useCartStore = defineStore("cart", () => {
   const items = ref<CartItem[]>([]);
@@ -41,6 +43,7 @@ export const useCartStore = defineStore("cart", () => {
   const isLoadingDrafts = ref(false);
   const currency = ref("");
   const conversionRate = ref(1);
+  const selectedDeliveryCharge = ref<DeliveryCharge | null>(null);
 
   const itemCount = computed(() =>
     items.value.reduce((sum: number, item: CartItem) => sum + Math.abs(item.qty), 0)
@@ -51,26 +54,19 @@ export const useCartStore = defineStore("cart", () => {
       const itemTotal = item.qty * item.rate;
       let discount = 0;
       if (item.discount_percentage) {
-        // Percentage discount works correctly for both positive and negative totals
         discount = (itemTotal * item.discount_percentage) / 100;
       } else if (item.discount_amount) {
-        // For amount discount on return items (negative qty), we need to negate the discount
-        // so that subtracting it reduces the refund amount
         discount = item.qty < 0 ? -item.discount_amount : item.discount_amount;
       }
       return sum + (itemTotal - discount);
     }, 0)
   );
 
-  // Calculate individual tax amounts based on tax template
-  // Supports item-level tax templates: when an item has an item_tax_map,
-  // its tax rate overrides the global POS profile rate for matching account heads.
   const calculatedTaxes = computed(() => {
     const posStore = usePosStore();
     const taxDetails = posStore.taxes || [];
     const taxInclusive = posStore.taxInclusiveMode;
 
-    // Compute per-item net amount (after item discounts)
     const itemNets: { net: number; taxMap: Record<string, number> | undefined }[] = [];
     for (const item of items.value) {
       const itemTotal = item.qty * item.rate;
@@ -94,9 +90,7 @@ export const useCartStore = defineStore("cart", () => {
       const isIncluded = tax.included_in_print_rate === 1;
       let totalTaxAmount = 0;
 
-      // Calculate tax per-item to respect item-level overrides
       for (const { net, taxMap } of itemNets) {
-        // Determine effective rate for this item & tax account
         let effectiveRate = tax.rate;
         if (taxMap && tax.account_head in taxMap) {
           effectiveRate = taxMap[tax.account_head];
@@ -111,7 +105,6 @@ export const useCartStore = defineStore("cart", () => {
         }
       }
 
-      // Actual (fixed) taxes are not per-item
       if (tax.charge_type === "Actual") {
         totalTaxAmount = tax.rate;
       }
@@ -126,8 +119,6 @@ export const useCartStore = defineStore("cart", () => {
       }
     }
 
-    // Also collect taxes from item_tax_maps that don't exist in the POS profile taxes.
-    // These are item-specific tax accounts not in the global template.
     const profileAccountHeads = new Set(taxDetails.map((t) => t.account_head));
     const extraTaxAccounts: Map<string, number> = new Map();
 
@@ -158,21 +149,18 @@ export const useCartStore = defineStore("cart", () => {
     return result;
   });
 
-  // Total tax that is NOT included in prices (to be added)
   const taxAmount = computed(() => {
     return calculatedTaxes.value
       .filter((t) => !t.included_in_print_rate)
       .reduce((sum, t) => sum + t.amount, 0);
   });
 
-  // Total tax that IS included in prices (for display only)
   const includedTaxAmount = computed(() => {
     return calculatedTaxes.value
       .filter((t) => t.included_in_print_rate)
       .reduce((sum, t) => sum + t.amount, 0);
   });
 
-  // Total of all taxes (for display)
   const totalTaxAmount = computed(() => {
     return calculatedTaxes.value.reduce((sum, t) => sum + t.amount, 0);
   });
@@ -185,17 +173,16 @@ export const useCartStore = defineStore("cart", () => {
     } else if (discountAmount.value > 0) {
       total -= discountAmount.value;
     }
-    // Subtract loyalty amount (not applicable for returns)
     if (!isReturnMode.value && redeemLoyaltyPoints.value && loyaltyAmount.value > 0) {
       total -= loyaltyAmount.value;
     }
-    // Subtract write-off (not applicable for returns)
     if (!isReturnMode.value && writeOffAmount.value > 0) {
       total -= writeOffAmount.value;
     }
-    // For returns, allow negative total; for regular sales, ensure non-negative
+    if (!isReturnMode.value && selectedDeliveryCharge.value) {
+      total += selectedDeliveryCharge.value.rate || 0;
+    }
     total = isReturnMode.value ? total : Math.max(0, total);
-    // Apply rounding unless disabled in Global Defaults
     if (!posStore.disableRoundedTotal && total !== 0) {
       total = Math.round(total);
     }
@@ -220,22 +207,15 @@ export const useCartStore = defineStore("cart", () => {
   const hasOffers = computed(
     () => appliedOffers.value.length > 0 || !!appliedCoupon.value
   );
-
-
-  /**
-   * Check if item can be added to cart based on stock availability
-   * Returns true if item can be added, false otherwise
-   */
+  
   function canAddItem(item: POSItem): { allowed: boolean; message?: string } {
     const posStore = usePosStore();
     const allowNegativeStock = posStore.stockSettings?.allow_negative_stock;
 
-    // If negative stock is allowed, always permit adding
     if (allowNegativeStock) {
       return { allowed: true };
     }
 
-    // Check available quantity
     const actualQty = item.actual_qty ?? 0;
     if (actualQty <= 0) {
       return {
@@ -244,7 +224,6 @@ export const useCartStore = defineStore("cart", () => {
       };
     }
 
-    // Check if adding would exceed available stock
     const existingItem = items.value.find(
       (i: CartItem) =>
         i.item_code === item.item_code && !i.serial_no && !i.batch_no
@@ -262,7 +241,6 @@ export const useCartStore = defineStore("cart", () => {
   }
 
   function addItem(item: POSItem): { success: boolean; message?: string } {
-    // Check stock availability before adding
     const stockCheck = canAddItem(item);
     if (!stockCheck.allowed && !isReturnMode.value) {
       return { success: false, message: stockCheck.message };
@@ -297,10 +275,7 @@ export const useCartStore = defineStore("cart", () => {
 
     return { success: true };
   }
-
-  /**
-   * Check if item with specific details can be added
-   */
+  
   function canAddItemWithDetails(
     item: POSItem,
     qty: number,
@@ -320,9 +295,7 @@ export const useCartStore = defineStore("cart", () => {
         message: `${item.item_name} is out of stock`
       };
     }
-
-    // For batch items, the qty check should be against actual_qty
-    // For regular items, sum up existing qty in cart
+    
     const existingItems = items.value.filter(
       (i: CartItem) =>
         i.item_code === item.item_code &&
@@ -349,7 +322,6 @@ export const useCartStore = defineStore("cart", () => {
     batchNo?: string,
     conversionFactor?: number
   ): { success: boolean; message?: string } {
-    // Check stock availability before adding (skip for return mode and serial items)
     if (!isReturnMode.value && !serialNo) {
       const stockCheck = canAddItemWithDetails(item, qty, batchNo);
       if (!stockCheck.allowed) {
@@ -357,7 +329,6 @@ export const useCartStore = defineStore("cart", () => {
       }
     }
 
-    // For items with serial numbers, always add as new line (unique serial)
     if (!serialNo) {
       const existing = items.value.find(
         (i: CartItem) =>
@@ -406,9 +377,8 @@ export const useCartStore = defineStore("cart", () => {
     }
 
     const item = items.value[index];
-    if (!item) return { success: false, message: "Item not found" };
+    if (!item) return { success: false, message: __("Item not found") };
 
-    // Validate stock when increasing quantity (not in return mode)
     if (!isReturnMode.value && qty > item.qty) {
       const posStore = usePosStore();
       const allowNegativeStock = posStore.stockSettings?.allow_negative_stock;
@@ -464,10 +434,6 @@ export const useCartStore = defineStore("cart", () => {
     customer.value = cust;
   }
 
-  /**
-   * Set item-level tax template and tax map for a cart item.
-   * Called after the backend resolves the applicable tax template.
-   */
   function setItemTax(
     itemCode: string,
     taxTemplate: string,
@@ -572,6 +538,7 @@ export const useCartStore = defineStore("cart", () => {
     currentDraftName.value = "";
     currency.value = "";
     conversionRate.value = 1;
+    selectedDeliveryCharge.value = null;
   }
 
   function clearAll(): void {
@@ -718,7 +685,7 @@ export const useCartStore = defineStore("cart", () => {
   function closeDraftDialog(): void {
     showDraftDialog.value = false;
   }
-  
+
   function loadFromInvoice(invoiceData: {
     customer: string;
     customer_name: string;
@@ -856,7 +823,16 @@ export const useCartStore = defineStore("cart", () => {
       }));
     }
 
+    if (selectedDeliveryCharge.value) {
+      data.pos_delivery_charges = selectedDeliveryCharge.value.name;
+      data.pos_delivery_charges_rate = selectedDeliveryCharge.value.rate;
+    }
+
     return data;
+  }
+
+  function setDeliveryCharge(charge: DeliveryCharge | null): void {
+    selectedDeliveryCharge.value = charge;
   }
 
   return {
@@ -886,6 +862,7 @@ export const useCartStore = defineStore("cart", () => {
     isLoadingDrafts,
     currency,
     conversionRate,
+    selectedDeliveryCharge,
     // Computed
     itemCount,
     subtotal,
@@ -936,5 +913,6 @@ export const useCartStore = defineStore("cart", () => {
     loadDraftInvoice,
     openDraftDialog,
     closeDraftDialog,
+    setDeliveryCharge,
   };
 });
