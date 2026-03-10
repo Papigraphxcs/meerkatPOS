@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
 import frappe
 from frappe.utils import cstr, flt, getdate, nowdate
-from xpos.x_pos.doctype.pos_coupon.pos_coupon import check_coupon_code
+from xpos.x_pos.doctype.xpos_coupon.xpos_coupon import check_coupon_code
 from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges as _get_applicable_delivery_charges,
 )

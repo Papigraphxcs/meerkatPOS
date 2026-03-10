@@ -3,37 +3,40 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe import _
+from frappe.utils import strip
+from frappe.utils import getdate, today
 
 
 class XPOSCoupon(Document):
-	# begin: auto-generated types
-	# This code is auto-generated. Do not modify anything in this block.
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
 
-	from typing import TYPE_CHECKING
+    from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
-		from frappe.types import DF
+    if TYPE_CHECKING:
+        from frappe.types import DF
 
-		campaign: DF.Link | None
-		company: DF.Link
-		coupon_code: DF.Data | None
-		coupon_name: DF.Data
-		coupon_type: DF.Literal["Promotional", "Gift Card"]
-		customer: DF.Link | None
-		customer_name: DF.Data | None
-		description: DF.TextEditor | None
-		email_id: DF.Data | None
-		maximum_use: DF.Int
-		mobile_no: DF.Data | None
-		one_use: DF.Check
-		pos_offer: DF.Link
-		referral_code: DF.Link | None
-		used: DF.Int
-		valid_from: DF.Date | None
-		valid_upto: DF.Date | None
-	# end: auto-generated types
- 
-	def autoname(self):
+        campaign: DF.Link | None
+        company: DF.Link
+        coupon_code: DF.Data | None
+        coupon_name: DF.Data
+        coupon_type: DF.Literal["Promotional", "Gift Card"]
+        customer: DF.Link | None
+        customer_name: DF.Data | None
+        description: DF.TextEditor | None
+        email_id: DF.Data | None
+        maximum_use: DF.Int
+        mobile_no: DF.Data | None
+        one_use: DF.Check
+        pos_offer: DF.Link
+        referral_code: DF.Link | None
+        used: DF.Int
+        valid_from: DF.Date | None
+        valid_upto: DF.Date | None
+    # end: auto-generated types
+    
+    def autoname(self):
         self.coupon_name = strip(self.coupon_name)
         self.name = self.coupon_name
 

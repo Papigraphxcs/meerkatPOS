@@ -1,5 +1,5 @@
 import frappe
-from xpos.x_pos.doctype.pos_closing_shift.closing_processing.invoices import submit_printed_invoices
+from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.invoices import submit_printed_invoices
 
 @frappe.whitelist()
 def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
@@ -16,7 +16,7 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_pos_invoices(pos_opening_shift, doctype=None):
     if not doctype:
-        pos_profile = frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile")
+        pos_profile = frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "pos_profile")
         use_pos_invoice = frappe.db.get_value(
             "POS Profile",
             pos_profile,

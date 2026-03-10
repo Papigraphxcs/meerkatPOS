@@ -81,7 +81,7 @@
    "is_query_report": 0,
    "label": "POS Opening Shift",
    "link_count": 0,
-   "link_to": "POS Opening Shift",
+   "link_to": "XPOS Opening Shift",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"

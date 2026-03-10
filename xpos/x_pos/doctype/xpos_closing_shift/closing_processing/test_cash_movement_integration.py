@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from xpos.x_pos.doctype.pos_closing_shift.closing_processing import creation, overview
+from xpos.x_pos.doctype.xpos_closing_shift.closing_processing import creation, overview
 
 
 class DummyClosingShift:
@@ -81,7 +81,7 @@ class TestClosingShiftCashMovementIntegration(unittest.TestCase):
             0 if field == "create_pos_invoice_instead_of_sales_invoice" else "Cash"
         )
         mock_frappe.get_doc.return_value = SimpleNamespace(
-            doctype="POS Opening Shift",
+            doctype="XPOS Opening Shift",
             name="POS-OPEN-1",
             pos_profile="POS-PROFILE-1",
             company="My Co",

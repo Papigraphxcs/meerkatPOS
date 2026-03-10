@@ -2,8 +2,8 @@ import frappe
 from frappe.utils import flt, json
 from collections import defaultdict
 from frappe import _
-from xpos.x_pos.doctype.pos_closing_shift.closing_processing.utils import get_base_value
-from xpos.x_pos.doctype.pos_closing_shift.closing_processing.data import (
+from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.utils import get_base_value
+from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.data import (
     get_pos_invoices,
     get_payments_entries,
 )

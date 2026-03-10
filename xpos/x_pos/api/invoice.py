@@ -12,7 +12,7 @@ from xpos.x_pos.api.payments import get_pos_credit_redeem_remark
 from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
-from xpos.x_pos.doctype.pos_coupon.pos_coupon import update_coupon_code_count
+from xpos.x_pos.doctype.xpos_coupon.xpos_coupon import update_coupon_code_count
 
 
 def validate(doc, method):
@@ -306,13 +306,12 @@ def apply_tax_inclusive(doc):
 
 def validate_shift(doc):
     if getattr(doc, "pos_opening_shift", None) and doc.pos_profile and doc.is_pos:
-        # check if shift is open
         shift = frappe.get_cached_doc("XPOS Opening Shift", doc.pos_opening_shift)
         if shift.status != "Open":
             frappe.throw(_("POS Shift {0} is not open").format(shift.name))
-        # check if shift is for the same profile
+        
         if shift.pos_profile != doc.pos_profile:
             frappe.throw(_("POS Opening Shift {0} is not for the same POS Profile").format(shift.name))
-        # check if shift is for the same company
+        
         if shift.company != doc.company:
             frappe.throw(_("POS Opening Shift {0} is not for the same company").format(shift.name))

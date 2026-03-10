@@ -37,7 +37,7 @@ class XPOSClosingShift(Document):
         from frappe.types import DF
         from xpos.x_pos.doctype.xpos_closing_shift_detail.xpos_closing_shift_detail import XPOSClosingShiftDetail
         from xpos.x_pos.doctype.xpos_closing_shift_taxes.xpos_closing_shift_taxes import XPOSClosingShiftTaxes
-        from xpos.x_pos.doctype.pos_payment_entry_reference.pos_payment_entry_reference import POSPaymentEntryReference
+        from xpos.x_pos.doctype.xpos_payment_entry_reference.xpos_payment_entry_reference import POSPaymentEntryReference
         from xpos.x_pos.doctype.sales_invoice_reference.sales_invoice_reference import SalesInvoiceReference
 
         amended_from: DF.Link | None

@@ -24,7 +24,7 @@ def expand_item_groups(item_groups):
         return item_groups
 
     try:
-        from erpnext.utilities.doctype.item_group.item_group import get_child_groups
+        from erpnext.setup.doctype.item_group.item_group import get_child_groups
     except Exception:
         get_child_groups = None
 

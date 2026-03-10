@@ -1,6 +1,4 @@
-"""Shared helpers for bulk item data retrieval used by POS Awesome APIs."""
-
-from __future__ import annotations
+"""Shared helpers for bulk item data retrieval."""
 
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
