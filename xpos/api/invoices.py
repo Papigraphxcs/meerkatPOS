@@ -445,13 +445,18 @@ def update_draft_invoice(data):
 
 @frappe.whitelist()
 def save_draft_invoice(data):
-    """Save invoice as draft without submitting."""
+    """Save invoice as draft without submitting.
+
+    If data contains a ``name`` field that matches an existing draft invoice,
+    that draft is updated in place rather than creating a new document.
+    """
     data = json.loads(data) if isinstance(data, str) else data
 
     pos_profile = data.get("pos_profile")
     customer = data.get("customer")
     items = data.get("items", [])
     pos_opening_shift = data.get("pos_opening_shift")
+    invoice_name = data.get("name")
 
     if not pos_profile or not customer or not items:
         frappe.throw(_("POS Profile, Customer, and Items are required"))
@@ -469,7 +474,18 @@ def save_draft_invoice(data):
             "Company", pos.company, "default_receivable_account"
         )
 
-    invoice_doc = frappe.new_doc(doctype)
+    # If an existing draft name is provided, update it instead of creating a new one
+    is_update = False
+    if invoice_name and frappe.db.exists(doctype, invoice_name):
+        invoice_doc = frappe.get_doc(doctype, invoice_name)
+        if invoice_doc.docstatus != 0:
+            frappe.throw(_("Invoice {0} is not a draft and cannot be updated").format(invoice_name))
+        is_update = True
+        invoice_doc.set("items", [])
+        invoice_doc.set("taxes", [])
+    else:
+        invoice_doc = frappe.new_doc(doctype)
+
     invoice_doc.is_pos = 1
     invoice_doc.pos_profile = pos_profile
     invoice_doc.customer = customer
@@ -478,10 +494,22 @@ def save_draft_invoice(data):
     invoice_doc.posting_date = nowdate()
     invoice_doc.set_warehouse = pos.warehouse
     invoice_doc.update_stock = cint(pos.get("update_stock")) or 1
-    invoice_doc.currency = pos.currency or frappe.db.get_value(
+    invoice_doc.currency = data.get("currency") or pos.currency or frappe.db.get_value(
         "Company", pos.company, "default_currency"
     )
-    invoice_doc.selling_price_list = pos.get("selling_price_list")
+    invoice_doc.selling_price_list = data.get("selling_price_list") or pos.get("selling_price_list")
+
+    if data.get("additional_discount_percentage"):
+        invoice_doc.additional_discount_percentage = flt(data["additional_discount_percentage"])
+        invoice_doc.apply_discount_on = data.get("apply_discount_on") or "Grand Total"
+    elif data.get("discount_amount"):
+        invoice_doc.discount_amount = flt(data["discount_amount"])
+        invoice_doc.apply_discount_on = data.get("apply_discount_on") or "Grand Total"
+
+    try:
+        invoice_doc.pos_notes = data.get("pos_notes") or ""
+    except Exception:
+        pass
 
     for item_data in items:
         item = invoice_doc.append("items", {})
@@ -491,6 +519,10 @@ def save_draft_invoice(data):
         item.rate = flt(item_data.get("rate", 0))
         item.uom = item_data.get("uom") or item_data.get("stock_uom")
         item.warehouse = item_data.get("warehouse") or pos.warehouse
+        if item_data.get("discount_percentage"):
+            item.discount_percentage = flt(item_data["discount_percentage"])
+        if item_data.get("discount_amount"):
+            item.discount_amount = flt(item_data["discount_amount"])
         if item_data.get("serial_no"):
             item.serial_no = item_data["serial_no"]
         if item_data.get("batch_no"):
@@ -505,7 +537,10 @@ def save_draft_invoice(data):
         except Exception:
             pass
 
-    invoice_doc.insert(ignore_permissions=True)
+    if is_update:
+        invoice_doc.save(ignore_permissions=True)
+    else:
+        invoice_doc.insert(ignore_permissions=True)
 
     return {
         "name": invoice_doc.name,

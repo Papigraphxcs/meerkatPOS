@@ -141,6 +141,12 @@ import { useCustomerStore } from "@/stores/customerStore";
 import { usePosStore } from "@/stores/posStore";
 import { showSuccess, showError, call } from "@/services/api";
 import {
+    cacheCustomerGroups, getCachedCustomerGroups,
+    cacheTerritories, getCachedTerritories,
+    cacheCountries, getCachedCountries,
+} from "@/services/idbService";
+import { isOnline } from "@/utils";
+import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -160,8 +166,6 @@ const search = ref("");
 const showNewForm = ref(false);
 const isCreating = ref(false);
 const highlightedIndex = ref(-1);
-
-// Dropdown options
 const customerGroups = ref<string[]>([]);
 const territories = ref<string[]>([]);
 const countries = ref<string[]>([]);
@@ -183,7 +187,6 @@ const newCustomer = ref({
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-// Reset highlight when customer list changes
 watch(() => customerStore.customers.length, () => {
     highlightedIndex.value = customerStore.customers.length > 0 ? 0 : -1;
 });
@@ -195,24 +198,57 @@ onMounted(() => {
         (input as HTMLInputElement)?.focus();
     });
 
-    // Fetch dropdown options for the new customer form
     fetchDropdownOptions();
 });
 
 async function fetchDropdownOptions() {
+    const [cachedGroups, cachedTerritories, cachedCountries] = await Promise.all([
+        getCachedCustomerGroups(),
+        getCachedTerritories(),
+        getCachedCountries(),
+    ]);
+
+    if (cachedGroups.length) customerGroups.value = cachedGroups;
+    if (cachedTerritories.length) territories.value = cachedTerritories;
+    if (cachedCountries.length) countries.value = cachedCountries;
+
+    if (!isOnline()) {
+        if (!customerGroups.value.length) customerGroups.value = ["All Customer Groups"];
+        if (!territories.value.length) territories.value = ["All Territories"];
+        if (!countries.value.length) countries.value = ["Pakistan"];
+        return;
+    }
     try {
         const [groupsResult, territoriesResult, countriesResult] = await Promise.all([
-            call<string[]>("xpos.api.customers.get_customer_groups").catch(() => []),
-            call<string[]>("xpos.api.customers.get_territories").catch(() => []),
-            call<string[]>("xpos.api.customers.get_countries").catch(() => []),
+            call<string[]>("xpos.api.customers.get_customer_groups").catch(() => [] as string[]),
+            call<string[]>("xpos.api.customers.get_territories").catch(() => [] as string[]),
+            call<string[]>("xpos.api.customers.get_countries").catch(() => [] as string[]),
         ]);
-        customerGroups.value = groupsResult || ["All Customer Groups"];
-        territories.value = territoriesResult || ["All Territories"];
-        countries.value = countriesResult || ["Pakistan"];
+
+        if (groupsResult?.length) {
+            customerGroups.value = groupsResult;
+            await cacheCustomerGroups(groupsResult);
+        } else if (!customerGroups.value.length) {
+            customerGroups.value = ["All Customer Groups"];
+        }
+
+        if (territoriesResult?.length) {
+            territories.value = territoriesResult;
+            await cacheTerritories(territoriesResult);
+        } else if (!territories.value.length) {
+            territories.value = ["All Territories"];
+        }
+
+        if (countriesResult?.length) {
+            countries.value = countriesResult;
+            await cacheCountries(countriesResult);
+        } else if (!countries.value.length) {
+            countries.value = ["Pakistan"];
+        }
     } catch {
-        customerGroups.value = ["All Customer Groups"];
-        territories.value = ["All Territories"];
-        countries.value = ["Pakistan"];
+        if (!customerGroups.value.length) customerGroups.value = ["All Customer Groups"];
+        if (!territories.value.length) territories.value = ["All Territories"];
+        if (!countries.value.length) countries.value = ["Pakistan"];
     }
 }
 
@@ -233,7 +269,6 @@ function moveHighlight(direction: number) {
     if (newIdx >= len) newIdx = 0;
     highlightedIndex.value = newIdx;
 
-    // Scroll highlighted item into view
     nextTick(() => {
         const btn = customerRefs[newIdx];
         if (btn) {
@@ -259,7 +294,6 @@ async function createAndSelect() {
     isCreating.value = true;
 
     try {
-        // Build payload with all fields
         const payload: Record<string, unknown> = {
             customer_name: newCustomer.value.customer_name,
             mobile_no: newCustomer.value.mobile_no || undefined,
@@ -275,7 +309,6 @@ async function createAndSelect() {
             country: newCustomer.value.country || undefined,
         };
 
-        // Remove undefined values
         Object.keys(payload).forEach((key) => {
             if (payload[key] === undefined) delete payload[key];
         });
@@ -305,7 +338,6 @@ function close() {
     customerStore.showCustomerDialog = false;
     showNewForm.value = false;
     search.value = "";
-    // Reset form
     newCustomer.value = {
         customer_name: "",
         tax_id: "",

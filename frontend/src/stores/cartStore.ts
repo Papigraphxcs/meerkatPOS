@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { call } from "@/services/api";
 import { usePosStore } from "./posStore";
+import { getCachedItemByCode, getCachedStockForItem } from "@/services/idbService";
 import type {
   CartItem,
   POSItem,
@@ -636,10 +637,34 @@ export const useCartStore = defineStore("cart", () => {
           customer_name: result.customer_name || result.customer,
         };
       }
-      
-      // Load items
+
       if (result.items && Array.isArray(result.items)) {
+        const posStore = usePosStore();
+        const warehouse = posStore.warehouse || "";
+
+        const { useItemStore } = await import("@/stores/itemStore");
+        const itemStore = useItemStore();
+        const inMemoryMap = new Map<string, number>(
+          itemStore.items.map((i: POSItem) => [i.item_code, i.actual_qty ?? 0])
+        );
+
         for (const item of result.items) {
+          let actualQty: number = inMemoryMap.get(item.item_code) ?? -1;
+
+          if (actualQty < 0) {
+            if (warehouse) {
+              const stockEntry = await getCachedStockForItem(warehouse, item.item_code);
+              if (stockEntry) {
+                actualQty = stockEntry.actual_qty;
+              }
+            }
+
+            if (actualQty < 0) {
+              const cachedItem = await getCachedItemByCode(item.item_code);
+              actualQty = cachedItem?.actual_qty ?? 0;
+            }
+          }
+
           items.value.push({
             item_code: item.item_code,
             item_name: item.item_name,
@@ -652,7 +677,7 @@ export const useCartStore = defineStore("cart", () => {
             discount_amount: item.discount_amount || 0,
             serial_no: item.serial_no || "",
             batch_no: item.batch_no || "",
-            actual_qty: 0,
+            actual_qty: actualQty,
             has_serial_no: item.has_serial_no || false,
             has_batch_no: item.has_batch_no || false,
             conversion_factor: 1,
@@ -661,16 +686,13 @@ export const useCartStore = defineStore("cart", () => {
           } as CartItem);
         }
       }
-      
-      // Load discounts
+
       if (result.additional_discount_percentage) {
         discountPercentage.value = result.additional_discount_percentage;
       }
       if (result.discount_amount) {
         discountAmount.value = result.discount_amount;
       }
-      
-      // Load other fields
       if (result.pos_notes) {
         orderNotes.value = result.pos_notes;
       }
@@ -680,8 +702,6 @@ export const useCartStore = defineStore("cart", () => {
       if (result.authorization_code) {
         authorizationCode.value = result.authorization_code;
       }
-      
-      // Set current draft name
       currentDraftName.value = draftName;
       
       return true;
@@ -698,10 +718,7 @@ export const useCartStore = defineStore("cart", () => {
   function closeDraftDialog(): void {
     showDraftDialog.value = false;
   }
-
-  /**
-   * Load items from an existing invoice into the cart (repeat invoice).   * Clears the current cart first, then adds all items from the invoice.
-   */
+  
   function loadFromInvoice(invoiceData: {
     customer: string;
     customer_name: string;

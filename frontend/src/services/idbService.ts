@@ -443,6 +443,33 @@ export async function getCachedPOSData(): Promise<unknown | null> {
   return await getMeta("pos_complete_data");
 }
 
+export async function cacheCustomerGroups(groups: string[]): Promise<void> {
+  await setMeta("customer_groups", groups);
+}
+
+export async function getCachedCustomerGroups(): Promise<string[]> {
+  const val = await getMeta("customer_groups");
+  return val ? (val as string[]) : [];
+}
+
+export async function cacheTerritories(territories: string[]): Promise<void> {
+  await setMeta("territories", territories);
+}
+
+export async function getCachedTerritories(): Promise<string[]> {
+  const val = await getMeta("territories");
+  return val ? (val as string[]) : [];
+}
+
+export async function cacheCountries(countries: string[]): Promise<void> {
+  await setMeta("countries", countries);
+}
+
+export async function getCachedCountries(): Promise<string[]> {
+  const val = await getMeta("countries");
+  return val ? (val as string[]) : [];
+}
+
 export async function cacheItemTax(
   itemCode: string,
   company: string,
