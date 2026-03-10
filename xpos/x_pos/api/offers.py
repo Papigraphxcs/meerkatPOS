@@ -23,7 +23,7 @@ def get_active_gift_coupons(customer, company):
     coupons = []
     today = getdate(nowdate())
     coupons_data = frappe.get_all(
-        "POS Coupon",
+        "XPOS Coupon",
         filters={
             "company": company,
             "coupon_type": "Gift Card",
@@ -130,7 +130,7 @@ def _get_promotional_scheme_offers(pos_profile):
             as_dict=True,
         )
     except Exception:
-        frappe.log_error(frappe.get_traceback(), "POS Awesome - Failed to fetch Promotional Schemes")
+        frappe.log_error(frappe.get_traceback(), "XPOS - Failed to fetch Promotional Schemes")
         return []
 
     offers = []
@@ -140,7 +140,7 @@ def _get_promotional_scheme_offers(pos_profile):
         except Exception:
             frappe.log_error(
                 frappe.get_traceback(),
-                f"POS Awesome - Unable to load Promotional Scheme {row.name}",
+                f"POS - Unable to load Promotional Scheme {row.name}",
             )
             continue
 

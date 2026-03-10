@@ -499,7 +499,7 @@ class ItemDetailAggregator:
             except Exception:
                 frappe.log_error(
                     f"Missing exchange rate from {price_list_currency} to {company_currency}",
-                    "POS Awesome",
+                    "XPOS",
                 )
         return 1
 

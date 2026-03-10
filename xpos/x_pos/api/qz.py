@@ -136,10 +136,10 @@ def setup_qz_certificate() -> dict[str, str]:
         # Non-POSIX platforms may not support chmod modes the same way.
         pass
 
-    company = frappe.db.get_default("company") or "POS Awesome"
+    company = frappe.db.get_default("company") or "XPOS"
     subject = issuer = x509.Name(
         [
-            x509.NameAttribute(NameOID.COMMON_NAME, "POS Awesome QZ Tray Signing"),
+            x509.NameAttribute(NameOID.COMMON_NAME, "XPOS QZ Tray Signing"),
             x509.NameAttribute(NameOID.ORGANIZATION_NAME, company),
         ]
     )
@@ -162,7 +162,7 @@ def setup_qz_certificate() -> dict[str, str]:
     frappe.msgprint(
         _(
             "QZ Tray certificate generated successfully.<br><br>"
-            "Download the certificate from POS Awesome and import it into "
+            "Download the certificate from XPOS and import it into "
             "QZ Tray on each POS machine, then restart QZ Tray."
         ),
         title=_("QZ Certificate Ready"),

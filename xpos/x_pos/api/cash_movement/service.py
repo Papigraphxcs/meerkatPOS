@@ -28,7 +28,7 @@ from .validation import (
 
 
 def _enforce_shift_access(pos_opening_shift):
-    shift_user = frappe.db.get_value("POS Opening Shift", pos_opening_shift, "user")
+    shift_user = frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "user")
     if not shift_user:
         frappe.throw(_("POS Opening Shift not found."))
     if shift_user != frappe.session.user and not is_manager():
@@ -67,7 +67,7 @@ def _create_cash_movement(payload, movement_type):
 
     movement_doc = frappe.get_doc(
         {
-            "doctype": "POS Cash Movement",
+            "doctype": "XPOS Cash Movement",
             "posting_date": data.get("posting_date") or nowdate(),
             "company": profile_doc.company,
             "pos_profile": profile_doc.name,
@@ -106,7 +106,7 @@ def _create_cash_movement(payload, movement_type):
 def get_cash_movement_context(pos_profile=None, pos_opening_shift=None):
     profile_name = pos_profile
     if not profile_name and pos_opening_shift:
-        profile_name = frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile")
+        profile_name = frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "pos_profile")
     if not profile_name:
         frappe.throw(_("POS Profile is required."))
 
@@ -187,7 +187,7 @@ def get_submitted_expenses(pos_opening_shift, limit_start=0, limit_page_length=5
 
 @frappe.whitelist()
 def cancel_cash_movement(name):
-    movement_doc = frappe.get_doc("POS Cash Movement", name)
+    movement_doc = frappe.get_doc("XPOS Cash Movement", name)
     ensure_owner_or_manager(movement_doc)
     if movement_doc.docstatus != 1:
         frappe.throw(_("Only submitted cash movements can be cancelled."))
@@ -203,7 +203,7 @@ def cancel_cash_movement(name):
 
 @frappe.whitelist()
 def delete_cash_movement(name):
-    movement_doc = frappe.get_doc("POS Cash Movement", name)
+    movement_doc = frappe.get_doc("XPOS Cash Movement", name)
     ensure_owner_or_manager(movement_doc)
     if movement_doc.docstatus != 2:
         frappe.throw(_("Only cancelled cash movements can be deleted."))
@@ -218,7 +218,7 @@ def delete_cash_movement(name):
 
 @frappe.whitelist()
 def duplicate_cash_movement(name, posting_date=None):
-    movement_doc = frappe.get_doc("POS Cash Movement", name)
+    movement_doc = frappe.get_doc("XPOS Cash Movement", name)
     ensure_owner_or_manager(movement_doc)
     if movement_doc.docstatus not in (1, 2):
         frappe.throw(_("Only submitted or cancelled cash movements can be duplicated."))

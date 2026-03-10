@@ -28,7 +28,7 @@ def get_cash_movement_context(pos_profile):
     allow_cash_deposit = cint(pos.get("allow_cash_deposit"))
 
     expense_accounts = frappe.get_all(
-        "POS Allowed Expense Account",
+        "XPOS Allowed Expense Account",
         filters={"parent": pos_profile},
         fields=["account"],
         order_by="idx",
@@ -42,7 +42,7 @@ def get_cash_movement_context(pos_profile):
     )
 
     source_accounts = frappe.get_all(
-        "POS Allowed Source Account",
+        "XPOS Allowed Source Account",
         filters={"parent": pos_profile},
         fields=["account"],
         order_by="idx",
@@ -88,7 +88,7 @@ def create_pos_expense(payload):
     if not expense_account:
         frappe.throw(_("Expense account is required"))
 
-    opening = frappe.get_doc("POS Opening Shift", pos_opening_shift)
+    opening = frappe.get_doc("XPOS Opening Shift", pos_opening_shift)
     company = company or opening.company
     cost_center = cost_center or frappe.db.get_value("Company", company, "cost_center")
 
@@ -133,7 +133,7 @@ def create_pos_expense(payload):
     je.submit()
     
     movement = _create_cash_movement_record(
-        pos_profile=frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile"),
+        pos_profile=frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "pos_profile"),
         pos_opening_shift=pos_opening_shift,
         source_account=cash_account,
         target_account=expense_account,
@@ -170,7 +170,7 @@ def create_cash_deposit(payload):
     if not target_account:
         frappe.throw(_("Target account is required"))
 
-    opening = frappe.get_doc("POS Opening Shift", pos_opening_shift)
+    opening = frappe.get_doc("XPOS Opening Shift", pos_opening_shift)
     company = company or opening.company
     cost_center = cost_center or frappe.db.get_value("Company", company, "cost_center")
 
@@ -213,7 +213,7 @@ def create_cash_deposit(payload):
     je.submit()
 
     movement = _create_cash_movement_record(
-        pos_profile=frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile"),
+        pos_profile=frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "pos_profile"),
         pos_opening_shift=pos_opening_shift,
         source_account=cash_account,
         target_account=target_account,
@@ -246,7 +246,7 @@ def get_shift_cash_movements(
         filters["movement_type"] = movement_type
 
     return frappe.get_list(
-        "POS Cash Movement",
+        "XPOS Cash Movement",
         filters=filters,
         fields=[
             "name",
@@ -266,12 +266,10 @@ def get_shift_cash_movements(
 
 @frappe.whitelist()
 def cancel_cash_movement(name):
-    """Cancels a submitted cash movement and its linked journal entry.
-
-    Same as POS Awesome's cancel_cash_movement.
-    """
+    """Cancels a submitted cash movement and its linked journal entry."""
+    
     try:
-        movement = frappe.get_doc("POS Cash Movement", name)
+        movement = frappe.get_doc("XPOS Cash Movement", name)
     except Exception:
         frappe.throw(_("Cash movement {0} not found").format(name))
 
@@ -287,7 +285,7 @@ def cancel_cash_movement(name):
         except Exception:
             frappe.log_error(
                 f"Failed to cancel Journal Entry {movement.journal_entry}",
-                "X POS Cash Movement",
+                "XPOS Cash Movement",
             )
 
     movement.status = "Cancelled"
@@ -300,7 +298,7 @@ def _create_cash_movement_record(**kwargs):
     """Create a POS Cash Movement record if the doctype exists."""
     movement = frappe.get_doc(
         {
-            "doctype": "POS Cash Movement",
+            "doctype": "XPOS Cash Movement",
             "docstatus": 1,
             "pos_profile": kwargs.get("pos_profile"),
             "pos_opening_shift": kwargs.get("pos_opening_shift"),

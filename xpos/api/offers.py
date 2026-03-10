@@ -74,9 +74,9 @@ def get_offers(pos_profile):
 
 @frappe.whitelist()
 def get_pos_coupon(coupon, customer, company):
-    """Validate and return a POS coupon."""
+    """Validate and return a XPOS coupon."""
     coupon_doc = frappe.db.get_value(
-        "POS Coupon",
+        "XPOS Coupon",
         {"coupon_code": coupon, "company": company, "used": 0},
         [
             "name",
@@ -115,7 +115,7 @@ def get_active_gift_coupons(customer, company):
 
     today = getdate(nowdate())
     coupons_data = frappe.get_all(
-        "POS Coupon",
+        "XPOS Coupon",
         filters={
             "company": company,
             "coupon_type": "Gift Card",

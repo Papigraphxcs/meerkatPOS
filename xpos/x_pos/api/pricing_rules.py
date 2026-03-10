@@ -1,4 +1,4 @@
-"""Pricing rule API endpoints for POS Awesome.
+"""Pricing rule API endpoints for XPOS.
 
 These endpoints expose a lightweight snapshot of active pricing rules for the
 frontend and provide a reconciliation endpoint to double check locally applied

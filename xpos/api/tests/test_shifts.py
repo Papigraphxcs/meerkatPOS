@@ -159,7 +159,7 @@ class TestCloseShift(unittest.TestCase):
 
     @patch("xpos.api.shifts.frappe")
     def test_close_shift_creates_closing_shift(self, mock_frappe):
-        """Test that close_shift creates POS Closing Shift."""
+        """Test that close_shift creates XPOS Closing Shift."""
         # Setup mocks
         mock_opening_doc = MagicMock()
         mock_opening_doc.name = "POS-OPEN-001"
@@ -174,7 +174,7 @@ class TestCloseShift(unittest.TestCase):
         mock_closing_doc.as_dict.return_value = {"name": "POS-CLOSE-001"}
 
         def get_doc_side_effect(*args, **kwargs):
-            if args[0] == "POS Opening Shift":
+            if args[0] == "XPOS Opening Shift":
                 return mock_opening_doc
             return mock_closing_doc
 
@@ -207,7 +207,7 @@ class TestCloseShift(unittest.TestCase):
         mock_closing_doc.as_dict.return_value = {"name": "POS-CLOSE-002"}
 
         def get_doc_side_effect(*args, **kwargs):
-            if args[0] == "POS Opening Shift":
+            if args[0] == "XPOS Opening Shift":
                 return mock_opening_doc
             return mock_closing_doc
 

@@ -65,7 +65,7 @@ Before closing, you can review a complete summary of the shift:
 4. Click **Close Shift** to finalize
 
 ### What Happens on Shift Close
-- A **POS Closing Shift** document is created with:
+- A **XPOS Closing Shift** document is created with:
   - All invoices linked as child records (Sales Invoice Reference table)
   - Payment reconciliation details
   - Tax summary breakdown

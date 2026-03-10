@@ -1,4 +1,4 @@
-"""Expose API functions for POS Awesome."""
+"""Expose API functions for XPOS."""
 
 from .bundles import get_bundle_components
 from .customers import (

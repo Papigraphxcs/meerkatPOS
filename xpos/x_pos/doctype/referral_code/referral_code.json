@@ -67,14 +67,14 @@
    "fieldname": "customer_offer",
    "fieldtype": "Link",
    "label": "Final Customer Offer",
-   "options": "POS Offer",
+   "options": "XPOS Offer",
    "reqd": 1
   },
   {
    "fieldname": "primary_offer",
    "fieldtype": "Link",
    "label": "Primary Customer Offer",
-   "options": "POS Offer"
+   "options": "XPOS Offer"
   },
   {
    "fieldname": "customer",
@@ -109,7 +109,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-04 20:13:53.777385",
+ "modified": "2026-03-10 16:58:11.601834",
  "modified_by": "Administrator",
  "module": "X POS",
  "name": "Referral Code",

@@ -37,15 +37,15 @@ msgstr ""
 msgid "Accept Qty"
 msgstr ""
 
-#. Label of a Link field in DocType 'POS Allowed Expense Account'
-#. Label of a Link field in DocType 'POS Allowed Source Account'
+#. Label of a Link field in DocType 'XPOS Allowed Expense Account'
+#. Label of a Link field in DocType 'XPOS Allowed Source Account'
 #: xpos/x_pos/doctype/pos_allowed_expense_account/pos_allowed_expense_account.json
 #: xpos/x_pos/doctype/pos_allowed_source_account/pos_allowed_source_account.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:95
 msgid "Account"
 msgstr ""
 
-#. Label of a Link field in DocType 'POS Closing Shift Taxes'
+#. Label of a Link field in DocType 'XPOS Closing Shift Taxes'
 #: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
 msgid "Account Head"
 msgstr ""
@@ -125,7 +125,7 @@ msgid "Allocation amount for payment {0} exceeds outstanding invoices"
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Cash Movement'
-#. Label of a Link field in DocType 'POS Closing Shift'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
 #. Label of a Link field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
@@ -134,7 +134,7 @@ msgid "Amended From"
 msgstr ""
 
 #. Label of a Currency field in DocType 'POS Cash Movement'
-#. Label of a Currency field in DocType 'POS Closing Shift Taxes'
+#. Label of a Currency field in DocType 'XPOS Closing Shift Taxes'
 #. Label of a Currency field in DocType 'POS Payment Entry Reference'
 #. Label of a Currency field in DocType 'Sales Invoice Reference'
 #: frontend/src/components/shift/CashMovementDialog.vue:60
@@ -358,7 +358,7 @@ msgstr ""
 msgid "Cash movement {0} not found"
 msgstr ""
 
-#. Label of a Link field in DocType 'POS Closing Shift'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
 #. Label of a Link field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
@@ -424,7 +424,7 @@ msgstr ""
 msgid "Closing"
 msgstr ""
 
-#. Label of a Currency field in DocType 'POS Closing Shift Detail'
+#. Label of a Currency field in DocType 'XPOS Closing Shift Detail'
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 msgid "Closing Amount"
 msgstr ""
@@ -435,7 +435,7 @@ msgstr ""
 
 #. Label of a Link field in DocType 'Delivery Charges'
 #. Label of a Link field in DocType 'POS Cash Movement'
-#. Label of a Link field in DocType 'POS Closing Shift'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
 #. Label of a Link field in DocType 'POS Coupon'
 #. Label of a Link field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'POS Opening Shift'
@@ -733,12 +733,12 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#. Label of a Section Break field in DocType 'POS Closing Shift'
+#. Label of a Section Break field in DocType 'XPOS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Details"
 msgstr ""
 
-#. Label of a Currency field in DocType 'POS Closing Shift Detail'
+#. Label of a Currency field in DocType 'XPOS Closing Shift Detail'
 #: frontend/src/components/shift/ClosingDialog.vue:92
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 msgid "Difference"
@@ -899,7 +899,7 @@ msgstr ""
 msgid "Expected"
 msgstr ""
 
-#. Label of a Currency field in DocType 'POS Closing Shift Detail'
+#. Label of a Currency field in DocType 'XPOS Closing Shift Detail'
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 msgid "Expected Amount"
 msgstr ""
@@ -1024,7 +1024,7 @@ msgstr ""
 msgid "Given Quantity"
 msgstr ""
 
-#. Label of a Currency field in DocType 'POS Closing Shift'
+#. Label of a Currency field in DocType 'XPOS Closing Shift'
 #. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
 #: frontend/src/components/shift/ClosingDialog.vue:25
 #: frontend/src/views/OrdersView.vue:209
@@ -1255,7 +1255,7 @@ msgstr ""
 msgid "Large (60×40mm)"
 msgstr ""
 
-#. Label of a Section Break field in DocType 'POS Closing Shift'
+#. Label of a Section Break field in DocType 'XPOS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Linked Invoices"
 msgstr ""
@@ -1374,8 +1374,8 @@ msgstr ""
 msgid "Mode Of Payment"
 msgstr ""
 
-#. Label of a Link field in DocType 'POS Closing Shift Detail'
-#. Label of a Link field in DocType 'POS Opening Shift Detail'
+#. Label of a Link field in DocType 'XPOS Closing Shift Detail'
+#. Label of a Link field in DocType 'XPOS Opening Shift Detail'
 #: xpos/x_pos/api/payment_processing/data.py:170
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:58
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
@@ -1387,7 +1387,7 @@ msgstr ""
 msgid "Mode of Payments"
 msgstr ""
 
-#. Label of a Section Break field in DocType 'POS Closing Shift'
+#. Label of a Section Break field in DocType 'XPOS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Modes of Payment"
 msgstr ""
@@ -1401,7 +1401,7 @@ msgstr ""
 msgid "Movement Type must be Expense or Deposit."
 msgstr ""
 
-#. Label of a Currency field in DocType 'POS Closing Shift'
+#. Label of a Currency field in DocType 'XPOS Closing Shift'
 #: frontend/src/components/shift/ClosingDialog.vue:35
 #: frontend/src/views/OrdersView.vue:184
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:28
@@ -1648,8 +1648,8 @@ msgstr ""
 msgid "Opening"
 msgstr ""
 
-#. Label of a Currency field in DocType 'POS Closing Shift Detail'
-#. Label of a Currency field in DocType 'POS Opening Shift Detail'
+#. Label of a Currency field in DocType 'XPOS Closing Shift Detail'
+#. Label of a Currency field in DocType 'XPOS Opening Shift Detail'
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 #: xpos/x_pos/doctype/pos_opening_shift_detail/pos_opening_shift_detail.json
 msgid "Opening Amount"
@@ -1702,7 +1702,7 @@ msgstr ""
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_allowed_source_account/pos_allowed_source_account.json
-msgid "POS Allowed Source Account"
+msgid "XPOS Allowed Source Account"
 msgstr ""
 
 #. Name of a DocType
@@ -1719,21 +1719,21 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
-msgid "POS Closing Shift"
+msgid "XPOS Closing Shift"
 msgstr ""
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
-msgid "POS Closing Shift Detail"
+msgid "XPOS Closing Shift Detail"
 msgstr ""
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
-msgid "POS Closing Shift Taxes"
+msgid "XPOS Closing Shift Taxes"
 msgstr ""
 
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:74
-msgid "POS Closing Shift {} against {} between selected period"
+msgid "XPOS Closing Shift {} against {} between selected period"
 msgstr ""
 
 #. Name of a DocType
@@ -1783,7 +1783,7 @@ msgid "POS Offer is disabled."
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Cash Movement'
-#. Label of a Link field in DocType 'POS Closing Shift'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
 #. Name of a DocType
 #. Label of a Link in the X POS Workspace
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -1795,7 +1795,7 @@ msgstr ""
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_opening_shift_detail/pos_opening_shift_detail.json
-msgid "POS Opening Shift Detail"
+msgid "XPOS Opening Shift Detail"
 msgstr ""
 
 #: xpos/api/cash_movements.py:85 xpos/api/cash_movements.py:167
@@ -1833,7 +1833,7 @@ msgstr ""
 msgid "POS Payment Entry Reference"
 msgstr ""
 
-#. Label of a Table field in DocType 'POS Closing Shift'
+#. Label of a Table field in DocType 'XPOS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "POS Payments"
 msgstr ""
@@ -1845,7 +1845,7 @@ msgstr ""
 
 #. Label of a Link field in DocType 'Delivery Charges POS Profile'
 #. Label of a Link field in DocType 'POS Cash Movement'
-#. Label of a Link field in DocType 'POS Closing Shift'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
 #. Label of a Link field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'POS Opening Shift'
 #. Label of a Link in the X POS Workspace
@@ -1912,7 +1912,7 @@ msgstr ""
 msgid "POS Shift {0} is not open"
 msgstr ""
 
-#. Label of a Table field in DocType 'POS Closing Shift'
+#. Label of a Table field in DocType 'XPOS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "POS Transactions"
 msgstr ""
@@ -1958,7 +1958,7 @@ msgstr ""
 msgid "Payment Gateway Account not found"
 msgstr ""
 
-#. Label of a Table field in DocType 'POS Closing Shift'
+#. Label of a Table field in DocType 'XPOS Closing Shift'
 #: frontend/src/components/shift/ClosingDialog.vue:76
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Payment Reconciliation"
@@ -1989,14 +1989,14 @@ msgstr ""
 msgid "Pending"
 msgstr ""
 
-#. Label of a Datetime field in DocType 'POS Closing Shift'
+#. Label of a Datetime field in DocType 'XPOS Closing Shift'
 #. Label of a Date field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Period End Date"
 msgstr ""
 
-#. Label of a Datetime field in DocType 'POS Closing Shift'
+#. Label of a Datetime field in DocType 'XPOS Closing Shift'
 #. Label of a Datetime field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
@@ -2063,7 +2063,7 @@ msgid "Positions are 1-indexed and counted on the full barcode. Example: 3310100
 msgstr ""
 
 #. Label of a Date field in DocType 'POS Cash Movement'
-#. Label of a Date field in DocType 'POS Closing Shift'
+#. Label of a Date field in DocType 'XPOS Closing Shift'
 #. Label of a Date field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
@@ -2283,7 +2283,7 @@ msgid "Quotation name is required"
 msgstr ""
 
 #. Label of a Currency field in DocType 'Delivery Charges POS Profile'
-#. Label of a Percent field in DocType 'POS Closing Shift Taxes'
+#. Label of a Percent field in DocType 'XPOS Closing Shift Taxes'
 #. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
 #. Label of a Float field in DocType 'POS Offer'
 #: frontend/src/views/OrdersView.vue:151
@@ -2908,7 +2908,7 @@ msgstr ""
 msgid "Tax ID"
 msgstr ""
 
-#. Label of a Table field in DocType 'POS Closing Shift'
+#. Label of a Table field in DocType 'XPOS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:90
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Taxes"
@@ -2963,7 +2963,7 @@ msgstr ""
 msgid "Total Paid"
 msgstr ""
 
-#. Label of a Float field in DocType 'POS Closing Shift'
+#. Label of a Float field in DocType 'XPOS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:41
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Total Quantity"

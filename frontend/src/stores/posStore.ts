@@ -507,7 +507,6 @@ export const usePosStore = defineStore("pos", () => {
     companyName,
     sellingPriceList,
     defaultCustomer,
-    // POS Profile Settings
     allowEditRate,
     allowEditItemDiscount,
     allowEditAdditionalDiscount,

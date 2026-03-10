@@ -62,7 +62,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
 
     new_pos_opening = frappe.get_doc(
         {
-            "doctype": "POS Opening Shift",
+            "doctype": "XPOS Opening Shift",
             "period_start_date": frappe.utils.get_datetime(),
             "posting_date": frappe.utils.getdate(),
             "user": frappe.session.user,
@@ -83,7 +83,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
 @frappe.whitelist()
 def check_opening_shift(user):
     open_vouchers = frappe.db.get_all(
-        "POS Opening Shift",
+        "XPOS Opening Shift",
         filters={
             "user": user,
             "pos_closing_shift": ["is", "not set"],
@@ -96,7 +96,7 @@ def check_opening_shift(user):
     data = ""
     if len(open_vouchers) > 0:
         data = {}
-        data["pos_opening_shift"] = frappe.get_doc("POS Opening Shift", open_vouchers[0]["name"])
+        data["pos_opening_shift"] = frappe.get_doc("XPOS Opening Shift", open_vouchers[0]["name"])
         update_opening_shift_data(data, open_vouchers[0]["pos_profile"])
     return data
 

@@ -19,7 +19,7 @@ def validate_status(status, options):
 
 
 status_map = {
-    "POS Opening Shift": [
+    "XPOS Opening Shift": [
         ["Draft", None],
         ["Open", "eval:self.docstatus == 1 and not self.pos_closing_shift"],
         ["Closed", "eval:self.docstatus == 1 and self.pos_closing_shift"],

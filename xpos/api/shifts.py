@@ -73,7 +73,7 @@ def open_shift(pos_profile, company, balance_details):
 
     new_shift = frappe.get_doc(
         {
-            "doctype": "POS Opening Shift",
+            "doctype": "XPOS Opening Shift",
             "period_start_date": now_datetime(),
             "posting_date": nowdate(),
             "user": frappe.session.user,
@@ -103,7 +103,7 @@ def check_open_shift(user=None):
     user = user or frappe.session.user
 
     open_shifts = frappe.db.get_all(
-        "POS Opening Shift",
+        "XPOS Opening Shift",
         filters={
             "user": user,
             "pos_closing_shift": ["is", "not set"],
@@ -122,7 +122,7 @@ def check_open_shift(user=None):
     shift_name = _row_value(shift, "name")
     pos_profile = _row_value(shift, "pos_profile")
     data = {
-        "pos_opening_shift": frappe.get_doc("POS Opening Shift", shift_name).as_dict(),
+        "pos_opening_shift": frappe.get_doc("XPOS Opening Shift", shift_name).as_dict(),
     }
     _enrich_shift_data(data, pos_profile)
 
@@ -131,7 +131,7 @@ def check_open_shift(user=None):
 
 @frappe.whitelist()
 def close_shift(opening_shift, closing_details):
-    """Create a POS Closing Shift and close the opening shift.
+    """Create a XPOS Closing Shift and close the opening shift.
 
     - Aggregates invoices by POS opening shift reference
     - Tax summary per shift
@@ -143,7 +143,7 @@ def close_shift(opening_shift, closing_details):
         else closing_details
     )
 
-    opening = frappe.get_doc("POS Opening Shift", opening_shift)
+    opening = frappe.get_doc("XPOS Opening Shift", opening_shift)
 
     invoices = frappe.get_all(
         "Sales Invoice",
@@ -191,7 +191,7 @@ def close_shift(opening_shift, closing_details):
 
     closing_shift = frappe.get_doc(
         {
-            "doctype": "POS Closing Shift",
+            "doctype": "XPOS Closing Shift",
             "period_start_date": opening.period_start_date,
             "period_end_date": now_datetime(),
             "posting_date": nowdate(),
@@ -263,7 +263,7 @@ def get_shift_summary(opening_shift):
 
     Enhanced version with tax breakdown and return info.
     """
-    opening = frappe.get_doc("POS Opening Shift", opening_shift)
+    opening = frappe.get_doc("XPOS Opening Shift", opening_shift)
 
     invoices = frappe.get_all(
         "Sales Invoice",

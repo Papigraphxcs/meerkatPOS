@@ -265,7 +265,7 @@ def create_customer(
             elif len(birthday) == 10 and birthday[4] == "-" and birthday[7] == "-":
                 formatted_birthday = birthday
         except Exception:
-            frappe.log_error(f"Error formatting birthday: {birthday}", "POS Awesome")
+            frappe.log_error(f"Error formatting birthday: {birthday}", "XPOS")
 
     if method == "create":
         is_exist = frappe.db.exists("Customer", {"customer_name": customer_name})
