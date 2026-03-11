@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { usePurchaseStore } from "@/stores/purchaseStore";
-import { Search, Plus, User, Phone, Mail, X } from "lucide-vue-next";
+import { Plus, User, X } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LinkField, type LinkFieldOption } from "@/components/ui/link";
 import {
     Dialog,
     DialogContent,
@@ -15,7 +16,7 @@ import __ from "@/lib/translate";
 
 const purchaseStore = usePurchaseStore();
 
-const searchTerm = ref("");
+const supplierLinkValue = ref("");
 const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
 const newSupplier = ref({
@@ -29,14 +30,19 @@ const newSupplier = ref({
 
 const isCreating = ref(false);
 
-function onSearchInput(): void {
-    if (debounceTimer.value) {
-        clearTimeout(debounceTimer.value);
-    }
-
+function handleSupplierSearch(text: string): void {
+    if (debounceTimer.value) clearTimeout(debounceTimer.value);
     debounceTimer.value = setTimeout(() => {
-        purchaseStore.searchSuppliers(searchTerm.value);
+        purchaseStore.searchSuppliers(text);
     }, 300);
+}
+
+function handleSupplierSelect(option: LinkFieldOption): void {
+    purchaseStore.selectSupplier({
+        name: option.value,
+        supplier_name: option.description || option.value,
+    });
+    supplierLinkValue.value = "";
 }
 
 function selectSupplier(supplier: typeof purchaseStore.suppliers[0]): void {
@@ -45,7 +51,7 @@ function selectSupplier(supplier: typeof purchaseStore.suppliers[0]): void {
 
 function openNewSupplierForm(): void {
     newSupplier.value = {
-        supplier_name: searchTerm.value,
+        supplier_name: "",
         supplier_group: "",
         supplier_type: "Company",
         mobile_no: "",
@@ -81,10 +87,16 @@ onUnmounted(() => {
     <div class="h-full flex flex-col min-h-0 overflow-hidden">
         <div class="p-4 border-b border-border bg-muted">
             <div class="flex gap-2">
-                <div class="relative flex-1">
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input v-model="searchTerm" type="text" :placeholder="__('Search suppliers...')" @input="onSearchInput"
-                        class="pl-10" />
+                <div class="flex-1">
+                    <LinkField
+                        :model-value="supplierLinkValue"
+                        @update:model-value="supplierLinkValue = $event"
+                        @search="handleSupplierSearch"
+                        @select="handleSupplierSelect"
+                        doctype="Supplier"
+                        label-field="supplier_name"
+                        :empty-text="__('No suppliers found')"
+                    />
                 </div>
                 <Button @click="openNewSupplierForm" variant="outline" size="icon">
                     <Plus class="w-4 h-4" />
@@ -169,18 +181,12 @@ onUnmounted(() => {
                     </div>
 
                     <div>
-                        <label class="text-sm font-medium mb-1 block text-foreground">
-                            <Phone class="w-4 h-4 inline mr-1" />
-                            {{ __("Mobile") }}
-                        </label>
+                        <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Mobile") }}</label>
                         <Input v-model="newSupplier.mobile_no" :placeholder="__('Phone number')" />
                     </div>
 
                     <div>
-                        <label class="text-sm font-medium mb-1 block text-foreground">
-                            <Mail class="w-4 h-4 inline mr-1" />
-                            {{ __("Email") }}
-                        </label>
+                        <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Email") }}</label>
                         <Input v-model="newSupplier.email_id" type="email" :placeholder="__('Email address')" />
                     </div>
 

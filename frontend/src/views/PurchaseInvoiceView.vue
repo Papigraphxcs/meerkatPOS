@@ -1,22 +1,16 @@
 <script setup lang="ts">
-/**
- * Purchase Invoice View
- * For creating purchase invoices with batch, expiry, GST, bonus tracking
- */
 import { ref, onMounted, computed, reactive } from "vue";
 import { usePurchaseStore } from "@/stores/purchaseStore";
 import { usePosStore } from "@/stores/posStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NumberInput } from "@/components/ui/number-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Table } from "@/components/ui/table";
+import type { TableColumn } from "@/components/ui/table/types";
 import {
     Search,
     Plus,
-    Trash2,
-    RefreshCw,
     Package,
     Save,
     X,
@@ -25,21 +19,14 @@ import {
     Loader2,
     Calculator,
 } from "lucide-vue-next";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
 import type { SearchItem, Supplier } from "@/types/pos.types";
 import { showError, showSuccess, call } from "@/services/api";
 import __ from "@/lib/translate";
+import { CreateItemDialog, CreateSupplierDialog } from "@/components/purchase";
 
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
 
-// Invoice item type with batch/expiry/GST fields
 interface InvoiceItem {
     item_code: string;
     item_name: string;
@@ -55,7 +42,6 @@ interface InvoiceItem {
     warehouse: string;
 }
 
-// Invoice header state
 const invoiceHeader = reactive({
     invoice_no: "",
     alias_name: "",
@@ -68,7 +54,6 @@ const invoiceHeader = reactive({
     sale_order_no: "",
 });
 
-// Invoice settings
 const invoiceSettings = reactive({
     stock_discount_percent: 0,
     flat_discount: 0,
@@ -76,46 +61,24 @@ const invoiceSettings = reactive({
     invoice_gst_percent: 0,
 });
 
-// Invoice items
 const invoiceItems = ref<InvoiceItem[]>([]);
 
-// Search states
 const itemSearchTerm = ref("");
 const supplierSearchTerm = ref("");
 const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
-// Barcode scanner
 const barcodeValue = ref("");
 const isBarcodeScan = ref(false);
 const barcodeFlash = ref<"" | "success" | "error">("");
 let barcodeFlashTimer: ReturnType<typeof setTimeout> | null = null;
 
-// Dialogs
+// New item / supplier dialog visibility
 const showNewItemDialog = ref(false);
 const showNewSupplierDialog = ref(false);
-const newItem = ref({
-    item_name: "",
-    item_code: "",
-    item_group: "",
-    stock_uom: "Nos",
-    barcode: "",
-    buying_price: 0,
-    selling_price: 0,
-});
-const isCreatingItem = ref(false);
-const newSupplier = ref({
-    supplier_name: "",
-    supplier_type: "Company",
-    mobile_no: "",
-    email_id: "",
-    tax_id: "",
-});
-const isCreatingSupplier = ref(false);
 const isProcessing = ref(false);
 
-const standardUOMs = ["Nos", "Unit", "Kg", "Gram", "Litre", "mL", "Box", "Pack", "Dozen", "Pair", "Set", "Meter", "Feet"];
+// Computed
 
-// Computed values
 function getValueExTax(item: InvoiceItem): number {
     const gross = (item.qty + item.bonus_qty) * item.rate;
     const discAmt = item.discount_amount || (gross * (item.discount_percent || 0) / 100);
@@ -172,7 +135,6 @@ function formatCurrency(value: number): string {
     return `${posStore.currencySymbol}${value.toFixed(2)}`;
 }
 
-// Item search
 function onItemSearch(): void {
     if (debounceTimer.value) clearTimeout(debounceTimer.value);
     debounceTimer.value = setTimeout(() => {
@@ -180,7 +142,6 @@ function onItemSearch(): void {
     }, 300);
 }
 
-// Barcode scan
 async function onBarcodeScan(): Promise<void> {
     const code = barcodeValue.value.trim();
     if (!code) return;
@@ -211,7 +172,6 @@ function onBarcodePaste(): void {
     }, 50);
 }
 
-// Supplier search
 function onSupplierSearch(): void {
     if (debounceTimer.value) clearTimeout(debounceTimer.value);
     debounceTimer.value = setTimeout(() => {
@@ -223,7 +183,6 @@ function selectSupplier(supplier: Supplier): void {
     purchaseStore.selectSupplier(supplier);
 }
 
-// Add item to invoice
 function addItemToInvoice(item: SearchItem): void {
     invoiceItems.value.push({
         item_code: item.item_code,
@@ -245,68 +204,180 @@ function removeItem(index: number): void {
     invoiceItems.value.splice(index, 1);
 }
 
-// Create dialogs
-function openNewItemDialog(): void {
-    newItem.value = {
-        item_name: itemSearchTerm.value,
-        item_code: "",
-        item_group: "",
-        stock_uom: "Nos",
-        barcode: "",
-        buying_price: 0,
-        selling_price: 0,
-    };
-    showNewItemDialog.value = true;
-}
-
-async function handleCreateItem(): Promise<void> {
-    if (!newItem.value.item_name.trim()) return;
-    isCreatingItem.value = true;
-    try {
-        const created = await purchaseStore.createItem({
-            item_name: newItem.value.item_name,
-            item_code: newItem.value.item_code || undefined,
-            item_group: newItem.value.item_group || undefined,
-            stock_uom: newItem.value.stock_uom,
-            barcode: newItem.value.barcode || undefined,
-            buying_price: newItem.value.buying_price || undefined,
-            selling_price: newItem.value.selling_price || undefined,
-        });
-        if (created) {
-            addItemToInvoice({ ...created, standard_rate: newItem.value.buying_price });
-            showNewItemDialog.value = false;
-        }
-    } finally {
-        isCreatingItem.value = false;
+function removeItems(indices: number[]): void {
+    // indices come sorted descending from ChildTable
+    for (const i of indices) {
+        invoiceItems.value.splice(i, 1);
     }
 }
 
-function openNewSupplierDialog(): void {
-    newSupplier.value = {
-        supplier_name: supplierSearchTerm.value,
-        supplier_type: "Company",
-        mobile_no: "",
-        email_id: "",
-        tax_id: "",
-    };
-    showNewSupplierDialog.value = true;
+function duplicateItem(index: number): void {
+    const src = invoiceItems.value[index];
+    invoiceItems.value.splice(index + 1, 0, { ...src });
 }
 
-async function handleCreateSupplier(): Promise<void> {
-    if (!newSupplier.value.supplier_name.trim()) return;
-    isCreatingSupplier.value = true;
-    try {
-        await purchaseStore.createSupplier(newSupplier.value);
-        showNewSupplierDialog.value = false;
-    } finally {
-        isCreatingSupplier.value = false;
+function moveItem(index: number, direction: -1 | 1): void {
+    const target = index + direction;
+    if (target < 0 || target >= invoiceItems.value.length) return;
+    const temp = invoiceItems.value[index];
+    invoiceItems.value[index] = invoiceItems.value[target];
+    invoiceItems.value[target] = temp;
+}
+
+function onCellChange(payload: { rowIndex: number; fieldname: string; value: any }): void {
+    const item = invoiceItems.value[payload.rowIndex];
+    if (item) {
+        (item as any)[payload.fieldname] = payload.value;
     }
 }
 
-// Re-calculate all values
+// Column definitions for the invoice child table
+const invoiceColumns = computed<TableColumn[]>(() => [
+    {
+        fieldname: "item_name",
+        label: "Item Name",
+        type: "readonly" as const,
+        width: "min-w-[140px]",
+        align: "left" as const,
+        editable: false,
+        alwaysVisible: true,
+        format: (val: any) => val || "-",
+    },
+    {
+        fieldname: "batch_no",
+        label: "Batch",
+        type: "text" as const,
+        width: "w-[90px]",
+        align: "left" as const,
+        placeholder: "Batch",
+    },
+    {
+        fieldname: "expiry_date",
+        label: "Expiry",
+        type: "date" as const,
+        width: "w-[100px]",
+        align: "left" as const,
+    },
+    {
+        fieldname: "qty",
+        label: "Qty",
+        type: "number" as const,
+        width: "w-[60px]",
+        align: "right" as const,
+        min: 0,
+        precision: 0,
+    },
+    {
+        fieldname: "bonus_qty",
+        label: "Bonus",
+        type: "number" as const,
+        width: "w-[55px]",
+        align: "right" as const,
+        min: 0,
+        precision: 0,
+    },
+    {
+        fieldname: "rate",
+        label: "P.Price",
+        type: "number" as const,
+        width: "w-[75px]",
+        align: "right" as const,
+        min: 0,
+        precision: 2,
+    },
+    {
+        fieldname: "discount_percent",
+        label: "Disc%",
+        type: "number" as const,
+        width: "w-[55px]",
+        align: "right" as const,
+        min: 0,
+        max: 100,
+        precision: 1,
+    },
+    {
+        fieldname: "discount_amount",
+        label: "Discount",
+        type: "number" as const,
+        width: "w-[70px]",
+        align: "right" as const,
+        min: 0,
+        precision: 2,
+    },
+    {
+        fieldname: "value_ex_tax",
+        label: "Val Ex.Tax",
+        type: "readonly" as const,
+        width: "w-[80px]",
+        align: "right" as const,
+        editable: false,
+        format: (_: any, row: any) => formatCurrency(getValueExTax(row)),
+    },
+    {
+        fieldname: "total_exc_tax",
+        label: "Total(Exc)",
+        type: "readonly" as const,
+        width: "w-[85px]",
+        align: "right" as const,
+        editable: false,
+        format: (_: any, row: any) => formatCurrency(getTotalExcTax(row)),
+    },
+    {
+        fieldname: "gst_percent",
+        label: "GST%",
+        type: "number" as const,
+        width: "w-[55px]",
+        align: "right" as const,
+        min: 0,
+        max: 100,
+        precision: 1,
+    },
+    {
+        fieldname: "gst_value",
+        label: "GST Val",
+        type: "readonly" as const,
+        width: "w-[70px]",
+        align: "right" as const,
+        editable: false,
+        format: (_: any, row: any) => formatCurrency(getGstValue(row)),
+    },
+    {
+        fieldname: "total_inc_tax",
+        label: "Total(Inc)",
+        type: "readonly" as const,
+        width: "w-[85px]",
+        align: "right" as const,
+        editable: false,
+        cellClass: "text-green-600 font-medium",
+        format: (_: any, row: any) => formatCurrency(getTotalIncTax(row)),
+    },
+    {
+        fieldname: "sale_price",
+        label: "SalePrice",
+        type: "number" as const,
+        width: "w-[75px]",
+        align: "right" as const,
+        min: 0,
+        precision: 2,
+    },
+    {
+        fieldname: "margin_percent",
+        label: "Margin%",
+        type: "readonly" as const,
+        width: "w-[60px]",
+        align: "right" as const,
+        editable: false,
+        format: (_: any, row: any) => `${getMarginPercent(row).toFixed(1)}%`,
+        cellClass: (_: any, row: any) => getMarginPercent(row) >= 0 ? "text-green-600" : "text-red-500",
+    },
+]);
+
+function onItemCreated(item: SearchItem, buyingPrice: number): void {
+    addItemToInvoice({ ...item, standard_rate: buyingPrice });
+}
+
 function recalculate(): void {
     invoiceItems.value.forEach(item => {
-        // Recalculate discount amount from percent if needed
         if (item.discount_percent > 0 && item.discount_amount === 0) {
             const gross = item.qty * item.rate;
             item.discount_amount = gross * item.discount_percent / 100;
@@ -314,7 +385,6 @@ function recalculate(): void {
     });
 }
 
-// Create Invoice
 async function createInvoice(): Promise<void> {
     if (!purchaseStore.selectedSupplier) {
         showError(__("Please select a supplier"));
@@ -329,7 +399,7 @@ async function createInvoice(): Promise<void> {
     try {
         const payload = {
             pos_profile: posStore.profileName,
-            supplier: purchaseStore.selectedSupplier.name,
+            supplier: purchaseStore.selectedSupplier,
             company: posStore.companyName,
             warehouse: posStore.warehouse,
             bill_no: invoiceHeader.supplier_invoice_no || undefined,
@@ -386,7 +456,6 @@ onMounted(() => {
 
 <template>
     <div class="h-full flex flex-col bg-background overflow-hidden">
-        <!-- Header -->
         <header class="bg-card border-b border-border px-4 py-3 shrink-0">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -400,7 +469,6 @@ onMounted(() => {
             </div>
         </header>
 
-        <!-- Invoice Header Fields -->
         <div class="bg-card border-b border-border px-4 py-3 shrink-0">
             <div class="grid grid-cols-6 gap-3">
                 <div>
@@ -425,10 +493,10 @@ onMounted(() => {
                         <div class="relative flex-1">
                             <Search class="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                             <Input v-model="supplierSearchTerm" @input="onSupplierSearch"
-                                :placeholder="purchaseStore.selectedSupplier?.supplier_name || __('Search supplier...')"
+                                :placeholder="purchaseStore.selectedSupplier || __('Search supplier...')"
                                 class="h-8 text-sm pl-7" />
                         </div>
-                        <Button @click="openNewSupplierDialog" variant="outline" size="icon" class="h-8 w-8 shrink-0">
+                        <Button @click="showNewSupplierDialog = true" variant="outline" size="icon" class="h-8 w-8 shrink-0">
                             <Plus class="w-3.5 h-3.5" />
                         </Button>
                     </div>
@@ -472,11 +540,8 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="flex-1 flex min-h-0 overflow-hidden">
-            <!-- Left: Item Search Panel -->
             <div class="w-72 border-r border-border bg-card flex flex-col shrink-0 overflow-hidden">
-                <!-- Barcode Scanner -->
                 <div class="px-3 pt-3 pb-2 border-b border-border">
                     <div class="relative">
                         <ScanBarcode class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -490,7 +555,6 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- Item Search -->
                 <div class="p-3 border-b border-border">
                     <div class="flex gap-1">
                         <div class="relative flex-1">
@@ -498,13 +562,12 @@ onMounted(() => {
                             <Input v-model="itemSearchTerm" @input="onItemSearch" :placeholder="__('Search items...')"
                                 class="pl-8 h-8 text-sm" />
                         </div>
-                        <Button @click="openNewItemDialog" variant="outline" size="icon" class="h-8 w-8 shrink-0">
+                        <Button @click="showNewItemDialog = true" variant="outline" size="icon" class="h-8 w-8 shrink-0">
                             <Plus class="w-4 h-4" />
                         </Button>
                     </div>
                 </div>
 
-                <!-- Item List -->
                 <ScrollArea class="flex-1 min-h-0">
                     <div v-if="purchaseStore.isLoadingItems" class="p-4 text-center text-muted-foreground text-sm">
                         {{ __("Loading...") }}
@@ -527,106 +590,44 @@ onMounted(() => {
                 </ScrollArea>
             </div>
 
-            <!-- Right: Invoice Grid -->
             <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <!-- Toolbar -->
-                <div class="px-4 py-2 border-b border-border bg-muted flex items-center justify-between shrink-0">
-                    <span class="text-sm font-medium text-foreground">{{ __("Items") }} ({{ invoiceItems.length }})</span>
-                    <Button @click="recalculate" variant="outline" size="sm">
-                        <Calculator class="w-3.5 h-3.5 mr-1" />
-                        {{ __("Re-Calculate") }}
-                    </Button>
-                </div>
+                <Table
+                    :rows="invoiceItems"
+                    :columns="invoiceColumns"
+                    label="Items"
+                    min-width="1400px"
+                    :show-add-row="false"
+                    :show-checkboxes="true"
+                    :show-row-numbers="true"
+                    :show-delete-button="true"
+                    :keyboard-navigation="true"
+                    :allow-reorder="true"
+                    :allow-duplicate="true"
+                    :show-column-settings="true"
+                    :highlight-new-rows="true"
+                    empty-message="No items added"
+                    empty-description="Search and add items from the left panel"
+                    @delete-row="removeItem"
+                    @delete-rows="removeItems"
+                    @duplicate-row="duplicateItem"
+                    @move-row="moveItem"
+                    @cell-change="onCellChange"
+                    class="flex-1 min-h-0 flex flex-col"
+                >
+                    <template #toolbar>
+                        <Button @click="recalculate" variant="outline" size="sm" class="h-7 text-xs">
+                            <Calculator class="w-3.5 h-3.5 mr-1" />
+                            {{ __("Re-Calculate") }}
+                        </Button>
+                    </template>
 
-                <!-- Grid Table -->
-                <ScrollArea class="flex-1 min-h-0">
-                    <div v-if="invoiceItems.length === 0" class="flex items-center justify-center h-full p-8">
-                        <div class="text-center text-muted-foreground">
-                            <Package class="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-                            <p class="font-medium">{{ __("No items added") }}</p>
-                            <p class="text-sm mt-1">{{ __("Search and add items from the left panel") }}</p>
-                        </div>
-                    </div>
-                    <div v-else class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse min-w-[1400px]">
-                            <thead class="sticky top-0 z-10 bg-muted border-b border-border">
-                                <tr class="text-xs text-muted-foreground uppercase tracking-wider">
-                                    <th class="px-2 py-2 text-center w-8">{{ __("No.") }}</th>
-                                    <th class="px-2 py-2 text-left min-w-[140px]">{{ __("Item Name") }}</th>
-                                    <th class="px-2 py-2 text-left w-[90px]">{{ __("Batch") }}</th>
-                                    <th class="px-2 py-2 text-left w-[100px]">{{ __("Expiry") }}</th>
-                                    <th class="px-2 py-2 text-right w-[60px]">{{ __("Qty") }}</th>
-                                    <th class="px-2 py-2 text-right w-[55px]">{{ __("Bonus") }}</th>
-                                    <th class="px-2 py-2 text-right w-[75px]">{{ __("P.Price") }}</th>
-                                    <th class="px-2 py-2 text-right w-[55px]">{{ __("Disc%") }}</th>
-                                    <th class="px-2 py-2 text-right w-[70px]">{{ __("Discount") }}</th>
-                                    <th class="px-2 py-2 text-right w-[80px]">{{ __("Val Ex.Tax") }}</th>
-                                    <th class="px-2 py-2 text-right w-[85px]">{{ __("Total(Exc)") }}</th>
-                                    <th class="px-2 py-2 text-right w-[55px]">{{ __("GST%") }}</th>
-                                    <th class="px-2 py-2 text-right w-[70px]">{{ __("GST Val") }}</th>
-                                    <th class="px-2 py-2 text-right w-[85px]">{{ __("Total(Inc)") }}</th>
-                                    <th class="px-2 py-2 text-right w-[75px]">{{ __("SalePrice") }}</th>
-                                    <th class="px-2 py-2 text-right w-[60px]">{{ __("Margin%") }}</th>
-                                    <th class="px-2 py-2 w-8"></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-border">
-                                <tr v-for="(item, index) in invoiceItems" :key="`${item.item_code}-${index}`"
-                                    class="hover:bg-muted/50 transition-colors">
-                                    <td class="px-2 py-1 text-center text-muted-foreground">{{ index + 1 }}</td>
-                                    <td class="px-2 py-1">
-                                        <div class="truncate font-medium text-xs" :title="item.item_name">{{ item.item_name }}</div>
-                                        <div class="text-[10px] text-muted-foreground truncate">{{ item.item_code }}</div>
-                                    </td>
-                                    <td class="px-2 py-1">
-                                        <Input v-model="item.batch_no" class="h-7 text-xs" :placeholder="__('Batch')" />
-                                    </td>
-                                    <td class="px-2 py-1">
-                                        <Input type="date" v-model="item.expiry_date" class="h-7 text-xs" />
-                                    </td>
-                                    <td class="px-2 py-1">
-                                        <NumberInput v-model="item.qty" :min="0" :precision="0" class="h-7 text-xs w-full" />
-                                    </td>
-                                    <td class="px-2 py-1">
-                                        <NumberInput v-model="item.bonus_qty" :min="0" :precision="0" class="h-7 text-xs w-full" />
-                                    </td>
-                                    <td class="px-2 py-1">
-                                        <NumberInput v-model="item.rate" :min="0" :precision="2" class="h-7 text-xs w-full" />
-                                    </td>
-                                    <td class="px-2 py-1">
-                                        <NumberInput v-model="item.discount_percent" :min="0" :max="100" :precision="1" class="h-7 text-xs w-full" />
-                                    </td>
-                                    <td class="px-2 py-1">
-                                        <NumberInput v-model="item.discount_amount" :min="0" :precision="2" class="h-7 text-xs w-full" />
-                                    </td>
-                                    <td class="px-2 py-1 text-right text-xs font-mono">{{ formatCurrency(getValueExTax(item)) }}</td>
-                                    <td class="px-2 py-1 text-right text-xs font-mono">{{ formatCurrency(getTotalExcTax(item)) }}</td>
-                                    <td class="px-2 py-1">
-                                        <NumberInput v-model="item.gst_percent" :min="0" :max="100" :precision="1" class="h-7 text-xs w-full" />
-                                    </td>
-                                    <td class="px-2 py-1 text-right text-xs font-mono">{{ formatCurrency(getGstValue(item)) }}</td>
-                                    <td class="px-2 py-1 text-right text-xs font-medium text-green-600 font-mono">{{ formatCurrency(getTotalIncTax(item)) }}</td>
-                                    <td class="px-2 py-1">
-                                        <NumberInput v-model="item.sale_price" :min="0" :precision="2" class="h-7 text-xs w-full" />
-                                    </td>
-                                    <td class="px-2 py-1 text-right text-xs font-mono" :class="getMarginPercent(item) >= 0 ? 'text-green-600' : 'text-red-500'">
-                                        {{ getMarginPercent(item).toFixed(1) }}%
-                                    </td>
-                                    <td class="px-1 py-1">
-                                        <Button @click="removeItem(index)" variant="ghost" size="icon"
-                                            class="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10">
-                                            <Trash2 class="w-3 h-3" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </ScrollArea>
+                    <template #cell-item_name="{ row }">
+                        <div class="truncate font-medium text-xs" :title="row.item_name">{{ row.item_name }}</div>
+                        <div class="text-[10px] text-muted-foreground truncate">{{ row.item_code }}</div>
+                    </template>
+                </Table>
 
-                <!-- Footer Totals & Settings -->
                 <div class="border-t border-border bg-muted shrink-0">
-                    <!-- Invoice Settings Row -->
                     <div class="px-4 py-2 border-b border-border grid grid-cols-6 gap-4 text-sm">
                         <div class="flex items-center gap-2">
                             <span class="text-muted-foreground">{{ __("Stock") }}:</span>
@@ -654,7 +655,6 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <!-- Grand Total Row -->
                     <div class="px-4 py-3 flex items-center justify-between">
                         <div class="flex items-center gap-6 text-sm">
                             <span class="text-muted-foreground">{{ __("Items") }}: <strong>{{ invoiceItems.length }}</strong></span>
@@ -682,97 +682,15 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- New Item Dialog -->
-        <Dialog v-model:open="showNewItemDialog">
-            <DialogContent class="max-w-lg">
-                <DialogHeader>
-                    <DialogTitle>{{ __("Create New Item") }}</DialogTitle>
-                    <DialogDescription>{{ __("Add a new item to inventory") }}</DialogDescription>
-                </DialogHeader>
-                <form @submit.prevent="handleCreateItem" class="space-y-4 mt-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="text-sm font-medium mb-1 block">{{ __("Item Name") }} *</label>
-                            <Input v-model="newItem.item_name" required />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Item Code") }}</label>
-                            <Input v-model="newItem.item_code" :placeholder="__('Auto-generated')" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Barcode") }}</label>
-                            <Input v-model="newItem.barcode" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("UOM") }}</label>
-                            <select v-model="newItem.stock_uom" class="w-full h-9 px-3 border border-border rounded-md text-sm">
-                                <option v-for="uom in standardUOMs" :key="uom" :value="uom">{{ uom }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Item Group") }}</label>
-                            <Input v-model="newItem.item_group" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Buying Price") }}</label>
-                            <NumberInput v-model="newItem.buying_price" :min="0" :precision="2" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Selling Price") }}</label>
-                            <NumberInput v-model="newItem.selling_price" :min="0" :precision="2" />
-                        </div>
-                    </div>
-                    <div class="flex justify-end gap-2 pt-4">
-                        <Button type="button" variant="outline" @click="showNewItemDialog = false">{{ __("Cancel") }}</Button>
-                        <Button type="submit" :disabled="isCreatingItem || !newItem.item_name.trim()">
-                            {{ isCreatingItem ? __("Creating...") : __("Create") }}
-                        </Button>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
+        <CreateItemDialog
+            v-model:open="showNewItemDialog"
+            :initial-name="itemSearchTerm"
+            @created="onItemCreated"
+        />
 
-        <!-- New Supplier Dialog -->
-        <Dialog v-model:open="showNewSupplierDialog">
-            <DialogContent class="max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{{ __("Create New Supplier") }}</DialogTitle>
-                    <DialogDescription>{{ __("Add a new supplier") }}</DialogDescription>
-                </DialogHeader>
-                <form @submit.prevent="handleCreateSupplier" class="space-y-4 mt-4">
-                    <div>
-                        <label class="text-sm font-medium mb-1 block">{{ __("Supplier Name") }} *</label>
-                        <Input v-model="newSupplier.supplier_name" required />
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Type") }}</label>
-                            <select v-model="newSupplier.supplier_type" class="w-full h-9 px-3 border border-border rounded-md text-sm">
-                                <option value="Company">{{ __("Company") }}</option>
-                                <option value="Individual">{{ __("Individual") }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Tax ID") }}</label>
-                            <Input v-model="newSupplier.tax_id" />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium mb-1 block">{{ __("Mobile") }}</label>
-                        <Input v-model="newSupplier.mobile_no" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium mb-1 block">{{ __("Email") }}</label>
-                        <Input v-model="newSupplier.email_id" type="email" />
-                    </div>
-                    <div class="flex justify-end gap-2 pt-4">
-                        <Button type="button" variant="outline" @click="showNewSupplierDialog = false">{{ __("Cancel") }}</Button>
-                        <Button type="submit" :disabled="isCreatingSupplier || !newSupplier.supplier_name.trim()">
-                            {{ isCreatingSupplier ? __("Creating...") : __("Create") }}
-                        </Button>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
+        <CreateSupplierDialog
+            v-model:open="showNewSupplierDialog"
+            :initial-name="supplierSearchTerm"
+        />
     </div>
 </template>

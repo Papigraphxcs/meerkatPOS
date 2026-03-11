@@ -27,6 +27,7 @@ const props = withDefaults(defineProps<{
   ignoreUserPermissions?: boolean;
   labelField?: string;
   emptyText?: string;
+  openOnFocus?: boolean;
   class?: HTMLAttributes["class"];
 }>(), {
   disabled: false,
@@ -37,6 +38,7 @@ const props = withDefaults(defineProps<{
   emptyText: __("No matches found"),
   filters: () => ({}),
   ignoreUserPermissions: false,
+  openOnFocus: false,
 });
 
 const emit = defineEmits<{
@@ -168,8 +170,9 @@ function onInput(event: Event) {
 }
 
 function onFocus() {
-  if (!props.disabled) {
+  if (!props.disabled && props.openOnFocus) {
     open.value = true;
+    void searchOptions(query.value);
   }
 }
 
@@ -236,7 +239,11 @@ function clearSelection() {
               <X class="h-3.5 w-3.5" />
             </button>
             <Loader2 v-if="loading" class="h-4 w-4 text-muted-foreground animate-spin" />
-            <ChevronDown v-else class="h-4 w-4 text-muted-foreground" :class="{ 'rotate-180': open }" />
+            <button v-else type="button" tabindex="-1"
+              class="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              @mousedown.prevent="open = !open; if (open) { void searchOptions(query) }">
+              <ChevronDown class="h-4 w-4" :class="{ 'rotate-180': open }" />
+            </button>
           </div>
         </div>
       </PopoverAnchor>

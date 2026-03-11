@@ -54,25 +54,6 @@ export interface PurchaseCartItem {
     item_uoms?: Array<{ uom: string; conversion_factor: number }>;
 }
 
-// Draft PO structure
-export interface DraftPurchaseOrder {
-    id: string;
-    data: {
-        supplier: string;
-        supplier_name?: string;
-        items: PurchaseCartItem[];
-        po_category?: string;
-        po_type?: string;
-        po_department?: string;
-        po_remarks?: string;
-        po_zero_qty?: string;
-    };
-    created_at: string;
-    updated_at: string;
-}
-
-const DRAFT_STORAGE_KEY = "xpos_po_drafts";
-
 export const usePurchaseStore = defineStore("purchase", () => {
     const suppliers = ref<Supplier[]>([]);
     const isLoadingSuppliers = ref(false);
@@ -86,8 +67,8 @@ export const usePurchaseStore = defineStore("purchase", () => {
     const showItemDialog = ref(false);
     const showNewItemForm = ref(false);
     const cartItems = ref<PurchaseCartItem[]>([]);
-    const receiveImmediately = ref(true);
-    const createInvoice = ref(true);
+    const receiveImmediately = ref(false);
+    const createInvoice = ref(false);
     const selectedWarehouse = ref("");
     const showPurchaseDialog = ref(false);
     const isProcessing = ref(false);
@@ -115,7 +96,8 @@ export const usePurchaseStore = defineStore("purchase", () => {
     const poZeroQty = ref("No");
     
     // Draft management
-    const currentDraftId = ref<string | null>(null);
+    const currentDraftName = ref<string | null>(null);
+    const isDraftSaving = ref(false);
     const isFetchingCategoryItems = ref(false);
 
     const cartTotal = computed(() =>
@@ -461,8 +443,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
                     class: item.class,
                     pack_units: item.pack_units,
                 })),
-                receive: receiveImmediately.value,
-                create_invoice: createInvoice.value,
                 submit: true,
                 custom_po_category: poCategory.value || undefined,
                 custom_po_type: poType.value || undefined,
@@ -482,14 +462,20 @@ export const usePurchaseStore = defineStore("purchase", () => {
                 { data: JSON.stringify(orderData) }
             );
 
-            let message = __("Purchase Order {0} created", [result.purchase_order ?? ""]);
-            if (result.purchase_receipt) {
-                message += __(", Receipt: {0}", [result.purchase_receipt ?? ""]);
+            showSuccess(__("Purchase Order {0} created", [result.purchase_order ?? ""]));
+
+            // Delete the draft from Frappe if one was active
+            const draftName = currentDraftName.value;
+            if (draftName) {
+                try {
+                    await call(
+                        "xpos.x_pos.api.purchase_orders.delete_po_draft",
+                        { name: draftName }
+                    );
+                } catch (e) {
+                    console.warn("[XPOS Purchase] Failed to delete draft after submission:", e);
+                }
             }
-            if (result.purchase_invoice) {
-                message += __(", Invoice: {0}", [result.purchase_invoice ?? ""]);
-            }
-            showSuccess(message);
 
             clearAfterOrder();
             return result;
@@ -511,6 +497,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
         poDepartment.value = "";
         poRemarks.value = "";
         poZeroQty.value = "No";
+        currentDraftName.value = null;
         showPurchaseDialog.value = false;
     }
 
@@ -540,7 +527,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
                         "per_billed",
                     ],
                     filters: {
-                        docstatus: ["!=", 2],
+                        docstatus: 1,
                         ...(filters?.status && { status: filters.status }),
                         ...(filters?.supplier && { supplier: filters.supplier }),
                         ...(filters?.from_date && { transaction_date: [">=", filters.from_date] }),
@@ -886,101 +873,137 @@ export const usePurchaseStore = defineStore("purchase", () => {
         selectedTransit.value = null;
     }
 
-    // Draft management functions
-    function generateDraftId(): string {
-        return `draft_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    function getAllDrafts(): DraftPurchaseOrder[] {
+    // Draft management — server-side (Frappe Purchase Order, docstatus=0)
+    async function getAllDrafts(): Promise<Array<{
+        name: string;
+        supplier: string;
+        supplier_name: string;
+        transaction_date: string;
+        creation: string;
+        modified: string;
+        items_count: number;
+    }>> {
         try {
-            const stored = localStorage.getItem(DRAFT_STORAGE_KEY);
-            if (stored) {
-                return JSON.parse(stored);
-            }
+            const result = await call<Array<{
+                name: string;
+                supplier: string;
+                supplier_name: string;
+                transaction_date: string;
+                creation: string;
+                modified: string;
+                items_count: number;
+            }>>(
+                "xpos.x_pos.api.purchase_orders.list_po_drafts",
+                { limit: 50 }
+            );
+            return result || [];
         } catch (e) {
             console.warn("[XPOS Purchase] Failed to load drafts:", e);
+            return [];
         }
-        return [];
     }
 
-    function saveDraft(): string {
-        const drafts = getAllDrafts();
-        const now = new Date().toISOString();
-        
-        const draftData: DraftPurchaseOrder = {
-            id: currentDraftId.value || generateDraftId(),
-            data: {
+    async function saveDraft(): Promise<string | null> {
+        if (!selectedSupplier.value) {
+            showError(__("Please select a supplier before saving a draft."));
+            return null;
+        }
+        isDraftSaving.value = true;
+        try {
+            const posStore = usePosStore();
+            const payload = {
+                draft_name: currentDraftName.value || undefined,
                 supplier: selectedSupplier.value,
-                items: JSON.parse(JSON.stringify(cartItems.value)),
-                po_category: poCategory.value,
-                po_type: poType.value,
-                po_department: poDepartment.value,
-                po_remarks: poRemarks.value,
-                po_zero_qty: poZeroQty.value,
-            },
-            created_at: currentDraftId.value 
-                ? (drafts.find(d => d.id === currentDraftId.value)?.created_at || now)
-                : now,
-            updated_at: now,
-        };
-
-        // Update existing or add new
-        const existingIndex = drafts.findIndex(d => d.id === draftData.id);
-        if (existingIndex >= 0) {
-            drafts[existingIndex] = draftData;
-        } else {
-            drafts.push(draftData);
+                company: posStore.companyName,
+                warehouse: posStore.warehouse,
+                items: cartItems.value.map((item) => ({
+                    item_code: item.item_code,
+                    item_name: item.item_name,
+                    qty: item.qty,
+                    rate: item.rate,
+                    uom: item.uom,
+                    stock_uom: item.stock_uom,
+                    conversion_factor: item.conversion_factor,
+                    warehouse: item.warehouse,
+                    stock_in_hand: item.stock_in_hand,
+                    transit_stock: item.transit_stock,
+                    required_packs: item.required_packs,
+                    pack_units: item.pack_units,
+                    class: item.class,
+                    item_packing: item.item_packing,
+                })),
+                custom_po_category: poCategory.value || undefined,
+                custom_po_type: poType.value || undefined,
+                custom_po_remarks: poRemarks.value || undefined,
+                custom_zero_qty: poZeroQty.value || undefined,
+            };
+            const result = await call<{ draft_name: string }>(
+                "xpos.x_pos.api.purchase_orders.save_po_draft",
+                { data: JSON.stringify(payload) }
+            );
+            currentDraftName.value = result.draft_name;
+            showSuccess(__("Draft saved successfully"));
+            return result.draft_name;
+        } catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to save draft");
+            return null;
+        } finally {
+            isDraftSaving.value = false;
         }
-
-        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
-        currentDraftId.value = draftData.id;
-        showSuccess(__("Draft saved successfully"));
-        return draftData.id;
     }
 
-    function loadDraft(draftId: string): boolean {
-        const drafts = getAllDrafts();
-        const draft = drafts.find(d => d.id === draftId);
-        
-        if (!draft) {
-            showError(__("Draft not found"));
+    async function loadDraft(name: string): Promise<boolean> {
+        try {
+            const result = await call<{
+                draft_name: string;
+                supplier: string;
+                items: PurchaseCartItem[];
+                po_category?: string;
+                po_type?: string;
+                po_remarks?: string;
+                po_zero_qty?: string;
+            }>(
+                "xpos.x_pos.api.purchase_orders.load_po_draft",
+                { name }
+            );
+            clearCart();
+            clearSupplier();
+            currentDraftName.value = result.draft_name;
+            selectedSupplier.value = result.supplier || "";
+            cartItems.value = result.items || [];
+            poCategory.value = result.po_category || "";
+            poType.value = result.po_type || "";
+            poRemarks.value = result.po_remarks || "";
+            poZeroQty.value = result.po_zero_qty || "No";
+            if (cartItems.value.length > 0) {
+                const codes = cartItems.value.map(i => i.item_code);
+                fetchStockForItems(codes);
+            }
+            return true;
+        } catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to load draft");
             return false;
         }
-
-        clearCart();
-        clearSupplier();
-
-        currentDraftId.value = draft.id;
-        selectedSupplier.value = draft.data.supplier || "";
-        cartItems.value = draft.data.items || [];
-        poCategory.value = draft.data.po_category || "";
-        poType.value = draft.data.po_type || "";
-        poDepartment.value = draft.data.po_department || "";
-        poRemarks.value = draft.data.po_remarks || "";
-        poZeroQty.value = draft.data.po_zero_qty || "No";
-
-        // Refresh stock for loaded items
-        if (cartItems.value.length > 0) {
-            const codes = cartItems.value.map(i => i.item_code);
-            fetchStockForItems(codes);
-        }
-
-        return true;
     }
 
-    function deleteDraft(draftId: string): void {
-        const drafts = getAllDrafts().filter(d => d.id !== draftId);
-        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
-        
-        if (currentDraftId.value === draftId) {
-            currentDraftId.value = null;
+    async function deleteDraft(name: string): Promise<void> {
+        try {
+            await call(
+                "xpos.x_pos.api.purchase_orders.delete_po_draft",
+                { name }
+            );
+            if (currentDraftName.value === name) {
+                currentDraftName.value = null;
+            }
+        } catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to delete draft");
         }
     }
 
     function loadFromOrder(order: PurchaseOrder): void {
         clearCart();
         clearSupplier();
-        currentDraftId.value = null;
+        currentDraftName.value = null;
 
         selectedSupplier.value = order.supplier;
         
@@ -1089,7 +1112,8 @@ export const usePurchaseStore = defineStore("purchase", () => {
         poDepartment,
         poRemarks,
         poZeroQty,
-        currentDraftId,
+        currentDraftName,
+        isDraftSaving,
         isFetchingCategoryItems,
         cartTotal,
         cartItemCount,

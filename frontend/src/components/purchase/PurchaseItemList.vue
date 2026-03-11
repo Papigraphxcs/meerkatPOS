@@ -2,10 +2,11 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { usePurchaseStore } from "@/stores/purchaseStore";
 import { usePosStore } from "@/stores/posStore";
-import { Search, Plus, Package, ShoppingCart, ScanBarcode, Loader2 } from "lucide-vue-next";
+import { Plus, Package, ShoppingCart, ScanBarcode, Loader2 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
+import { LinkField, type LinkFieldOption } from "@/components/ui/link";
 import {
     Dialog,
     DialogContent,
@@ -21,6 +22,7 @@ const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
 
 const searchTerm = ref("");
+const selectedItemCode = ref("");
 const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
 const barcodeValue = ref("");
@@ -40,30 +42,26 @@ const newItem = ref({
 
 const isCreating = ref(false);
 
-const standardUOMs = [
-    "Nos",
-    "Unit",
-    "Kg",
-    "Gram",
-    "Litre",
-    "mL",
-    "Box",
-    "Pack",
-    "Dozen",
-    "Pair",
-    "Set",
-    "Meter",
-    "Feet",
-];
-
-function onSearchInput(): void {
-    if (debounceTimer.value) {
-        clearTimeout(debounceTimer.value);
-    }
-
+function handleItemLinkSearch(text: string): void {
+    if (debounceTimer.value) clearTimeout(debounceTimer.value);
     debounceTimer.value = setTimeout(() => {
-        purchaseStore.searchItems(searchTerm.value);
+        searchTerm.value = text;
+        purchaseStore.searchItems(text);
     }, 300);
+}
+
+async function handleItemLinkSelect(option: LinkFieldOption): Promise<void> {
+    selectedItemCode.value = "";
+    let item = purchaseStore.purchaseItems.find(i => i.item_code === option.value);
+    if (!item) {
+        await purchaseStore.searchItems(option.value);
+        item = purchaseStore.purchaseItems.find(i => i.item_code === option.value);
+    }
+    if (item) {
+        purchaseStore.addToCart(item, 1);
+    }
+    searchTerm.value = "";
+    void purchaseStore.searchItems();
 }
 
 async function onBarcodeScan(): Promise<void> {
@@ -184,10 +182,15 @@ onUnmounted(() => {
 
         <div class="p-4 border-b border-border bg-muted">
             <div class="flex gap-2">
-                <div class="relative flex-1">
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input v-model="searchTerm" type="text" :placeholder="__('Search items by name, code or barcode...')"
-                        @input="onSearchInput" class="pl-10" />
+                <div class="flex-1">
+                    <LinkField
+                        :model-value="selectedItemCode"
+                        @update:model-value="selectedItemCode = $event"
+                        @search="handleItemLinkSearch"
+                        @select="handleItemLinkSelect"
+                        doctype="Item"
+                        :empty-text="__('No items found')"
+                    />
                 </div>
                 <Button @click="openNewItemForm" variant="outline" size="icon" :title="__('Create new item')">
                     <Plus class="w-4 h-4" />
@@ -261,13 +264,7 @@ onUnmounted(() => {
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-medium mb-1 block text-foreground">{{ __("Stock UOM") }} *</label>
-                            <select v-model="newItem.stock_uom"
-                                class="w-full px-3 py-2 border border-border rounded-md text-sm bg-background text-foreground"
-                                required>
-                                <option v-for="uom in standardUOMs" :key="uom" :value="uom">
-                                    {{ uom }}
-                                </option>
-                            </select>
+                            <LinkField v-model="newItem.stock_uom" doctype="UOM" :open-on-focus="true" />
                         </div>
 
                         <div>

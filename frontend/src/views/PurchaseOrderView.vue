@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick, watch } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore, type PurchaseCartItem } from "@/stores/purchaseStore";
+import { Select, SelectTriggerStyled, SelectContentStyled, SelectItemStyled, SelectValue } from "@/components/ui/select";
 import { usePosStore } from "@/stores/posStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NumberInput } from "@/components/ui/number-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Table } from "@/components/ui/table";
+import type { TableColumn, TableRow } from "@/components/ui/table/types";
 import {
     Search,
     Plus,
-    Trash2,
     RefreshCw,
     Package,
     Save,
@@ -24,17 +25,11 @@ import {
     List,
     Send,
 } from "lucide-vue-next";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
 import type { SearchItem, Supplier } from "@/types/pos.types";
 import { showError, showSuccess } from "@/services/api";
 import __ from "@/lib/translate";
 import LinkField from "@/components/ui/link/LinkField.vue";
+import { CreateItemDialog, CreateSupplierDialog } from "@/components/purchase";
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
@@ -53,48 +48,17 @@ const isBarcodeScan = ref(false);
 const barcodeFlash = ref<"" | "success" | "error">("");
 let barcodeFlashTimer: ReturnType<typeof setTimeout> | null = null;
 
-// New item dialog
+// New item / supplier dialog visibility
 const showNewItemDialog = ref(false);
-const newItem = ref({
-    item_name: "",
-    item_code: "",
-    item_group: "",
-    stock_uom: "Nos",
-    barcode: "",
-    buying_price: 0,
-    selling_price: 0,
-});
-const isCreatingItem = ref(false);
-
-// New supplier dialog
 const showNewSupplierDialog = ref(false);
-const newSupplier = ref({
-    supplier_name: "",
-    supplier_type: "Company",
-    mobile_no: "",
-    email_id: "",
-    tax_id: "",
-});
-const isCreatingSupplier = ref(false);
-
-// Table refs for keyboard navigation
-const tableRef = ref<HTMLElement | null>(null);
-const inputRefs = ref<Map<string, HTMLInputElement>>(new Map());
 
 // PO Categories
 const poCategories = [
-    "",
     "Against Purchase Quotation",
     "Against Sale Order",
     "Projection Period",
     "Reorder Level",
 ];
-
-const standardUOMs = ["Nos", "Unit", "Kg", "Gram", "Litre", "mL", "Box", "Pack", "Dozen", "Pair", "Set", "Meter", "Feet"];
-
-// Editable column config for keyboard navigation
-const editableColumns = ["packs", "uom", "price", "discount"] as const;
-type EditableColumn = typeof editableColumns[number];
 
 // Computed
 const grandTotal = computed(() => {
@@ -118,115 +82,6 @@ function getItemAmount(item: PurchaseCartItem): number {
     const disc = item.discount_percent || 0;
     return gross * (1 - disc / 100);
 }
-
-// Register input ref for keyboard navigation
-function registerInput(rowIndex: number, column: EditableColumn, el: HTMLInputElement | null): void {
-    const key = `${rowIndex}-${column}`;
-    if (el) {
-        inputRefs.value.set(key, el);
-    } else {
-        inputRefs.value.delete(key);
-    }
-}
-
-// Keyboard navigation handler
-function handleKeyDown(event: KeyboardEvent, rowIndex: number, column: EditableColumn): void {
-    const totalRows = purchaseStore.cartItems.length;
-    const colIndex = editableColumns.indexOf(column);
-
-    let newRowIndex = rowIndex;
-    let newColIndex = colIndex;
-
-    switch (event.key) {
-        case "ArrowUp":
-            event.preventDefault();
-            newRowIndex = Math.max(0, rowIndex - 1);
-            break;
-        case "ArrowDown":
-            event.preventDefault();
-            newRowIndex = Math.min(totalRows - 1, rowIndex + 1);
-            break;
-        case "ArrowLeft":
-            if ((event.target as HTMLInputElement)?.selectionStart === 0) {
-                event.preventDefault();
-                newColIndex = Math.max(0, colIndex - 1);
-            }
-            break;
-        case "ArrowRight":
-            const input = event.target as HTMLInputElement;
-            if (input?.selectionStart === input?.value?.length) {
-                event.preventDefault();
-                newColIndex = Math.min(editableColumns.length - 1, colIndex + 1);
-            }
-            break;
-        case "Enter":
-            event.preventDefault();
-            newRowIndex = Math.min(totalRows - 1, rowIndex + 1);
-            break;
-        case "Tab":
-            // Let default behavior handle tab
-            return;
-        default:
-            return;
-    }
-
-    // Focus the new cell
-    if (newRowIndex !== rowIndex || newColIndex !== colIndex) {
-        const newColumn = editableColumns[newColIndex];
-        const key = `${newRowIndex}-${newColumn}`;
-        nextTick(() => {
-            const input = inputRefs.value.get(key);
-            if (input) {
-                input.focus();
-                input.select();
-            }
-        });
-    }
-}
-
-// Focus and scroll to last added item
-watch(() => purchaseStore.cartItems.length, (newLength, oldLength) => {
-    if (newLength > oldLength) {
-        // New item added, focus its packs input and scroll into view
-        nextTick(() => {
-            const lastIndex = newLength - 1;
-            const key = `${lastIndex}-packs`;
-            const input = inputRefs.value.get(key);
-            if (input) {
-                input.focus();
-                input.select();
-            }
-
-            // Scroll to the new row and highlight it
-            const rows = tableRef.value?.querySelectorAll('.po-row');
-            const lastRow = rows?.[lastIndex] as HTMLElement | null;
-            if (lastRow) {
-                lastRow.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                lastRow.classList.add('ring-2', 'ring-primary/50');
-                setTimeout(() => {
-                    lastRow.classList.remove('ring-2', 'ring-primary/50');
-                }, 800);
-            }
-        });
-    }
-});
-
-// When existing item qty is updated (same length, different lastAddedIndex), scroll & highlight
-watch(() => purchaseStore.lastAddedIndex, (index) => {
-    if (index < 0 || index >= purchaseStore.cartItems.length) return;
-    // Only highlight if length didn't change (handled above)
-    nextTick(() => {
-        const rows = tableRef.value?.querySelectorAll('.po-row');
-        const row = rows?.[index] as HTMLElement | null;
-        if (row) {
-            row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            row.classList.add('ring-2', 'ring-primary/50');
-            setTimeout(() => {
-                row.classList.remove('ring-2', 'ring-primary/50');
-            }, 800);
-        }
-    });
-});
 
 // Item search
 function onItemSearch(): void {
@@ -321,16 +176,56 @@ function deleteRow(index: number): void {
     purchaseStore.removeFromCart(index);
 }
 
-// UOM change handler
-function handleUOMChange(index: number, uomValue: string): void {
-    const item = purchaseStore.cartItems[index];
-    if (!item) return;
+function deleteRows(indices: number[]): void {
+    // indices come sorted descending from ChildTable
+    for (const i of indices) {
+        purchaseStore.removeFromCart(i);
+    }
+}
 
-    // Find conversion factor from item_uoms
-    const uomData = item.item_uoms?.find(u => u.uom === uomValue);
-    const conversionFactor = uomData?.conversion_factor || 1;
+function duplicateRow(index: number): void {
+    const src = purchaseStore.cartItems[index];
+    if (src) {
+        purchaseStore.cartItems.splice(index + 1, 0, { ...src });
+    }
+}
 
-    purchaseStore.updateCartItemUOM(index, uomValue, conversionFactor);
+function moveRow(index: number, direction: -1 | 1): void {
+    const target = index + direction;
+    const items = purchaseStore.cartItems;
+    if (target < 0 || target >= items.length) return;
+    const temp = items[index];
+    items[index] = items[target];
+    items[target] = temp;
+}
+
+// Cell change handler for ChildTable — routes to store methods
+function onPOCellChange(payload: { rowIndex: number; fieldname: string; value: any }): void {
+    const { rowIndex, fieldname, value } = payload;
+    switch (fieldname) {
+        case "required_packs":
+            purchaseStore.updateCartItemPacks(rowIndex, value);
+            break;
+        case "rate":
+            purchaseStore.updateCartItemRate(rowIndex, value);
+            break;
+        case "discount_percent":
+            purchaseStore.updateCartItemDiscount(rowIndex, value);
+            break;
+        case "uom": {
+            const item = purchaseStore.cartItems[rowIndex];
+            const uomData = item?.item_uoms?.find(u => u.uom === value);
+            const cf = uomData?.conversion_factor || 1;
+            purchaseStore.updateCartItemUOM(rowIndex, value, cf);
+            break;
+        }
+        default: {
+            const item = purchaseStore.cartItems[rowIndex];
+            if (item) {
+                (item as any)[fieldname] = value;
+            }
+        }
+    }
 }
 
 // Get UOM options for item
@@ -341,83 +236,121 @@ function getUOMOptions(item: PurchaseCartItem): Array<{ uom: string; conversion_
     return [{ uom: item.stock_uom, conversion_factor: 1 }];
 }
 
-// Create new item
-function openNewItemDialog(): void {
-    newItem.value = {
-        item_name: itemSearchTerm.value,
-        item_code: "",
-        item_group: "",
-        stock_uom: "Nos",
-        barcode: "",
-        buying_price: 0,
-        selling_price: 0,
-    };
-    showNewItemDialog.value = true;
+const poColumns = computed<TableColumn[]>(() => [
+    {
+        fieldname: "item_name",
+        label: "Item Name",
+        type: "readonly" as const,
+        width: "min-w-[140px]",
+        align: "left" as const,
+        editable: false,
+        alwaysVisible: true,
+        format: (val: any) => val || "-",
+    },
+    {
+        fieldname: "stock_in_hand",
+        label: "Stock",
+        type: "readonly" as const,
+        width: "w-[70px]",
+        align: "right" as const,
+        editable: false,
+        format: (val: any) => (val || 0).toFixed(0),
+    },
+    {
+        fieldname: "transit_stock",
+        label: "Transit",
+        type: "readonly" as const,
+        width: "w-[70px]",
+        align: "right" as const,
+        editable: false,
+        format: (val: any) => (val || 0).toFixed(0),
+    },
+    {
+        fieldname: "required_packs",
+        label: "Pack(s)",
+        type: "number" as const,
+        width: "w-[80px]",
+        align: "center" as const,
+        min: 0,
+        precision: 0,
+    },
+    {
+        fieldname: "uom",
+        label: "UOM",
+        type: "select" as const,
+        width: "w-[100px]",
+        align: "left" as const,
+        options: (row: TableRow) => {
+            const item = row as unknown as PurchaseCartItem;
+            return getUOMOptions(item).map(u => ({
+                label: `${u.uom} (${u.conversion_factor})`,
+                value: u.uom,
+            }));
+        },
+    },
+    {
+        fieldname: "pack_units",
+        label: "Units",
+        type: "readonly" as const,
+        width: "w-[55px]",
+        align: "right" as const,
+        editable: false,
+        format: (val: any) => (val || 0).toFixed(0),
+    },
+    {
+        fieldname: "rate",
+        label: "Price",
+        type: "number" as const,
+        width: "w-[90px]",
+        align: "center" as const,
+        min: 0,
+        precision: 2,
+    },
+    {
+        fieldname: "discount_percent",
+        label: "Disc%",
+        type: "number" as const,
+        width: "w-[70px]",
+        align: "center" as const,
+        min: 0,
+        max: 100,
+        precision: 1,
+    },
+    {
+        fieldname: "item_group",
+        label: "Item Group",
+        type: "readonly" as const,
+        width: "w-[100px]",
+        align: "left" as const,
+        editable: false,
+        format: (val: any) => val || "-",
+    },
+    {
+        fieldname: "amount",
+        label: "Amount",
+        type: "readonly" as const,
+        width: "w-[100px]",
+        align: "right" as const,
+        editable: false,
+        cellClass: "text-green-600 font-medium",
+        format: (_: any, row: any) => formatCurrency(getItemAmount(row as PurchaseCartItem)),
+    },
+]);
+
+function onItemCreated(item: SearchItem, buyingPrice: number): void {
+    purchaseStore.addToCart({ ...item, standard_rate: buyingPrice }, 1);
 }
 
-async function handleCreateItem(): Promise<void> {
-    if (!newItem.value.item_name.trim()) return;
-    isCreatingItem.value = true;
-    try {
-        const created = await purchaseStore.createItem({
-            item_name: newItem.value.item_name,
-            item_code: newItem.value.item_code || undefined,
-            item_group: newItem.value.item_group || undefined,
-            stock_uom: newItem.value.stock_uom,
-            barcode: newItem.value.barcode || undefined,
-            buying_price: newItem.value.buying_price || undefined,
-            selling_price: newItem.value.selling_price || undefined,
-        });
-        if (created) {
-            purchaseStore.addToCart({ ...created, standard_rate: newItem.value.buying_price }, 1);
-            showNewItemDialog.value = false;
-        }
-    } finally {
-        isCreatingItem.value = false;
-    }
-}
-
-// Create new supplier
-function openNewSupplierDialog(): void {
-    newSupplier.value = {
-        supplier_name: supplierSearchTerm.value,
-        supplier_type: "Company",
-        mobile_no: "",
-        email_id: "",
-        tax_id: "",
-    };
-    showNewSupplierDialog.value = true;
-}
-
-async function handleCreateSupplier(): Promise<void> {
-    if (!newSupplier.value.supplier_name.trim()) return;
-    isCreatingSupplier.value = true;
-    try {
-        await purchaseStore.createSupplier(newSupplier.value);
-        showNewSupplierDialog.value = false;
-    } finally {
-        isCreatingSupplier.value = false;
-    }
-}
-
-// Fetch items by PO Category
 async function fetchCategoryItems(): Promise<void> {
     await purchaseStore.fetchCategoryItems();
 }
 
-// Draft operations
-function saveDraft(): void {
-    purchaseStore.saveDraft();
+async function saveDraft(): Promise<void> {
+    await purchaseStore.saveDraft();
 }
 
-// Create PO
-async function createOrder(submit = true): Promise<void> {
-    // Clear draft after successful creation
-    const draftId = purchaseStore.currentDraftId;
-    const result = await purchaseStore.createPurchaseOrder();
-    if (result && draftId) {
-        purchaseStore.deleteDraft(draftId);
-    }
+async function createOrder(): Promise<void> {
+    await purchaseStore.createPurchaseOrder();
 }
 
 function clearForm(): void {
@@ -428,7 +361,7 @@ function clearForm(): void {
     purchaseStore.poDepartment = "";
     purchaseStore.poRemarks = "";
     purchaseStore.poZeroQty = "No";
-    purchaseStore.currentDraftId = null;
+    purchaseStore.currentDraftName = null;
 }
 
 function goToList(): void {
@@ -449,7 +382,7 @@ onMounted(() => {
                 <div class="flex items-center gap-3">
                     <ShoppingCart class="w-6 h-6 text-primary" />
                     <h1 class="text-xl font-semibold text-foreground">{{ __("Purchase Order") }}</h1>
-                    <Badge v-if="purchaseStore.currentDraftId" variant="secondary" class="text-xs">
+                    <Badge v-if="purchaseStore.currentDraftName" variant="secondary" class="text-xs">
                         {{ __("Draft") }}
                     </Badge>
                 </div>
@@ -468,7 +401,6 @@ onMounted(() => {
             </div>
         </header>
 
-        <!-- PO Header Fields -->
         <div class="bg-card border-b border-border px-4 py-3 shrink-0">
             <div class="grid grid-cols-8 gap-3">
                 <div class="col-span-2">
@@ -478,18 +410,21 @@ onMounted(() => {
                             <LinkField v-model="purchaseStore.selectedSupplier" doctype="Supplier"
                                 class="h-8 text-sm" />
                         </div>
-                        <Button @click="openNewSupplierDialog" variant="outline" size="icon" class="h-8 w-8 shrink-0">
+                        <Button @click="showNewSupplierDialog = true" variant="outline" size="icon" class="h-8 w-8 shrink-0">
                             <Plus class="w-3.5 h-3.5" />
                         </Button>
                     </div>
                 </div>
                 <div>
                     <label class="text-xs text-muted-foreground mb-1 block">{{ __("P/O Category") }}</label>
-                    <select v-model="purchaseStore.poCategory"
-                        class="w-full h-8 px-2 border border-border rounded-md text-sm bg-background text-foreground">
-                        <option v-for="cat in poCategories" :key="cat" :value="cat">{{ cat || __("-- Select --") }}
-                        </option>
-                    </select>
+                    <Select v-model="purchaseStore.poCategory">
+                        <SelectTriggerStyled class="h-8 w-[140px]">
+                            <SelectValue placeholder="P/O Category" />
+                        </SelectTriggerStyled>
+                        <SelectContentStyled>
+                            <SelectItemStyled v-for="cat in poCategories" :key="cat" :value="cat" >{{ cat }}</SelectItemStyled>
+                        </SelectContentStyled>
+                    </Select>
                 </div>
                 <div v-if="showCategoryButton">
                     <label class="text-xs text-muted-foreground mb-1 block">&nbsp;</label>
@@ -502,11 +437,15 @@ onMounted(() => {
                 </div>
                 <div v-else>
                     <label class="text-xs text-muted-foreground mb-1 block">{{ __("Zero Qty") }}</label>
-                    <select v-model="purchaseStore.poZeroQty"
-                        class="w-full h-8 px-2 border border-border rounded-md text-sm bg-background text-foreground">
-                        <option value="No">{{ __("No") }}</option>
-                        <option value="Yes">{{ __("Yes") }}</option>
-                    </select>
+                    <Select v-model="purchaseStore.poZeroQty">
+                        <SelectTriggerStyled class="h-8 w-[140px]">
+                            <SelectValue :placeholder="__('Zero Qty')" />
+                        </SelectTriggerStyled>
+                        <SelectContentStyled>
+                            <SelectItemStyled value="No">{{ __("No") }}</SelectItemStyled>
+                            <SelectItemStyled value="Yes">{{ __("Yes") }}</SelectItemStyled>
+                        </SelectContentStyled>
+                    </Select>
                 </div>
                 <div class="col-span-3">
                     <label class="text-xs text-muted-foreground mb-1 block">{{ __("Remarks") }}</label>
@@ -515,11 +454,8 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="flex-1 flex min-h-0 overflow-hidden">
-            <!-- Left: Item Search Panel -->
             <div class="w-72 border-r border-border bg-card flex flex-col shrink-0 overflow-hidden">
-                <!-- Barcode Scanner -->
                 <div class="px-3 pt-3 pb-2 border-b border-border">
                     <div class="relative">
                         <ScanBarcode class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -533,7 +469,6 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- Item Search -->
                 <div class="p-3 border-b border-border">
                     <div class="flex gap-1">
                         <div class="relative flex-1">
@@ -542,13 +477,12 @@ onMounted(() => {
                                 @keydown="handleItemSearchKeyDown" :placeholder="__('Search items...')"
                                 class="pl-8 h-8 text-sm" ref="itemSearchInputRef" />
                         </div>
-                        <Button @click="openNewItemDialog" variant="outline" size="icon" class="h-8 w-8 shrink-0">
+                        <Button @click="showNewItemDialog = true" variant="outline" size="icon" class="h-8 w-8 shrink-0">
                             <Plus class="w-4 h-4" />
                         </Button>
                     </div>
                 </div>
 
-                <!-- Item List -->
                 <ScrollArea class="flex-1 min-h-0">
                     <div v-if="purchaseStore.isLoadingItems" class="p-4 text-center text-muted-foreground text-sm">
                         {{ __("Loading...") }}
@@ -574,124 +508,46 @@ onMounted(() => {
                 </ScrollArea>
             </div>
 
-            <!-- Right: Cart Grid -->
             <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <!-- Toolbar -->
-                <div class="px-4 py-2 border-b border-border bg-muted flex items-center justify-between shrink-0">
-                    <span class="text-sm font-medium text-foreground">
-                        {{ __("Items") }} ({{ purchaseStore.cartItems.length }})
-                    </span>
-                    <Button v-if="purchaseStore.cartItems.length > 0" @click="purchaseStore.refreshAllStock()"
-                        variant="outline" size="sm">
-                        <RefreshCw class="w-3.5 h-3.5 mr-1" />
-                        {{ __("Refresh Stock") }}
-                    </Button>
-                </div>
+                <Table
+                    :rows="purchaseStore.cartItems"
+                    :columns="poColumns"
+                    label="Items"
+                    min-width="1200px"
+                    :show-add-row="false"
+                    :show-checkboxes="true"
+                    :show-row-numbers="true"
+                    :show-delete-button="true"
+                    :keyboard-navigation="true"
+                    :allow-reorder="true"
+                    :allow-duplicate="true"
+                    :show-column-settings="true"
+                    :highlight-new-rows="true"
+                    empty-message="No items added"
+                    empty-description="Search and add items from the left panel"
+                    @delete-row="deleteRow"
+                    @delete-rows="deleteRows"
+                    @duplicate-row="duplicateRow"
+                    @move-row="moveRow"
+                    @cell-change="onPOCellChange"
+                    class="flex-1 min-h-0 flex flex-col"
+                >
+                    <template #toolbar>
+                        <Button v-if="purchaseStore.cartItems.length > 0" @click="purchaseStore.refreshAllStock()"
+                            variant="outline" size="sm" class="h-7 text-xs">
+                            <RefreshCw class="w-3.5 h-3.5 mr-1" />
+                            {{ __("Refresh Stock") }}
+                        </Button>
+                    </template>
 
-                <!-- Grid Table with Sticky Headers and Frozen Amount Column -->
-                <div class="flex-1 min-h-0 overflow-hidden" ref="tableRef">
-                    <div v-if="purchaseStore.cartItems.length === 0"
-                        class="flex items-center justify-center h-full p-8">
-                        <div class="text-center text-muted-foreground">
-                            <Package class="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-                            <p class="font-medium">{{ __("No items added") }}</p>
-                            <p class="text-sm mt-1">{{ __("Search and add items from the left panel") }}</p>
+                    <template #cell-item_name="{ row }">
+                        <div class="truncate font-medium text-xs" :title="row.item_name">
+                            {{ row.item_name }}
                         </div>
-                    </div>
-                    <div v-else class="h-full overflow-auto po-table-container">
-                        <table class="w-full text-sm border-collapse min-w-[1200px] po-table">
-                            <thead class="po-table-header">
-                                <tr class="text-xs text-muted-foreground uppercase tracking-wider">
-                                    <th class="po-cell px-2 py-2 text-center w-10 bg-muted">{{ __("S#") }}</th>
-                                    <th class="po-cell px-2 py-2 text-left min-w-[140px] bg-muted">{{ __("Item Name") }}
-                                    </th>
-                                    <th class="po-cell px-2 py-2 text-right w-[70px] bg-muted">{{ __("Stock") }}</th>
-                                    <th class="po-cell px-2 py-2 text-right w-[70px] bg-muted">{{ __("Transit") }}</th>
-                                    <th class="po-cell px-2 py-2 text-center w-[80px] bg-muted">{{ __("Pack(s)") }}</th>
-                                    <th class="po-cell px-2 py-2 text-left w-[100px] bg-muted">{{ __("UOM") }}</th>
-                                    <th class="po-cell px-2 py-2 text-right w-[55px] bg-muted">{{ __("Units") }}</th>
-                                    <th class="po-cell px-2 py-2 text-center w-[90px] bg-muted">{{ __("Price") }}</th>
-                                    <th class="po-cell px-2 py-2 text-center w-[70px] bg-muted">{{ __("Disc%") }}</th>
-                                    <th class="po-cell px-2 py-2 text-left w-[100px] bg-muted">{{ __("Item Group") }}
-                                    </th>
-                                    <th class="po-cell-frozen px-2 py-2 text-right w-[100px] bg-muted">{{ __("Amount")
-                                        }}</th>
-                                    <th class="po-cell-frozen-last px-2 py-2 w-10 bg-muted"></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-border">
-                                <tr v-for="(item, index) in purchaseStore.cartItems" :key="`${item.item_code}-${index}`"
-                                    class="hover:bg-muted/50 transition-colors po-row">
-                                    <td class="po-cell px-2 py-1 text-center text-muted-foreground">{{ index + 1 }}</td>
-                                    <td class="po-cell px-2 py-1">
-                                        <div class="truncate font-medium text-xs" :title="item.item_name">
-                                            {{ item.item_name }}
-                                        </div>
-                                        <div class="text-[10px] text-muted-foreground truncate">{{ item.item_code }}
-                                        </div>
-                                    </td>
-                                    <td class="po-cell px-2 py-1 text-right text-xs font-mono">
-                                        {{ (item.stock_in_hand || 0).toFixed(0) }}
-                                    </td>
-                                    <td class="po-cell px-2 py-1 text-right text-xs font-mono">
-                                        {{ (item.transit_stock || 0).toFixed(0) }}
-                                    </td>
-                                    <td class="po-cell px-2 py-1">
-                                        <NumberInput :model-value="item.required_packs || 0"
-                                            @update:model-value="purchaseStore.updateCartItemPacks(index, $event)"
-                                            :min="0" :precision="0" class="h-7 text-xs w-full"
-                                            @keydown="handleKeyDown($event, index, 'packs')"
-                                            :ref="(el: any) => registerInput(index, 'packs', el?.$el?.querySelector('input'))" />
-                                    </td>
-                                    <td class="po-cell px-2 py-1">
-                                        <select :value="item.uom"
-                                            @change="handleUOMChange(index, ($event.target as HTMLSelectElement).value)"
-                                            class="h-7 w-full px-1 border border-border rounded text-xs bg-background"
-                                            @keydown="handleKeyDown($event, index, 'uom')"
-                                            :ref="(el: any) => registerInput(index, 'uom', el)">
-                                            <option v-for="uomOpt in getUOMOptions(item)" :key="uomOpt.uom"
-                                                :value="uomOpt.uom">
-                                                {{ uomOpt.uom }} ({{ uomOpt.conversion_factor }})
-                                            </option>
-                                        </select>
-                                    </td>
-                                    <td class="po-cell px-2 py-1 text-right text-xs font-mono">
-                                        {{ (item.pack_units || 0).toFixed(0) }}
-                                    </td>
-                                    <td class="po-cell px-2 py-1">
-                                        <NumberInput :model-value="item.rate"
-                                            @update:model-value="purchaseStore.updateCartItemRate(index, $event)"
-                                            :min="0" :precision="2" class="h-7 text-xs w-full"
-                                            @keydown="handleKeyDown($event, index, 'price')"
-                                            :ref="(el: any) => registerInput(index, 'price', el?.$el?.querySelector('input'))" />
-                                    </td>
-                                    <td class="po-cell px-2 py-1">
-                                        <NumberInput :model-value="item.discount_percent || 0"
-                                            @update:model-value="purchaseStore.updateCartItemDiscount(index, $event)"
-                                            :min="0" :max="100" :precision="1" class="h-7 text-xs w-full"
-                                            @keydown="handleKeyDown($event, index, 'discount')"
-                                            :ref="(el: any) => registerInput(index, 'discount', el?.$el?.querySelector('input'))" />
-                                    </td>
-                                    <td class="po-cell px-2 py-1 text-xs text-muted-foreground truncate">
-                                        {{ item.item_group || '-' }}
-                                    </td>
-                                    <td
-                                        class="po-cell-frozen px-2 py-1 text-right text-xs font-medium text-green-600 font-mono bg-card">
-                                        {{ formatCurrency(getItemAmount(item)) }}
-                                    </td>
-                                    <td class="po-cell-frozen-last px-1 py-1 bg-card">
-                                        <Button @click="deleteRow(index)" variant="ghost" size="icon"
-                                            class="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10">
-                                            <Trash2 class="w-3 h-3" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                        <div class="text-[10px] text-muted-foreground truncate">{{ row.item_code }}</div>
+                    </template>
+                </Table>
 
-                <!-- Footer Totals -->
                 <div class="px-4 py-3 border-t border-border bg-muted shrink-0">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-6 text-sm">
@@ -711,9 +567,9 @@ onMounted(() => {
                                     {{ __("Clear") }}
                                 </Button>
                                 <Button @click="saveDraft" variant="secondary"
-                                    :disabled="purchaseStore.cartItems.length === 0">
+                                    :disabled="purchaseStore.cartItems.length === 0 || purchaseStore.isDraftSaving">
                                     <FileText class="w-4 h-4 mr-1" />
-                                    {{ __("Save Draft") }}
+                                    {{ purchaseStore.isDraftSaving ? __("Saving...") : __("Save Draft") }}
                                 </Button>
                                 <Button @click="createOrder()"
                                     :disabled="!purchaseStore.canCreateOrder || purchaseStore.isProcessing">
@@ -727,153 +583,17 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- New Item Dialog -->
-        <Dialog v-model:open="showNewItemDialog">
-            <DialogContent class="max-w-lg">
-                <DialogHeader>
-                    <DialogTitle>{{ __("Create New Item") }}</DialogTitle>
-                    <DialogDescription>{{ __("Add a new item to inventory") }}</DialogDescription>
-                </DialogHeader>
-                <form @submit.prevent="handleCreateItem" class="space-y-4 mt-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="text-sm font-medium mb-1 block">{{ __("Item Name") }} *</label>
-                            <Input v-model="newItem.item_name" required />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Item Code") }}</label>
-                            <Input v-model="newItem.item_code" :placeholder="__('Auto-generated')" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Barcode") }}</label>
-                            <Input v-model="newItem.barcode" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("UOM") }}</label>
-                            <select v-model="newItem.stock_uom"
-                                class="w-full h-9 px-3 border border-border rounded-md text-sm">
-                                <option v-for="uom in standardUOMs" :key="uom" :value="uom">{{ uom }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Item Group") }}</label>
-                            <Input v-model="newItem.item_group" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Buying Price") }}</label>
-                            <NumberInput v-model="newItem.buying_price" :min="0" :precision="2" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Selling Price") }}</label>
-                            <NumberInput v-model="newItem.selling_price" :min="0" :precision="2" />
-                        </div>
-                    </div>
-                    <div class="flex justify-end gap-2 pt-4">
-                        <Button type="button" variant="outline" @click="showNewItemDialog = false">{{ __("Cancel")
-                        }}</Button>
-                        <Button type="submit" :disabled="isCreatingItem || !newItem.item_name.trim()">
-                            {{ isCreatingItem ? __("Creating...") : __("Create") }}
-                        </Button>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
+        <CreateItemDialog
+            v-model:open="showNewItemDialog"
+            :initial-name="itemSearchTerm"
+            @created="onItemCreated"
+        />
 
-        <!-- New Supplier Dialog -->
-        <Dialog v-model:open="showNewSupplierDialog">
-            <DialogContent class="max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{{ __("Create New Supplier") }}</DialogTitle>
-                    <DialogDescription>{{ __("Add a new supplier") }}</DialogDescription>
-                </DialogHeader>
-                <form @submit.prevent="handleCreateSupplier" class="space-y-4 mt-4">
-                    <div>
-                        <label class="text-sm font-medium mb-1 block">{{ __("Supplier Name") }} *</label>
-                        <Input v-model="newSupplier.supplier_name" required />
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Type") }}</label>
-                            <select v-model="newSupplier.supplier_type"
-                                class="w-full h-9 px-3 border border-border rounded-md text-sm">
-                                <option value="Company">{{ __("Company") }}</option>
-                                <option value="Individual">{{ __("Individual") }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium mb-1 block">{{ __("Tax ID") }}</label>
-                            <Input v-model="newSupplier.tax_id" />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium mb-1 block">{{ __("Mobile") }}</label>
-                        <Input v-model="newSupplier.mobile_no" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium mb-1 block">{{ __("Email") }}</label>
-                        <Input v-model="newSupplier.email_id" type="email" />
-                    </div>
-                    <div class="flex justify-end gap-2 pt-4">
-                        <Button type="button" variant="outline" @click="showNewSupplierDialog = false">{{ __("Cancel")
-                        }}</Button>
-                        <Button type="submit" :disabled="isCreatingSupplier || !newSupplier.supplier_name.trim()">
-                            {{ isCreatingSupplier ? __("Creating...") : __("Create") }}
-                        </Button>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
+        <CreateSupplierDialog
+            v-model:open="showNewSupplierDialog"
+            :initial-name="supplierSearchTerm"
+        />
     </div>
 </template>
 
-<style scoped>
-/* Sticky header and frozen columns for PO table */
-.po-table-container {
-    position: relative;
-}
 
-.po-table {
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.po-table-header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-}
-
-.po-table-header th {
-    border-bottom: 1px solid hsl(var(--border));
-}
-
-/* Frozen columns (Amount and Delete) */
-.po-cell-frozen,
-.po-cell-frozen-last {
-    position: sticky;
-    z-index: 10;
-}
-
-.po-cell-frozen {
-    right: 42px;
-    /* Width of delete button column */
-    border-left: 1px solid hsl(var(--border));
-    box-shadow: -2px 0 4px -2px rgba(0, 0, 0, 0.1);
-}
-
-.po-cell-frozen-last {
-    right: 0;
-}
-
-/* Header frozen cells need higher z-index */
-.po-table-header .po-cell-frozen,
-.po-table-header .po-cell-frozen-last {
-    z-index: 30;
-}
-
-/* Row hover should not affect frozen cells background */
-.po-row:hover .po-cell-frozen,
-.po-row:hover .po-cell-frozen-last {
-    background-color: hsl(var(--muted) / 0.5);
-}
-</style>

@@ -56,8 +56,16 @@ const selectedOrder = ref<PurchaseOrder | null>(null);
 const showDetailDialog = ref(false);
 const isLoadingDetail = ref(false);
 
-// Draft orders from localStorage
-const draftOrders = ref<Array<{ id: string; data: any; created_at: string }>>([]);
+// Draft orders from server (docstatus=0 Purchase Orders)
+const draftOrders = ref<Array<{
+    name: string;
+    supplier: string;
+    supplier_name: string;
+    transaction_date: string;
+    creation: string;
+    modified: string;
+    items_count: number;
+}>>([]);
 
 const statusOptions = [
     { value: "", label: __("All Status") },
@@ -152,22 +160,22 @@ async function viewOrder(order: PurchaseOrder): Promise<void> {
 function createNewOrder(): void {
     purchaseStore.clearCart();
     purchaseStore.clearSupplier();
-    purchaseStore.currentDraftId = null;
+    purchaseStore.currentDraftName = null;
     router.push("/purchase-order");
 }
 
-function editDraftOrder(draft: { id: string; data: any }): void {
-    purchaseStore.loadDraft(draft.id);
+async function editDraftOrder(draft: { name: string }): Promise<void> {
+    await purchaseStore.loadDraft(draft.name);
     router.push("/purchase-order");
 }
 
-function deleteDraftOrder(id: string): void {
-    purchaseStore.deleteDraft(id);
-    loadDrafts();
+async function deleteDraftOrder(name: string): Promise<void> {
+    await purchaseStore.deleteDraft(name);
+    await loadDrafts();
 }
 
-function loadDrafts(): void {
-    draftOrders.value = purchaseStore.getAllDrafts();
+async function loadDrafts(): Promise<void> {
+    draftOrders.value = await purchaseStore.getAllDrafts();
 }
 
 function editSubmittedOrder(order: PurchaseOrder): void {
@@ -234,23 +242,23 @@ onMounted(() => {
                 </div>
                 <ScrollArea class="flex-1 min-h-0">
                     <div class="divide-y divide-border">
-                        <div v-for="draft in draftOrders" :key="draft.id"
+                        <div v-for="draft in draftOrders" :key="draft.name"
                             class="p-3 hover:bg-muted/50 transition-colors">
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-sm font-medium text-foreground truncate">
-                                    {{ draft.data.supplier || __("No Supplier") }}
+                                    {{ draft.supplier_name || draft.supplier || __("No Supplier") }}
                                 </span>
                                 <Badge variant="secondary" class="text-[10px]">{{ __("Draft") }}</Badge>
                             </div>
                             <div class="text-xs text-muted-foreground mb-2">
-                                {{ formatDate(draft.created_at) }} · {{ draft.data.items?.length || 0 }} {{ __("items") }}
+                                {{ formatDate(draft.modified) }} · {{ draft.items_count || 0 }} {{ __("items") }}
                             </div>
                             <div class="flex gap-1">
                                 <Button @click="editDraftOrder(draft)" variant="outline" size="sm" class="flex-1 h-7">
                                     <Edit class="w-3 h-3 mr-1" />
                                     {{ __("Edit") }}
                                 </Button>
-                                <Button @click="deleteDraftOrder(draft.id)" variant="ghost" size="icon"
+                                <Button @click="deleteDraftOrder(draft.name)" variant="ghost" size="icon"
                                     class="h-7 w-7 text-destructive hover:text-destructive">
                                     <Trash2 class="w-3 h-3" />
                                 </Button>

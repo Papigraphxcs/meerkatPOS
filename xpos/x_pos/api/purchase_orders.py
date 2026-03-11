@@ -1375,3 +1375,234 @@ def _get_item_uoms(item_codes):
                 uom_map[item_code].append({"uom": stock_uom, "conversion_factor": 1})
     
     return uom_map
+
+
+# ---------------------------------------------------------------------------
+# Draft Purchase Order management (XPOS — save in Frappe doctype, docstatus=0)
+# ---------------------------------------------------------------------------
+
+@frappe.whitelist()
+def save_po_draft(data):
+    """
+    Save or update a Purchase Order in Draft state (docstatus=0).
+
+    Accepts the same cart payload as create_purchase_order plus an optional
+    ``draft_name`` field.  When ``draft_name`` is provided and points to an
+    existing docstatus=0 PO, that document is updated in-place; otherwise a
+    new Draft PO is inserted.
+
+    Returns:
+        dict: draft_name, supplier, supplier_name, transaction_date,
+              items_count, modified
+    """
+    payload = json.loads(data) if isinstance(data, str) else data
+
+    supplier_input = payload.get("supplier")
+    if not supplier_input:
+        frappe.throw(_("Please select a supplier before saving a draft."))
+
+    supplier = _resolve_supplier(supplier_input)
+    if not supplier:
+        frappe.throw(_("Supplier '{0}' not found.").format(supplier_input))
+
+    company = payload.get("company") or frappe.defaults.get_default("company")
+    if not company:
+        frappe.throw(_("Company is required."))
+
+    warehouse = payload.get("warehouse") or get_default_warehouse(company)
+    transaction_date = payload.get("transaction_date") or nowdate()
+    schedule_date = payload.get("schedule_date") or transaction_date
+    draft_name = payload.get("draft_name")
+
+    if draft_name and frappe.db.exists("Purchase Order", draft_name):
+        po_doc = frappe.get_doc("Purchase Order", draft_name)
+        if po_doc.docstatus != 0:
+            frappe.throw(_("Cannot update a submitted Purchase Order as draft."))
+        po_doc.supplier = supplier
+        po_doc.company = company
+        po_doc.transaction_date = transaction_date
+        po_doc.schedule_date = schedule_date
+        po_doc.items = []
+    else:
+        supplier_doc = frappe.get_doc("Supplier", supplier)
+        supplier_currency = supplier_doc.default_currency or frappe.get_value(
+            "Company", company, "default_currency"
+        )
+        buying_price_list = _resolve_buying_price_list()
+        po_doc = frappe.get_doc({
+            "doctype": "Purchase Order",
+            "supplier": supplier,
+            "company": company,
+            "transaction_date": transaction_date,
+            "schedule_date": schedule_date,
+            "currency": supplier_currency,
+            "buying_price_list": buying_price_list,
+        })
+
+    if warehouse:
+        po_doc.set_warehouse = warehouse
+
+    for cf in ("custom_alias_name", "custom_po_category", "custom_po_type",
+               "custom_po_department", "custom_po_remarks", "custom_zero_qty"):
+        val = payload.get(cf)
+        if val is not None:
+            po_doc.set(cf, val)
+
+    for row in payload.get("items") or []:
+        item_code = row.get("item_code")
+        if not item_code:
+            continue
+        qty = flt(row.get("qty", 0))
+        if qty <= 0:
+            continue
+        uom = row.get("uom") or row.get("stock_uom") or "Nos"
+        stock_uom = row.get("stock_uom") or uom
+        po_doc.append("items", {
+            "item_code": item_code,
+            "item_name": row.get("item_name") or item_code,
+            "qty": qty,
+            "uom": uom,
+            "stock_uom": stock_uom,
+            "conversion_factor": flt(row.get("conversion_factor") or 1),
+            "rate": flt(row.get("rate") or 0),
+            "warehouse": row.get("warehouse") or warehouse,
+            "schedule_date": schedule_date,
+            "custom_alias": row.get("item_name") or item_code,
+            "custom_stock_in_hand": flt(row.get("stock_in_hand") or 0),
+            "custom_transit_stock": flt(row.get("transit_stock") or 0),
+            "custom_required_packs": flt(row.get("required_packs") or 0),
+            "custom_pack_units": flt(row.get("pack_units") or 0),
+            "custom_class": row.get("class") or "",
+            "custom_item_packing": row.get("item_packing") or "",
+        })
+
+    po_doc.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+
+    if draft_name and po_doc.get("name"):
+        po_doc.save()
+    else:
+        po_doc.insert()
+
+    return {
+        "draft_name": po_doc.name,
+        "supplier": po_doc.supplier,
+        "supplier_name": po_doc.supplier_name or po_doc.supplier,
+        "transaction_date": str(po_doc.transaction_date),
+        "items_count": len(po_doc.items),
+        "modified": str(po_doc.modified),
+    }
+
+
+@frappe.whitelist()
+def load_po_draft(name):
+    """
+    Load a draft Purchase Order and return its data in the frontend cart format.
+
+    Args:
+        name: Purchase Order docname
+
+    Returns:
+        dict compatible with the purchaseStore draft loader.
+    """
+    if not frappe.db.exists("Purchase Order", name):
+        frappe.throw(_("Purchase Order '{0}' not found.").format(name))
+
+    po = frappe.get_doc("Purchase Order", name)
+    if po.docstatus != 0:
+        frappe.throw(_("Purchase Order '{0}' is not a draft.").format(name))
+
+    item_codes = [item.item_code for item in po.items]
+    uom_data_map = _get_item_uoms(item_codes) if item_codes else {}
+
+    items = []
+    for item in po.items:
+        uom_list = uom_data_map.get(item.item_code, [])
+        if not any(u["uom"] == item.stock_uom for u in uom_list):
+            uom_list.append({"uom": item.stock_uom, "conversion_factor": 1})
+        items.append({
+            "item_code": item.item_code,
+            "item_name": item.item_name,
+            "qty": flt(item.qty),
+            "rate": flt(item.rate),
+            "uom": item.uom,
+            "stock_uom": item.stock_uom,
+            "conversion_factor": flt(item.conversion_factor) or 1,
+            "warehouse": item.warehouse,
+            "stock_in_hand": flt(item.get("custom_stock_in_hand")),
+            "transit_stock": flt(item.get("custom_transit_stock")),
+            "required_packs": flt(item.get("custom_required_packs")),
+            "pack_units": flt(item.get("custom_pack_units")),
+            "class": item.get("custom_class") or "",
+            "item_packing": item.get("custom_item_packing") or "",
+            "item_group": item.item_group or "",
+            "item_uoms": uom_list,
+            "discount_percent": 0,
+        })
+
+    return {
+        "draft_name": po.name,
+        "supplier": po.supplier,
+        "supplier_name": po.supplier_name or po.supplier,
+        "items": items,
+        "po_category": po.get("custom_po_category") or "",
+        "po_type": po.get("custom_po_type") or "",
+        "po_department": po.get("custom_po_department") or "",
+        "po_remarks": po.get("custom_po_remarks") or "",
+        "po_zero_qty": po.get("custom_zero_qty") or "No",
+        "created_at": str(po.creation),
+        "updated_at": str(po.modified),
+    }
+
+
+@frappe.whitelist()
+def delete_po_draft(name):
+    """
+    Delete a draft Purchase Order (docstatus=0 only).
+
+    Args:
+        name: Purchase Order docname
+
+    Returns:
+        dict with success status.
+    """
+    if not frappe.db.exists("Purchase Order", name):
+        return {"success": True}
+
+    po = frappe.get_doc("Purchase Order", name)
+    if po.docstatus != 0:
+        frappe.throw(_("Cannot delete a submitted Purchase Order."))
+
+    frappe.delete_doc("Purchase Order", name, ignore_permissions=True)
+    return {"success": True}
+
+
+@frappe.whitelist()
+def list_po_drafts(limit=20):
+    """
+    List draft Purchase Orders owned by the current user (docstatus=0).
+
+    Returns:
+        List of dicts: name, supplier, supplier_name, transaction_date,
+                       grand_total, creation, modified, items_count.
+    """
+    drafts = frappe.get_all(
+        "Purchase Order",
+        filters={
+            "docstatus": 0,
+            "owner": frappe.session.user,
+        },
+        fields=[
+            "name", "supplier", "supplier_name", "transaction_date",
+            "grand_total", "creation", "modified",
+        ],
+        order_by="modified desc",
+        limit_page_length=cint(limit) or 20,
+    )
+
+    for draft in drafts:
+        draft["items_count"] = frappe.db.count(
+            "Purchase Order Item", filters={"parent": draft["name"]}
+        )
+
+    return drafts

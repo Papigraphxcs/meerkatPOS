@@ -14,6 +14,8 @@ export interface NumberInputProps {
     class?: HTMLAttributes["class"];
     allowDecimal?: boolean;
     selectOnFocus?: boolean;
+    /** Disables ArrowUp/ArrowDown key increment/decrement spinner behaviour */
+    disableSpinner?: boolean;
 }
 
 const props = withDefaults(defineProps<NumberInputProps>(), {
@@ -25,6 +27,7 @@ const props = withDefaults(defineProps<NumberInputProps>(), {
     readonly: false,
     allowDecimal: true,
     selectOnFocus: true,
+    disableSpinner: false,
 });
 
 const emit = defineEmits<{
@@ -121,12 +124,12 @@ function onKeyDown(event: KeyboardEvent): void {
         return;
     }
 
-    if (event.key === "ArrowUp") {
+    if (!props.disableSpinner && event.key === "ArrowUp") {
         event.preventDefault();
         const current = props.modelValue ?? 0;
         commitValue(current + props.step);
         displayValue.value = formatNumber(clampValue(current + props.step));
-    } else if (event.key === "ArrowDown") {
+    } else if (!props.disableSpinner && event.key === "ArrowDown") {
         event.preventDefault();
         const current = props.modelValue ?? 0;
         commitValue(current - props.step);
