@@ -78,6 +78,7 @@ import ItemDetailDialog from "@/components/items/ItemDetailDialog.vue";
 import CashMovementDialog from "@/components/shift/CashMovementDialog.vue";
 import DraftInvoiceDialog from "@/components/cart/DraftInvoiceDialog.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
+import { initSyncListeners } from "@/services/syncIpcHandler";
 
 const route = useRoute();
 const posStore = usePosStore();
@@ -131,6 +132,7 @@ provide("theme", theme);
 provide("toggleDarkMode", toggleDarkMode);
 
 let mediaQuery: MediaQueryList | null = null;
+let cleanupSyncListeners: (() => void) | null = null;
 function handleSystemThemeChange(e: MediaQueryListEvent) {
 	systemPrefersDark.value = e.matches;
 }
@@ -159,6 +161,9 @@ onMounted(() => {
 	}
 
 	offlineStore.init();
+
+	// Initialize Electron sync IPC listeners (no-op in browser mode)
+	cleanupSyncListeners = initSyncListeners();
 });
 
 watch(isAuthPage, (isAuth, wasAuth) => {
@@ -170,6 +175,9 @@ watch(isAuthPage, (isAuth, wasAuth) => {
 onUnmounted(() => {
 	if (mediaQuery) {
 		mediaQuery.removeEventListener("change", handleSystemThemeChange);
+	}
+	if (cleanupSyncListeners) {
+		cleanupSyncListeners();
 	}
 	offlineStore.destroy();
 });

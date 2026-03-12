@@ -119,6 +119,14 @@ export interface CachedSupplier {
   email_id?: string;
 }
 
+/** Tracks local-ID ↔ server-ID mapping for synced records. */
+export interface SyncIdMap {
+  local_id: string;
+  server_name: string;
+  doctype: string;
+  synced_at: string;
+}
+
 class XPosDB extends Dexie {
   items!: Table<POSItem, string>;
   itemGroups!: Table<ItemGroupEntry, string>;
@@ -128,6 +136,7 @@ class XPosDB extends Dexie {
   pendingPurchases!: Table<PendingPurchase, number>;
   stockCache!: Table<StockEntry, string>;
   meta!: Table<MetaEntry, string>;
+  syncIdMap!: Table<SyncIdMap, string>;
 
   constructor() {
     super("xpos_offline_v3");
@@ -141,6 +150,19 @@ class XPosDB extends Dexie {
       pendingPurchases: "++id, type, status, created_at",
       stockCache: "cache_key, warehouse, item_code",
       meta: "key",
+    });
+
+    // Version 2: Add sync ID mapping table for Electron offline sync
+    this.version(2).stores({
+      items: "item_code, item_name, item_group, barcode",
+      itemGroups: "name",
+      customers: "name, customer_name, mobile_no, email_id",
+      suppliers: "name, supplier_name, mobile_no, email_id",
+      pendingInvoices: "++id, status, created_at",
+      pendingPurchases: "++id, type, status, created_at",
+      stockCache: "cache_key, warehouse, item_code",
+      meta: "key",
+      syncIdMap: "local_id, server_name, doctype",
     });
   }
 }
@@ -501,13 +523,14 @@ export async function getCachedOffers(
 }
 
 export async function clearAllData(): Promise<void> {
-  await db.transaction("rw", [db.items, db.itemGroups, db.customers, db.suppliers, db.stockCache, db.meta], async () => {
+  await db.transaction("rw", [db.items, db.itemGroups, db.customers, db.suppliers, db.stockCache, db.meta, db.syncIdMap], async () => {
     await db.items.clear();
     await db.itemGroups.clear();
     await db.customers.clear();
     await db.suppliers.clear();
     await db.stockCache.clear();
     await db.meta.clear();
+    await db.syncIdMap.clear();
   });
 }
 
@@ -516,6 +539,54 @@ export async function clearPendingData(): Promise<void> {
     await db.pendingInvoices.clear();
     await db.pendingPurchases.clear();
   });
+}
+
+// ── Sync ID Map (local_id ↔ server_name mapping) ─────────────────
+
+export async function addSyncIdMapping(entry: SyncIdMap): Promise<void> {
+  await db.syncIdMap.put(sanitizeForIdb(entry));
+}
+
+export async function getServerName(localId: string): Promise<string | null> {
+  const entry = await db.syncIdMap.get(localId);
+  return entry?.server_name || null;
+}
+
+export async function getLocalId(serverName: string): Promise<string | null> {
+  const entry = await db.syncIdMap.where("server_name").equals(serverName).first();
+  return entry?.local_id || null;
+}
+
+export async function getSyncIdMapByDoctype(doctype: string): Promise<SyncIdMap[]> {
+  return db.syncIdMap.where("doctype").equals(doctype).toArray();
+}
+
+/**
+ * Upsert records from a sync pull batch into the appropriate store.
+ * Called by the renderer-side sync IPC handler when the main process
+ * sends pulled data.
+ */
+export async function upsertPullBatch(
+  store: string,
+  records: Record<string, unknown>[],
+  isIncremental: boolean
+): Promise<void> {
+  const safeRecords = sanitizeForIdb(records);
+
+  if (store === "items") {
+    if (!isIncremental) await db.items.clear();
+    await db.items.bulkPut(safeRecords as unknown as POSItem[]);
+  } else if (store === "customers") {
+    if (!isIncremental) await db.customers.clear();
+    await db.customers.bulkPut(safeRecords as unknown as Customer[]);
+  } else if (store === "suppliers") {
+    if (!isIncremental) await db.suppliers.clear();
+    await db.suppliers.bulkPut(safeRecords as unknown as CachedSupplier[]);
+  } else if (store === "itemGroups") {
+    // Item groups are small — always full replace
+    await db.itemGroups.clear();
+    await db.itemGroups.bulkPut(safeRecords as unknown as ItemGroupEntry[]);
+  }
 }
 
 export { db };

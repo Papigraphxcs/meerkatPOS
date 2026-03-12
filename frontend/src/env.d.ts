@@ -86,4 +86,5 @@ interface Window {
     csrf_token?: string;
   };
   frappe?: Frappe;
+  electronAPI?: import("@/services/electronBridge").ElectronAPI;
 }

@@ -1,0 +1,65 @@
+appId: com.xpos.app
+productName: X POS
+copyright: Copyright © 2026
+
+directories:
+  buildResources: build
+  output: release
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+
+extraMetadata:
+  main: dist-electron/main.js
+
+extraResources:
+  - from: electron/database/schema.sql
+    to: schema.sql
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-Setup.${ext}
+  icon: build/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: X POS
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  artifactName: ${productName}-${version}.${ext}
+  icon: build/icon.icns
+  category: public.app-category.business
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  artifactName: ${productName}-${version}.${ext}
+  icon: build/icon.png
+  category: Office
+
+# Auto-update: configure `publish` to point to your release server.
+# For GitHub Releases, use:
+#   publish:
+#     provider: github
+#     owner: <org>
+#     repo: <repo>
+# For a generic static server, use:
+publish:
+  provider: generic
+  url: https://releases.example.com/xpos/

@@ -1,5 +1,6 @@
 const PosView = () => import("@/views/PosView.vue");
 const OrdersView = () => import("@/views/OrdersView.vue");
+const SettingsView = () => import("@/views/SettingsView.vue");
 const PurchaseView = () => import("@/views/PurchaseView.vue");
 const PurchaseOrderView = () => import("@/views/PurchaseOrderView.vue");
 const PurchaseOrderListView = () => import("@/views/PurchaseOrderListView.vue");
@@ -74,6 +75,12 @@ const routes: RouteRecordRaw[] = [
     name: "stock-receiving",
     component: StockReceivingView,
     meta: { title: "Stock Receiving", requiresAuth: true },
+  },
+  {
+    path: "/settings",
+    name: "settings",
+    component: SettingsView,
+    meta: { title: "Settings", requiresAuth: true },
   },
 ];
 

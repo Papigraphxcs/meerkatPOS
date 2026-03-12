@@ -100,6 +100,7 @@ import {
     ChevronRight,
     Building2,
     Receipt,
+    Settings,
 } from "lucide-vue-next";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
@@ -124,6 +125,7 @@ const purchaseNavItems = [
 
 const toolsNavItems = [
     { route: "/barcode-print", label: __("Barcode Printer"), icon: Printer },
+    { route: "/settings", label: __("Settings"), icon: Settings },
 ];
 
 function isActive(path: string): boolean {

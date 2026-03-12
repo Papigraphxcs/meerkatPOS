@@ -1,32 +1,39 @@
-// X POS Main Entry Point - Standalone SPA mode
+// X POS Main Entry Point - Standalone SPA / Electron desktop mode
 import "./style.css";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import { router } from "./router";
-import { registerSW } from "virtual:pwa-register";
 import { showError } from "@/services/api";
+import { isElectron, getApiBaseUrl } from "@/services/electronBridge";
 
-// Register PWA service worker with auto-update
-const updateSW = registerSW({
-  onNeedRefresh() {
-    // Auto-update when new version available
-    if (confirm("A new version of X POS is available. Reload to update?")) {
-      updateSW(true);
-    }
-  },
-  onOfflineReady() {
-    console.log("[XPOS PWA] App is ready for offline use");
-  },
-  onRegisteredSW(swUrl, r) {
-    // Check for SW updates every hour
-    if (r) {
-      setInterval(() => {
-        r.update();
-      }, 60 * 60 * 1000);
-    }
-  },
-});
+// Register PWA service worker only in browser mode (not Electron)
+if (!isElectron()) {
+  import("virtual:pwa-register").then(({ registerSW }) => {
+    const updateSW = registerSW({
+      onNeedRefresh() {
+        if (confirm("A new version of X POS is available. Reload to update?")) {
+          updateSW(true);
+        }
+      },
+      onOfflineReady() {
+        console.log("[XPOS PWA] App is ready for offline use");
+      },
+      onRegisteredSW(_swUrl, r) {
+        if (r) {
+          setInterval(() => {
+            r.update();
+          }, 60 * 60 * 1000);
+        }
+      },
+    });
+  });
+} else {
+  // Warm the server URL cache early
+  getApiBaseUrl().then((url) => {
+    console.log("[XPOS Electron] Server URL:", url);
+  });
+}
 
 // Setup frappe-like API wrapper for standalone mode
 function initializeFrappeAPI(): void {

@@ -1,10 +1,11 @@
 /**
  * X POS API Service
- * Works in both standalone SPA mode and embedded Frappe desk mode
+ * Works in standalone SPA mode, embedded Frappe desk mode, and Electron desktop mode.
  */
 
 import { showSuccess as toastSuccess, showError as toastError, showInfo as toastInfo } from "@/composables/useToast";
 import { isOnline, isNetworkError } from "@/utils";
+import { isElectron, getApiBaseUrlSync } from "@/services/electronBridge";
 
 // Re-export isNetworkError for backwards compatibility
 export { isNetworkError } from "@/utils";
@@ -40,13 +41,18 @@ async function fetchCall<T = unknown>(
     "X-Frappe-CSRF-Token": csrfToken,
   };
 
+  // In Electron, API calls go to the remote server (absolute URL).
+  // In browser/PWA, same-origin relative URLs.
+  const baseUrl = getApiBaseUrlSync();
+  const url = `${baseUrl}/api/method/${method}`;
+
   let response: Response;
   try {
-    response = await fetch(`/api/method/${method}`, {
+    response = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(args),
-      credentials: "same-origin",
+      credentials: isElectron() ? "include" : "same-origin",
     });
   } catch (fetchError) {
     throw new Error("__offline__");

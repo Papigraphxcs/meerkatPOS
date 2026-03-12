@@ -1,9 +1,16 @@
-import { createRouter, createWebHistory, type Router, type RouteRecordRaw } from "vue-router";
+import { createRouter, createWebHistory, createWebHashHistory, type Router, type RouteRecordRaw } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
+import { isElectron } from "@/services/electronBridge";
 import routes from "./routes";
 
+// Electron uses hash-based routing (file:// protocol, no server for SPA fallback).
+// Browser/PWA uses history-based routing with /xpos base path.
+const history = isElectron()
+  ? createWebHashHistory()
+  : createWebHistory("/xpos");
+
 export const router: Router = createRouter({
-  history: createWebHistory("/xpos"),
+  history,
   routes,
 });
 
