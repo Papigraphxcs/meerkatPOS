@@ -22,6 +22,11 @@ for (const channel of SYNC_DATA_CHANNELS) {
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {
+  // ── App Setup ────────────────────────────────────────────────
+  isFirstRun: (): Promise<boolean> => ipcRenderer.invoke("app:is-first-run"),
+  testErpNext: (config: { url: string; apiKey?: string; apiSecret?: string }): Promise<{ success: boolean; error?: string }> =>
+    ipcRenderer.invoke("app:test-erpnext", config),
+
   // ── Server Configuration ─────────────────────────────────────
   getServerUrl: (): Promise<string> => ipcRenderer.invoke("get-server-url"),
   setServerUrl: (url: string): Promise<boolean> =>
@@ -33,7 +38,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
     arch: string;
     version: string;
     isElectron: boolean;
+    logDir: string;
   }> => ipcRenderer.invoke("get-platform-info"),
+
+  checkMariaDb: (): Promise<{
+    installed: boolean;
+    version: string | null;
+    binary: string | null;
+  }> => ipcRenderer.invoke("check-mariadb"),
 
   // ── Auth ─────────────────────────────────────────────────────
   setAuthCookie: (
@@ -83,6 +95,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // ── Sync Control (renderer → main) ──────────────────────────
   triggerSync: (): Promise<boolean> => ipcRenderer.invoke("trigger-sync"),
+  startSyncEngine: (opts?: { csrfToken?: string; sessionCookies?: string }): Promise<{ success: boolean; error?: string }> =>
+    ipcRenderer.invoke("start-sync-engine", opts),
   getSyncState: (): Promise<{
     isSyncing: boolean;
     lastSyncTime: string | null;
@@ -165,6 +179,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.invoke("db:update-pending-purchase", id, updates),
     deletePendingPurchase: (id: number) =>
       ipcRenderer.invoke("db:delete-pending-purchase", id),
+    countPendingPurchases: (): Promise<number> =>
+      ipcRenderer.invoke("db:count-pending-purchases"),
 
     // Sync ID Map
     addSyncId: (localId: string, serverName: string, doctype: string) =>
@@ -189,6 +205,259 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.invoke("db:cache-item-tax", itemCode, company, data),
     getCachedItemTax: (itemCode: string, company: string) =>
       ipcRenderer.invoke("db:get-cached-item-tax", itemCode, company),
+
+    // ── New Master Data Tables ──────────────────────────────────
+
+    // Companies
+    getCompanies: () => ipcRenderer.invoke("db:get-companies"),
+    upsertCompanies: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-companies", rows),
+
+    // Cost Centers
+    getCostCenters: (company?: string) =>
+      ipcRenderer.invoke("db:get-cost-centers", company),
+    upsertCostCenters: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-cost-centers", rows),
+
+    // Countries
+    getCountries: () => ipcRenderer.invoke("db:get-countries"),
+    upsertCountries: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-countries", rows),
+
+    // Currencies
+    getCurrencies: () => ipcRenderer.invoke("db:get-currencies"),
+    upsertCurrencies: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-currencies", rows),
+
+    // Warehouses
+    getWarehouses: (opts?: { company?: string; isGroup?: boolean }) =>
+      ipcRenderer.invoke("db:get-warehouses", opts),
+    upsertWarehouses: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-warehouses", rows),
+
+    // Accounts
+    getAccounts: (opts?: { company?: string; accountType?: string; rootType?: string }) =>
+      ipcRenderer.invoke("db:get-accounts", opts),
+    upsertAccounts: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-accounts", rows),
+
+    // Price Lists
+    getPriceLists: (selling?: boolean) =>
+      ipcRenderer.invoke("db:get-price-lists", selling),
+    upsertPriceLists: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-price-lists", rows),
+
+    // UOM
+    getUom: () => ipcRenderer.invoke("db:get-uom"),
+    upsertUom: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-uom", rows),
+
+    // UOM Conversion Details
+    getUomConversions: (itemCode: string) =>
+      ipcRenderer.invoke("db:get-uom-conversions", itemCode),
+    upsertUomConversions: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-uom-conversions", rows),
+
+    // Brands
+    getBrands: () => ipcRenderer.invoke("db:get-brands"),
+    upsertBrands: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-brands", rows),
+
+    // Industries
+    getIndustries: () => ipcRenderer.invoke("db:get-industries"),
+    upsertIndustries: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-industries", rows),
+
+    // Modes of Payment
+    getModesOfPayment: () => ipcRenderer.invoke("db:get-modes-of-payment"),
+    upsertModesOfPayment: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-modes-of-payment", rows),
+
+    // Mode of Payment Accounts
+    getModeOfPaymentAccounts: (company: string) =>
+      ipcRenderer.invoke("db:get-mode-of-payment-accounts", company),
+    upsertModeOfPaymentAccounts: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-mode-of-payment-accounts", rows),
+
+    // Item Barcodes
+    getItemByBarcode: (barcode: string) =>
+      ipcRenderer.invoke("db:get-item-by-barcode", barcode),
+    upsertItemBarcodes: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-item-barcodes", rows),
+
+    // Item Prices
+    getItemPrice: (itemCode: string, priceList: string) =>
+      ipcRenderer.invoke("db:get-item-price", itemCode, priceList),
+    getItemPrices: (opts?: { priceList?: string; selling?: boolean }) =>
+      ipcRenderer.invoke("db:get-item-prices", opts),
+    upsertItemPrices: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-item-prices", rows),
+
+    // Item Tax Templates
+    getItemTaxTemplates: (company?: string) =>
+      ipcRenderer.invoke("db:get-item-tax-templates", company),
+    upsertItemTaxTemplates: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-item-tax-templates", rows),
+
+    // Item Tax Template Details
+    getItemTaxTemplateDetails: (templateName: string) =>
+      ipcRenderer.invoke("db:get-item-tax-template-details", templateName),
+    upsertItemTaxTemplateDetails: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-item-tax-template-details", rows),
+
+    // Item Taxes
+    getItemTaxes: (itemCode: string) =>
+      ipcRenderer.invoke("db:get-item-taxes", itemCode),
+    upsertItemTaxes: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-item-taxes", rows),
+
+    // Item Vendors
+    getItemVendors: (itemCode: string) =>
+      ipcRenderer.invoke("db:get-item-vendors", itemCode),
+    upsertItemVendors: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-item-vendors", rows),
+
+    // Item Reorder Levels
+    getItemReorderLevels: (itemCode: string) =>
+      ipcRenderer.invoke("db:get-item-reorder-levels", itemCode),
+    upsertItemReorderLevels: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-item-reorder-levels", rows),
+
+    // POS Profiles
+    getPosProfiles: (company?: string) =>
+      ipcRenderer.invoke("db:get-pos-profiles", company),
+    getPosProfile: (name: string) =>
+      ipcRenderer.invoke("db:get-pos-profile", name),
+    upsertPosProfiles: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-pos-profiles", rows),
+
+    // POS Payment Methods
+    getPosPaymentMethods: (posProfile: string) =>
+      ipcRenderer.invoke("db:get-pos-payment-methods", posProfile),
+    upsertPosPaymentMethods: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-pos-payment-methods", rows),
+
+    // POS Users
+    getPosUsers: () => ipcRenderer.invoke("db:get-pos-users"),
+    getPosUser: (email: string) => ipcRenderer.invoke("db:get-pos-user", email),
+    upsertPosUsers: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-pos-users", rows),
+
+    // Sales Tax Templates
+    getSalesTaxTemplates: (company?: string) =>
+      ipcRenderer.invoke("db:get-sales-tax-templates", company),
+    upsertSalesTaxTemplates: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-sales-tax-templates", rows),
+
+    // Sales Tax Charges
+    getSalesTaxCharges: (templateName: string) =>
+      ipcRenderer.invoke("db:get-sales-tax-charges", templateName),
+    upsertSalesTaxCharges: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-sales-tax-charges", rows),
+
+    // Pricing Rules
+    getPricingRules: (opts?: { company?: string; itemCode?: string }) =>
+      ipcRenderer.invoke("db:get-pricing-rules", opts),
+    getPricingRuleItems: (parent: string) =>
+      ipcRenderer.invoke("db:get-pricing-rule-items", parent),
+    getPricingRuleGroups: (parent: string) =>
+      ipcRenderer.invoke("db:get-pricing-rule-groups", parent),
+    getPricingRuleBrands: (parent: string) =>
+      ipcRenderer.invoke("db:get-pricing-rule-brands", parent),
+    upsertPricingRules: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-pricing-rules", rows),
+    upsertPricingRuleItemCodes: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-pricing-rule-item-codes", rows),
+    upsertPricingRuleItemGroups: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-pricing-rule-item-groups", rows),
+    upsertPricingRuleBrands: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-pricing-rule-brands", rows),
+
+    // Bins (Stock)
+    getBin: (itemCode: string, warehouse: string) =>
+      ipcRenderer.invoke("db:get-bin", itemCode, warehouse),
+    getBins: (warehouse?: string) =>
+      ipcRenderer.invoke("db:get-bins", warehouse),
+    upsertBins: (rows: Record<string, unknown>[]) =>
+      ipcRenderer.invoke("db:upsert-bins", rows),
+
+    // ── POS Shifts ─────────────────────────────────────────────
+
+    createPosOpeningShift: (shift: Record<string, unknown>) =>
+      ipcRenderer.invoke("db:create-pos-opening-shift", shift),
+    getOpenShift: (user: string) =>
+      ipcRenderer.invoke("db:get-open-shift", user),
+    closePosShift: (localId: string) =>
+      ipcRenderer.invoke("db:close-pos-shift", localId),
+    getPosOpeningShifts: (opts?: { user?: string; status?: string }) =>
+      ipcRenderer.invoke("db:get-pos-opening-shifts", opts),
+
+    // POS Closing Entries
+    createPosClosingEntry: (entry: Record<string, unknown>) =>
+      ipcRenderer.invoke("db:create-pos-closing-entry", entry),
+    getPosClosingEntries: (opts?: { user?: string; status?: string }) =>
+      ipcRenderer.invoke("db:get-pos-closing-entries", opts),
+    getPosClosingEntryDetails: (parentId: number) =>
+      ipcRenderer.invoke("db:get-pos-closing-entry-details", parentId),
+
+    // ── Sales Invoices ─────────────────────────────────────────
+
+    saveSalesInvoice: (invoice: Record<string, unknown>) =>
+      ipcRenderer.invoke("db:save-sales-invoice", invoice),
+    getSalesInvoices: (opts?: {
+      customer?: string; posProfile?: string; shiftLocalId?: string;
+      fromDate?: string; toDate?: string; limit?: number;
+    }) => ipcRenderer.invoke("db:get-sales-invoices", opts),
+    getSalesInvoice: (localId: string) =>
+      ipcRenderer.invoke("db:get-sales-invoice", localId),
+    getShiftSalesSummary: (shiftLocalId: string) =>
+      ipcRenderer.invoke("db:get-shift-sales-summary", shiftLocalId),
+
+    // ── Expenses ───────────────────────────────────────────────
+
+    createExpense: (expense: Record<string, unknown>) =>
+      ipcRenderer.invoke("db:create-expense", expense),
+    getExpenses: (opts?: {
+      user?: string; fromDate?: string; toDate?: string;
+      shiftLocalId?: string; syncStatus?: string;
+    }) => ipcRenderer.invoke("db:get-expenses", opts),
+    deleteExpense: (id: number) =>
+      ipcRenderer.invoke("db:delete-expense", id),
+
+    // ── Bank Drops ─────────────────────────────────────────────
+
+    createBankDrop: (drop: Record<string, unknown>) =>
+      ipcRenderer.invoke("db:create-bank-drop", drop),
+    getBankDrops: (opts?: {
+      user?: string; fromDate?: string; toDate?: string;
+      shiftLocalId?: string; syncStatus?: string;
+    }) => ipcRenderer.invoke("db:get-bank-drops", opts),
+    deleteBankDrop: (id: number) =>
+      ipcRenderer.invoke("db:delete-bank-drop", id),
+
+    // ── Stock Adjustments ──────────────────────────────────────
+
+    createStockAdjustment: (adj: Record<string, unknown>) =>
+      ipcRenderer.invoke("db:create-stock-adjustment", adj),
+    getStockAdjustments: (opts?: {
+      warehouse?: string; syncStatus?: string; fromDate?: string; toDate?: string;
+    }) => ipcRenderer.invoke("db:get-stock-adjustments", opts),
+
+    // ── Quotations ─────────────────────────────────────────────
+
+    saveQuotation: (quotation: Record<string, unknown>) =>
+      ipcRenderer.invoke("db:save-quotation", quotation),
+    getQuotations: (opts?: {
+      customer?: string; fromDate?: string; toDate?: string;
+      status?: string; limit?: number;
+    }) => ipcRenderer.invoke("db:get-quotations", opts),
+
+    // ── Generic Sync Helpers ───────────────────────────────────
+
+    upsertTable: (table: string, rows: Record<string, unknown>[], keyField: string) =>
+      ipcRenderer.invoke("db:upsert-table", table, rows, keyField),
+    clearTable: (table: string) =>
+      ipcRenderer.invoke("db:clear-table", table),
 
     // Bulk Operations
     clearAllData: () => ipcRenderer.invoke("db:clear-all-data"),
@@ -218,9 +487,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
       hubUrl?: string;
       tillId?: string;
       hubApiPort?: number;
+      hubSecret?: string;
     }): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke("node:set-role", config),
     pingHub: (): Promise<boolean> => ipcRenderer.invoke("node:ping-hub"),
+    getHubSecret: (): Promise<string | null> => ipcRenderer.invoke("node:get-hub-secret"),
     triggerTillSync: (): Promise<Record<string, unknown>> =>
       ipcRenderer.invoke("node:trigger-till-sync"),
   },

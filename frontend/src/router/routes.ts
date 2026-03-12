@@ -6,12 +6,21 @@ const PurchaseOrderView = () => import("@/views/PurchaseOrderView.vue");
 const PurchaseOrderListView = () => import("@/views/PurchaseOrderListView.vue");
 const PurchaseInvoiceView = () => import("@/views/PurchaseInvoiceView.vue");
 const StockReceivingView = () => import("@/views/StockReceivingView.vue");
+const ExpenseView = () => import("@/views/ExpenseView.vue");
+const BankDropView = () => import("@/views/BankDropView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
 const ResetPasswordView = () => import("@/views/ResetPasswordView.vue");
 const BarcodePrintView = () => import("@/views/BarcodePrintView.vue");
+const SetupWizardView = () => import("@/views/SetupWizardView.vue");
 import { RouteRecordRaw } from "vue-router";
 
 const routes: RouteRecordRaw[] = [
+  {
+    path: "/setup",
+    name: "setup",
+    component: SetupWizardView,
+    meta: { title: "Setup", requiresAuth: false, isSetupPage: true },
+  },
   {
     path: "/login",
     name: "login",
@@ -81,6 +90,18 @@ const routes: RouteRecordRaw[] = [
     name: "settings",
     component: SettingsView,
     meta: { title: "Settings", requiresAuth: true },
+  },
+  {
+    path: "/expenses",
+    name: "expenses",
+    component: ExpenseView,
+    meta: { title: "Expenses", requiresAuth: true },
+  },
+  {
+    path: "/bank-drops",
+    name: "bank-drops",
+    component: BankDropView,
+    meta: { title: "Bank Drops", requiresAuth: true },
   },
 ];
 

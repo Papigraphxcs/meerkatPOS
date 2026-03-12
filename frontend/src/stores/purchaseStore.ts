@@ -11,9 +11,8 @@ import {
     updatePendingPurchase,
     deletePendingPurchase,
     countPendingPurchases,
-    type CachedSupplier,
-    type PendingPurchase,
-} from "@/services/idbService";
+} from "@/services/dbBridge";
+import type { CachedSupplier, PendingPurchase } from "@/services/idbService";
 import type {
     Supplier,
     PurchaseOrder,
@@ -550,16 +549,13 @@ export const usePurchaseStore = defineStore("purchase", () => {
         const record = {
             type: "purchase_order" as const,
             data,
-            status: "pending" as const,
-            created_at: new Date().toISOString(),
-            retry_count: 0,
             supplier_name: selectedSupplier.value,
             grand_total: cartTotal.value,
         };
 
-        const id = await addPendingPurchase(record);
+        const result = await addPendingPurchase(record);
         await refreshPendingCount();
-        return id;
+        return (result as any).id ?? result;
     }
 
     async function refreshPendingCount(): Promise<void> {
@@ -600,7 +596,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 
                 try {
                     purchase.status = "syncing";
-                    if (purchase.id) await updatePendingPurchase(purchase);
+                    if (purchase.id) await updatePendingPurchase(purchase.id, { status: "syncing" });
 
                     await call<PurchaseOrderResult>(
                         "xpos.x_pos.api.purchase_orders.create_purchase_order",
@@ -614,7 +610,11 @@ export const usePurchaseStore = defineStore("purchase", () => {
                     purchase.status = "failed";
                     purchase.retry_count = (purchase.retry_count || 0) + 1;
                     purchase.error = error instanceof Error ? error.message : String(error);
-                    if (purchase.id) await updatePendingPurchase(purchase);
+                    if (purchase.id) await updatePendingPurchase(purchase.id, {
+                        status: "failed",
+                        retry_count: purchase.retry_count,
+                        error: purchase.error,
+                    });
                 }
             }
 
@@ -646,7 +646,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 
         try {
             purchase.status = "syncing";
-            await updatePendingPurchase(purchase);
+            await updatePendingPurchase(purchase.id!, { status: "syncing" });
 
             await call<PurchaseOrderResult>(
                 "xpos.x_pos.api.purchase_orders.create_purchase_order",
@@ -662,7 +662,11 @@ export const usePurchaseStore = defineStore("purchase", () => {
             purchase.status = "failed";
             purchase.retry_count = (purchase.retry_count || 0) + 1;
             purchase.error = error instanceof Error ? error.message : String(error);
-            await updatePendingPurchase(purchase);
+            await updatePendingPurchase(purchase.id!, {
+                status: "failed",
+                retry_count: purchase.retry_count,
+                error: purchase.error,
+            });
             await loadPendingPurchases();
             showError("Sync failed: " + purchase.error);
             return false;

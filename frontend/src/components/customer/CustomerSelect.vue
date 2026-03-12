@@ -144,7 +144,7 @@ import {
     cacheCustomerGroups, getCachedCustomerGroups,
     cacheTerritories, getCachedTerritories,
     cacheCountries, getCachedCountries,
-} from "@/services/idbService";
+} from "@/services/dbBridge";
 import { isOnline } from "@/utils";
 import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,

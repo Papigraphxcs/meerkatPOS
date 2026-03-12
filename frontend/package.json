@@ -2,6 +2,8 @@
 	"name": "xpos-frontend",
 	"private": true,
 	"version": "0.0.1",
+	"description": "X POS - Point of Sale Desktop Application for ERPNext",
+	"author": "X POS Team",
 	"type": "module",
 	"main": "dist-electron/main.js",
 	"scripts": {
@@ -16,7 +18,7 @@
 		"test:run": "vitest run",
 		"pack": "yarn build:electron && electron-builder --dir",
 		"dist": "yarn build:electron && electron-builder",
-		"dist:win": "yarn build:electron && electron-builder --win",
+		"dist:win": "yarn build:electron && node scripts/build-win.mjs",
 		"dist:mac": "yarn build:electron && electron-builder --mac",
 		"dist:linux": "yarn build:electron && electron-builder --linux"
 	},

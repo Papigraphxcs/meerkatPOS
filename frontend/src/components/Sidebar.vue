@@ -56,6 +56,19 @@
                         </router-link>
 
                         <p class="px-3 py-2 pt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            {{ __("Finance") }}
+                        </p>
+                        <router-link v-for="item in financeNavItems" :key="item.route" :to="item.route"
+                            @click="isOpen = false"
+                            :class="cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors no-underline',
+                                isActive(item.route)
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground')">
+                            <component :is="item.icon" class="w-4 h-4 shrink-0" />
+                            <span>{{ item.label }}</span>
+                        </router-link>
+
+                        <p class="px-3 py-2 pt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                             {{ __("Tools") }}
                         </p>
                         <router-link v-for="item in toolsNavItems" :key="item.route" :to="item.route"
@@ -101,6 +114,8 @@ import {
     Building2,
     Receipt,
     Settings,
+    Wallet,
+    Landmark,
 } from "lucide-vue-next";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
@@ -126,6 +141,11 @@ const purchaseNavItems = [
 const toolsNavItems = [
     { route: "/barcode-print", label: __("Barcode Printer"), icon: Printer },
     { route: "/settings", label: __("Settings"), icon: Settings },
+];
+
+const financeNavItems = [
+    { route: "/expenses", label: __("Expenses"), icon: Wallet },
+    { route: "/bank-drops", label: __("Bank Drops"), icon: Landmark },
 ];
 
 function isActive(path: string): boolean {

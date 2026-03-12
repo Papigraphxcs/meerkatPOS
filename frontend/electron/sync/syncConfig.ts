@@ -3,10 +3,13 @@
  * their pull order, batch size, and the custom field used for
  * local-ID ↔ server-ID mapping.
  *
- * Mirrors the .NET WinForms pattern:
+ * Mirrors the .NET WinForms (DeskPos) pattern:
  *   1. Pull master data tables first (in dependency order)
  *   2. Then push locally-created records to the server
  *   3. Validate local IDs via custom `xpos_local_id` field
+ *
+ * The pull order numbers ensure dependencies are resolved before
+ * dependent tables. Child tables have pullOrder = parent + 1.
  */
 
 export interface SyncTableConfig {
@@ -28,7 +31,7 @@ export interface SyncTableConfig {
   orderBy: string;
   /** Direction of pull */
   direction: "pull" | "push" | "both";
-  /** IndexedDB store name (from idbService) for caching pulled data. */
+  /** Local MariaDB table name for storing pulled data. */
   idbStore: string;
   /** Custom field on the ERPNext doctype that holds the local UUID.
    *  Used to prevent duplicate pushes and map local ↔ server IDs. */
@@ -42,19 +45,227 @@ export interface SyncTableConfig {
   pullOrder: number;
   /** Dependencies – other idbStore names that must be synced before this one. */
   dependsOn?: string[];
+  /** Parent doctype for child tables (filters by parent doctype). */
+  parentDoctype?: string;
+  /** If true, filter by company during pull. */
+  isCompanyBased?: boolean;
+  /** If true, always pull full set (ignore incremental modified tracking). */
+  regetAll?: boolean;
 }
 
 /**
  * Default sync configuration.
  * Pull order ensures master data is ready before transactional data.
+ *
+ * Mirrors DeskPos SyncTablesData.cs — every table that DeskPos syncs
+ * is represented here.
  */
 export const SYNC_TABLES: SyncTableConfig[] = [
-  // ── Master Data (pull-only) ────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────
+  // MASTER DATA — Lookup Tables (pull-only, small, full refresh)
+  // ──────────────────────────────────────────────────────────────
+  {
+    doctype: "Company",
+    label: "Companies",
+    fields: ["name", "company_name", "abbr", "default_currency", "country"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "companies",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    batchSize: 100,
+    pullOrder: 1,
+    isCompanyBased: false,
+  },
+  {
+    doctype: "Country",
+    label: "Countries",
+    fields: ["name", "code"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "countries",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    regetAll: true,
+    batchSize: 500,
+    pullOrder: 2,
+  },
+  {
+    doctype: "Currency",
+    label: "Currencies",
+    fields: ["name", "currency_name", "symbol", "enabled"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "currencies",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    regetAll: true,
+    batchSize: 500,
+    pullOrder: 2,
+  },
+  {
+    doctype: "UOM",
+    label: "Units of Measure",
+    fields: ["name", "uom_name", "enabled"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "uom",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    regetAll: true,
+    batchSize: 500,
+    pullOrder: 2,
+  },
+  {
+    doctype: "Brand",
+    label: "Brands",
+    fields: ["name", "brand"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "brands",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 3,
+  },
+  {
+    doctype: "Industry Type",
+    label: "Industries",
+    fields: ["name", "industry"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "industries",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 3,
+  },
+  {
+    doctype: "Mode of Payment",
+    label: "Modes of Payment",
+    fields: ["name", "mode_of_payment", "type", "enabled"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "modes_of_payment",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    regetAll: true,
+    batchSize: 500,
+    pullOrder: 3,
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // MASTER DATA — Company-based (pull-only, incremental)
+  // ──────────────────────────────────────────────────────────────
+  {
+    doctype: "Cost Center",
+    label: "Cost Centers",
+    fields: ["name", "cost_center_name", "parent_cost_center", "is_group", "company"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "cost_centers",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 4,
+    isCompanyBased: true,
+  },
+  {
+    doctype: "Warehouse",
+    label: "Warehouses",
+    fields: ["name", "warehouse_name", "parent_warehouse", "is_group", "company", "disabled"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "warehouses",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 4,
+    isCompanyBased: true,
+  },
+  {
+    doctype: "Account",
+    label: "Accounts",
+    fields: [
+      "name", "account_name", "account_type", "parent_account",
+      "root_type", "is_group", "company", "disabled",
+    ],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "accounts",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 4,
+    isCompanyBased: true,
+  },
+  {
+    doctype: "Price List",
+    label: "Price Lists",
+    fields: ["name", "price_list_name", "buying", "selling", "currency", "enabled"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "price_lists",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 4,
+    isCompanyBased: true,
+  },
+  {
+    doctype: "Mode of Payment Account",
+    label: "Mode of Payment Accounts",
+    fields: ["name", "parent", "company", "default_account"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "mode_of_payment_accounts",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 4,
+    isCompanyBased: true,
+    parentDoctype: "Mode of Payment",
+  },
+  {
+    doctype: "POS Profile",
+    label: "POS Profiles",
+    fields: [
+      "name", "company", "warehouse", "cost_center", "currency",
+      "selling_price_list", "write_off_account", "write_off_cost_center",
+      "customer", "income_account", "expense_account",
+      "taxes_and_charges", "tax_category", "apply_discount_on", "disabled",
+    ],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "pos_profiles",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 100,
+    pullOrder: 5,
+    isCompanyBased: true,
+    dependsOn: ["companies", "warehouses", "accounts"],
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // MASTER DATA — Items & Related
+  // ──────────────────────────────────────────────────────────────
+  {
+    doctype: "Item Group",
+    label: "Item Groups",
+    fields: ["name", "parent_item_group", "is_group", "image"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "item_groups",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    batchSize: 500,
+    pullOrder: 5,
+  },
   {
     doctype: "Item",
     label: "Items",
     fields: [
-      "name", "item_code", "item_name", "item_group", "description",
+      "name", "item_code", "item_name", "item_group", "brand", "description",
       "stock_uom", "image", "has_serial_no", "has_batch_no",
       "has_variants", "variant_of", "is_stock_item", "disabled",
       "standard_rate", "item_tax_template", "barcode",
@@ -67,30 +278,248 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     incremental: true,
     batchSize: 500,
     pullOrder: 10,
+    dependsOn: ["item_groups", "brands"],
   },
   {
-    doctype: "Item Group",
-    label: "Item Groups",
-    fields: ["name", "parent_item_group", "is_group", "image"],
+    doctype: "Item Barcode",
+    label: "Item Barcodes",
+    fields: ["name", "parent", "barcode", "barcode_type"],
     orderBy: "modified",
     direction: "pull",
-    idbStore: "item_groups",
+    idbStore: "item_barcodes",
     localIdField: "xpos_local_id",
-    incremental: false, // small table, always full pull
+    incremental: true,
     batchSize: 500,
-    pullOrder: 5,
+    pullOrder: 11,
+    parentDoctype: "Item",
+    dependsOn: ["items"],
   },
+  {
+    doctype: "UOM Conversion Detail",
+    label: "UOM Conversions",
+    fields: ["name", "parent", "uom", "conversion_factor"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "uom_conversion_details",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 11,
+    parentDoctype: "Item",
+    dependsOn: ["items", "uom"],
+  },
+  {
+    doctype: "Item Price",
+    label: "Item Prices",
+    fields: [
+      "name", "item_code", "item_name", "price_list", "buying", "selling",
+      "currency", "price_list_rate", "uom", "min_qty", "valid_from", "valid_upto",
+    ],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "item_prices",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 12,
+    isCompanyBased: true,
+    dependsOn: ["items", "price_lists"],
+  },
+  {
+    doctype: "Item Tax",
+    label: "Item Taxes",
+    fields: ["name", "parent", "item_tax_template", "tax_category", "valid_from"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "item_taxes",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 12,
+    parentDoctype: "Item",
+    dependsOn: ["items"],
+  },
+  {
+    doctype: "Item Supplier",
+    label: "Item Vendors",
+    fields: ["name", "parent", "supplier"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "item_vendors",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 12,
+    isCompanyBased: true,
+    parentDoctype: "Item",
+    dependsOn: ["items", "suppliers"],
+  },
+  {
+    doctype: "Item Reorder",
+    label: "Item Reorder Levels",
+    fields: ["name", "parent", "warehouse", "warehouse_reorder_level", "warehouse_reorder_qty"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "item_reorder_levels",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 12,
+    isCompanyBased: true,
+    parentDoctype: "Item",
+    dependsOn: ["items", "warehouses"],
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // MASTER DATA — Tax Templates
+  // ──────────────────────────────────────────────────────────────
+  {
+    doctype: "Item Tax Template",
+    label: "Item Tax Templates",
+    fields: ["name", "title", "company", "disabled"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "item_tax_templates",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    regetAll: true,
+    batchSize: 500,
+    pullOrder: 13,
+    isCompanyBased: true,
+  },
+  {
+    doctype: "Item Tax Template Detail",
+    label: "Item Tax Template Details",
+    fields: ["name", "parent", "tax_type", "tax_rate"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "item_tax_template_details",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    regetAll: true,
+    batchSize: 500,
+    pullOrder: 14,
+    parentDoctype: "Item Tax Template",
+    dependsOn: ["item_tax_templates"],
+  },
+  {
+    doctype: "Sales Taxes and Charges Template",
+    label: "Sales Tax Templates",
+    fields: ["name", "title", "company", "tax_category", "disabled"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "sales_taxes_templates",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 13,
+    isCompanyBased: true,
+  },
+  {
+    doctype: "Sales Taxes and Charges",
+    label: "Sales Tax Charges",
+    fields: [
+      "name", "parent", "charge_type", "account_head", "description",
+      "rate", "tax_amount", "included_in_print_rate", "idx",
+    ],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "sales_taxes_charges",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 14,
+    parentDoctype: "Sales Taxes and Charges Template",
+    dependsOn: ["sales_taxes_templates"],
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // MASTER DATA — Pricing Rules
+  // ──────────────────────────────────────────────────────────────
+  {
+    doctype: "Pricing Rule",
+    label: "Pricing Rules",
+    fields: [
+      "name", "title", "apply_on", "price_or_product_discount",
+      "rate_or_discount", "selling", "buying", "applicable_for",
+      "company", "customer", "customer_group", "territory",
+      "sales_partner", "campaign", "for_price_list", "warehouse",
+      "min_qty", "max_qty", "min_amt", "max_amt",
+      "valid_from", "valid_upto",
+      "discount_percentage", "discount_amount", "rate",
+      "margin_type", "margin_rate_or_amount",
+      "priority", "disable", "is_cumulative", "mixed_conditions",
+      "coupon_code_based", "same_item", "free_item", "free_qty",
+      "free_item_rate", "free_item_uom", "round_free_qty",
+      "is_recursive", "recurse_for", "apply_recursion_over",
+    ],
+    filters: { disable: 0, selling: 1 },
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "pricing_rules",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 15,
+    isCompanyBased: true,
+  },
+  {
+    doctype: "Pricing Rule Item Code",
+    label: "Pricing Rule Items",
+    fields: ["name", "parent", "item_code"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "pricing_rule_item_codes",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 16,
+    parentDoctype: "Pricing Rule",
+    dependsOn: ["pricing_rules"],
+  },
+  {
+    doctype: "Pricing Rule Item Group",
+    label: "Pricing Rule Groups",
+    fields: ["name", "parent", "item_group"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "pricing_rule_item_groups",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 16,
+    parentDoctype: "Pricing Rule",
+    dependsOn: ["pricing_rules"],
+  },
+  {
+    doctype: "Pricing Rule Brand",
+    label: "Pricing Rule Brands",
+    fields: ["name", "parent", "brand"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "pricing_rule_brands",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 16,
+    parentDoctype: "Pricing Rule",
+    dependsOn: ["pricing_rules"],
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // MASTER DATA — Parties
+  // ──────────────────────────────────────────────────────────────
   {
     doctype: "Customer",
     label: "Customers",
     fields: [
-      "name", "customer_name", "customer_group", "territory",
-      "mobile_no", "email_id", "default_currency",
+      "name", "customer_name", "customer_group", "customer_type", "territory",
+      "tax_category", "mobile_no", "email_id", "default_currency",
       "loyalty_program", "loyalty_points", "disabled",
     ],
     filters: { disabled: 0 },
     orderBy: "modified",
-    direction: "both", // POS can create customers
+    direction: "both",
     idbStore: "customers",
     localIdField: "xpos_local_id",
     incremental: true,
@@ -113,7 +542,64 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     pullOrder: 25,
   },
 
-  // ── Transactional (push-only from POS) ─────────────────────────
+  // ──────────────────────────────────────────────────────────────
+  // STOCK DATA
+  // ──────────────────────────────────────────────────────────────
+  {
+    doctype: "Bin",
+    label: "Stock Bins",
+    fields: [
+      "name", "item_code", "warehouse", "actual_qty",
+      "projected_qty", "reserved_qty", "ordered_qty",
+    ],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "bins",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 30,
+    dependsOn: ["items", "warehouses"],
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // POS USERS (pull-only for offline auth)
+  // ──────────────────────────────────────────────────────────────
+  {
+    doctype: "POS User",
+    label: "POS Users",
+    pullMethod: "xpos.api.auth.get_pos_users",
+    fields: ["*"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "pos_users",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 100,
+    pullOrder: 35,
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // POS Payment Methods (child of POS Profile)
+  // ──────────────────────────────────────────────────────────────
+  {
+    doctype: "POS Payment Method",
+    label: "POS Payment Methods",
+    fields: ["name", "parent", "mode_of_payment", "default"],
+    orderBy: "modified",
+    direction: "pull",
+    idbStore: "pos_payment_methods",
+    localIdField: "xpos_local_id",
+    incremental: true,
+    batchSize: 500,
+    pullOrder: 6,
+    parentDoctype: "POS Profile",
+    dependsOn: ["pos_profiles", "modes_of_payment"],
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // TRANSACTIONAL — Push-only from POS
+  // ──────────────────────────────────────────────────────────────
   {
     doctype: "POS Invoice",
     label: "POS Invoices",
@@ -140,7 +626,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     batchSize: 50,
     pullOrder: 110,
     dependsOn: ["suppliers", "items"],
-    /** Note: idbStore uses snake_case to match MariaDB table names */
   },
 ];
 

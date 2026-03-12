@@ -12,6 +12,9 @@ import {
   testConnection, initDatabase, getConfig,
   type DbConfig,
 } from "./dbService";
+import { createLogger } from "../logger";
+
+const log = createLogger("DB-IPC");
 
 export function registerDbHandlers(): void {
 
@@ -295,6 +298,11 @@ export function registerDbHandlers(): void {
     return true;
   });
 
+  ipcMain.handle("db:count-pending-purchases", async () => {
+    const rows = await execute("SELECT COUNT(*) as cnt FROM `pending_purchases` WHERE `status` IN ('pending','failed')");
+    return (rows as Array<{ cnt: number }>)[0]?.cnt ?? 0;
+  });
+
   // ── Sync ID Map ───────────────────────────────────────────────
 
   ipcMain.handle("db:add-sync-id", async (_e, localId: string, serverName: string, doctype: string) => {
@@ -367,11 +375,787 @@ export function registerDbHandlers(): void {
     };
   });
 
+  // ── Companies ───────────────────────────────────────────────
+
+  ipcMain.handle("db:get-companies", async () => {
+    return query("SELECT * FROM `companies` ORDER BY `company_name`");
+  });
+
+  ipcMain.handle("db:upsert-companies", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("companies", rows, "name");
+  });
+
+  // ── Cost Centers ──────────────────────────────────────────────
+
+  ipcMain.handle("db:get-cost-centers", async (_e, company?: string) => {
+    if (company) {
+      return query("SELECT * FROM `cost_centers` WHERE `company` = ? ORDER BY `name`", [company]);
+    }
+    return query("SELECT * FROM `cost_centers` ORDER BY `name`");
+  });
+
+  ipcMain.handle("db:upsert-cost-centers", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("cost_centers", rows, "name");
+  });
+
+  // ── Countries ─────────────────────────────────────────────────
+
+  ipcMain.handle("db:get-countries", async () => {
+    return query("SELECT * FROM `countries` ORDER BY `name`");
+  });
+
+  ipcMain.handle("db:upsert-countries", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("countries", rows, "name");
+  });
+
+  // ── Currencies ────────────────────────────────────────────────
+
+  ipcMain.handle("db:get-currencies", async () => {
+    return query("SELECT * FROM `currencies` WHERE `enabled` = 1 ORDER BY `name`");
+  });
+
+  ipcMain.handle("db:upsert-currencies", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("currencies", rows, "name");
+  });
+
+  // ── Warehouses ────────────────────────────────────────────────
+
+  ipcMain.handle("db:get-warehouses", async (_e, opts?: { company?: string; isGroup?: boolean }) => {
+    let sql = "SELECT * FROM `warehouses` WHERE `disabled` = 0";
+    const params: unknown[] = [];
+    if (opts?.company) { sql += " AND `company` = ?"; params.push(opts.company); }
+    if (opts?.isGroup !== undefined) { sql += " AND `is_group` = ?"; params.push(opts.isGroup ? 1 : 0); }
+    sql += " ORDER BY `warehouse_name`";
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:upsert-warehouses", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("warehouses", rows, "name");
+  });
+
+  // ── Accounts ──────────────────────────────────────────────────
+
+  ipcMain.handle("db:get-accounts", async (_e, opts?: { company?: string; accountType?: string; rootType?: string }) => {
+    let sql = "SELECT * FROM `accounts` WHERE `disabled` = 0";
+    const params: unknown[] = [];
+    if (opts?.company) { sql += " AND `company` = ?"; params.push(opts.company); }
+    if (opts?.accountType) { sql += " AND `account_type` = ?"; params.push(opts.accountType); }
+    if (opts?.rootType) { sql += " AND `root_type` = ?"; params.push(opts.rootType); }
+    sql += " ORDER BY `name`";
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:upsert-accounts", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("accounts", rows, "name");
+  });
+
+  // ── Price Lists ───────────────────────────────────────────────
+
+  ipcMain.handle("db:get-price-lists", async (_e, selling?: boolean) => {
+    if (selling !== undefined) {
+      return query("SELECT * FROM `price_lists` WHERE `enabled` = 1 AND `selling` = ? ORDER BY `name`",
+        [selling ? 1 : 0]);
+    }
+    return query("SELECT * FROM `price_lists` WHERE `enabled` = 1 ORDER BY `name`");
+  });
+
+  ipcMain.handle("db:upsert-price-lists", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("price_lists", rows, "name");
+  });
+
+  // ── UOM ───────────────────────────────────────────────────────
+
+  ipcMain.handle("db:get-uom", async () => {
+    return query("SELECT * FROM `uom` WHERE `enabled` = 1 ORDER BY `name`");
+  });
+
+  ipcMain.handle("db:upsert-uom", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("uom", rows, "name");
+  });
+
+  // ── UOM Conversion Details ────────────────────────────────────
+
+  ipcMain.handle("db:get-uom-conversions", async (_e, itemCode: string) => {
+    return query("SELECT * FROM `uom_conversion_details` WHERE `parent` = ?", [itemCode]);
+  });
+
+  ipcMain.handle("db:upsert-uom-conversions", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("uom_conversion_details", rows, "name");
+  });
+
+  // ── Brands ────────────────────────────────────────────────────
+
+  ipcMain.handle("db:get-brands", async () => {
+    return query("SELECT * FROM `brands` ORDER BY `name`");
+  });
+
+  ipcMain.handle("db:upsert-brands", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("brands", rows, "name");
+  });
+
+  // ── Industries ────────────────────────────────────────────────
+
+  ipcMain.handle("db:get-industries", async () => {
+    return query("SELECT * FROM `industries` ORDER BY `name`");
+  });
+
+  ipcMain.handle("db:upsert-industries", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("industries", rows, "name");
+  });
+
+  // ── Modes of Payment ──────────────────────────────────────────
+
+  ipcMain.handle("db:get-modes-of-payment", async () => {
+    return query("SELECT * FROM `modes_of_payment` WHERE `enabled` = 1 ORDER BY `name`");
+  });
+
+  ipcMain.handle("db:upsert-modes-of-payment", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("modes_of_payment", rows, "name");
+  });
+
+  // ── Mode of Payment Accounts ──────────────────────────────────
+
+  ipcMain.handle("db:get-mode-of-payment-accounts", async (_e, company: string) => {
+    return query("SELECT * FROM `mode_of_payment_accounts` WHERE `company` = ?", [company]);
+  });
+
+  ipcMain.handle("db:upsert-mode-of-payment-accounts", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("mode_of_payment_accounts", rows, "name");
+  });
+
+  // ── Item Barcodes ─────────────────────────────────────────────
+
+  ipcMain.handle("db:get-item-by-barcode", async (_e, barcode: string) => {
+    const bc = await queryOne<{ parent: string }>(
+      "SELECT `parent` FROM `item_barcodes` WHERE `barcode` = ?", [barcode]
+    );
+    if (!bc) return null;
+    return queryOne("SELECT * FROM `items` WHERE `item_code` = ?", [bc.parent]);
+  });
+
+  ipcMain.handle("db:upsert-item-barcodes", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("item_barcodes", rows, "name");
+  });
+
+  // ── Item Prices ───────────────────────────────────────────────
+
+  ipcMain.handle("db:get-item-price", async (_e, itemCode: string, priceList: string) => {
+    return queryOne(
+      `SELECT * FROM \`item_prices\`
+       WHERE \`item_code\` = ? AND \`price_list\` = ?
+       AND (\`valid_from\` IS NULL OR \`valid_from\` <= CURDATE())
+       AND (\`valid_upto\` IS NULL OR \`valid_upto\` >= CURDATE())
+       ORDER BY \`valid_from\` DESC LIMIT 1`,
+      [itemCode, priceList]
+    );
+  });
+
+  ipcMain.handle("db:get-item-prices", async (_e, opts?: { priceList?: string; selling?: boolean }) => {
+    let sql = "SELECT * FROM `item_prices` WHERE 1=1";
+    const params: unknown[] = [];
+    if (opts?.priceList) { sql += " AND `price_list` = ?"; params.push(opts.priceList); }
+    if (opts?.selling !== undefined) { sql += " AND `selling` = ?"; params.push(opts.selling ? 1 : 0); }
+    sql += " ORDER BY `item_code`";
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:upsert-item-prices", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("item_prices", rows, "name");
+  });
+
+  // ── Item Tax Templates ────────────────────────────────────────
+
+  ipcMain.handle("db:get-item-tax-templates", async (_e, company?: string) => {
+    let sql = "SELECT * FROM `item_tax_templates` WHERE `disabled` = 0";
+    const params: unknown[] = [];
+    if (company) { sql += " AND `company` = ?"; params.push(company); }
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:upsert-item-tax-templates", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("item_tax_templates", rows, "name");
+  });
+
+  // ── Item Tax Template Details ─────────────────────────────────
+
+  ipcMain.handle("db:get-item-tax-template-details", async (_e, templateName: string) => {
+    return query("SELECT * FROM `item_tax_template_details` WHERE `parent` = ?", [templateName]);
+  });
+
+  ipcMain.handle("db:upsert-item-tax-template-details", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("item_tax_template_details", rows, "name");
+  });
+
+  // ── Item Taxes (per item) ─────────────────────────────────────
+
+  ipcMain.handle("db:get-item-taxes", async (_e, itemCode: string) => {
+    return query("SELECT * FROM `item_taxes` WHERE `parent` = ?", [itemCode]);
+  });
+
+  ipcMain.handle("db:upsert-item-taxes", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("item_taxes", rows, "name");
+  });
+
+  // ── Item Vendors ──────────────────────────────────────────────
+
+  ipcMain.handle("db:get-item-vendors", async (_e, itemCode: string) => {
+    return query("SELECT * FROM `item_vendors` WHERE `parent` = ?", [itemCode]);
+  });
+
+  ipcMain.handle("db:upsert-item-vendors", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("item_vendors", rows, "name");
+  });
+
+  // ── Item Reorder Levels ───────────────────────────────────────
+
+  ipcMain.handle("db:get-item-reorder-levels", async (_e, itemCode: string) => {
+    return query("SELECT * FROM `item_reorder_levels` WHERE `parent` = ?", [itemCode]);
+  });
+
+  ipcMain.handle("db:upsert-item-reorder-levels", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("item_reorder_levels", rows, "name");
+  });
+
+  // ── POS Profiles ──────────────────────────────────────────────
+
+  ipcMain.handle("db:get-pos-profiles", async (_e, company?: string) => {
+    let sql = "SELECT * FROM `pos_profiles` WHERE `disabled` = 0";
+    const params: unknown[] = [];
+    if (company) { sql += " AND `company` = ?"; params.push(company); }
+    sql += " ORDER BY `name`";
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:get-pos-profile", async (_e, name: string) => {
+    return queryOne("SELECT * FROM `pos_profiles` WHERE `name` = ?", [name]);
+  });
+
+  ipcMain.handle("db:upsert-pos-profiles", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("pos_profiles", rows, "name");
+  });
+
+  // ── POS Payment Methods ───────────────────────────────────────
+
+  ipcMain.handle("db:get-pos-payment-methods", async (_e, posProfile: string) => {
+    return query(
+      "SELECT * FROM `pos_payment_methods` WHERE `parent` = ? ORDER BY `idx`",
+      [posProfile]
+    );
+  });
+
+  ipcMain.handle("db:upsert-pos-payment-methods", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("pos_payment_methods", rows, "name");
+  });
+
+  // ── POS Users (offline auth) ──────────────────────────────────
+
+  ipcMain.handle("db:get-pos-users", async () => {
+    return query("SELECT * FROM `pos_users` ORDER BY `full_name`");
+  });
+
+  ipcMain.handle("db:get-pos-user", async (_e, email: string) => {
+    return queryOne("SELECT * FROM `pos_users` WHERE `email` = ?", [email]);
+  });
+
+  ipcMain.handle("db:upsert-pos-users", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("pos_users", rows, "name");
+  });
+
+  // ── Sales Tax Templates ───────────────────────────────────────
+
+  ipcMain.handle("db:get-sales-tax-templates", async (_e, company?: string) => {
+    let sql = "SELECT * FROM `sales_taxes_templates` WHERE `disabled` = 0";
+    const params: unknown[] = [];
+    if (company) { sql += " AND `company` = ?"; params.push(company); }
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:upsert-sales-tax-templates", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("sales_taxes_templates", rows, "name");
+  });
+
+  // ── Sales Tax Charges ─────────────────────────────────────────
+
+  ipcMain.handle("db:get-sales-tax-charges", async (_e, templateName: string) => {
+    return query("SELECT * FROM `sales_taxes_charges` WHERE `parent` = ? ORDER BY `idx`", [templateName]);
+  });
+
+  ipcMain.handle("db:upsert-sales-tax-charges", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("sales_taxes_charges", rows, "name");
+  });
+
+  // ── Pricing Rules ─────────────────────────────────────────────
+
+  ipcMain.handle("db:get-pricing-rules", async (_e, opts?: { company?: string; itemCode?: string }) => {
+    let sql = "SELECT * FROM `pricing_rules` WHERE `disable` = 0";
+    const params: unknown[] = [];
+    if (opts?.company) { sql += " AND (`company` = ? OR `company` IS NULL OR `company` = '')"; params.push(opts.company); }
+    sql += " ORDER BY `priority` DESC, `name`";
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:get-pricing-rule-items", async (_e, parent: string) => {
+    return query("SELECT * FROM `pricing_rule_item_codes` WHERE `parent` = ?", [parent]);
+  });
+
+  ipcMain.handle("db:get-pricing-rule-groups", async (_e, parent: string) => {
+    return query("SELECT * FROM `pricing_rule_item_groups` WHERE `parent` = ?", [parent]);
+  });
+
+  ipcMain.handle("db:get-pricing-rule-brands", async (_e, parent: string) => {
+    return query("SELECT * FROM `pricing_rule_brands` WHERE `parent` = ?", [parent]);
+  });
+
+  ipcMain.handle("db:upsert-pricing-rules", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("pricing_rules", rows, "name");
+  });
+
+  ipcMain.handle("db:upsert-pricing-rule-item-codes", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("pricing_rule_item_codes", rows, "name");
+  });
+
+  ipcMain.handle("db:upsert-pricing-rule-item-groups", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("pricing_rule_item_groups", rows, "name");
+  });
+
+  ipcMain.handle("db:upsert-pricing-rule-brands", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("pricing_rule_brands", rows, "name");
+  });
+
+  // ── Bins (Stock) ──────────────────────────────────────────────
+
+  ipcMain.handle("db:get-bin", async (_e, itemCode: string, warehouse: string) => {
+    return queryOne(
+      "SELECT * FROM `bins` WHERE `item_code` = ? AND `warehouse` = ?",
+      [itemCode, warehouse]
+    );
+  });
+
+  ipcMain.handle("db:get-bins", async (_e, warehouse?: string) => {
+    if (warehouse) {
+      return query("SELECT * FROM `bins` WHERE `warehouse` = ?", [warehouse]);
+    }
+    return query("SELECT * FROM `bins`");
+  });
+
+  ipcMain.handle("db:upsert-bins", async (_e, rows: Record<string, unknown>[]) => {
+    return upsertBatch("bins", rows, "name");
+  });
+
+  // ── POS Opening Shifts ────────────────────────────────────────
+
+  ipcMain.handle("db:create-pos-opening-shift", async (_e, shift: Record<string, unknown>) => {
+    const localId = `pos_open_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    await execute(
+      `INSERT INTO \`pos_opening_shifts\`
+       (\`local_id\`, \`pos_profile\`, \`user\`, \`company\`, \`opening_date\`, \`status\`)
+       VALUES (?, ?, ?, ?, ?, 'Open')`,
+      [localId, shift.pos_profile, shift.user, shift.company, shift.opening_date || new Date().toISOString().slice(0, 10)]
+    );
+    // Insert opening amounts
+    const payments = shift.opening_amounts as Array<{ mode_of_payment: string; opening_amount: number }> | undefined;
+    if (payments?.length) {
+      for (const p of payments) {
+        await execute(
+          `INSERT INTO \`pos_opening_entry_details\`
+           (\`parent_local_id\`, \`mode_of_payment\`, \`opening_amount\`)
+           VALUES (?, ?, ?)`,
+          [localId, p.mode_of_payment, p.opening_amount || 0]
+        );
+      }
+    }
+    return { local_id: localId };
+  });
+
+  ipcMain.handle("db:get-open-shift", async (_e, user: string) => {
+    const shift = await queryOne(
+      "SELECT * FROM `pos_opening_shifts` WHERE `user` = ? AND `status` = 'Open' ORDER BY `id` DESC LIMIT 1",
+      [user]
+    );
+    if (!shift) return null;
+    const details = await query(
+      "SELECT * FROM `pos_opening_entry_details` WHERE `parent_local_id` = ?",
+      [(shift as Record<string, unknown>).local_id]
+    );
+    return { ...(shift as Record<string, unknown>), opening_amounts: details };
+  });
+
+  ipcMain.handle("db:close-pos-shift", async (_e, localId: string) => {
+    await execute(
+      "UPDATE `pos_opening_shifts` SET `status` = 'Closed' WHERE `local_id` = ?",
+      [localId]
+    );
+    return true;
+  });
+
+  ipcMain.handle("db:get-pos-opening-shifts", async (_e, opts?: { user?: string; status?: string }) => {
+    let sql = "SELECT * FROM `pos_opening_shifts`";
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (opts?.user) { conditions.push("`user` = ?"); params.push(opts.user); }
+    if (opts?.status) { conditions.push("`status` = ?"); params.push(opts.status); }
+    if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
+    sql += " ORDER BY `id` DESC";
+    return query(sql, params);
+  });
+
+  // ── POS Closing Entries ───────────────────────────────────────
+
+  ipcMain.handle("db:create-pos-closing-entry", async (_e, entry: Record<string, unknown>) => {
+    const localId = `pos_close_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const result = await execute(
+      `INSERT INTO \`pos_closing_entries\`
+       (\`local_id\`, \`pos_profile\`, \`user\`, \`company\`, \`pos_opening_shift_local_id\`,
+        \`closing_date\`, \`grand_total\`, \`net_total\`, \`total_qty\`,
+        \`num_invoices\`, \`status\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Submitted', 'pending')`,
+      [
+        localId, entry.pos_profile, entry.user, entry.company,
+        entry.pos_opening_shift_local_id,
+        entry.closing_date || new Date().toISOString().slice(0, 10),
+        entry.grand_total || 0, entry.net_total || 0, entry.total_qty || 0,
+        entry.num_invoices || 0,
+      ]
+    );
+    // Insert payment details
+    const payments = entry.payment_details as Array<{
+      mode_of_payment: string; opening_amount: number; expected_amount: number; closing_amount: number; difference: number;
+    }> | undefined;
+    if (payments?.length) {
+      for (const p of payments) {
+        await execute(
+          `INSERT INTO \`pos_closing_entry_details\`
+           (\`parent_id\`, \`mode_of_payment\`, \`opening_amount\`, \`expected_amount\`, \`closing_amount\`, \`difference\`)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [result.insertId, p.mode_of_payment, p.opening_amount || 0, p.expected_amount || 0, p.closing_amount || 0, p.difference || 0]
+        );
+      }
+    }
+    return { id: result.insertId, local_id: localId };
+  });
+
+  ipcMain.handle("db:get-pos-closing-entries", async (_e, opts?: { user?: string; status?: string }) => {
+    let sql = "SELECT * FROM `pos_closing_entries`";
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (opts?.user) { conditions.push("`user` = ?"); params.push(opts.user); }
+    if (opts?.status) { conditions.push("`sync_status` = ?"); params.push(opts.status); }
+    if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
+    sql += " ORDER BY `id` DESC";
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:get-pos-closing-entry-details", async (_e, parentId: number) => {
+    return query("SELECT * FROM `pos_closing_entry_details` WHERE `parent_id` = ?", [parentId]);
+  });
+
+  // ── Sales Invoices (local copies) ─────────────────────────────
+
+  ipcMain.handle("db:save-sales-invoice", async (_e, invoice: Record<string, unknown>) => {
+    const localId = `sinv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    await execute(
+      `INSERT INTO \`sales_invoices\`
+       (\`local_id\`, \`name\`, \`customer\`, \`customer_name\`, \`pos_profile\`,
+        \`posting_date\`, \`grand_total\`, \`net_total\`, \`total_qty\`,
+        \`status\`, \`pos_opening_shift_local_id\`, \`data\`)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        localId, invoice.name || localId, invoice.customer, invoice.customer_name,
+        invoice.pos_profile, invoice.posting_date || new Date().toISOString().slice(0, 10),
+        invoice.grand_total || 0, invoice.net_total || 0, invoice.total_qty || 0,
+        invoice.status || "Draft", invoice.pos_opening_shift_local_id || null,
+        JSON.stringify(invoice),
+      ]
+    );
+    // Insert items
+    const items = invoice.items as Array<Record<string, unknown>> | undefined;
+    if (items?.length) {
+      for (const item of items) {
+        await execute(
+          `INSERT INTO \`sales_invoice_items\`
+           (\`parent_local_id\`, \`item_code\`, \`item_name\`, \`qty\`, \`rate\`,
+            \`amount\`, \`uom\`, \`warehouse\`, \`discount_percentage\`, \`discount_amount\`)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            localId, item.item_code, item.item_name, item.qty || 0, item.rate || 0,
+            item.amount || 0, item.uom || null, item.warehouse || null,
+            item.discount_percentage || 0, item.discount_amount || 0,
+          ]
+        );
+      }
+    }
+    // Insert payments
+    const payments = invoice.payments as Array<Record<string, unknown>> | undefined;
+    if (payments?.length) {
+      for (const p of payments) {
+        await execute(
+          `INSERT INTO \`sales_invoice_payments\`
+           (\`parent_local_id\`, \`mode_of_payment\`, \`amount\`, \`account\`)
+           VALUES (?, ?, ?, ?)`,
+          [localId, p.mode_of_payment, p.amount || 0, p.account || null]
+        );
+      }
+    }
+    return { local_id: localId };
+  });
+
+  ipcMain.handle("db:get-sales-invoices", async (_e, opts?: {
+    customer?: string; posProfile?: string; shiftLocalId?: string;
+    fromDate?: string; toDate?: string; limit?: number;
+  }) => {
+    let sql = "SELECT * FROM `sales_invoices`";
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (opts?.customer) { conditions.push("`customer` = ?"); params.push(opts.customer); }
+    if (opts?.posProfile) { conditions.push("`pos_profile` = ?"); params.push(opts.posProfile); }
+    if (opts?.shiftLocalId) { conditions.push("`pos_opening_shift_local_id` = ?"); params.push(opts.shiftLocalId); }
+    if (opts?.fromDate) { conditions.push("`posting_date` >= ?"); params.push(opts.fromDate); }
+    if (opts?.toDate) { conditions.push("`posting_date` <= ?"); params.push(opts.toDate); }
+    if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
+    sql += " ORDER BY `id` DESC";
+    if (opts?.limit) { sql += " LIMIT ?"; params.push(opts.limit); }
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:get-sales-invoice", async (_e, localId: string) => {
+    const invoice = await queryOne("SELECT * FROM `sales_invoices` WHERE `local_id` = ?", [localId]);
+    if (!invoice) return null;
+    const items = await query("SELECT * FROM `sales_invoice_items` WHERE `parent_local_id` = ?", [localId]);
+    const payments = await query("SELECT * FROM `sales_invoice_payments` WHERE `parent_local_id` = ?", [localId]);
+    return { ...(invoice as Record<string, unknown>), items, payments };
+  });
+
+  ipcMain.handle("db:get-shift-sales-summary", async (_e, shiftLocalId: string) => {
+    const summary = await queryOne<{ total: number; count: number; qty: number }>(
+      `SELECT COALESCE(SUM(\`grand_total\`), 0) as total,
+              COUNT(*) as count,
+              COALESCE(SUM(\`total_qty\`), 0) as qty
+       FROM \`sales_invoices\`
+       WHERE \`pos_opening_shift_local_id\` = ? AND \`status\` != 'Cancelled'`,
+      [shiftLocalId]
+    );
+    const paymentSummary = await query(
+      `SELECT sip.\`mode_of_payment\`, COALESCE(SUM(sip.\`amount\`), 0) as total
+       FROM \`sales_invoice_payments\` sip
+       JOIN \`sales_invoices\` si ON si.\`local_id\` = sip.\`parent_local_id\`
+       WHERE si.\`pos_opening_shift_local_id\` = ? AND si.\`status\` != 'Cancelled'
+       GROUP BY sip.\`mode_of_payment\``,
+      [shiftLocalId]
+    );
+    return { ...(summary ?? { total: 0, count: 0, qty: 0 }), payment_breakdown: paymentSummary };
+  });
+
+  // ── Expenses ──────────────────────────────────────────────────
+
+  ipcMain.handle("db:create-expense", async (_e, expense: Record<string, unknown>) => {
+    const localId = `exp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const result = await execute(
+      `INSERT INTO \`expenses\`
+       (\`local_id\`, \`expense_type\`, \`amount\`, \`description\`, \`posting_date\`,
+        \`company\`, \`cost_center\`, \`mode_of_payment\`, \`user\`,
+        \`pos_opening_shift_local_id\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [
+        localId, expense.expense_type, expense.amount || 0,
+        expense.description || null,
+        expense.posting_date || new Date().toISOString().slice(0, 10),
+        expense.company || null, expense.cost_center || null,
+        expense.mode_of_payment || null, expense.user || null,
+        expense.pos_opening_shift_local_id || null,
+      ]
+    );
+    return { id: result.insertId, local_id: localId };
+  });
+
+  ipcMain.handle("db:get-expenses", async (_e, opts?: {
+    user?: string; fromDate?: string; toDate?: string; shiftLocalId?: string; syncStatus?: string;
+  }) => {
+    let sql = "SELECT * FROM `expenses`";
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (opts?.user) { conditions.push("`user` = ?"); params.push(opts.user); }
+    if (opts?.fromDate) { conditions.push("`posting_date` >= ?"); params.push(opts.fromDate); }
+    if (opts?.toDate) { conditions.push("`posting_date` <= ?"); params.push(opts.toDate); }
+    if (opts?.shiftLocalId) { conditions.push("`pos_opening_shift_local_id` = ?"); params.push(opts.shiftLocalId); }
+    if (opts?.syncStatus) { conditions.push("`sync_status` = ?"); params.push(opts.syncStatus); }
+    if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
+    sql += " ORDER BY `id` DESC";
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:delete-expense", async (_e, id: number) => {
+    await execute("DELETE FROM `expenses` WHERE `id` = ? AND `sync_status` = 'pending'", [id]);
+    return true;
+  });
+
+  // ── Bank Drops ────────────────────────────────────────────────
+
+  ipcMain.handle("db:create-bank-drop", async (_e, drop: Record<string, unknown>) => {
+    const localId = `bd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const result = await execute(
+      `INSERT INTO \`bank_drops\`
+       (\`local_id\`, \`amount\`, \`description\`, \`posting_date\`,
+        \`company\`, \`mode_of_payment\`, \`user\`,
+        \`pos_opening_shift_local_id\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [
+        localId, drop.amount || 0, drop.description || null,
+        drop.posting_date || new Date().toISOString().slice(0, 10),
+        drop.company || null, drop.mode_of_payment || null,
+        drop.user || null, drop.pos_opening_shift_local_id || null,
+      ]
+    );
+    return { id: result.insertId, local_id: localId };
+  });
+
+  ipcMain.handle("db:get-bank-drops", async (_e, opts?: {
+    user?: string; fromDate?: string; toDate?: string; shiftLocalId?: string; syncStatus?: string;
+  }) => {
+    let sql = "SELECT * FROM `bank_drops`";
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (opts?.user) { conditions.push("`user` = ?"); params.push(opts.user); }
+    if (opts?.fromDate) { conditions.push("`posting_date` >= ?"); params.push(opts.fromDate); }
+    if (opts?.toDate) { conditions.push("`posting_date` <= ?"); params.push(opts.toDate); }
+    if (opts?.shiftLocalId) { conditions.push("`pos_opening_shift_local_id` = ?"); params.push(opts.shiftLocalId); }
+    if (opts?.syncStatus) { conditions.push("`sync_status` = ?"); params.push(opts.syncStatus); }
+    if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
+    sql += " ORDER BY `id` DESC";
+    return query(sql, params);
+  });
+
+  ipcMain.handle("db:delete-bank-drop", async (_e, id: number) => {
+    await execute("DELETE FROM `bank_drops` WHERE `id` = ? AND `sync_status` = 'pending'", [id]);
+    return true;
+  });
+
+  // ── Stock Adjustments ─────────────────────────────────────────
+
+  ipcMain.handle("db:create-stock-adjustment", async (_e, adj: Record<string, unknown>) => {
+    const localId = `adj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const result = await execute(
+      `INSERT INTO \`stock_adjustments\`
+       (\`local_id\`, \`item_code\`, \`warehouse\`, \`qty\`, \`adjustment_type\`,
+        \`reason\`, \`posting_date\`, \`user\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [
+        localId, adj.item_code, adj.warehouse, adj.qty || 0,
+        adj.adjustment_type || "increase",
+        adj.reason || null,
+        adj.posting_date || new Date().toISOString().slice(0, 10),
+        adj.user || null,
+      ]
+    );
+    return { id: result.insertId, local_id: localId };
+  });
+
+  ipcMain.handle("db:get-stock-adjustments", async (_e, opts?: {
+    warehouse?: string; syncStatus?: string; fromDate?: string; toDate?: string;
+  }) => {
+    let sql = "SELECT * FROM `stock_adjustments`";
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (opts?.warehouse) { conditions.push("`warehouse` = ?"); params.push(opts.warehouse); }
+    if (opts?.syncStatus) { conditions.push("`sync_status` = ?"); params.push(opts.syncStatus); }
+    if (opts?.fromDate) { conditions.push("`posting_date` >= ?"); params.push(opts.fromDate); }
+    if (opts?.toDate) { conditions.push("`posting_date` <= ?"); params.push(opts.toDate); }
+    if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
+    sql += " ORDER BY `id` DESC";
+    return query(sql, params);
+  });
+
+  // ── Quotations ────────────────────────────────────────────────
+
+  ipcMain.handle("db:save-quotation", async (_e, quotation: Record<string, unknown>) => {
+    const localId = `qt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    await execute(
+      `INSERT INTO \`quotations\`
+       (\`local_id\`, \`customer\`, \`customer_name\`, \`posting_date\`,
+        \`grand_total\`, \`net_total\`, \`status\`, \`data\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [
+        localId, quotation.customer, quotation.customer_name,
+        quotation.posting_date || new Date().toISOString().slice(0, 10),
+        quotation.grand_total || 0, quotation.net_total || 0,
+        quotation.status || "Draft", JSON.stringify(quotation),
+      ]
+    );
+    return { local_id: localId };
+  });
+
+  ipcMain.handle("db:get-quotations", async (_e, opts?: {
+    customer?: string; fromDate?: string; toDate?: string; status?: string; limit?: number;
+  }) => {
+    let sql = "SELECT * FROM `quotations`";
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (opts?.customer) { conditions.push("`customer` = ?"); params.push(opts.customer); }
+    if (opts?.fromDate) { conditions.push("`posting_date` >= ?"); params.push(opts.fromDate); }
+    if (opts?.toDate) { conditions.push("`posting_date` <= ?"); params.push(opts.toDate); }
+    if (opts?.status) { conditions.push("`status` = ?"); params.push(opts.status); }
+    if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
+    sql += " ORDER BY `id` DESC";
+    if (opts?.limit) { sql += " LIMIT ?"; params.push(opts.limit); }
+    return query(sql, params);
+  });
+
+  // ── Generic Table Upsert (for sync engine) ─────────────────────
+
+  ipcMain.handle("db:upsert-table", async (_e, table: string, rows: Record<string, unknown>[], keyField: string) => {
+    // Whitelist of tables allowed for generic upsert
+    const allowedTables = new Set([
+      "companies", "cost_centers", "countries", "currencies", "warehouses",
+      "accounts", "price_lists", "uom", "uom_conversion_details", "brands",
+      "industries", "items", "item_groups", "item_barcodes", "item_prices",
+      "item_reorder_levels", "item_tax_templates", "item_tax_template_details",
+      "item_taxes", "item_vendors", "modes_of_payment", "mode_of_payment_accounts",
+      "pos_profiles", "pos_payment_methods", "customers", "suppliers",
+      "bins", "sales_taxes_templates", "sales_taxes_charges",
+      "pricing_rules", "pricing_rule_item_codes", "pricing_rule_item_groups",
+      "pricing_rule_brands", "pos_users",
+    ]);
+    if (!allowedTables.has(table)) {
+      throw new Error(`Table "${table}" is not allowed for generic upsert`);
+    }
+    return upsertBatch(table, rows, keyField);
+  });
+
+  ipcMain.handle("db:clear-table", async (_e, table: string) => {
+    const allowedTables = new Set([
+      "companies", "cost_centers", "countries", "currencies", "warehouses",
+      "accounts", "price_lists", "uom", "uom_conversion_details", "brands",
+      "industries", "items", "item_groups", "item_barcodes", "item_prices",
+      "item_reorder_levels", "item_tax_templates", "item_tax_template_details",
+      "item_taxes", "item_vendors", "modes_of_payment", "mode_of_payment_accounts",
+      "pos_profiles", "pos_payment_methods", "customers", "suppliers",
+      "bins", "sales_taxes_templates", "sales_taxes_charges",
+      "pricing_rules", "pricing_rule_item_codes", "pricing_rule_item_groups",
+      "pricing_rule_brands", "pos_users", "stock_cache",
+      "pos_profile_cache", "item_tax_cache",
+    ]);
+    if (!allowedTables.has(table)) {
+      throw new Error(`Table "${table}" is not allowed for clear`);
+    }
+    await execute(`DELETE FROM \`${table}\``);
+    return true;
+  });
+
   // ── Bulk Clear ────────────────────────────────────────────────
 
   ipcMain.handle("db:clear-all-data", async () => {
-    const tables = ["items", "item_groups", "customers", "suppliers", "stock_cache",
-      "sync_meta", "pos_profile_cache", "item_tax_cache", "sync_id_map"];
+    const tables = [
+      "items", "item_groups", "item_barcodes", "item_prices",
+      "item_tax_templates", "item_tax_template_details", "item_taxes", "item_vendors",
+      "item_reorder_levels", "uom_conversion_details",
+      "customers", "suppliers", "stock_cache", "bins",
+      "companies", "cost_centers", "countries", "currencies",
+      "warehouses", "accounts", "price_lists", "uom", "brands", "industries",
+      "modes_of_payment", "mode_of_payment_accounts",
+      "pos_profiles", "pos_payment_methods", "pos_users",
+      "sales_taxes_templates", "sales_taxes_charges",
+      "pricing_rules", "pricing_rule_item_codes", "pricing_rule_item_groups", "pricing_rule_brands",
+      "sync_meta", "pos_profile_cache", "item_tax_cache", "sync_id_map",
+    ];
     for (const t of tables) {
       await execute(`DELETE FROM \`${t}\``);
     }
@@ -384,5 +1168,5 @@ export function registerDbHandlers(): void {
     return true;
   });
 
-  console.log("[DB IPC] All handlers registered");
+  log.info("All handlers registered");
 }

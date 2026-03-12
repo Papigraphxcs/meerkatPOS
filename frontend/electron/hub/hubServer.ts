@@ -19,11 +19,42 @@
  */
 
 import http from "http";
-import { query, execute, upsertBatch } from "../database/dbService";
+import { query, execute, upsertBatch, getMeta, setMeta } from "../database/dbService";
 import { DEFAULT_HUB_PORT } from "./nodeConfig";
 import crypto from "crypto";
+import { createLogger } from "../logger";
+
+const log = createLogger("HubAPI");
 
 let server: http.Server | null = null;
+let hubSecret: string | null = null;
+
+// ── Auth helpers ──────────────────────────────────────────────────
+
+async function getOrCreateHubSecret(): Promise<string> {
+  if (hubSecret) return hubSecret;
+  const existing = await getMeta("hub_api_secret");
+  if (existing) {
+    hubSecret = existing;
+    return existing;
+  }
+  const secret = crypto.randomBytes(32).toString("hex");
+  await setMeta("hub_api_secret", secret);
+  hubSecret = secret;
+  return secret;
+}
+
+function isAuthorized(req: http.IncomingMessage): boolean {
+  if (!hubSecret) return true; // Not yet initialized — allow health check
+  const auth = req.headers["authorization"] || "";
+  if (auth.startsWith("Bearer ")) {
+    return crypto.timingSafeEqual(
+      Buffer.from(auth.slice(7)),
+      Buffer.from(hubSecret)
+    );
+  }
+  return false;
+}
 
 // ── Route helpers ─────────────────────────────────────────────────
 
@@ -60,12 +91,52 @@ function readBody(req: http.IncomingMessage): Promise<string> {
 
 // Allowed pull tables (whitelist to prevent arbitrary table reads)
 const PULL_TABLES: Record<string, { primaryKey: string; modifiedCol?: string }> = {
+  // Lookup tables
+  companies: { primaryKey: "name", modifiedCol: "modified" },
+  countries: { primaryKey: "name", modifiedCol: "modified" },
+  currencies: { primaryKey: "name", modifiedCol: "modified" },
+  uom: { primaryKey: "name", modifiedCol: "modified" },
+  brands: { primaryKey: "name", modifiedCol: "modified" },
+  industries: { primaryKey: "name", modifiedCol: "modified" },
+  modes_of_payment: { primaryKey: "name", modifiedCol: "modified" },
+  // Company-based master data
+  cost_centers: { primaryKey: "name", modifiedCol: "modified" },
+  warehouses: { primaryKey: "name", modifiedCol: "modified" },
+  accounts: { primaryKey: "name", modifiedCol: "modified" },
+  price_lists: { primaryKey: "name", modifiedCol: "modified" },
+  mode_of_payment_accounts: { primaryKey: "name", modifiedCol: "modified" },
+  pos_profiles: { primaryKey: "name", modifiedCol: "modified" },
+  pos_payment_methods: { primaryKey: "name", modifiedCol: "modified" },
+  // Items & related
   items: { primaryKey: "item_code", modifiedCol: "modified" },
   item_groups: { primaryKey: "name", modifiedCol: "modified" },
+  item_barcodes: { primaryKey: "name", modifiedCol: "modified" },
+  uom_conversion_details: { primaryKey: "name", modifiedCol: "modified" },
+  item_prices: { primaryKey: "name", modifiedCol: "modified" },
+  item_taxes: { primaryKey: "name", modifiedCol: "modified" },
+  item_vendors: { primaryKey: "name", modifiedCol: "modified" },
+  item_reorder_levels: { primaryKey: "name", modifiedCol: "modified" },
+  // Tax templates
+  item_tax_templates: { primaryKey: "name", modifiedCol: "modified" },
+  item_tax_template_details: { primaryKey: "name", modifiedCol: "modified" },
+  sales_taxes_templates: { primaryKey: "name", modifiedCol: "modified" },
+  sales_taxes_charges: { primaryKey: "name", modifiedCol: "modified" },
+  // Pricing rules
+  pricing_rules: { primaryKey: "name", modifiedCol: "modified" },
+  pricing_rule_item_codes: { primaryKey: "name", modifiedCol: "modified" },
+  pricing_rule_item_groups: { primaryKey: "name", modifiedCol: "modified" },
+  pricing_rule_brands: { primaryKey: "name", modifiedCol: "modified" },
+  // Parties
   customers: { primaryKey: "name", modifiedCol: "modified" },
   suppliers: { primaryKey: "name", modifiedCol: "modified" },
+  // Stock
+  bins: { primaryKey: "name", modifiedCol: "modified" },
+  // POS users (offline auth)
+  pos_users: { primaryKey: "name", modifiedCol: "modified" },
+  // Cache tables
   pos_profile_cache: { primaryKey: "name" },
   item_tax_cache: { primaryKey: "cache_key" },
+  stock_cache: { primaryKey: "cache_key" },
 };
 
 // ── Request Router ────────────────────────────────────────────────
@@ -90,9 +161,15 @@ async function handleRequest(
   }
 
   try {
-    // GET /api/health
+    // GET /api/health (public — used for discovery)
     if (method === "GET" && path === "/api/health") {
       json(res, { status: "ok", role: "hub", timestamp: new Date().toISOString() });
+      return;
+    }
+
+    // All other routes require authorization
+    if (!isAuthorized(req)) {
+      error(res, "Unauthorized", 401);
       return;
     }
 
@@ -213,11 +290,82 @@ async function handleRequest(
       return;
     }
 
+    // POST /api/push/expense
+    if (method === "POST" && path === "/api/push/expense") {
+      const body = JSON.parse(await readBody(req));
+      const localId = body.local_id || crypto.randomUUID();
+
+      await execute(
+        `INSERT INTO \`expenses\`
+         (\`local_id\`, \`expense_type\`, \`amount\`, \`description\`, \`posting_date\`,
+          \`company\`, \`cost_center\`, \`mode_of_payment\`, \`user\`,
+          \`pos_opening_shift_local_id\`, \`sync_status\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+         ON DUPLICATE KEY UPDATE \`amount\` = VALUES(\`amount\`), \`sync_status\` = 'pending'`,
+        [
+          localId, body.expense_type, body.amount || 0,
+          body.description || null, body.posting_date || null,
+          body.company || null, body.cost_center || null,
+          body.mode_of_payment || null, body.user || null,
+          body.pos_opening_shift_local_id || null,
+        ]
+      );
+
+      json(res, { success: true, local_id: localId }, 201);
+      return;
+    }
+
+    // POST /api/push/bank-drop
+    if (method === "POST" && path === "/api/push/bank-drop") {
+      const body = JSON.parse(await readBody(req));
+      const localId = body.local_id || crypto.randomUUID();
+
+      await execute(
+        `INSERT INTO \`bank_drops\`
+         (\`local_id\`, \`amount\`, \`description\`, \`posting_date\`,
+          \`company\`, \`mode_of_payment\`, \`user\`,
+          \`pos_opening_shift_local_id\`, \`sync_status\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+         ON DUPLICATE KEY UPDATE \`amount\` = VALUES(\`amount\`), \`sync_status\` = 'pending'`,
+        [
+          localId, body.amount || 0, body.description || null,
+          body.posting_date || null, body.company || null,
+          body.mode_of_payment || null, body.user || null,
+          body.pos_opening_shift_local_id || null,
+        ]
+      );
+
+      json(res, { success: true, local_id: localId }, 201);
+      return;
+    }
+
+    // POST /api/push/stock-adjustment
+    if (method === "POST" && path === "/api/push/stock-adjustment") {
+      const body = JSON.parse(await readBody(req));
+      const localId = body.local_id || crypto.randomUUID();
+
+      await execute(
+        `INSERT INTO \`stock_adjustments\`
+         (\`local_id\`, \`item_code\`, \`warehouse\`, \`qty\`, \`adjustment_type\`,
+          \`reason\`, \`posting_date\`, \`user\`, \`sync_status\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+         ON DUPLICATE KEY UPDATE \`qty\` = VALUES(\`qty\`), \`sync_status\` = 'pending'`,
+        [
+          localId, body.item_code, body.warehouse, body.qty || 0,
+          body.adjustment_type || "increase", body.reason || null,
+          body.posting_date || null, body.user || null,
+        ]
+      );
+
+      json(res, { success: true, local_id: localId }, 201);
+      return;
+    }
+
     // Not found
     error(res, "Not found", 404);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Internal error";
-    console.error("[HubAPI] Error:", msg);
+    log.error("Request error", msg);
     error(res, msg, 500);
   }
 }
@@ -229,21 +377,24 @@ async function handleRequest(
  * Call this only when the node role is "hub".
  */
 export function startHubServer(port = DEFAULT_HUB_PORT): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (server) {
       resolve();
       return;
     }
 
+    // Initialize the shared secret for till auth
+    await getOrCreateHubSecret();
+
     server = http.createServer(handleRequest);
 
     server.on("error", (err) => {
-      console.error("[HubAPI] Server error:", err.message);
+      log.error("Server error", err.message);
       reject(err);
     });
 
     server.listen(port, "0.0.0.0", () => {
-      console.log(`[HubAPI] Listening on 0.0.0.0:${port}`);
+      log.info(`Listening on 0.0.0.0:${port}`);
       resolve();
     });
   });
@@ -257,7 +408,7 @@ export function stopHubServer(): Promise<void> {
     }
     server.close(() => {
       server = null;
-      console.log("[HubAPI] Server stopped");
+      log.info("Server stopped");
       resolve();
     });
   });
@@ -265,4 +416,11 @@ export function stopHubServer(): Promise<void> {
 
 export function isHubRunning(): boolean {
   return server !== null && server.listening;
+}
+
+/**
+ * Get the hub API secret for sharing with till clients during setup.
+ */
+export async function getHubApiSecret(): Promise<string> {
+  return getOrCreateHubSecret();
 }

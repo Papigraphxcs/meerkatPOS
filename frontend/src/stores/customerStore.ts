@@ -6,7 +6,7 @@ import {
   cacheCustomers,
   getCachedCustomers,
   searchCachedCustomers,
-} from "@/services/idbService";
+} from "@/services/dbBridge";
 import type {
   Customer,
   CustomerAddress,

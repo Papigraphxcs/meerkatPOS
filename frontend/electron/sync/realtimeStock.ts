@@ -14,6 +14,9 @@
 import { BrowserWindow, session } from "electron";
 import { io, Socket } from "socket.io-client";
 import { execute, queryOne } from "../database/dbService";
+import { createLogger } from "../logger";
+
+const log = createLogger("Realtime");
 
 let socket: Socket | null = null;
 let serverUrl = "";
@@ -56,7 +59,7 @@ export async function initRealtimeStock(url: string): Promise<void> {
   });
 
   socket.on("connect", () => {
-    console.log("[Realtime] Connected to", serverUrl);
+    log.info(`Connected to ${serverUrl}`);
 
     // Subscribe to doctype rooms for stock events
     socket!.emit("doctype_subscribe", "Bin");
@@ -64,7 +67,7 @@ export async function initRealtimeStock(url: string): Promise<void> {
   });
 
   socket.on("disconnect", (reason) => {
-    console.log("[Realtime] Disconnected:", reason);
+    log.info(`Disconnected: ${reason}`);
   });
 
   // ERPNext emits "list_update" when a doctype list changes
@@ -126,7 +129,7 @@ async function updateLocalStock(warehouse: string, itemCode: string, actualQty: 
       [`${warehouse}::${itemCode}`, warehouse, itemCode, actualQty]
     );
   } catch (err) {
-    console.error("[Realtime] Failed to update local stock:", err);
+    log.error("Failed to update local stock", err);
   }
 }
 
@@ -138,7 +141,7 @@ export function disconnectRealtime(): void {
     socket.disconnect();
     socket = null;
   }
-  console.log("[Realtime] Disconnected");
+  log.info("Disconnected");
 }
 
 /**

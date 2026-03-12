@@ -11,7 +11,7 @@ import {
   cacheStockForWarehouse,
   getCachedStock,
   getCachedItemByCode,
-} from "@/services/idbService";
+} from "@/services/dbBridge";
 import type {
   POSItem,
   ItemGroup,

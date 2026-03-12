@@ -8,10 +8,12 @@
 
 import { autoUpdater, type UpdateInfo, type ProgressInfo } from "electron-updater";
 import { BrowserWindow, ipcMain } from "electron";
+import { createLogger } from "./logger";
+
+const log = createLogger("AutoUpdater");
 
 let updateCheckInterval: ReturnType<typeof setInterval> | null = null;
 
-/** How often to check for updates (default: every 2 hours) */
 const CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
 
 function emitToAllWindows(channel: string, data: unknown): void {
@@ -29,15 +31,12 @@ function emitToAllWindows(channel: string, data: unknown): void {
  *   electron-updater uses the publish config from electron-builder.yml.
  */
 export function initAutoUpdater(feedUrl?: string): void {
-  // Don't auto-download — let the user decide
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
 
   if (feedUrl) {
     autoUpdater.setFeedURL({ provider: "generic", url: feedUrl });
   }
-
-  // ── Events ────────────────────────────────────────────────────
 
   autoUpdater.on("checking-for-update", () => {
     emitToAllWindows("update-status", { status: "checking" });
@@ -73,14 +72,12 @@ export function initAutoUpdater(feedUrl?: string): void {
   });
 
   autoUpdater.on("error", (err: Error) => {
-    console.error("[AutoUpdater]", err.message);
+    log.error(err.message);
     emitToAllWindows("update-status", {
       status: "error",
       error: err.message,
     });
   });
-
-  // ── IPC Handlers ──────────────────────────────────────────────
 
   ipcMain.handle("update:check", async () => {
     try {
@@ -103,20 +100,16 @@ export function initAutoUpdater(feedUrl?: string): void {
   ipcMain.handle("update:install", () => {
     autoUpdater.quitAndInstall(false, true);
   });
-
-  // ── Initial check + periodic checks ───────────────────────────
-
-  // Check shortly after launch
+  
   setTimeout(() => {
     autoUpdater.checkForUpdates().catch(() => {});
   }, 10_000);
 
-  // Periodic checks
   updateCheckInterval = setInterval(() => {
     autoUpdater.checkForUpdates().catch(() => {});
   }, CHECK_INTERVAL_MS);
 
-  console.log("[AutoUpdater] Initialized");
+  log.info("Initialized");
 }
 
 export function stopAutoUpdater(): void {

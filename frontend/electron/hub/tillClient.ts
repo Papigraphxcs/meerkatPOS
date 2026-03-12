@@ -9,10 +9,14 @@
 
 import { net } from "electron";
 import { upsertBatch, query, execute, getMeta, setMeta } from "../database/dbService";
+import { createLogger } from "../logger";
+
+const log = createLogger("TillClient");
 
 interface TillSyncContext {
   hubUrl: string;   // e.g. http://192.168.1.100:6789
   tillId: string;   // e.g. "TILL-01"
+  hubSecret?: string; // Shared API secret for hub auth
 }
 
 let context: TillSyncContext | null = null;
@@ -32,6 +36,9 @@ function hubFetch<T = unknown>(
     const request = net.request({ method, url });
     request.setHeader("Content-Type", "application/json");
     request.setHeader("X-Till-Id", context!.tillId);
+    if (context!.hubSecret) {
+      request.setHeader("Authorization", `Bearer ${context!.hubSecret}`);
+    }
 
     let body = "";
     request.on("response", (response) => {
@@ -62,10 +69,48 @@ function hubFetch<T = unknown>(
 // ── Pull master data from hub ─────────────────────────────────────
 
 const PULL_TABLES = [
+  // Lookup tables
+  { table: "companies", primaryKey: "name" },
+  { table: "countries", primaryKey: "name" },
+  { table: "currencies", primaryKey: "name" },
+  { table: "uom", primaryKey: "name" },
+  { table: "brands", primaryKey: "name" },
+  { table: "industries", primaryKey: "name" },
+  { table: "modes_of_payment", primaryKey: "name" },
+  // Company-based master data
+  { table: "cost_centers", primaryKey: "name" },
+  { table: "warehouses", primaryKey: "name" },
+  { table: "accounts", primaryKey: "name" },
+  { table: "price_lists", primaryKey: "name" },
+  { table: "mode_of_payment_accounts", primaryKey: "name" },
+  { table: "pos_profiles", primaryKey: "name" },
+  { table: "pos_payment_methods", primaryKey: "name" },
+  // Items & related
   { table: "items", primaryKey: "item_code" },
   { table: "item_groups", primaryKey: "name" },
+  { table: "item_barcodes", primaryKey: "name" },
+  { table: "uom_conversion_details", primaryKey: "name" },
+  { table: "item_prices", primaryKey: "name" },
+  { table: "item_taxes", primaryKey: "name" },
+  { table: "item_vendors", primaryKey: "name" },
+  { table: "item_reorder_levels", primaryKey: "name" },
+  // Tax templates
+  { table: "item_tax_templates", primaryKey: "name" },
+  { table: "item_tax_template_details", primaryKey: "name" },
+  { table: "sales_taxes_templates", primaryKey: "name" },
+  { table: "sales_taxes_charges", primaryKey: "name" },
+  // Pricing rules
+  { table: "pricing_rules", primaryKey: "name" },
+  { table: "pricing_rule_item_codes", primaryKey: "name" },
+  { table: "pricing_rule_item_groups", primaryKey: "name" },
+  { table: "pricing_rule_brands", primaryKey: "name" },
+  // Parties
   { table: "customers", primaryKey: "name" },
   { table: "suppliers", primaryKey: "name" },
+  // Stock
+  { table: "bins", primaryKey: "name" },
+  // POS users (offline auth)
+  { table: "pos_users", primaryKey: "name" },
 ] as const;
 
 async function pullFromHub(): Promise<number> {
@@ -112,12 +157,10 @@ async function pullDeletionsFromHub(): Promise<number> {
   }>(`/api/deletions${since ? `?since=${encodeURIComponent(since)}` : ""}`);
 
   let deleted = 0;
-  const keyColMap: Record<string, string> = {
-    items: "item_code",
-    item_groups: "name",
-    customers: "name",
-    suppliers: "name",
-  };
+  const keyColMap: Record<string, string> = {};
+  for (const { table, primaryKey } of PULL_TABLES) {
+    keyColMap[table] = primaryKey;
+  }
 
   for (const row of result.data) {
     const keyCol = keyColMap[row.table_name];
@@ -208,14 +251,121 @@ async function pushToHub(): Promise<{ invoices: number; purchases: number }> {
     }
   }
 
+  // Push pending expenses
+  const pendingExpenses = await query<{
+    id: number; local_id: string; sync_status: string;
+    expense_type: string; amount: number; description: string;
+    posting_date: string; company: string; cost_center: string;
+    mode_of_payment: string; user: string; pos_opening_shift_local_id: string;
+  }>(
+    "SELECT * FROM `expenses` WHERE `sync_status` IN ('pending', 'failed') ORDER BY `id` ASC"
+  );
+
+  for (const exp of pendingExpenses) {
+    try {
+      await execute("UPDATE `expenses` SET `sync_status` = 'syncing' WHERE `id` = ?", [exp.id]);
+
+      await hubFetch("/api/push/expense", {
+        method: "POST",
+        body: JSON.stringify({
+          local_id: exp.local_id,
+          expense_type: exp.expense_type,
+          amount: exp.amount,
+          description: exp.description,
+          posting_date: exp.posting_date,
+          company: exp.company,
+          cost_center: exp.cost_center,
+          mode_of_payment: exp.mode_of_payment,
+          user: exp.user,
+          pos_opening_shift_local_id: exp.pos_opening_shift_local_id,
+        }),
+      });
+
+      await execute("UPDATE `expenses` SET `sync_status` = 'synced' WHERE `id` = ?", [exp.id]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      await execute("UPDATE `expenses` SET `sync_status` = 'failed' WHERE `id` = ?", [exp.id]);
+    }
+  }
+
+  // Push pending bank drops
+  const pendingBankDrops = await query<{
+    id: number; local_id: string; sync_status: string;
+    amount: number; description: string; posting_date: string;
+    company: string; mode_of_payment: string; user: string;
+    pos_opening_shift_local_id: string;
+  }>(
+    "SELECT * FROM `bank_drops` WHERE `sync_status` IN ('pending', 'failed') ORDER BY `id` ASC"
+  );
+
+  for (const bd of pendingBankDrops) {
+    try {
+      await execute("UPDATE `bank_drops` SET `sync_status` = 'syncing' WHERE `id` = ?", [bd.id]);
+
+      await hubFetch("/api/push/bank-drop", {
+        method: "POST",
+        body: JSON.stringify({
+          local_id: bd.local_id,
+          amount: bd.amount,
+          description: bd.description,
+          posting_date: bd.posting_date,
+          company: bd.company,
+          mode_of_payment: bd.mode_of_payment,
+          user: bd.user,
+          pos_opening_shift_local_id: bd.pos_opening_shift_local_id,
+        }),
+      });
+
+      await execute("UPDATE `bank_drops` SET `sync_status` = 'synced' WHERE `id` = ?", [bd.id]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      await execute("UPDATE `bank_drops` SET `sync_status` = 'failed' WHERE `id` = ?", [bd.id]);
+    }
+  }
+
+  // Push pending stock adjustments
+  const pendingAdjustments = await query<{
+    id: number; local_id: string; sync_status: string;
+    item_code: string; warehouse: string; qty: number;
+    adjustment_type: string; reason: string; posting_date: string; user: string;
+  }>(
+    "SELECT * FROM `stock_adjustments` WHERE `sync_status` IN ('pending', 'failed') ORDER BY `id` ASC"
+  );
+
+  for (const adj of pendingAdjustments) {
+    try {
+      await execute("UPDATE `stock_adjustments` SET `sync_status` = 'syncing' WHERE `id` = ?", [adj.id]);
+
+      await hubFetch("/api/push/stock-adjustment", {
+        method: "POST",
+        body: JSON.stringify({
+          local_id: adj.local_id,
+          item_code: adj.item_code,
+          warehouse: adj.warehouse,
+          qty: adj.qty,
+          adjustment_type: adj.adjustment_type,
+          reason: adj.reason,
+          posting_date: adj.posting_date,
+          user: adj.user,
+        }),
+      });
+
+      await execute("UPDATE `stock_adjustments` SET `sync_status` = 'synced' WHERE `id` = ?", [adj.id]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      await execute("UPDATE `stock_adjustments` SET `sync_status` = 'failed' WHERE `id` = ?", [adj.id]);
+    }
+  }
+
   return { invoices, purchases };
 }
 
 // ── Public API ────────────────────────────────────────────────────
 
-export function initTillClient(hubUrl: string, tillId: string): void {
-  context = { hubUrl: hubUrl.replace(/\/$/, ""), tillId };
-  console.log(`[TillClient] Initialized — hub: ${context.hubUrl}, till: ${tillId}`);
+export async function initTillClient(hubUrl: string, tillId: string): Promise<void> {
+  const hubSecret = await getMeta("hub_api_secret") || undefined;
+  context = { hubUrl: hubUrl.replace(/\/$/, ""), tillId, hubSecret };
+  log.info(`Initialized — hub: ${context.hubUrl}, till: ${tillId}, auth: ${hubSecret ? "yes" : "no"}`);
 }
 
 /**

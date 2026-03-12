@@ -20,6 +20,9 @@ import { SYNC_TABLES, SYNC_DEFAULTS, type SyncTableConfig } from "./syncConfig";
 import {
   query, queryOne, execute, upsertBatch, getMeta, setMeta,
 } from "../database/dbService";
+import { createLogger } from "../logger";
+
+const log = createLogger("SyncEngine");
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -263,7 +266,7 @@ async function detectDeletions(config: SyncTableConfig): Promise<number> {
       table: config.label,
       progress: deleted,
     });
-    console.log(`[SyncEngine] Detected ${deleted} deletions in ${config.label}`);
+    log.info(`Detected ${deleted} deletions in ${config.label}`);
   }
 
   return deleted;
@@ -526,7 +529,7 @@ export function initSyncEngine(context: SyncContext): void {
   // but we also poll periodically as a safety net
   setInterval(checkOnline, 30_000);
 
-  console.log("[SyncEngine] Initialized with interval:", SYNC_DEFAULTS.intervalMs, "ms");
+  log.info(`Initialized with interval: ${SYNC_DEFAULTS.intervalMs} ms`);
 }
 
 /**
@@ -553,5 +556,5 @@ export function stopSyncEngine(): void {
     syncIntervalId = null;
   }
   syncContext = null;
-  console.log("[SyncEngine] Stopped");
+  log.info("Stopped");
 }

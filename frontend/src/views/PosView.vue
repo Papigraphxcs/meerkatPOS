@@ -72,7 +72,7 @@ import { useItemStore } from "@/stores/itemStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useOfferStore } from "@/stores/offerStore";
 import { call, showError, isNetworkError } from "@/services/api";
-import { cacheItemTax, getCachedItemTax } from "@/services/idbService";
+import { cacheItemTax, getCachedItemTax } from "@/services/dbBridge";
 import SearchBar from "@/components/items/SearchBar.vue";
 import BarcodeScanner from "@/components/items/BarcodeScanner.vue";
 import ItemGrid from "@/components/items/ItemGrid.vue";

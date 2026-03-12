@@ -13,6 +13,9 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { app } from "electron";
+import { createLogger } from "../logger";
+
+const log = createLogger("DB");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,6 +65,7 @@ export async function initDatabase(config?: Partial<DbConfig>): Promise<void> {
     password: currentConfig.password,
     waitForConnections: true,
     connectionLimit: 2,
+    connectTimeout: 5000,
   });
 
   try {
@@ -84,6 +88,7 @@ export async function initDatabase(config?: Partial<DbConfig>): Promise<void> {
     queueLimit: 0,
     charset: "utf8mb4",
     timezone: "+00:00",
+    connectTimeout: 5000,
   });
 
   // Test connection
@@ -93,14 +98,14 @@ export async function initDatabase(config?: Partial<DbConfig>): Promise<void> {
   // Run schema migrations
   await runSchema();
 
-  console.log("[DB] Connected to MariaDB:", currentConfig.host, currentConfig.database);
+  log.info(`Connected to MariaDB: ${currentConfig.host} ${currentConfig.database}`);
 }
 
 export async function closeDatabase(): Promise<void> {
   if (pool) {
     await pool.end();
     pool = null;
-    console.log("[DB] Connection pool closed");
+    log.info("Connection pool closed");
   }
 }
 
@@ -126,7 +131,7 @@ async function runSchema(): Promise<void> {
     }
   }
 
-  console.warn("[DB] schema.sql not found, skipping migrations");
+  log.warn("schema.sql not found, skipping migrations");
 }
 
 async function executeSchemaFile(filePath: string): Promise<void> {
@@ -144,11 +149,11 @@ async function executeSchemaFile(filePath: string): Promise<void> {
       // Ignore "table already exists" errors during migration
       const msg = err instanceof Error ? err.message : String(err);
       if (!msg.includes("already exists")) {
-        console.error("[DB] Schema error:", msg, "\nStatement:", stmt.substring(0, 100));
+        log.error(`Schema error: ${msg}\nStatement: ${stmt.substring(0, 100)}`);
       }
     }
   }
-  console.log("[DB] Schema applied");
+  log.info("Schema applied");
 }
 
 // ── Query Helpers ─────────────────────────────────────────────────

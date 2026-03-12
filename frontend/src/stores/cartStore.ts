@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { call } from "@/services/api";
 import { usePosStore } from "./posStore";
-import { getCachedItemByCode, getCachedStockForItem } from "@/services/idbService";
+import { getCachedItemByCode, getCachedStockForItem } from "@/services/dbBridge";
 import type {
   CartItem,
   POSItem,

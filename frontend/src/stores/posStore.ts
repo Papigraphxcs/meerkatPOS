@@ -4,7 +4,7 @@ import { call } from "@/services/api";
 import {
   cachePOSData,
   getCachedPOSData,
-} from "@/services/idbService";
+} from "@/services/dbBridge";
 import type {
   POSOpeningShift,
   POSProfile,

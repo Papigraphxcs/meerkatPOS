@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, type Ref } from "vue";
 import { call, isNetworkError } from "@/services/api";
-import { cacheOffers, getCachedOffers } from "@/services/idbService";
+import { cacheOffers, getCachedOffers } from "@/services/dbBridge";
 import type {
   POSOffer,
   POSCoupon,

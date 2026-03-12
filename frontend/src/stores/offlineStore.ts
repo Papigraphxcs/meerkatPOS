@@ -6,10 +6,10 @@ import {
     addPendingInvoice,
     getAllPendingInvoices,
     updatePendingInvoice,
-    deletePendingInvoice as idbDeletePending,
+    deletePendingInvoice,
     countPendingInvoices,
-    type PendingInvoice,
-} from "@/services/idbService";
+} from "@/services/dbBridge";
+import type { PendingInvoice } from "@/services/idbService";
 import type { InvoiceData } from "@/types/pos.types";
 import { isOnline } from "@/utils";
 import __ from "@/lib/translate";
@@ -90,18 +90,15 @@ export const useOfflineStore = defineStore("offline", () => {
         try {
             const record = {
                 data: invoiceData as unknown,
-                status: "pending" as const,
-                created_at: new Date().toISOString(),
-                retry_count: 0,
                 customer_name: customerName || invoiceData.customer,
                 grand_total: grandTotal,
             };
 
-            const id = await addPendingInvoice(record);
+            const result = await addPendingInvoice(record);
             await refreshPendingCount();
             await loadPendingInvoices();
 
-            return { success: true, localId: id };
+            return { success: true, localId: (result as any).id ?? result };
         } catch (error) {
             console.error("Failed to save offline invoice:", error);
             return { success: false };
@@ -141,13 +138,13 @@ export const useOfflineStore = defineStore("offline", () => {
 
                 try {
                     invoice.status = "syncing";
-                    if (invoice.id) await updatePendingInvoice(invoice as PendingInvoice);
+                    if (invoice.id) await updatePendingInvoice(invoice.id, { status: "syncing" });
 
                     const result = await call<{ name: string }>(
                         "xpos.api.invoices.create_invoice",
                         { data: JSON.stringify(invoice.data) }
                     );
-                    if (invoice.id) await idbDeletePending(invoice.id);
+                    if (invoice.id) await deletePendingInvoice(invoice.id);
                     synced++;
                 } catch (error: unknown) {
                     failed++;
@@ -161,7 +158,11 @@ export const useOfflineStore = defineStore("offline", () => {
                         );
                     }
 
-                    if (invoice.id) await updatePendingInvoice(invoice as PendingInvoice);
+                    if (invoice.id) await updatePendingInvoice(invoice.id, {
+                        status: "failed",
+                        retry_count: invoice.retry_count,
+                        error: invoice.error,
+                    });
                 }
             }
 
@@ -194,14 +195,14 @@ export const useOfflineStore = defineStore("offline", () => {
 
         try {
             invoice.status = "syncing";
-            await updatePendingInvoice(invoice as PendingInvoice);
+            await updatePendingInvoice(invoice.id!, { status: "syncing" });
 
             await call<{ name: string }>(
                 "xpos.api.invoices.create_invoice",
                 { data: JSON.stringify(invoice.data) }
             );
 
-            await idbDeletePending(id);
+            await deletePendingInvoice(id);
             await refreshPendingCount();
             await loadPendingInvoices();
             showSuccess(__("Invoice synced successfully"));
@@ -210,7 +211,11 @@ export const useOfflineStore = defineStore("offline", () => {
             invoice.status = "failed";
             invoice.retry_count = (invoice.retry_count || 0) + 1;
             invoice.error = error instanceof Error ? error.message : String(error);
-            await updatePendingInvoice(invoice as PendingInvoice);
+            await updatePendingInvoice(invoice.id!, {
+                status: "failed",
+                retry_count: invoice.retry_count,
+                error: invoice.error,
+            });
             await loadPendingInvoices();
             showError(__("Sync failed: ") + invoice.error);
             return false;
@@ -218,7 +223,7 @@ export const useOfflineStore = defineStore("offline", () => {
     }
 
     async function deletePending(id: number): Promise<void> {
-        await idbDeletePending(id);
+        await deletePendingInvoice(id);
         await refreshPendingCount();
         await loadPendingInvoices();
     }
@@ -226,7 +231,7 @@ export const useOfflineStore = defineStore("offline", () => {
     async function clearAll(): Promise<void> {
         const invoices = await getAllPendingInvoices();
         for (const inv of invoices) {
-            if (inv.id) await idbDeletePending(inv.id);
+            if ((inv as any).id) await deletePendingInvoice((inv as any).id);
         }
         await refreshPendingCount();
         pendingInvoices.value = [];

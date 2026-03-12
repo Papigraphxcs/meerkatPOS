@@ -8,6 +8,8 @@
  */
 
 export interface ElectronAPI {
+  isFirstRun: () => Promise<boolean>;
+  testErpNext: (config: { url: string; apiKey?: string; apiSecret?: string }) => Promise<{ success: boolean; error?: string }>;
   getServerUrl: () => Promise<string>;
   setServerUrl: (url: string) => Promise<boolean>;
   getPlatformInfo: () => Promise<{
@@ -15,6 +17,12 @@ export interface ElectronAPI {
     arch: string;
     version: string;
     isElectron: boolean;
+    logDir: string;
+  }>;
+  checkMariaDb: () => Promise<{
+    installed: boolean;
+    version: string | null;
+    binary: string | null;
   }>;
   setAuthCookie: (
     cookies: { name: string; value: string; domain: string }[]
@@ -33,6 +41,7 @@ export interface ElectronAPI {
     callback: (data: { warehouse: string; item_code: string; actual_qty: number }) => void
   ) => () => void;
   triggerSync: () => Promise<boolean>;
+  startSyncEngine: (opts?: { csrfToken?: string; sessionCookies?: string }) => Promise<{ success: boolean; error?: string }>;
   getSyncState: () => Promise<{
     isSyncing: boolean;
     lastSyncTime: string | null;
@@ -57,8 +66,10 @@ export interface ElectronNodeAPI {
     hubUrl?: string;
     tillId?: string;
     hubApiPort?: number;
+    hubSecret?: string;
   }) => Promise<{ success: boolean; error?: string }>;
   pingHub: () => Promise<boolean>;
+  getHubSecret: () => Promise<string | null>;
   triggerTillSync: () => Promise<Record<string, unknown>>;
 }
 
@@ -112,6 +123,7 @@ export interface ElectronDbAPI {
   getPendingPurchases: (opts?: { type?: string; status?: string }) => Promise<Record<string, unknown>[]>;
   updatePendingPurchase: (id: number, updates: Record<string, unknown>) => Promise<boolean>;
   deletePendingPurchase: (id: number) => Promise<boolean>;
+  countPendingPurchases: () => Promise<number>;
 
   // Sync ID Map
   addSyncId: (localId: string, serverName: string, doctype: string) => Promise<boolean>;
