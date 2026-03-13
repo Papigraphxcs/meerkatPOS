@@ -28,7 +28,8 @@ async function checkFirstRun(): Promise<boolean> {
   try {
     _isFirstRun = await window.electronAPI!.isFirstRun();
   } catch {
-    _isFirstRun = false;
+    // If the IPC call fails, assume first run (show setup wizard)
+    _isFirstRun = true;
   }
   _firstRunChecked = true;
   return _isFirstRun;

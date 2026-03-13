@@ -141,6 +141,18 @@ export interface ElectronDbAPI {
   cacheItemTax: (itemCode: string, company: string, data: { item_tax_template: string | null; item_tax_map: Record<string, number> }) => Promise<boolean>;
   getCachedItemTax: (itemCode: string, company: string) => Promise<{ item_tax_template: string; item_tax_map: Record<string, number> } | null>;
 
+  // POS Users
+  getPosUser: (username: string) => Promise<Record<string, unknown> | null>;
+  createLocalUser: (user: { username: string; full_name: string; password: string; role?: string }) => Promise<{ success: boolean; error?: string }>;
+
+  // POS Opening Shifts
+  createPosOpeningShift: (shift: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  getOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
+  checkOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
+
+  // Opening Data (profiles + companies)
+  getOpeningData: () => Promise<Record<string, unknown>>;
+
   // Bulk Operations
   clearAllData: () => Promise<boolean>;
   clearPendingData: () => Promise<boolean>;

@@ -6,6 +6,7 @@
 import { showSuccess as toastSuccess, showError as toastError, showInfo as toastInfo } from "@/composables/useToast";
 import { isOnline, isNetworkError } from "@/utils";
 import { isElectron, getApiBaseUrlSync } from "@/services/electronBridge";
+import { getMeta } from "./idbService";
 
 // Re-export isNetworkError for backwards compatibility
 export { isNetworkError } from "@/utils";

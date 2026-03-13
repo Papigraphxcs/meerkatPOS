@@ -1,19 +1,13 @@
 -- X POS Local MariaDB Schema
 -- This file runs on first launch and on every app start (idempotent).
 -- All tables use CREATE TABLE IF NOT EXISTS.
--- Schema Version: 2 (expanded for full offline parity with DeskPos)
 
--- ── Schema Version Tracking ───────────────────────────────────────
--- Stored in sync_meta as key = 'schema_version'
-
--- ── Sync Metadata ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `sync_meta` (
   `key` VARCHAR(255) NOT NULL PRIMARY KEY,
   `value` TEXT,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── App Settings ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `app_settings` (
   `key` VARCHAR(255) NOT NULL PRIMARY KEY,
   `value` TEXT,
@@ -21,11 +15,6 @@ CREATE TABLE IF NOT EXISTS `app_settings` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ══════════════════════════════════════════════════════════════════
--- MASTER DATA (pulled from ERPNext server)
--- ══════════════════════════════════════════════════════════════════
-
--- ── Companies ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `companies` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `company_name` VARCHAR(255) DEFAULT NULL,
@@ -37,7 +26,6 @@ CREATE TABLE IF NOT EXISTS `companies` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Cost Centers ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `cost_centers` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `cost_center_name` VARCHAR(255) DEFAULT NULL,
@@ -50,7 +38,6 @@ CREATE TABLE IF NOT EXISTS `cost_centers` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Countries ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `countries` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `code` VARCHAR(10) DEFAULT NULL,
@@ -58,7 +45,6 @@ CREATE TABLE IF NOT EXISTS `countries` (
   `synced_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Currencies ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `currencies` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `currency_name` VARCHAR(255) DEFAULT NULL,
@@ -68,7 +54,6 @@ CREATE TABLE IF NOT EXISTS `currencies` (
   `synced_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Warehouses ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `warehouses` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `warehouse_name` VARCHAR(255) DEFAULT NULL,
@@ -82,7 +67,6 @@ CREATE TABLE IF NOT EXISTS `warehouses` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Accounts ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `accounts` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `account_name` VARCHAR(255) DEFAULT NULL,
@@ -99,7 +83,6 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Price Lists ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `price_lists` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `price_list_name` VARCHAR(255) DEFAULT NULL,
@@ -112,7 +95,6 @@ CREATE TABLE IF NOT EXISTS `price_lists` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── UOM ───────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `uom` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `uom_name` VARCHAR(255) DEFAULT NULL,
@@ -121,7 +103,6 @@ CREATE TABLE IF NOT EXISTS `uom` (
   `synced_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── UOM Conversion Details (child of Item) ────────────────────────
 CREATE TABLE IF NOT EXISTS `uom_conversion_details` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -133,7 +114,6 @@ CREATE TABLE IF NOT EXISTS `uom_conversion_details` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Brands ────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `brands` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `brand` VARCHAR(255) DEFAULT NULL,
@@ -141,7 +121,6 @@ CREATE TABLE IF NOT EXISTS `brands` (
   `synced_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Industries ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `industries` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `industry` VARCHAR(255) DEFAULT NULL,
@@ -149,7 +128,6 @@ CREATE TABLE IF NOT EXISTS `industries` (
   `synced_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Items (pulled from server) ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `items` (
   `item_code` VARCHAR(255) NOT NULL PRIMARY KEY,
   `item_name` VARCHAR(255) NOT NULL,
@@ -176,7 +154,6 @@ CREATE TABLE IF NOT EXISTS `items` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Barcodes (child of Item) ─────────────────────────────────
 CREATE TABLE IF NOT EXISTS `item_barcodes` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -188,7 +165,6 @@ CREATE TABLE IF NOT EXISTS `item_barcodes` (
   INDEX `idx_barcode` (`barcode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Groups (pulled from server) ──────────────────────────────
 CREATE TABLE IF NOT EXISTS `item_groups` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent_item_group` VARCHAR(255) DEFAULT NULL,
@@ -198,7 +174,6 @@ CREATE TABLE IF NOT EXISTS `item_groups` (
   `synced_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Prices ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `item_prices` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `item_code` VARCHAR(255) NOT NULL,
@@ -219,7 +194,6 @@ CREATE TABLE IF NOT EXISTS `item_prices` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Reorder Levels (child of Item) ───────────────────────────
 CREATE TABLE IF NOT EXISTS `item_reorder_levels` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -232,7 +206,6 @@ CREATE TABLE IF NOT EXISTS `item_reorder_levels` (
   INDEX `idx_warehouse` (`warehouse`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Tax Templates ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `item_tax_templates` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `title` VARCHAR(255) DEFAULT NULL,
@@ -244,7 +217,6 @@ CREATE TABLE IF NOT EXISTS `item_tax_templates` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Tax Template Details (child of Item Tax Template) ────────
 CREATE TABLE IF NOT EXISTS `item_tax_template_details` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -255,7 +227,6 @@ CREATE TABLE IF NOT EXISTS `item_tax_template_details` (
   INDEX `idx_parent` (`parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Taxes (child of Item) ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `item_taxes` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -268,7 +239,6 @@ CREATE TABLE IF NOT EXISTS `item_taxes` (
   INDEX `idx_item_tax_template` (`item_tax_template`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Vendors (child of Item) ──────────────────────────────────
 CREATE TABLE IF NOT EXISTS `item_vendors` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -279,7 +249,6 @@ CREATE TABLE IF NOT EXISTS `item_vendors` (
   INDEX `idx_supplier` (`supplier`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Customers (pulled + created locally) ──────────────────────────
 CREATE TABLE IF NOT EXISTS `customers` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `customer_name` VARCHAR(255) NOT NULL,
@@ -303,7 +272,6 @@ CREATE TABLE IF NOT EXISTS `customers` (
   INDEX `idx_local_id` (`local_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Suppliers (pulled from server) ────────────────────────────────
 CREATE TABLE IF NOT EXISTS `suppliers` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `supplier_name` VARCHAR(255) NOT NULL,
@@ -318,7 +286,6 @@ CREATE TABLE IF NOT EXISTS `suppliers` (
   INDEX `idx_mobile_no` (`mobile_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Modes of Payment ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `modes_of_payment` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `mode_of_payment` VARCHAR(255) DEFAULT NULL,
@@ -328,7 +295,6 @@ CREATE TABLE IF NOT EXISTS `modes_of_payment` (
   `synced_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Mode of Payment Accounts (child of Mode of Payment) ──────────
 CREATE TABLE IF NOT EXISTS `mode_of_payment_accounts` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -340,7 +306,6 @@ CREATE TABLE IF NOT EXISTS `mode_of_payment_accounts` (
   INDEX `idx_company` (`company`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── POS Profiles ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `pos_profiles` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `company` VARCHAR(255) DEFAULT NULL,
@@ -363,7 +328,6 @@ CREATE TABLE IF NOT EXISTS `pos_profiles` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── POS Payment Methods (child of POS Profile) ───────────────────
 CREATE TABLE IF NOT EXISTS `pos_payment_methods` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -374,7 +338,6 @@ CREATE TABLE IF NOT EXISTS `pos_payment_methods` (
   INDEX `idx_parent` (`parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Bins (stock quantity per warehouse per item) ──────────────────
 CREATE TABLE IF NOT EXISTS `bins` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `item_code` VARCHAR(255) NOT NULL,
@@ -390,7 +353,6 @@ CREATE TABLE IF NOT EXISTS `bins` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Sales Taxes and Charges Templates ─────────────────────────────
 CREATE TABLE IF NOT EXISTS `sales_taxes_templates` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `title` VARCHAR(255) DEFAULT NULL,
@@ -403,7 +365,6 @@ CREATE TABLE IF NOT EXISTS `sales_taxes_templates` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Sales Taxes and Charges (child of Sales Taxes Template) ───────
 CREATE TABLE IF NOT EXISTS `sales_taxes_charges` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -419,7 +380,6 @@ CREATE TABLE IF NOT EXISTS `sales_taxes_charges` (
   INDEX `idx_parent` (`parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Pricing Rules ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `pricing_rules` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `title` VARCHAR(255) DEFAULT NULL,
@@ -469,7 +429,6 @@ CREATE TABLE IF NOT EXISTS `pricing_rules` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Pricing Rule Item Codes (child of Pricing Rule) ──────────────
 CREATE TABLE IF NOT EXISTS `pricing_rule_item_codes` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -478,7 +437,6 @@ CREATE TABLE IF NOT EXISTS `pricing_rule_item_codes` (
   INDEX `idx_parent` (`parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Pricing Rule Item Groups (child of Pricing Rule) ─────────────
 CREATE TABLE IF NOT EXISTS `pricing_rule_item_groups` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -487,7 +445,6 @@ CREATE TABLE IF NOT EXISTS `pricing_rule_item_groups` (
   INDEX `idx_parent` (`parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Pricing Rule Brands (child of Pricing Rule) ──────────────────
 CREATE TABLE IF NOT EXISTS `pricing_rule_brands` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `parent` VARCHAR(255) NOT NULL,
@@ -496,11 +453,6 @@ CREATE TABLE IF NOT EXISTS `pricing_rule_brands` (
   INDEX `idx_parent` (`parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ══════════════════════════════════════════════════════════════════
--- POS USERS & AUTH (synced from ERPNext for offline login)
--- ══════════════════════════════════════════════════════════════════
-
--- ── POS Users ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `pos_users` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `username` VARCHAR(255) NOT NULL,
@@ -532,11 +484,6 @@ CREATE TABLE IF NOT EXISTS `pos_users` (
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ══════════════════════════════════════════════════════════════════
--- POS SHIFT MANAGEMENT (created locally, pushed to server)
--- ══════════════════════════════════════════════════════════════════
-
--- ── POS Opening Shifts ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `pos_opening_shifts` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) DEFAULT NULL,
@@ -556,7 +503,6 @@ CREATE TABLE IF NOT EXISTS `pos_opening_shifts` (
   INDEX `idx_sync_status` (`sync_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── POS Opening Entry Details (child of POS Opening Shift) ───────
 CREATE TABLE IF NOT EXISTS `pos_opening_entry_details` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `parent_id` INT NOT NULL,
@@ -565,7 +511,6 @@ CREATE TABLE IF NOT EXISTS `pos_opening_entry_details` (
   INDEX `idx_parent_id` (`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── POS Closing Entries ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `pos_closing_entries` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) DEFAULT NULL,
@@ -586,7 +531,6 @@ CREATE TABLE IF NOT EXISTS `pos_closing_entries` (
   INDEX `idx_sync_status` (`sync_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── POS Closing Entry Details (child of POS Closing Entry) ───────
 CREATE TABLE IF NOT EXISTS `pos_closing_entry_details` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `parent_id` INT NOT NULL,
@@ -598,11 +542,6 @@ CREATE TABLE IF NOT EXISTS `pos_closing_entry_details` (
   INDEX `idx_parent_id` (`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ══════════════════════════════════════════════════════════════════
--- LOCAL TRANSACTIONS (created locally, pushed to server)
--- ══════════════════════════════════════════════════════════════════
-
--- ── Sales Invoices (local copies for offline listing) ─────────────
 CREATE TABLE IF NOT EXISTS `sales_invoices` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(255) DEFAULT NULL,
@@ -635,7 +574,6 @@ CREATE TABLE IF NOT EXISTS `sales_invoices` (
   INDEX `idx_pos_opening_entry_id` (`pos_opening_entry_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Sales Invoice Items (child of Sales Invoice) ──────────────────
 CREATE TABLE IF NOT EXISTS `sales_invoice_items` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `parent_id` INT NOT NULL,
@@ -656,7 +594,6 @@ CREATE TABLE IF NOT EXISTS `sales_invoice_items` (
   INDEX `idx_item_code` (`item_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Sales Invoice Payments (child of Sales Invoice) ───────────────
 CREATE TABLE IF NOT EXISTS `sales_invoice_payments` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `parent_id` INT NOT NULL,
@@ -666,7 +603,6 @@ CREATE TABLE IF NOT EXISTS `sales_invoice_payments` (
   INDEX `idx_parent_id` (`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Expenses (created locally, pushed to server) ──────────────────
 CREATE TABLE IF NOT EXISTS `expenses` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) DEFAULT NULL,
@@ -685,7 +621,6 @@ CREATE TABLE IF NOT EXISTS `expenses` (
   INDEX `idx_owner` (`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Bank Drops (created locally, pushed to server) ────────────────
 CREATE TABLE IF NOT EXISTS `bank_drops` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) DEFAULT NULL,
@@ -706,7 +641,6 @@ CREATE TABLE IF NOT EXISTS `bank_drops` (
   INDEX `idx_owner` (`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Stock Adjustments (created locally, pushed to server) ─────────
 CREATE TABLE IF NOT EXISTS `stock_adjustments` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) DEFAULT NULL,
@@ -724,7 +658,6 @@ CREATE TABLE IF NOT EXISTS `stock_adjustments` (
   INDEX `idx_sync_status` (`sync_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Quotations (created locally, pushed to server) ────────────────
 CREATE TABLE IF NOT EXISTS `quotations` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) DEFAULT NULL,
@@ -744,11 +677,6 @@ CREATE TABLE IF NOT EXISTS `quotations` (
   INDEX `idx_sync_status` (`sync_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ══════════════════════════════════════════════════════════════════
--- EXISTING TABLES (unchanged)
--- ══════════════════════════════════════════════════════════════════
-
--- ── Stock Cache (pulled per warehouse) ────────────────────────────
 CREATE TABLE IF NOT EXISTS `stock_cache` (
   `cache_key` VARCHAR(510) NOT NULL PRIMARY KEY,
   `warehouse` VARCHAR(255) NOT NULL,
@@ -759,7 +687,6 @@ CREATE TABLE IF NOT EXISTS `stock_cache` (
   INDEX `idx_item_code` (`item_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Pending Invoices (created locally, pushed to server) ──────────
 CREATE TABLE IF NOT EXISTS `pending_invoices` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `local_id` VARCHAR(100) NOT NULL,
@@ -777,7 +704,6 @@ CREATE TABLE IF NOT EXISTS `pending_invoices` (
   INDEX `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Pending Purchases (created locally, pushed to server) ─────────
 CREATE TABLE IF NOT EXISTS `pending_purchases` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `local_id` VARCHAR(100) NOT NULL,
@@ -796,7 +722,6 @@ CREATE TABLE IF NOT EXISTS `pending_purchases` (
   INDEX `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Sync ID Map (local_id ↔ server_name) ─────────────────────────
 CREATE TABLE IF NOT EXISTS `sync_id_map` (
   `local_id` VARCHAR(100) NOT NULL PRIMARY KEY,
   `server_name` VARCHAR(255) NOT NULL,
@@ -806,14 +731,12 @@ CREATE TABLE IF NOT EXISTS `sync_id_map` (
   INDEX `idx_doctype` (`doctype`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── POS Profile Cache ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `pos_profile_cache` (
   `name` VARCHAR(255) NOT NULL PRIMARY KEY,
   `data` LONGTEXT NOT NULL,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Item Tax Cache ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `item_tax_cache` (
   `cache_key` VARCHAR(510) NOT NULL PRIMARY KEY,
   `item_code` VARCHAR(255) NOT NULL,
@@ -824,7 +747,6 @@ CREATE TABLE IF NOT EXISTS `item_tax_cache` (
   INDEX `idx_item_code` (`item_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Deletion Log (tracks records removed from ERPNext) ────────────
 CREATE TABLE IF NOT EXISTS `deletion_log` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `table_name` VARCHAR(100) NOT NULL,

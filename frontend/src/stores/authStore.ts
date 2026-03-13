@@ -22,11 +22,15 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       isLoading.value = true;
       error.value = "";
+
+      // Electron: restore session from local DB — never hit ERPNext
+      if (isElectron()) {
+        return await checkOfflineAuth();
+      }
+
       const response = await call("frappe.auth.get_logged_user");
 
       if (!response) {
-        // If online check failed in Electron, try offline auth
-        if (isElectron()) return checkOfflineAuth();
         isAuthenticated.value = false;
         user.value = null;
         return false;
@@ -51,8 +55,6 @@ export const useAuthStore = defineStore("auth", () => {
       return false;
     } catch (err) {
       console.error("Auth check failed:", err);
-      // If server unreachable in Electron, try offline
-      if (isElectron()) return checkOfflineAuth();
       isAuthenticated.value = false;
       user.value = null;
       return false;
@@ -89,35 +91,26 @@ export const useAuthStore = defineStore("auth", () => {
       isLoading.value = true;
       error.value = "";
 
-      try {
-        const response = await call("login", {
-          usr: username,
-          pwd: password,
-        });
-
-        isAuthenticated.value = true;
-        isOfflineAuth.value = false;
-        user.value = {
-          user: username,
-          user_email: username,
-        };
-
-        // Save credentials for offline login in Electron
-        if (isElectron()) {
-          await window.electronAPI!.db.setSetting("last_logged_user", username, "auth");
-          // Start sync engine for hub mode (uses Electron session cookies automatically)
-          window.electronAPI!.startSyncEngine().catch(() => {});
-        }
-
-        await loadPermissions(username);
-        return true;
-      } catch (onlineErr) {
-        // If server unreachable in Electron, attempt offline login
-        if (isElectron()) {
-          return loginOffline(username, password);
-        }
-        throw onlineErr;
+      // Electron always authenticates against the local MariaDB
+      if (isElectron()) {
+        return await loginOffline(username, password);
       }
+
+      // Web/PWA: authenticate via ERPNext
+      const response = await call("login", {
+        usr: username,
+        pwd: password,
+      });
+
+      isAuthenticated.value = true;
+      isOfflineAuth.value = false;
+      user.value = {
+        user: username,
+        user_email: username,
+      };
+
+      await loadPermissions(username);
+      return true;
     } catch (err) {
       console.error("Login failed:", err);
       error.value = err instanceof Error ? err.message : "Login failed";
@@ -131,19 +124,17 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const posUser = await window.electronAPI!.db.getPosUser(username);
       if (!posUser) {
-        error.value = "No offline credentials found. Connect to the server first.";
+        error.value = "User not found. Check your username.";
         return false;
       }
 
       const userData = posUser as Record<string, unknown>;
-      // Verify the stored password hash
       const storedHash = userData.password_hash as string | undefined;
       if (!storedHash) {
-        error.value = "Offline credentials not set up. Login online first.";
+        error.value = "No password configured for this user.";
         return false;
       }
 
-      // Simple hash comparison (the hash is created server-side during sync)
       const inputHash = await hashPassword(password);
       if (inputHash !== storedHash) {
         error.value = "Invalid password";
@@ -157,11 +148,22 @@ export const useAuthStore = defineStore("auth", () => {
         user_email: (userData.email as string) || username,
         user_fullname: (userData.full_name as string) || username,
       };
+
+      // Remember last user and start sync
+      await window.electronAPI!.db.setSetting("last_logged_user", username, "auth");
+      window.electronAPI!.startSyncEngine().then((result) => {
+        if (!result.success) {
+          console.warn("[XPOS] Sync engine start failed:", result.error);
+        }
+      }).catch((err) => {
+        console.warn("[XPOS] startSyncEngine error:", err);
+      });
+
       await loadPermissions(username);
       return true;
     } catch (err) {
-      console.error("Offline login failed:", err);
-      error.value = "Offline login failed";
+      console.error("Login failed:", err);
+      error.value = "Login failed";
       return false;
     }
   }

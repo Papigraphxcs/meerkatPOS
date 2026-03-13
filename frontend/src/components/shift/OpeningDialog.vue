@@ -19,9 +19,24 @@
 					</div>
 
 					<template v-else>
+						<!-- Header row: POS Profile label + refresh button -->
+						<div class="flex items-center justify-between">
+							<label class="text-sm font-semibold text-foreground">POS Profile</label>
+							<button
+								type="button"
+								class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+								:class="{ 'animate-spin pointer-events-none': syncStatus.isSyncing.value }"
+								:disabled="isLoadingData"
+								@click="loadProfiles"
+								:title="syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh profiles'"
+							>
+								<RefreshCw class="w-3.5 h-3.5" />
+								<span>{{ syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh' }}</span>
+							</button>
+						</div>
+
 						<!-- POS Profile Select -->
 						<div>
-							<label class="text-sm font-semibold text-foreground mb-1.5 block">POS Profile</label>
 							<select
 								v-model="selectedProfile"
 								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -36,6 +51,10 @@
 									{{ profile.name }} ({{ profile.company }})
 								</option>
 							</select>
+							<!-- No profiles hint -->
+							<p v-if="profiles.length === 0" class="mt-1 text-xs text-muted-foreground">
+								{{ syncStatus.isSyncing.value ? 'Downloading profiles from server…' : 'No profiles found. Check server connection or click Refresh.' }}
+							</p>
 						</div>
 
 						<!-- Company (auto-filled) -->
@@ -96,13 +115,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { showError } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Zap, Loader2, Lock } from "lucide-vue-next";
+import { Zap, Loader2, Lock, RefreshCw } from "lucide-vue-next";
+import { useSyncStatus } from "@/composables/useSyncStatus";
 
 interface ProfileOption {
 	name: string;
@@ -118,6 +138,7 @@ interface PaymentMethodEntry {
 }
 
 const posStore = usePosStore();
+const syncStatus = useSyncStatus();
 
 const isLoadingData = ref(true);
 const isOpening = ref(false);
@@ -126,7 +147,8 @@ const selectedProfile = ref("");
 const selectedCompany = ref("");
 const paymentMethodsList = ref<PaymentMethodEntry[]>([]);
 
-onMounted(async () => {
+async function loadProfiles() {
+	isLoadingData.value = true;
 	try {
 		const data = await posStore.fetchOpeningData();
 		profiles.value = (data?.pos_profiles || []) as ProfileOption[];
@@ -139,6 +161,15 @@ onMounted(async () => {
 		showError("Failed to load POS data. Please refresh.");
 	} finally {
 		isLoadingData.value = false;
+	}
+}
+
+onMounted(loadProfiles);
+
+// Auto-reload the dropdown whenever a sync cycle completes
+watch(syncStatus.syncCompleteCount, (count, prev) => {
+	if (count > prev) {
+		loadProfiles();
 	}
 });
 

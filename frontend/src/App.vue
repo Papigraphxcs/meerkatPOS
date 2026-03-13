@@ -1,5 +1,5 @@
 <template>
-	<div id="xpos-app" :class="['h-screen w-screen overflow-hidden font-sans', isDark ? 'dark' : '']">
+	<div id="xpos-app" :class="['h-screen w-screen font-sans', isDark ? 'dark' : '', isAuthPage ? 'overflow-y-auto' : 'overflow-hidden']">
 		<template v-if="isAuthPage">
 			<router-view v-slot="{ Component }">
 				<transition name="fade" mode="out-in">
@@ -55,6 +55,34 @@
 			rich-colors
 			close-button
 		/>
+
+		<!-- Electron sync status badge (bottom-left, POS mode only) -->
+		<Transition name="fade">
+			<div
+				v-if="!isAuthPage && isElectronEnv"
+				class="fixed bottom-3 left-3 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium shadow-md select-none"
+				:class="syncStatus.isSyncing.value
+					? 'bg-blue-600 text-white'
+					: syncStatus.lastError.value
+					? 'bg-destructive text-destructive-foreground'
+					: 'bg-muted text-muted-foreground'"
+				:title="syncStatus.lastError.value || (syncStatus.lastSyncTime.value ? 'Last sync: ' + syncStatus.lastSyncTime.value : 'Not synced yet')"
+			>
+				<span
+					v-if="syncStatus.isSyncing.value"
+					class="w-2 h-2 rounded-full bg-white animate-ping"
+				/>
+				<span v-else class="w-2 h-2 rounded-full" :class="syncStatus.lastError.value ? 'bg-white' : 'bg-green-400'" />
+				<span>
+					<template v-if="syncStatus.isSyncing.value">
+						Syncing{{ syncStatus.syncTable.value ? ': ' + syncStatus.syncTable.value : '...' }}
+					</template>
+					<template v-else-if="syncStatus.lastError.value">Sync error</template>
+					<template v-else-if="syncStatus.lastSyncTime.value">Synced {{ syncStatus.lastSyncTime.value }}</template>
+					<template v-else>Sync pending</template>
+				</span>
+			</div>
+		</Transition>
 	</div>
 </template>
 
@@ -79,6 +107,8 @@ import CashMovementDialog from "@/components/shift/CashMovementDialog.vue";
 import DraftInvoiceDialog from "@/components/cart/DraftInvoiceDialog.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { initSyncListeners } from "@/services/syncIpcHandler";
+import { useSyncStatus } from "@/composables/useSyncStatus";
+import { isElectron } from "@/services/electronBridge";
 
 const route = useRoute();
 const posStore = usePosStore();
@@ -88,8 +118,10 @@ const itemStore = useItemStore();
 const paymentStore = usePaymentStore();
 const authStore = useAuthStore();
 const offlineStore = useOfflineStore();
+const syncStatus = useSyncStatus();
+const isElectronEnv = isElectron();
 
-const isAuthPage = computed(() => route.meta.isAuthPage === true);
+const isAuthPage = computed(() => route.meta.isAuthPage === true || route.meta.isSetupPage === true);
 
 const theme = ref<"light" | "dark" | "system">("system");
 const systemPrefersDark = ref(window.matchMedia("(prefers-color-scheme: dark)").matches);

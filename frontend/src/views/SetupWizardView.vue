@@ -251,8 +251,56 @@
         </CardFooter>
       </template>
 
-      <!-- Step 4: Summary & Complete -->
+      <!-- Step 4: Admin User -->
       <template v-if="step === 4">
+        <CardHeader>
+          <CardTitle>{{ __('Admin User') }}</CardTitle>
+          <CardDescription>{{ __('Create the local administrator account for this installation') }}</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-4">
+          <div class="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm text-muted-foreground">
+            {{ __('This account is stored locally and used to log in to X POS. It is independent of your ERPNext users.') }}
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="text-sm font-medium text-foreground">{{ __('Username') }}</label>
+              <Input v-model="adminUser.username" placeholder="admin" class="mt-1" autocomplete="off" />
+            </div>
+            <div>
+              <label class="text-sm font-medium text-foreground">{{ __('Full Name') }}</label>
+              <Input v-model="adminUser.fullName" placeholder="Administrator" class="mt-1" autocomplete="off" />
+            </div>
+            <div>
+              <label class="text-sm font-medium text-foreground">{{ __('Password') }}</label>
+              <div class="relative mt-1">
+                <Input v-model="adminUser.password" :type="showAdminPassword ? 'text' : 'password'" placeholder="••••••" class="pr-10" autocomplete="new-password" />
+                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" @click="showAdminPassword = !showAdminPassword">
+                  <component :is="showAdminPassword ? 'svg' : 'svg'" class="w-4 h-4" />
+                </button>
+              </div>
+              <p v-if="adminUser.password && adminUser.password.length < 6" class="text-xs text-destructive mt-1">{{ __('Minimum 6 characters') }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-foreground">{{ __('Confirm Password') }}</label>
+              <Input v-model="adminUser.confirmPassword" :type="showAdminConfirm ? 'text' : 'password'" placeholder="••••••" class="mt-1" autocomplete="new-password" />
+              <p v-if="adminUser.confirmPassword && adminUser.password !== adminUser.confirmPassword" class="text-xs text-destructive mt-1">{{ __('Passwords do not match') }}</p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter class="justify-between">
+          <Button variant="outline" @click="step = 3">
+            <ChevronLeft class="w-4 h-4 mr-1" />
+            {{ __('Back') }}
+          </Button>
+          <Button @click="step = 5" :disabled="!adminUser.username || !adminPasswordMatch">
+            {{ __('Next') }}
+            <ChevronRight class="w-4 h-4 ml-1" />
+          </Button>
+        </CardFooter>
+      </template>
+
+      <!-- Step 5: Summary & Complete -->
+      <template v-if="step === 5">
         <CardHeader>
           <CardTitle>{{ __('Setup Summary') }}</CardTitle>
           <CardDescription>{{ __('Review your configuration before completing setup') }}</CardDescription>
@@ -283,10 +331,14 @@
               <span class="text-muted-foreground">{{ __('Till ID') }}</span>
               <span class="text-foreground font-medium">{{ config.tillId }}</span>
             </div>
+            <div class="flex items-center justify-between p-3 rounded-lg bg-muted">
+              <span class="text-muted-foreground">{{ __('Admin User') }}</span>
+              <span class="text-foreground font-medium">{{ adminUser.username }}</span>
+            </div>
           </div>
         </CardContent>
         <CardFooter class="justify-between">
-          <Button variant="outline" @click="step = 3">
+          <Button variant="outline" @click="step = 4">
             <ChevronLeft class="w-4 h-4 mr-1" />
             {{ __('Back') }}
           </Button>
@@ -318,13 +370,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Store, Server, MonitorSmartphone, ChevronRight, ChevronLeft,
-  Check, Loader2, Globe, Wifi, DatabaseZap, CircleCheck, AlertTriangle, RefreshCw,
+  Check, Loader2, Globe, Wifi, DatabaseZap, CircleCheck, AlertTriangle, RefreshCw, UserCog,
 } from "lucide-vue-next";
 
 const router = useRouter();
 
 const step = ref(1);
-const totalSteps = 4;
+const totalSteps = 5;
 
 const config = reactive({
   role: "" as "" | "hub" | "till",
@@ -376,6 +428,20 @@ const erpTestError = ref("");
 // Hub ping state
 const testingHub = ref(false);
 const hubTestResult = ref<boolean | null>(null);
+
+// Admin user state
+const adminUser = reactive({
+  username: "admin",
+  fullName: "Administrator",
+  password: "",
+  confirmPassword: "",
+});
+const adminPasswordMatch = computed(() =>
+  adminUser.password.length >= 6 &&
+  adminUser.password === adminUser.confirmPassword
+);
+const showAdminPassword = ref(false);
+const showAdminConfirm = ref(false);
 
 // Final state
 const completing = ref(false);
@@ -476,7 +542,15 @@ async function completeSetup() {
       await api.db.setMeta("hub_url", config.hubUrl);
     }
 
-    // 3. Set node role (this also starts hub server or till client)
+    // 4. Create the local admin user
+    await api.db.createLocalUser({
+      username: adminUser.username,
+      password: adminUser.password,
+      fullName: adminUser.fullName,
+      role: "Manager",
+    });
+
+    // 4. Set node role (this also starts hub server or till client)
     const roleResult = await api.node.setRole({
       role: config.role,
       hubUrl: config.role === "till" ? config.hubUrl : undefined,

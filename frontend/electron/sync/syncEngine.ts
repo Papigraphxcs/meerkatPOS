@@ -36,6 +36,8 @@ interface SyncContext {
   serverUrl: string;
   csrfToken: string;
   sessionCookies: string;
+  apiKey?: string;
+  apiSecret?: string;
 }
 
 // ── State ─────────────────────────────────────────────────────────
@@ -81,21 +83,36 @@ async function apiCall<T = unknown>(
 ): Promise<T> {
   if (!syncContext) throw new Error("Sync context not initialized");
 
-  const url = `${syncContext.serverUrl}/api/method/${method}`;
+  // Frappe REST API: pass args as query string for GET to avoid
+  // Electron net.request auto-adding 'Expect: 100-continue' on POST,
+  // which causes HTTP 417 from some Frappe versions.
+  const baseUrl = `${syncContext.serverUrl}/api/method/${method}`;
+  const queryString = Object.entries(args)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(typeof v === "object" ? JSON.stringify(v) : String(v))}`)
+    .join("&");
+  const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
 
   return new Promise<T>((resolve, reject) => {
     const request = net.request({
-      method: "POST",
+      method: "GET",
       url,
     });
 
-    request.setHeader("Content-Type", "application/json");
     request.setHeader("Accept", "application/json");
-    if (syncContext!.csrfToken) {
-      request.setHeader("X-Frappe-CSRF-Token", syncContext!.csrfToken);
-    }
-    if (syncContext!.sessionCookies) {
-      request.setHeader("Cookie", syncContext!.sessionCookies);
+    // Prefer API key/secret (used after local login)
+    if (syncContext!.apiKey && syncContext!.apiSecret) {
+      request.setHeader(
+        "Authorization",
+        `token ${syncContext!.apiKey}:${syncContext!.apiSecret}`
+      );
+    } else {
+      // Fall back to session cookie auth (web PWA flow)
+      if (syncContext!.csrfToken) {
+        request.setHeader("X-Frappe-CSRF-Token", syncContext!.csrfToken);
+      }
+      if (syncContext!.sessionCookies) {
+        request.setHeader("Cookie", syncContext!.sessionCookies);
+      }
     }
 
     let responseBody = "";
@@ -123,7 +140,6 @@ async function apiCall<T = unknown>(
       reject(err);
     });
 
-    request.write(JSON.stringify(args));
     request.end();
   });
 }
@@ -495,6 +511,13 @@ async function runSyncCycle(): Promise<void> {
 }
 
 // ── Public API (called from main.ts) ──────────────────────────────
+
+/**
+ * Trigger a manual sync cycle from outside the module (e.g. right after login).
+ */
+export async function runSyncCyclePublic(): Promise<void> {
+  await runSyncCycle();
+}
 
 /**
  * Initialize the sync engine, register IPC handlers, start periodic sync.

@@ -20,8 +20,6 @@ const log = createLogger("DB");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ── Types ─────────────────────────────────────────────────────────
-
 export interface DbConfig {
   host: string;
   port: number;
@@ -38,12 +36,58 @@ const DEFAULT_CONFIG: DbConfig = {
   database: "xpos_local",
 };
 
-// ── State ─────────────────────────────────────────────────────────
-
 let pool: Pool | null = null;
 let currentConfig: DbConfig = { ...DEFAULT_CONFIG };
 
-// ── Connection ────────────────────────────────────────────────────
+function configFilePath(): string {
+  return path.join(app.getPath("userData"), "db-config.json");
+}
+
+export function saveDbConfig(cfg: DbConfig): void {
+  const pathsToWrite: string[] = [];
+  try {
+    pathsToWrite.push(path.join(app.getPath("userData"), "db-config.json"));
+  } catch { /* ignore */ }
+  if (process.env.APPDATA) {
+    pathsToWrite.push(path.join(process.env.APPDATA, "X POS", "db-config.json"));
+    pathsToWrite.push(path.join(process.env.APPDATA, "xpos-frontend", "db-config.json"));
+  }
+  const data = JSON.stringify(cfg, null, 2);
+  for (const p of pathsToWrite) {
+    try {
+      fs.mkdirSync(path.dirname(p), { recursive: true });
+      fs.writeFileSync(p, data, "utf-8");
+    } catch (err) {
+      log.warn(`Failed to save db-config.json to ${p}`, err);
+    }
+  }
+}
+
+export function loadDbConfig(): DbConfig {
+  const candidates: string[] = [];
+  try {
+    candidates.push(path.join(app.getPath("userData"), "db-config.json"));
+  } catch {
+  }
+  if (process.env.APPDATA) {
+    candidates.push(path.join(process.env.APPDATA, "X POS", "db-config.json"));
+    candidates.push(path.join(process.env.APPDATA, "xpos-frontend", "db-config.json"));
+  }
+
+  for (const candidate of candidates) {
+    try {
+      const raw = fs.readFileSync(candidate, "utf-8");
+      const parsed = JSON.parse(raw) as Partial<DbConfig>;
+      log.info(`Loaded DB config from: ${candidate}`);
+      return { ...DEFAULT_CONFIG, ...parsed };
+    } catch {
+      // try next candidate
+    }
+  }
+
+  log.warn(`No db-config.json found (tried: ${candidates.join(", ")}), using defaults`);
+  return { ...DEFAULT_CONFIG };
+}
 
 export function getPool(): Pool {
   if (!pool) {
@@ -53,11 +97,13 @@ export function getPool(): Pool {
 }
 
 export async function initDatabase(config?: Partial<DbConfig>): Promise<void> {
-  if (config) {
-    currentConfig = { ...currentConfig, ...config };
-  }
+  const persisted = loadDbConfig();
+  currentConfig = { ...persisted, ...(config || {}) };
 
-  // First connect without database to ensure it exists
+  log.info(`DB init — host: ${currentConfig.host}, port: ${currentConfig.port}, user: ${currentConfig.user}, db: ${currentConfig.database}`);
+
+  saveDbConfig(currentConfig);
+
   const rootPool = mysql.createPool({
     host: currentConfig.host,
     port: currentConfig.port,
@@ -76,7 +122,6 @@ export async function initDatabase(config?: Partial<DbConfig>): Promise<void> {
     await rootPool.end();
   }
 
-  // Now connect to the actual database
   pool = mysql.createPool({
     host: currentConfig.host,
     port: currentConfig.port,
@@ -91,11 +136,9 @@ export async function initDatabase(config?: Partial<DbConfig>): Promise<void> {
     connectTimeout: 5000,
   });
 
-  // Test connection
   const conn = await pool.getConnection();
   conn.release();
 
-  // Run schema migrations
   await runSchema();
 
   log.info(`Connected to MariaDB: ${currentConfig.host} ${currentConfig.database}`);
@@ -113,11 +156,7 @@ export function getConfig(): DbConfig {
   return { ...currentConfig };
 }
 
-// ── Schema ────────────────────────────────────────────────────────
-
 async function runSchema(): Promise<void> {
-  // In packaged app, schema.sql is in extraResources (process.resourcesPath)
-  // In dev, it's relative to the compiled JS in dist-electron/
   const candidates = [
     path.join(process.resourcesPath || "", "schema.sql"),
     path.join(__dirname, "schema.sql"),
@@ -138,15 +177,19 @@ async function executeSchemaFile(filePath: string): Promise<void> {
   const sql = fs.readFileSync(filePath, "utf-8");
   const statements = sql
     .split(";")
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0 && !s.startsWith("--"));
+    .map((s) =>
+      s.split("\n")
+        .filter((line) => !line.trim().startsWith("--"))
+        .join("\n")
+        .trim()
+    )
+    .filter((s) => s.length > 0);
 
   const db = getPool();
   for (const stmt of statements) {
     try {
       await db.execute(stmt);
     } catch (err) {
-      // Ignore "table already exists" errors during migration
       const msg = err instanceof Error ? err.message : String(err);
       if (!msg.includes("already exists")) {
         log.error(`Schema error: ${msg}\nStatement: ${stmt.substring(0, 100)}`);
@@ -156,9 +199,6 @@ async function executeSchemaFile(filePath: string): Promise<void> {
   log.info("Schema applied");
 }
 
-// ── Query Helpers ─────────────────────────────────────────────────
-
-/** Select multiple rows. */
 export async function query<T = RowDataPacket>(
   sql: string,
   params: unknown[] = []
@@ -168,7 +208,6 @@ export async function query<T = RowDataPacket>(
   return rows as T[];
 }
 
-/** Select a single row or null. */
 export async function queryOne<T = RowDataPacket>(
   sql: string,
   params: unknown[] = []
@@ -177,7 +216,6 @@ export async function queryOne<T = RowDataPacket>(
   return rows[0] || null;
 }
 
-/** Insert/Update/Delete — returns affected rows and insertId. */
 export async function execute(
   sql: string,
   params: unknown[] = []
@@ -187,7 +225,6 @@ export async function execute(
   return { affectedRows: result.affectedRows, insertId: result.insertId };
 }
 
-/** Run a callback inside a transaction. */
 export async function transaction<T>(
   fn: (conn: PoolConnection) => Promise<T>
 ): Promise<T> {
@@ -206,7 +243,6 @@ export async function transaction<T>(
   }
 }
 
-/** Bulk upsert rows into a table. Uses INSERT ... ON DUPLICATE KEY UPDATE. */
 export async function upsertBatch(
   table: string,
   rows: Record<string, unknown>[],
@@ -224,7 +260,6 @@ export async function upsertBatch(
   const db = getPool();
   let affected = 0;
 
-  // Process in chunks of 100 to avoid packet size limits
   const CHUNK = 100;
   for (let i = 0; i < rows.length; i += CHUNK) {
     const chunk = rows.slice(i, i + CHUNK);
@@ -242,7 +277,6 @@ export async function upsertBatch(
   return affected;
 }
 
-/** Get a meta value from the sync_meta table. */
 export async function getMeta(key: string): Promise<string | null> {
   const row = await queryOne<{ value: string }>(
     "SELECT `value` FROM `sync_meta` WHERE `key` = ?",
@@ -251,7 +285,6 @@ export async function getMeta(key: string): Promise<string | null> {
   return row?.value ?? null;
 }
 
-/** Set a meta value in the sync_meta table. */
 export async function setMeta(key: string, value: string): Promise<void> {
   await execute(
     `INSERT INTO \`sync_meta\` (\`key\`, \`value\`, \`updated_at\`)
@@ -261,7 +294,6 @@ export async function setMeta(key: string, value: string): Promise<void> {
   );
 }
 
-/** Test connection — returns true if the database is reachable. */
 export async function testConnection(config: Partial<DbConfig>): Promise<{ success: boolean; error?: string }> {
   const testConfig = { ...currentConfig, ...config };
   let testPool: Pool | null = null;

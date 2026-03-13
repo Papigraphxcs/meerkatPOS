@@ -9,7 +9,7 @@
 import { ipcMain } from "electron";
 import {
   query, queryOne, execute, upsertBatch, getMeta, setMeta,
-  testConnection, initDatabase, getConfig,
+  testConnection, initDatabase, getConfig, saveDbConfig,
   type DbConfig,
 } from "./dbService";
 import { createLogger } from "../logger";
@@ -17,9 +17,6 @@ import { createLogger } from "../logger";
 const log = createLogger("DB-IPC");
 
 export function registerDbHandlers(): void {
-
-  // ── Settings ──────────────────────────────────────────────────
-
   ipcMain.handle("db:get-setting", async (_e, key: string) => {
     const row = await queryOne<{ value: string }>(
       "SELECT `value` FROM `app_settings` WHERE `key` = ?", [key]
@@ -45,15 +42,12 @@ export function registerDbHandlers(): void {
     return query("SELECT `key`, `value`, `category` FROM `app_settings` ORDER BY `category`, `key`");
   });
 
-  // ── Database Config ───────────────────────────────────────────
-
   ipcMain.handle("db:test-connection", async (_e, config: Partial<DbConfig>) => {
     return testConnection(config);
   });
 
   ipcMain.handle("db:get-config", () => {
     const cfg = getConfig();
-    // Don't expose password to renderer
     return { ...cfg, password: cfg.password ? "****" : "" };
   });
 
@@ -62,11 +56,10 @@ export function registerDbHandlers(): void {
       await initDatabase(config);
       return { success: true };
     } catch (err) {
+      log.error("db:reinit failed", err);
       return { success: false, error: err instanceof Error ? err.message : String(err) };
     }
   });
-
-  // ── Items ─────────────────────────────────────────────────────
 
   ipcMain.handle("db:get-items", async (_e, opts?: {
     search?: string; group?: string; limit?: number; offset?: number;
@@ -113,8 +106,6 @@ export function registerDbHandlers(): void {
     return true;
   });
 
-  // ── Item Groups ───────────────────────────────────────────────
-
   ipcMain.handle("db:get-item-groups", async () => {
     return query("SELECT * FROM `item_groups` ORDER BY `name`");
   });
@@ -122,8 +113,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-item-groups", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("item_groups", rows, "name");
   });
-
-  // ── Customers ─────────────────────────────────────────────────
 
   ipcMain.handle("db:get-customers", async (_e, opts?: { search?: string; limit?: number }) => {
     let sql = "SELECT * FROM `customers` WHERE `disabled` = 0";
@@ -165,8 +154,6 @@ export function registerDbHandlers(): void {
     return { name: localId, local_id: localId };
   });
 
-  // ── Suppliers ─────────────────────────────────────────────────
-
   ipcMain.handle("db:get-suppliers", async (_e, opts?: { search?: string; limit?: number }) => {
     let sql = "SELECT * FROM `suppliers`";
     const params: unknown[] = [];
@@ -187,8 +174,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-suppliers", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("suppliers", rows, "name");
   });
-
-  // ── Stock Cache ───────────────────────────────────────────────
 
   ipcMain.handle("db:get-stock", async (_e, warehouse: string, itemCode?: string) => {
     if (itemCode) {
@@ -219,8 +204,6 @@ export function registerDbHandlers(): void {
     );
     return true;
   });
-
-  // ── Pending Invoices ──────────────────────────────────────────
 
   ipcMain.handle("db:add-pending-invoice", async (_e, record: {
     data: unknown; customer_name?: string; grand_total?: number;
@@ -260,8 +243,6 @@ export function registerDbHandlers(): void {
     return row?.cnt ?? 0;
   });
 
-  // ── Pending Purchases ─────────────────────────────────────────
-
   ipcMain.handle("db:add-pending-purchase", async (_e, record: {
     type: string; data: unknown; supplier_name?: string; grand_total?: number;
   }) => {
@@ -299,11 +280,9 @@ export function registerDbHandlers(): void {
   });
 
   ipcMain.handle("db:count-pending-purchases", async () => {
-    const rows = await execute("SELECT COUNT(*) as cnt FROM `pending_purchases` WHERE `status` IN ('pending','failed')");
-    return (rows as Array<{ cnt: number }>)[0]?.cnt ?? 0;
+    const rows = await query<{ cnt: number }>("SELECT COUNT(*) as cnt FROM `pending_purchases` WHERE `status` IN ('pending','failed')");
+    return rows[0]?.cnt ?? 0;
   });
-
-  // ── Sync ID Map ───────────────────────────────────────────────
 
   ipcMain.handle("db:add-sync-id", async (_e, localId: string, serverName: string, doctype: string) => {
     await execute(
@@ -322,15 +301,11 @@ export function registerDbHandlers(): void {
     return row?.server_name ?? null;
   });
 
-  // ── Sync Metadata ─────────────────────────────────────────────
-
   ipcMain.handle("db:get-meta", async (_e, key: string) => getMeta(key));
   ipcMain.handle("db:set-meta", async (_e, key: string, value: string) => {
     await setMeta(key, value);
     return true;
   });
-
-  // ── POS Profile Cache ─────────────────────────────────────────
 
   ipcMain.handle("db:cache-pos-data", async (_e, name: string, data: unknown) => {
     await execute(
@@ -348,8 +323,6 @@ export function registerDbHandlers(): void {
     );
     return row ? JSON.parse(row.data) : null;
   });
-
-  // ── Item Tax Cache ────────────────────────────────────────────
 
   ipcMain.handle("db:cache-item-tax", async (_e, itemCode: string, company: string, data: {
     item_tax_template: string | null; item_tax_map: Record<string, number>;
@@ -375,8 +348,6 @@ export function registerDbHandlers(): void {
     };
   });
 
-  // ── Companies ───────────────────────────────────────────────
-
   ipcMain.handle("db:get-companies", async () => {
     return query("SELECT * FROM `companies` ORDER BY `company_name`");
   });
@@ -384,8 +355,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-companies", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("companies", rows, "name");
   });
-
-  // ── Cost Centers ──────────────────────────────────────────────
 
   ipcMain.handle("db:get-cost-centers", async (_e, company?: string) => {
     if (company) {
@@ -398,8 +367,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("cost_centers", rows, "name");
   });
 
-  // ── Countries ─────────────────────────────────────────────────
-
   ipcMain.handle("db:get-countries", async () => {
     return query("SELECT * FROM `countries` ORDER BY `name`");
   });
@@ -408,8 +375,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("countries", rows, "name");
   });
 
-  // ── Currencies ────────────────────────────────────────────────
-
   ipcMain.handle("db:get-currencies", async () => {
     return query("SELECT * FROM `currencies` WHERE `enabled` = 1 ORDER BY `name`");
   });
@@ -417,8 +382,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-currencies", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("currencies", rows, "name");
   });
-
-  // ── Warehouses ────────────────────────────────────────────────
 
   ipcMain.handle("db:get-warehouses", async (_e, opts?: { company?: string; isGroup?: boolean }) => {
     let sql = "SELECT * FROM `warehouses` WHERE `disabled` = 0";
@@ -432,8 +395,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-warehouses", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("warehouses", rows, "name");
   });
-
-  // ── Accounts ──────────────────────────────────────────────────
 
   ipcMain.handle("db:get-accounts", async (_e, opts?: { company?: string; accountType?: string; rootType?: string }) => {
     let sql = "SELECT * FROM `accounts` WHERE `disabled` = 0";
@@ -449,8 +410,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("accounts", rows, "name");
   });
 
-  // ── Price Lists ───────────────────────────────────────────────
-
   ipcMain.handle("db:get-price-lists", async (_e, selling?: boolean) => {
     if (selling !== undefined) {
       return query("SELECT * FROM `price_lists` WHERE `enabled` = 1 AND `selling` = ? ORDER BY `name`",
@@ -463,8 +422,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("price_lists", rows, "name");
   });
 
-  // ── UOM ───────────────────────────────────────────────────────
-
   ipcMain.handle("db:get-uom", async () => {
     return query("SELECT * FROM `uom` WHERE `enabled` = 1 ORDER BY `name`");
   });
@@ -472,8 +429,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-uom", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("uom", rows, "name");
   });
-
-  // ── UOM Conversion Details ────────────────────────────────────
 
   ipcMain.handle("db:get-uom-conversions", async (_e, itemCode: string) => {
     return query("SELECT * FROM `uom_conversion_details` WHERE `parent` = ?", [itemCode]);
@@ -483,8 +438,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("uom_conversion_details", rows, "name");
   });
 
-  // ── Brands ────────────────────────────────────────────────────
-
   ipcMain.handle("db:get-brands", async () => {
     return query("SELECT * FROM `brands` ORDER BY `name`");
   });
@@ -492,8 +445,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-brands", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("brands", rows, "name");
   });
-
-  // ── Industries ────────────────────────────────────────────────
 
   ipcMain.handle("db:get-industries", async () => {
     return query("SELECT * FROM `industries` ORDER BY `name`");
@@ -503,8 +454,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("industries", rows, "name");
   });
 
-  // ── Modes of Payment ──────────────────────────────────────────
-
   ipcMain.handle("db:get-modes-of-payment", async () => {
     return query("SELECT * FROM `modes_of_payment` WHERE `enabled` = 1 ORDER BY `name`");
   });
@@ -513,8 +462,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("modes_of_payment", rows, "name");
   });
 
-  // ── Mode of Payment Accounts ──────────────────────────────────
-
   ipcMain.handle("db:get-mode-of-payment-accounts", async (_e, company: string) => {
     return query("SELECT * FROM `mode_of_payment_accounts` WHERE `company` = ?", [company]);
   });
@@ -522,8 +469,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-mode-of-payment-accounts", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("mode_of_payment_accounts", rows, "name");
   });
-
-  // ── Item Barcodes ─────────────────────────────────────────────
 
   ipcMain.handle("db:get-item-by-barcode", async (_e, barcode: string) => {
     const bc = await queryOne<{ parent: string }>(
@@ -536,8 +481,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-item-barcodes", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("item_barcodes", rows, "name");
   });
-
-  // ── Item Prices ───────────────────────────────────────────────
 
   ipcMain.handle("db:get-item-price", async (_e, itemCode: string, priceList: string) => {
     return queryOne(
@@ -563,8 +506,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("item_prices", rows, "name");
   });
 
-  // ── Item Tax Templates ────────────────────────────────────────
-
   ipcMain.handle("db:get-item-tax-templates", async (_e, company?: string) => {
     let sql = "SELECT * FROM `item_tax_templates` WHERE `disabled` = 0";
     const params: unknown[] = [];
@@ -576,8 +517,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("item_tax_templates", rows, "name");
   });
 
-  // ── Item Tax Template Details ─────────────────────────────────
-
   ipcMain.handle("db:get-item-tax-template-details", async (_e, templateName: string) => {
     return query("SELECT * FROM `item_tax_template_details` WHERE `parent` = ?", [templateName]);
   });
@@ -585,8 +524,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-item-tax-template-details", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("item_tax_template_details", rows, "name");
   });
-
-  // ── Item Taxes (per item) ─────────────────────────────────────
 
   ipcMain.handle("db:get-item-taxes", async (_e, itemCode: string) => {
     return query("SELECT * FROM `item_taxes` WHERE `parent` = ?", [itemCode]);
@@ -596,8 +533,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("item_taxes", rows, "name");
   });
 
-  // ── Item Vendors ──────────────────────────────────────────────
-
   ipcMain.handle("db:get-item-vendors", async (_e, itemCode: string) => {
     return query("SELECT * FROM `item_vendors` WHERE `parent` = ?", [itemCode]);
   });
@@ -606,8 +541,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("item_vendors", rows, "name");
   });
 
-  // ── Item Reorder Levels ───────────────────────────────────────
-
   ipcMain.handle("db:get-item-reorder-levels", async (_e, itemCode: string) => {
     return query("SELECT * FROM `item_reorder_levels` WHERE `parent` = ?", [itemCode]);
   });
@@ -615,8 +548,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-item-reorder-levels", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("item_reorder_levels", rows, "name");
   });
-
-  // ── POS Profiles ──────────────────────────────────────────────
 
   ipcMain.handle("db:get-pos-profiles", async (_e, company?: string) => {
     let sql = "SELECT * FROM `pos_profiles` WHERE `disabled` = 0";
@@ -634,8 +565,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("pos_profiles", rows, "name");
   });
 
-  // ── POS Payment Methods ───────────────────────────────────────
-
   ipcMain.handle("db:get-pos-payment-methods", async (_e, posProfile: string) => {
     return query(
       "SELECT * FROM `pos_payment_methods` WHERE `parent` = ? ORDER BY `idx`",
@@ -647,21 +576,34 @@ export function registerDbHandlers(): void {
     return upsertBatch("pos_payment_methods", rows, "name");
   });
 
-  // ── POS Users (offline auth) ──────────────────────────────────
-
   ipcMain.handle("db:get-pos-users", async () => {
     return query("SELECT * FROM `pos_users` ORDER BY `full_name`");
   });
 
-  ipcMain.handle("db:get-pos-user", async (_e, email: string) => {
-    return queryOne("SELECT * FROM `pos_users` WHERE `email` = ?", [email]);
+  ipcMain.handle("db:get-pos-user", async (_e, username: string) => {
+    return queryOne(
+      "SELECT * FROM `pos_users` WHERE `username` = ? OR `name` = ?",
+      [username, username]
+    );
   });
 
   ipcMain.handle("db:upsert-pos-users", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("pos_users", rows, "name");
   });
 
-  // ── Sales Tax Templates ───────────────────────────────────────
+  ipcMain.handle("db:create-local-user", async (_e, user: {
+    username: string; password: string; fullName: string; role?: string;
+  }) => {
+    const { createHash } = await import("crypto");
+    const hash = createHash("sha256").update(user.password).digest("hex");
+    await execute(
+      `INSERT INTO \`pos_users\` (\`name\`, \`username\`, \`full_name\`, \`password_hash\`, \`role\`, \`enabled\`)
+       VALUES (?, ?, ?, ?, ?, 1)
+       ON DUPLICATE KEY UPDATE \`password_hash\` = VALUES(\`password_hash\`), \`full_name\` = VALUES(\`full_name\`)`,
+      [user.username, user.username, user.fullName || user.username, hash, user.role || "Manager"]
+    );
+    return true;
+  });
 
   ipcMain.handle("db:get-sales-tax-templates", async (_e, company?: string) => {
     let sql = "SELECT * FROM `sales_taxes_templates` WHERE `disabled` = 0";
@@ -674,8 +616,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("sales_taxes_templates", rows, "name");
   });
 
-  // ── Sales Tax Charges ─────────────────────────────────────────
-
   ipcMain.handle("db:get-sales-tax-charges", async (_e, templateName: string) => {
     return query("SELECT * FROM `sales_taxes_charges` WHERE `parent` = ? ORDER BY `idx`", [templateName]);
   });
@@ -683,8 +623,6 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:upsert-sales-tax-charges", async (_e, rows: Record<string, unknown>[]) => {
     return upsertBatch("sales_taxes_charges", rows, "name");
   });
-
-  // ── Pricing Rules ─────────────────────────────────────────────
 
   ipcMain.handle("db:get-pricing-rules", async (_e, opts?: { company?: string; itemCode?: string }) => {
     let sql = "SELECT * FROM `pricing_rules` WHERE `disable` = 0";
@@ -722,8 +660,6 @@ export function registerDbHandlers(): void {
     return upsertBatch("pricing_rule_brands", rows, "name");
   });
 
-  // ── Bins (Stock) ──────────────────────────────────────────────
-
   ipcMain.handle("db:get-bin", async (_e, itemCode: string, warehouse: string) => {
     return queryOne(
       "SELECT * FROM `bins` WHERE `item_code` = ? AND `warehouse` = ?",
@@ -742,29 +678,26 @@ export function registerDbHandlers(): void {
     return upsertBatch("bins", rows, "name");
   });
 
-  // ── POS Opening Shifts ────────────────────────────────────────
-
   ipcMain.handle("db:create-pos-opening-shift", async (_e, shift: Record<string, unknown>) => {
-    const localId = `pos_open_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    await execute(
+    const result = await execute(
       `INSERT INTO \`pos_opening_shifts\`
-       (\`local_id\`, \`pos_profile\`, \`user\`, \`company\`, \`opening_date\`, \`status\`)
-       VALUES (?, ?, ?, ?, ?, 'Open')`,
-      [localId, shift.pos_profile, shift.user, shift.company, shift.opening_date || new Date().toISOString().slice(0, 10)]
+       (\`pos_profile\`, \`user\`, \`company\`, \`posting_date\`, \`period_start_date\`, \`status\`)
+       VALUES (?, ?, ?, ?, NOW(), 'Open')`,
+      [shift.pos_profile, shift.user, shift.company, shift.opening_date || new Date().toISOString().slice(0, 10)]
     );
-    // Insert opening amounts
+    const shiftId = result.insertId;
     const payments = shift.opening_amounts as Array<{ mode_of_payment: string; opening_amount: number }> | undefined;
     if (payments?.length) {
       for (const p of payments) {
         await execute(
           `INSERT INTO \`pos_opening_entry_details\`
-           (\`parent_local_id\`, \`mode_of_payment\`, \`opening_amount\`)
+           (\`parent_id\`, \`mode_of_payment\`, \`opening_amount\`)
            VALUES (?, ?, ?)`,
-          [localId, p.mode_of_payment, p.opening_amount || 0]
+          [shiftId, p.mode_of_payment, p.opening_amount || 0]
         );
       }
     }
-    return { local_id: localId };
+    return { id: shiftId };
   });
 
   ipcMain.handle("db:get-open-shift", async (_e, user: string) => {
@@ -774,16 +707,95 @@ export function registerDbHandlers(): void {
     );
     if (!shift) return null;
     const details = await query(
-      "SELECT * FROM `pos_opening_entry_details` WHERE `parent_local_id` = ?",
-      [(shift as Record<string, unknown>).local_id]
+      "SELECT * FROM `pos_opening_entry_details` WHERE `parent_id` = ?",
+      [(shift as Record<string, unknown>).id]
     );
     return { ...(shift as Record<string, unknown>), opening_amounts: details };
   });
 
-  ipcMain.handle("db:close-pos-shift", async (_e, localId: string) => {
+  ipcMain.handle("db:check-open-shift", async (_e, user: string) => {
+    const shift = await queryOne<Record<string, unknown>>(
+      "SELECT * FROM `pos_opening_shifts` WHERE `user` = ? AND `status` = 'Open' ORDER BY `id` DESC LIMIT 1",
+      [user]
+    );
+
+    if (!shift) return null;
+
+    const posProfileName = shift.pos_profile as string;
+
+    const profile = await queryOne<Record<string, unknown>>(
+      "SELECT * FROM `pos_profiles` WHERE `name` = ?",
+      [posProfileName]
+    );
+    if (!profile) return null;
+
+    const payments = await query<Record<string, unknown>>(
+      "SELECT `mode_of_payment`, `default` FROM `pos_payment_methods` WHERE `parent` = ?",
+      [posProfileName]
+    );
+    const profileWithPayments = { ...profile, payments };
+
+    const companyRow = await queryOne<Record<string, unknown>>(
+      "SELECT * FROM `companies` WHERE `name` = ?",
+      [profile.company as string]
+    );
+
+    const balanceDetails = await query<Record<string, unknown>>(
+      "SELECT `mode_of_payment`, `opening_amount` FROM `pos_opening_entry_details` WHERE `parent_id` = ?",
+      [shift.id as number]
+    );
+
+    const posOpeningShift = {
+      name: String(shift.id),
+      pos_profile: posProfileName,
+      company: profile.company,
+      user: shift.user,
+      period_start_date: shift.period_start_date || shift.posting_date,
+      posting_date: shift.posting_date,
+      balance_details: balanceDetails,
+    };
+
+    return {
+      pos_opening_shift: posOpeningShift,
+      pos_profile: profileWithPayments,
+      company: companyRow || { name: profile.company, company_name: profile.company, default_currency: profile.currency },
+      stock_settings: {},
+      taxes: [],
+      tax_inclusive: false,
+      disable_rounded_total: false,
+      print_settings: null,
+    };
+  });
+
+  ipcMain.handle("db:get-opening-data", async () => {
+    const profiles = await query<Record<string, unknown>>(
+      "SELECT * FROM `pos_profiles` WHERE `disabled` = 0 ORDER BY `name`"
+    );
+    const companies = await query<Record<string, unknown>>(
+      "SELECT * FROM `companies` ORDER BY `name`"
+    );
+
+    const profilesWithPayments = await Promise.all(
+      profiles.map(async (p) => {
+        const payments = await query<Record<string, unknown>>(
+          "SELECT `mode_of_payment`, `default` FROM `pos_payment_methods` WHERE `parent` = ?",
+          [p.name as string]
+        );
+        return { ...p, payments };
+      })
+    );
+
+    return {
+      pos_profiles: profilesWithPayments,
+      companies,
+      payment_methods: [],
+    };
+  });
+
+  ipcMain.handle("db:close-pos-shift", async (_e, shiftId: string | number) => {
     await execute(
-      "UPDATE `pos_opening_shifts` SET `status` = 'Closed' WHERE `local_id` = ?",
-      [localId]
+      "UPDATE `pos_opening_shifts` SET `status` = 'Closed' WHERE `id` = ?",
+      [shiftId]
     );
     return true;
   });
@@ -799,25 +811,24 @@ export function registerDbHandlers(): void {
     return query(sql, params);
   });
 
-  // ── POS Closing Entries ───────────────────────────────────────
-
   ipcMain.handle("db:create-pos-closing-entry", async (_e, entry: Record<string, unknown>) => {
-    const localId = `pos_close_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const openingEntryId = entry.pos_opening_entry_id
+      ? Number(entry.pos_opening_entry_id)
+      : entry.pos_opening_shift_local_id
+        ? Number(entry.pos_opening_shift_local_id)
+        : null;
     const result = await execute(
       `INSERT INTO \`pos_closing_entries\`
-       (\`local_id\`, \`pos_profile\`, \`user\`, \`company\`, \`pos_opening_shift_local_id\`,
-        \`closing_date\`, \`grand_total\`, \`net_total\`, \`total_qty\`,
-        \`num_invoices\`, \`status\`, \`sync_status\`)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Submitted', 'pending')`,
+       (\`pos_profile\`, \`user\`, \`company\`, \`pos_opening_entry_id\`,
+        \`posting_date\`, \`period_end_date\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
       [
-        localId, entry.pos_profile, entry.user, entry.company,
-        entry.pos_opening_shift_local_id,
-        entry.closing_date || new Date().toISOString().slice(0, 10),
-        entry.grand_total || 0, entry.net_total || 0, entry.total_qty || 0,
-        entry.num_invoices || 0,
+        entry.pos_profile, entry.user, entry.company,
+        openingEntryId,
+        entry.posting_date || entry.closing_date || new Date().toISOString().slice(0, 10),
+        entry.period_end_date || entry.posting_date || new Date().toISOString().slice(0, 10),
       ]
     );
-    // Insert payment details
     const payments = entry.payment_details as Array<{
       mode_of_payment: string; opening_amount: number; expected_amount: number; closing_amount: number; difference: number;
     }> | undefined;
@@ -831,7 +842,7 @@ export function registerDbHandlers(): void {
         );
       }
     }
-    return { id: result.insertId, local_id: localId };
+    return { id: result.insertId };
   });
 
   ipcMain.handle("db:get-pos-closing-entries", async (_e, opts?: { user?: string; status?: string }) => {
@@ -849,54 +860,58 @@ export function registerDbHandlers(): void {
     return query("SELECT * FROM `pos_closing_entry_details` WHERE `parent_id` = ?", [parentId]);
   });
 
-  // ── Sales Invoices (local copies) ─────────────────────────────
-
   ipcMain.handle("db:save-sales-invoice", async (_e, invoice: Record<string, unknown>) => {
     const localId = `sinv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    await execute(
+    const openingEntryId = invoice.pos_opening_entry_id
+      ? Number(invoice.pos_opening_entry_id)
+      : invoice.pos_opening_shift_local_id
+        ? Number(invoice.pos_opening_shift_local_id)
+        : null;
+    const result = await execute(
       `INSERT INTO \`sales_invoices\`
        (\`local_id\`, \`name\`, \`customer\`, \`customer_name\`, \`pos_profile\`,
-        \`posting_date\`, \`grand_total\`, \`net_total\`, \`total_qty\`,
-        \`status\`, \`pos_opening_shift_local_id\`, \`data\`)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        \`posting_date\`, \`grand_total\`, \`net_total\`,
+        \`total_taxes_and_charges\`, \`discount_amount\`,
+        \`is_return\`, \`return_against\`, \`status\`, \`pos_opening_entry_id\`)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         localId, invoice.name || localId, invoice.customer, invoice.customer_name,
         invoice.pos_profile, invoice.posting_date || new Date().toISOString().slice(0, 10),
-        invoice.grand_total || 0, invoice.net_total || 0, invoice.total_qty || 0,
-        invoice.status || "Draft", invoice.pos_opening_shift_local_id || null,
-        JSON.stringify(invoice),
+        invoice.grand_total || 0, invoice.net_total || 0,
+        invoice.total_taxes_and_charges || 0, invoice.discount_amount || 0,
+        invoice.is_return ? 1 : 0, invoice.return_against || null,
+        invoice.status || "Draft", openingEntryId,
       ]
     );
-    // Insert items
+    const invoiceId = result.insertId;
     const items = invoice.items as Array<Record<string, unknown>> | undefined;
     if (items?.length) {
       for (const item of items) {
         await execute(
           `INSERT INTO \`sales_invoice_items\`
-           (\`parent_local_id\`, \`item_code\`, \`item_name\`, \`qty\`, \`rate\`,
-            \`amount\`, \`uom\`, \`warehouse\`, \`discount_percentage\`, \`discount_amount\`)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (\`parent_id\`, \`item_code\`, \`item_name\`, \`qty\`, \`rate\`,
+            \`amount\`, \`uom\`, \`discount_percentage\`, \`discount_amount\`)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
-            localId, item.item_code, item.item_name, item.qty || 0, item.rate || 0,
-            item.amount || 0, item.uom || null, item.warehouse || null,
+            invoiceId, item.item_code, item.item_name, item.qty || 0, item.rate || 0,
+            item.amount || 0, item.uom || null,
             item.discount_percentage || 0, item.discount_amount || 0,
           ]
         );
       }
     }
-    // Insert payments
     const payments = invoice.payments as Array<Record<string, unknown>> | undefined;
     if (payments?.length) {
       for (const p of payments) {
         await execute(
           `INSERT INTO \`sales_invoice_payments\`
-           (\`parent_local_id\`, \`mode_of_payment\`, \`amount\`, \`account\`)
+           (\`parent_id\`, \`mode_of_payment\`, \`amount\`, \`account\`)
            VALUES (?, ?, ?, ?)`,
-          [localId, p.mode_of_payment, p.amount || 0, p.account || null]
+          [invoiceId, p.mode_of_payment, p.amount || 0, p.account || null]
         );
       }
     }
-    return { local_id: localId };
+    return { id: invoiceId, local_id: localId };
   });
 
   ipcMain.handle("db:get-sales-invoices", async (_e, opts?: {
@@ -908,7 +923,7 @@ export function registerDbHandlers(): void {
     const params: unknown[] = [];
     if (opts?.customer) { conditions.push("`customer` = ?"); params.push(opts.customer); }
     if (opts?.posProfile) { conditions.push("`pos_profile` = ?"); params.push(opts.posProfile); }
-    if (opts?.shiftLocalId) { conditions.push("`pos_opening_shift_local_id` = ?"); params.push(opts.shiftLocalId); }
+    if (opts?.shiftLocalId) { conditions.push("`pos_opening_entry_id` = ?"); params.push(Number(opts.shiftLocalId)); }
     if (opts?.fromDate) { conditions.push("`posting_date` >= ?"); params.push(opts.fromDate); }
     if (opts?.toDate) { conditions.push("`posting_date` <= ?"); params.push(opts.toDate); }
     if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
@@ -920,51 +935,53 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:get-sales-invoice", async (_e, localId: string) => {
     const invoice = await queryOne("SELECT * FROM `sales_invoices` WHERE `local_id` = ?", [localId]);
     if (!invoice) return null;
-    const items = await query("SELECT * FROM `sales_invoice_items` WHERE `parent_local_id` = ?", [localId]);
-    const payments = await query("SELECT * FROM `sales_invoice_payments` WHERE `parent_local_id` = ?", [localId]);
-    return { ...(invoice as Record<string, unknown>), items, payments };
+    const inv = invoice as Record<string, unknown>;
+    const items = await query("SELECT * FROM `sales_invoice_items` WHERE `parent_id` = ?", [inv.id]);
+    const payments = await query("SELECT * FROM `sales_invoice_payments` WHERE `parent_id` = ?", [inv.id]);
+    return { ...inv, items, payments };
   });
 
-  ipcMain.handle("db:get-shift-sales-summary", async (_e, shiftLocalId: string) => {
-    const summary = await queryOne<{ total: number; count: number; qty: number }>(
+  ipcMain.handle("db:get-shift-sales-summary", async (_e, shiftId: string | number) => {
+    const shiftIdNum = Number(shiftId);
+    const summary = await queryOne<{ total: number; count: number }>(
       `SELECT COALESCE(SUM(\`grand_total\`), 0) as total,
-              COUNT(*) as count,
-              COALESCE(SUM(\`total_qty\`), 0) as qty
+              COUNT(*) as count
        FROM \`sales_invoices\`
-       WHERE \`pos_opening_shift_local_id\` = ? AND \`status\` != 'Cancelled'`,
-      [shiftLocalId]
+       WHERE \`pos_opening_entry_id\` = ? AND \`status\` != 'Cancelled'`,
+      [shiftIdNum]
     );
     const paymentSummary = await query(
       `SELECT sip.\`mode_of_payment\`, COALESCE(SUM(sip.\`amount\`), 0) as total
        FROM \`sales_invoice_payments\` sip
-       JOIN \`sales_invoices\` si ON si.\`local_id\` = sip.\`parent_local_id\`
-       WHERE si.\`pos_opening_shift_local_id\` = ? AND si.\`status\` != 'Cancelled'
+       JOIN \`sales_invoices\` si ON si.\`id\` = sip.\`parent_id\`
+       WHERE si.\`pos_opening_entry_id\` = ? AND si.\`status\` != 'Cancelled'
        GROUP BY sip.\`mode_of_payment\``,
-      [shiftLocalId]
+      [shiftIdNum]
     );
-    return { ...(summary ?? { total: 0, count: 0, qty: 0 }), payment_breakdown: paymentSummary };
+    return { ...(summary ?? { total: 0, count: 0 }), payment_breakdown: paymentSummary };
   });
 
-  // ── Expenses ──────────────────────────────────────────────────
-
   ipcMain.handle("db:create-expense", async (_e, expense: Record<string, unknown>) => {
-    const localId = `exp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const openingEntryId = expense.pos_opening_entry_id
+      ? Number(expense.pos_opening_entry_id)
+      : expense.pos_opening_shift_local_id
+        ? Number(expense.pos_opening_shift_local_id)
+        : null;
     const result = await execute(
       `INSERT INTO \`expenses\`
-       (\`local_id\`, \`expense_type\`, \`amount\`, \`description\`, \`posting_date\`,
-        \`company\`, \`cost_center\`, \`mode_of_payment\`, \`user\`,
-        \`pos_opening_shift_local_id\`, \`sync_status\`)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+       (\`to_account\`, \`amount\`, \`posting_date\`, \`remarks\`,
+        \`owner\`, \`pos_opening_entry_id\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
       [
-        localId, expense.expense_type, expense.amount || 0,
-        expense.description || null,
+        expense.expense_type || expense.to_account || "General",
+        expense.amount || 0,
         expense.posting_date || new Date().toISOString().slice(0, 10),
-        expense.company || null, expense.cost_center || null,
-        expense.mode_of_payment || null, expense.user || null,
-        expense.pos_opening_shift_local_id || null,
+        expense.description || expense.remarks || null,
+        expense.user || expense.owner || null,
+        openingEntryId,
       ]
     );
-    return { id: result.insertId, local_id: localId };
+    return { id: result.insertId };
   });
 
   ipcMain.handle("db:get-expenses", async (_e, opts?: {
@@ -973,10 +990,10 @@ export function registerDbHandlers(): void {
     let sql = "SELECT * FROM `expenses`";
     const conditions: string[] = [];
     const params: unknown[] = [];
-    if (opts?.user) { conditions.push("`user` = ?"); params.push(opts.user); }
+    if (opts?.user) { conditions.push("`owner` = ?"); params.push(opts.user); }
     if (opts?.fromDate) { conditions.push("`posting_date` >= ?"); params.push(opts.fromDate); }
     if (opts?.toDate) { conditions.push("`posting_date` <= ?"); params.push(opts.toDate); }
-    if (opts?.shiftLocalId) { conditions.push("`pos_opening_shift_local_id` = ?"); params.push(opts.shiftLocalId); }
+    if (opts?.shiftLocalId) { conditions.push("`pos_opening_entry_id` = ?"); params.push(Number(opts.shiftLocalId)); }
     if (opts?.syncStatus) { conditions.push("`sync_status` = ?"); params.push(opts.syncStatus); }
     if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
     sql += " ORDER BY `id` DESC";
@@ -988,24 +1005,27 @@ export function registerDbHandlers(): void {
     return true;
   });
 
-  // ── Bank Drops ────────────────────────────────────────────────
-
   ipcMain.handle("db:create-bank-drop", async (_e, drop: Record<string, unknown>) => {
-    const localId = `bd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const openingEntryId = drop.pos_opening_entry_id
+      ? Number(drop.pos_opening_entry_id)
+      : drop.pos_opening_shift_local_id
+        ? Number(drop.pos_opening_shift_local_id)
+        : null;
     const result = await execute(
       `INSERT INTO \`bank_drops\`
-       (\`local_id\`, \`amount\`, \`description\`, \`posting_date\`,
-        \`company\`, \`mode_of_payment\`, \`user\`,
-        \`pos_opening_shift_local_id\`, \`sync_status\`)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+       (\`to_account\`, \`amount\`, \`posting_date\`, \`remarks\`,
+        \`owner\`, \`pos_opening_entry_id\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
       [
-        localId, drop.amount || 0, drop.description || null,
+        drop.mode_of_payment || drop.to_account || "Cash",
+        drop.amount || 0,
         drop.posting_date || new Date().toISOString().slice(0, 10),
-        drop.company || null, drop.mode_of_payment || null,
-        drop.user || null, drop.pos_opening_shift_local_id || null,
+        drop.description || drop.remarks || null,
+        drop.user || drop.owner || null,
+        openingEntryId,
       ]
     );
-    return { id: result.insertId, local_id: localId };
+    return { id: result.insertId };
   });
 
   ipcMain.handle("db:get-bank-drops", async (_e, opts?: {
@@ -1014,10 +1034,10 @@ export function registerDbHandlers(): void {
     let sql = "SELECT * FROM `bank_drops`";
     const conditions: string[] = [];
     const params: unknown[] = [];
-    if (opts?.user) { conditions.push("`user` = ?"); params.push(opts.user); }
+    if (opts?.user) { conditions.push("`owner` = ?"); params.push(opts.user); }
     if (opts?.fromDate) { conditions.push("`posting_date` >= ?"); params.push(opts.fromDate); }
     if (opts?.toDate) { conditions.push("`posting_date` <= ?"); params.push(opts.toDate); }
-    if (opts?.shiftLocalId) { conditions.push("`pos_opening_shift_local_id` = ?"); params.push(opts.shiftLocalId); }
+    if (opts?.shiftLocalId) { conditions.push("`pos_opening_entry_id` = ?"); params.push(Number(opts.shiftLocalId)); }
     if (opts?.syncStatus) { conditions.push("`sync_status` = ?"); params.push(opts.syncStatus); }
     if (conditions.length) sql += " WHERE " + conditions.join(" AND ");
     sql += " ORDER BY `id` DESC";
@@ -1029,24 +1049,19 @@ export function registerDbHandlers(): void {
     return true;
   });
 
-  // ── Stock Adjustments ─────────────────────────────────────────
-
   ipcMain.handle("db:create-stock-adjustment", async (_e, adj: Record<string, unknown>) => {
-    const localId = `adj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const result = await execute(
       `INSERT INTO \`stock_adjustments\`
-       (\`local_id\`, \`item_code\`, \`warehouse\`, \`qty\`, \`adjustment_type\`,
-        \`reason\`, \`posting_date\`, \`user\`, \`sync_status\`)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+       (\`item_code\`, \`warehouse\`, \`qty\`, \`reason\`,
+        \`owner\`, \`sync_status\`)
+       VALUES (?, ?, ?, ?, ?, 'pending')`,
       [
-        localId, adj.item_code, adj.warehouse, adj.qty || 0,
-        adj.adjustment_type || "increase",
-        adj.reason || null,
-        adj.posting_date || new Date().toISOString().slice(0, 10),
-        adj.user || null,
+        adj.item_code, adj.warehouse, adj.qty || 0,
+        adj.reason || adj.adjustment_type || null,
+        adj.user || adj.owner || null,
       ]
     );
-    return { id: result.insertId, local_id: localId };
+    return { id: result.insertId };
   });
 
   ipcMain.handle("db:get-stock-adjustments", async (_e, opts?: {
@@ -1063,8 +1078,6 @@ export function registerDbHandlers(): void {
     sql += " ORDER BY `id` DESC";
     return query(sql, params);
   });
-
-  // ── Quotations ────────────────────────────────────────────────
 
   ipcMain.handle("db:save-quotation", async (_e, quotation: Record<string, unknown>) => {
     const localId = `qt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -1099,10 +1112,7 @@ export function registerDbHandlers(): void {
     return query(sql, params);
   });
 
-  // ── Generic Table Upsert (for sync engine) ─────────────────────
-
   ipcMain.handle("db:upsert-table", async (_e, table: string, rows: Record<string, unknown>[], keyField: string) => {
-    // Whitelist of tables allowed for generic upsert
     const allowedTables = new Set([
       "companies", "cost_centers", "countries", "currencies", "warehouses",
       "accounts", "price_lists", "uom", "uom_conversion_details", "brands",
@@ -1139,8 +1149,6 @@ export function registerDbHandlers(): void {
     await execute(`DELETE FROM \`${table}\``);
     return true;
   });
-
-  // ── Bulk Clear ────────────────────────────────────────────────
 
   ipcMain.handle("db:clear-all-data", async () => {
     const tables = [

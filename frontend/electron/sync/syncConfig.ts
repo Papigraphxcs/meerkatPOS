@@ -215,6 +215,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Mode of Payment Account",
     label: "Mode of Payment Accounts",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "company", "default_account"],
     orderBy: "modified",
     direction: "pull",
@@ -268,7 +269,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
       "name", "item_code", "item_name", "item_group", "brand", "description",
       "stock_uom", "image", "has_serial_no", "has_batch_no",
       "has_variants", "variant_of", "is_stock_item", "disabled",
-      "standard_rate", "item_tax_template", "barcode",
+      "standard_rate", "barcode",
     ],
     filters: { disabled: 0 },
     orderBy: "modified",
@@ -283,6 +284,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Item Barcode",
     label: "Item Barcodes",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "barcode", "barcode_type"],
     orderBy: "modified",
     direction: "pull",
@@ -297,6 +299,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "UOM Conversion Detail",
     label: "UOM Conversions",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "uom", "conversion_factor"],
     orderBy: "modified",
     direction: "pull",
@@ -313,7 +316,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     label: "Item Prices",
     fields: [
       "name", "item_code", "item_name", "price_list", "buying", "selling",
-      "currency", "price_list_rate", "uom", "min_qty", "valid_from", "valid_upto",
+      "currency", "price_list_rate", "uom", "valid_from", "valid_upto",
     ],
     orderBy: "modified",
     direction: "pull",
@@ -328,6 +331,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Item Tax",
     label: "Item Taxes",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "item_tax_template", "tax_category", "valid_from"],
     orderBy: "modified",
     direction: "pull",
@@ -342,6 +346,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Item Supplier",
     label: "Item Vendors",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "supplier"],
     orderBy: "modified",
     direction: "pull",
@@ -357,6 +362,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Item Reorder",
     label: "Item Reorder Levels",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "warehouse", "warehouse_reorder_level", "warehouse_reorder_qty"],
     orderBy: "modified",
     direction: "pull",
@@ -390,6 +396,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Item Tax Template Detail",
     label: "Item Tax Template Details",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "tax_type", "tax_rate"],
     orderBy: "modified",
     direction: "pull",
@@ -418,6 +425,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Sales Taxes and Charges",
     label: "Sales Tax Charges",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: [
       "name", "parent", "charge_type", "account_head", "description",
       "rate", "tax_amount", "included_in_print_rate", "idx",
@@ -466,6 +474,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Pricing Rule Item Code",
     label: "Pricing Rule Items",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "item_code"],
     orderBy: "modified",
     direction: "pull",
@@ -480,6 +489,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Pricing Rule Item Group",
     label: "Pricing Rule Groups",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "item_group"],
     orderBy: "modified",
     direction: "pull",
@@ -494,6 +504,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Pricing Rule Brand",
     label: "Pricing Rule Brands",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "brand"],
     orderBy: "modified",
     direction: "pull",
@@ -515,7 +526,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     fields: [
       "name", "customer_name", "customer_group", "customer_type", "territory",
       "tax_category", "mobile_no", "email_id", "default_currency",
-      "loyalty_program", "loyalty_points", "disabled",
+      "loyalty_program", "disabled",
     ],
     filters: { disabled: 0 },
     orderBy: "modified",
@@ -585,6 +596,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "POS Payment Method",
     label: "POS Payment Methods",
+    pullMethod: "xpos.api.sync.get_child_table_data",
     fields: ["name", "parent", "mode_of_payment", "default"],
     orderBy: "modified",
     direction: "pull",

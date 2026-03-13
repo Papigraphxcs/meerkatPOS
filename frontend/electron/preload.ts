@@ -22,17 +22,12 @@ for (const channel of SYNC_DATA_CHANNELS) {
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  // ── App Setup ────────────────────────────────────────────────
   isFirstRun: (): Promise<boolean> => ipcRenderer.invoke("app:is-first-run"),
   testErpNext: (config: { url: string; apiKey?: string; apiSecret?: string }): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke("app:test-erpnext", config),
-
-  // ── Server Configuration ─────────────────────────────────────
   getServerUrl: (): Promise<string> => ipcRenderer.invoke("get-server-url"),
   setServerUrl: (url: string): Promise<boolean> =>
     ipcRenderer.invoke("set-server-url", url),
-
-  // ── Platform Info ────────────────────────────────────────────
   getPlatformInfo: (): Promise<{
     platform: string;
     arch: string;
@@ -47,13 +42,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     binary: string | null;
   }> => ipcRenderer.invoke("check-mariadb"),
 
-  // ── Auth ─────────────────────────────────────────────────────
   setAuthCookie: (
     cookies: { name: string; value: string; domain: string }[]
   ): Promise<boolean> => ipcRenderer.invoke("set-auth-cookie", cookies),
   clearAuth: (): Promise<boolean> => ipcRenderer.invoke("clear-auth"),
 
-  // ── Sync Engine Events (main → renderer) ─────────────────────
   onSyncStatus: (
     callback: (status: { phase: string; table?: string; progress?: number }) => void
   ) => {
@@ -339,9 +332,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // POS Users
     getPosUsers: () => ipcRenderer.invoke("db:get-pos-users"),
-    getPosUser: (email: string) => ipcRenderer.invoke("db:get-pos-user", email),
+    getPosUser: (username: string) => ipcRenderer.invoke("db:get-pos-user", username),
     upsertPosUsers: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-pos-users", rows),
+    createLocalUser: (user: { username: string; password: string; fullName: string; role?: string }) =>
+      ipcRenderer.invoke("db:create-local-user", user),
 
     // Sales Tax Templates
     getSalesTaxTemplates: (company?: string) =>
@@ -387,6 +382,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.invoke("db:create-pos-opening-shift", shift),
     getOpenShift: (user: string) =>
       ipcRenderer.invoke("db:get-open-shift", user),
+    // Composite query: returns full ShiftCheckResult from local tables
+    checkOpenShift: (user: string) =>
+      ipcRenderer.invoke("db:check-open-shift", user),
+    // Composite query: returns OpeningData (profiles + companies) from local tables
+    getOpeningData: () =>
+      ipcRenderer.invoke("db:get-opening-data"),
     closePosShift: (localId: string) =>
       ipcRenderer.invoke("db:close-pos-shift", localId),
     getPosOpeningShifts: (opts?: { user?: string; status?: string }) =>

@@ -181,7 +181,7 @@ async function handleSave() {
       posting_date: today,
       company: posStore.company,
       user: authStore.userEmail,
-      pos_opening_shift_local_id: posStore.posOpeningShift?.local_id || null,
+      pos_opening_entry_id: posStore.posOpeningShift?.name ? Number(posStore.posOpeningShift.name) : null,
     });
     showForm.value = false;
     form.value = { amount: 0, mode_of_payment: "Cash", description: "" };

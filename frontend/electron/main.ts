@@ -1,11 +1,12 @@
 import { app, BrowserWindow, ipcMain, shell, session } from "electron";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import { execFile } from "child_process";
 import { initDatabase, closeDatabase } from "./database/dbService";
 import { registerDbHandlers } from "./database/ipcHandlers";
 import { initRealtimeStock, disconnectRealtime } from "./sync/realtimeStock";
-import { initSyncEngine, stopSyncEngine, updateSyncContext } from "./sync/syncEngine";
+import { initSyncEngine, stopSyncEngine, updateSyncContext, runSyncCyclePublic } from "./sync/syncEngine";
 import { initAutoUpdater, stopAutoUpdater } from "./autoUpdater";
 import { startHubServer, stopHubServer, getHubApiSecret } from "./hub/hubServer";
 import { initTillClient, runTillSync, pingHub } from "./hub/tillClient";
@@ -18,7 +19,6 @@ const log = createLogger("Main");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Global error handlers
 process.on("uncaughtException", (err) => {
   log.error("Uncaught exception", { message: err.message, stack: err.stack });
 });
@@ -26,10 +26,8 @@ process.on("unhandledRejection", (reason) => {
   log.error("Unhandled rejection", { reason: String(reason) });
 });
 
-// Store ref so it won't be GC'd
 let mainWindow: BrowserWindow | null = null;
 
-// Server URL – set via env or stored settings
 const SERVER_URL = process.env.XPOS_SERVER_URL || "http://localhost:8000";
 
 function createWindow(): void {
@@ -39,8 +37,6 @@ function createWindow(): void {
     minWidth: 1024,
     minHeight: 600,
     title: "X POS",
-    // On Windows/Mac the window icon is embedded in the exe by electron-builder.
-    // On Linux, load it from the build resources bundled alongside the asar.
     ...(process.platform === "linux" ? {
       icon: path.join(__dirname, "../build/icon.png"),
     } : {}),
@@ -54,12 +50,10 @@ function createWindow(): void {
     show: false,
   });
 
-  // Show when ready to avoid white flash
   mainWindow.once("ready-to-show", () => {
     mainWindow?.show();
   });
 
-  // Open external links in system browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith("http")) {
       shell.openExternal(url);
@@ -68,11 +62,9 @@ function createWindow(): void {
   });
 
   if (process.env.VITE_DEV_SERVER_URL) {
-    // Dev mode: load Vite dev server
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
     mainWindow.webContents.openDevTools({ mode: "detach" });
   } else {
-    // Production: load built files
     mainWindow.loadFile(path.join(__dirname, "../dist/index.electron.html"));
   }
 
@@ -81,20 +73,15 @@ function createWindow(): void {
   });
 }
 
-// ── IPC Handlers ──────────────────────────────────────────────────
-
-// First-run detection: checks if node_role has been set already
 ipcMain.handle("app:is-first-run", async () => {
   try {
     const role = await getMeta("node_role");
     return !role;
   } catch {
-    // DB not initialized yet → definitely first run
     return true;
   }
 });
 
-// Test ERPNext server connectivity with optional API key authentication
 ipcMain.handle("app:test-erpnext", async (_event, config: {
   url: string;
   apiKey?: string;
@@ -113,10 +100,20 @@ ipcMain.handle("app:test-erpnext", async (_event, config: {
   }
 });
 
-// Return server URL to renderer
-ipcMain.handle("get-server-url", () => SERVER_URL);
+ipcMain.handle("get-server-url", async () => {
+  if (process.env.XPOS_SERVER_URL && process.env.XPOS_SERVER_URL !== "http://localhost:8000") {
+    return process.env.XPOS_SERVER_URL;
+  }
+  try {
+    const saved = await getMeta("server_url");
+    if (saved) {
+      process.env.XPOS_SERVER_URL = saved;
+      return saved;
+    }
+  } catch { /* DB not ready yet */ }
+  return SERVER_URL;
+});
 
-// Return platform info
 ipcMain.handle("get-platform-info", () => ({
   platform: process.platform,
   arch: process.arch,
@@ -125,11 +122,33 @@ ipcMain.handle("get-platform-info", () => ({
   logDir: getLogDir(),
 }));
 
-// Check if MariaDB/MySQL is available and get version + status
 ipcMain.handle("check-mariadb", async () => {
-  const bins = process.platform === "win32"
+  const bins: string[] = process.platform === "win32"
     ? ["mariadb", "mysql"]
     : ["/usr/bin/mariadb", "/usr/local/bin/mariadb", "mariadb", "/usr/bin/mysql", "/usr/local/bin/mysql", "mysql"];
+
+  if (process.platform === "win32") {
+    const pfDirs = [
+      process.env["ProgramFiles"] || "C:\\Program Files",
+      process.env["ProgramFiles(x86)"] || "C:\\Program Files (x86)",
+      process.env["ProgramW6432"] || "C:\\Program Files",
+    ].filter((v, i, a) => a.indexOf(v) === i);
+
+    for (const base of pfDirs) {
+      try {
+        const entries = fs.readdirSync(base);
+        for (const entry of entries) {
+          const lower = entry.toLowerCase();
+          if (lower.startsWith("mariadb") || lower.startsWith("mysql")) {
+            for (const binName of ["mariadb.exe", "mysql.exe"]) {
+              const fullPath = path.join(base, entry, "bin", binName);
+              if (fs.existsSync(fullPath)) bins.push(fullPath);
+            }
+          }
+        }
+      } catch { /* ignore */ }
+    }
+  }
 
   for (const bin of bins) {
     try {
@@ -147,13 +166,14 @@ ipcMain.handle("check-mariadb", async () => {
   return { installed: false, version: null, binary: null };
 });
 
-// Set server URL (from login/settings screen)
-ipcMain.handle("set-server-url", (_event, url: string) => {
+ipcMain.handle("set-server-url", async (_event, url: string) => {
   process.env.XPOS_SERVER_URL = url;
+  try {
+    await setMeta("server_url", url); // persist so it survives restarts
+  } catch { /* DB may not be ready during setup */ }
   return true;
 });
 
-// Set session cookie for authenticated API calls
 ipcMain.handle(
   "set-auth-cookie",
   async (_event, cookies: { name: string; value: string; domain: string }[]) => {
@@ -170,7 +190,6 @@ ipcMain.handle(
   }
 );
 
-// Clear cookies on logout
 ipcMain.handle("clear-auth", async () => {
   const ses = session.defaultSession;
   const cookies = await ses.cookies.get({ url: SERVER_URL });
@@ -182,7 +201,6 @@ ipcMain.handle("clear-auth", async () => {
   return true;
 });
 
-// Start sync engine for hub mode (called after auth with CSRF token + cookies)
 let syncEngineStarted = false;
 
 ipcMain.handle("start-sync-engine", async (_event, opts?: {
@@ -191,11 +209,17 @@ ipcMain.handle("start-sync-engine", async (_event, opts?: {
 }) => {
   if (currentRole !== "hub") return { success: false, error: "Sync engine is hub-only" };
   try {
-    const serverUrl = process.env.XPOS_SERVER_URL || SERVER_URL;
+    const savedUrl = await getMeta("server_url");
+    const serverUrl = savedUrl || process.env.XPOS_SERVER_URL || SERVER_URL;
 
-    // Gather session cookies from Electron's cookie jar
+    const storedApiKey = await getMeta("api_key");
+    const storedApiSecret = await getMeta("api_secret");
+
+    log.info(`Sync engine start — url: ${serverUrl}, apiKey: ${storedApiKey ? "set" : "missing"}, apiSecret: ${storedApiSecret ? "set" : "missing"}`);
+
     let cookieStr = opts?.sessionCookies || "";
-    if (!cookieStr) {
+    let csrfToken = opts?.csrfToken || "";
+    if (!storedApiKey && !cookieStr) {
       const ses = session.defaultSession;
       const cookies = await ses.cookies.get({ url: serverUrl });
       cookieStr = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
@@ -203,8 +227,10 @@ ipcMain.handle("start-sync-engine", async (_event, opts?: {
 
     const ctx = {
       serverUrl,
-      csrfToken: opts?.csrfToken || "",
+      csrfToken,
       sessionCookies: cookieStr,
+      apiKey: storedApiKey || undefined,
+      apiSecret: storedApiSecret || undefined,
     };
 
     if (syncEngineStarted) {
@@ -213,13 +239,16 @@ ipcMain.handle("start-sync-engine", async (_event, opts?: {
       initSyncEngine(ctx);
       syncEngineStarted = true;
     }
+
+    setTimeout(() => { runSyncCyclePublic(); }, 1000);
+
     return { success: true };
   } catch (err) {
+    log.error("start-sync-engine failed", err);
     return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 });
 
-// Start real-time stock connection (called after auth)
 ipcMain.handle("start-realtime", async () => {
   try {
     await initRealtimeStock(process.env.XPOS_SERVER_URL || SERVER_URL);
@@ -228,8 +257,6 @@ ipcMain.handle("start-realtime", async () => {
     return false;
   }
 });
-
-// ── Hub / Till Role IPC ───────────────────────────────────────────
 
 let currentRole: NodeRole = "hub";
 let tillSyncInterval: ReturnType<typeof setInterval> | null = null;
@@ -248,13 +275,11 @@ ipcMain.handle("node:set-role", async (_event, config: {
     await setMeta("node_role", config.role);
 
     if (config.role === "hub") {
-      // Stop till sync if running
       if (tillSyncInterval) { clearInterval(tillSyncInterval); tillSyncInterval = null; }
       const port = config.hubApiPort || 6789;
       await setMeta("hub_api_port", String(port));
       await startHubServer(port);
     } else {
-      // Stop hub server if running
       await stopHubServer();
       const hubUrl = config.hubUrl || "http://localhost:6789";
       const tillId = config.tillId || "TILL-01";
@@ -264,7 +289,6 @@ ipcMain.handle("node:set-role", async (_event, config: {
         await setMeta("hub_api_secret", config.hubSecret);
       }
       await initTillClient(hubUrl, tillId);
-      // Start periodic till sync (every 30 seconds)
       if (tillSyncInterval) clearInterval(tillSyncInterval);
       tillSyncInterval = setInterval(async () => {
         try { await runTillSync(); } catch (e) {
@@ -294,31 +318,33 @@ ipcMain.handle("node:trigger-till-sync", async () => {
   }
 });
 
-// ── App Lifecycle ─────────────────────────────────────────────────
-
 app.whenReady().then(async () => {
-  // Register database IPC handlers (even before DB is connected, so renderer can call them)
+  try {
+    const ses = session.defaultSession;
+    await ses.clearStorageData({ storages: ["cookies"] });
+  } catch { /* ignore */ }
+
+  try {
+    await initDatabase();
+    log.info("Local MariaDB initialized");
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    log.error(`MariaDB init failed: ${errMsg}`);
+  }
+
   registerDbHandlers();
 
-  // Initialize auto-updater (checks for updates on start + periodically)
   initAutoUpdater();
 
-  // Show window immediately so the user sees something right away
   createWindow();
 
-  // macOS: re-create window when dock icon clicked
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 
-  // Initialize local MariaDB connection + schema (non-blocking for window)
   try {
-    await initDatabase();
-    log.info("Local MariaDB initialized");
-
-    // Restore hub/till role from settings
     const savedRole = await getMeta("node_role");
     currentRole = (savedRole === "till" ? "till" : "hub") as NodeRole;
 
@@ -328,6 +354,19 @@ app.whenReady().then(async () => {
       startHubServer(port).catch((e) =>
         log.error("Hub server failed to start", e)
       );
+
+      // Auto-start sync engine if credentials are already configured
+      const apiKey = await getMeta("api_key");
+      const apiSecret = await getMeta("api_secret");
+      const serverUrl = await getMeta("server_url");
+      if (apiKey && apiSecret && serverUrl) {
+        log.info("Auto-starting sync engine with saved credentials");
+        initSyncEngine({ serverUrl, csrfToken: "", sessionCookies: "", apiKey, apiSecret });
+        syncEngineStarted = true;
+        setTimeout(() => { runSyncCyclePublic(); }, 3000);
+      } else {
+        log.info(`Sync engine not auto-started — missing: ${!apiKey ? "api_key " : ""}${!apiSecret ? "api_secret " : ""}${!serverUrl ? "server_url" : ""}`);
+      }
     } else {
       const hubUrl = (await getMeta("hub_url")) || "http://localhost:6789";
       const tillId = (await getMeta("till_id")) || "TILL-01";
@@ -337,18 +376,16 @@ app.whenReady().then(async () => {
       }, 30_000);
     }
   } catch (err) {
-    log.error("MariaDB init failed — app will run without local DB", err);
+    log.error("Post-DB init setup failed", err);
   }
 });
 
-// Quit when all windows closed (except macOS)
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-// Clean up DB pool on quit
 app.on("will-quit", async () => {
   stopAutoUpdater();
   stopSyncEngine();
@@ -357,7 +394,6 @@ app.on("will-quit", async () => {
   await closeDatabase();
 });
 
-// Security: limit navigation to expected origins
 app.on("web-contents-created", (_event, contents) => {
   contents.on("will-navigate", (event, url) => {
     const allowed = [

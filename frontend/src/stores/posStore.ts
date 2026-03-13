@@ -5,6 +5,7 @@ import {
   cachePOSData,
   getCachedPOSData,
 } from "@/services/dbBridge";
+import { isElectron } from "@/services/electronBridge";
 import type {
   POSOpeningShift,
   POSProfile,
@@ -252,6 +253,29 @@ export const usePosStore = defineStore("pos", () => {
   async function checkExistingShift(): Promise<void> {
     isLoading.value = true;
     try {
+      if (isElectron()) {
+        const { useAuthStore } = await import("@/stores/authStore");
+        const authStore = useAuthStore();
+        const currentUser = authStore.userName;
+
+        const result = await window.electronAPI!.db.checkOpenShift(currentUser) as ShiftCheckResult | null;
+
+        if (result) {
+          posOpeningShift.value = result.pos_opening_shift;
+          posProfile.value = result.pos_profile;
+          company.value = result.company;
+          stockSettings.value = result.stock_settings || {};
+          taxes.value = result.taxes || [];
+          taxInclusiveMode.value = !!(result.tax_inclusive);
+          disableRoundedTotal.value = !!(result.disable_rounded_total);
+          printSettings.value = result.print_settings || null;
+          isReady.value = true;
+        } else {
+          showOpeningDialog.value = true;
+        }
+        return;
+      }
+
       if (!isOnline()) {
         const cachedData = await getCachedPOSData() as ShiftCheckResult | null;
 
@@ -346,6 +370,12 @@ export const usePosStore = defineStore("pos", () => {
 
   async function fetchOpeningData(): Promise<OpeningData | undefined> {
     try {
+      if (isElectron()) {
+        const data = await window.electronAPI!.db.getOpeningData() as unknown as OpeningData;
+        openingData.value = data;
+        return data;
+      }
+
       const data = await call<OpeningData>(
         "xpos.api.shifts.get_opening_data"
       );
@@ -365,6 +395,30 @@ export const usePosStore = defineStore("pos", () => {
     balanceDetails: Record<string, unknown>[]
   ): Promise<OpenShiftResult> {
     try {
+      if (isElectron()) {
+        const { useAuthStore } = await import("@/stores/authStore");
+        const authStore = useAuthStore();
+        await window.electronAPI!.db.createPosOpeningShift({
+          pos_profile: profileName,
+          company: companyName,
+          user: authStore.userName,
+          opening_date: new Date().toISOString().slice(0, 10),
+          opening_amounts: balanceDetails,
+        });
+        const result = await window.electronAPI!.db.checkOpenShift(authStore.userName) as unknown as OpenShiftResult;
+        posOpeningShift.value = result.pos_opening_shift;
+        posProfile.value = result.pos_profile;
+        company.value = result.company;
+        stockSettings.value = result.stock_settings || {};
+        taxes.value = result.taxes || [];
+        taxInclusiveMode.value = !!(result.tax_inclusive);
+        disableRoundedTotal.value = !!(result.disable_rounded_total);
+        printSettings.value = result.print_settings || null;
+        showOpeningDialog.value = false;
+        isReady.value = true;
+        return result;
+      }
+
       const result = await call<OpenShiftResult>(
         "xpos.api.shifts.open_shift",
         {
