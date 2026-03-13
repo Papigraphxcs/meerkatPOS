@@ -269,7 +269,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
       "name", "item_code", "item_name", "item_group", "brand", "description",
       "stock_uom", "image", "has_serial_no", "has_batch_no",
       "has_variants", "variant_of", "is_stock_item", "disabled",
-      "standard_rate", "barcode",
+      "standard_rate",
     ],
     filters: { disabled: 0 },
     orderBy: "modified",

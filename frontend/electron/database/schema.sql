@@ -144,13 +144,11 @@ CREATE TABLE IF NOT EXISTS `items` (
   `disabled` TINYINT(1) DEFAULT 0,
   `standard_rate` DECIMAL(18,6) DEFAULT 0,
   `item_tax_template` VARCHAR(255) DEFAULT NULL,
-  `barcode` VARCHAR(255) DEFAULT NULL,
   `modified` DATETIME DEFAULT NULL,
   `synced_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_item_name` (`item_name`),
   INDEX `idx_item_group` (`item_group`),
   INDEX `idx_brand` (`brand`),
-  INDEX `idx_barcode` (`barcode`),
   INDEX `idx_modified` (`modified`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

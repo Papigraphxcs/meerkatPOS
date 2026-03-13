@@ -64,19 +64,23 @@ export function registerDbHandlers(): void {
   ipcMain.handle("db:get-items", async (_e, opts?: {
     search?: string; group?: string; limit?: number; offset?: number;
   }) => {
-    let sql = "SELECT * FROM `items` WHERE `disabled` = 0";
+    // Join item_barcodes so barcode search works (barcodes live in a separate table)
+    let sql = `SELECT DISTINCT i.*
+      FROM \`items\` i
+      LEFT JOIN \`item_barcodes\` ib ON ib.\`parent\` = i.\`item_code\`
+      WHERE i.\`disabled\` = 0`;
     const params: unknown[] = [];
 
     if (opts?.group && opts.group !== "All Item Groups") {
-      sql += " AND `item_group` = ?";
+      sql += " AND i.`item_group` = ?";
       params.push(opts.group);
     }
     if (opts?.search) {
-      sql += " AND (`item_code` LIKE ? OR `item_name` LIKE ? OR `barcode` LIKE ? OR `description` LIKE ?)";
+      sql += " AND (i.`item_code` LIKE ? OR i.`item_name` LIKE ? OR ib.`barcode` LIKE ? OR i.`description` LIKE ?)";
       const like = `%${opts.search}%`;
       params.push(like, like, like, like);
     }
-    sql += " ORDER BY `item_name` ASC";
+    sql += " ORDER BY i.`item_name` ASC";
     if (opts?.limit) {
       sql += " LIMIT ?";
       params.push(opts.limit);

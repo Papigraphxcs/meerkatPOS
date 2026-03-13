@@ -166,11 +166,34 @@ async function runSchema(): Promise<void> {
   for (const candidate of candidates) {
     if (candidate && fs.existsSync(candidate)) {
       await executeSchemaFile(candidate);
+      await runMigrations();
       return;
     }
   }
 
   log.warn("schema.sql not found, skipping migrations");
+}
+
+/**
+ * Incremental schema migrations that can't be expressed as CREATE TABLE IF NOT EXISTS.
+ * Safe to run on every startup (idempotent).
+ */
+async function runMigrations(): Promise<void> {
+  const db = getPool();
+
+  // Drop the legacy `barcode` column from `items` (barcodes live in `item_barcodes` now)
+  try {
+    const [cols] = await db.execute<RowDataPacket[]>(
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'items' AND COLUMN_NAME = 'barcode'"
+    );
+    if ((cols as RowDataPacket[]).length > 0) {
+      await db.execute("ALTER TABLE `items` DROP INDEX `idx_barcode`").catch(() => {/* index may not exist */});
+      await db.execute("ALTER TABLE `items` DROP COLUMN `barcode`");
+      log.info("Migration: dropped items.barcode column");
+    }
+  } catch (err) {
+    log.warn("Migration check for items.barcode failed", err);
+  }
 }
 
 async function executeSchemaFile(filePath: string): Promise<void> {
