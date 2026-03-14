@@ -1,13 +1,18 @@
 <template>
-    <div class="h-7 flex items-center bg-[#3c3c3c] dark:bg-[#1e1e1e] shrink-0 z-50 px-1 select-none border-b border-[#252526] dark:border-[#252526]"
+    <!-- ref lets the document-click handler detect clicks outside the menu bar -->
+    <div ref="menuBarRef"
+        class="h-7 flex items-center bg-[#3c3c3c] dark:bg-[#1e1e1e] shrink-0 z-50 px-1 select-none border-b border-[#252526] dark:border-[#252526]"
         @click.self="closeAll">
-        <div v-for="menu in menus" :key="menu.label" class="relative">
+        <div v-for="(menu, menuIndex) in menus" :key="menu.label" class="relative">
             <button
                 class="px-2.5 h-7 flex items-center text-[13px] rounded-sm transition-colors duration-75 outline-none"
                 :class="activeMenu === menu.label
                     ? 'bg-[#094771] dark:bg-[#094771] text-white'
-                    : 'text-[#cccccc] hover:bg-[#505050] dark:hover:bg-[#2a2d2e] hover:text-white'" @click="toggleMenu(menu.label)"
-                @mouseenter="activeMenu !== null && activeMenu !== menu.label && (activeMenu = menu.label)">
+                    : focusedMenuIndex === menuIndex && isMenuBarFocused && activeMenu === null
+                        ? 'bg-[#505050] dark:bg-[#2a2d2e] text-white'
+                        : 'text-[#cccccc] hover:bg-[#505050] dark:hover:bg-[#2a2d2e] hover:text-white'"
+                @click.stop="toggleMenu(menu.label, menuIndex)"
+                @mouseenter="handleMenuHover(menu.label, menuIndex)">
                 {{ __(menu.label) }}
             </button>
 
@@ -20,21 +25,22 @@
                             class="w-full flex items-center justify-between px-4 py-1 text-[13px] transition-colors duration-75 outline-none"
                             :class="item.disabled?.()
                                 ? 'text-[#666666] cursor-default'
-                                : 'text-[#cccccc] hover:bg-[#094771] hover:text-white cursor-pointer'" :disabled="item.disabled?.()"
-                            @click="!item.disabled?.() && run(item)">
+                                : focusedItemId === item.id
+                                    ? 'bg-[#094771] text-white cursor-pointer'
+                                    : 'text-[#cccccc] hover:bg-[#094771] hover:text-white cursor-pointer'"
+                            :disabled="item.disabled?.()"
+                            @click.stop="!item.disabled?.() && run(item)"
+                            @mouseenter="!item.disabled?.() && handleItemHover(item.id)">
                             <div class="flex items-center gap-2.5">
                                 <component :is="item.icon" v-if="item.icon" class="w-3.5 h-3.5 flex-shrink-0" />
                                 <span>{{ __(item.label!) }}</span>
                             </div>
-                            <span v-if="item.shortcut" class="ml-8 text-[11px] text-[#666666]">{{ item.shortcut
-                                }}</span>
+                            <span v-if="item.shortcut" class="ml-8 text-[11px] text-[#666666]">{{ item.shortcut }}</span>
                         </button>
                     </template>
                 </div>
             </Transition>
         </div>
-
-        <div v-if="activeMenu" class="fixed inset-0 z-[199]" @click="closeAll" />
     </div>
 
     <AboutDialog :open="showAboutDialog" @close="showAboutDialog = false" />
@@ -71,17 +77,66 @@ const authStore = useAuthStore();
 const toggleDarkMode = inject<() => void>("toggleDarkMode")!;
 const theme = inject<Ref<"light" | "dark" | "system">>("theme")!;
 
+const menuBarRef = ref<HTMLElement | null>(null);
 const activeMenu = ref<string | null>(null);
+// Index of the highlighted top-level menu (keyboard or hover tracking)
+const focusedMenuIndex = ref<number>(-1);
+// ID of the highlighted dropdown item (keyboard or hover tracking)
+const focusedItemId = ref<string | null>(null);
+// True when the menu bar has keyboard focus (Alt pressed)
+const isMenuBarFocused = ref(false);
 const isFullscreen = ref(false);
 const showAboutDialog = ref(false);
 const showShortcutsDialog = ref(false);
 
-function toggleMenu(label: string) {
-    activeMenu.value = activeMenu.value === label ? null : label;
+// Index of the currently open top-level menu
+const activeMenuIdx = computed(() => {
+    if (!activeMenu.value) return -1;
+    return menus.value.findIndex(m => m.label === activeMenu.value);
+});
+
+// Non-separator, non-disabled items from the currently open menu (for keyboard nav)
+function getNavigableItems(): MenuItem[] {
+    const idx = activeMenuIdx.value;
+    if (idx < 0) return [];
+    return menus.value[idx].items.filter(item => !item.separator && !item.disabled?.());
+}
+
+function toggleMenu(label: string, menuIndex: number) {
+    if (activeMenu.value === label) {
+        // Close the open menu but keep keyboard focus on the button
+        activeMenu.value = null;
+        focusedItemId.value = null;
+        focusedMenuIndex.value = menuIndex;
+        isMenuBarFocused.value = true;
+    } else {
+        activeMenu.value = label;
+        focusedMenuIndex.value = menuIndex;
+        focusedItemId.value = null;
+        isMenuBarFocused.value = true;
+    }
+}
+
+// Called when the mouse enters a top-level menu button.
+// If another menu is already open, switch to this one immediately (desktop-app behaviour).
+function handleMenuHover(label: string, menuIndex: number) {
+    focusedMenuIndex.value = menuIndex;
+    if (activeMenu.value !== null && activeMenu.value !== label) {
+        activeMenu.value = label;
+        focusedItemId.value = null;
+    }
+}
+
+// Track which dropdown item the mouse is over (for visual highlight + keyboard continuity)
+function handleItemHover(itemId: string) {
+    focusedItemId.value = itemId;
 }
 
 function closeAll() {
     activeMenu.value = null;
+    focusedMenuIndex.value = -1;
+    focusedItemId.value = null;
+    isMenuBarFocused.value = false;
 }
 
 function run(item: MenuItem) {
@@ -89,17 +144,138 @@ function run(item: MenuItem) {
     item.action?.();
 }
 
-// Focus the first menu item when Alt key is pressed alone
+// Move keyboard focus left / right between top-level menus
+function navigateMenus(delta: number) {
+    const total = menus.value.length;
+    const current = activeMenuIdx.value >= 0
+        ? activeMenuIdx.value
+        : focusedMenuIndex.value >= 0 ? focusedMenuIndex.value : 0;
+    const next = ((current + delta) % total + total) % total;
+    focusedMenuIndex.value = next;
+    isMenuBarFocused.value = true;
+    if (activeMenu.value !== null) {
+        // A menu is open — switch it to the adjacent one
+        activeMenu.value = menus.value[next].label;
+        focusedItemId.value = null;
+    }
+}
+
+// Move keyboard focus up / down through dropdown items
+function navigateItems(delta: number) {
+    if (!activeMenu.value) {
+        // No menu open yet — open the focused top-level menu
+        const idx = focusedMenuIndex.value >= 0 ? focusedMenuIndex.value : 0;
+        activeMenu.value = menus.value[idx]?.label ?? null;
+        focusedMenuIndex.value = idx;
+        isMenuBarFocused.value = true;
+        const items = getNavigableItems();
+        focusedItemId.value = items.length > 0
+            ? (delta > 0 ? items[0].id : items[items.length - 1].id)
+            : null;
+        return;
+    }
+    const items = getNavigableItems();
+    if (items.length === 0) return;
+    const currentIdx = focusedItemId.value
+        ? items.findIndex(i => i.id === focusedItemId.value)
+        : -1;
+    let next = currentIdx + delta;
+    if (next < 0) next = items.length - 1;
+    if (next >= items.length) next = 0;
+    focusedItemId.value = items[next].id;
+}
+
+function handleKeyDown(e: KeyboardEvent) {
+    // Only intercept when the menu bar has focus or a dropdown is open
+    if (!isMenuBarFocused.value && !activeMenu.value) return;
+    // Never intercept while the user is typing in an input
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+    switch (e.key) {
+        case 'ArrowLeft':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            navigateMenus(-1);
+            break;
+        case 'ArrowRight':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            navigateMenus(1);
+            break;
+        case 'ArrowDown':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            navigateItems(1);
+            break;
+        case 'ArrowUp':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            navigateItems(-1);
+            break;
+        case 'Enter':
+        case ' ':
+            if (activeMenu.value && focusedItemId.value) {
+                const item = getNavigableItems().find(i => i.id === focusedItemId.value);
+                if (item) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    run(item);
+                }
+            } else if (!activeMenu.value && isMenuBarFocused.value && focusedMenuIndex.value >= 0) {
+                // Open the highlighted top-level menu
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                activeMenu.value = menus.value[focusedMenuIndex.value]?.label ?? null;
+                focusedItemId.value = null;
+            }
+            break;
+        case 'Escape':
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (activeMenu.value) {
+                // Close dropdown but keep focus on the menu bar
+                activeMenu.value = null;
+                focusedItemId.value = null;
+                // isMenuBarFocused stays true so arrows still work
+            } else {
+                closeAll();
+            }
+            break;
+        case 'Tab':
+            // Tab always escapes the menu bar
+            closeAll();
+            break;
+    }
+}
+
+// Close when the user clicks anywhere outside the menu bar container
+function handleDocumentClick(e: MouseEvent) {
+    if (menuBarRef.value && !menuBarRef.value.contains(e.target as Node)) {
+        closeAll();
+    }
+}
+
+// Toggle keyboard focus on the menu bar when Alt is pressed (from useKeyboardShortcuts)
 function focusMenuBar() {
-    activeMenu.value = activeMenu.value ? null : menus.value[0]?.label || null;
+    if (activeMenu.value || isMenuBarFocused.value) {
+        closeAll();
+    } else {
+        isMenuBarFocused.value = true;
+        focusedMenuIndex.value = 0;
+    }
 }
 
 onMounted(() => {
     window.addEventListener("xpos:focus-menubar", focusMenuBar);
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("click", handleDocumentClick);
 });
 
 onUnmounted(() => {
     window.removeEventListener("xpos:focus-menubar", focusMenuBar);
+    window.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("click", handleDocumentClick);
 });
 
 async function toggleFullscreen() {

@@ -322,7 +322,6 @@ ipcMain.handle("node:trigger-till-sync", async () => {
   }
 });
 
-// ── Print IPC Handlers ──────────────────────────────────────────
 ipcMain.handle("print:invoice", async (_event, data: {
   localId: number;
   data: unknown;
@@ -401,7 +400,6 @@ ipcMain.handle("print:invoice", async (_event, data: {
       </html>
     `;
 
-    // Create a hidden print window
     const printWin = new BrowserWindow({
       show: false,
       webPreferences: { nodeIntegration: false, contextIsolation: true },
@@ -501,7 +499,6 @@ app.whenReady().then(async () => {
         log.error("Hub server failed to start", e)
       );
 
-      // Auto-start sync engine if credentials are already configured
       const apiKey = await getMeta("api_key");
       const apiSecret = await getMeta("api_secret");
       const serverUrl = await getMeta("server_url");

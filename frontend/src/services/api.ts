@@ -1,18 +1,11 @@
-/**
- * X POS API Service
- * Works in standalone SPA mode, embedded Frappe desk mode, and Electron desktop mode.
- */
-
 import { showSuccess as toastSuccess, showError as toastError, showInfo as toastInfo } from "@/composables/useToast";
 import { isOnline, isNetworkError } from "@/utils";
 import { isElectron, getApiBaseUrlSync, getApiCredentialsSync } from "@/services/electronBridge";
 import { getMeta } from "./idbService";
 
-// Re-export isNetworkError for backwards compatibility
 export { isNetworkError } from "@/utils";
 
 function getCsrfToken(): string {
-  // Try multiple sources for CSRF token
   return (
     window.xpos?.csrf_token ||
     (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ||
@@ -20,12 +13,6 @@ function getCsrfToken(): string {
   );
 }
 
-/**
- * Make an API call using native fetch (standalone mode).
- * Throws with message "__offline__" when the browser is offline
- * **or** when the fetch itself fails due to a network error,
- * so callers can catch and fall back to cache.
- */
 async function fetchCall<T = unknown>(
   method: string,
   args: Record<string, unknown> = {}

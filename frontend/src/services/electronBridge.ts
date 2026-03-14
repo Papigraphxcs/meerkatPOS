@@ -92,44 +92,29 @@ export interface ElectronNodeAPI {
 }
 
 export interface ElectronDbAPI {
-  // Settings
   getSetting: (key: string) => Promise<string | null>;
   setSetting: (key: string, value: string, category?: string) => Promise<boolean>;
   getSettingsByCategory: (category: string) => Promise<{ key: string; value: string }[]>;
   getAllSettings: () => Promise<{ key: string; value: string; category: string }[]>;
-
-  // Database config
   testConnection: (config: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
   getConfig: () => Promise<Record<string, unknown>>;
   reinit: (config: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
-
-  // Items
   getItems: (opts?: { search?: string; group?: string; limit?: number; offset?: number; priceList?: string; warehouse?: string }) => Promise<Record<string, unknown>[]>;
   getItem: (itemCode: string) => Promise<Record<string, unknown> | null>;
   upsertItems: (rows: Record<string, unknown>[]) => Promise<void>;
   countItems: () => Promise<number>;
   clearItems: () => Promise<void>;
-
-  // Item Groups
   getItemGroups: () => Promise<Record<string, unknown>[]>;
   upsertItemGroups: (rows: Record<string, unknown>[]) => Promise<void>;
-
-  // Customers
   getCustomers: (opts?: { search?: string; limit?: number }) => Promise<Record<string, unknown>[]>;
   getCustomer: (name: string) => Promise<Record<string, unknown> | null>;
   upsertCustomers: (rows: Record<string, unknown>[]) => Promise<void>;
   addLocalCustomer: (customer: Record<string, unknown>) => Promise<{ name: string; local_id: string }>;
-
-  // Suppliers
   getSuppliers: (opts?: { search?: string; limit?: number }) => Promise<Record<string, unknown>[]>;
   upsertSuppliers: (rows: Record<string, unknown>[]) => Promise<void>;
-
-  // Stock
   getStock: (warehouse: string, itemCode?: string) => Promise<Record<string, unknown> | Record<string, unknown>[]>;
   upsertStock: (warehouse: string, entries: { item_code: string; actual_qty: number }[]) => Promise<void>;
   updateStockQty: (warehouse: string, itemCode: string, qty: number) => Promise<boolean>;
-
-  // Pending Invoices
   addPendingInvoice: (record: { data: unknown; customer_name?: string; grand_total?: number }) => Promise<{ id: number; local_id: string }>;
   getPendingInvoice: (id: number) => Promise<{
     id: number;
@@ -145,43 +130,25 @@ export interface ElectronDbAPI {
   updatePendingInvoice: (id: number, updates: Record<string, unknown>) => Promise<boolean>;
   deletePendingInvoice: (id: number) => Promise<boolean>;
   countPendingInvoices: () => Promise<number>;
-
-  // Pending Purchases
   addPendingPurchase: (record: { type: string; data: unknown; supplier_name?: string; grand_total?: number }) => Promise<{ id: number; local_id: string }>;
   getPendingPurchases: (opts?: { type?: string; status?: string }) => Promise<Record<string, unknown>[]>;
   updatePendingPurchase: (id: number, updates: Record<string, unknown>) => Promise<boolean>;
   deletePendingPurchase: (id: number) => Promise<boolean>;
   countPendingPurchases: () => Promise<number>;
-
-  // Sync ID Map
   addSyncId: (localId: string, serverName: string, doctype: string) => Promise<boolean>;
   getServerName: (localId: string) => Promise<string | null>;
-
-  // Sync Metadata
   getMeta: (key: string) => Promise<string | null>;
   setMeta: (key: string, value: string) => Promise<boolean>;
-
-  // POS Profile Cache
   cachePosData: (name: string, data: unknown) => Promise<boolean>;
   getCachedPosData: (name: string) => Promise<unknown>;
-
-  // Item Tax Cache
   cacheItemTax: (itemCode: string, company: string, data: { item_tax_template: string | null; item_tax_map: Record<string, number> }) => Promise<boolean>;
   getCachedItemTax: (itemCode: string, company: string) => Promise<{ item_tax_template: string; item_tax_map: Record<string, number> } | null>;
-
-  // POS Users
   getPosUser: (username: string) => Promise<Record<string, unknown> | null>;
   createLocalUser: (user: { username: string; full_name: string; password: string; role?: string }) => Promise<{ success: boolean; error?: string }>;
-
-  // POS Opening Shifts
   createPosOpeningShift: (shift: Record<string, unknown>) => Promise<Record<string, unknown>>;
   getOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
   checkOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
-
-  // Opening Data (profiles + companies)
   getOpeningData: () => Promise<Record<string, unknown>>;
-
-  // Bulk Operations
   clearAllData: () => Promise<boolean>;
   clearPendingData: () => Promise<boolean>;
 }
@@ -192,23 +159,15 @@ declare global {
   }
 }
 
-/** True when running inside Electron (preload script exposed electronAPI). */
 export function isElectron(): boolean {
   return typeof window !== "undefined" && !!window.electronAPI;
 }
 
-/** Cached server URL to avoid async lookups on every API call. */
 let _serverUrl: string | null = null;
 
-/** Cached API credentials to avoid async lookups on every API call. */
 let _apiKey: string | null = null;
 let _apiSecret: string | null = null;
 
-/**
- * Get the base URL for API calls.
- * - Browser/PWA: returns "" (same origin, relative URLs)
- * - Electron: returns the configured server URL (e.g. "https://erp.example.com")
- */
 export async function getApiBaseUrl(): Promise<string> {
   if (!isElectron()) return "";
 
@@ -218,18 +177,11 @@ export async function getApiBaseUrl(): Promise<string> {
   return _serverUrl;
 }
 
-/**
- * Synchronous version — returns cached value or empty string.
- * Call `getApiBaseUrl()` at least once during init to warm the cache.
- */
 export function getApiBaseUrlSync(): string {
   if (!isElectron()) return "";
   return _serverUrl || "";
 }
 
-/**
- * Update the server URL (e.g. from a settings screen).
- */
 export async function setServerUrl(url: string): Promise<void> {
   if (isElectron()) {
     await window.electronAPI!.setServerUrl(url);
@@ -237,34 +189,20 @@ export async function setServerUrl(url: string): Promise<void> {
   _serverUrl = url;
 }
 
-/**
- * Clear the cached server URL (on logout).
- */
 export function clearServerUrlCache(): void {
   _serverUrl = null;
 }
 
-/**
- * Warm the API credential cache from the local DB.
- * Call once at startup so getApiCredentialsSync() works synchronously.
- */
 export async function warmApiCredentials(): Promise<void> {
   if (!isElectron()) return;
   _apiKey = await window.electronAPI!.db.getMeta("api_key");
   _apiSecret = await window.electronAPI!.db.getMeta("api_secret");
 }
 
-/**
- * Synchronous — returns cached API key and secret.
- * Returns null values if not yet warmed or not configured.
- */
 export function getApiCredentialsSync(): { apiKey: string | null; apiSecret: string | null } {
   return { apiKey: _apiKey, apiSecret: _apiSecret };
 }
 
-/**
- * Clear the cached API credentials (on logout).
- */
 export function clearApiCredentialsCache(): void {
   _apiKey = null;
   _apiSecret = null;
