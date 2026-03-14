@@ -168,6 +168,11 @@ async function pullTable(config: SyncTableConfig): Promise<number> {
   let totalPulled = 0;
   let start = 0;
   let hasMore = true;
+  // Track the most recent modified timestamp returned by the server.
+  // Using the server's own timestamps (rather than new Date() on the client)
+  // ensures timezone-independent incremental sync — if the server clock differs
+  // from the client clock, the next sync filter is still correct.
+  let maxServerModified: string | null = null;
 
   while (hasMore) {
     const filters: Record<string, unknown> = { ...(config.filters || {}) };
@@ -192,9 +197,32 @@ async function pullTable(config: SyncTableConfig): Promise<number> {
       break;
     }
 
-    // Write batch directly to local MariaDB
+    // Track max modified from server records for incremental timestamp
+    for (const row of batch) {
+      const m = row["modified"] as string | undefined;
+      if (m && (!maxServerModified || m > maxServerModified)) {
+        maxServerModified = m;
+      }
+    }
+
+    // Write batch directly to local MariaDB.
+    // Normalize rows first: Frappe always returns 'name' but some local tables
+    // (e.g. items) use a different primary key and have no 'name' column.
+    // Strip 'name' for those tables; seed the real PK from it if missing.
     const primaryKey = getPrimaryKeyForTable(config.idbStore);
-    await upsertBatch(config.idbStore, batch, primaryKey);
+    const processedBatch = primaryKey === "name"
+      ? batch
+      : batch.map((row) => {
+          const r: Record<string, unknown> = { ...row };
+          if ("name" in r) {
+            if (r[primaryKey] === undefined || r[primaryKey] === null) {
+              r[primaryKey] = r["name"];
+            }
+            delete r["name"];
+          }
+          return r;
+        });
+    await upsertBatch(config.idbStore, processedBatch, primaryKey);
 
     totalPulled += batch.length;
     start += config.batchSize;
@@ -211,9 +239,12 @@ async function pullTable(config: SyncTableConfig): Promise<number> {
     }
   }
 
-  // Update last sync timestamp
+  // Update last sync timestamp.
+  // Prefer the server's max modified timestamp so the next incremental filter
+  // is expressed in the server's own timezone — avoids clock-skew gaps.
   if (totalPulled > 0 || !config.incremental) {
-    await setMeta(`last_sync_${config.idbStore}`, new Date().toISOString());
+    const newTimestamp = maxServerModified ?? new Date().toISOString();
+    await setMeta(`last_sync_${config.idbStore}`, newTimestamp);
   }
 
   return totalPulled;

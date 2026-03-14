@@ -64,26 +64,8 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function checkOfflineAuth(): Promise<boolean> {
-    try {
-      const lastUser = await window.electronAPI!.db.getSetting("last_logged_user");
-      if (!lastUser) return false;
-
-      const posUser = await window.electronAPI!.db.getPosUser(lastUser);
-      if (!posUser) return false;
-
-      const userData = posUser as Record<string, unknown>;
-      isAuthenticated.value = true;
-      isOfflineAuth.value = true;
-      user.value = {
-        user: lastUser,
-        user_email: (userData.email as string) || lastUser,
-        user_fullname: (userData.full_name as string) || lastUser,
-      };
-      await loadPermissions(lastUser);
-      return true;
-    } catch {
-      return false;
-    }
+    // Always require fresh credentials — never restore session from cache
+    return false;
   }
 
   async function login(username: string, password: string): Promise<boolean> {
@@ -208,8 +190,17 @@ export const useAuthStore = defineStore("auth", () => {
       isOfflineAuth.value = false;
       user.value = null;
       resetPermissions();
-      
-      window.location.href = "/xpos/login";
+
+      // Clear cached credentials so next startup forces fresh login
+      if (isElectron()) {
+        try {
+          await window.electronAPI!.db.setSetting("last_logged_user", "", "auth");
+        } catch { /* ignore */ }
+        window.location.hash = "#/login";
+        window.location.reload();
+      } else {
+        window.location.href = "/xpos/login";
+      }
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {

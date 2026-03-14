@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { call, isNetworkError } from "@/services/api";
+import { isElectron } from "@/services/electronBridge";
 import { usePosStore } from "@/stores/posStore";
 import {
   cacheItems as idbCacheItems,
@@ -65,6 +66,8 @@ export const useItemStore = defineStore("items", () => {
   });
 
   async function cacheAllItems(posProfile: string): Promise<void> {
+    // In Electron mode the sync engine populates the local MariaDB — no direct API caching needed.
+    if (isElectron()) return;
     try {
       const batchSize = 200;
       let start = 0;
@@ -99,6 +102,8 @@ export const useItemStore = defineStore("items", () => {
   }
 
   async function cacheAllStock(posProfile: string, warehouse: string, allItems?: POSItem[]): Promise<void> {
+    // In Electron mode the sync engine syncs Bin data — stock_cache is managed separately.
+    if (isElectron()) return;
     if (!isOnline()) {
       console.warn("[XPOS Offline] Cannot cache stock - system is offline");
       return;
@@ -146,6 +151,28 @@ export const useItemStore = defineStore("items", () => {
     isLoading.value = true;
 
     try {
+      // Electron: always read items from local MariaDB (sync engine keeps it up to date)
+      if (isElectron()) {
+        const posStoreRef = usePosStore();
+        const results = await window.electronAPI!.db.getItems({
+          search: searchTerm.value || undefined,
+          group: selectedGroup.value === "All Item Groups" ? undefined : selectedGroup.value,
+          limit: pageLength.value,
+          offset: append ? items.value.length : undefined,
+          priceList: posStoreRef.sellingPriceList || undefined,
+          warehouse: posStoreRef.warehouse || undefined,
+        }) as POSItem[];
+
+        if (append) {
+          items.value = [...items.value, ...results];
+        } else {
+          items.value = results;
+          currentPage.value = 0;
+        }
+        hasMore.value = results.length === pageLength.value;
+        return;
+      }
+
       if (!isOnline()) {
         const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
 
@@ -219,6 +246,14 @@ export const useItemStore = defineStore("items", () => {
 
   async function fetchItemGroups(): Promise<void> {
     try {
+      // Electron: read item groups from local MariaDB
+      if (isElectron()) {
+        const all = await window.electronAPI!.db.getItemGroups() as ItemGroup[];
+        itemGroups.value = all;
+        parentGroups.value = all.filter(g => !!g.is_group);
+        return;
+      }
+
       if (!isOnline()) {
         const cached = await idbGetCachedGroups();
         itemGroups.value = cached.groups;
@@ -253,6 +288,22 @@ export const useItemStore = defineStore("items", () => {
     _posProfile?: string
   ): Promise<POSItem | null> {
     try {
+      // Electron: lookup barcode in local MariaDB (item_barcodes joined to items)
+      if (isElectron()) {
+        const lower = barcode.toLowerCase();
+        const posStoreRef = usePosStore();
+        const all = await window.electronAPI!.db.getItems({
+          search: barcode,
+          priceList: posStoreRef.sellingPriceList || undefined,
+          warehouse: posStoreRef.warehouse || undefined,
+        }) as POSItem[];
+        return all.find(
+          (i) =>
+            (i.barcode && String(i.barcode).toLowerCase() === lower) ||
+            i.item_code.toLowerCase() === lower
+        ) || null;
+      }
+
       if (!isOnline()) {
         const cached = await idbGetCachedItems();
         const lower = barcode.toLowerCase();

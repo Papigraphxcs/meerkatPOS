@@ -88,3 +88,57 @@ def get_child_table_data(
         page_length=limit_page_length,
         ignore_permissions=True,
     )
+
+
+@frappe.whitelist()
+def get_item_prices(
+    fields=None,
+    filters=None,
+    order_by="modified asc",
+    limit_start=0,
+    limit_page_length=500,
+):
+    """Return Item Price records for the sync engine.
+
+    Uses ``ignore_permissions=True`` so the POS API key user does not
+    need explicit read permission on the Item Price doctype.  Only
+    selling-relevant fields are exposed.
+
+    Args:
+        fields: JSON string or list of field names to return.
+        filters: JSON string or dict of additional filters.
+        order_by: ORDER BY clause (default ``"modified asc"``).
+        limit_start: Pagination offset.
+        limit_page_length: Page size (default 500).
+
+    Returns:
+        list[dict]: Matching Item Price records.
+    """
+    if isinstance(fields, str):
+        fields = json.loads(fields)
+    if isinstance(filters, str):
+        filters = json.loads(filters)
+    if not isinstance(filters, dict):
+        filters = {}
+
+    limit_start = cint(limit_start)
+    limit_page_length = cint(limit_page_length)
+
+    # Default to the full set of fields the sync engine needs
+    if not fields:
+        fields = [
+            "name", "item_code", "item_name", "price_list",
+            "buying", "selling", "currency", "price_list_rate",
+            "uom", "valid_from", "valid_upto", "modified",
+        ]
+
+    return frappe.get_all(
+        "Item Price",
+        fields=fields,
+        filters=filters,
+        order_by=order_by,
+        start=limit_start,
+        page_length=limit_page_length,
+        ignore_permissions=True,
+    )
+

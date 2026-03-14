@@ -194,6 +194,33 @@ async function runMigrations(): Promise<void> {
   } catch (err) {
     log.warn("Migration check for items.barcode failed", err);
   }
+
+  // Add missing operational columns to pos_profiles (existing installs lack these)
+  const posProfileMigrations: [string, string][] = [
+    ["allow_rate_change",            "TINYINT(1) NOT NULL DEFAULT 0"],
+    ["hide_images",                  "TINYINT(1) NOT NULL DEFAULT 0"],
+    ["hide_unavailable_items",       "TINYINT(1) NOT NULL DEFAULT 0"],
+    ["block_sale_beyond_available_qty", "TINYINT(1) NOT NULL DEFAULT 0"],
+    ["display_items_in_stock",       "TINYINT(1) NOT NULL DEFAULT 0"],
+    ["cash_mode_of_payment",         "VARCHAR(255) DEFAULT NULL"],
+    ["apply_customer_discount",      "TINYINT(1) NOT NULL DEFAULT 0"],
+    ["allow_print_draft_invoices",   "TINYINT(1) NOT NULL DEFAULT 0"],
+    ["use_offline_mode",             "TINYINT(1) NOT NULL DEFAULT 0"],
+  ];
+  for (const [col, typedef] of posProfileMigrations) {
+    try {
+      const [existing] = await db.execute<RowDataPacket[]>(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pos_profiles' AND COLUMN_NAME = ?",
+        [col]
+      );
+      if ((existing as RowDataPacket[]).length === 0) {
+        await db.execute(`ALTER TABLE \`pos_profiles\` ADD COLUMN \`${col}\` ${typedef}`);
+        log.info(`Migration: added pos_profiles.${col}`);
+      }
+    } catch (err) {
+      log.warn(`Migration for pos_profiles.${col} failed`, err);
+    }
+  }
 }
 
 async function executeSchemaFile(filePath: string): Promise<void> {

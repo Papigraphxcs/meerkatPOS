@@ -5,7 +5,7 @@
 
 import { showSuccess as toastSuccess, showError as toastError, showInfo as toastInfo } from "@/composables/useToast";
 import { isOnline, isNetworkError } from "@/utils";
-import { isElectron, getApiBaseUrlSync } from "@/services/electronBridge";
+import { isElectron, getApiBaseUrlSync, getApiCredentialsSync } from "@/services/electronBridge";
 import { getMeta } from "./idbService";
 
 // Re-export isNetworkError for backwards compatibility
@@ -41,6 +41,15 @@ async function fetchCall<T = unknown>(
     "Accept": "application/json",
     "X-Frappe-CSRF-Token": csrfToken,
   };
+
+  // In Electron, inject API key auth so Frappe sees an authenticated user
+  // (cross-origin fetch can't use session cookies reliably)
+  if (isElectron()) {
+    const { apiKey, apiSecret } = getApiCredentialsSync();
+    if (apiKey && apiSecret) {
+      (headers as Record<string, string>)["Authorization"] = `token ${apiKey}:${apiSecret}`;
+    }
+  }
 
   // In Electron, API calls go to the remote server (absolute URL).
   // In browser/PWA, same-origin relative URLs.

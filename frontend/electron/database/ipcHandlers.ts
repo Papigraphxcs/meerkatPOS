@@ -63,13 +63,34 @@ export function registerDbHandlers(): void {
 
   ipcMain.handle("db:get-items", async (_e, opts?: {
     search?: string; group?: string; limit?: number; offset?: number;
+    priceList?: string; warehouse?: string;
   }) => {
-    // Join item_barcodes so barcode search works (barcodes live in a separate table)
-    let sql = `SELECT DISTINCT i.*
+    // Correlated subqueries for price and stock avoid duplicate rows from JOINs.
+    // The item_barcodes LEFT JOIN is only for search filtering.
+    const params: unknown[] = [
+      opts?.priceList || "",  // price subquery
+      opts?.warehouse || "",  // stock_cache subquery
+      opts?.warehouse || "",  // bins subquery
+    ];
+
+    let sql = `SELECT DISTINCT i.*,
+      COALESCE(
+        (SELECT ip.\`price_list_rate\` FROM \`item_prices\` ip
+         WHERE ip.\`item_code\` = i.\`item_code\` AND ip.\`price_list\` = ? AND ip.\`selling\` = 1
+         ORDER BY ip.\`valid_from\` DESC LIMIT 1),
+        i.\`standard_rate\`, 0
+      ) AS rate,
+      i.\`stock_uom\` AS uom,
+      COALESCE(
+        (SELECT sc.\`actual_qty\` FROM \`stock_cache\` sc
+         WHERE sc.\`item_code\` = i.\`item_code\` AND sc.\`warehouse\` = ? LIMIT 1),
+        (SELECT b.\`actual_qty\` FROM \`bins\` b
+         WHERE b.\`item_code\` = i.\`item_code\` AND b.\`warehouse\` = ? LIMIT 1),
+        0
+      ) AS actual_qty
       FROM \`items\` i
       LEFT JOIN \`item_barcodes\` ib ON ib.\`parent\` = i.\`item_code\`
       WHERE i.\`disabled\` = 0`;
-    const params: unknown[] = [];
 
     if (opts?.group && opts.group !== "All Item Groups") {
       sql += " AND i.`item_group` = ?";
@@ -731,18 +752,22 @@ export function registerDbHandlers(): void {
       "SELECT * FROM `pos_profiles` WHERE `name` = ?",
       [posProfileName]
     );
-    if (!profile) return null;
+
+    // If the POS Profile hasn't synced yet, build a minimal stand-in so the POS
+    // can open without showing the opening dialog on every startup.
+    const profileData = profile || { name: posProfileName, company: shift.company, disabled: 0 };
 
     const payments = await query<Record<string, unknown>>(
       "SELECT `mode_of_payment`, `default` FROM `pos_payment_methods` WHERE `parent` = ?",
       [posProfileName]
     );
-    const profileWithPayments = { ...profile, payments };
+    const profileWithPayments = { ...profileData, payments };
 
-    const companyRow = await queryOne<Record<string, unknown>>(
+    const companyName = (profileData.company || shift.company) as string;
+    const companyRow = companyName ? await queryOne<Record<string, unknown>>(
       "SELECT * FROM `companies` WHERE `name` = ?",
-      [profile.company as string]
-    );
+      [companyName]
+    ) : null;
 
     const balanceDetails = await query<Record<string, unknown>>(
       "SELECT `mode_of_payment`, `opening_amount` FROM `pos_opening_entry_details` WHERE `parent_id` = ?",
@@ -752,7 +777,7 @@ export function registerDbHandlers(): void {
     const posOpeningShift = {
       name: String(shift.id),
       pos_profile: posProfileName,
-      company: profile.company,
+      company: companyName,
       user: shift.user,
       period_start_date: shift.period_start_date || shift.posting_date,
       posting_date: shift.posting_date,
@@ -762,7 +787,7 @@ export function registerDbHandlers(): void {
     return {
       pos_opening_shift: posOpeningShift,
       pos_profile: profileWithPayments,
-      company: companyRow || { name: profile.company, company_name: profile.company, default_currency: profile.currency },
+      company: companyRow || { name: companyName, company_name: companyName, default_currency: (profileData.currency as string) || "" },
       stock_settings: {},
       taxes: [],
       tax_inclusive: false,

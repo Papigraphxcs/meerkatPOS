@@ -235,6 +235,10 @@ export const SYNC_TABLES: SyncTableConfig[] = [
       "selling_price_list", "write_off_account", "write_off_cost_center",
       "customer", "income_account", "expense_account",
       "taxes_and_charges", "tax_category", "apply_discount_on", "disabled",
+      "allow_rate_change", "hide_images", "hide_unavailable_items",
+      "block_sale_beyond_available_qty", "display_items_in_stock",
+      "cash_mode_of_payment", "apply_customer_discount",
+      "allow_print_draft_invoices", "use_offline_mode",
     ],
     orderBy: "modified",
     direction: "pull",
@@ -266,7 +270,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     doctype: "Item",
     label: "Items",
     fields: [
-      "name", "item_code", "item_name", "item_group", "brand", "description",
+      "item_code", "item_name", "item_group", "brand", "description",
       "stock_uom", "image", "has_serial_no", "has_batch_no",
       "has_variants", "variant_of", "is_stock_item", "disabled",
       "standard_rate",
@@ -314,9 +318,10 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   {
     doctype: "Item Price",
     label: "Item Prices",
+    pullMethod: "xpos.api.sync.get_item_prices",
     fields: [
       "name", "item_code", "item_name", "price_list", "buying", "selling",
-      "currency", "price_list_rate", "uom", "valid_from", "valid_upto",
+      "currency", "price_list_rate", "uom", "valid_from", "valid_upto", "modified",
     ],
     orderBy: "modified",
     direction: "pull",
@@ -325,7 +330,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     incremental: true,
     batchSize: 500,
     pullOrder: 12,
-    isCompanyBased: true,
     dependsOn: ["items", "price_lists"],
   },
   {
@@ -440,10 +444,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     parentDoctype: "Sales Taxes and Charges Template",
     dependsOn: ["sales_taxes_templates"],
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // MASTER DATA — Pricing Rules
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "Pricing Rule",
     label: "Pricing Rules",
@@ -516,10 +516,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     parentDoctype: "Pricing Rule",
     dependsOn: ["pricing_rules"],
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // MASTER DATA — Parties
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "Customer",
     label: "Customers",

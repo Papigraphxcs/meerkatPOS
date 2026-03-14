@@ -79,7 +79,7 @@ export const usePosStore = defineStore("pos", () => {
   );
 
   const defaultCustomer = computed(
-    () => posProfile.value?.default_customer || ""
+    () => posProfile.value?.customer || posProfile.value?.default_customer || ""
   );
 
   const allowEditRate = computed(

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, session } from "electron";
+import { app, BrowserWindow, ipcMain, shell, session, Menu } from "electron";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -46,11 +46,15 @@ function createWindow(): void {
       nodeIntegration: false,
       sandbox: false,
     },
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     show: false,
   });
 
+  // Remove the native menu bar entirely — we use our own in-app menu
+  mainWindow.setMenu(null);
+
   mainWindow.once("ready-to-show", () => {
+    mainWindow?.maximize();
     mainWindow?.show();
   });
 
@@ -319,6 +323,8 @@ ipcMain.handle("node:trigger-till-sync", async () => {
 });
 
 app.whenReady().then(async () => {
+  Menu.setApplicationMenu(null);
+
   try {
     const ses = session.defaultSession;
     await ses.clearStorageData({ storages: ["cookies"] });

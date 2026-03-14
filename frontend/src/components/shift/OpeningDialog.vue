@@ -104,8 +104,8 @@
 				</CardContent>
 			</Card>
 
-			<!-- Back to desk link -->
-			<div class="text-center mt-4">
+			<!-- Back to desk link — hidden in Electron (no Frappe desk available) -->
+			<div v-if="!isElectronMode" class="text-center mt-4">
 				<a href="/app" class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline">
 					← Back to Desk
 				</a>
@@ -123,6 +123,9 @@ import { NumberInput } from "@/components/ui/number-input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Zap, Loader2, Lock, RefreshCw } from "lucide-vue-next";
 import { useSyncStatus } from "@/composables/useSyncStatus";
+import { isElectron } from "@/services/electronBridge";
+
+const isElectronMode = isElectron();
 
 interface ProfileOption {
 	name: string;

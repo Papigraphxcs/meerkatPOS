@@ -5,7 +5,7 @@ import { createPinia } from "pinia";
 import App from "./App.vue";
 import { router } from "./router";
 import { showError } from "@/services/api";
-import { isElectron, getApiBaseUrl } from "@/services/electronBridge";
+import { isElectron, getApiBaseUrl, warmApiCredentials } from "@/services/electronBridge";
 
 // Register PWA service worker only in browser mode (not Electron)
 if (!isElectron()) {
@@ -29,9 +29,12 @@ if (!isElectron()) {
     });
   });
 } else {
-  // Warm the server URL cache early
+  // Warm the server URL and API credential caches early
   getApiBaseUrl().then((url) => {
     console.log("[XPOS Electron] Server URL:", url);
+  });
+  warmApiCredentials().then(() => {
+    console.log("[XPOS Electron] API credentials cache warmed");
   });
 }
 

@@ -115,7 +115,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.invoke("db:reinit", config),
 
     // Items
-    getItems: (opts?: { search?: string; group?: string; limit?: number; offset?: number }) =>
+    getItems: (opts?: { search?: string; group?: string; limit?: number; offset?: number; priceList?: string; warehouse?: string }) =>
       ipcRenderer.invoke("db:get-items", opts),
     getItem: (itemCode: string) => ipcRenderer.invoke("db:get-item", itemCode),
     upsertItems: (rows: Record<string, unknown>[]) =>

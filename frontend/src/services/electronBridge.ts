@@ -86,7 +86,7 @@ export interface ElectronDbAPI {
   reinit: (config: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
 
   // Items
-  getItems: (opts?: { search?: string; group?: string; limit?: number; offset?: number }) => Promise<Record<string, unknown>[]>;
+  getItems: (opts?: { search?: string; group?: string; limit?: number; offset?: number; priceList?: string; warehouse?: string }) => Promise<Record<string, unknown>[]>;
   getItem: (itemCode: string) => Promise<Record<string, unknown> | null>;
   upsertItems: (rows: Record<string, unknown>[]) => Promise<void>;
   countItems: () => Promise<number>;
@@ -172,6 +172,10 @@ export function isElectron(): boolean {
 /** Cached server URL to avoid async lookups on every API call. */
 let _serverUrl: string | null = null;
 
+/** Cached API credentials to avoid async lookups on every API call. */
+let _apiKey: string | null = null;
+let _apiSecret: string | null = null;
+
 /**
  * Get the base URL for API calls.
  * - Browser/PWA: returns "" (same origin, relative URLs)
@@ -210,4 +214,30 @@ export async function setServerUrl(url: string): Promise<void> {
  */
 export function clearServerUrlCache(): void {
   _serverUrl = null;
+}
+
+/**
+ * Warm the API credential cache from the local DB.
+ * Call once at startup so getApiCredentialsSync() works synchronously.
+ */
+export async function warmApiCredentials(): Promise<void> {
+  if (!isElectron()) return;
+  _apiKey = await window.electronAPI!.db.getMeta("api_key");
+  _apiSecret = await window.electronAPI!.db.getMeta("api_secret");
+}
+
+/**
+ * Synchronous — returns cached API key and secret.
+ * Returns null values if not yet warmed or not configured.
+ */
+export function getApiCredentialsSync(): { apiKey: string | null; apiSecret: string | null } {
+  return { apiKey: _apiKey, apiSecret: _apiSecret };
+}
+
+/**
+ * Clear the cached API credentials (on logout).
+ */
+export function clearApiCredentialsCache(): void {
+  _apiKey = null;
+  _apiSecret = null;
 }
