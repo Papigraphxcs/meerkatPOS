@@ -50,6 +50,24 @@ export interface ElectronAPI {
   db: ElectronDbAPI;
   update: ElectronUpdateAPI;
   node: ElectronNodeAPI;
+  print: ElectronPrintAPI;
+}
+
+export interface ElectronPrintAPI {
+  printInvoice: (data: {
+    localId: number;
+    data: unknown;
+    customerName: string;
+    grandTotal: number;
+    isReturn: boolean;
+    printFormat: string;
+    letterHead: string;
+    companyName: string;
+  }) => Promise<{ success: boolean; error?: string }>;
+  printReport: (html: string, options?: {
+    landscape?: boolean;
+    margins?: Record<string, number>;
+  }) => Promise<{ success: boolean; error?: string }>;
 }
 
 export interface ElectronUpdateAPI {
@@ -113,6 +131,16 @@ export interface ElectronDbAPI {
 
   // Pending Invoices
   addPendingInvoice: (record: { data: unknown; customer_name?: string; grand_total?: number }) => Promise<{ id: number; local_id: string }>;
+  getPendingInvoice: (id: number) => Promise<{
+    id: number;
+    local_id: string;
+    data: Record<string, unknown>;
+    status: string;
+    customer_name: string | null;
+    grand_total: number;
+    is_return: boolean;
+    is_draft: boolean;
+  } | null>;
   getPendingInvoices: (status?: string) => Promise<Record<string, unknown>[]>;
   updatePendingInvoice: (id: number, updates: Record<string, unknown>) => Promise<boolean>;
   deletePendingInvoice: (id: number) => Promise<boolean>;

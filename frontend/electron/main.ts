@@ -322,6 +322,146 @@ ipcMain.handle("node:trigger-till-sync", async () => {
   }
 });
 
+// ── Print IPC Handlers ──────────────────────────────────────────
+ipcMain.handle("print:invoice", async (_event, data: {
+  localId: number;
+  data: unknown;
+  customerName: string;
+  grandTotal: number;
+  isReturn: boolean;
+  printFormat: string;
+  letterHead: string;
+  companyName: string;
+}) => {
+  try {
+    const win = BrowserWindow.getFocusedWindow();
+    if (!win) {
+      return { success: false, error: "No active window" };
+    }
+
+    // Generate print HTML from invoice data
+    const invoiceData = data.data as Record<string, unknown>;
+    const items = (invoiceData.items || []) as Array<{
+      item_code: string; item_name: string; qty: number; rate: number; amount: number;
+    }>;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Invoice #${data.localId}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .company { font-size: 16px; font-weight: bold; }
+          .divider { border-top: 1px dashed #000; margin: 10px 0; }
+          .row { display: flex; justify-content: space-between; margin: 5px 0; }
+          .items { margin: 10px 0; }
+          .item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 5px; margin: 5px 0; }
+          .total { font-weight: bold; font-size: 14px; }
+          .footer { text-align: center; margin-top: 20px; font-size: 10px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="company">${data.companyName || "XPOS"}</div>
+          <div>${data.isReturn ? "RETURN" : "INVOICE"}</div>
+          <div>Local #${data.localId}</div>
+          <div>${new Date().toLocaleString()}</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <span>Customer:</span>
+          <span>${data.customerName || "Walk-in Customer"}</span>
+        </div>
+        <div class="divider"></div>
+        <div class="items">
+          <div class="item" style="font-weight: bold;">
+            <span>Item</span><span>Qty</span><span>Rate</span><span>Amount</span>
+          </div>
+          ${items.map(item => `
+            <div class="item">
+              <span>${item.item_name || item.item_code}</span>
+              <span>${item.qty}</span>
+              <span>${item.rate?.toFixed(2)}</span>
+              <span>${item.amount?.toFixed(2)}</span>
+            </div>
+          `).join("")}
+        </div>
+        <div class="divider"></div>
+        <div class="row total">
+          <span>Grand Total:</span>
+          <span>${data.grandTotal?.toFixed(2)}</span>
+        </div>
+        <div class="footer">
+          <p>Thank you for your business!</p>
+          <p>This invoice will sync to server automatically.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Create a hidden print window
+    const printWin = new BrowserWindow({
+      show: false,
+      webPreferences: { nodeIntegration: false, contextIsolation: true },
+    });
+
+    await printWin.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+
+    return new Promise((resolve) => {
+      printWin.webContents.print({ silent: false, printBackground: true }, (success, failureReason) => {
+        printWin.close();
+        if (success) {
+          resolve({ success: true });
+        } else {
+          resolve({ success: false, error: failureReason || "Print failed" });
+        }
+      });
+    });
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
+  }
+});
+
+ipcMain.handle("print:report", async (_event, html: string, options?: {
+  landscape?: boolean;
+  margins?: Record<string, number>;
+}) => {
+  try {
+    const printWin = new BrowserWindow({
+      show: false,
+      webPreferences: { nodeIntegration: false, contextIsolation: true },
+    });
+
+    await printWin.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+
+    return new Promise((resolve) => {
+      printWin.webContents.print({
+        silent: false,
+        printBackground: true,
+        landscape: options?.landscape ?? false,
+        margins: options?.margins ? {
+          marginType: "custom",
+          top: options.margins.top ?? 10,
+          bottom: options.margins.bottom ?? 10,
+          left: options.margins.left ?? 10,
+          right: options.margins.right ?? 10,
+        } : undefined,
+      }, (success, failureReason) => {
+        printWin.close();
+        if (success) {
+          resolve({ success: true });
+        } else {
+          resolve({ success: false, error: failureReason || "Print failed" });
+        }
+      });
+    });
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
+  }
+});
+
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
 

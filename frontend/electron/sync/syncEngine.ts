@@ -49,6 +49,7 @@ let syncState: SyncState = {
 };
 
 let syncIntervalId: ReturnType<typeof setInterval> | null = null;
+let pushIntervalId: ReturnType<typeof setInterval> | null = null;
 let syncContext: SyncContext | null = null;
 let syncCycleCount = 0;
 
@@ -352,34 +353,70 @@ async function pushTable(
     progress: 0,
   });
 
-  // Get pending records from local MariaDB
+  // Determine which local table to query based on idbStore
   let pendingTable: string;
   let typeFilter = "";
+  let selectFields = "*";
+  let statusField = "status";
+  let statusPending = "'pending'";
+  let statusFailed = "'failed'";
+  let statusSyncing = "syncing";
+  let statusSynced = "synced";
+  let retryField = "retry_count";
+  let idField = "id";
+  let localIdField = "id";
   const params: unknown[] = [];
 
   if (config.idbStore === "pending_invoices") {
     pendingTable = "pending_invoices";
+    localIdField = "local_id";
   } else if (config.idbStore === "pending_purchases") {
     pendingTable = "pending_purchases";
+    localIdField = "local_id";
     const docKey = config.doctype.toLowerCase().replace(/ /g, "_");
     typeFilter = " AND `type` = ?";
     params.push(docKey);
+  } else if (config.idbStore === "pos_opening_shifts") {
+    pendingTable = "pos_opening_shifts";
+    statusField = "sync_status";
+    retryField = "COALESCE(retry_count, 0)";
+    localIdField = "id";
+    // Only push shifts that are Open or Closed and not yet synced
+    statusPending = "'pending'";
+    statusFailed = "'failed'";
+    statusSyncing = "syncing";
+    statusSynced = "synced";
+  } else if (config.idbStore === "pos_closing_entries") {
+    pendingTable = "pos_closing_entries";
+    statusField = "sync_status";
+    retryField = "COALESCE(retry_count, 0)";
+    localIdField = "id";
+    statusPending = "'pending'";
+    statusFailed = "'failed'";
+    statusSyncing = "syncing";
+    statusSynced = "synced";
   } else {
     return { synced: 0, failed: 0 };
   }
 
-  const pendingRecords = await query<{
-    id: number;
-    local_id: string;
-    data: string;
-    status: string;
-    retry_count: number;
-  }>(
-    `SELECT * FROM \`${pendingTable}\`
-     WHERE (\`status\` = 'pending' OR \`status\` = 'failed')
-       AND \`retry_count\` < ?${typeFilter}
-     ORDER BY \`created_at\` ASC`,
-    [SYNC_DEFAULTS.maxRetries, ...params]
+  // Build the query dynamically based on the table structure
+  let querySQL: string;
+  if (pendingTable === "pending_invoices" || pendingTable === "pending_purchases") {
+    querySQL = `SELECT * FROM \`${pendingTable}\`
+     WHERE (\`${statusField}\` = ${statusPending} OR \`${statusField}\` = ${statusFailed})
+       AND COALESCE(\`retry_count\`, 0) < ?${typeFilter}
+     ORDER BY \`created_at\` ASC`;
+  } else {
+    // For pos_opening_shifts and pos_closing_entries
+    querySQL = `SELECT * FROM \`${pendingTable}\`
+     WHERE (\`${statusField}\` = ${statusPending} OR \`${statusField}\` = ${statusFailed})
+     ORDER BY \`created_at\` ASC`;
+    params.length = 0; // Clear params, we don't need retry check for shifts
+  }
+
+  const pendingRecords = await query<Record<string, unknown>>(
+    querySQL,
+    pendingTable.includes("pending") ? [SYNC_DEFAULTS.maxRetries, ...params] : params
   );
 
   if (pendingRecords.length === 0) return { synced: 0, failed: 0 };
@@ -390,20 +427,85 @@ async function pushTable(
   for (const record of pendingRecords) {
     if (!isOnline()) break;
 
+    const recordId = record[idField] as number;
+    const recordLocalId = String(record[localIdField] || recordId);
+
     try {
       // Mark as syncing
       await execute(
-        `UPDATE \`${pendingTable}\` SET \`status\` = 'syncing' WHERE \`id\` = ?`,
-        [record.id]
+        `UPDATE \`${pendingTable}\` SET \`${statusField}\` = '${statusSyncing}' WHERE \`${idField}\` = ?`,
+        [recordId]
       );
 
-      // Parse the stored JSON data
-      const data = typeof record.data === "string" ? JSON.parse(record.data) : record.data;
+      // Prepare the data to send to the server
+      let data: Record<string, unknown>;
+
+      if (pendingTable === "pending_invoices" || pendingTable === "pending_purchases") {
+        // These tables store data as JSON string in `data` column
+        const rawData = record.data;
+        data = typeof rawData === "string" ? JSON.parse(rawData) : (rawData as Record<string, unknown>) || {};
+
+        // For invoices, resolve local shift ID to server docname
+        if (pendingTable === "pending_invoices") {
+          const localShiftId = data.pos_opening_shift || data.pos_opening_shift_local_id;
+          if (localShiftId) {
+            // Try to get server name from sync_id_map first
+            const serverShiftName = await getServerShiftName(String(localShiftId));
+            if (serverShiftName) {
+              data.pos_opening_shift = serverShiftName;
+              delete data.pos_opening_shift_local_id;
+            } else {
+              // Shift not yet synced - skip this invoice for now
+              await execute(
+                `UPDATE \`${pendingTable}\` SET \`${statusField}\` = 'pending' WHERE \`${idField}\` = ?`,
+                [recordId]
+              );
+              continue;
+            }
+          }
+        }
+      } else if (pendingTable === "pos_opening_shifts") {
+        // Build data from shift columns
+        data = {
+          period_start_date: record.period_start_date,
+          posting_date: record.posting_date,
+          user: record.user,
+          pos_profile: record.pos_profile,
+          company: record.company,
+          balance_details: await getOpeningShiftDetails(recordId),
+        };
+      } else if (pendingTable === "pos_closing_entries") {
+        // Build data from closing entry columns
+        const openingShiftLocalId = record.pos_opening_entry_id as number;
+        const serverOpeningShiftName = await getServerShiftName(String(openingShiftLocalId));
+
+        if (!serverOpeningShiftName) {
+          // Opening shift not yet synced - skip this closing entry for now
+          await execute(
+            `UPDATE \`${pendingTable}\` SET \`${statusField}\` = 'pending' WHERE \`${idField}\` = ?`,
+            [recordId]
+          );
+          continue;
+        }
+
+        data = {
+          pos_opening_shift: serverOpeningShiftName,
+          period_end_date: record.period_end_date,
+          posting_date: record.posting_date,
+          posting_time: record.posting_time,
+          pos_profile: record.pos_profile,
+          user: record.user,
+          company: record.company,
+          payment_reconciliation: await getClosingEntryDetails(recordId),
+        };
+      } else {
+        data = record as Record<string, unknown>;
+      }
 
       // Push to server — the server checks xpos_local_id to prevent duplicates
       const serverResult = await apiCall<{ name?: string }>(config.pushMethod, {
         data: JSON.stringify(data),
-        local_id: record.local_id,
+        local_id: recordLocalId,
       });
 
       // Store the sync ID mapping (local_id → server_name)
@@ -412,19 +514,27 @@ async function pushTable(
           `INSERT INTO \`sync_id_map\` (\`local_id\`, \`server_name\`, \`doctype\`)
            VALUES (?, ?, ?)
            ON DUPLICATE KEY UPDATE \`server_name\` = VALUES(\`server_name\`)`,
-          [record.local_id, serverResult.name, config.doctype]
+          [recordLocalId, serverResult.name, config.doctype]
         );
 
-        // Update the pending record with server name
-        await execute(
-          `UPDATE \`${pendingTable}\` SET \`server_name\` = ?, \`status\` = 'synced' WHERE \`id\` = ?`,
-          [serverResult.name, record.id]
-        );
+        // Update the record with server name and mark as synced
+        if (pendingTable === "pending_invoices" || pendingTable === "pending_purchases") {
+          await execute(
+            `UPDATE \`${pendingTable}\` SET \`server_name\` = ?, \`${statusField}\` = '${statusSynced}' WHERE \`${idField}\` = ?`,
+            [serverResult.name, recordId]
+          );
+        } else {
+          // For shifts, update erp_id and sync_status
+          await execute(
+            `UPDATE \`${pendingTable}\` SET \`erp_id\` = ?, \`${statusField}\` = '${statusSynced}', \`synced_at\` = NOW() WHERE \`${idField}\` = ?`,
+            [serverResult.name, recordId]
+          );
+        }
       } else {
-        // Remove completed record
+        // Mark as synced even without server name (shouldn't happen normally)
         await execute(
-          `DELETE FROM \`${pendingTable}\` WHERE \`id\` = ?`,
-          [record.id]
+          `UPDATE \`${pendingTable}\` SET \`${statusField}\` = '${statusSynced}' WHERE \`${idField}\` = ?`,
+          [recordId]
         );
       }
 
@@ -433,10 +543,18 @@ async function pushTable(
       failed++;
       const errMsg = error instanceof Error ? error.message : String(error);
 
-      await execute(
-        `UPDATE \`${pendingTable}\` SET \`status\` = 'failed', \`error\` = ?, \`retry_count\` = \`retry_count\` + 1 WHERE \`id\` = ?`,
-        [errMsg, record.id]
-      );
+      // Update status based on table type
+      if (pendingTable === "pending_invoices" || pendingTable === "pending_purchases") {
+        await execute(
+          `UPDATE \`${pendingTable}\` SET \`status\` = 'failed', \`error\` = ?, \`retry_count\` = COALESCE(\`retry_count\`, 0) + 1 WHERE \`id\` = ?`,
+          [errMsg, recordId]
+        );
+      } else {
+        await execute(
+          `UPDATE \`${pendingTable}\` SET \`${statusField}\` = 'failed' WHERE \`${idField}\` = ?`,
+          [recordId]
+        );
+      }
 
       emitToRenderer("sync-error", {
         message: errMsg,
@@ -452,6 +570,66 @@ async function pushTable(
   }
 
   return { synced, failed };
+}
+
+/**
+ * Get server docname for a local shift ID.
+ * First checks sync_id_map, then the erp_id column in pos_opening_shifts.
+ */
+async function getServerShiftName(localShiftId: string): Promise<string | null> {
+  // First check the sync_id_map table
+  const mapRow = await queryOne<{ server_name: string }>(
+    "SELECT `server_name` FROM `sync_id_map` WHERE `local_id` = ? AND `doctype` = 'XPOS Opening Shift'",
+    [localShiftId]
+  );
+  if (mapRow?.server_name) return mapRow.server_name;
+
+  // Then check the erp_id column in pos_opening_shifts
+  const shiftRow = await queryOne<{ erp_id: string }>(
+    "SELECT `erp_id` FROM `pos_opening_shifts` WHERE `id` = ?",
+    [localShiftId]
+  );
+  if (shiftRow?.erp_id) return shiftRow.erp_id;
+
+  return null;
+}
+
+/**
+ * Get opening shift balance details for pushing to server.
+ */
+async function getOpeningShiftDetails(shiftId: number): Promise<{ mode_of_payment: string; opening_amount: number }[]> {
+  const rows = await query<{ mode_of_payment: string; opening_amount: number }>(
+    "SELECT `mode_of_payment`, `opening_amount` FROM `pos_opening_entry_details` WHERE `parent_id` = ?",
+    [shiftId]
+  );
+  return rows.map(r => ({
+    mode_of_payment: r.mode_of_payment,
+    opening_amount: r.opening_amount,
+  }));
+}
+
+/**
+ * Get closing entry payment reconciliation details for pushing to server.
+ */
+async function getClosingEntryDetails(closingId: number): Promise<{
+  mode_of_payment: string;
+  opening_amount: number;
+  expected_amount: number;
+  closing_amount: number;
+  difference: number;
+}[]> {
+  const rows = await query<{
+    mode_of_payment: string;
+    opening_amount: number;
+    expected_amount: number;
+    closing_amount: number;
+    difference: number;
+  }>(
+    `SELECT \`mode_of_payment\`, \`opening_amount\`, \`expected_amount\`, \`closing_amount\`, \`difference\`
+     FROM \`pos_closing_entry_details\` WHERE \`parent_id\` = ?`,
+    [closingId]
+  );
+  return rows;
 }
 
 // ── Main Sync Cycle ───────────────────────────────────────────────
@@ -541,6 +719,35 @@ async function runSyncCycle(): Promise<void> {
   }
 }
 
+/**
+ * Run a push-only sync cycle for quicker invoice/shift syncing.
+ * Called more frequently than the full sync cycle.
+ */
+async function runPushCycle(): Promise<void> {
+  if (syncState.isSyncing || !isOnline()) return;
+
+  const pushTables = SYNC_TABLES
+    .filter((t) => t.direction === "push" || t.direction === "both")
+    .sort((a, b) => a.pullOrder - b.pullOrder);
+
+  let totalPushed = 0;
+
+  for (const table of pushTables) {
+    if (!isOnline()) break;
+    try {
+      const { synced } = await pushTable(table);
+      totalPushed += synced;
+    } catch (error) {
+      // Silent fail for push-only cycle - full sync will retry
+      log.warn(`Push-only cycle failed for ${table.label}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  if (totalPushed > 0) {
+    log.info(`Push-only cycle completed: ${totalPushed} records pushed`);
+  }
+}
+
 // ── Public API (called from main.ts) ──────────────────────────────
 
 /**
@@ -596,18 +803,31 @@ export function updateSyncContext(context: Partial<SyncContext>): void {
 }
 
 function startPeriodicSync(): void {
+  // Full sync cycle (pull + push) at longer intervals
   if (syncIntervalId) clearInterval(syncIntervalId);
   syncIntervalId = setInterval(() => {
     if (isOnline() && !syncState.isSyncing) {
       runSyncCycle();
     }
   }, SYNC_DEFAULTS.intervalMs);
+
+  // Push-only cycle at shorter intervals for quicker invoice syncing
+  if (pushIntervalId) clearInterval(pushIntervalId);
+  pushIntervalId = setInterval(() => {
+    if (isOnline() && !syncState.isSyncing) {
+      runPushCycle();
+    }
+  }, SYNC_DEFAULTS.pushIntervalMs);
 }
 
 export function stopSyncEngine(): void {
   if (syncIntervalId) {
     clearInterval(syncIntervalId);
     syncIntervalId = null;
+  }
+  if (pushIntervalId) {
+    clearInterval(pushIntervalId);
+    pushIntervalId = null;
   }
   syncContext = null;
   log.info("Stopped");

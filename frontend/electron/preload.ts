@@ -154,6 +154,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     // Pending Invoices
     addPendingInvoice: (record: { data: unknown; customer_name?: string; grand_total?: number }) =>
       ipcRenderer.invoke("db:add-pending-invoice", record),
+    getPendingInvoice: (id: number) =>
+      ipcRenderer.invoke("db:get-pending-invoice", id),
     getPendingInvoices: (status?: string) =>
       ipcRenderer.invoke("db:get-pending-invoices", status),
     updatePendingInvoice: (id: number, updates: Record<string, unknown>) =>
@@ -478,6 +480,23 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.on("update-status", handler);
       return () => ipcRenderer.removeListener("update-status", handler);
     },
+  },
+
+  // ── Print API ────────────────────────────────────────────────
+  print: {
+    printInvoice: (data: {
+      localId: number;
+      data: unknown;
+      customerName: string;
+      grandTotal: number;
+      isReturn: boolean;
+      printFormat: string;
+      letterHead: string;
+      companyName: string;
+    }): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke("print:invoice", data),
+    printReport: (html: string, options?: { landscape?: boolean; margins?: Record<string, number> }): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke("print:report", html, options),
   },
 
   // ── Hub / Till Role API ──────────────────────────────────────

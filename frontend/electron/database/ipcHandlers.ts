@@ -242,6 +242,21 @@ export function registerDbHandlers(): void {
     return { id: result.insertId, local_id: localId };
   });
 
+  ipcMain.handle("db:get-pending-invoice", async (_e, id: number) => {
+    const row = await queryOne<{
+      id: number; local_id: string; data: string;
+      status: string; customer_name: string | null; grand_total: number;
+      is_return: number; is_draft: number;
+    }>(`SELECT * FROM \`pending_invoices\` WHERE \`id\` = ?`, [id]);
+    if (!row) return null;
+    return {
+      ...row,
+      data: JSON.parse(row.data || "{}"),
+      is_return: row.is_return === 1,
+      is_draft: row.is_draft === 1,
+    };
+  });
+
   ipcMain.handle("db:get-pending-invoices", async (_e, status?: string) => {
     if (status) {
       return query("SELECT * FROM `pending_invoices` WHERE `status` = ? ORDER BY `created_at`", [status]);
@@ -704,6 +719,18 @@ export function registerDbHandlers(): void {
   });
 
   ipcMain.handle("db:create-pos-opening-shift", async (_e, shift: Record<string, unknown>) => {
+    // Check if there's already an open shift for this user
+    const existingShift = await queryOne<Record<string, unknown>>(
+      "SELECT * FROM `pos_opening_shifts` WHERE `user` = ? AND `status` = 'Open' ORDER BY `id` DESC LIMIT 1",
+      [shift.user]
+    );
+    
+    if (existingShift) {
+      // Return the existing shift instead of creating a new one
+      log.info(`Reusing existing open shift ${existingShift.id} for user ${shift.user}`);
+      return { id: existingShift.id, existing: true };
+    }
+
     const result = await execute(
       `INSERT INTO \`pos_opening_shifts\`
        (\`pos_profile\`, \`user\`, \`company\`, \`posting_date\`, \`period_start_date\`, \`status\`)

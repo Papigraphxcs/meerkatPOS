@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, type Ref } from "vue";
+import { ref, computed, inject, onMounted, onUnmounted, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
@@ -88,6 +88,19 @@ function run(item: MenuItem) {
     closeAll();
     item.action?.();
 }
+
+// Focus the first menu item when Alt key is pressed alone
+function focusMenuBar() {
+    activeMenu.value = activeMenu.value ? null : menus.value[0]?.label || null;
+}
+
+onMounted(() => {
+    window.addEventListener("xpos:focus-menubar", focusMenuBar);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("xpos:focus-menubar", focusMenuBar);
+});
 
 async function toggleFullscreen() {
     if (!document.fullscreenElement) {

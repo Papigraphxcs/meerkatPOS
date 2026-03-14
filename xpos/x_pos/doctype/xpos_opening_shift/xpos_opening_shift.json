@@ -21,7 +21,8 @@
   "opening_balance_details_section",
   "balance_details",
   "section_break_9",
-  "amended_from"
+  "amended_from",
+  "xpos_local_id"
  ],
  "fields": [
   {
@@ -124,6 +125,15 @@
    "label": "Amended From",
    "no_copy": 1,
    "options": "XPOS Opening Shift",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "xpos_local_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "XPOS Local ID",
+   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   }

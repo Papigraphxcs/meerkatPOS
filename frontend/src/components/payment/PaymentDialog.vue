@@ -272,6 +272,7 @@ import { usePaymentStore } from "@/stores/paymentStore";
 import { call, showSuccess, showError, showInfo, isNetworkError } from "@/services/api";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { __ } from "@/lib/translate";
+import { isElectron } from "@/services/electronBridge";
 import {
 	Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -561,9 +562,10 @@ async function submitPayment(withPrint: boolean = true) {
 	printAfterSave.value = withPrint;
 
 	try {
+		const shiftName = posStore.posOpeningShift?.name || "";
 		const invoiceData = cartStore.getInvoiceData(
 			posStore.profileName,
-			posStore.posOpeningShift?.name || ""
+			shiftName
 		);
 
 		if (isSplitPayment.value) {
@@ -576,6 +578,39 @@ async function submitPayment(withPrint: boolean = true) {
 				},
 			];
 		}
+
+		// In Electron mode, always save locally and let sync engine handle posting
+		if (isElectron() && window.electronAPI?.db) {
+			const result = await window.electronAPI.db.addPendingInvoice({
+				data: {
+					...invoiceData,
+					// Store local shift ID for sync engine to resolve later
+					pos_opening_shift_local_id: shiftName,
+					is_draft: false,
+					is_return: cartStore.isReturnMode,
+				},
+				customer_name: cartStore.customerName,
+				grand_total: cartStore.grandTotal,
+			});
+
+			const localId = result.id;
+			posStore.lastInvoiceName = `LOCAL-${localId}`;
+
+			if (cartStore.isReturnMode) {
+				showSuccess(__("Return saved locally (#{0}). It will sync to server automatically.", [localId]));
+			} else {
+				showSuccess(__("Invoice saved locally (#{0}). It will sync to server automatically.", [localId]));
+			}
+
+			// Print invoice locally in Electron
+			if (withPrint && localId && window.electronAPI?.print) {
+				await printInvoiceLocal(localId);
+			}
+
+			cartStore.clearAll();
+			return;
+		}
+
 		if (!isOnline()) {
 			const result = await offlineStore.saveOffline(
 				invoiceData,
@@ -671,6 +706,37 @@ async function printInvoice(invoiceName: string) {
 	} catch (error) {
 		console.error("Print error:", error);
 		showError(__("Failed to print invoice"));
+	}
+}
+
+async function printInvoiceLocal(localId: number) {
+	try {
+		if (!window.electronAPI?.db || !window.electronAPI?.print) {
+			showError(__("Print not available"));
+			return;
+		}
+
+		// Get invoice data from local database
+		const invoice = await window.electronAPI.db.getPendingInvoice(localId);
+		if (!invoice) {
+			showError(__("Invoice not found for printing"));
+			return;
+		}
+
+		// Use Electron's print functionality
+		await window.electronAPI.print.printInvoice({
+			localId,
+			data: invoice.data,
+			customerName: invoice.customer_name || "",
+			grandTotal: invoice.grand_total,
+			isReturn: invoice.is_return,
+			printFormat: posStore.printSettings?.print_format || "POS Invoice",
+			letterHead: posStore.printSettings?.letter_head || "",
+			companyName: posStore.posProfile?.company || "",
+		});
+	} catch (error) {
+		console.error("Local print error:", error);
+		showError(__("Failed to print invoice locally"));
 	}
 }
 

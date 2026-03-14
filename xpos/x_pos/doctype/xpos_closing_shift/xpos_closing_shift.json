@@ -32,7 +32,8 @@
   "column_break_16",
   "taxes",
   "section_break_14",
-  "amended_from"
+  "amended_from",
+  "xpos_local_id"
  ],
  "fields": [
   {
@@ -196,6 +197,15 @@
   {
    "fieldname": "section_break_if3m1",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "xpos_local_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "XPOS Local ID",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,

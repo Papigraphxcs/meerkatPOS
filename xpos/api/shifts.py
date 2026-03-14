@@ -438,3 +438,121 @@ def _get_shift_tax_summary(invoices):
     )
 
     return taxes
+
+
+@frappe.whitelist()
+def create_opening_shift(data, local_id=None):
+    """Create XPOS Opening Shift from desktop app sync.
+    
+    Used by the sync engine to push locally-created shifts to the server.
+    
+    Args:
+        data: JSON string containing shift data
+        local_id: Local ID from the desktop app for deduplication
+        
+    Returns:
+        dict with 'name' key containing the server docname
+    """
+    data = json.loads(data) if isinstance(data, str) else data
+    
+    # Check for duplicate via local_id (xpos_local_id custom field)
+    if local_id:
+        existing = frappe.db.get_value(
+            "XPOS Opening Shift",
+            {"xpos_local_id": local_id},
+            "name"
+        )
+        if existing:
+            return {"name": existing, "duplicate": True}
+    
+    new_shift = frappe.get_doc({
+        "doctype": "XPOS Opening Shift",
+        "period_start_date": data.get("period_start_date") or now_datetime(),
+        "posting_date": data.get("posting_date") or nowdate(),
+        "user": data.get("user") or frappe.session.user,
+        "pos_profile": data.get("pos_profile"),
+        "company": data.get("company"),
+        "xpos_local_id": local_id,
+        "docstatus": 1,  # Submit immediately
+    })
+    
+    # Add balance details if provided
+    balance_details = data.get("balance_details") or []
+    for detail in balance_details:
+        new_shift.append("balance_details", {
+            "mode_of_payment": detail.get("mode_of_payment"),
+            "amount": flt(detail.get("opening_amount") or detail.get("amount", 0)),
+        })
+    
+    new_shift.insert(ignore_permissions=True)
+    
+    return {"name": new_shift.name}
+
+
+@frappe.whitelist()
+def create_closing_shift(data, local_id=None):
+    """Create XPOS Closing Shift from desktop app sync.
+    
+    Used by the sync engine to push locally-created closing shifts to the server.
+    
+    Args:
+        data: JSON string containing closing data
+        local_id: Local ID from the desktop app for deduplication
+        
+    Returns:
+        dict with 'name' key containing the server docname
+    """
+    data = json.loads(data) if isinstance(data, str) else data
+    
+    # Check for duplicate via local_id (xpos_local_id custom field)
+    if local_id:
+        existing = frappe.db.get_value(
+            "XPOS Closing Shift",
+            {"xpos_local_id": local_id},
+            "name"
+        )
+        if existing:
+            return {"name": existing, "duplicate": True}
+    
+    # Get the opening shift server name
+    opening_shift = data.get("pos_opening_shift")
+    if not opening_shift:
+        frappe.throw(_("Opening Shift is required"))
+    
+    # Try to get opening shift doc
+    try:
+        opening = frappe.get_doc("XPOS Opening Shift", opening_shift)
+    except frappe.DoesNotExistError:
+        frappe.throw(_("XPOS Opening Shift {0} not found").format(opening_shift))
+    
+    closing_shift = frappe.get_doc({
+        "doctype": "XPOS Closing Shift",
+        "period_start_date": opening.period_start_date,
+        "period_end_date": data.get("period_end_date") or now_datetime(),
+        "posting_date": data.get("posting_date") or nowdate(),
+        "posting_time": data.get("posting_time") or now_datetime().strftime("%H:%M:%S"),
+        "pos_profile": data.get("pos_profile") or opening.pos_profile,
+        "user": data.get("user") or frappe.session.user,
+        "company": data.get("company") or opening.company,
+        "pos_opening_shift": opening.name,
+        "grand_total": flt(data.get("grand_total", 0)),
+        "net_total": flt(data.get("net_total", 0)),
+        "total_quantity": cint(data.get("total_quantity", 0)),
+        "xpos_local_id": local_id,
+    })
+    
+    # Add payment reconciliation details
+    payment_details = data.get("payment_reconciliation") or data.get("closing_details") or []
+    for detail in payment_details:
+        closing_shift.append("payment_reconciliation", {
+            "mode_of_payment": detail.get("mode_of_payment"),
+            "opening_amount": flt(detail.get("opening_amount", 0)),
+            "expected_amount": flt(detail.get("expected_amount", 0)),
+            "closing_amount": flt(detail.get("closing_amount", 0)),
+            "difference": flt(detail.get("difference", 0)),
+        })
+    
+    closing_shift.insert(ignore_permissions=True)
+    closing_shift.submit()
+    
+    return {"name": closing_shift.name}

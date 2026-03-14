@@ -609,6 +609,33 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   // TRANSACTIONAL — Push-only from POS
   // ──────────────────────────────────────────────────────────────
   {
+    doctype: "XPOS Opening Shift",
+    label: "POS Opening Shifts",
+    pushMethod: "xpos.api.shifts.create_opening_shift",
+    fields: ["*"],
+    orderBy: "creation",
+    direction: "push",
+    idbStore: "pos_opening_shifts",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    batchSize: 50,
+    pullOrder: 98,
+  },
+  {
+    doctype: "XPOS Closing Shift",
+    label: "POS Closing Shifts",
+    pushMethod: "xpos.api.shifts.create_closing_shift",
+    fields: ["*"],
+    orderBy: "creation",
+    direction: "push",
+    idbStore: "pos_closing_entries",
+    localIdField: "xpos_local_id",
+    incremental: false,
+    batchSize: 50,
+    pullOrder: 99,
+    dependsOn: ["pos_opening_shifts"],
+  },
+  {
     doctype: "POS Invoice",
     label: "POS Invoices",
     pushMethod: "xpos.api.invoices.create_invoice",
@@ -620,6 +647,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     incremental: false,
     batchSize: 50,
     pullOrder: 100,
+    dependsOn: ["pos_opening_shifts"],
   },
   {
     doctype: "Purchase Order",
@@ -641,10 +669,16 @@ export const SYNC_TABLES: SyncTableConfig[] = [
  * Default sync settings
  */
 export const SYNC_DEFAULTS = {
-  /** Interval between automatic sync cycles (ms). Default 5 minutes. */
+  /** Interval between automatic full sync cycles (pull + push) in ms. Default 5 minutes. */
   intervalMs: 5 * 60 * 1000,
+  /** Interval for push-only cycles (invoices, shifts) in ms. Default 30 seconds. */
+  pushIntervalMs: 30 * 1000,
   /** Max retries before marking a record as permanently failed. */
   maxRetries: 3,
   /** Grace period after going online before starting sync (ms). */
   onlineGracePeriodMs: 3_000,
+  /** Business hours start (24h format) for adaptive sync intervals. */
+  businessHoursStart: 9,
+  /** Business hours end (24h format) for adaptive sync intervals. */
+  businessHoursEnd: 21,
 };

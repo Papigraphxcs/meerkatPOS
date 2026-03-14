@@ -199,6 +199,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useOfferStore } from "@/stores/offerStore";
 import { call, showSuccess, showError } from "@/services/api";
 import { __ } from "@/lib/translate";
+import { isElectron } from "@/services/electronBridge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
@@ -350,11 +351,30 @@ async function holdOrder() {
 			return;
 		}
 
-		await call("xpos.api.invoices.save_draft_invoice", {
-			data: JSON.stringify(data),
-		});
-		cartStore.clearAll();
-		showSuccess(__('Order saved as draft'));
+		// In Electron mode, save locally and don't pass local shift ID to server
+		if (isElectron() && window.electronAPI?.db) {
+			// Save to local database
+			await window.electronAPI.db.addPendingInvoice({
+				data: { ...data, is_draft: true, pos_opening_shift_local_id: shiftName },
+				customer_name: cartStore.customerName || data.customer,
+				grand_total: cartStore.grandTotal || 0,
+			});
+			cartStore.clearAll();
+			showSuccess(__('Order saved as draft locally'));
+		} else {
+			// Web mode - call server API but don't send local shift ID
+			// Server will use session user to find open shift
+			const serverData = { ...data };
+			// Don't send pos_opening_shift if it looks like a local ID (number-only)
+			if (serverData.pos_opening_shift && /^\d+$/.test(String(serverData.pos_opening_shift))) {
+				delete serverData.pos_opening_shift;
+			}
+			await call("xpos.api.invoices.save_draft_invoice", {
+				data: JSON.stringify(serverData),
+			});
+			cartStore.clearAll();
+			showSuccess(__('Order saved as draft'));
+		}
 	} catch (error: unknown) {
 		showError(__('Failed to save draft: {0}', [extractErrorMessage(error)]));
 	}
