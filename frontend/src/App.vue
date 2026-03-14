@@ -108,6 +108,7 @@ import DraftInvoiceDialog from "@/components/cart/DraftInvoiceDialog.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { initSyncListeners } from "@/services/syncIpcHandler";
 import { useSyncStatus } from "@/composables/useSyncStatus";
+import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
 import { isElectron } from "@/services/electronBridge";
 
 const route = useRoute();
@@ -121,7 +122,75 @@ const offlineStore = useOfflineStore();
 const syncStatus = useSyncStatus();
 const isElectronEnv = isElectron();
 
+const keyboardShortcuts = useKeyboardShortcuts();
+const { 
+    showShortcutsDialog, 
+    showAboutDialog, 
+    init: initKeyboardShortcuts,
+    destroy: destroyKeyboardShortcuts
+} = keyboardShortcuts;
+
 const isAuthPage = computed(() => route.meta.isAuthPage === true || route.meta.isSetupPage === true);
+
+function handleClearCart() {
+    cartStore.clearCart();
+}
+
+function handleProcessPayment() {
+    if (cartStore.items.length > 0 && posStore.isShiftOpen) {
+        cartStore.showPaymentDialog = true;
+    }
+}
+
+function handleSelectCustomer() {
+    customerStore.showCustomerDialog = true;
+}
+
+function handleShowDrafts() {
+    cartStore.showDraftDialog = true;
+}
+
+function handleHoldInvoice() {
+    if (cartStore.items.length > 0) {
+        cartStore.openDraftDialog();
+    }
+}
+
+function handleRemoveLastItem() {
+    if (cartStore.items.length > 0) {
+        cartStore.removeItem(cartStore.items.length - 1);
+    }
+}
+
+function handleCloseShift() {
+    if (posStore.isShiftOpen) {
+        posStore.showClosingDialog = true;
+        posStore.fetchClosingData();
+    }
+}
+
+function handleCashExpense() {
+    if (posStore.allowPosExpense && posStore.isShiftOpen) {
+        paymentStore.openCashMovement("expense");
+    }
+}
+
+function handleCashDeposit() {
+    if (posStore.allowCashDeposit && posStore.isShiftOpen) {
+        paymentStore.openCashMovement("deposit");
+    }
+}
+
+function handlePrintLast() {
+    const name = posStore.lastInvoiceName;
+    if (!name) return;
+    if (typeof frappe !== "undefined" && frappe.urllib) {
+        const url = frappe.urllib.get_full_url(
+            `/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`
+        );
+        window.open(url, "_blank");
+    }
+}
 
 const theme = ref<"light" | "dark" | "system">("system");
 const systemPrefersDark = ref(window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -193,9 +262,19 @@ onMounted(() => {
 	}
 
 	offlineStore.init();
-
-	// Initialize Electron sync IPC listeners (no-op in browser mode)
 	cleanupSyncListeners = initSyncListeners();
+	initKeyboardShortcuts();
+
+	window.addEventListener("xpos:clear-cart", handleClearCart as EventListener);
+	window.addEventListener("xpos:process-payment", handleProcessPayment as EventListener);
+	window.addEventListener("xpos:select-customer", handleSelectCustomer as EventListener);
+	window.addEventListener("xpos:show-drafts", handleShowDrafts as EventListener);
+	window.addEventListener("xpos:hold-invoice", handleHoldInvoice as EventListener);
+	window.addEventListener("xpos:remove-last-item", handleRemoveLastItem as EventListener);
+	window.addEventListener("xpos:close-shift", handleCloseShift as EventListener);
+	window.addEventListener("xpos:cash-expense", handleCashExpense as EventListener);
+	window.addEventListener("xpos:cash-deposit", handleCashDeposit as EventListener);
+	window.addEventListener("xpos:print-last", handlePrintLast as EventListener);
 });
 
 watch(isAuthPage, (isAuth, wasAuth) => {
@@ -212,5 +291,17 @@ onUnmounted(() => {
 		cleanupSyncListeners();
 	}
 	offlineStore.destroy();
+	destroyKeyboardShortcuts();
+
+	window.removeEventListener("xpos:clear-cart", handleClearCart as EventListener);
+	window.removeEventListener("xpos:process-payment", handleProcessPayment as EventListener);
+	window.removeEventListener("xpos:select-customer", handleSelectCustomer as EventListener);
+	window.removeEventListener("xpos:show-drafts", handleShowDrafts as EventListener);
+	window.removeEventListener("xpos:hold-invoice", handleHoldInvoice as EventListener);
+	window.removeEventListener("xpos:remove-last-item", handleRemoveLastItem as EventListener);
+	window.removeEventListener("xpos:close-shift", handleCloseShift as EventListener);
+	window.removeEventListener("xpos:cash-expense", handleCashExpense as EventListener);
+	window.removeEventListener("xpos:cash-deposit", handleCashDeposit as EventListener);
+	window.removeEventListener("xpos:print-last", handlePrintLast as EventListener);
 });
 </script>

@@ -36,32 +36,45 @@
 
         <div v-if="activeMenu" class="fixed inset-0 z-[199]" @click="closeAll" />
     </div>
+
+    <AboutDialog :open="showAboutDialog" @close="showAboutDialog = false" />
+    <KeyboardShortcutsDialog :open="showShortcutsDialog" @close="showShortcutsDialog = false" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, inject, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import { usePosStore } from "@/stores/posStore";
+import { useCartStore } from "@/stores/cartStore";
 import { usePaymentStore } from "@/stores/paymentStore";
+import { useCustomerStore } from "@/stores/customerStore";
 import { useAuthStore } from "@/stores/authStore";
 import { isElectron } from "@/services/electronBridge";
 import __ from "@/lib/translate";
+import AboutDialog from "@/components/AboutDialog.vue";
+import KeyboardShortcutsDialog from "@/components/KeyboardShortcutsDialog.vue";
 import {
     ShoppingCart, Printer, LogOut, Monitor, Sun, Moon,
     Maximize2, Minimize2, LayoutGrid, ClipboardList,
     ArrowUpCircle, ArrowDownCircle, HelpCircle, Keyboard,
-    Power
+    Power, FileText, Receipt, PackageCheck, Barcode,
+    Settings, Wallet, Landmark, RotateCcw, Repeat, CreditCard,
+    Users, Pause, RefreshCw, Info
 } from "lucide-vue-next";
 
 const router = useRouter();
 const posStore = usePosStore();
+const cartStore = useCartStore();
 const paymentStore = usePaymentStore();
+const customerStore = useCustomerStore();
 const authStore = useAuthStore();
 const toggleDarkMode = inject<() => void>("toggleDarkMode")!;
 const theme = inject<Ref<"light" | "dark" | "system">>("theme")!;
 
 const activeMenu = ref<string | null>(null);
 const isFullscreen = ref(false);
+const showAboutDialog = ref(false);
+const showShortcutsDialog = ref(false);
 
 function toggleMenu(label: string) {
     activeMenu.value = activeMenu.value === label ? null : label;
@@ -83,6 +96,12 @@ async function toggleFullscreen() {
     } else {
         await document.exitFullscreen();
         isFullscreen.value = false;
+    }
+}
+
+async function triggerSync() {
+    if (isElectron() && window.electronAPI?.triggerSync) {
+        await window.electronAPI.triggerSync();
     }
 }
 
@@ -109,13 +128,36 @@ const menus = computed<Menu[]>(() => [
                 id: "new-sale",
                 label: "New Sale",
                 icon: ShoppingCart,
-                shortcut: "Ctrl + N",
-                action: () => router.push("/pos"),
+                shortcut: "Ctrl+N",
+                action: () => {
+                    cartStore.clearCart();
+                    router.push("/pos");
+                },
             },
+            {
+                id: "repeat-invoice",
+                label: "Repeat Invoice",
+                icon: Repeat,
+                shortcut: "Ctrl+G",
+                action: () => {
+                    window.dispatchEvent(new CustomEvent("xpos:show-repeat-dialog"));
+                },
+            },
+            {
+                id: "return-invoice",
+                label: "Return Invoice",
+                icon: RotateCcw,
+                shortcut: "Ctrl+R",
+                action: () => {
+                    window.dispatchEvent(new CustomEvent("xpos:show-return-dialog"));
+                },
+            },
+            { id: "sep-f0", separator: true },
             {
                 id: "print-last",
                 label: "Print Last Receipt",
                 icon: Printer,
+                shortcut: "Ctrl+P",
                 disabled: () => !posStore.lastInvoiceName,
                 action: () => {
                     const name = posStore.lastInvoiceName;
@@ -130,13 +172,21 @@ const menus = computed<Menu[]>(() => [
             },
             { id: "sep-f1", separator: true },
             {
+                id: "settings",
+                label: "Settings",
+                icon: Settings,
+                shortcut: "Ctrl+,",
+                action: () => router.push("/settings"),
+            },
+            { id: "sep-f2", separator: true },
+            {
                 id: "signout",
                 label: "Sign Out",
                 icon: LogOut,
                 action: () => authStore.logout(),
             },
             ...(isElectron() ? [
-                { id: "sep-f2", separator: true },
+                { id: "sep-f3", separator: true },
                 {
                     id: "exit",
                     label: "Exit",
@@ -148,21 +198,99 @@ const menus = computed<Menu[]>(() => [
         ],
     },
     {
-        label: "View",
+        label: "Sales",
         items: [
             {
                 id: "goto-pos",
                 label: "Point of Sale",
                 icon: LayoutGrid,
+                shortcut: "Alt+1",
                 action: () => router.push("/pos"),
             },
             {
                 id: "goto-orders",
                 label: "Orders",
-                icon: ClipboardList,
+                icon: FileText,
+                shortcut: "Alt+2",
                 action: () => router.push("/orders"),
             },
-            { id: "sep-v1", separator: true },
+            { id: "sep-sales1", separator: true },
+            {
+                id: "process-payment",
+                label: "Process Payment",
+                icon: CreditCard,
+                shortcut: "F4",
+                disabled: () => cartStore.items.length === 0 || !posStore.isShiftOpen,
+                action: () => {
+                    if (cartStore.items.length > 0 && posStore.isShiftOpen) {
+                        cartStore.showPaymentDialog = true;
+                    }
+                },
+            },
+            {
+                id: "select-customer",
+                label: "Select Customer",
+                icon: Users,
+                shortcut: "F6",
+                action: () => { customerStore.showCustomerDialog = true; },
+            },
+            {
+                id: "held-invoices",
+                label: "Held Invoices",
+                icon: Pause,
+                shortcut: "F8",
+                action: () => { cartStore.showDraftDialog = true; },
+            },
+        ],
+    },
+    {
+        label: "Purchasing",
+        items: [
+            {
+                id: "goto-purchase-order",
+                label: "Purchase Order",
+                icon: ClipboardList,
+                shortcut: "Alt+3",
+                action: () => router.push("/purchase-order"),
+            },
+            {
+                id: "goto-purchase-invoice",
+                label: "Purchase Invoice",
+                icon: Receipt,
+                shortcut: "Alt+4",
+                action: () => router.push("/purchase-invoice"),
+            },
+            {
+                id: "goto-stock-receiving",
+                label: "Stock Receiving",
+                icon: PackageCheck,
+                shortcut: "Alt+5",
+                action: () => router.push("/stock-receiving"),
+            },
+        ],
+    },
+    {
+        label: "Finance",
+        items: [
+            {
+                id: "goto-expenses",
+                label: "Expenses",
+                icon: Wallet,
+                shortcut: "Alt+6",
+                action: () => router.push("/expenses"),
+            },
+            {
+                id: "goto-bank-drops",
+                label: "Bank Drops",
+                icon: Landmark,
+                shortcut: "Alt+7",
+                action: () => router.push("/bank-drops"),
+            },
+        ],
+    },
+    {
+        label: "View",
+        items: [
             {
                 id: "fullscreen",
                 label: isFullscreen.value ? "Exit Full Screen" : "Toggle Full Screen",
@@ -176,6 +304,14 @@ const menus = computed<Menu[]>(() => [
                 icon: theme.value === "dark" ? Sun : theme.value === "light" ? Monitor : Moon,
                 action: () => toggleDarkMode(),
             },
+            { id: "sep-v1", separator: true },
+            {
+                id: "goto-barcode-print",
+                label: "Barcode Printer",
+                icon: Barcode,
+                shortcut: "Alt+8",
+                action: () => router.push("/barcode-print"),
+            },
         ],
     },
     {
@@ -185,6 +321,7 @@ const menus = computed<Menu[]>(() => [
                 id: "close-shift",
                 label: "Close Shift",
                 icon: LogOut,
+                shortcut: "Ctrl+Shift+O",
                 disabled: () => !posStore.isShiftOpen,
                 action: () => {
                     posStore.showClosingDialog = true;
@@ -196,6 +333,7 @@ const menus = computed<Menu[]>(() => [
                 id: "cash-deposit",
                 label: "Cash Deposit",
                 icon: ArrowUpCircle,
+                shortcut: "Ctrl+Shift+D",
                 disabled: () => !posStore.allowCashDeposit || !posStore.isShiftOpen,
                 action: () => paymentStore.openCashMovement("deposit"),
             },
@@ -203,9 +341,20 @@ const menus = computed<Menu[]>(() => [
                 id: "expense",
                 label: "Cash Expense",
                 icon: ArrowDownCircle,
+                shortcut: "Ctrl+E",
                 disabled: () => !posStore.allowPosExpense || !posStore.isShiftOpen,
                 action: () => paymentStore.openCashMovement("expense"),
             },
+            ...(isElectron() ? [
+                { id: "sep-s2", separator: true },
+                {
+                    id: "sync-now",
+                    label: "Sync Now",
+                    icon: RefreshCw,
+                    shortcut: "Ctrl+Shift+S",
+                    action: () => triggerSync(),
+                }
+            ] : []),
         ],
     },
     {
@@ -216,14 +365,14 @@ const menus = computed<Menu[]>(() => [
                 label: "Keyboard Shortcuts",
                 icon: Keyboard,
                 shortcut: "Ctrl+/",
-                action: () => { /* future: open shortcuts dialog */ },
+                action: () => { showShortcutsDialog.value = true; },
             },
             { id: "sep-h1", separator: true },
             {
                 id: "about",
                 label: "About X POS",
-                icon: HelpCircle,
-                action: () => { /* future: open about dialog */ },
+                icon: Info,
+                action: () => { showAboutDialog.value = true; },
             },
         ],
     },

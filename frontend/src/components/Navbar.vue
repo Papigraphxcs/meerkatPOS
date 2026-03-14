@@ -184,15 +184,36 @@ function handleOfflineAction() {
 	}
 }
 
+function handleShowRepeatDialog() {
+	showRepeatDialog.value = true;
+}
+
+function handleShowReturnDialog() {
+	showReturnDialog.value = true;
+}
+
 function handleKeyboard(e: KeyboardEvent) {
 	if (e.ctrlKey && e.key.toLowerCase() === "g") {
 		e.preventDefault();
 		showRepeatDialog.value = true;
 	}
+	if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "r") {
+		e.preventDefault();
+		showReturnDialog.value = true;
+	}
 }
 
-onMounted(() => window.addEventListener("keydown", handleKeyboard));
-onUnmounted(() => window.removeEventListener("keydown", handleKeyboard));
+onMounted(() => {
+	window.addEventListener("keydown", handleKeyboard);
+	window.addEventListener("xpos:show-repeat-dialog", handleShowRepeatDialog as EventListener);
+	window.addEventListener("xpos:show-return-dialog", handleShowReturnDialog as EventListener);
+});
+
+onUnmounted(() => {
+	window.removeEventListener("keydown", handleKeyboard);
+	window.removeEventListener("xpos:show-repeat-dialog", handleShowRepeatDialog as EventListener);
+	window.removeEventListener("xpos:show-return-dialog", handleShowReturnDialog as EventListener);
+});
 
 function printLastInvoice() {
 	const name = posStore.lastInvoiceName;

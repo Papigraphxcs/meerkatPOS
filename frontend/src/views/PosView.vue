@@ -123,12 +123,30 @@ onMounted(() => {
 		loadInitialData();
 	}
 	document.addEventListener("keydown", handleGlobalKeydown);
+	window.addEventListener("xpos:toggle-view", handleToggleView as EventListener);
+	window.addEventListener("xpos:focus-barcode", handleFocusBarcode as EventListener);
+	window.addEventListener("xpos:focus-search", handleFocusSearch as EventListener);
 	nextTick(() => barcodeScannerRef.value?.focus());
 });
 
 onUnmounted(() => {
 	document.removeEventListener("keydown", handleGlobalKeydown);
+	window.removeEventListener("xpos:toggle-view", handleToggleView as EventListener);
+	window.removeEventListener("xpos:focus-barcode", handleFocusBarcode as EventListener);
+	window.removeEventListener("xpos:focus-search", handleFocusSearch as EventListener);
 });
+
+function handleToggleView() {
+	viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid';
+}
+
+function handleFocusBarcode() {
+	barcodeScannerRef.value?.focus();
+}
+
+function handleFocusSearch() {
+	searchBarRef.value?.focus();
+}
 
 watch(() => posStore.isReady, (ready) => {
 	if (ready) loadInitialData();
@@ -216,8 +234,27 @@ function onNavigate(direction: 'up' | 'down') {
 
 function handleGlobalKeydown(e: KeyboardEvent) {
 	const tag = (document.activeElement?.tagName || "").toLowerCase();
-	if (tag === "input" || tag === "textarea" || tag === "select") return;
-	if (document.activeElement?.closest("[role='dialog']")) return;
+	const isInput = tag === "input" || tag === "textarea" || tag === "select";
+	const isInDialog = document.activeElement?.closest("[role='dialog']");
+
+	if (e.key === "F1") {
+		e.preventDefault();
+		barcodeScannerRef.value?.focus();
+		return;
+	}
+	if (e.key === "F2") {
+		e.preventDefault();
+		searchBarRef.value?.focus();
+		return;
+	}
+	if (e.key === "F5") {
+		e.preventDefault();
+		viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid';
+		return;
+	}
+
+	if (isInput) return;
+	if (isInDialog) return;
 
 	if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
 		e.preventDefault();
