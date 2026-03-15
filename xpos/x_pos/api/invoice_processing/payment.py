@@ -51,7 +51,6 @@ def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_acc
     if not resolved_cash_account and cash_mode_of_payment:
         # Use get_bank_cash_account from erpnext or our processing utility?
         # The original code imported get_bank_cash_account from erpnext.accounts.doctype.sales_invoice.sales_invoice
-        # But we also have one in posawesome.api.payment_processing.utils
         # Let's use the one from erpnext as in original code
         resolved_cash_account = get_bank_cash_account(cash_mode_of_payment, invoice_doc.company)
 

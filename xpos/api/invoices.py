@@ -187,14 +187,12 @@ def create_invoice(data):
         item.item_code = item_data.get("item_code")
         item.item_name = item_data.get("item_name")
         item.qty = item_qty
-        item.rate = item_rate
         item.uom = item_data.get("uom") or item_data.get("stock_uom")
         item.warehouse = item_data.get("warehouse") or pos.warehouse
 
         disc_pct = flt(item_data.get("discount_percentage", 0), 2)
         disc_amt = flt(item_data.get("discount_amount", 0), 2)
 
-        # Validate max discount allowed
         max_discount = flt(pos.get("max_discount_percentage_allowed", 0))
         if max_discount > 0 and disc_pct > max_discount:
             frappe.throw(
@@ -203,10 +201,15 @@ def create_invoice(data):
                 )
             )
 
+        item.price_list_rate = item_rate
         if disc_pct:
             item.discount_percentage = disc_pct
-        if disc_amt:
+            item.rate = flt(item_rate * (1.0 - disc_pct / 100.0), 2)
+        elif disc_amt:
             item.discount_amount = disc_amt
+            item.rate = flt(item_rate - disc_amt, 2)
+        else:
+            item.rate = item_rate
         if item_data.get("serial_no"):
             item.serial_no = item_data.get("serial_no")
         if item_data.get("batch_no"):
@@ -258,7 +261,7 @@ def create_invoice(data):
     total_payment = 0
     for payment in payments:
         pay_amount = flt(payment.get("amount", 0), 2)
-        if pay_amount != 0:  # Allow negative for returns
+        if pay_amount != 0:
             invoice_doc.append(
                 "payments",
                 {

@@ -118,6 +118,11 @@
 				@click="toggleDelivery" :title="__('Delivery charge')">
 				<Truck class="w-4 h-4" />
 			</Button>
+			<Button variant="outline" size="sm" :disabled="!hasAnyDiscount"
+				:class="{ 'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20': !!cartStore.selectedDeliveryCharge }"
+				@click="clearAllDiscounts" :title="__('Clear all discounts')">
+				<X class="w-4 h-4" />
+			</Button>
 		</div>
 
 		<transition name="slide-up">
@@ -204,7 +209,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Separator } from "@/components/ui/separator";
-import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2, Percent, FileText, Truck } from "lucide-vue-next";
+import { Tag, Ticket, Clock, Trash2, Wallet, Gift, Loader2, Percent, FileText, Truck, X } from "lucide-vue-next";
 import type { DeliveryCharge } from "@/types/pos.types";
 
 const posStore = usePosStore();
@@ -225,6 +230,17 @@ const isApplyingCoupon = ref(false);
 const hasDiscount = computed(() =>
 	cartStore.discountPercentage > 0 || cartStore.discountAmount > 0
 );
+
+const hasAnyDiscount = computed(() =>
+	hasDiscount.value || itemDiscountTotal.value > 0 || cartStore.hasOffers
+);
+
+function clearAllDiscounts() {
+	cartStore.clearAllDiscounts();
+	discountInput.value = 0;
+	showDiscount.value = false;
+	showCoupon.value = false;
+}
 
 const itemDiscountTotal = computed(() => {
 	return cartStore.items.reduce((sum, item) => {

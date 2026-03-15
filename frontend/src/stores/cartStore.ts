@@ -499,6 +499,18 @@ export const useCartStore = defineStore("cart", () => {
     couponCode.value = "";
   }
 
+  function clearAllDiscounts(): void {
+    discountPercentage.value = 0;
+    discountAmount.value = 0;
+    for (const item of items.value) {
+      item.discount_percentage = 0;
+      item.discount_amount = 0;
+    }
+    appliedCoupon.value = null;
+    couponCode.value = "";
+    appliedOffers.value = [];
+  }
+
   function addPayment(modeOfPayment: string, amount: number): void {
     const existing = payments.value.find((p) => p.mode_of_payment === modeOfPayment);
     if (existing) {
@@ -899,6 +911,7 @@ export const useCartStore = defineStore("cart", () => {
     removeOffer,
     applyCoupon,
     removeCoupon,
+    clearAllDiscounts,
     addPayment,
     setPayments,
     clearPayments,

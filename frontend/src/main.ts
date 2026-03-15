@@ -1,4 +1,3 @@
-// X POS Main Entry Point - Standalone SPA / Electron desktop mode
 import "./style.css";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
@@ -7,7 +6,6 @@ import { router } from "./router";
 import { showError } from "@/services/api";
 import { isElectron, getApiBaseUrl, warmApiCredentials } from "@/services/electronBridge";
 
-// Register PWA service worker only in browser mode (not Electron)
 if (!isElectron()) {
   import("virtual:pwa-register").then(({ registerSW }) => {
     const updateSW = registerSW({
@@ -29,7 +27,6 @@ if (!isElectron()) {
     });
   });
 } else {
-  // Warm the server URL and API credential caches early
   getApiBaseUrl().then((url) => {
     console.log("[XPOS Electron] Server URL:", url);
   });
@@ -38,12 +35,10 @@ if (!isElectron()) {
   });
 }
 
-// Setup frappe-like API wrapper for standalone mode
 function initializeFrappeAPI(): void {
   const bootData = window.xpos?.boot || {};
   const csrfToken = window.xpos?.csrf_token || "";
 
-  // Setup frappe global if not exists
   if (typeof window.frappe === "undefined") {
     const frappeObj = {
       boot: bootData,
@@ -110,8 +105,6 @@ function initializeFrappeAPI(): void {
       },
 
       show_alert: (options: { message: string; indicator: string }, duration?: number): void => {
-        // Legacy compatibility - use console logging as fallback
-        // Toast notifications are now handled directly by components using useToast
         console.log(`[${options.indicator}] ${options.message}`);
       },
 
@@ -138,7 +131,6 @@ function initializeFrappeAPI(): void {
       },
 
       provide: (key: string): void => {
-        // Stub for frappe.provide
         console.log("frappe.provide:", key);
       },
 
@@ -147,12 +139,10 @@ function initializeFrappeAPI(): void {
       },
     };
 
-    // Assign to window.frappe
     (window as unknown as { frappe: typeof frappeObj }).frappe = frappeObj;
   }
 }
 
-// Initialize
 initializeFrappeAPI();
 
 const app = createApp(App);

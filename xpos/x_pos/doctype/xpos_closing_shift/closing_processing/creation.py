@@ -1,7 +1,9 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, json
-from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.utils import get_base_value
+from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.utils import (
+    get_base_value,
+)
 from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.data import (
     get_pos_invoices,
     get_payments_entries,
@@ -9,6 +11,7 @@ from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.data import (
 from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.invoices import (
     submit_printed_invoices,
 )
+
 
 @frappe.whitelist()
 def make_closing_shift_from_opening(opening_shift):
@@ -31,12 +34,17 @@ def make_closing_shift_from_opening(opening_shift):
     closing_shift.net_total = 0
     closing_shift.total_quantity = 0
 
-    company_currency = frappe.get_cached_value("Company", closing_shift.company, "default_currency")
-    cash_mode_of_payment = frappe.get_value(
-        "POS Profile",
-        opening_shift.get("pos_profile"),
-        "cash_mode_of_payment",
-    ) or "Cash"
+    company_currency = frappe.get_cached_value(
+        "Company", closing_shift.company, "default_currency"
+    )
+    cash_mode_of_payment = (
+        frappe.get_value(
+            "POS Profile",
+            opening_shift.get("pos_profile"),
+            "cash_mode_of_payment",
+        )
+        or "Cash"
+    )
 
     invoices = get_pos_invoices(opening_shift.get("name"), doctype)
 
@@ -64,21 +72,31 @@ def make_closing_shift_from_opening(opening_shift):
                 {
                     invoice_field: d.name,
                     "posting_date": d.posting_date,
-                    "grand_total": get_base_value(d, "grand_total", "base_grand_total", conversion_rate),
+                    "grand_total": get_base_value(
+                        d, "grand_total", "base_grand_total", conversion_rate
+                    ),
                     "transaction_currency": d.get("currency") or company_currency,
                     "transaction_amount": flt(d.get("grand_total")),
                     "customer": d.customer,
                 }
             )
         )
-        base_grand_total = get_base_value(d, "grand_total", "base_grand_total", conversion_rate)
-        base_net_total = get_base_value(d, "net_total", "base_net_total", conversion_rate)
+        base_grand_total = get_base_value(
+            d, "grand_total", "base_grand_total", conversion_rate
+        )
+        base_net_total = get_base_value(
+            d, "net_total", "base_net_total", conversion_rate
+        )
         closing_shift.grand_total += base_grand_total
         closing_shift.net_total += base_net_total
         closing_shift.total_quantity += flt(d.total_qty)
 
         for t in d.taxes:
-            existing_tax = [tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate]
+            existing_tax = [
+                tx
+                for tx in taxes
+                if tx.account_head == t.account_head and tx.rate == t.rate
+            ]
             if existing_tax:
                 existing_tax[0].amount += get_base_value(
                     t, "tax_amount", "base_tax_amount", d.get("conversion_rate")
@@ -90,18 +108,25 @@ def make_closing_shift_from_opening(opening_shift):
                             "account_head": t.account_head,
                             "rate": t.rate,
                             "amount": get_base_value(
-                                t, "tax_amount", "base_tax_amount", d.get("conversion_rate")
+                                t,
+                                "tax_amount",
+                                "base_tax_amount",
+                                d.get("conversion_rate"),
                             ),
                         }
                     )
                 )
 
         for p in d.payments:
-            existing_pay = [pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
+            existing_pay = [
+                pay for pay in payments if pay.mode_of_payment == p.mode_of_payment
+            ]
             if existing_pay:
                 conversion_rate = d.get("conversion_rate")
                 if existing_pay[0].mode_of_payment == cash_mode_of_payment:
-                    amount = get_base_value(p, "amount", "base_amount", conversion_rate) - get_base_value(
+                    amount = get_base_value(
+                        p, "amount", "base_amount", conversion_rate
+                    ) - get_base_value(
                         d, "change_amount", "base_change_amount", conversion_rate
                     )
                 else:
@@ -134,9 +159,13 @@ def make_closing_shift_from_opening(opening_shift):
                 }
             )
         )
-        existing_pay = [pay for pay in payments if pay.mode_of_payment == py.mode_of_payment]
+        existing_pay = [
+            pay for pay in payments if pay.mode_of_payment == py.mode_of_payment
+        ]
         multiplier = -1 if py.payment_type == "Pay" else 1
-        signed_amount = multiplier * abs(get_base_value(py, "paid_amount", "base_paid_amount"))
+        signed_amount = multiplier * abs(
+            get_base_value(py, "paid_amount", "base_paid_amount")
+        )
         if existing_pay:
             existing_pay[0].expected_amount += signed_amount
         else:
@@ -157,7 +186,9 @@ def make_closing_shift_from_opening(opening_shift):
     )
     cash_movement_total = sum(flt(row.get("amount")) for row in cash_movements)
     if cash_movement_total:
-        existing_cash = [pay for pay in payments if pay.mode_of_payment == cash_mode_of_payment]
+        existing_cash = [
+            pay for pay in payments if pay.mode_of_payment == cash_mode_of_payment
+        ]
         if existing_cash:
             existing_cash[0].expected_amount -= cash_movement_total
         else:
