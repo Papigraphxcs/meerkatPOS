@@ -23,45 +23,53 @@
 			</router-link>
 		</nav>
 
-		<!-- Spacer to push actions to the right -->
 		<div class="flex-1"></div>
 
 		<div v-if="posStore.enableCashMovement" class="hidden md:flex items-center gap-1">
-			<Button v-if="posStore.allowPosExpense" variant="ghost" size="sm"
-				class="text-muted-foreground hover:text-red-500 gap-1" @click="paymentStore.openCashMovement('expense')"
-				:title="__('POS Expense')">
-				<ArrowDownCircle class="w-4 h-4" />
-				<span class="hidden lg:inline text-xs">{{ __('Expense') }}</span>
-			</Button>
-			<Button v-if="posStore.allowCashDeposit" variant="ghost" size="sm"
-				class="text-muted-foreground hover:text-emerald-500 gap-1"
-				@click="paymentStore.openCashMovement('deposit')" :title="__('Cash Deposit')">
-				<ArrowUpCircle class="w-4 h-4" />
-				<span class="hidden lg:inline text-xs">{{ __('Deposit') }}</span>
-			</Button>
+			<TooltipWrapper v-if="posStore.allowPosExpense" :content="__('POS Expense')">
+				<Button variant="ghost" size="sm"
+					class="text-muted-foreground hover:text-red-500 gap-1" @click="paymentStore.openCashMovement('expense')">
+					<ArrowDownCircle class="w-4 h-4" />
+					<span class="hidden lg:inline text-xs">{{ __('Expense') }}</span>
+				</Button>
+			</TooltipWrapper>
+			<TooltipWrapper v-if="posStore.allowCashDeposit" :content="__('Cash Deposit')">
+				<Button variant="ghost" size="sm"
+					class="text-muted-foreground hover:text-emerald-500 gap-1"
+					@click="paymentStore.openCashMovement('deposit')">
+					<ArrowUpCircle class="w-4 h-4" />
+					<span class="hidden lg:inline text-xs">{{ __('Deposit') }}</span>
+				</Button>
+			</TooltipWrapper>
 		</div>
 
-		<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-blue-500 gap-1"
-			@click="showRepeatDialog = true" :title="__('Repeat Invoice (Ctrl+G)')">
-			<Repeat class="w-4 h-4" />
-			<span class="hidden lg:inline text-xs">{{ __('Repeat') }}</span>
-		</Button>
+		<TooltipWrapper :content="__('Repeat Invoice (Ctrl+G)')">
+			<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-blue-500 gap-1"
+				@click="showRepeatDialog = true">
+				<Repeat class="w-4 h-4" />
+				<span class="hidden lg:inline text-xs">{{ __('Repeat') }}</span>
+			</Button>
+		</TooltipWrapper>
 
-		<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-amber-500 gap-1"
-			@click="showReturnDialog = true" :title="__('Process Return')">
-			<RotateCcw class="w-4 h-4" />
-			<span class="hidden lg:inline text-xs">{{ __('Return') }}</span>
-		</Button>
+		<TooltipWrapper :content="__('Process Return')">
+			<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-amber-500 gap-1"
+				@click="showReturnDialog = true">
+				<RotateCcw class="w-4 h-4" />
+				<span class="hidden lg:inline text-xs">{{ __('Return') }}</span>
+			</Button>
+		</TooltipWrapper>
 
-		<Button v-if="posStore.allowPrintLastInvoice && posStore.lastInvoiceName" variant="ghost" size="sm"
-			class="text-muted-foreground hover:text-foreground gap-1" @click="printLastInvoice"
-			:title="__('Print Last Invoice')">
-			<Printer class="w-4 h-4" />
-		</Button>
+		<TooltipWrapper v-if="posStore.allowPrintLastInvoice && posStore.lastInvoiceName" :content="__('Print Last Invoice')">
+			<Button variant="ghost" size="sm"
+				class="text-muted-foreground hover:text-foreground gap-1" @click="printLastInvoice">
+				<Printer class="w-4 h-4" />
+			</Button>
+		</TooltipWrapper>
 
 		<div class="flex items-center gap-1">
+			<TooltipWrapper :content="offlineStore.statusLabel">
 			<Button variant="ghost" size="sm" :class="['gap-1.5', offlineStore.statusColor]"
-				@click="handleOfflineAction" :title="offlineStore.statusLabel">
+				@click="handleOfflineAction">
 				<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />
 				<WifiOff v-else-if="!isOnline()" class="w-4 h-4" />
 				<CloudUpload v-else-if="offlineStore.hasPending" class="w-4 h-4" />
@@ -72,6 +80,7 @@
 				</Badge>
 				<span class="hidden lg:inline text-xs">{{ offlineStore.statusLabel }}</span>
 			</Button>
+			</TooltipWrapper>
 		</div>
 
 		<OfflinePendingPanel :open="showOfflinePanel" @close="showOfflinePanel = false" />
@@ -83,10 +92,12 @@
 			</Badge>
 		</div>
 
-		<Button variant="ghost" size="icon-sm" @click="toggleDarkMode" :title="themeTooltip"
+		<TooltipWrapper :content="themeTooltip">
+		<Button variant="ghost" size="icon-sm" @click="toggleDarkMode"
 			:class="{ 'text-amber-400': theme === 'dark', 'text-blue-400': theme === 'system' }">
 			<component :is="themeIcon" class="w-4 h-4" />
 		</Button>
+		</TooltipWrapper>
 		
 		<Popover>
 			<PopoverTrigger as-child>
@@ -112,12 +123,14 @@
 			</PopoverContentStyled>
 		</Popover>
 
-		<Button v-if="!posStore.hideClosingShift" variant="ghost" size="sm"
-			class="text-muted-foreground hover:text-destructive gap-1.5"
-			@click="posStore.showClosingDialog = true; posStore.fetchClosingData()" :title="__('Close Shift')">
-			<LogOut class="w-4 h-4" />
-			<span class="hidden sm:inline">{{ __('Close Shift') }}</span>
-		</Button>
+		<TooltipWrapper v-if="!posStore.hideClosingShift" :content="__('Close Shift')">
+			<Button variant="ghost" size="sm"
+				class="text-muted-foreground hover:text-destructive gap-1.5"
+				@click="posStore.showClosingDialog = true; posStore.fetchClosingData()">
+				<LogOut class="w-4 h-4" />
+				<span class="hidden sm:inline">{{ __('Close Shift') }}</span>
+			</Button>
+		</TooltipWrapper>
 
 		<ReturnDialog :open="showReturnDialog" @close="showReturnDialog = false" />
 
@@ -132,6 +145,7 @@ import { usePaymentStore } from "@/stores/paymentStore";
 import { useAuthStore } from "@/stores/authStore";
 import { __ } from "@/lib/translate";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContentStyled, PopoverTrigger } from "@/components/ui/popover";

@@ -68,15 +68,16 @@
                             </div>
 
                             <div class="ml-3 flex items-center gap-2">
+                                <TooltipWrapper :content="__('Delete draft')">
                                 <Button 
                                     variant="ghost" 
                                     size="icon-sm" 
                                     class="opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
                                     @click.stop="deleteDraft(draft.name)"
-                                    :title="__('Delete draft')"
                                 >
                                     <Trash2 class="w-3.5 h-3.5" />
                                 </Button>
+                                </TooltipWrapper>
                                 <Button 
                                     variant="ghost" 
                                     size="icon-sm"
@@ -118,6 +119,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { 
     Clock, FileText, Loader2, User, Calendar, ArrowRight, 
     Trash2, RefreshCw

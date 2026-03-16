@@ -22,17 +22,18 @@
 						<!-- Header row: POS Profile label + refresh button -->
 						<div class="flex items-center justify-between">
 							<label class="text-sm font-semibold text-foreground">POS Profile</label>
-							<button
-								type="button"
-								class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-								:class="{ 'animate-spin pointer-events-none': syncStatus.isSyncing.value }"
-								:disabled="isLoadingData"
-								@click="loadProfiles"
-								:title="syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh profiles'"
-							>
-								<RefreshCw class="w-3.5 h-3.5" />
-								<span>{{ syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh' }}</span>
-							</button>
+						<TooltipWrapper :content="syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh profiles'">
+						<button
+							type="button"
+							class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+							:class="{ 'animate-spin pointer-events-none': syncStatus.isSyncing.value }"
+							:disabled="isLoadingData"
+							@click="loadProfiles"
+						>
+							<RefreshCw class="w-3.5 h-3.5" />
+							<span>{{ syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh' }}</span>
+						</button>
+						</TooltipWrapper>
 						</div>
 
 						<!-- POS Profile Select -->
@@ -121,6 +122,7 @@ import { showError } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { Card, CardContent } from "@/components/ui/card";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { Zap, Loader2, Lock, RefreshCw } from "lucide-vue-next";
 import { useSyncStatus } from "@/composables/useSyncStatus";
 import { isElectron } from "@/services/electronBridge";

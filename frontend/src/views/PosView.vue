@@ -6,11 +6,12 @@
 					<div class="flex-1">
 					<SearchBar ref="searchBarRef" @search="onSearch" @enter="onSearchEnter" @navigate="onNavigate" />
 					</div>
+					<TooltipWrapper :content="__('Search items (Ctrl+K)')">
 					<Button variant="outline" size="icon" class="h-9 w-9 shrink-0"
-						@click="commandSearchRef?.open()"
-						:title="__('Search items (Ctrl+K)')">
+						@click="commandSearchRef?.open()">
 						<Search class="h-4 w-4" />
 					</Button>
+					</TooltipWrapper>
 					<div class="w-52 shrink-0">
 						<BarcodeScanner ref="barcodeScannerRef" @scanned="onBarcodeScan" />
 					</div>
@@ -80,6 +81,7 @@ import CommandSearch from "@/components/items/CommandSearch.vue";
 import Cart from "@/components/cart/Cart.vue";
 import { Button } from "@/components/ui/button";
 import { Autocomplete } from "@/components/ui/autocomplete";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { LayoutGrid, List, Search } from "lucide-vue-next";
 
 import type { POSItem } from "@/types/pos.types";

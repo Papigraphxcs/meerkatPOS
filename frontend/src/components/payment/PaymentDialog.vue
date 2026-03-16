@@ -459,7 +459,11 @@ function selectMethod(method: string) {
 }
 
 function setQuickAmount(amount: number) {
-	tenderedAmount.value = roundCurrency(amount);
+	const rounded = roundCurrency(amount);
+	tenderedAmount.value = rounded;
+	setTimeout(() => {
+		amountInput.value?.setValue(rounded);
+	});
 	focusAmountInput();
 }
 
@@ -574,17 +578,19 @@ async function submitPayment(withPrint: boolean = true) {
 			invoiceData.payments = [
 				{
 					mode_of_payment: selectedMethod.value,
-					amount: roundCurrency(cartStore.grandTotal),
+					amount: roundCurrency(tenderedAmount.value),
 				},
 			];
 		}
 
-		// In Electron mode, always save locally and let sync engine handle posting
+		if (changeAmount.value > 0) {
+			invoiceData.change_amount = changeAmount.value;
+		}
+
 		if (isElectron() && window.electronAPI?.db) {
 			const result = await window.electronAPI.db.addPendingInvoice({
 				data: {
 					...invoiceData,
-					// Store local shift ID for sync engine to resolve later
 					pos_opening_shift_local_id: shiftName,
 					is_draft: false,
 					is_return: cartStore.isReturnMode,
@@ -602,7 +608,6 @@ async function submitPayment(withPrint: boolean = true) {
 				showSuccess(__("Invoice saved locally (#{0}). It will sync to server automatically.", [localId]));
 			}
 
-			// Print invoice locally in Electron
 			if (withPrint && localId && window.electronAPI?.print) {
 				await printInvoiceLocal(localId);
 			}
@@ -625,7 +630,6 @@ async function submitPayment(withPrint: boolean = true) {
 			}
 			return;
 		}
-
 		const result = await call<{ name: string }>("xpos.api.invoices.create_invoice", {
 			data: JSON.stringify(invoiceData),
 		});
@@ -633,12 +637,11 @@ async function submitPayment(withPrint: boolean = true) {
 		posStore.lastInvoiceName = result.name;
 
 		if (cartStore.isReturnMode) {
-			showSuccess(__("Return {0} created successfully!", [result.name]));
+			showSuccess(__("Return {0} saved successfully!", [result.name]));
 		} else {
-			showSuccess(__("Invoice {0} created successfully!", [result.name]));
+			showSuccess(__("Invoice {0} saved successfully!", [result.name]));
 		}
 
-		// Print invoice if requested
 		if (withPrint && result.name) {
 			await printInvoice(result.name);
 		}
@@ -659,6 +662,9 @@ async function submitPayment(withPrint: boolean = true) {
 						amount: roundCurrency(cartStore.grandTotal),
 					},
 				];
+			}
+			if (changeAmount.value > 0) {
+				invoiceData.change_amount = changeAmount.value;
 			}
 			const result = await offlineStore.saveOffline(
 				invoiceData,

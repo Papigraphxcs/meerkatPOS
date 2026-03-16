@@ -147,7 +147,17 @@ function select() {
     inputRef.value?.select();
 }
 
-defineExpose({ inputRef, focus, select });
+function setValue(val: number): void {
+    const clamped = clampValue(val);
+    const rounded = effectivePrecision.value > 0
+        ? parseFloat(clamped.toFixed(effectivePrecision.value))
+        : Math.round(clamped);
+    displayValue.value = isFocused.value ? String(rounded) : formatNumber(rounded);
+    emit("update:modelValue", rounded);
+    emit("change", rounded);
+}
+
+defineExpose({ inputRef, focus, select, setValue });
 </script>
 
 <template>

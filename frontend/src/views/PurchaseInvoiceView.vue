@@ -23,6 +23,7 @@ import type { SearchItem, Supplier } from "@/types/pos.types";
 import { showError, showSuccess, call } from "@/services/api";
 import __ from "@/lib/translate";
 import { CreateItemDialog, CreateSupplierDialog } from "@/components/purchase";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
@@ -622,7 +623,9 @@ onMounted(() => {
                     </template>
 
                     <template #cell-item_name="{ row }">
-                        <div class="truncate font-medium text-xs" :title="row.item_name">{{ row.item_name }}</div>
+                        <TooltipWrapper :content="row.item_name">
+                        <div class="truncate font-medium text-xs">{{ row.item_name }}</div>
+                        </TooltipWrapper>
                         <div class="text-[10px] text-muted-foreground truncate">{{ row.item_code }}</div>
                     </template>
                 </Table>

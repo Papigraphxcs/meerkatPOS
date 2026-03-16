@@ -30,7 +30,8 @@
 			</div>
 		</div>
 
-		<Badge v-if="showStock && item.actual_qty !== undefined" :variant="stockVariant" class="shrink-0 text-[10px]" :title="isOutOfStock ? __('Out of Stock') : item.actual_qty">
+		<TooltipWrapper v-if="showStock && item.actual_qty !== undefined" :content="String(isOutOfStock ? __('Out of Stock') : item.actual_qty)">
+		<Badge :variant="stockVariant" class="shrink-0 text-[10px]">
 			<template v-if="isOutOfStock">
 				<AlertCircle class="w-3 h-3 mr-1" />
 				{{ __("Out of Stock") }}
@@ -39,6 +40,7 @@
 				{{ stockLabel }}
 			</template>
 		</Badge>
+		</TooltipWrapper>
 
 		<div class="shrink-0 text-right">
 			<span class="text-sm font-bold text-primary tabular-nums">
@@ -67,6 +69,7 @@
 import { computed } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { Badge } from "@/components/ui/badge";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { Package, Plus, AlertCircle, Ban, Info } from "lucide-vue-next";
 import __ from "@/lib/translate";
 

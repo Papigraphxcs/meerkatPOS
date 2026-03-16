@@ -58,15 +58,18 @@
 
 		<!-- Electron sync status badge (bottom-left, POS mode only) -->
 		<Transition name="fade">
-			<div
+			<TooltipWrapper
 				v-if="!isAuthPage && isElectronEnv"
+				:content="syncStatus.lastError.value || (syncStatus.lastSyncTime.value ? 'Last sync: ' + syncStatus.lastSyncTime.value : 'Not synced yet')"
+				side="right"
+			>
+			<div
 				class="fixed bottom-3 left-3 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium shadow-md select-none"
 				:class="syncStatus.isSyncing.value
 					? 'bg-blue-600 text-white'
 					: syncStatus.lastError.value
 					? 'bg-destructive text-destructive-foreground'
 					: 'bg-muted text-muted-foreground'"
-				:title="syncStatus.lastError.value || (syncStatus.lastSyncTime.value ? 'Last sync: ' + syncStatus.lastSyncTime.value : 'Not synced yet')"
 			>
 				<span
 					v-if="syncStatus.isSyncing.value"
@@ -82,6 +85,7 @@
 					<template v-else>Sync pending</template>
 				</span>
 			</div>
+			</TooltipWrapper>
 		</Transition>
 	</div>
 </template>
@@ -105,6 +109,7 @@ import LoyaltyDialog from "@/components/customer/LoyaltyDialog.vue";
 import ItemDetailDialog from "@/components/items/ItemDetailDialog.vue";
 import CashMovementDialog from "@/components/shift/CashMovementDialog.vue";
 import DraftInvoiceDialog from "@/components/cart/DraftInvoiceDialog.vue";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { initSyncListeners } from "@/services/syncIpcHandler";
 import { useSyncStatus } from "@/composables/useSyncStatus";

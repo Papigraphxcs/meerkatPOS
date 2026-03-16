@@ -357,6 +357,7 @@ export interface InvoiceData {
   return_against?: string;
   write_off_amount?: number;
   write_off_account?: string;
+  change_amount?: number;
   authorization_code?: string;
   currency?: string;
   conversion_rate?: number;

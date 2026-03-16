@@ -30,6 +30,7 @@ import { showError, showSuccess } from "@/services/api";
 import __ from "@/lib/translate";
 import LinkField from "@/components/ui/link/LinkField.vue";
 import { CreateItemDialog, CreateSupplierDialog } from "@/components/purchase";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
@@ -541,9 +542,11 @@ onMounted(() => {
                     </template>
 
                     <template #cell-item_name="{ row }">
-                        <div class="truncate font-medium text-xs" :title="row.item_name">
+                        <TooltipWrapper :content="row.item_name">
+                        <div class="truncate font-medium text-xs">
                             {{ row.item_name }}
                         </div>
+                        </TooltipWrapper>
                         <div class="text-[10px] text-muted-foreground truncate">{{ row.item_code }}</div>
                     </template>
                 </Table>

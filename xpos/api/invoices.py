@@ -280,6 +280,10 @@ def create_invoice(data):
     ):
         frappe.throw(_("Payment amount must be greater than zero"))
 
+    change_amount = flt(data.get("change_amount", 0))
+    if change_amount > 0:
+        invoice_doc.change_amount = change_amount
+
     if pos_opening_shift:
         try:
             invoice_doc.pos_opening_shift = pos_opening_shift

@@ -3,6 +3,7 @@ import { ref, computed, nextTick, watch } from "vue";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Button } from "@/components/ui/button";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import {
     Trash2,
     Plus,
@@ -326,23 +327,29 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                     <span class="text-[11px] font-medium text-blue-600 dark:text-blue-400 mr-1">
                         {{ selectedIndices.size }} {{ __("selected") }}
                     </span>
+                    <TooltipWrapper :content="__('Delete selected')">
                     <Button variant="ghost" size="icon" class="h-7 w-7 text-destructive hover:bg-destructive/10"
-                        :title="__('Delete selected')" @click="deleteSelected">
+                        @click="deleteSelected">
                         <Trash2 class="w-3.5 h-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" class="h-7 w-7" :title="__('Deselect all')"
+                    </TooltipWrapper>
+                    <TooltipWrapper :content="__('Deselect all')">
+                    <Button variant="ghost" size="icon" class="h-7 w-7"
                         @click="selectedIndices.clear()">
                         <X class="w-3.5 h-3.5" />
                     </Button>
+                    </TooltipWrapper>
                     <div class="w-px h-4 bg-border mx-0.5" />
                 </template>
 
                 <slot name="toolbar" />
 
-                <Button v-if="showColumnSettings" variant="ghost" size="icon" class="h-7 w-7"
-                    :title="__('Column settings')" @click="showColumnSettingsModal = true">
+                <TooltipWrapper v-if="showColumnSettings" :content="__('Column settings')">
+                <Button variant="ghost" size="icon" class="h-7 w-7"
+                    @click="showColumnSettingsModal = true">
                     <Settings class="w-3.5 h-3.5" />
                 </Button>
+                </TooltipWrapper>
 
                 <Button v-if="showAddRow" variant="outline" size="sm" class="h-7 text-xs" @click="addRow">
                     <Plus class="w-3.5 h-3.5 mr-1" />
@@ -457,23 +464,31 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                         <td v-if="showDeleteButton || allowReorder || allowDuplicate" class="px-1 py-1">
                             <div
                                 class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button v-if="allowDuplicate" variant="ghost" size="icon" class="h-6 w-6"
-                                    :title="__('Duplicate')" @click.stop="duplicateRow(rowIndex)">
+                                <TooltipWrapper v-if="allowDuplicate" :content="__('Duplicate')">
+                                <Button variant="ghost" size="icon" class="h-6 w-6"
+                                    @click.stop="duplicateRow(rowIndex)">
                                     <Copy class="w-3 h-3" />
                                 </Button>
-                                <Button v-if="allowReorder && rowIndex > 0" variant="ghost" size="icon" class="h-6 w-6"
-                                    :title="__('Move up')" @click.stop="moveRow(rowIndex, -1)">
+                                </TooltipWrapper>
+                                <TooltipWrapper v-if="allowReorder && rowIndex > 0" :content="__('Move up')">
+                                <Button variant="ghost" size="icon" class="h-6 w-6"
+                                    @click.stop="moveRow(rowIndex, -1)">
                                     <ChevronUp class="w-3 h-3" />
                                 </Button>
-                                <Button v-if="allowReorder && rowIndex < rows.length - 1" variant="ghost" size="icon"
-                                    class="h-6 w-6" :title="__('Move down')" @click.stop="moveRow(rowIndex, 1)">
+                                </TooltipWrapper>
+                                <TooltipWrapper v-if="allowReorder && rowIndex < rows.length - 1" :content="__('Move down')">
+                                <Button variant="ghost" size="icon"
+                                    class="h-6 w-6" @click.stop="moveRow(rowIndex, 1)">
                                     <ChevronDown class="w-3 h-3" />
                                 </Button>
-                                <Button v-if="showDeleteButton" variant="ghost" size="icon"
+                                </TooltipWrapper>
+                                <TooltipWrapper v-if="showDeleteButton" :content="__('Delete')">
+                                <Button variant="ghost" size="icon"
                                     class="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    :title="__('Delete')" @click.stop="$emit('delete-row', rowIndex)">
+                                    @click.stop="$emit('delete-row', rowIndex)">
                                     <Trash2 class="w-3 h-3" />
                                 </Button>
+                                </TooltipWrapper>
                             </div>
                         </td>
                     </tr>

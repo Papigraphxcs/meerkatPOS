@@ -101,28 +101,38 @@
 				{{ __('Coupon') }}
 			</Button>
 
-			<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground"
-				:disabled="cartStore.isEmpty" @click="holdOrder" :title="__('Save as draft')">
-				<Clock class="w-4 h-4" />
-			</Button>
-			<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground"
-				@click="cartStore.openDraftDialog()" :title="__('Restore draft')">
-				<FileText class="w-4 h-4" />
-			</Button>
-			<Button variant="outline" size="sm" class="text-destructive hover:text-destructive dark:border-border"
-				:disabled="cartStore.isEmpty" @click="cartStore.clearCart()" :title="__('Clear cart')">
-				<Trash2 class="w-4 h-4" />
-			</Button>
-			<Button variant="outline" size="sm" :disabled="cartStore.isEmpty"
-				:class="{ 'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20': !!cartStore.selectedDeliveryCharge }"
-				@click="toggleDelivery" :title="__('Delivery charge')">
-				<Truck class="w-4 h-4" />
-			</Button>
-			<Button variant="outline" size="sm" :disabled="!hasAnyDiscount"
-				:class="{ 'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20': !!cartStore.selectedDeliveryCharge }"
-				@click="clearAllDiscounts" :title="__('Clear all discounts')">
-				<X class="w-4 h-4" />
-			</Button>
+			<TooltipWrapper :content="__('Save as draft')">
+				<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground"
+					:disabled="cartStore.isEmpty" @click="holdOrder">
+					<Clock class="w-4 h-4" />
+				</Button>
+			</TooltipWrapper>
+			<TooltipWrapper :content="__('Restore draft')">
+				<Button variant="outline" size="sm" class="dark:border-border dark:text-foreground"
+					@click="cartStore.openDraftDialog()">
+					<FileText class="w-4 h-4" />
+				</Button>
+			</TooltipWrapper>
+			<TooltipWrapper :content="__('Clear cart')">
+				<Button variant="outline" size="sm" class="text-destructive hover:text-destructive dark:border-border"
+					:disabled="cartStore.isEmpty" @click="cartStore.clearCart()">
+					<Trash2 class="w-4 h-4" />
+				</Button>
+			</TooltipWrapper>
+			<TooltipWrapper :content="__('Delivery charge')">
+				<Button variant="outline" size="sm" :disabled="cartStore.isEmpty"
+					:class="{ 'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20': !!cartStore.selectedDeliveryCharge }"
+					@click="toggleDelivery">
+					<Truck class="w-4 h-4" />
+				</Button>
+			</TooltipWrapper>
+			<TooltipWrapper :content="__('Clear all discounts')">
+				<Button variant="outline" size="sm" :disabled="!hasAnyDiscount"
+					:class="{ 'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20': !!cartStore.selectedDeliveryCharge }"
+					@click="clearAllDiscounts">
+					<X class="w-4 h-4" />
+				</Button>
+			</TooltipWrapper>
 		</div>
 
 		<transition name="slide-up">
@@ -206,6 +216,7 @@ import { call, showSuccess, showError } from "@/services/api";
 import { __ } from "@/lib/translate";
 import { isElectron } from "@/services/electronBridge";
 import { Button } from "@/components/ui/button";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Separator } from "@/components/ui/separator";

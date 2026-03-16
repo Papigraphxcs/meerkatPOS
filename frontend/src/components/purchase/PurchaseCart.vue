@@ -3,6 +3,7 @@ import { usePurchaseStore, type PurchaseCartItem } from "@/stores/purchaseStore"
 import { usePosStore } from "@/stores/posStore";
 import { Trash2, ShoppingCart, Package, RefreshCw } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { NumberInput } from "@/components/ui/number-input";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -34,11 +35,12 @@ function getItemAmount(item: PurchaseCartItem): number {
                     ({{ purchaseStore.cartItems.length }} {{ __("items") }})
                 </span>
             </h2>
-            <Button v-if="!purchaseStore.isEmpty" @click="purchaseStore.refreshAllStock()" variant="outline" size="sm"
-                :title="__('Refresh stock data')">
-                <RefreshCw class="w-3.5 h-3.5 mr-1" />
-                {{ __("Stock") }}
-            </Button>
+            <TooltipWrapper v-if="!purchaseStore.isEmpty" :content="__('Refresh stock data')">
+                <Button @click="purchaseStore.refreshAllStock()" variant="outline" size="sm">
+                    <RefreshCw class="w-3.5 h-3.5 mr-1" />
+                    {{ __("Stock") }}
+                </Button>
+            </TooltipWrapper>
         </div>
 
         <!-- Empty State -->
@@ -87,9 +89,11 @@ function getItemAmount(item: PurchaseCartItem): number {
 
                             <!-- Item Name -->
                             <td class="px-2 py-1.5">
-                                <div class="truncate text-foreground font-medium text-xs" :title="item.item_name">
+                                <TooltipWrapper :content="item.item_name">
+                                <div class="truncate text-foreground font-medium text-xs">
                                     {{ item.item_name }}
                                 </div>
+                                </TooltipWrapper>
                                 <div class="text-[10px] text-muted-foreground truncate">{{ item.item_code }}</div>
                             </td>
 

@@ -6,6 +6,7 @@ import { Plus, Package, ShoppingCart, ScanBarcode, Loader2 } from "lucide-vue-ne
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
+import { TooltipWrapper } from "@/components/ui/tooltip";
 import { LinkField, type LinkFieldOption } from "@/components/ui/link";
 import {
     Dialog,
@@ -192,9 +193,11 @@ onUnmounted(() => {
                         :empty-text="__('No items found')"
                     />
                 </div>
-                <Button @click="openNewItemForm" variant="outline" size="icon" :title="__('Create new item')">
+                <TooltipWrapper :content="__('Create new item')">
+                <Button @click="openNewItemForm" variant="outline" size="icon">
                     <Plus class="w-4 h-4" />
                 </Button>
+                </TooltipWrapper>
             </div>
         </div>
 

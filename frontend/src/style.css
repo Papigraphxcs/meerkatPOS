@@ -60,37 +60,6 @@
   }
 }
 
-/* ============ Frappe Overrides ============ */
-.page-container[data-page-route="xpos"] .page-head,
-.page-container[data-page-route="xpos"] .page-title .title-area,
-body[data-route="xpos"] .page-head {
-  display: none !important;
-}
-
-.page-container[data-page-route="xpos"] .main-section {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.page-container[data-page-route="xpos"] .page-body {
-  margin: 0 !important;
-}
-
-/* Force dark mode on Frappe parent containers */
-.dark .page-container[data-page-route="xpos"],
-.dark .page-container[data-page-route="xpos"] .main-section,
-.dark .page-container[data-page-route="xpos"] .page-body,
-.dark .page-container[data-page-route="xpos"] .layout-main,
-.dark .page-container[data-page-route="xpos"] .container {
-  background-color: hsl(var(--background)) !important;
-}
-
-/* Ensure #xpos-app covers full background in dark mode */
-#xpos-app.dark {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-}
-
 /* ============ Vue Transitions ============ */
 .fade-enter-active,
 .fade-leave-active {
