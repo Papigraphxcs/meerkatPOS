@@ -534,6 +534,15 @@ export async function clearAllData(): Promise<void> {
   });
 }
 
+export async function cacheERPSettings(settings: unknown): Promise<void> {
+  await setMeta("erp_settings", settings);
+  await setMeta("erp_settings_cached_at", new Date().toISOString());
+}
+
+export async function getCachedERPSettings(): Promise<unknown | null> {
+  return await getMeta("erp_settings");
+}
+
 export async function clearPendingData(): Promise<void> {
   await db.transaction("rw", [db.pendingInvoices, db.pendingPurchases], async () => {
     await db.pendingInvoices.clear();

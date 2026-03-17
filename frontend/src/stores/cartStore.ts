@@ -25,6 +25,7 @@ export const useCartStore = defineStore("cart", () => {
   const posStore = usePosStore();
   const isReturnMode = ref(false);
   const returnAgainst = ref("");
+  const returnItemCodes = ref<string[]>([]);
   const orderNotes = ref("");
   const deliveryDate = ref("");
   const authorizationCode = ref("");
@@ -241,6 +242,10 @@ export const useCartStore = defineStore("cart", () => {
   }
 
   function addItem(item: POSItem): { success: boolean; message?: string } {
+    if (isReturnMode.value && returnItemCodes.value.length > 0 && !returnItemCodes.value.includes(item.item_code)) {
+      return { success: false, message: __("This item is not in the original invoice") };
+    }
+
     const stockCheck = canAddItem(item);
     if (!stockCheck.allowed && !isReturnMode.value) {
       return { success: false, message: stockCheck.message };
@@ -322,6 +327,10 @@ export const useCartStore = defineStore("cart", () => {
     batchNo?: string,
     conversionFactor?: number
   ): { success: boolean; message?: string } {
+    if (isReturnMode.value && returnItemCodes.value.length > 0 && !returnItemCodes.value.includes(item.item_code)) {
+      return { success: false, message: __("This item is not in the original invoice") };
+    }
+
     if (!isReturnMode.value && !serialNo) {
       const stockCheck = canAddItemWithDetails(item, qty, batchNo);
       if (!stockCheck.allowed) {
@@ -456,14 +465,16 @@ export const useCartStore = defineStore("cart", () => {
     }
   }
 
-  function enterReturnMode(invoiceName: string): void {
+  function enterReturnMode(invoiceName: string, allowedItemCodes?: string[]): void {
     isReturnMode.value = true;
     returnAgainst.value = invoiceName;
+    returnItemCodes.value = allowedItemCodes || items.value.map(i => i.item_code);
   }
 
   function exitReturnMode(): void {
     isReturnMode.value = false;
     returnAgainst.value = "";
+    returnItemCodes.value = [];
     clearCart();
   }
 
@@ -559,6 +570,15 @@ export const useCartStore = defineStore("cart", () => {
     showPaymentDialog.value = false;
     isReturnMode.value = false;
     returnAgainst.value = "";
+    returnItemCodes.value = [];
+    const posStore = usePosStore();
+    if (posStore.defaultCustomer) {
+      const name = String(posStore.defaultCustomer);
+      customer.value = {
+        name,
+        customer_name: name,
+      };
+    }
   }
 
   function openPaymentDialog(): void {
@@ -856,6 +876,7 @@ export const useCartStore = defineStore("cart", () => {
     showPaymentDialog,
     isReturnMode,
     returnAgainst,
+    returnItemCodes,
     orderNotes,
     deliveryDate,
     authorizationCode,

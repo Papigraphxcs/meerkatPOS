@@ -1,3 +1,5 @@
+import { call } from "@/services/api";
+
 /**
  * Check if the browser has an active network connection.
  * Uses the Navigator.onLine API which provides a reliable way
@@ -85,4 +87,13 @@ export function formatNumber(value: number, decimals = 2): string {
  */
 export function generateLocalId(): string {
     return `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+
+export async function getCustomer(customerId: string) {
+    const customer = await call("frappe.client.get", {
+        doctype: "Customer",
+        name: customerId,
+    });
+    return customer;
 }

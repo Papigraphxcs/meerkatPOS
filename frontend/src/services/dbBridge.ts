@@ -1058,3 +1058,21 @@ export async function countPendingPurchases(): Promise<number> {
   const { db } = await import("./idbService");
   return db.table("pendingPurchases").where("status").anyOf(["pending", "failed"]).count();
 }
+
+export async function cacheERPSettings(settings: unknown): Promise<void> {
+  if (isElectron()) {
+    await getDb().setMeta("erp_settings", JSON.stringify(settings));
+    return;
+  }
+  const idb = await import("./idbService");
+  await idb.cacheERPSettings(settings);
+}
+
+export async function getCachedERPSettings(): Promise<unknown | null> {
+  if (isElectron()) {
+    const val = await getDb().getMeta("erp_settings");
+    return val ? JSON.parse(val) : null;
+  }
+  const idb = await import("./idbService");
+  return idb.getCachedERPSettings();
+}

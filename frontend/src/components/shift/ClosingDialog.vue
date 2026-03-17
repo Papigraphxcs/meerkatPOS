@@ -122,14 +122,23 @@
 			</div>
 
 			<DialogFooter class="shrink-0 border-t border-border px-5 py-4">
-				<Button variant="outline" @click="close">{{ __("Cancel") }}</Button>
-				<Button variant="destructive" class="font-bold" :disabled="isClosing" @click="handleCloseShift">
-					<template v-if="isClosing">
-						<Loader2 class="w-4 h-4 animate-spin" />
-						{{ __("Closing...") }}
-					</template>
-					<span v-else>{{ __("Close Shift") }}</span>
-				</Button>
+				<template v-if="shiftClosed">
+					<Button v-if="closedShiftName" variant="outline" class="gap-1.5" @click="printShiftSummary">
+						<Printer class="w-4 h-4" />
+						{{ __("Print Summary") }}
+					</Button>
+					<Button @click="close">{{ __("Done") }}</Button>
+				</template>
+				<template v-else>
+					<Button variant="outline" @click="close">{{ __("Cancel") }}</Button>
+					<Button variant="destructive" class="font-bold" :disabled="isClosing" @click="handleCloseShift">
+						<template v-if="isClosing">
+							<Loader2 class="w-4 h-4 animate-spin" />
+							{{ __("Closing...") }}
+						</template>
+						<span v-else>{{ __("Close Shift") }}</span>
+					</Button>
+				</template>
 			</DialogFooter>
 		</DialogScrollContent>
 	</Dialog>
@@ -145,7 +154,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-vue-next";
+import { Loader2, Printer } from "lucide-vue-next";
 import __ from "@/lib/translate";
 
 interface ClosingSummary {
@@ -169,6 +178,8 @@ const posStore = usePosStore();
 
 const isLoading = ref(true);
 const isClosing = ref(false);
+const shiftClosed = ref(false);
+const closedShiftName = ref("");
 const summary = ref<ClosingSummary | null>(null);
 const closingDetails = ref<ClosingDetail[]>([]);
 
@@ -233,13 +244,22 @@ async function handleCloseShift() {
 	isClosing.value = true;
 
 	try {
-		await posStore.closeShift(closingDetails.value);
+		const result = await posStore.closeShift(closingDetails.value) as { name?: string } | undefined;
+		closedShiftName.value = result?.name || "";
+		shiftClosed.value = true;
 		showSuccess(__("Shift closed successfully!"));
 	} catch (error: unknown) {
 		showError("Failed to close shift: " + ((error as Error)?.message || error));
 	} finally {
 		isClosing.value = false;
 	}
+}
+
+function printShiftSummary() {
+	const name = closedShiftName.value;
+	if (!name) return;
+	const url = `/printview?doctype=POS+Closing+Entry&name=${encodeURIComponent(name)}&no_letterhead=0&trigger_print=1`;
+	window.open(url, "_blank");
 }
 
 function close() {

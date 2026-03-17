@@ -9,7 +9,7 @@
 				<X class="w-4 h-4 text-muted-foreground" />
 			</Button>
 		</div>
-		<div class="absolute right-14 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1">
+		<div class="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1">
 			<kbd
 				class="px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-muted rounded border border-border">/</kbd>
 		</div>

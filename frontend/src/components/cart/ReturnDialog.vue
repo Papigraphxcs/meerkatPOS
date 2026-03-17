@@ -107,6 +107,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Search, RotateCcw, ArrowLeft, Loader2 } from "lucide-vue-next";
+import __ from "@/lib/translate";
 
 const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{ (e: "close"): void }>();
@@ -232,7 +233,8 @@ function processReturn() {
     if (!selectedInvoice.value || !hasReturnItems.value) return;
 
     cartStore.clearCart();
-    cartStore.enterReturnMode(selectedInvoice.value.name);
+    const allowedItemCodes = returnItems.value.map(i => i.item_code);
+    cartStore.enterReturnMode(selectedInvoice.value.name, allowedItemCodes);
 
     cartStore.setCustomer({
         name: selectedInvoice.value.customer || selectedInvoice.value.customer_name,

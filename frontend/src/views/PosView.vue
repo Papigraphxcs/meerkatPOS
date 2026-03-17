@@ -1,42 +1,32 @@
 <template>
 	<div class="flex h-full overflow-hidden">
-		<div class="flex-1 flex flex-col min-w-0 border-r border-border bg-background max-w-[calc(100%-560px)] xl:max-w-[calc(100%-520px)]">
+		<div
+			class="flex-1 flex flex-col min-w-0 border-r border-border bg-background max-w-[calc(100%-560px)] xl:max-w-[calc(100%-520px)]">
 			<div class="shrink-0 p-4 pb-2 space-y-3">
 				<div class="flex items-center gap-2">
 					<div class="flex-1">
-					<SearchBar ref="searchBarRef" @search="onSearch" @enter="onSearchEnter" @navigate="onNavigate" />
+						<SearchBar ref="searchBarRef" @search="onSearch" @enter="onSearchEnter"
+							@navigate="onNavigate" />
 					</div>
-					<TooltipWrapper :content="__('Search items (Ctrl+K)')">
-					<Button variant="outline" size="icon" class="h-9 w-9 shrink-0"
-						@click="commandSearchRef?.open()">
-						<Search class="h-4 w-4" />
-					</Button>
-					</TooltipWrapper>
 					<div class="w-52 shrink-0">
 						<BarcodeScanner ref="barcodeScannerRef" @scanned="onBarcodeScan" />
 					</div>
 					<div class="flex items-center gap-1 border rounded-lg p-1">
-						<Button :variant="viewMode === 'grid' ? 'default' : 'ghost'" size="icon"
-							class="h-8 w-8" @click="viewMode = 'grid'">
+						<Button :variant="viewMode === 'grid' ? 'default' : 'ghost'" size="icon" class="h-8 w-8"
+							@click="viewMode = 'grid'">
 							<LayoutGrid class="h-4 w-4" />
 						</Button>
-						<Button :variant="viewMode === 'list' ? 'default' : 'ghost'" size="icon"
-							class="h-8 w-8" @click="viewMode = 'list'">
+						<Button :variant="viewMode === 'list' ? 'default' : 'ghost'" size="icon" class="h-8 w-8"
+							@click="viewMode = 'list'">
 							<List class="h-4 w-4" />
 						</Button>
 					</div>
 				</div>
 				<div class="flex items-center gap-2 overflow-x-auto pb-1 xpos-scrollbar">
-					<Autocomplete
-						:model-value="itemStore.selectedGroup"
-						:options="groupAutocompleteOptions"
-						:placeholder="__('Search item groups...')"
-						:show-search-icon="true"
-						:max-visible="12"
-						empty-text="__('No groups found')"
-						class="w-52 shrink-0 mt-2"
-						@update:model-value="selectGroup($event)"
-					/>
+					<Autocomplete :model-value="itemStore.selectedGroup" :options="groupAutocompleteOptions"
+						:placeholder="__('Search item groups...')" :show-search-icon="true" :max-visible="12"
+						empty-text="__('No groups found')" class="w-52 shrink-0 mt-2"
+						@update:model-value="selectGroup($event)" />
 					<Button :variant="itemStore.selectedGroup === 'All Item Groups' ? 'default' : 'outline'" size="sm"
 						class="rounded-full shrink-0" @click="selectGroup('All Item Groups')">
 						{{ __("All Groups") }}
@@ -49,11 +39,11 @@
 				</div>
 			</div>
 
-				<div class="flex-1 overflow-y-auto p-4 pt-2 xpos-scrollbar">
-				<ItemGrid :items="itemStore.filteredItems" :is-loading="itemStore.isLoading"
+			<div class="flex-1 overflow-y-auto p-4 pt-2 xpos-scrollbar">
+				<ItemGrid ref="gridRef" :items="itemStore.filteredItems" :is-loading="itemStore.isLoading"
 					:currency-symbol="posStore.currencySymbol" :view-mode="viewMode"
-					:highlighted-index="highlightedIndex"
-					@select-item="handleAddItem" @show-detail="handleShowDetail" @load-more="handleLoadMore" />
+					:highlighted-index="highlightedIndex" @select-item="handleAddItem" @show-detail="handleShowDetail"
+					@load-more="handleLoadMore" />
 			</div>
 		</div>
 
@@ -95,10 +85,12 @@ const offerStore = useOfferStore();
 const viewMode = ref<'grid' | 'list'>('grid');
 
 watch(() => posStore.defaultView, (defaultView) => {
-  if (defaultView) {
-    viewMode.value = defaultView.toLowerCase() === 'list' ? 'list' : 'grid';
-  }
+	if (defaultView) {
+		viewMode.value = defaultView.toLowerCase() === 'list' ? 'list' : 'grid';
+	}
 }, { immediate: true });
+
+const gridRef = ref();
 
 const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null);
 const barcodeScannerRef = ref<InstanceType<typeof BarcodeScanner> | null>(null);
@@ -121,6 +113,9 @@ const groupAutocompleteOptions = computed(() => {
 });
 
 onMounted(() => {
+	nextTick(() => {
+		gridRef.value?.focus();
+	});
 	if (posStore.isReady) {
 		loadInitialData();
 	}
@@ -128,6 +123,7 @@ onMounted(() => {
 	window.addEventListener("xpos:toggle-view", handleToggleView as EventListener);
 	window.addEventListener("xpos:focus-barcode", handleFocusBarcode as EventListener);
 	window.addEventListener("xpos:focus-search", handleFocusSearch as EventListener);
+	window.addEventListener("xpos:open-command-search", handleOpenCommandSearch as EventListener);
 	nextTick(() => barcodeScannerRef.value?.focus());
 });
 
@@ -136,6 +132,7 @@ onUnmounted(() => {
 	window.removeEventListener("xpos:toggle-view", handleToggleView as EventListener);
 	window.removeEventListener("xpos:focus-barcode", handleFocusBarcode as EventListener);
 	window.removeEventListener("xpos:focus-search", handleFocusSearch as EventListener);
+	window.removeEventListener("xpos:open-command-search", handleOpenCommandSearch as EventListener);
 });
 
 function handleToggleView() {
@@ -148,6 +145,10 @@ function handleFocusBarcode() {
 
 function handleFocusSearch() {
 	searchBarRef.value?.focus();
+}
+
+function handleOpenCommandSearch() {
+	commandSearchRef.value?.open();
 }
 
 watch(() => posStore.isReady, (ready) => {
@@ -163,7 +164,7 @@ async function loadInitialData() {
 		itemStore.fetchItems(posStore.profileName),
 		itemStore.fetchItemGroups(),
 	]);
-	
+
 	nextTick(() => barcodeScannerRef.value?.focus());
 }
 
@@ -278,7 +279,10 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 
 	if (e.key === "Enter" && highlightedIndex.value >= 0) {
 		e.preventDefault();
-		handleAddItem(itemStore.items[highlightedIndex.value]);
+		const item = itemStore.filteredItems[highlightedIndex.value]; // use filteredItems
+		if (item) {
+			handleShowDetail(item);
+		}
 		highlightedIndex.value = -1;
 	}
 }
@@ -296,6 +300,11 @@ function handleAddItem(item: POSItem) {
 
 	if (item.has_variants && !posStore.hideVariantsItems) {
 		itemStore.openVariantPicker(item, posStore.profileName);
+		return;
+	}
+
+	if (posStore.inputQty) {
+		handleShowDetail(item);
 		return;
 	}
 
@@ -341,7 +350,7 @@ async function fetchAndApplyItemTax(item: POSItem) {
 			cacheItemTax(item.item_code, posStore.companyName, {
 				item_tax_template: taxData.item_tax_template,
 				item_tax_map: taxData.item_tax_map || {},
-			}).catch(() => {});
+			}).catch(() => { });
 		}
 	} catch (e) {
 		if (isNetworkError(e)) {

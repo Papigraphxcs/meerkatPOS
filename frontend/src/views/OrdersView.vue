@@ -3,7 +3,15 @@
         <div class="shrink-0 p-4 pb-3">
             <div class="flex items-center justify-between mb-4">
                 <h1 class="text-xl font-bold text-foreground">{{ __("Order History") }}</h1>
-                <Autocomplete
+                <div class="flex items-center gap-2">
+                    <Input
+                        v-model="invoiceSearch"
+                        :placeholder="__('Search Invoice ID...')"
+                        class="w-48 h-8 text-sm"
+                        @keydown.enter="onInvoiceSearch"
+                        @input="onInvoiceSearchDebounced"
+                    />
+                    <Autocomplete
                     v-model="customerFilter"
                     :options="customerFilterOptions"
                     placeholder="Filter by customer..."
@@ -15,6 +23,7 @@
                     @search="onCustomerSearch"
                     @update:model-value="onCustomerFilterChange"
                 />
+                </div>
             </div>
 
             <ListFilters :from-date="fromDate" :to-date="toDate" @update="handleFilterUpdate"
@@ -303,6 +312,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import type { AutocompleteOption } from "@/components/ui/autocomplete";
@@ -327,13 +337,14 @@ const selectedOrder = ref<Invoice | null>(null);
 // Customer filter autocomplete
 const customerFilter = ref("");
 const customerFilterOptions = ref<AutocompleteOption[]>([]);
+const invoiceSearch = ref("");
+let invoiceSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
 function onCustomerSearch(query: string) {
     if (!query || query.length < 2) {
         customerFilterOptions.value = [];
         return;
     }
-    // Build options from existing orders for quick local filtering
     const seen = new Set<string>();
     const opts: AutocompleteOption[] = [];
     for (const order of orders.value) {
@@ -358,6 +369,25 @@ function onCustomerFilterChange(val: string) {
     }
     currentPage.value = 1;
     fetchOrders();
+}
+
+function onInvoiceSearch() {
+    const val = invoiceSearch.value.trim();
+    if (val) {
+        activeFilters.value.queryFilters = [
+            ...activeFilters.value.queryFilters.filter(f => f[0] !== "name"),
+            ["name", "like", `%${val}%`],
+        ];
+    } else {
+        activeFilters.value.queryFilters = activeFilters.value.queryFilters.filter(f => f[0] !== "name");
+    }
+    currentPage.value = 1;
+    fetchOrders();
+}
+
+function onInvoiceSearchDebounced() {
+    if (invoiceSearchTimer) clearTimeout(invoiceSearchTimer);
+    invoiceSearchTimer = setTimeout(() => onInvoiceSearch(), 400);
 }
 
 function orderDateTime(order: Invoice): string {
@@ -481,7 +511,8 @@ async function returnFromOrder(order: Invoice) {
         );
 
         cartStore.clearCart();
-        cartStore.enterReturnMode(order.name);
+        const allowedItemCodes = (details?.items || []).map(i => i.item_code);
+        cartStore.enterReturnMode(order.name, allowedItemCodes);
         cartStore.setCustomer({
             name: order.customer || order.customer_name || "",
             customer_name: order.customer_name,

@@ -25,6 +25,14 @@
 
 		<div class="flex-1"></div>
 
+		<TooltipWrapper :content="__('Search Items (Ctrl+K)')">
+			<Button variant="ghost" size="sm" class="text-muted-foreground hover:text-foreground gap-1"
+				@click="openSearch">
+				<Search class="w-4 h-4" />
+				<span class="hidden lg:inline text-xs">{{ __('Search') }}</span>
+			</Button>
+		</TooltipWrapper>
+
 		<div v-if="posStore.enableCashMovement" class="hidden md:flex items-center gap-1">
 			<TooltipWrapper v-if="posStore.allowPosExpense" :content="__('POS Expense')">
 				<Button variant="ghost" size="sm"
@@ -66,7 +74,7 @@
 			</Button>
 		</TooltipWrapper>
 
-		<div class="flex items-center gap-1">
+		<div v-if="posStore.useOfflineMode" class="flex items-center gap-1">
 			<TooltipWrapper :content="offlineStore.statusLabel">
 			<Button variant="ghost" size="sm" :class="['gap-1.5', offlineStore.statusColor]"
 				@click="handleOfflineAction">
@@ -139,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onMounted, onUnmounted, ref, type Ref } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref, nextTick, type Ref } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { useAuthStore } from "@/stores/authStore";
@@ -155,7 +163,7 @@ import {
 	Building2, Sun, Moon, Monitor, User, LogOut,
 	ArrowDownCircle, ArrowUpCircle, RotateCcw, Repeat, Printer, Power,
 	Wifi, WifiOff, CloudUpload, Loader2,
-	LayoutGrid, FileText
+	LayoutGrid, FileText, Search
 } from "lucide-vue-next";
 import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
@@ -164,7 +172,9 @@ import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
 import { isOnline } from "@/utils";
 import { cn } from "@/lib/utils";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const posStore = usePosStore();
 const paymentStore = usePaymentStore();
 const authStore = useAuthStore();
@@ -196,6 +206,11 @@ function handleOfflineAction() {
 	} else if (!isOnline()) {
 		showOfflinePanel.value = true;
 	}
+}
+
+function openSearch() {
+	router.push("/pos");
+	nextTick(() => window.dispatchEvent(new CustomEvent("xpos:open-command-search")));
 }
 
 function handleShowRepeatDialog() {

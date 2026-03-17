@@ -1,6 +1,6 @@
 <template>
 	<div class="group flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors duration-150 dark:hover:bg-accent/50"
-		:data-cart-index="index">
+		:data-cart-index="index" tabindex="0" @keydown.delete="handleDeleteKey">
 		<div class="w-9 h-9 rounded-md bg-muted overflow-hidden shrink-0 flex items-center justify-center">
 			<img v-if="item.image" :src="item.image" :alt="item.item_name" class="w-full h-full object-cover" />
 			<Package v-else class="w-4 h-4 text-muted-foreground/40" />
@@ -284,5 +284,13 @@ function blockInvalidNumericKeys(event: KeyboardEvent) {
 	if (["e", "E", "+", "-"].includes(event.key)) {
 		event.preventDefault();
 	}
+}
+
+function handleDeleteKey(event: KeyboardEvent) {
+	const tag = (event.target as HTMLElement)?.tagName?.toLowerCase();
+	if (tag === "input" || tag === "textarea") return;
+	event.preventDefault();
+	event.stopPropagation();
+	emit("remove", props.index);
 }
 </script>

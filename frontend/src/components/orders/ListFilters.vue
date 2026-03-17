@@ -194,6 +194,7 @@ const localFilters = reactive({
 const queryFilters = ref<QueryFilter[]>([]);
 
 const filterFields: FilterField[] = [
+  { label: __("Invoice ID"), value: "name", type: "text" },
   { label: __("Customer"), value: "customer", type: "text" },
   { label: __("Customer Name"), value: "customer_name", type: "text" },
   { label: __("Grand Total"), value: "grand_total", type: "number" },

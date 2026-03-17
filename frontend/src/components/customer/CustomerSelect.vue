@@ -178,11 +178,11 @@ const newCustomer = ref({
     city: "",
     country: "",
     email_id: "",
-    gender: "",
+    gender: "Male",
     referral_code: "",
     birthday: "",
-    customer_group: "",
-    territory: "",
+    customer_group: "Individual",
+    territory: "Rest Of The World",
 });
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;

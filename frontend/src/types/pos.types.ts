@@ -55,7 +55,7 @@ export interface POSProfile {
   default_pos_expense_account?: string;
   back_office_cash_account?: string;
   block_sale_beyond_available_qty?: boolean;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface POSPaymentMethod {
@@ -901,4 +901,85 @@ export interface ReturnShortageResult {
   status: string;
   items_returned: number;
   total_returned_qty: number;
+}
+
+export interface SellingSettings {
+  selling_price_list: string;
+  default_selling_price_list: string;
+  customer_group: string;
+  territory: string;
+  campaign: string;
+  allow_multiple_items: number;
+  allow_against_multiple_purchase_orders: number;
+  validate_selling_price: number;
+  editable_bundle_item_rates: number;
+  hide_tax_id: number;
+  so_required: string;
+  dn_required: string;
+  allow_sales_order_creation_for_expired_quotation: number;
+  default_valid_till: string;
+  [key: string]: unknown;
+}
+
+export interface BuyingSettings {
+  buying_price_list: string;
+  default_buying_price_list: string;
+  supplier_group: string;
+  supp_master_name: string;
+  maintain_same_rate: number;
+  allow_multiple_items: number;
+  po_required: string;
+  pr_required: string;
+  [key: string]: unknown;
+}
+
+export interface ERPStockSettings {
+  allow_negative_stock: number;
+  valuation_method: string;
+  show_barcode_field: number;
+  auto_insert_price_list_rate_if_missing: number;
+  automatically_set_serial_nos_based_on_fifo: number;
+  default_warehouse: string;
+  stock_uom: string;
+  over_delivery_receipt_allowance: number;
+  item_naming_by: string;
+  [key: string]: unknown;
+}
+
+export interface AccountsSettings {
+  allow_stale: number;
+  stale_days: number;
+  make_payment_via_journal_entry: number;
+  over_billing_allowance: number;
+  credit_controller: string;
+  add_taxes_from_item_tax_template: number;
+  automatically_fetch_payment_terms: number;
+  enable_discount_accounting: number;
+  unlink_payment_on_cancellation_of_invoice: number;
+  book_asset_depreciation_entry_automatically: number;
+  [key: string]: unknown;
+}
+
+export interface GlobalDefaults {
+  default_currency: string;
+  default_company: string;
+  country: string;
+  disable_rounded_total: number;
+  disable_in_words: number;
+  [key: string]: unknown;
+}
+
+export interface CurrencyPrecision {
+  currency_precision: string;
+  float_precision: string;
+  [key: string]: unknown;
+}
+
+export interface ERPSettings {
+  selling_settings: SellingSettings;
+  buying_settings: BuyingSettings;
+  stock_settings: ERPStockSettings;
+  accounts_settings: AccountsSettings;
+  global_defaults: GlobalDefaults;
+  currency_precision: CurrencyPrecision;
 }

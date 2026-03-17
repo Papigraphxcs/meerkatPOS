@@ -45,6 +45,9 @@
 			<CashMovementDialog v-if="paymentStore.showCashMovementDialog" />
 
 			<DraftInvoiceDialog v-if="cartStore.showDraftDialog" />
+
+			<KeyboardShortcutsDialog :open="showShortcutsDialog" @close="showShortcutsDialog = false" />
+			<AboutDialog :open="showAboutDialog" @close="showAboutDialog = false" />
 		</template>
 
 		<Toaster
@@ -109,12 +112,15 @@ import LoyaltyDialog from "@/components/customer/LoyaltyDialog.vue";
 import ItemDetailDialog from "@/components/items/ItemDetailDialog.vue";
 import CashMovementDialog from "@/components/shift/CashMovementDialog.vue";
 import DraftInvoiceDialog from "@/components/cart/DraftInvoiceDialog.vue";
+import KeyboardShortcutsDialog from "@/components/KeyboardShortcutsDialog.vue";
+import AboutDialog from "@/components/AboutDialog.vue";
 import { TooltipWrapper } from "@/components/ui/tooltip";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { initSyncListeners } from "@/services/syncIpcHandler";
 import { useSyncStatus } from "@/composables/useSyncStatus";
 import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
 import { isElectron } from "@/services/electronBridge";
+import { getCustomer } from "./utils";
 
 const route = useRoute();
 const posStore = usePosStore();
@@ -137,8 +143,12 @@ const {
 
 const isAuthPage = computed(() => route.meta.isAuthPage === true || route.meta.isSetupPage === true);
 
-function handleClearCart() {
+async function handleClearCart() {
     cartStore.clearCart();
+    if (!cartStore.customer && posStore.defaultCustomer) {
+        const customer = await getCustomer(posStore.defaultCustomer);
+		cartStore.setCustomer(customer as any);
+    }
 }
 
 function handleProcessPayment() {
@@ -285,6 +295,18 @@ onMounted(() => {
 watch(isAuthPage, (isAuth, wasAuth) => {
 	if (wasAuth && !isAuth && authStore.isAuthenticated) {
 		posStore.checkExistingShift();
+	}
+});
+
+watch(() => posStore.isReady, async (ready, wasReady) => {
+	if (wasReady && !ready) {
+		cartStore.clearAll();
+	}
+	if (ready && !wasReady) {
+		if (!cartStore.customer && posStore.defaultCustomer) {
+			const customer = await getCustomer(posStore.defaultCustomer);
+			cartStore.setCustomer(customer as any);
+		}
 	}
 });
 

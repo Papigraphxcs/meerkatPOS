@@ -228,7 +228,7 @@
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Enter</kbd>
 					<span>{{ __('Save & Print') }}</span>
 					<span class="mx-1">|</span>
-					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Shift+Enter</kbd>
+					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Ctrl+Enter</kbd>
 					<span>{{ __('Save Only') }}</span>
 					<span class="mx-1">|</span>
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Esc</kbd>
@@ -411,16 +411,18 @@ onUnmounted(() => {
 function handleGlobalKeydown(e: KeyboardEvent) {
 	if (!cartStore.showPaymentDialog || isSubmitting.value) return;
 
-	if (e.key === "Enter" && !e.shiftKey && canSubmit.value) {
+	if (e.key === "Enter" && e.ctrlKey && canSubmit.value) {
+		e.preventDefault();
+		e.stopPropagation();
+		submitPayment(false);
+		return;
+	}
+
+	if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && canSubmit.value) {
 		const target = e.target as HTMLElement;
 		if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
 		e.preventDefault();
 		submitPayment(true);
-	}
-
-	if (e.key === "Enter" && e.shiftKey && canSubmit.value) {
-		e.preventDefault();
-		submitPayment(false);
 	}
 }
 
@@ -581,6 +583,13 @@ async function submitPayment(withPrint: boolean = true) {
 					amount: roundCurrency(tenderedAmount.value),
 				},
 			];
+		}
+
+		if (cartStore.isReturnMode && invoiceData.payments) {
+			invoiceData.payments = invoiceData.payments.map(p => ({
+				...p,
+				amount: -Math.abs(p.amount),
+			}));
 		}
 
 		if (changeAmount.value > 0) {

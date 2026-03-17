@@ -78,9 +78,7 @@ export const usePosStore = defineStore("pos", () => {
     () => posProfile.value?.selling_price_list || ""
   );
 
-  const defaultCustomer = computed(
-    () => posProfile.value?.customer || posProfile.value?.default_customer || ""
-  );
+  const defaultCustomer = computed(() => posProfile.value?.customer || "");
 
   const allowEditRate = computed(
     () => !!posProfile.value?.allow_rate_change
@@ -270,6 +268,13 @@ export const usePosStore = defineStore("pos", () => {
           disableRoundedTotal.value = !!(result.disable_rounded_total);
           printSettings.value = result.print_settings || null;
           isReady.value = true;
+
+          import("@/stores/settingsStore").then(({ useSettingsStore }) => {
+            const settingsStore = useSettingsStore();
+            settingsStore.fetchSettings().catch(error => {
+              console.warn("[XPOS] Failed to fetch ERP settings:", error);
+            });
+          });
         } else {
           showOpeningDialog.value = true;
         }
@@ -289,6 +294,13 @@ export const usePosStore = defineStore("pos", () => {
           disableRoundedTotal.value = !!(cachedData.disable_rounded_total);
           printSettings.value = cachedData.print_settings || null;
           isReady.value = true;
+
+          import("@/stores/settingsStore").then(({ useSettingsStore }) => {
+            const settingsStore = useSettingsStore();
+            settingsStore.fetchSettings().catch(error => {
+              console.warn("[XPOS] Failed to load cached ERP settings:", error);
+            });
+          });
           return;
         } else {
           console.warn("[XPOS Offline] No cached POS data available");
@@ -316,6 +328,13 @@ export const usePosStore = defineStore("pos", () => {
         isReady.value = true;
 
         fetchPrintFormats();
+
+        import("@/stores/settingsStore").then(({ useSettingsStore }) => {
+          const settingsStore = useSettingsStore();
+          settingsStore.fetchSettings().catch(error => {
+            console.warn("[XPOS] Failed to fetch ERP settings:", error);
+          });
+        });
 
         if (result.pos_profile?.use_offline_mode) {
           try {
@@ -443,10 +462,17 @@ export const usePosStore = defineStore("pos", () => {
 
       fetchPrintFormats();
 
+      import("@/stores/settingsStore").then(({ useSettingsStore }) => {
+        const settingsStore = useSettingsStore();
+        settingsStore.fetchSettings().catch(error => {
+          console.warn("[XPOS] Failed to fetch ERP settings:", error);
+        });
+      });
+
       if (result.pos_profile?.use_offline_mode) {
         try {
           await cachePOSData(result);
-          
+
           import("@/stores/itemStore").then(({ useItemStore }) => {
             const itemStore = useItemStore();
             itemStore.cacheAllItems(profileName).catch(error => {
@@ -514,6 +540,12 @@ export const usePosStore = defineStore("pos", () => {
       showOpeningDialog.value = true;
       printFormats.value = [];
       lastInvoiceName.value = "";
+
+      import("@/stores/settingsStore").then(({ useSettingsStore }) => {
+        const settingsStore = useSettingsStore();
+        settingsStore.reset();
+      });
+
       return result;
     } catch (error) {
       console.error("Error closing shift:", error);

@@ -119,7 +119,7 @@
 					<Trash2 class="w-4 h-4" />
 				</Button>
 			</TooltipWrapper>
-			<TooltipWrapper :content="__('Delivery charge')">
+			<TooltipWrapper v-if="!cartStore.isReturnMode" :content="__('Delivery charge')">
 				<Button variant="outline" size="sm" :disabled="cartStore.isEmpty"
 					:class="{ 'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20': !!cartStore.selectedDeliveryCharge }"
 					@click="toggleDelivery">

@@ -82,7 +82,7 @@
 
                     <div>
                         <label class="text-sm font-semibold text-foreground mb-1.5 block">Quantity</label>
-                        <NumberInput v-model="selectedQty" :min="1" :allow-decimal="false" class="w-32" />
+                        <NumberInput ref="qtyInputRef" v-model="selectedQty" :min="1" :allow-decimal="false" class="w-32" @keydown.enter.prevent="addToCart" />
                     </div>
                 </template>
             </div>
@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import { useItemStore } from "@/stores/itemStore";
 import { useCartStore } from "@/stores/cartStore";
 import { usePosStore } from "@/stores/posStore";
@@ -124,6 +124,7 @@ const selectedSerials = ref<string[]>([]);
 const selectedQty = ref(1);
 const serialSearch = ref("");
 const uomConversionFactor = ref(1);
+const qtyInputRef = ref<InstanceType<typeof NumberInput> | null>(null);
 
 const itemForDetail = computed(() => itemStore.selectedItemForDetail);
 const detail = computed(() => itemStore.selectedItemDetail);
@@ -138,6 +139,10 @@ watch(detail, (d) => {
         if (posStore.autoSetBatch && d.batches?.length > 0) {
             selectedBatch.value = d.batches[0].batch_no;
         }
+        nextTick(() => {
+            const el = qtyInputRef.value?.$el?.querySelector('input') ?? qtyInputRef.value?.$el;
+            if (el && typeof el.focus === 'function') el.focus();
+        });
     }
 });
 
