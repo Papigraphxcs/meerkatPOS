@@ -59,7 +59,7 @@
 					class="w-9 h-5 text-center text-[10px] font-semibold text-foreground bg-muted/50 rounded
 								 border border-border focus:outline-none focus:ring-1 focus:ring-ring
 								 dark:bg-accent/50 dark:border-muted-foreground/30
-								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" @change="onQtyChange"
+								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none px-1" @change="onQtyChange"
 					@keydown.up.prevent="focusAdjacentItem(-1, 'qty')"
 					@keydown.down.prevent="focusAdjacentItem(1, 'qty')"
 					@keydown="blockInvalidNumericKeys" />

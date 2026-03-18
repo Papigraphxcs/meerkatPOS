@@ -6,18 +6,19 @@ import {
   getCachedPOSData,
 } from "@/services/dbBridge";
 import { isElectron } from "@/services/electronBridge";
-import type {
-  POSOpeningShift,
-  POSProfile,
-  Company,
-  StockSettings,
-  ShiftCheckResult,
-  OpeningData,
-  ShiftSummary,
-  PrintFormat,
-  CurrencySymbolMap,
-  TaxDetail,
-  PrintSettings,
+import {
+  type POSOpeningShift,
+  type POSProfile,
+  type Company,
+  type StockSettings,
+  type ShiftCheckResult,
+  type OpeningData,
+  type ShiftSummary,
+  type PrintFormat,
+  type CurrencySymbolMap,
+  type TaxDetail,
+  type PrintSettings,
+  currencySymbols,
 } from "@/types/pos.types";
 import { isOnline } from "@/utils";
 
@@ -51,12 +52,6 @@ export const usePosStore = defineStore("pos", () => {
   const currency = computed(
     () => posProfile.value?.currency
   );
-
-  const currencySymbols: CurrencySymbolMap = {
-    USD: "$", EUR: "€", GBP: "£", JPY: "¥", INR: "₹",
-    PKR: "Rs", AED: "د.إ", SAR: "﷼", CNY: "¥", KRW: "₩",
-    BDT: "৳", LKR: "Rs", NPR: "Rs", CAD: "C$", AUD: "A$",
-  };
 
   const currencySymbol = computed(
     () => currencySymbols[currency.value ?? ""] || currency.value + " "
@@ -248,8 +243,36 @@ export const usePosStore = defineStore("pos", () => {
     () => posProfile.value?.cash_mode_of_payment || "Cash"
   );
 
+  function clearShiftState(): void {
+    posOpeningShift.value = null;
+    posProfile.value = null;
+    company.value = null;
+    stockSettings.value = {};
+    taxes.value = [];
+    taxInclusiveMode.value = false;
+    disableRoundedTotal.value = false;
+    printSettings.value = null;
+    isReady.value = false;
+    printFormats.value = [];
+    lastInvoiceName.value = "";
+  }
+
+  function applyShiftState(result: ShiftCheckResult): void {
+    posOpeningShift.value = result.pos_opening_shift;
+    posProfile.value = result.pos_profile;
+    company.value = result.company;
+    stockSettings.value = result.stock_settings || {};
+    taxes.value = result.taxes || [];
+    taxInclusiveMode.value = !!result.tax_inclusive;
+    disableRoundedTotal.value = !!result.disable_rounded_total;
+    printSettings.value = result.print_settings || null;
+    showOpeningDialog.value = false;
+    isReady.value = true;
+  }
+
   async function checkExistingShift(): Promise<void> {
     isLoading.value = true;
+    showOpeningDialog.value = false;
     try {
       if (isElectron()) {
         const { useAuthStore } = await import("@/stores/authStore");
@@ -259,15 +282,7 @@ export const usePosStore = defineStore("pos", () => {
         const result = await window.electronAPI!.db.checkOpenShift(currentUser) as ShiftCheckResult | null;
 
         if (result) {
-          posOpeningShift.value = result.pos_opening_shift;
-          posProfile.value = result.pos_profile;
-          company.value = result.company;
-          stockSettings.value = result.stock_settings || {};
-          taxes.value = result.taxes || [];
-          taxInclusiveMode.value = !!(result.tax_inclusive);
-          disableRoundedTotal.value = !!(result.disable_rounded_total);
-          printSettings.value = result.print_settings || null;
-          isReady.value = true;
+          applyShiftState(result);
 
           import("@/stores/settingsStore").then(({ useSettingsStore }) => {
             const settingsStore = useSettingsStore();
@@ -276,6 +291,7 @@ export const usePosStore = defineStore("pos", () => {
             });
           });
         } else {
+          clearShiftState();
           showOpeningDialog.value = true;
         }
         return;
@@ -285,15 +301,7 @@ export const usePosStore = defineStore("pos", () => {
         const cachedData = await getCachedPOSData() as ShiftCheckResult | null;
 
         if (cachedData) {
-          posOpeningShift.value = cachedData.pos_opening_shift;
-          posProfile.value = cachedData.pos_profile;
-          company.value = cachedData.company;
-          stockSettings.value = cachedData.stock_settings || {};
-          taxes.value = cachedData.taxes || [];
-          taxInclusiveMode.value = !!(cachedData.tax_inclusive);
-          disableRoundedTotal.value = !!(cachedData.disable_rounded_total);
-          printSettings.value = cachedData.print_settings || null;
-          isReady.value = true;
+          applyShiftState(cachedData);
 
           import("@/stores/settingsStore").then(({ useSettingsStore }) => {
             const settingsStore = useSettingsStore();
@@ -304,6 +312,7 @@ export const usePosStore = defineStore("pos", () => {
           return;
         } else {
           console.warn("[XPOS Offline] No cached POS data available");
+          clearShiftState();
           showOpeningDialog.value = true;
           return;
         }
@@ -314,18 +323,7 @@ export const usePosStore = defineStore("pos", () => {
       );
 
       if (result) {
-        posOpeningShift.value = result.pos_opening_shift;
-        posProfile.value = result.pos_profile;
-        company.value = result.company;
-        stockSettings.value = result.stock_settings || {};
-
-        taxes.value = result.taxes || [];
-        taxInclusiveMode.value = !!(result.tax_inclusive);
-
-        disableRoundedTotal.value = !!(result.disable_rounded_total);
-
-        printSettings.value = result.print_settings || null;
-        isReady.value = true;
+        applyShiftState(result);
 
         fetchPrintFormats();
 
@@ -358,6 +356,7 @@ export const usePosStore = defineStore("pos", () => {
           }
         }
       } else {
+        clearShiftState();
         showOpeningDialog.value = true;
       }
     } catch (error) {
@@ -366,21 +365,14 @@ export const usePosStore = defineStore("pos", () => {
       try {
         const cachedData = await getCachedPOSData() as ShiftCheckResult | null;
         if (cachedData && cachedData.pos_profile?.use_offline_mode) {
-          posOpeningShift.value = cachedData.pos_opening_shift;
-          posProfile.value = cachedData.pos_profile;
-          company.value = cachedData.company;
-          stockSettings.value = cachedData.stock_settings || {};
-          taxes.value = cachedData.taxes || [];
-          taxInclusiveMode.value = !!(cachedData.tax_inclusive);
-          disableRoundedTotal.value = !!(cachedData.disable_rounded_total);
-          printSettings.value = cachedData.print_settings || null;
-          isReady.value = true;
+          applyShiftState(cachedData);
           return;
         }
       } catch {
         console.warn("[XPOS Offline] Failed to load cached POS data");
       }
 
+      clearShiftState();
       showOpeningDialog.value = true;
     } finally {
       isLoading.value = false;

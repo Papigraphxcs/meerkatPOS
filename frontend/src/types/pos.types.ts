@@ -983,3 +983,79 @@ export interface ERPSettings {
   global_defaults: GlobalDefaults;
   currency_precision: CurrencyPrecision;
 }
+
+
+export const currencySymbols: Record<string, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  JPY: "¥",
+
+  // South Asia
+  PKR: "روپے",
+  INR: "₹",
+  BDT: "৳",
+  LKR: "රු",
+  NPR: "रू",
+
+  // Middle East
+  AED: "درهم",
+  SAR: "﷼",
+  QAR: "﷼",
+  OMR: "ر.ع.",
+  KWD: "د.ك",
+  BHD: "د.ب",
+  IQD: "د.ع",
+  IRR: "﷼",
+  YER: "﷼",
+
+  // East Asia
+  CNY: "¥",
+  KRW: "₩",
+  VND: "₫",
+  THB: "฿",
+
+  // Europe
+  RUB: "₽",
+  UAH: "₴",
+  TRY: "₺",
+  PLN: "zł",
+  CZK: "Kč",
+  HUF: "Ft",
+  SEK: "kr",
+  NOK: "kr",
+  DKK: "kr",
+  CHF: "CHF",
+
+  // Africa
+  NGN: "₦",
+  ZAR: "R",
+  GHS: "₵",
+  KES: "KSh",
+  UGX: "USh",
+  TZS: "TSh",
+
+  // Americas
+  CAD: "C$",
+  AUD: "A$",
+  NZD: "NZ$",
+  MXN: "$",
+  BRL: "R$",
+  ARS: "$",
+  CLP: "$",
+  COP: "$",
+  PEN: "S/",
+  UYU: "$",
+
+  // Southeast Asia
+  IDR: "Rp",
+  MYR: "RM",
+  SGD: "S$",
+  PHP: "₱",
+
+  // Others
+  AFN: "؋",
+  MNT: "₮",
+  KZT: "₸",
+  GEL: "₾",
+};

@@ -1,9 +1,7 @@
 <template>
 	<div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-muted p-4">
 		<div class="mb-8 text-center">
-			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary flex items-center justify-center">
-				<Store class="w-8 h-8 text-primary-foreground" />
-			</div>
+			<img :src="isDark ? LogoLight : LogoDark" alt="X POS Logo" class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center" />
 			<h1 class="text-2xl font-bold text-foreground">X POS</h1>
 			<p class="text-muted-foreground text-sm mt-1">{{ __('Point of Sale System') }}</p>
 		</div>
@@ -98,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, inject } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,7 +113,10 @@ import {
 	Loader2,
 	AlertCircle,
 } from "lucide-vue-next";
-
+import LogoDark from "@/assets/images/xpos-logo-dark.svg";
+import LogoLight from "@/assets/images/xpos-logo-light.svg";
+const isDark = inject("isDark")! as boolean;
+	
 const router = useRouter();
 const authStore = useAuthStore();
 

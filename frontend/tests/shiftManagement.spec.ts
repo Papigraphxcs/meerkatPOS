@@ -10,7 +10,29 @@ vi.mock('@/services/api', () => ({
   default: { call: vi.fn() },
 }))
 
+vi.mock('@/services/dbBridge', () => ({
+  cachePOSData: vi.fn(),
+  getCachedPOSData: vi.fn(),
+}))
+
+vi.mock('@/services/electronBridge', () => ({
+  isElectron: vi.fn(() => false),
+}))
+
+vi.mock('@/utils', () => ({
+  isOnline: vi.fn(() => true),
+  isNetworkError: vi.fn(() => false),
+}))
+
+vi.mock('@/stores/settingsStore', () => ({
+  useSettingsStore: () => ({
+    fetchSettings: vi.fn().mockResolvedValue(undefined),
+    reset: vi.fn(),
+  }),
+}))
+
 import { call } from '@/services/api'
+import { usePosStore } from '@/stores/posStore'
 
 describe('Shift Management', () => {
   beforeEach(() => {
@@ -102,6 +124,44 @@ describe('Shift Management', () => {
       const result = await call('xpos.api.shifts.check_open_shift', {})
 
       expect(result).toBeNull()
+    })
+
+    it('should clear opening dialog when a later check finds an open shift', async () => {
+      const mockedCall = call as ReturnType<typeof vi.fn>
+      const posStore = usePosStore()
+
+      mockedCall.mockResolvedValueOnce(null)
+      await posStore.checkExistingShift()
+
+      expect(posStore.showOpeningDialog).toBe(true)
+      expect(posStore.isReady).toBe(false)
+
+      mockedCall.mockResolvedValueOnce({
+        pos_opening_shift: {
+          name: 'POS-OPEN-001',
+          pos_profile: 'POS-PROFILE-1',
+          company: 'Test Company',
+        },
+        pos_profile: {
+          name: 'POS-PROFILE-1',
+          company: 'Test Company',
+          payments: [],
+        },
+        company: {
+          name: 'Test Company',
+        },
+        stock_settings: {},
+        taxes: [],
+        tax_inclusive: false,
+        disable_rounded_total: false,
+        print_settings: null,
+      })
+
+      await posStore.checkExistingShift()
+
+      expect(posStore.showOpeningDialog).toBe(false)
+      expect(posStore.isReady).toBe(true)
+      expect(posStore.posOpeningShift?.name).toBe('POS-OPEN-001')
     })
   })
 
