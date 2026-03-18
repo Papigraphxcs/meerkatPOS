@@ -12,7 +12,7 @@
             </DialogHeader>
             
             <ScrollArea class="max-h-[60vh]">
-                <div class="space-y-6 pr-4">
+                <div class="space-y-6 pe-4">
                     <div>
                         <h3 class="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                             <Monitor class="w-4 h-4" />

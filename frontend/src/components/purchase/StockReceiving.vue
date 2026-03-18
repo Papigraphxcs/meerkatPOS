@@ -202,7 +202,7 @@ onMounted(() => {
                                 <p class="text-xs text-muted-foreground">{{ item.item_code }} &middot; {{ item.uom }}
                                 </p>
                             </div>
-                            <div class="text-right shrink-0">
+                            <div class="text-end shrink-0">
                                 <p class="text-sm font-medium text-foreground">{{ formatCurrency(item.basic_rate) }}</p>
                                 <p class="text-xs text-muted-foreground">
                                     {{ __("In Transit") }}: <span class="font-semibold">{{ item.pending_qty }}</span>
@@ -263,7 +263,7 @@ onMounted(() => {
                     <Button @click="goBackToTransitList" variant="outline" class="flex-1">{{ __("Cancel") }}</Button>
                     <Button @click="submitTransitReceive" class="flex-1"
                         :disabled="(!hasTransitFormData && !hasShortageData) || isSubmittingTransit">
-                        <PackageCheck class="w-4 h-4 mr-1" />
+                        <PackageCheck class="w-4 h-4 me-1" />
                         {{ isSubmittingTransit ? __("Processing...") : __("Receive & Return") }}
                     </Button>
                 </div>
@@ -278,7 +278,7 @@ onMounted(() => {
                     </h3>
                     <Button @click="purchaseStore.fetchInTransitTransfers()" variant="outline" size="sm"
                         :disabled="purchaseStore.isLoadingTransits">
-                        <RefreshCw class="w-4 h-4 mr-1"
+                        <RefreshCw class="w-4 h-4 me-1"
                             :class="{ 'animate-spin': purchaseStore.isLoadingTransits }" />
                         {{ __("Refresh") }}
                     </Button>
@@ -304,7 +304,7 @@ onMounted(() => {
                 <div v-else class="divide-y divide-border">
                     <button v-for="entry in purchaseStore.inTransitEntries" :key="entry.name"
                         @click="selectTransit(entry)"
-                        class="w-full p-4 text-left hover:bg-muted transition-colors flex items-center gap-3">
+                        class="w-full p-4 text-start hover:bg-muted transition-colors flex items-center gap-3">
                         <div
                             class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
                             <ArrowRightLeft class="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -313,7 +313,7 @@ onMounted(() => {
                             <div class="flex items-center justify-between">
                                 <p class="font-medium text-foreground truncate">{{ entry.name }}</p>
                                 <Badge variant="secondary"
-                                    class="shrink-0 ml-2 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">
+                                    class="shrink-0 ms-2 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">
                                     {{ entry.total_pending_items }} {{ __("items") }}
                                 </Badge>
                             </div>

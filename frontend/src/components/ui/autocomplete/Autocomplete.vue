@@ -55,14 +55,12 @@ const isOpen = ref(false);
 const query = ref("");
 const highlightedIndex = ref(-1);
 
-// Resolve display text from value
 const selectedOption = computed(() =>
   props.options.find((o) => o.value === props.modelValue),
 );
 
 const displayText = computed(() => selectedOption.value?.label ?? "");
 
-// Sync query when closed
 watch(isOpen, (open) => {
   if (!open) {
     query.value = displayText.value;
@@ -70,7 +68,6 @@ watch(isOpen, (open) => {
   }
 });
 
-// Initialize query to match selected value
 watch(
   () => props.modelValue,
   () => {
@@ -81,7 +78,6 @@ watch(
   { immediate: true },
 );
 
-// Filtered options (local filtering)
 const filteredOptions = computed(() => {
   if (props.remoteSearch) return props.options;
 
@@ -96,7 +92,6 @@ const filteredOptions = computed(() => {
   );
 });
 
-// Grouped options
 const groupedOptions = computed(() => {
   const groups: Record<string, AutocompleteOption[]> = {};
   const ungrouped: AutocompleteOption[] = [];
@@ -173,7 +168,6 @@ function onFocus() {
 }
 
 function onBlurDelayed() {
-  // Delay to allow click on option
   setTimeout(() => {
     if (!rootRef.value?.contains(document.activeElement)) {
       isOpen.value = false;
@@ -229,7 +223,6 @@ function getInputEl(): HTMLInputElement | null {
   return rootRef.value?.querySelector("input") ?? null;
 }
 
-// Click outside
 function onClickOutside(e: MouseEvent) {
   const target = e.target as Node;
   const isInsideRoot = rootRef.value?.contains(target);
@@ -267,16 +260,16 @@ onUnmounted(() => {
 
     <div class="relative">
       <Search v-if="showSearchIcon"
-        class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        class="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
       <input ref="inputRef" v-model="query" type="text" autocomplete="off"
         :placeholder="modelValue ? displayText : placeholder" :disabled="disabled" :class="cn(
           'flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
-          showSearchIcon && 'pl-9',
-          (clearable && modelValue) && 'pr-16',
-          !(clearable && modelValue) && 'pr-8',
+          showSearchIcon && 'ps-9',
+          (clearable && modelValue) && 'pe-16',
+          !(clearable && modelValue) && 'pe-8',
         )" @input="onInput" @focus="onFocus" @blur="onBlurDelayed" @keydown="onKeydown" />
 
-      <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+      <div class="absolute end-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
         <button v-if="clearable && modelValue" type="button" tabindex="-1"
           class="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           @mousedown.prevent="clearSelection">
@@ -297,7 +290,7 @@ onUnmounted(() => {
           :style="dropdownStyle" role="listbox">
           <div v-if="loading && filteredOptions.length === 0" class="flex items-center justify-center py-6">
             <Loader2 class="h-5 w-5 text-primary animate-spin" />
-            <span class="ml-2 text-sm text-muted-foreground">Searching...</span>
+            <span class="ms-2 text-sm text-muted-foreground">Searching...</span>
           </div>
 
           <div v-else-if="filteredOptions.length === 0" class="py-6 text-center text-sm text-muted-foreground">
@@ -311,7 +304,7 @@ onUnmounted(() => {
               </div>
               <button v-for="(option, idx) in groupOptions" :key="option.value"
                 :data-index="flatVisibleOptions.indexOf(option)" type="button" :disabled="option.disabled"
-                class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors outline-none cursor-pointer"
+                class="flex w-full items-center gap-3 px-3 py-2 text-start text-sm transition-colors outline-none cursor-pointer"
                 :class="[
                   flatVisibleOptions.indexOf(option) === highlightedIndex
                     ? 'bg-accent text-accent-foreground'
@@ -332,7 +325,7 @@ onUnmounted(() => {
 
             <button v-for="option in groupedOptions.ungrouped" :key="option.value"
               :data-index="flatVisibleOptions.indexOf(option)" type="button" :disabled="option.disabled"
-              class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors outline-none" :class="[
+              class="flex w-full items-center gap-3 px-3 py-2 text-start text-sm transition-colors outline-none" :class="[
                 flatVisibleOptions.indexOf(option) === highlightedIndex
                   ? 'bg-accent text-accent-foreground'
                   : 'hover:bg-accent/50',

@@ -1,10 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ============ shadcn-vue CSS Variables ============ */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -60,7 +60,6 @@
   }
 }
 
-/* ============ Vue Transitions ============ */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
@@ -97,8 +96,6 @@
   transition: transform 0.3s ease;
 }
 
-/* ============ Scrollbar ============ */
-/* Global thin scrollbars — work in both light & dark mode via CSS vars */
 *,
 .purchase-scroll {
   scrollbar-width: thin;
@@ -132,28 +129,40 @@
   background: transparent;
 }
 
-/* Legacy per-class helper (kept for backwards compat) */
 .xpos-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--border)) transparent;
 }
 
-/* ============ Dialog/Modal Fix ============ */
-/* Ensure dialogs are properly centered and isolated */
 [data-radix-popper-content-wrapper] {
   z-index: 9999 !important;
 }
 
-/* Dialog overlay must cover entire viewport */
-[data-state="open"][role="dialog"]~[data-aria-hidden="true"],
-body>[data-radix-portal] {
-  position: fixed !important;
-  inset: 0 !important;
-}
-
-/* ============ Skeleton ============ */
 @layer components {
   .xpos-skeleton {
     @apply bg-muted rounded-lg animate-pulse;
   }
+}
+
+[dir="rtl"] .list-enter-from,
+[dir="rtl"] .list-leave-to {
+  transform: translateX(20px);
+}
+
+[dir="rtl"] body {
+  font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", "Inter", system-ui, sans-serif;
+  text-align: right;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+[dir="rtl"] [data-state="closed"].slide-out-to-left-1\/2 {
+  --tw-exit-translate-x: 50%;
+}
+[dir="rtl"] [data-state="open"].slide-in-from-left-1\/2 {
+  --tw-enter-translate-x: 50%;
 }

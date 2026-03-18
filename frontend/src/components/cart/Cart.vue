@@ -46,7 +46,7 @@
 						<User class="w-3.5 h-3.5" />
 					</AvatarFallback>
 				</Avatar>
-				<div class="text-left flex-1 min-w-0">
+				<div class="text-start flex-1 min-w-0">
 					<p class="text-sm font-medium text-foreground truncate">{{ cartStore.customerName }}</p>
 					<template v-if="cartStore.customer">
 						<div class="flex items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -55,7 +55,7 @@
 								<span class="truncate">{{ cartStore.customer.mobile_no }}</span>
 							</template>
 							<template v-if="cartStore.customer.email_id">
-								<Mail class="w-3 h-3 shrink-0" :class="{ 'ml-1': cartStore.customer.mobile_no }" />
+								<Mail class="w-3 h-3 shrink-0" :class="{ 'ms-1': cartStore.customer.mobile_no }" />
 								<span class="truncate">{{ cartStore.customer.email_id }}</span>
 							</template>
 						</div>

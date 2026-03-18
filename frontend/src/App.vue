@@ -1,5 +1,5 @@
 <template>
-	<div id="xpos-app" :class="['h-screen w-screen font-sans', isDark ? 'dark' : '', isAuthPage ? 'overflow-y-auto' : 'overflow-hidden']">
+	<div id="xpos-app" :class="['h-screen w-screen font-sans', isDark ? 'dark' : '', isAuthPage ? 'overflow-y-auto' : 'overflow-hidden', isRtl ? 'rtl' : 'ltr']">
 		<template v-if="isAuthPage">
 			<router-view v-slot="{ Component }">
 				<transition name="fade" mode="out-in">
@@ -52,14 +52,14 @@
 
 		<Toaster
 			:theme="isDark ? 'dark' : 'light'"
-			position="bottom-right"
+			:position="isRtl ? 'bottom-left' : 'bottom-right'"
 			:duration="4000"
 			:expand="true"
 			rich-colors
 			close-button
+			:dir="isRtl ? 'rtl' : 'ltr'"
 		/>
 
-		<!-- Electron sync status badge (bottom-left, POS mode only) -->
 		<Transition name="fade">
 			<TooltipWrapper
 				v-if="!isAuthPage && isElectronEnv"
@@ -67,7 +67,7 @@
 				side="right"
 			>
 			<div
-				class="fixed bottom-3 left-3 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium shadow-md select-none"
+				class="fixed bottom-3 start-3 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium shadow-md select-none"
 				:class="syncStatus.isSyncing.value
 					? 'bg-blue-600 text-white'
 					: syncStatus.lastError.value
@@ -132,6 +132,7 @@ const authStore = useAuthStore();
 const offlineStore = useOfflineStore();
 const syncStatus = useSyncStatus();
 const isElectronEnv = isElectron();
+const isRtl = computed(() => document.documentElement.dir === "rtl");
 
 const keyboardShortcuts = useKeyboardShortcuts();
 const { 

@@ -1,0 +1,717 @@
+"1-indexed start position of item code in the full barcode. Example: for item code 3310100 in 3310100010009, start is 1.",
+"1-indexed start position of weight segment. Example: in 3310100010009, weight starts at position 8.",
+"<span class=\""h4\"">X POS</span>",
+Accept Qty,
+Account,계정
+Account Head,계정 헤드
+Accounts Manager,계정 관리자
+Accounts User,회계시용자
+Add Filter,필터 추가
+Add New Supplier,
+Add a new supplier to the system,
+Add items to pay,
+Add to Cart,쇼핑 카트에 담기
+Add/Edit Coupon Conditions,쿠폰 조건 추가 / 편집
+Additional Discount,추가 할인
+Administrator,관리자
+Against Name,
+All,모두
+All Groups,
+All orders have been received,
+Allocated {0} across {1} payment(s).,
+Allocation amount for payment {0} exceeds outstanding invoices,
+Amended From,개정
+Amount,양
+Amount Due,
+Amount exceeds POS Profile cash movement max amount.,
+Amount must be greater than zero,
+Amount must be greater than zero.,
+Applied,적용된
+Apply,대다
+Apply For,
+Apply For POS Profiles,
+Apply On,에 적용
+Apply Rule On Brand,브랜드에 규칙 적용
+Apply Rule On Item Code,항목 코드에 규칙 적용
+Apply Rule On Item Group,품목 그룹에 규칙 적용
+Apply Type,
+Are you sure you want to delete this draft?,
+At least one item is required,
+Auto Apply,
+Auto-receive,
+Available Programs,
+Back Office Cash Account is fixed by POS Profile and cannot be overridden.,
+Back Office Cash Account is required for cash deposit.,
+Back Office Cash Account must be a Cash account.,
+Back to Sign In,
+Barcode,바코드
+Barcode Printer,
+Barcode Structure,
+Barcode Type,바코드 유형
+Barcode lookup failed,
+Barcode {0} already exists.,
+Barcodes,바코드
+Brand,상표
+Campaign,캠페인
+Cancel,취소
+Cancelled,취소 된
+Cancelling submitted cash movements is disabled for this POS Profile.,
+Cannot add item to cart,
+Cart,카트
+Cart is empty,
+Cash Deposit,
+Cash Deposit is disabled for this POS Profile.,
+Cash Movement,
+Cash Movement is disabled for this POS Profile.,
+Cash deposit recorded,
+Cash flow tracking,
+Cash movement is already cancelled,
+Cash movement {0} not found,
+Cashier,출납원
+Change,변경
+Change Given,
+Check your email for reset instructions,
+Clear All,
+Clear cart,
+Click on items to add them here,
+Click to change customer,
+Click to select customer,
+Client Request ID,
+Close,닫기
+Close Shift,
+Closed,닫힘
+Closing,
+Closing Amount,마감 금액
+Closing...,
+Company,회사
+Company is required,
+Company is required.,
+Company must match the selected POS Opening Shift company.,
+Company must match the selected POS Profile company.,
+Contact administrator to set up loyalty programs,
+Context is required,
+Cost Center,비용 센터
+Cost Center is not set in pos profile {0},
+Coupon,
+Coupon Based,
+Coupon Code,쿠폰 코드
+Coupon Code Based,쿠폰 코드 기반
+Coupon Description,쿠폰 설명
+Coupon Name,쿠폰 이름
+Coupon Type,쿠폰 종류
+Coupon has expired,
+Coupon is not valid for this customer,
+Coupon is not yet valid,
+Create New Supplier,
+Create Supplier,
+Create items,
+Create suppliers,
+Created By,제작
+Creating...,
+Credit Note,신용 주
+Credit Note {0} has no remaining balance to allocate.,
+Credit note {0} is already fully allocated,
+Credit note {0} still has an unapplied balance of {1},
+Currency,통화
+"Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}",
+Currency is required,
+Customer,고객
+Customer Group,고객 그룹
+Customer Name,고객 이름
+Customer already exists,
+Customer is already enrolled in {0},
+Customer is already enrolled in {0}. Please unenroll from the current program first.,
+Customer is not enrolled in any loyalty program,
+Customer is required,고객이 필요합니다
+Customer is required to create an address,
+Customer locked for return,
+Customer mismatch: Return must be for the same customer ({0}) as the original invoice,
+Customer name is required,
+Customer {0} not found,
+"Customer, Company, Amount, and Mode of Payment are required",
+Date,날짜
+Date & Time,
+Default Loyalty Program,
+Default Rate,
+Default Rate is required,
+Delete draft,
+Deleting cancelled cash movements is disabled for this POS Profile.,
+Delivery Charges,
+Delivery Charges POS Profile,
+Deposit,
+Deposit To,
+Description,기술
+Details,세부 정보
+Difference,차
+Digits after decimal. Example: 1.000 => decimals 3.,
+"Digits before decimal. Example: for 1.000, use 1 (or 2 if your scale encodes 01.000).",
+Disable,사용 안함
+Disabled,사용 안함
+Discount,할인
+Discount %,
+Discount Amount,할인 금액
+Discount Percentage,할인 비율
+Discount Type,할인 유형
+Discount amount,
+Draft,초안
+Draft invoice deleted,
+Draft invoice restored to cart,
+Email,이메일
+Email Address,이메일 주소
+Email ID,이메일 주소
+Email Sent Successfully,
+Email address,이메일 주소
+Email or Username,
+Enable only if barcode also contains price segment.,
+"Enable when your barcode starts with a fixed prefix value (for example, 331).",
+Enroll Customer,
+Enrolled,등록됨
+Enrolling...,등록 중 ...
+Enter coupon code...,
+Enter reason for this transaction...,
+Enter supplier name,
+Enter the email address associated with your account,
+Enter your email address,
+Enter your email or username,
+Enter your email to receive a password reset link,
+Enter your password,암호를 입력
+Expected,
+Expected Amount,예상 금액
+Expense,지출
+Expense Account,비용 계정
+Expense Account is required for expense entries.,
+Expense account is required,
+Expense account is required for POS Expense.,
+Expense target account must match Expense Account.,
+Expires,
+Failed to create payment request: {0},
+Failed to delete draft invoice,
+Failed to fetch draft invoices,
+Failed to load draft invoice,
+Failed to reconcile Credit Note {0}: {1},
+Failed to reconcile Journal Entry {0}: {1},
+Failed to reconcile Payment Entry {0}: {1},
+Failed to record cash movement,
+Failed to save draft: {0},
+Failed to validate coupon,
+Final Customer Offer,
+"Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored.",
+Forgot password?,
+Generate and print barcode labels for items,
+Generating...,
+Gift Card,기프트 카드
+Give Item,
+Give Item Row ID,
+Give Product,
+Given Quantity,
+Grand Total,총 합계
+In Transit,대중 교통 수단
+In-Transit,
+In-Transit Stock,
+Include QR Code,
+Individual,개교회들과 사역들은 생겼다가 사라진다.
+Invalid Opening Entry,잘못된 시작 항목
+Invalid POS Opening Shift data provided.,
+Invalid Period,유효하지 않은 기간
+Invalid language code,
+Invalid language code format: {0},
+Invalid movement type for journal entry.,
+Invalid movement type.,
+Invalid or already used coupon code,
+Invalid or expired coupon code,
+Invalid payload for cash movement.,
+Invalid posting date.,
+Invalid {0} filter,
+Invoice,송장
+Invoice Amount,
+Invoice Currency,
+Invoice details,
+Invoice name is required for update,
+Invoice {0} Deleted,
+Invoice {0} does not exist,
+Invoice {0} not found,
+Item,항목
+Item Code,상품 코드
+Item Code and Price List are required,
+Item Code is required,
+Item Discounts,
+Item Group,항목 그룹
+Item Price,상품 가격
+Item Price has been added or updated,
+Item Rate Should Less Then,
+Item code digits,
+Item code is required.,
+Item code starting position,
+Item {0} was not in the original invoice {1},
+"Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})",
+"Item {0}: Cannot return {1}, maximum returnable is {2}",
+Item {0}: Discount {1}% exceeds maximum allowed {2}%,
+Item {0}: Quantity must be greater than zero,
+Item {0}: Rate cannot be negative,
+Items,아이템
+Journal Entry,분개
+Journal Entry {0} has no unallocated amount remaining.,
+Label,라벨
+Label Size,
+Large (60×40mm),
+Linked Invoices,연결된 송장
+Loading in-transit stock...,
+Loading pending orders...,
+Loading suppliers...,
+Loyalty,
+Loyalty Information,
+Loyalty Point,
+Loyalty Point Scheme,
+Loyalty Points,로열티 포인트
+Loyalty Points Redeemed,
+Loyalty Program,충성도 프로그램
+Loyalty Program is required,
+Loyalty Program {0} not found,
+Manage loyalty for,
+Material transfers awaiting receipt at your warehouse,
+Max Amount,최대 금액
+Max Quantity,
+Maximum Use,최대 사용
+Medium (50×30mm),
+Method,방법
+Min Amount,최소 금액
+Min Quantity,
+Missing Dependency,
+Mobile,변하기 쉬운
+Mobile NO,
+Mode Of Payment,결제 방식
+Mode of Payment,지불 방식
+Mode of Payments,지불 방식
+Modes of Payment,지불 방식
+Movement Type,
+Movement Type must be Expense or Deposit.,
+Net Total,합계액
+No allocation made for credit note {0},
+No allocation made for payment {0},
+No allocation was recorded for Credit Note {0}.,
+No allocation was recorded for Journal Entry {0}.,
+No allocation was recorded for Payment Entry {0}.,
+No allocations were made.,
+No batches available in {0} for {1}.,
+No draft invoices found,
+No groups found,
+No in-transit stock,
+No items found,
+No items in cart to save.,
+No items selected,
+No items to invoice. Please ensure there are items on the Purchase Order.,
+No items to receive.,
+No items to receive. Please enter received quantities.,
+No items to return.,
+No loyalty programs available,
+No matches found,
+No material transfers pending receipt,
+No open shift found. Please open a shift first.,
+No orders found,
+No outstanding invoices available for allocation of credit note {0},
+No outstanding invoices available for allocation of payment {0},
+No outstanding invoices were available to reconcile Credit Note {0}.,
+No outstanding invoices were available to reconcile Journal Entry {0}.,
+No outstanding invoices were available to reconcile Payment Entry {0}.,
+No outstanding invoices were found for {0}.,
+No pending stock,
+"No query filters. Click \""Add Filter\"" to add one.",
+No suppliers found,
+No unallocated payments were available for reconciliation.,
+No valid batches available in {0} for {1}.,
+No valid items to receive.,
+No valid items to return.,
+Not Enrolled,
+Number of decimal places encoded for the price.,
+Number of digits representing the price before decimal places.,
+Numpad,
+Offer,
+Offer Applied,
+Offer Name,
+Offers &amp; Coupons,
+Offline,오프라인
+Only One Use Per Customer,
+Only cancelled POS Cash Movement records can be deleted.,
+Only cancelled cash movements can be deleted.,
+Only draft Quotations can be updated,
+Only draft Sales Orders can be updated,
+Only draft invoices can be deleted,
+Only draft invoices can be updated,
+Only draft invoices can be updated and submitted,
+Only submitted cash movements can be cancelled.,
+Only submitted or cancelled cash movements can be duplicated.,
+Only the shift owner can create cash movement entries.,
+Open,열기
+Opening,열기
+Opening Amount,개시 금액
+Opening Balance Details,기초 잔액 세부 정보
+Order History,
+Order only,
+Order saved as draft,
+Orders,명령
+Original invoice {0} not found,
+Out of Stock,품절
+Outgoing Stock Entry is required.,
+POS,POS
+POS Allowed Expense Account,
+XPOS Allowed Source Account,
+POS Cash Movement,
+XPOS Closing Shift,
+XPOS Closing Shift Detail,
+XPOS Closing Shift Taxes,
+XPOS Closing Shift {} against {} between selected period,
+POS Coupon,
+POS Coupon Detail,
+POS Expense,
+POS Expense is disabled for this POS Profile.,
+POS Invoice,POS 송장
+POS Offer,
+POS Offer Detail,
+POS Offer is disabled.,
+POS Opening Shift,
+XPOS Opening Shift Detail,
+POS Opening Shift is required,
+POS Opening Shift is required to compute the overview.,
+POS Opening Shift is required.,
+POS Opening Shift must be submitted and open.,
+POS Opening Shift not found.,
+POS Opening Shift {0} is not for the same POS Profile,
+POS Opening Shift {0} is not for the same company,
+POS Payment Entry Reference,
+POS Payments,
+POS Print Format Rule,
+POS Profile,POS 프로필
+POS Profile company must match active POS Opening Shift company.,
+POS Profile is not set. Please close and reopen the shift.,
+POS Profile is required,
+POS Profile is required to create purchase documents.,
+POS Profile is required.,
+POS Profile must match the active POS Opening Shift profile.,
+POS Profile must match the selected POS Opening Shift profile.,
+POS Profile {} does not belongs to company {},POS 프로필 {}은 (는) 회사 {}에 속하지 않습니다.
+"POS Profile, Customer, and Items are required",
+POS Profiles,
+POS Sales Person Filter,
+POS Shift {0} is not open,
+POS Transactions,POS 거래
+POS credit redemption for Sales Invoice {0},
+POS expense recorded,
+POS profile data is missing or invalid.,
+Password,비밀번호
+Pay {0},
+Payment,지불
+Payment Entry,결제 항목
+Payment Entry is already created or payment account is not matched,
+Payment Entry {0} has no unallocated amount remaining.,
+Payment Gateway Account not found,
+Payment Reconciliation,결제 조정
+Payment Request for {0},{0} 지불 요청
+Payment amount cannot be less than or equal to 0,결제 금액은 0보다 작거나 같을 수 없습니다.
+Payment amount must be greater than zero,
+Payment {0} is already fully allocated,
+Payments,지불
+Pending,대기 중
+Period End Date,기한 종료 날짜
+Period Start Date,기간 시작일
+Phone number,
+Please enter the phone number first,먼저 전화 번호를 입력하세요
+Please select Coupon Code Based POS Offer.,
+Please select a customer before adding items to the cart,
+Please select a customer before holding the order.,
+Please select the correct POS Offer with the same company.,
+Please select the customer.,고객을 선택하십시오.
+Please set Default Payable Account in Company {0},
+Please set default account for Mode of Payment {0} in company {1},
+Point of Sale System,
+Points Earned,
+Points Redeemed,
+Points Value,
+"Positions are 1-indexed and counted on the full barcode. Example: 3310100010009 => prefix 331, item code 3310100, weight 1.000, check digit 9.",
+Posting Date,등록일자
+Prefix,접두사
+Prefix included in barcode,
+Prefix length,
+"Prefix length (for example, prefix 331 => length 3). Item/weight start positions still use full barcode positions.",
+Price,가격
+Price Discount Scheme ,
+Price List is required,
+Price decimals,
+Price digits,
+Price included in barcode,
+Price starting position,
+Primary Customer Offer,
+Print,인쇄
+Print Format,인쇄 형식
+Print Labels,
+Print Last Invoice,
+Process Return,
+Process Return {0},
+Processing...,처리 중 ...
+Product Discount Scheme,제품 할인 제도
+Profile,
+Profiles List,
+Program,프로그램
+Promo Type,
+Promotional,프로모션
+Promotional Schemes,
+Purchase,구입
+Purchase Order is required.,
+Purchase Order {0} does not exist.,
+Purchase Order {0} is not submitted.,
+Purchase Order {0} processing failed: {1},
+Purchase Orders,구매 주문
+Purchase Orders pending receipt at,
+Purchase order requires at least one item with quantity.,
+Purchase order requires at least one item.,
+Purchase orders,
+Python package 'cryptography' is required for QZ Tray signing. Please install it on the server and retry.,
+QZ Certificate Missing,
+QZ Certificate Ready,
+"QZ Tray certificate generated successfully.<br><br>Download the certificate from POS Awesome and import it into QZ Tray on each POS machine, then restart QZ Tray.",
+QZ Tray certificate not found. Ask an administrator to run Setup QZ Certificate.,
+QZ certificate already exists.,
+QZ certificate generated successfully.,
+Qty,수량
+Qualifying Transaction / Item,
+Quantity and Amount Conditions,
+Quotation name is required,
+Rate,비율
+Reason / Notes,
+Receive,수신
+Receive & Return,
+Receive Qty,
+Receive Stock,
+Receive stock,
+Received at {0},
+Receiving at,
+Receiving...,
+Recent Movements,
+Record Deposit,
+Record Expense,
+Record a cash deposit,
+Record a cash withdrawal,
+Redeem Points,
+Referral Code,추천 코드
+Referral Code is required,
+Referral Code {0} does not exist,
+Referral Code {0} is disabled,
+Referral Name,
+Refresh,새로 고침
+Refund Amount,
+Reject Qty,
+Remaining,남은
+Remaining outstanding: {0} across {1} invoice(s).,
+Remarks,Remarks
+"Remarks (optional, e.g. items damaged)",
+"Remarks (optional, e.g. missing or damaged items)",
+Remarks are required for cash movement in this POS Profile.,
+Remove Loyalty,
+Repeat,반복
+Repeat Invoice (Ctrl+G),
+Replace Cheapest Item,
+Replace Same Item,
+Reset Password,암호 재설정
+Restore Draft Invoice,
+Restore draft,
+Return,반환
+Return & Print,
+Return Against invoice is required for returns,
+Return Payment,
+Return Qty,
+Returns,보고
+Returns are only allowed until {0},
+Review and reconcile your shift,
+"Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches",행 # {0} : 배치 {1}에는 {2} 개의 수량 만 있습니다. {3} 수량이있는 다른 배치를 선택하거나 행을 여러 행으로 분할하여 여러 배치에서 전달 / 발행하십시오.
+Row ID,
+Sales Invoice,매출송장
+Sales Invoice Reference,
+Sales Manager,영업 관리자
+Sales Master Manager,판매 마스터 관리자
+Sales Order Created,
+Sales Order Created at <a href='{0}'>{1}</a>,
+Sales Order name is required,
+Sales Partner,영업 파트너
+Sales Person,영업 담당자
+Sales Summary,판매 요약
+Sales User,판매 사용자
+Save & Print,
+Save Only,
+Save as draft,
+Save your current order to create a draft,
+Scale Barcode Settings,
+Scan barcode...,
+Search and add items from the left panel,
+"Search by name, phone, email...",
+Search for items to add barcode labels,
+Search for or create a customer,
+Search item groups...,
+"Search items by name, code, or barcode...",
+"Search items, scan barcode...",
+Search suppliers...,
+Searching...,
+Secure login powered by Frappe Framework,
+Select Customer,고객 선택
+Select a draft invoice to restore to cart,
+Select a loyalty program to enroll this customer,
+Select customer first,
+Selected,
+Selected POS Opening Shift should be open.,
+Selected expense account is not allowed for this POS Profile.,
+Selected source account is not allowed for this POS Profile.,
+Send Reset Link,
+Sending...,
+Set Posting Date,게시일 설정
+Shift,
+Shift closed successfully!,
+Shipping Account,배송 계정
+Shortage return from transit to source,
+Show Price,가격 표시
+Sign In,
+Sign Out,
+Sign in to your account to continue,
+Signing in...,
+Small (38×25mm),
+Small remaining amounts,
+"Sorry, this coupon code cannot be used by this company",
+"Sorry, this coupon code cannot be used by this customer",
+"Sorry, this coupon code is no longer valid",죄송합니다.이 쿠폰 코드는 더 이상 유효하지 않습니다.
+"Sorry, this coupon code not exists",
+"Sorry, this coupon code's validity has expired",죄송합니다.이 쿠폰 코드의 유효 기간이 만료되었습니다.
+"Sorry, this coupon code's validity has not started",죄송합니다.이 쿠폰 코드의 유효 기간이 시작되지 않았습니다.
+"Sorry, {0} have used this coupon before",
+Source Account,
+Source account,
+Source account must be a Cash account.,
+Source account must belong to the selected company.,
+Source account override is disabled for this POS Profile.,
+Source and target accounts are required.,
+Source and target accounts cannot be the same for cash deposit.,
+Split Payment,
+Starting position (1-indexed) of the price segment.,
+Status,상태
+Status must be one of {0},상태 중 하나 여야합니다 {0}
+Stock Entry {0} does not exist.,
+Stock Entry {0} has already been fully received.,
+Stock Entry {0} is not a Material Transfer with in-transit.,
+Stock Entry {0} is not a valid in-transit transfer.,
+Stock Entry {0} is not submitted.,
+Stock Receiving,
+Stock UOM is required.,
+Subtotal,소계
+Successfully enrolled {0} in {1},
+Successfully unenrolled {0} from {1},
+Summary,개요
+Supplier Name,공급 업체 이름
+Supplier is required.,
+Supplier name is required.,
+Supplier {0} was not found.,
+Suppliers,공급자
+Sync,동조
+System Manager,시스템 관리자
+Target Account,
+Target account,
+Target account is required,
+Target account must belong to the selected company.,
+Target warehouse is required.,
+Tax Breakdown,
+Tax ID,세금 아이디
+Taxes,세금
+Taxes & Charges,
+Taxes Breakdown,
+Tendered,
+Theme: Dark (click to switch to System),
+Theme: Light (click to switch to Dark),
+Theme: System ({0}) (click to switch to Light),
+This Referral Code {0} not exists,
+This invoice {0} cannot be deleted,
+Title,제목
+Total,합계
+Total Invoices,
+Total Paid,
+Total Quantity,총량
+Total Taxes,
+Total item code digits to extract. Example: item code 3310100 => digits 7.,
+Transaction,거래
+Try a different search or category,
+Try adjusting your filters,
+Try again,
+Type,종류
+Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again.,
+Unable to create Journal Entry for customer credit.,
+Unable to determine cash account for change payment entry.,
+Unable to determine customer receivable account for change payment entry.,
+Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually,
+Unable to load Credit Note {0}: {1},
+Unable to load Payment Entry {0}: {1},
+Unable to resolve POS Opening Shift.,
+Unable to resolve POS cash account from POS Profile cash mode of payment.,
+Unenroll from Program,
+Unknown error,
+Used,익숙한
+User,사용자
+User must match the selected POS Opening Shift user.,
+User {} has been disabled. Please select valid user/cashier,
+Valid From,유효
+Valid Upto,유효 기간
+Validity and Usage,유효성과 사용법
+Walk-in Customer,
+Warehouse,창고
+Website Manager,웹 사이트 관리자
+Weight,무게
+Weight decimals,
+Weight digits,
+Weight starting position,
+Weight value is parsed as: [weight digits].[weight decimals].,
+Welcome back,
+"When enabled, price is extracted using the price start/digits/decimals fields below.",
+Worth {0},
+Write Off,탕치다
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,
+X POS,
+X POS App,
+X POS Payments is not enabled for this POS Profile,
+X POS Purchase Order Flow Failed,
+You are not allowed to access this shift.,
+You are not allowed to manage this cash movement record.,
+You are trying to return more quantity for item {0} than was sold.,
+days,
+"e.g. \""Summer Holiday 2019 Offer 20\""",
+incl.,
+item,
+item(s),
+items,
+items must be a list,
+label(s),
+modified_after must be a valid ISO datetime,
+more,
+pts,
+received,
+transferred,
+unaccounted,
+unique e.g. SAVE20  To be used to get discount,고유함 예 : SAVE20 할인을받는 데 사용
+will be rejected,
+will be returned to,
+{0} Coupon used are {1}. Allowed quantity is exhausted,{0} 사용 된 쿠폰은 {1}입니다. 허용 수량이 소진되었습니다
+{0} is disabled for this POS Profile.,
+{0} is invalid.,
+{0} must belong to company {1}.,
+{0} payment(s) were skipped.,
+{0} {1} must be submitted before creating change payment entries.,
+{} Active,
+Default Currency,기본 통화
+"e.g. ""Summer Holiday 2019 Offer 20""",예 : &quot;Summer Holiday 2019 Offer 20&quot;
+Failed,실패한
+First Name,이름
+Full Name,전체 이름
+Invoice Number,송장 번호
+Keyboard Shortcuts,키보드 단축키
+Last Name,성
+Middle Name,중간 이름
+Mpesa Settings,Mpesa 설정
+Posting Time,등록시간
+Reload,다시로드
+Session Defaults,세션 기본값
+Success,성공
+Till Number,번호까지
+Transaction Type,거래 유형
+View Website,웹 사이트보기

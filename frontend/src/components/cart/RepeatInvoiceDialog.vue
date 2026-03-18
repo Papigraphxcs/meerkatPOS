@@ -12,13 +12,13 @@
 
             <div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
                 <div class="relative">
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                         ref="searchInputRef"
                         v-model="searchTerm"
                         type="text"
                         :placeholder="__('Search by invoice number or customer name...')"
-                        class="pl-9"
+                        class="ps-9"
                         @input="debouncedSearch"
                     />
                 </div>
@@ -31,7 +31,7 @@
                             v-for="inv in invoices"
                             :key="inv.name"
                             @click="selectInvoice(inv)"
-                            class="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-primary/5 transition-all text-left group"
+                            class="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-primary/5 transition-all text-start group"
                             :disabled="isLoading"
                         >
                             <div class="flex-1 min-w-0">
@@ -39,7 +39,7 @@
                                     <FileText class="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
                                     <span class="font-semibold text-foreground text-sm">{{ inv.name }}</span>
                                 </div>
-                                <div class="flex items-center gap-3 mt-1 ml-6 text-xs text-muted-foreground">
+                                <div class="flex items-center gap-3 mt-1 ms-6 text-xs text-muted-foreground">
                                     <span>{{ inv.customer_name }}</span>
                                     <span>&bull;</span>
                                     <span>{{ inv.posting_date }}</span>
@@ -47,7 +47,7 @@
                                     <span>{{ inv.total_qty }} items</span>
                                 </div>
                             </div>
-                            <span class="font-bold text-foreground text-sm shrink-0 ml-3">
+                            <span class="font-bold text-foreground text-sm shrink-0 ms-3">
                                 {{ formatPrice(inv.grand_total) }}
                             </span>
                         </button>

@@ -8,9 +8,9 @@
                 <DialogDescription class="sr-only">{{ __("Search for or create a customer") }}</DialogDescription>
 
                 <div class="relative">
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input ref="searchInput" v-model="search" type="text" :placeholder="__('Search by name, phone, email...')"
-                        class="pl-9" @input="debouncedSearch"
+                        class="ps-9" @input="debouncedSearch"
                         @keydown.down.prevent="moveHighlight(1)"
                         @keydown.up.prevent="moveHighlight(-1)"
                         @keydown.enter.prevent="selectHighlighted" />
@@ -27,7 +27,7 @@
                         :ref="el => { if (el) customerRefs[idx] = el as HTMLButtonElement }"
                         @click="selectCustomer(cust)"
                         @mouseenter="highlightedIndex = idx"
-                        class="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left group"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-start group"
                         :class="idx === highlightedIndex
                             ? 'bg-primary/10 dark:bg-primary/20 ring-1 ring-primary/30 border border-primary/40'
                             : 'hover:bg-accent border border-transparent'">
@@ -68,7 +68,7 @@
                         {{ __("Create New Customer") }}
                     </Button>
                 </div>
-                <div v-else class="space-y-3 animate-slide-up max-h-[50vh] overflow-y-auto xpos-scrollbar pr-1">
+                <div v-else class="space-y-3 animate-slide-up max-h-[50vh] overflow-y-auto xpos-scrollbar pe-1">
                     <h3 class="text-sm font-semibold text-foreground">{{ __("New Customer") }}</h3>
                     <Input v-model="newCustomer.customer_name" type="text" :placeholder="__('Customer Name *')" />
 
@@ -124,7 +124,7 @@
                         <Button variant="outline" class="flex-1" size="sm" @click="showNewForm = false">{{ __("Cancel") }}</Button>
                         <Button class="flex-1" size="sm" :disabled="!newCustomer.customer_name || isCreating"
                             @click="createAndSelect">
-                            <Loader2 v-if="isCreating" class="w-4 h-4 animate-spin mr-1" />
+                            <Loader2 v-if="isCreating" class="w-4 h-4 animate-spin me-1" />
                             {{ isCreating ? __('Creating...') : __('Create & Select') }}
                         </Button>
                     </div>

@@ -289,7 +289,6 @@ export function useKeyboardShortcuts() {
             return;
         }
 
-        // Alt key alone (without other modifiers) focuses the menu bar
         if (e.key === "Alt" && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
             e.preventDefault();
             window.dispatchEvent(new CustomEvent("xpos:focus-menubar"));

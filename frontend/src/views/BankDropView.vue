@@ -4,7 +4,7 @@
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-xl font-bold text-foreground">{{ __("Bank Drops") }}</h1>
         <Button size="sm" @click="showForm = true" :disabled="!canAddBankDrop">
-          <Plus class="w-4 h-4 mr-1" />
+          <Plus class="w-4 h-4 me-1" />
           {{ __("New Bank Drop") }}
         </Button>
       </div>
@@ -54,7 +54,7 @@
                 <span v-if="drop.description" class="truncate max-w-[200px]">{{ drop.description }}</span>
               </div>
             </div>
-            <div class="text-right">
+            <div class="text-end">
               <span class="font-bold text-foreground">{{ formatCurrency(drop.amount) }}</span>
             </div>
             <Button
@@ -71,7 +71,6 @@
       </div>
     </div>
 
-    <!-- New Bank Drop Dialog -->
     <Dialog :open="showForm" @update:open="showForm = $event">
       <DialogContent class="sm:max-w-md">
         <DialogHeader>
@@ -103,7 +102,7 @@
           </div>
           <Button class="w-full" :disabled="!form.amount || isSaving" @click="handleSave">
             <template v-if="isSaving">
-              <Loader2 class="w-4 h-4 animate-spin mr-2" /> {{ __("Saving...") }}
+              <Loader2 class="w-4 h-4 animate-spin me-2" /> {{ __("Saving...") }}
             </template>
             <template v-else>{{ __("Save Bank Drop") }}</template>
           </Button>

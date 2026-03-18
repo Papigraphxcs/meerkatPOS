@@ -1,12 +1,3 @@
-/**
- * Electron environment detection and bridge.
- *
- * In browser/PWA mode: API calls go to same origin (relative URLs).
- * In Electron mode: API calls go to the configured server URL (absolute URLs).
- *
- * This module abstracts the difference so the rest of the app doesn't care.
- */
-
 export interface ElectronAPI {
   isFirstRun: () => Promise<boolean>;
   testErpNext: (config: { url: string; apiKey?: string; apiSecret?: string }) => Promise<{ success: boolean; error?: string }>;

@@ -1,69 +1,24 @@
-/**
- * Sync configuration – defines which ERPNext doctypes are synced,
- * their pull order, batch size, and the custom field used for
- * local-ID ↔ server-ID mapping.
- *
- * Mirrors the .NET WinForms (DeskPos) pattern:
- *   1. Pull master data tables first (in dependency order)
- *   2. Then push locally-created records to the server
- *   3. Validate local IDs via custom `xpos_local_id` field
- *
- * The pull order numbers ensure dependencies are resolved before
- * dependent tables. Child tables have pullOrder = parent + 1.
- */
-
 export interface SyncTableConfig {
-  /** ERPNext doctype name */
   doctype: string;
-  /** Human-readable label for UI */
   label: string;
-  /** Frappe API method that returns paginated data for pull.
-   *  Falls back to `frappe.client.get_list` if not specified. */
   pullMethod?: string;
-  /** Frappe API method used to push local records.
-   *  Only required for tables where the POS creates records. */
   pushMethod?: string;
-  /** Fields to fetch during pull. `["*"]` = all fields. */
   fields: string[];
-  /** Extra filters applied during pull (e.g. `{ disabled: 0 }`). */
   filters?: Record<string, unknown>;
-  /** Order field for incremental pull (usually "modified"). */
   orderBy: string;
-  /** Direction of pull */
   direction: "pull" | "push" | "both";
-  /** Local MariaDB table name for storing pulled data. */
   idbStore: string;
-  /** Custom field on the ERPNext doctype that holds the local UUID.
-   *  Used to prevent duplicate pushes and map local ↔ server IDs. */
   localIdField: string;
-  /** If true, pull only records modified since last sync.
-   *  If false, always pull full set (used for small lookup tables). */
   incremental: boolean;
-  /** Number of records per batch (default 500). */
   batchSize: number;
-  /** Pull priority – lower number = pulled first (dependency order). */
   pullOrder: number;
-  /** Dependencies – other idbStore names that must be synced before this one. */
   dependsOn?: string[];
-  /** Parent doctype for child tables (filters by parent doctype). */
   parentDoctype?: string;
-  /** If true, filter by company during pull. */
   isCompanyBased?: boolean;
-  /** If true, always pull full set (ignore incremental modified tracking). */
   regetAll?: boolean;
 }
 
-/**
- * Default sync configuration.
- * Pull order ensures master data is ready before transactional data.
- *
- * Mirrors DeskPos SyncTablesData.cs — every table that DeskPos syncs
- * is represented here.
- */
 export const SYNC_TABLES: SyncTableConfig[] = [
-  // ──────────────────────────────────────────────────────────────
-  // MASTER DATA — Lookup Tables (pull-only, small, full refresh)
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "Company",
     label: "Companies",
@@ -153,10 +108,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     batchSize: 500,
     pullOrder: 3,
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // MASTER DATA — Company-based (pull-only, incremental)
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "Cost Center",
     label: "Cost Centers",
@@ -250,10 +201,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     isCompanyBased: true,
     dependsOn: ["companies", "warehouses", "accounts"],
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // MASTER DATA — Items & Related
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "Item Group",
     label: "Item Groups",
@@ -379,10 +326,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     parentDoctype: "Item",
     dependsOn: ["items", "warehouses"],
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // MASTER DATA — Tax Templates
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "Item Tax Template",
     label: "Item Tax Templates",
@@ -548,10 +491,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     batchSize: 500,
     pullOrder: 25,
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // STOCK DATA
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "Bin",
     label: "Stock Bins",
@@ -568,10 +507,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     pullOrder: 30,
     dependsOn: ["items", "warehouses"],
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // POS USERS (pull-only for offline auth)
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "POS User",
     label: "POS Users",
@@ -585,10 +520,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     batchSize: 100,
     pullOrder: 35,
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // POS Payment Methods (child of POS Profile)
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "POS Payment Method",
     label: "POS Payment Methods",
@@ -604,10 +535,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
     parentDoctype: "POS Profile",
     dependsOn: ["pos_profiles", "modes_of_payment"],
   },
-
-  // ──────────────────────────────────────────────────────────────
-  // TRANSACTIONAL — Push-only from POS
-  // ──────────────────────────────────────────────────────────────
   {
     doctype: "XPOS Opening Shift",
     label: "POS Opening Shifts",
@@ -665,20 +592,11 @@ export const SYNC_TABLES: SyncTableConfig[] = [
   },
 ];
 
-/**
- * Default sync settings
- */
 export const SYNC_DEFAULTS = {
-  /** Interval between automatic full sync cycles (pull + push) in ms. Default 5 minutes. */
   intervalMs: 5 * 60 * 1000,
-  /** Interval for push-only cycles (invoices, shifts) in ms. Default 30 seconds. */
   pushIntervalMs: 30 * 1000,
-  /** Max retries before marking a record as permanently failed. */
   maxRetries: 3,
-  /** Grace period after going online before starting sync (ms). */
   onlineGracePeriodMs: 3_000,
-  /** Business hours start (24h format) for adaptive sync intervals. */
   businessHoursStart: 9,
-  /** Business hours end (24h format) for adaptive sync intervals. */
   businessHoursEnd: 21,
 };

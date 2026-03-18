@@ -18,7 +18,7 @@
 
             <Transition name="menu-drop">
                 <div v-if="activeMenu === menu.label"
-                    class="absolute top-full left-0 min-w-[220px] bg-[#252526] dark:bg-[#252526] border border-[#454545] shadow-2xl py-1 z-[200]">
+                    class="absolute top-full start-0 min-w-[220px] bg-[#252526] dark:bg-[#252526] border border-[#454545] shadow-2xl py-1 z-[200]">
                     <template v-for="item in menu.items" :key="item.id">
                         <div v-if="item.separator" class="h-px bg-[#3c3c3c] mx-0 my-1" />
                         <button v-else
@@ -35,7 +35,7 @@
                                 <component :is="item.icon" v-if="item.icon" class="w-3.5 h-3.5 flex-shrink-0" />
                                 <span>{{ __(item.label!) }}</span>
                             </div>
-                            <span v-if="item.shortcut" class="ml-8 text-[11px] text-[#666666]">{{ item.shortcut }}</span>
+                            <span v-if="item.shortcut" class="ms-8 text-[11px] text-[#666666]">{{ item.shortcut }}</span>
                         </button>
                     </template>
                 </div>

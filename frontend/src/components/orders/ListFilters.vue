@@ -56,7 +56,7 @@
           <Filter class="h-3.5 w-3.5" />
           Filters
           <Badge v-if="queryFilters.length > 0" :variant="queryFilters.length > 0 ? 'secondary' : 'outline'"
-            class="ml-1 h-5 min-w-5 px-1.5 bg-background text-foreground">
+            class="ms-1 h-5 min-w-5 px-1.5 bg-background text-foreground">
             {{ queryFilters.length }}
           </Badge>
         </Button>

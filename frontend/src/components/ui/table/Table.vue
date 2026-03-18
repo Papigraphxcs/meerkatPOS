@@ -267,11 +267,11 @@ function resetColumns(): void {
 function getAlignClass(align?: string): string {
     switch (align) {
         case "right":
-            return "text-right";
+            return "text-end";
         case "center":
             return "text-center";
         default:
-            return "text-left";
+            return "text-start";
     }
 }
 
@@ -324,7 +324,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
             </div>
             <div class="flex items-center gap-1.5">
                 <template v-if="selectedIndices.size > 0">
-                    <span class="text-[11px] font-medium text-blue-600 dark:text-blue-400 mr-1">
+                    <span class="text-[11px] font-medium text-blue-600 dark:text-blue-400 me-1">
                         {{ selectedIndices.size }} {{ __("selected") }}
                     </span>
                     <TooltipWrapper :content="__('Delete selected')">
@@ -352,7 +352,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                 </TooltipWrapper>
 
                 <Button v-if="showAddRow" variant="outline" size="sm" class="h-7 text-xs" @click="addRow">
-                    <Plus class="w-3.5 h-3.5 mr-1" />
+                    <Plus class="w-3.5 h-3.5 me-1" />
                     {{ __("Add Row") }}
                 </Button>
             </div>
@@ -365,7 +365,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                     <p class="font-medium text-sm">{{ __(emptyMessage) }}</p>
                     <p class="text-xs mt-1">{{ __(emptyDescription) }}</p>
                     <Button v-if="showAddRow" variant="outline" size="sm" class="mt-3" @click="addRow">
-                        <Plus class="w-3.5 h-3.5 mr-1" />
+                        <Plus class="w-3.5 h-3.5 me-1" />
                         {{ __("Add First Row") }}
                     </Button>
                 </div>
@@ -430,14 +430,12 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                                     @keydown="handleKeyDown($event, rowIndex, col.fieldname)"
                                     :ref="(el: any) => registerInput(rowIndex, col.fieldname, el?.$el?.querySelector('input') || el?.inputRef)" />
 
-                                <!-- Date input -->
                                 <Input v-else-if="col.type === 'date'" type="date"
                                     :model-value="row[col.fieldname] || ''"
                                     @update:model-value="onCellChange(rowIndex, col.fieldname, $event)"
                                     class="h-7 text-xs" @keydown="handleKeyDown($event, rowIndex, col.fieldname)"
                                     :ref="(el: any) => registerInput(rowIndex, col.fieldname, el?.$el || el)" />
 
-                                <!-- Select input -->
                                 <select v-else-if="col.type === 'select'" :value="row[col.fieldname]"
                                     @change="onCellChange(rowIndex, col.fieldname, ($event.target as HTMLSelectElement).value)"
                                     class="h-7 w-full px-1 border border-border rounded text-xs bg-background focus:ring-2 focus:ring-ring focus:outline-none"
@@ -449,18 +447,15 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                                     </option>
                                 </select>
 
-                                <!-- Readonly display -->
                                 <span v-else-if="col.type === 'readonly'" class="text-xs font-mono"
                                     :class="getCellClass(col, row[col.fieldname], row, rowIndex)">
                                     {{ formatValue(col, row[col.fieldname], row, rowIndex) }}
                                 </span>
 
-                                <!-- Component slot — handled by named slot above -->
                                 <span v-else-if="col.type === 'component'" />
                             </slot>
                         </td>
 
-                        <!-- Actions -->
                         <td v-if="showDeleteButton || allowReorder || allowDuplicate" class="px-1 py-1">
                             <div
                                 class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -496,7 +491,6 @@ function handleTableKeyDown(event: KeyboardEvent): void {
             </table>
         </div>
 
-        <!-- Footer hints -->
         <div v-if="rows.length > 0 && keyboardNavigation"
             class="flex items-center justify-between px-3 py-1.5 border-t border-border bg-muted/30">
             <span class="text-[10px] text-muted-foreground">
@@ -510,7 +504,6 @@ function handleTableKeyDown(event: KeyboardEvent): void {
             </button>
         </div>
 
-        <!-- Column Settings Modal -->
         <Teleport to="body">
             <Transition name="ct-modal">
                 <div v-if="showColumnSettingsModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
@@ -518,7 +511,6 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                     <div class="absolute inset-0 bg-black/50" @click="showColumnSettingsModal = false" />
                     <div
                         class="relative bg-background border border-border rounded-lg shadow-xl w-full max-w-sm max-h-[80vh] flex flex-col">
-                        <!-- Modal header -->
                         <div class="flex items-center justify-between px-4 py-3 border-b border-border">
                             <h3 class="text-sm font-semibold text-foreground">
                                 {{ __("Column Settings") }}
@@ -529,7 +521,6 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                             </Button>
                         </div>
 
-                        <!-- Column list -->
                         <div class="flex-1 overflow-auto px-4 py-3 space-y-1">
                             <label v-for="col in columns" :key="col.fieldname"
                                 class="flex items-center gap-2.5 px-2 py-1.5 rounded hover:bg-muted cursor-pointer text-sm"
@@ -542,13 +533,12 @@ function handleTableKeyDown(event: KeyboardEvent): void {
                             </label>
                         </div>
 
-                        <!-- Modal footer -->
                         <div class="flex items-center justify-between px-4 py-3 border-t border-border">
                             <Button variant="ghost" size="sm" @click="resetColumns">
                                 {{ __("Reset") }}
                             </Button>
                             <Button size="sm" @click="showColumnSettingsModal = false">
-                                <Check class="w-3.5 h-3.5 mr-1" />
+                                <Check class="w-3.5 h-3.5 me-1" />
                                 {{ __("Done") }}
                             </Button>
                         </div>
@@ -573,7 +563,6 @@ function handleTableKeyDown(event: KeyboardEvent): void {
     transition: background-color 0.15s ease, box-shadow 0.3s ease;
 }
 
-/* Modal transition */
 .ct-modal-enter-active,
 .ct-modal-leave-active {
     transition: opacity 0.2s ease;

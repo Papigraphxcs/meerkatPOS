@@ -26,7 +26,6 @@ function getItemAmount(item: PurchaseCartItem): number {
 
 <template>
     <div class="h-full flex flex-col bg-card overflow-hidden">
-        <!-- Header -->
         <div class="px-4 py-3 border-b border-border bg-muted flex items-center justify-between shrink-0">
             <h2 class="font-semibold flex items-center gap-2 text-foreground">
                 <ShoppingCart class="w-5 h-5" />
@@ -37,13 +36,12 @@ function getItemAmount(item: PurchaseCartItem): number {
             </h2>
             <TooltipWrapper v-if="!purchaseStore.isEmpty" :content="__('Refresh stock data')">
                 <Button @click="purchaseStore.refreshAllStock()" variant="outline" size="sm">
-                    <RefreshCw class="w-3.5 h-3.5 mr-1" />
+                    <RefreshCw class="w-3.5 h-3.5 me-1" />
                     {{ __("Stock") }}
                 </Button>
             </TooltipWrapper>
         </div>
 
-        <!-- Empty State -->
         <div v-if="purchaseStore.isEmpty" class="flex-1 flex items-center justify-center p-8">
             <div class="text-center text-muted-foreground">
                 <Package class="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
@@ -52,42 +50,38 @@ function getItemAmount(item: PurchaseCartItem): number {
             </div>
         </div>
 
-        <!-- Cart Table -->
         <ScrollArea v-else class="flex-1 min-h-0">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm border-collapse min-w-[1100px]">
                     <thead class="sticky top-0 z-10 bg-muted border-b border-border">
                         <tr class="text-xs text-muted-foreground uppercase tracking-wider">
-                            <th class="px-2 py-2 text-left w-8">#</th>
-                            <th class="px-2 py-2 text-left min-w-[100px]">{{ __("Alias") }}</th>
-                            <th class="px-2 py-2 text-left min-w-[120px]">{{ __("Item Name") }}</th>
-                            <th class="px-2 py-2 text-right w-[80px]">{{ __("Stock") }}</th>
-                            <th class="px-2 py-2 text-right w-[80px]">{{ __("Transit") }}</th>
-                            <th class="px-2 py-2 text-right w-[70px]">{{ __("Loose") }}</th>
-                            <th class="px-2 py-2 text-right w-[70px]">{{ __("Packs") }}</th>
-                            <th class="px-2 py-2 text-right w-[80px]">{{ __("Rate") }}</th>
-                            <th class="px-2 py-2 text-right w-[60px]">{{ __("Disc%") }}</th>
-                            <th class="px-2 py-2 text-right w-[80px]">{{ __("Amount") }}</th>
-                            <th class="px-2 py-2 text-left min-w-[90px]">{{ __("Generic") }}</th>
-                            <th class="px-2 py-2 text-left w-[80px]">{{ __("Category") }}</th>
-                            <th class="px-2 py-2 text-left w-[70px]">{{ __("Class") }}</th>
-                            <th class="px-2 py-2 text-left w-[80px]">{{ __("Packing") }}</th>
-                            <th class="px-2 py-2 text-right w-[60px]">{{ __("P.Units") }}</th>
+                            <th class="px-2 py-2 text-start w-8">#</th>
+                            <th class="px-2 py-2 text-start min-w-[100px]">{{ __("Alias") }}</th>
+                            <th class="px-2 py-2 text-start min-w-[120px]">{{ __("Item Name") }}</th>
+                            <th class="px-2 py-2 text-end w-[80px]">{{ __("Stock") }}</th>
+                            <th class="px-2 py-2 text-end w-[80px]">{{ __("Transit") }}</th>
+                            <th class="px-2 py-2 text-end w-[70px]">{{ __("Loose") }}</th>
+                            <th class="px-2 py-2 text-end w-[70px]">{{ __("Packs") }}</th>
+                            <th class="px-2 py-2 text-end w-[80px]">{{ __("Rate") }}</th>
+                            <th class="px-2 py-2 text-end w-[60px]">{{ __("Disc%") }}</th>
+                            <th class="px-2 py-2 text-end w-[80px]">{{ __("Amount") }}</th>
+                            <th class="px-2 py-2 text-start min-w-[90px]">{{ __("Generic") }}</th>
+                            <th class="px-2 py-2 text-start w-[80px]">{{ __("Category") }}</th>
+                            <th class="px-2 py-2 text-start w-[70px]">{{ __("Class") }}</th>
+                            <th class="px-2 py-2 text-start w-[80px]">{{ __("Packing") }}</th>
+                            <th class="px-2 py-2 text-end w-[60px]">{{ __("P.Units") }}</th>
                             <th class="px-2 py-2 w-8"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border">
                         <tr v-for="(item, index) in purchaseStore.cartItems" :key="`${item.item_code}-${index}`"
                             class="hover:bg-muted/50 transition-colors">
-                            <!-- Serial -->
                             <td class="px-2 py-1.5 text-muted-foreground text-center">{{ index + 1 }}</td>
 
-                            <!-- Alias -->
                             <td class="px-2 py-1.5">
                                 <Input v-model="item.custom_alias" class="h-7 text-xs" />
                             </td>
 
-                            <!-- Item Name -->
                             <td class="px-2 py-1.5">
                                 <TooltipWrapper :content="item.item_name">
                                 <div class="truncate text-foreground font-medium text-xs">
@@ -97,75 +91,62 @@ function getItemAmount(item: PurchaseCartItem): number {
                                 <div class="text-[10px] text-muted-foreground truncate">{{ item.item_code }}</div>
                             </td>
 
-                            <!-- Stock in Hand -->
-                            <td class="px-2 py-1.5 text-right text-xs font-mono">
+                            <td class="px-2 py-1.5 text-end text-xs font-mono">
                                 {{ (item.custom_stock_in_hand || 0).toFixed(0) }}
                             </td>
 
-                            <!-- Transit Stock -->
-                            <td class="px-2 py-1.5 text-right text-xs font-mono">
+                            <td class="px-2 py-1.5 text-end text-xs font-mono">
                                 {{ (item.custom_transit_stock || 0).toFixed(0) }}
                             </td>
 
-                            <!-- Required Loose -->
                             <td class="px-2 py-1.5">
                                 <NumberInput :model-value="item.custom_required_loose || 0"
                                     @update:model-value="purchaseStore.updateCartItemLoose(index, $event)"
                                     :min="0" :precision="0" class="h-7 text-xs w-full" />
                             </td>
 
-                            <!-- Required Packs -->
                             <td class="px-2 py-1.5">
                                 <NumberInput :model-value="item.custom_required_packs || 0"
                                     @update:model-value="purchaseStore.updateCartItemPacks(index, $event)"
                                     :min="0" :precision="0" class="h-7 text-xs w-full" />
                             </td>
 
-                            <!-- Rate -->
                             <td class="px-2 py-1.5">
                                 <NumberInput :model-value="item.rate"
                                     @update:model-value="purchaseStore.updateCartItemRate(index, $event)"
                                     :min="0" :precision="2" class="h-7 text-xs w-full" />
                             </td>
 
-                            <!-- Discount -->
                             <td class="px-2 py-1.5">
                                 <NumberInput :model-value="item.discount_percent || 0"
                                     @update:model-value="purchaseStore.updateCartItemDiscount(index, $event)"
                                     :min="0" :max="100" :precision="1" class="h-7 text-xs w-full" />
                             </td>
 
-                            <!-- Amount -->
-                            <td class="px-2 py-1.5 text-right text-xs font-medium text-green-600 font-mono">
+                            <td class="px-2 py-1.5 text-end text-xs font-medium text-green-600 font-mono">
                                 {{ formatCurrency(getItemAmount(item)) }}
                             </td>
 
-                            <!-- Generic Item -->
                             <td class="px-2 py-1.5">
                                 <Input v-model="item.custom_generic_item" class="h-7 text-xs" />
                             </td>
 
-                            <!-- Category -->
                             <td class="px-2 py-1.5 text-xs text-muted-foreground truncate">
                                 {{ item.custom_category || '-' }}
                             </td>
 
-                            <!-- Class -->
                             <td class="px-2 py-1.5">
                                 <Input v-model="item.custom_class" class="h-7 text-xs" />
                             </td>
 
-                            <!-- Item Packing -->
                             <td class="px-2 py-1.5 text-xs text-muted-foreground truncate">
                                 {{ item.custom_item_packing || '-' }}
                             </td>
 
-                            <!-- Pack Units -->
-                            <td class="px-2 py-1.5 text-right text-xs font-mono">
+                            <td class="px-2 py-1.5 text-end text-xs font-mono">
                                 {{ (item.custom_pack_units || 0).toFixed(0) }}
                             </td>
 
-                            <!-- Delete -->
                             <td class="px-1 py-1.5">
                                 <Button @click="purchaseStore.removeFromCart(index)" variant="ghost" size="icon"
                                     class="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10">
@@ -178,7 +159,6 @@ function getItemAmount(item: PurchaseCartItem): number {
             </div>
         </ScrollArea>
 
-        <!-- Footer -->
         <div v-if="!purchaseStore.isEmpty" class="border-t border-border bg-muted p-4 shrink-0">
             <div class="space-y-1.5">
                 <div class="flex justify-between text-sm">

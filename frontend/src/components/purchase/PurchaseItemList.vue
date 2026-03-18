@@ -161,10 +161,10 @@ onUnmounted(() => {
     <div class="h-full flex flex-col overflow-hidden">
         <div class="px-4 pt-4 pb-2 border-b border-border bg-card">
             <div class="relative flex items-center">
-                <ScanBarcode class="absolute left-3 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <ScanBarcode class="absolute start-3 w-4 h-4 text-muted-foreground pointer-events-none" />
                 <Input
                     v-model="barcodeValue"
-                    class="pl-9 pr-9 h-9 text-sm"
+                    class="ps-9 pe-9 h-9 text-sm"
                     :class="{
                         'ring-2 ring-green-500/50 border-green-500': barcodeFlash === 'success',
                         'ring-2 ring-red-500/50 border-red-500': barcodeFlash === 'error'
@@ -176,7 +176,7 @@ onUnmounted(() => {
                 />
                 <Loader2
                     v-if="isBarcodeScan"
-                    class="absolute right-3 w-4 h-4 text-muted-foreground animate-spin"
+                    class="absolute end-3 w-4 h-4 text-muted-foreground animate-spin"
                 />
             </div>
         </div>
@@ -209,7 +209,7 @@ onUnmounted(() => {
                 <Package class="w-12 h-12 mx-auto mb-4 text-muted-foreground/40" />
                 <p>{{ __("No items found") }}</p>
                 <Button @click="openNewItemForm" variant="link" class="mt-2">
-                    <Plus class="w-4 h-4 mr-1" />
+                    <Plus class="w-4 h-4 me-1" />
                     {{ __("Create new item") }}
                 </Button>
             </div>
@@ -230,7 +230,7 @@ onUnmounted(() => {
                         </div>
                     </div>
                     <Button @click="addItem(item)" size="sm" variant="outline">
-                        <ShoppingCart class="w-4 h-4 mr-1" />
+                        <ShoppingCart class="w-4 h-4 me-1" />
                         {{ __("Add") }}
                     </Button>
                 </div>

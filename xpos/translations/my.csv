@@ -1,0 +1,717 @@
+"1-indexed start position of item code in the full barcode. Example: for item code 3310100 in 3310100010009, start is 1.",
+"1-indexed start position of weight segment. Example: in 3310100010009, weight starts at position 8.",
+"<span class=\""h4\"">X POS</span>",
+Accept Qty,
+Account,အကောင့်ဖွင့်
+Account Head,အကောင့်ဖွင့်ဦးခေါင်း
+Accounts Manager,အကောင့်အသစ်များ၏ Manager က
+Accounts User,အသုံးပြုသူအကောင့်
+Add Filter,Filter ကို Add
+Add New Supplier,
+Add a new supplier to the system,
+Add items to pay,
+Add to Cart,စျေးဝယ်ခြင်းထဲသို့ထည့်သည်
+Add/Edit Coupon Conditions,ကူပွန်အခြေအနေများထည့်ပေါင်း / တည်းဖြတ်ပါ
+Additional Discount,အပိုဆောင်းလျှော့
+Administrator,အုပ်ချုပ်သူ
+Against Name,
+All,အားလုံး
+All Groups,
+All orders have been received,
+Allocated {0} across {1} payment(s).,
+Allocation amount for payment {0} exceeds outstanding invoices,
+Amended From,မှစ. ပြင်ဆင်
+Amount,ငွေပမာဏ
+Amount Due,
+Amount exceeds POS Profile cash movement max amount.,
+Amount must be greater than zero,
+Amount must be greater than zero.,
+Applied,အသုံးချ
+Apply,Apply
+Apply For,
+Apply For POS Profiles,
+Apply On,တွင် Apply
+Apply Rule On Brand,ကုန်အမှတ်တံဆိပ်တွင်စည်းမျဉ်း Apply
+Apply Rule On Item Code,Item Code ကိုတွင်စည်းမျဉ်း Apply
+Apply Rule On Item Group,Item Group မှတွင်စည်းမျဉ်း Apply
+Apply Type,
+Are you sure you want to delete this draft?,
+At least one item is required,
+Auto Apply,
+Auto-receive,
+Available Programs,
+Back Office Cash Account is fixed by POS Profile and cannot be overridden.,
+Back Office Cash Account is required for cash deposit.,
+Back Office Cash Account must be a Cash account.,
+Back to Sign In,
+Barcode,ဘားကုဒ်
+Barcode Printer,
+Barcode Structure,
+Barcode Type,ဘားကုဒ်အမျိုးအစား
+Barcode lookup failed,
+Barcode {0} already exists.,
+Barcodes,ဘားကုဒ်များ
+Brand,ကုန်အမှတ်တံဆိပ်
+Campaign,ကင်ပိန်း
+Cancel,ပျက်စေ
+Cancelled,ဖျက်သိမ်းခဲ့သည်
+Cancelling submitted cash movements is disabled for this POS Profile.,
+Cannot add item to cart,
+Cart,လှည်း
+Cart is empty,
+Cash Deposit,
+Cash Deposit is disabled for this POS Profile.,
+Cash Movement,
+Cash Movement is disabled for this POS Profile.,
+Cash deposit recorded,
+Cash flow tracking,
+Cash movement is already cancelled,
+Cash movement {0} not found,
+Cashier,ငှေကိုငျစာရေး
+Change,ပွောငျးလဲခွငျး
+Change Given,
+Check your email for reset instructions,
+Clear All,
+Clear cart,
+Click on items to add them here,
+Click to change customer,
+Click to select customer,
+Client Request ID,
+Close,ပိတ်
+Close Shift,
+Closed,ပိတ်ထားသော
+Closing,
+Closing Amount,ပမာဏပိတ်ခြင်း
+Closing...,
+Company,ကုမ္ပဏီ
+Company is required,
+Company is required.,
+Company must match the selected POS Opening Shift company.,
+Company must match the selected POS Profile company.,
+Contact administrator to set up loyalty programs,
+Context is required,
+Cost Center,ကုန်ကျစရိတ် Center က
+Cost Center is not set in pos profile {0},
+Coupon,
+Coupon Based,
+Coupon Code,ကူပွန်ကုဒ်
+Coupon Code Based,ကူပွန် Code ကိုအခြေခံပြီး
+Coupon Description,ကူပွန်ဖော်ပြချက်
+Coupon Name,ကူပွန်အမည်
+Coupon Type,ကူပွန်အမျိုးအစား
+Coupon has expired,
+Coupon is not valid for this customer,
+Coupon is not yet valid,
+Create New Supplier,
+Create Supplier,
+Create items,
+Create suppliers,
+Created By,By Created
+Creating...,
+Credit Note,ခရက်ဒစ်မှတ်ချက်
+Credit Note {0} has no remaining balance to allocate.,
+Credit note {0} is already fully allocated,
+Credit note {0} still has an unapplied balance of {1},
+Currency,ငှေကွေး
+"Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}",
+Currency is required,
+Customer,ဝယ်သူ
+Customer Group,ဖောက်သည်အုပ်စု
+Customer Name,ဖောက်သည်အမည်
+Customer already exists,
+Customer is already enrolled in {0},
+Customer is already enrolled in {0}. Please unenroll from the current program first.,
+Customer is not enrolled in any loyalty program,
+Customer is required,customer လိုအပ်သည်
+Customer is required to create an address,
+Customer locked for return,
+Customer mismatch: Return must be for the same customer ({0}) as the original invoice,
+Customer name is required,
+Customer {0} not found,
+"Customer, Company, Amount, and Mode of Payment are required",
+Date,နေ့စှဲ
+Date & Time,
+Default Loyalty Program,
+Default Rate,
+Default Rate is required,
+Delete draft,
+Deleting cancelled cash movements is disabled for this POS Profile.,
+Delivery Charges,
+Delivery Charges POS Profile,
+Deposit,
+Deposit To,
+Description,ဖော်ပြချက်
+Details,အသေးစိတ်အချက်အလက်များကို
+Difference,ခြားနားချက်
+Digits after decimal. Example: 1.000 => decimals 3.,
+"Digits before decimal. Example: for 1.000, use 1 (or 2 if your scale encodes 01.000).",
+Disable,ကို disable
+Disabled,ချို့ငဲသော
+Discount,လြှော့ခွငျး
+Discount %,
+Discount Amount,လျော့စျေးပမာဏ
+Discount Percentage,လျော့စျေးရာခိုင်နှုန်း
+Discount Type,လျှော့စျေးအမျိုးအစား
+Discount amount,
+Draft,မူကြမ်း
+Draft invoice deleted,
+Draft invoice restored to cart,
+Email,အီးမေး
+Email Address,အီးမေးလိပ်စာ
+Email ID,အီးမေးလ်ပို့ရန် ID ကို
+Email Sent Successfully,
+Email address,အီးမေးလ်လိပ်စာ
+Email or Username,
+Enable only if barcode also contains price segment.,
+"Enable when your barcode starts with a fixed prefix value (for example, 331).",
+Enroll Customer,
+Enrolled,စာရင်းသွင်း
+Enrolling...,စာရင်းသွင်းနေသည် ...
+Enter coupon code...,
+Enter reason for this transaction...,
+Enter supplier name,
+Enter the email address associated with your account,
+Enter your email address,
+Enter your email or username,
+Enter your email to receive a password reset link,
+Enter your password,သင့်ရဲ့စကားဝှက်ကိုရိုက်ထည့်
+Expected,
+Expected Amount,မျှော်လင့်ထားသည့်ငွေပမာဏ
+Expense,သုံးငှေ
+Expense Account,စရိတ်အကောင့်
+Expense Account is required for expense entries.,
+Expense account is required,
+Expense account is required for POS Expense.,
+Expense target account must match Expense Account.,
+Expires,
+Failed to create payment request: {0},
+Failed to delete draft invoice,
+Failed to fetch draft invoices,
+Failed to load draft invoice,
+Failed to reconcile Credit Note {0}: {1},
+Failed to reconcile Journal Entry {0}: {1},
+Failed to reconcile Payment Entry {0}: {1},
+Failed to record cash movement,
+Failed to save draft: {0},
+Failed to validate coupon,
+Final Customer Offer,
+"Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored.",
+Forgot password?,
+Generate and print barcode labels for items,
+Generating...,
+Gift Card,လက်ဆောင်ကဒ်
+Give Item,
+Give Item Row ID,
+Give Product,
+Given Quantity,
+Grand Total,စုစုပေါင်း
+In Transit,အကူးအပြောင်းတွင်
+In-Transit,
+In-Transit Stock,
+Include QR Code,
+Individual,တစ်ဦးချင်း
+Invalid Opening Entry,မမှန်ကန်သောဖွင့်လှစ် Entry
+Invalid POS Opening Shift data provided.,
+Invalid Period,မမှန်ကန်သောကာလ
+Invalid language code,
+Invalid language code format: {0},
+Invalid movement type for journal entry.,
+Invalid movement type.,
+Invalid or already used coupon code,
+Invalid or expired coupon code,
+Invalid payload for cash movement.,
+Invalid posting date.,
+Invalid {0} filter,
+Invoice,ဝယ်ကုန်စာရင်း
+Invoice Amount,
+Invoice Currency,
+Invoice details,
+Invoice name is required for update,
+Invoice {0} Deleted,
+Invoice {0} does not exist,
+Invoice {0} not found,
+Item,အချက်
+Item Code,item Code ကို
+Item Code and Price List are required,
+Item Code is required,
+Item Discounts,
+Item Group,item Group က
+Item Price,item စျေးနှုန်း
+Item Price has been added or updated,
+Item Rate Should Less Then,
+Item code digits,
+Item code is required.,
+Item code starting position,
+Item {0} was not in the original invoice {1},
+"Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})",
+"Item {0}: Cannot return {1}, maximum returnable is {2}",
+Item {0}: Discount {1}% exceeds maximum allowed {2}%,
+Item {0}: Quantity must be greater than zero,
+Item {0}: Rate cannot be negative,
+Items,items
+Journal Entry,ဂျာနယ် Entry &#39;
+Journal Entry {0} has no unallocated amount remaining.,
+Label,ကပ်တံဆိပ်
+Label Size,
+Large (60×40mm),
+Linked Invoices,ဆက်နွယ်နေငွေတောင်းခံလွှာ
+Loading in-transit stock...,
+Loading pending orders...,
+Loading suppliers...,
+Loyalty,
+Loyalty Information,
+Loyalty Point,
+Loyalty Point Scheme,
+Loyalty Points,သစ္စာရှိမှုအမှတ်
+Loyalty Points Redeemed,
+Loyalty Program,သစ္စာရှိမှုအစီအစဉ်
+Loyalty Program is required,
+Loyalty Program {0} not found,
+Manage loyalty for,
+Material transfers awaiting receipt at your warehouse,
+Max Amount,မက်စ်ငွေပမာဏ
+Max Quantity,
+Maximum Use,အများဆုံးအသုံးပြုမှု
+Medium (50×30mm),
+Method,နည်းလမ်း
+Min Amount,min ငွေပမာဏ
+Min Quantity,
+Missing Dependency,
+Mobile,မိုဘိုင်း
+Mobile NO,
+Mode Of Payment,ငွေပေးချေမှုရမည့်၏ Mode ကို
+Mode of Payment,ငွေပေးချေမှုရမည့်၏ Mode ကို
+Mode of Payments,ငွေပေးချေ၏ Mode ကို
+Modes of Payment,ငွေပေးချေမှုရမည့်၏ modes
+Movement Type,
+Movement Type must be Expense or Deposit.,
+Net Total,net ကစုစုပေါင်း
+No allocation made for credit note {0},
+No allocation made for payment {0},
+No allocation was recorded for Credit Note {0}.,
+No allocation was recorded for Journal Entry {0}.,
+No allocation was recorded for Payment Entry {0}.,
+No allocations were made.,
+No batches available in {0} for {1}.,
+No draft invoices found,
+No groups found,
+No in-transit stock,
+No items found,
+No items in cart to save.,
+No items selected,
+No items to invoice. Please ensure there are items on the Purchase Order.,
+No items to receive.,
+No items to receive. Please enter received quantities.,
+No items to return.,
+No loyalty programs available,
+No matches found,
+No material transfers pending receipt,
+No open shift found. Please open a shift first.,
+No orders found,
+No outstanding invoices available for allocation of credit note {0},
+No outstanding invoices available for allocation of payment {0},
+No outstanding invoices were available to reconcile Credit Note {0}.,
+No outstanding invoices were available to reconcile Journal Entry {0}.,
+No outstanding invoices were available to reconcile Payment Entry {0}.,
+No outstanding invoices were found for {0}.,
+No pending stock,
+"No query filters. Click \""Add Filter\"" to add one.",
+No suppliers found,
+No unallocated payments were available for reconciliation.,
+No valid batches available in {0} for {1}.,
+No valid items to receive.,
+No valid items to return.,
+Not Enrolled,
+Number of decimal places encoded for the price.,
+Number of digits representing the price before decimal places.,
+Numpad,
+Offer,
+Offer Applied,
+Offer Name,
+Offers &amp; Coupons,
+Offline,အော့ဖ်လိုင်း
+Only One Use Per Customer,
+Only cancelled POS Cash Movement records can be deleted.,
+Only cancelled cash movements can be deleted.,
+Only draft Quotations can be updated,
+Only draft Sales Orders can be updated,
+Only draft invoices can be deleted,
+Only draft invoices can be updated,
+Only draft invoices can be updated and submitted,
+Only submitted cash movements can be cancelled.,
+Only submitted or cancelled cash movements can be duplicated.,
+Only the shift owner can create cash movement entries.,
+Open,ဖွင့်လှစ်
+Opening,ဖွင့်ပွဲ
+Opening Amount,ဖွင့်လှစ်ငွေပမာဏ
+Opening Balance Details,Balance အသေးစိတ်ဖွင့်လှစ်ခြင်း
+Order History,
+Order only,
+Order saved as draft,
+Orders,အမိန့်
+Original invoice {0} not found,
+Out of Stock,ပစ္စည်းပြတ်
+Outgoing Stock Entry is required.,
+POS,POS
+POS Allowed Expense Account,
+XPOS Allowed Source Account,
+POS Cash Movement,
+XPOS Closing Shift,
+XPOS Closing Shift Detail,
+XPOS Closing Shift Taxes,
+XPOS Closing Shift {} against {} between selected period,
+POS Coupon,
+POS Coupon Detail,
+POS Expense,
+POS Expense is disabled for this POS Profile.,
+POS Invoice,POS ငွေတောင်းခံလွှာ
+POS Offer,
+POS Offer Detail,
+POS Offer is disabled.,
+POS Opening Shift,
+XPOS Opening Shift Detail,
+POS Opening Shift is required,
+POS Opening Shift is required to compute the overview.,
+POS Opening Shift is required.,
+POS Opening Shift must be submitted and open.,
+POS Opening Shift not found.,
+POS Opening Shift {0} is not for the same POS Profile,
+POS Opening Shift {0} is not for the same company,
+POS Payment Entry Reference,
+POS Payments,
+POS Print Format Rule,
+POS Profile,POS ကိုယ်ရေးအချက်အလက်များ profile
+POS Profile company must match active POS Opening Shift company.,
+POS Profile is not set. Please close and reopen the shift.,
+POS Profile is required,
+POS Profile is required to create purchase documents.,
+POS Profile is required.,
+POS Profile must match the active POS Opening Shift profile.,
+POS Profile must match the selected POS Opening Shift profile.,
+POS Profile {} does not belongs to company {},POS ပရိုဖိုင်း {} သည်ကုမ္ပဏီနှင့်မဆိုင်ပါ။
+"POS Profile, Customer, and Items are required",
+POS Profiles,
+POS Sales Person Filter,
+POS Shift {0} is not open,
+POS Transactions,POS အရောင်းအဝယ်များ
+POS credit redemption for Sales Invoice {0},
+POS expense recorded,
+POS profile data is missing or invalid.,
+Password,စကားဝှက်
+Pay {0},
+Payment,ငွေပေးချေမှုရမည့်
+Payment Entry,ငွေပေးချေမှုရမည့် Entry &#39;
+Payment Entry is already created or payment account is not matched,
+Payment Entry {0} has no unallocated amount remaining.,
+Payment Gateway Account not found,
+Payment Reconciliation,ငွေပေးချေမှုရမည့်ပြန်လည်ရင်ကြားစေ့ရေး
+Payment Request for {0},{0} များအတွက်ငွေပေးချေမှုရမည့်တောင်းဆိုခြင်း
+Payment amount cannot be less than or equal to 0,ငွေပေးချေမှုပမာဏသည် 0 ထက်ငယ်သို့မဟုတ်မညီနိုင်ပါ
+Payment amount must be greater than zero,
+Payment {0} is already fully allocated,
+Payments,ငွေပေးချေမှု
+Pending,လာမည့်
+Period End Date,ကာလပြီးဆုံးရက်စွဲ
+Period Start Date,ကာလ Start ကိုနေ့စွဲ
+Phone number,
+Please enter the phone number first,ကျေးဇူးပြု၍ ဖုန်းနံပါတ်ကိုအရင်ထည့်ပါ
+Please select Coupon Code Based POS Offer.,
+Please select a customer before adding items to the cart,
+Please select a customer before holding the order.,
+Please select the correct POS Offer with the same company.,
+Please select the customer.,ကျေးဇူးပြုပြီးဖောက်သည်ကိုရွေးပါ။
+Please set Default Payable Account in Company {0},
+Please set default account for Mode of Payment {0} in company {1},
+Point of Sale System,
+Points Earned,
+Points Redeemed,
+Points Value,
+"Positions are 1-indexed and counted on the full barcode. Example: 3310100010009 => prefix 331, item code 3310100, weight 1.000, check digit 9.",
+Posting Date,Post date
+Prefix,ရှေ့ဆကျတှဲ
+Prefix included in barcode,
+Prefix length,
+"Prefix length (for example, prefix 331 => length 3). Item/weight start positions still use full barcode positions.",
+Price,စျေးနှုန်း
+Price Discount Scheme ,
+Price List is required,
+Price decimals,
+Price digits,
+Price included in barcode,
+Price starting position,
+Primary Customer Offer,
+Print,ပုံနှိပ်ပါ
+Print Format,ပုံနှိပ်စီစဉ်ဖွဲ့စည်းမှုပုံစံ
+Print Labels,
+Print Last Invoice,
+Process Return,
+Process Return {0},
+Processing...,လုပ်ဆောင်နေသည်...
+Product Discount Scheme,ကုန်ပစ္စည်းလျှော့အစီအစဉ်
+Profile,
+Profiles List,
+Program,အစီအစဉ်
+Promo Type,
+Promotional,မြှင့်တင်ရေး
+Promotional Schemes,
+Purchase,ဝယ်ခြမ်း
+Purchase Order is required.,
+Purchase Order {0} does not exist.,
+Purchase Order {0} is not submitted.,
+Purchase Order {0} processing failed: {1},
+Purchase Orders,ဝယ်ယူအမိန့်
+Purchase Orders pending receipt at,
+Purchase order requires at least one item with quantity.,
+Purchase order requires at least one item.,
+Purchase orders,
+Python package 'cryptography' is required for QZ Tray signing. Please install it on the server and retry.,
+QZ Certificate Missing,
+QZ Certificate Ready,
+"QZ Tray certificate generated successfully.<br><br>Download the certificate from POS Awesome and import it into QZ Tray on each POS machine, then restart QZ Tray.",
+QZ Tray certificate not found. Ask an administrator to run Setup QZ Certificate.,
+QZ certificate already exists.,
+QZ certificate generated successfully.,
+Qty,Qty
+Qualifying Transaction / Item,
+Quantity and Amount Conditions,
+Quotation name is required,
+Rate,rate
+Reason / Notes,
+Receive,လက်ခံရရှိ
+Receive & Return,
+Receive Qty,
+Receive Stock,
+Receive stock,
+Received at {0},
+Receiving at,
+Receiving...,
+Recent Movements,
+Record Deposit,
+Record Expense,
+Record a cash deposit,
+Record a cash withdrawal,
+Redeem Points,
+Referral Code,ရည်ညွှန်းကုဒ်
+Referral Code is required,
+Referral Code {0} does not exist,
+Referral Code {0} is disabled,
+Referral Name,
+Refresh,အားဖြည့်
+Refund Amount,
+Reject Qty,
+Remaining,ကျန်ရှိနေသေးသော
+Remaining outstanding: {0} across {1} invoice(s).,
+Remarks,အမှာစကား
+"Remarks (optional, e.g. items damaged)",
+"Remarks (optional, e.g. missing or damaged items)",
+Remarks are required for cash movement in this POS Profile.,
+Remove Loyalty,
+Repeat,ပြန်ဆို
+Repeat Invoice (Ctrl+G),
+Replace Cheapest Item,
+Replace Same Item,
+Reset Password,စကားဝှက်ကို ပြောင်းရန်
+Restore Draft Invoice,
+Restore draft,
+Return,ပြန်လာ
+Return & Print,
+Return Against invoice is required for returns,
+Return Payment,
+Return Qty,
+Returns,ပြန်
+Returns are only allowed until {0},
+Review and reconcile your shift,
+"Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches","အတန်း # {0}: အဆိုပါအသုတ် {1} ရှိသော {2} အရည်အတွက်ရှိပါတယ်။ ရရှိနိုင်ပါ {3} အရည်အတွက်ဟာအခြားအသုတ်ကိုရွေးချယ်ပါသို့မဟုတ်မျိုးစုံနေသည်ဟုသူများထံမှ / ကိစ္စကိုကယ်လွှတ်ခြင်းငှါ, မျိုးစုံတန်းသို့အတန်းခွဲ ကျေးဇူးပြု."
+Row ID,
+Sales Invoice,အရောင်းပြေစာ
+Sales Invoice Reference,
+Sales Manager,အရောင်းမန်နေဂျာ
+Sales Master Manager,အရောင်းမဟာ Manager က
+Sales Order Created,
+Sales Order Created at <a href='{0}'>{1}</a>,
+Sales Order name is required,
+Sales Partner,အရောင်း Partner
+Sales Person,အရောင်းပုဂ္ဂိုလ်
+Sales Summary,အရောင်းအကျဉ်းချုပ်
+Sales User,အရောင်းအသုံးပြုသူတို့၏
+Save & Print,
+Save Only,
+Save as draft,
+Save your current order to create a draft,
+Scale Barcode Settings,
+Scan barcode...,
+Search and add items from the left panel,
+"Search by name, phone, email...",
+Search for items to add barcode labels,
+Search for or create a customer,
+Search item groups...,
+"Search items by name, code, or barcode...",
+"Search items, scan barcode...",
+Search suppliers...,
+Searching...,
+Secure login powered by Frappe Framework,
+Select Customer,ဖောက်သည်ကို Select လုပ်ပါ
+Select a draft invoice to restore to cart,
+Select a loyalty program to enroll this customer,
+Select customer first,
+Selected,
+Selected POS Opening Shift should be open.,
+Selected expense account is not allowed for this POS Profile.,
+Selected source account is not allowed for this POS Profile.,
+Send Reset Link,
+Sending...,
+Set Posting Date,ပို့စ်တင်ရက်စွဲကိုသတ်မှတ်ပါ
+Shift,
+Shift closed successfully!,
+Shipping Account,သဘောင်္တင်ခအကောင့်
+Shortage return from transit to source,
+Show Price,Show ကိုစျေး
+Sign In,
+Sign Out,
+Sign in to your account to continue,
+Signing in...,
+Small (38×25mm),
+Small remaining amounts,
+"Sorry, this coupon code cannot be used by this company",
+"Sorry, this coupon code cannot be used by this customer",
+"Sorry, this coupon code is no longer valid",စိတ်မကောင်းပါ၊ ဤကူပွန်ကုဒ်သည်တရားဝင်မဟုတ်ပါ
+"Sorry, this coupon code not exists",
+"Sorry, this coupon code's validity has expired",ဝမ်းနည်းပါတယ်၊ ဒီကူပွန်ကုဒ်သက်တမ်းကုန်သွားပြီ
+"Sorry, this coupon code's validity has not started",စိတ်မကောင်းပါ၊ ဤကူပွန်နံပါတ်သက်တမ်းမစတင်သေးပါ
+"Sorry, {0} have used this coupon before",
+Source Account,
+Source account,
+Source account must be a Cash account.,
+Source account must belong to the selected company.,
+Source account override is disabled for this POS Profile.,
+Source and target accounts are required.,
+Source and target accounts cannot be the same for cash deposit.,
+Split Payment,
+Starting position (1-indexed) of the price segment.,
+Status,အဆင့်အတန်း
+Status must be one of {0},အဆင့်အတန်း {0} တယောက်ဖြစ်ရပါမည်
+Stock Entry {0} does not exist.,
+Stock Entry {0} has already been fully received.,
+Stock Entry {0} is not a Material Transfer with in-transit.,
+Stock Entry {0} is not a valid in-transit transfer.,
+Stock Entry {0} is not submitted.,
+Stock Receiving,
+Stock UOM is required.,
+Subtotal,စုစုပေါင်း
+Successfully enrolled {0} in {1},
+Successfully unenrolled {0} from {1},
+Summary,အကျဉ်းချုပ်
+Supplier Name,ပေးသွင်းအမည်
+Supplier is required.,
+Supplier name is required.,
+Supplier {0} was not found.,
+Suppliers,ပေးသွင်းသူများ
+Sync,Sync ကို
+System Manager,system Manager က
+Target Account,
+Target account,
+Target account is required,
+Target account must belong to the selected company.,
+Target warehouse is required.,
+Tax Breakdown,
+Tax ID,အခွန် ID ကို
+Taxes,အခွန်
+Taxes & Charges,
+Taxes Breakdown,
+Tendered,
+Theme: Dark (click to switch to System),
+Theme: Light (click to switch to Dark),
+Theme: System ({0}) (click to switch to Light),
+This Referral Code {0} not exists,
+This invoice {0} cannot be deleted,
+Title,ဘှဲ့
+Total,စုစုပေါင်း
+Total Invoices,
+Total Paid,
+Total Quantity,စုစုပေါင်းအရေအတွက်
+Total Taxes,
+Total item code digits to extract. Example: item code 3310100 => digits 7.,
+Transaction,ကိစ္စ
+Try a different search or category,
+Try adjusting your filters,
+Try again,
+Type,ပုံစံ
+Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again.,
+Unable to create Journal Entry for customer credit.,
+Unable to determine cash account for change payment entry.,
+Unable to determine customer receivable account for change payment entry.,
+Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually,
+Unable to load Credit Note {0}: {1},
+Unable to load Payment Entry {0}: {1},
+Unable to resolve POS Opening Shift.,
+Unable to resolve POS cash account from POS Profile cash mode of payment.,
+Unenroll from Program,
+Unknown error,
+Used,အသုံးပြုခံ့
+User,အသုံးပြုသူကို
+User must match the selected POS Opening Shift user.,
+User {} has been disabled. Please select valid user/cashier,
+Valid From,မှဖြစ်သည်
+Valid Upto,သက်တမ်းရှိ Upto
+Validity and Usage,တရားဝင်မှုနှင့်အသုံးပြုမှု
+Walk-in Customer,
+Warehouse,ကုနျလှောငျရုံ
+Website Manager,website Manager က
+Weight,အလေးချိန်
+Weight decimals,
+Weight digits,
+Weight starting position,
+Weight value is parsed as: [weight digits].[weight decimals].,
+Welcome back,
+"When enabled, price is extracted using the price start/digits/decimals fields below.",
+Worth {0},
+Write Off,အကြွေးလျှော်ပစ်ခြင်း
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,
+X POS,
+X POS App,
+X POS Payments is not enabled for this POS Profile,
+X POS Purchase Order Flow Failed,
+You are not allowed to access this shift.,
+You are not allowed to manage this cash movement record.,
+You are trying to return more quantity for item {0} than was sold.,
+days,
+"e.g. \""Summer Holiday 2019 Offer 20\""",
+incl.,
+item,
+item(s),
+items,
+items must be a list,
+label(s),
+modified_after must be a valid ISO datetime,
+more,
+pts,
+received,
+transferred,
+unaccounted,
+unique e.g. SAVE20  To be used to get discount,ထူးခြားတဲ့ဥပမာ - SAVE20 လျှော့စျေးရရန်အသုံးပြုသည်
+will be rejected,
+will be returned to,
+{0} Coupon used are {1}. Allowed quantity is exhausted,{0} ကူပွန်သည် {1} ဖြစ်သည်။ ခွင့်ပြုထားသောပမာဏကုန်သွားသည်
+{0} is disabled for this POS Profile.,
+{0} is invalid.,
+{0} must belong to company {1}.,
+{0} payment(s) were skipped.,
+{0} {1} must be submitted before creating change payment entries.,
+{} Active,
+Default Currency,default ငွေကြေးစနစ်
+"e.g. ""Summer Holiday 2019 Offer 20""",ဥပမာ &quot;နွေရာသီအားလပ်ရက် ၂၀၁၉ ကမ်းလှမ်းချက် ၂၀&quot;
+Failed,Failed
+First Name,နာမည်
+Full Name,နာမည်အပြည့်အစုံ
+Invoice Number,ကုန်ပို့လွှာနံပါတ်
+Keyboard Shortcuts,keyboard Shortcuts
+Last Name,မျိုးနွယ်အမည်
+Middle Name,အလယ်နာမည်
+Mpesa Settings,Mpesa ချိန်ညှိချက်များ
+Posting Time,posting အချိန်
+Reload,Reload ကို
+Session Defaults,session Defaults ကို
+Success,အောင်မြင်သည်
+Till Number,နံပါတ်မမှီမှီ
+Transaction Type,ငွေသွင်းငွေထုတ်အမျိုးအစား
+View Website,view ဝက်ဘ်ဆိုက်

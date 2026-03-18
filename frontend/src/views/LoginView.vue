@@ -27,13 +27,13 @@
 							{{ __('Email or Username') }}
 						</label>
 						<div class="relative">
-							<User class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+							<User class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 							<Input
 								id="username"
 								v-model="username"
 								type="text"
 								:placeholder="__('Enter your email or username')"
-								class="pl-10"
+								class="ps-10"
 								:disabled="authStore.isLoading"
 								required
 								autocomplete="username"
@@ -46,20 +46,20 @@
 							{{ __('Password') }}
 						</label>
 						<div class="relative">
-							<Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+							<Lock class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 							<Input
 								id="password"
 								v-model="password"
 								:type="showPassword ? 'text' : 'password'"
 								:placeholder="__('Enter your password')"
-								class="pl-10 pr-10"
+								class="ps-10 pe-10"
 								:disabled="authStore.isLoading"
 								required
 								autocomplete="current-password"
 							/>
 							<button
 								type="button"
-								class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+								class="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
 								@click="showPassword = !showPassword"
 							>
 								<EyeOff v-if="showPassword" class="w-4 h-4" />

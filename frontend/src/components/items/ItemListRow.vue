@@ -33,7 +33,7 @@
 		<TooltipWrapper v-if="showStock && item.actual_qty !== undefined" :content="String(isOutOfStock ? __('Out of Stock') : item.actual_qty)">
 		<Badge :variant="stockVariant" class="shrink-0 text-[10px]">
 			<template v-if="isOutOfStock">
-				<AlertCircle class="w-3 h-3 mr-1" />
+				<AlertCircle class="w-3 h-3 me-1" />
 				{{ __("Out of Stock") }}
 			</template>
 			<template v-else>
@@ -42,7 +42,7 @@
 		</Badge>
 		</TooltipWrapper>
 
-		<div class="shrink-0 text-right">
+		<div class="shrink-0 text-end">
 			<span class="text-sm font-bold text-primary tabular-nums">
 				{{ currencySymbol }}{{ formatPrice(item.rate) }}
 			</span>

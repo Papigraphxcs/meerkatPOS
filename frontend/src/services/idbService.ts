@@ -1,14 +1,3 @@
-/**
- * X POS IndexedDB Service using Dexie
- * Centralized database layer for offline support.
- * 
- * This service provides:
- * - Local caching of items, customers, and item groups
- * - Pending invoice queue for offline operations
- * - Stock data caching per warehouse
- * - POS profile and metadata storage
- * - Automatic sync support
- */
 import Dexie, { type Table } from "dexie";
 import type { POSItem, ItemGroup, Customer } from "@/types/pos.types";
 
@@ -119,7 +108,6 @@ export interface CachedSupplier {
   email_id?: string;
 }
 
-/** Tracks local-ID ↔ server-ID mapping for synced records. */
 export interface SyncIdMap {
   local_id: string;
   server_name: string;
@@ -152,7 +140,6 @@ class XPosDB extends Dexie {
       meta: "key",
     });
 
-    // Version 2: Add sync ID mapping table for Electron offline sync
     this.version(2).stores({
       items: "item_code, item_name, item_group, barcode",
       itemGroups: "name",
@@ -550,8 +537,6 @@ export async function clearPendingData(): Promise<void> {
   });
 }
 
-// ── Sync ID Map (local_id ↔ server_name mapping) ─────────────────
-
 export async function addSyncIdMapping(entry: SyncIdMap): Promise<void> {
   await db.syncIdMap.put(sanitizeForIdb(entry));
 }
@@ -570,11 +555,6 @@ export async function getSyncIdMapByDoctype(doctype: string): Promise<SyncIdMap[
   return db.syncIdMap.where("doctype").equals(doctype).toArray();
 }
 
-/**
- * Upsert records from a sync pull batch into the appropriate store.
- * Called by the renderer-side sync IPC handler when the main process
- * sends pulled data.
- */
 export async function upsertPullBatch(
   store: string,
   records: Record<string, unknown>[],
@@ -592,7 +572,6 @@ export async function upsertPullBatch(
     if (!isIncremental) await db.suppliers.clear();
     await db.suppliers.bulkPut(safeRecords as unknown as CachedSupplier[]);
   } else if (store === "itemGroups") {
-    // Item groups are small — always full replace
     await db.itemGroups.clear();
     await db.itemGroups.bulkPut(safeRecords as unknown as ItemGroupEntry[]);
   }

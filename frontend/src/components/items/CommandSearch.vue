@@ -31,7 +31,7 @@
 					<button v-for="(item, index) in items" :key="item.item_code"
 						:data-command-index="index" @click="selectItem(item)"
 						@mouseenter="highlightedIndex = index"
-						class="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
+						class="w-full flex items-center gap-3 px-4 py-2.5 text-start transition-colors"
 						:class="index === highlightedIndex
 							? 'bg-primary/10 text-foreground'
 							: 'text-foreground hover:bg-muted'">
@@ -45,7 +45,7 @@
 							<p class="text-sm font-medium truncate">{{ item.item_name }}</p>
 							<p class="text-xs text-muted-foreground truncate">{{ item.item_code }}</p>
 						</div>
-						<div class="text-right shrink-0">
+						<div class="text-end shrink-0">
 							<p class="text-sm font-medium text-green-600">
 								{{ currencySymbol }}{{ (item.rate || 0).toFixed(2) }}
 							</p>

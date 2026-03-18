@@ -1,7 +1,3 @@
-/**
- * Pricing Engine — evaluates pricing rules from local DB and resolves item prices.
- * Ported from deskpos PricingRuleEngine.cs logic.
- */
 import {
   getItemPrice,
   getPricingRules,
@@ -10,8 +6,6 @@ import {
   getPricingRuleBrands,
 } from "@/services/dbBridge";
 import { isElectron } from "@/services/electronBridge";
-
-// ── Types ──────────────────────────────────────────────────────────
 
 export interface PricingContext {
   item_code: string;
@@ -86,14 +80,11 @@ interface PricingRule {
   is_recursive: number;
   recurse_for: number;
   apply_recursion_over: number;
-  // populated at runtime
   _matched_item_codes?: string[];
   _matched_item_groups?: string[];
   _matched_brands?: string[];
   _score?: number;
 }
-
-// ── Cache ──────────────────────────────────────────────────────────
 
 let rulesCache: PricingRule[] | null = null;
 let ruleChildrenCache: Map<string, { itemCodes: string[]; itemGroups: string[]; brands: string[] }> = new Map();
@@ -114,7 +105,6 @@ async function loadRules(company?: string): Promise<PricingRule[]> {
 
   const raw = (await getPricingRules({ company })) as PricingRule[];
 
-  // Pre-load all child tables in parallel
   const childPromises = raw.map(async (rule) => {
     if (ruleChildrenCache.has(rule.name)) return;
     const [itemCodes, itemGroups, brands] = await Promise.all([
@@ -136,8 +126,6 @@ async function loadRules(company?: string): Promise<PricingRule[]> {
   return raw;
 }
 
-// ── Resolve item price from price list ─────────────────────────────
-
 export async function resolveItemPrice(
   itemCode: string,
   priceList: string
@@ -157,8 +145,6 @@ export async function resolveItemPrice(
   };
 }
 
-// ── Main: apply pricing rules to item ──────────────────────────────
-
 export async function applyPricingRules(ctx: PricingContext): Promise<PricingResult> {
   const result: PricingResult = {
     rate: ctx.rate,
@@ -172,19 +158,11 @@ export async function applyPricingRules(ctx: PricingContext): Promise<PricingRes
   const allRules = await loadRules(ctx.company);
   const today = new Date().toISOString().slice(0, 10);
 
-  // Filter to relevant rules
   const candidates = allRules.filter((rule) => {
-    // Date validity
     if (rule.valid_from && rule.valid_from > today) return false;
     if (rule.valid_upto && rule.valid_upto < today) return false;
-
-    // Coupon filter
     if (rule.coupon_code_based && !ctx.coupon_code) return false;
-
-    // Company filter
     if (rule.company && ctx.company && rule.company !== ctx.company) return false;
-
-    // Apply-on match
     const children = ruleChildrenCache.get(rule.name);
     if (!children) return false;
 
@@ -195,18 +173,15 @@ export async function applyPricingRules(ctx: PricingContext): Promise<PricingRes
     } else if (rule.apply_on === "Brand") {
       if (!ctx.brand || !children.brands.includes(ctx.brand)) return false;
     } else if (rule.apply_on === "Transaction") {
-      // Transaction-level rules — will be applied separately
     } else {
       return false;
     }
 
-    // Qty / amount conditions
     if (rule.min_qty && ctx.qty < rule.min_qty) return false;
     if (rule.max_qty && ctx.qty > rule.max_qty) return false;
     if (rule.min_amt && ctx.qty * ctx.price_list_rate < rule.min_amt) return false;
     if (rule.max_amt && ctx.qty * ctx.price_list_rate > rule.max_amt) return false;
 
-    // Applicable-for conditions
     if (rule.applicable_for) {
       switch (rule.applicable_for) {
         case "Customer":
@@ -221,10 +196,8 @@ export async function applyPricingRules(ctx: PricingContext): Promise<PricingRes
       }
     }
 
-    // Price list filter
     if (rule.for_price_list && ctx.price_list && rule.for_price_list !== ctx.price_list) return false;
 
-    // Warehouse filter
     if (rule.warehouse && ctx.warehouse && rule.warehouse !== ctx.warehouse) return false;
 
     return true;
@@ -232,7 +205,6 @@ export async function applyPricingRules(ctx: PricingContext): Promise<PricingRes
 
   if (candidates.length === 0) return result;
 
-  // Score & sort — most specific first (mirrors deskpos priority logic)
   const scored = candidates.map((rule) => {
     let score = (rule.priority || 0) * 1000;
     if (rule.apply_on === "Item Code") score += 100;
@@ -250,7 +222,6 @@ export async function applyPricingRules(ctx: PricingContext): Promise<PricingRes
 
   scored.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
 
-  // Apply rules
   let appliedPrice = false;
 
   for (const rule of scored) {
@@ -260,19 +231,15 @@ export async function applyPricingRules(ctx: PricingContext): Promise<PricingRes
       if (!rule.is_cumulative) break;
     } else if (rule.price_or_product_discount === "Product") {
       applyProductRule(rule, ctx, result);
-      // Product rules don't stop price rules
     }
   }
 
-  // If no price rule applied, rate stays as-is
   if (!appliedPrice) {
     result.rate = ctx.rate;
   }
 
   return result;
 }
-
-// ── Price discount application (Rate / Discount % / Discount Amount) ──
 
 function applyPriceRule(rule: PricingRule, ctx: PricingContext, result: PricingResult): void {
   const discountType = rule.rate_or_discount || "Discount Percentage";
@@ -306,7 +273,6 @@ function applyPriceRule(rule: PricingRule, ctx: PricingContext, result: PricingR
     }
   }
 
-  // Margin support
   if (rule.margin_type && rule.margin_rate_or_amount) {
     result.margin_type = rule.margin_type;
     result.margin_rate_or_amount = Number(rule.margin_rate_or_amount);
@@ -317,11 +283,8 @@ function applyPriceRule(rule: PricingRule, ctx: PricingContext, result: PricingR
     }
   }
 
-  // Ensure rate doesn't go below 0
   if (result.rate < 0) result.rate = 0;
 }
-
-// ── Product discount (free items) ──────────────────────────────────
 
 function applyProductRule(rule: PricingRule, ctx: PricingContext, result: PricingResult): void {
   const freeItemCode = rule.same_item ? ctx.item_code : rule.free_item;
@@ -329,7 +292,6 @@ function applyProductRule(rule: PricingRule, ctx: PricingContext, result: Pricin
 
   let freeQty = Number(rule.free_qty) || 0;
 
-  // Recursive: buy X get Y per every Z qty
   if (rule.is_recursive && rule.recurse_for > 0 && rule.apply_recursion_over > 0) {
     const eligibleQty = ctx.qty - rule.apply_recursion_over;
     if (eligibleQty <= 0) return;
@@ -350,8 +312,6 @@ function applyProductRule(rule: PricingRule, ctx: PricingContext, result: Pricin
     pricing_rule: rule.name,
   });
 }
-
-// ── Bulk: apply to all cart items at once ──────────────────────────
 
 export interface CartPricingItem {
   item_code: string;

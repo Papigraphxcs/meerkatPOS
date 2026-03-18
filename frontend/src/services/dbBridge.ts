@@ -1,20 +1,8 @@
-/**
- * Renderer-side database bridge.
- *
- * In Electron mode → calls go through IPC to the main process → local MariaDB.
- * In browser/PWA mode → calls go through Dexie (IndexedDB).
- *
- * Import this module in stores/composables instead of importing idbService
- * or electronBridge.db directly. It hides the environment difference.
- */
-
 import { isElectron } from "./electronBridge";
 
 function getDb() {
   return window.electronAPI!.db;
 }
-
-// ── Items ─────────────────────────────────────────────────────────
 
 export async function getItems(opts?: {
   search?: string;
@@ -25,7 +13,6 @@ export async function getItems(opts?: {
   if (isElectron()) {
     return getDb().getItems(opts);
   }
-  // Fallback: load from IndexedDB (lazy import to avoid bundling Dexie in Electron)
   const { db } = await import("./idbService");
   let col = db.items.orderBy("item_name");
   if (opts?.group && opts.group !== "All Item Groups") {
@@ -78,8 +65,6 @@ export async function clearItems() {
   await db.items.clear();
 }
 
-// ── Item Groups ───────────────────────────────────────────────────
-
 export async function getItemGroups() {
   if (isElectron()) {
     return getDb().getItemGroups();
@@ -95,8 +80,6 @@ export async function upsertItemGroups(rows: Record<string, unknown>[]) {
   const { db } = await import("./idbService");
   await db.itemGroups.bulkPut(rows as never[]);
 }
-
-// ── Customers ─────────────────────────────────────────────────────
 
 export async function getCustomers(opts?: { search?: string; limit?: number }) {
   if (isElectron()) {
@@ -143,8 +126,6 @@ export async function addLocalCustomer(customer: Record<string, unknown>) {
   return { name: localId, local_id: localId };
 }
 
-// ── Suppliers ─────────────────────────────────────────────────────
-
 export async function getSuppliers(opts?: { search?: string; limit?: number }) {
   if (isElectron()) {
     return getDb().getSuppliers(opts);
@@ -170,8 +151,6 @@ export async function upsertSuppliers(rows: Record<string, unknown>[]) {
   const { db } = await import("./idbService");
   await db.suppliers.bulkPut(rows as never[]);
 }
-
-// ── Stock Cache ───────────────────────────────────────────────────
 
 export async function getStock(warehouse: string, itemCode?: string) {
   if (isElectron()) {
@@ -214,8 +193,6 @@ export async function updateStockQty(warehouse: string, itemCode: string, qty: n
   });
   return true;
 }
-
-// ── Pending Invoices ──────────────────────────────────────────────
 
 export async function addPendingInvoice(record: {
   data: unknown;
@@ -275,8 +252,6 @@ export async function countPendingInvoices() {
   return db.table("pendingInvoices").where("status").anyOf(["pending", "failed"]).count();
 }
 
-// ── Pending Purchases ─────────────────────────────────────────────
-
 export async function addPendingPurchase(record: {
   type: string;
   data: unknown;
@@ -330,8 +305,6 @@ export async function deletePendingPurchase(id: number) {
   return true;
 }
 
-// ── Sync ID Map ───────────────────────────────────────────────────
-
 export async function addSyncId(localId: string, serverName: string, doctype: string) {
   if (isElectron()) {
     return getDb().addSyncId(localId, serverName, doctype);
@@ -348,8 +321,6 @@ export async function getServerName(localId: string) {
   const mod = await import("./idbService");
   return mod.getServerName(localId);
 }
-
-// ── Sync Metadata ─────────────────────────────────────────────────
 
 export async function getSyncMeta(key: string) {
   if (isElectron()) {
@@ -368,8 +339,6 @@ export async function setSyncMeta(key: string, value: string) {
   await db.table("syncMeta").put({ key, value });
   return true;
 }
-
-// ── Settings (Electron only, browser uses localStorage) ───────────
 
 export async function getSetting(key: string): Promise<string | null> {
   if (isElectron()) {
@@ -390,7 +359,6 @@ export async function getAllSettings() {
   if (isElectron()) {
     return getDb().getAllSettings();
   }
-  // Browser fallback: scan localStorage
   const settings: { key: string; value: string; category: string }[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
@@ -404,8 +372,6 @@ export async function getAllSettings() {
   }
   return settings;
 }
-
-// ── POS Profile Cache ─────────────────────────────────────────────
 
 export async function cachePosData(name: string, data: unknown) {
   if (isElectron()) {
@@ -424,8 +390,6 @@ export async function getCachedPosData(name: string) {
   const row = await db.table("posProfileCache").get(name);
   return row ? JSON.parse(row.data) : null;
 }
-
-// ── Bulk Operations ───────────────────────────────────────────────
 
 export async function clearAllData() {
   if (isElectron()) {
@@ -446,48 +410,30 @@ export async function clearPendingData() {
   return true;
 }
 
-// ══════════════════════════════════════════════════════════════════
-// NEW MASTER DATA & TRANSACTIONAL BRIDGES (Electron-first)
-// In browser/PWA mode these return empty data since these tables
-// only exist in local MariaDB.
-// ══════════════════════════════════════════════════════════════════
-
-// ── Companies ─────────────────────────────────────────────────────
-
 export async function getCompanies() {
   if (isElectron()) return getDb().getCompanies();
   return [];
 }
-
-// ── Warehouses ────────────────────────────────────────────────────
 
 export async function getWarehouses(opts?: { company?: string; isGroup?: boolean }) {
   if (isElectron()) return getDb().getWarehouses(opts);
   return [];
 }
 
-// ── Accounts ──────────────────────────────────────────────────────
-
 export async function getAccounts(opts?: { company?: string; accountType?: string; rootType?: string }) {
   if (isElectron()) return getDb().getAccounts(opts);
   return [];
 }
-
-// ── Cost Centers ──────────────────────────────────────────────────
 
 export async function getCostCenters(company?: string) {
   if (isElectron()) return getDb().getCostCenters(company);
   return [];
 }
 
-// ── Price Lists ───────────────────────────────────────────────────
-
 export async function getPriceLists(selling?: boolean) {
   if (isElectron()) return getDb().getPriceLists(selling);
   return [];
 }
-
-// ── Modes of Payment ──────────────────────────────────────────────
 
 export async function getModesOfPayment() {
   if (isElectron()) return getDb().getModesOfPayment();
@@ -498,8 +444,6 @@ export async function getModeOfPaymentAccounts(company: string) {
   if (isElectron()) return getDb().getModeOfPaymentAccounts(company);
   return [];
 }
-
-// ── POS Profiles ──────────────────────────────────────────────────
 
 export async function getPosProfiles(company?: string) {
   if (isElectron()) return getDb().getPosProfiles(company);
@@ -516,8 +460,6 @@ export async function getPosPaymentMethods(posProfile: string) {
   return [];
 }
 
-// ── POS Users ─────────────────────────────────────────────────────
-
 export async function getPosUsers() {
   if (isElectron()) return getDb().getPosUsers();
   return [];
@@ -527,8 +469,6 @@ export async function getPosUser(email: string) {
   if (isElectron()) return getDb().getPosUser(email);
   return null;
 }
-
-// ── Item Prices ───────────────────────────────────────────────────
 
 export async function getItemPrice(itemCode: string, priceList: string) {
   if (isElectron()) return getDb().getItemPrice(itemCode, priceList);
@@ -540,14 +480,10 @@ export async function getItemPrices(opts?: { priceList?: string; selling?: boole
   return [];
 }
 
-// ── Item Barcodes ─────────────────────────────────────────────────
-
 export async function getItemByBarcode(barcode: string) {
   if (isElectron()) return getDb().getItemByBarcode(barcode);
   return null;
 }
-
-// ── Item Tax Templates ────────────────────────────────────────────
 
 export async function getItemTaxTemplates(company?: string) {
   if (isElectron()) return getDb().getItemTaxTemplates(company);
@@ -559,8 +495,6 @@ export async function getItemTaxTemplateDetails(templateName: string) {
   return [];
 }
 
-// ── Sales Tax Templates ───────────────────────────────────────────
-
 export async function getSalesTaxTemplates(company?: string) {
   if (isElectron()) return getDb().getSalesTaxTemplates(company);
   return [];
@@ -570,8 +504,6 @@ export async function getSalesTaxCharges(templateName: string) {
   if (isElectron()) return getDb().getSalesTaxCharges(templateName);
   return [];
 }
-
-// ── Pricing Rules ─────────────────────────────────────────────────
 
 export async function getPricingRules(opts?: { company?: string; itemCode?: string }) {
   if (isElectron()) return getDb().getPricingRules(opts);
@@ -593,8 +525,6 @@ export async function getPricingRuleBrands(parent: string) {
   return [];
 }
 
-// ── Bins (Stock) ──────────────────────────────────────────────────
-
 export async function getBin(itemCode: string, warehouse: string) {
   if (isElectron()) return getDb().getBin(itemCode, warehouse);
   return null;
@@ -604,8 +534,6 @@ export async function getBins(warehouse?: string) {
   if (isElectron()) return getDb().getBins(warehouse);
   return [];
 }
-
-// ── POS Opening Shifts ──────────────────────────────────────────
 
 export async function createPosOpeningShift(shift: Record<string, unknown>) {
   if (isElectron()) return getDb().createPosOpeningShift(shift);
@@ -627,8 +555,6 @@ export async function getPosOpeningShifts(opts?: { user?: string; status?: strin
   return [];
 }
 
-// ── POS Closing Entries ─────────────────────────────────────────
-
 export async function createPosClosingEntry(entry: Record<string, unknown>) {
   if (isElectron()) return getDb().createPosClosingEntry(entry);
   throw new Error("POS Closing Entries require Electron mode");
@@ -643,8 +569,6 @@ export async function getPosClosingEntryDetails(parentId: number) {
   if (isElectron()) return getDb().getPosClosingEntryDetails(parentId);
   return [];
 }
-
-// ── Sales Invoices ──────────────────────────────────────────────
 
 export async function saveSalesInvoice(invoice: Record<string, unknown>) {
   if (isElectron()) return getDb().saveSalesInvoice(invoice);
@@ -669,8 +593,6 @@ export async function getShiftSalesSummary(shiftLocalId: string) {
   return { total: 0, count: 0, qty: 0, payment_breakdown: [] };
 }
 
-// ── Expenses ────────────────────────────────────────────────────
-
 export async function createExpense(expense: Record<string, unknown>) {
   if (isElectron()) return getDb().createExpense(expense);
   throw new Error("Expenses require Electron mode");
@@ -688,8 +610,6 @@ export async function deleteExpense(id: number) {
   if (isElectron()) return getDb().deleteExpense(id);
   return true;
 }
-
-// ── Bank Drops ──────────────────────────────────────────────────
 
 export async function createBankDrop(drop: Record<string, unknown>) {
   if (isElectron()) return getDb().createBankDrop(drop);
@@ -709,8 +629,6 @@ export async function deleteBankDrop(id: number) {
   return true;
 }
 
-// ── Stock Adjustments ───────────────────────────────────────────
-
 export async function createStockAdjustment(adj: Record<string, unknown>) {
   if (isElectron()) return getDb().createStockAdjustment(adj);
   throw new Error("Stock Adjustments require Electron mode");
@@ -722,8 +640,6 @@ export async function getStockAdjustments(opts?: {
   if (isElectron()) return getDb().getStockAdjustments(opts);
   return [];
 }
-
-// ── Quotations ──────────────────────────────────────────────────
 
 export async function saveQuotation(quotation: Record<string, unknown>) {
   if (isElectron()) return getDb().saveQuotation(quotation);
@@ -738,14 +654,10 @@ export async function getQuotations(opts?: {
   return [];
 }
 
-// ── Brands ──────────────────────────────────────────────────────
-
 export async function getBrands() {
   if (isElectron()) return getDb().getBrands();
   return [];
 }
-
-// ── UOM ─────────────────────────────────────────────────────────
 
 export async function getUom() {
   if (isElectron()) return getDb().getUom();
@@ -757,8 +669,6 @@ export async function getUomConversions(itemCode: string) {
   return [];
 }
 
-// ── Generic Table Helpers ───────────────────────────────────────
-
 export async function upsertTable(table: string, rows: Record<string, unknown>[], keyField: string) {
   if (isElectron()) return getDb().upsertTable(table, rows, keyField);
   return 0;
@@ -768,10 +678,6 @@ export async function clearTable(table: string) {
   if (isElectron()) return getDb().clearTable(table);
   return true;
 }
-
-// ── idbService-compatible wrappers ──────────────────────────────
-// These match the idbService function signatures so stores can import
-// from dbBridge without logic changes.
 
 import type { POSItem, ItemGroup, Customer } from "@/types/pos.types";
 

@@ -345,7 +345,6 @@ function clearValue() {
 
 <template>
   <div :class="cn('relative', props.class)">
-    <!-- Label -->
     <label v-if="label" class="block text-sm font-medium text-foreground mb-1.5">
       {{ label }}
     </label>
@@ -357,7 +356,7 @@ function clearValue() {
           variant="outline"
           :disabled="disabled"
           :class="cn(
-            'h-9 w-full justify-start gap-2 px-3 text-left font-normal',
+            'h-9 w-full justify-start gap-2 px-3 text-start font-normal',
             !formattedDisplay && 'text-muted-foreground',
             props.class,
           )"
@@ -369,7 +368,7 @@ function clearValue() {
             v-if="clearable && formattedDisplay"
             type="button"
             tabindex="-1"
-            class="ml-auto p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            class="ms-auto p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             @click.stop="clearValue"
           >
             <X class="h-3.5 w-3.5" />
@@ -378,9 +377,7 @@ function clearValue() {
       </PopoverTrigger>
 
       <PopoverContentStyled :class="cn('p-0 w-auto', mode === 'time' ? 'w-[200px]' : 'w-[300px]')" align="start">
-        <!-- Calendar (date & datetime modes) -->
         <div v-if="mode !== 'time'" class="p-3">
-          <!-- Month/Year Nav -->
           <div class="flex items-center justify-between mb-3">
             <Button type="button" variant="ghost" size="icon" class="h-7 w-7" @click="prevMonth">
               <ChevronLeft class="h-4 w-4" />
@@ -397,7 +394,6 @@ function clearValue() {
             </Button>
           </div>
 
-          <!-- Day Headers -->
           <div class="grid grid-cols-7 mb-1">
             <div
               v-for="dh in dayHeaders"
@@ -408,7 +404,6 @@ function clearValue() {
             </div>
           </div>
 
-          <!-- Day Grid -->
           <div class="grid grid-cols-7 gap-0.5">
             <button
               v-for="(day, idx) in calendarDays"
@@ -437,7 +432,6 @@ function clearValue() {
           </div>
         </div>
 
-        <!-- Time Picker (time & datetime modes) -->
         <div
           v-if="mode !== 'date'"
           :class="cn(
@@ -447,7 +441,6 @@ function clearValue() {
           )"
         >
           <div class="flex items-center justify-center gap-1">
-            <!-- Hours -->
             <div class="flex flex-col items-center">
               <button type="button" class="text-muted-foreground hover:text-foreground p-0.5" @click="incrementHour(1)">
                 <ChevronLeft class="h-3.5 w-3.5 rotate-90" />
@@ -462,7 +455,6 @@ function clearValue() {
 
             <span class="text-lg font-mono font-bold text-muted-foreground">:</span>
 
-            <!-- Minutes -->
             <div class="flex flex-col items-center">
               <button type="button" class="text-muted-foreground hover:text-foreground p-0.5" @click="incrementMinute(1)">
                 <ChevronLeft class="h-3.5 w-3.5 rotate-90" />
@@ -477,7 +469,6 @@ function clearValue() {
 
             <span class="text-lg font-mono font-bold text-muted-foreground">:</span>
 
-            <!-- Seconds -->
             <div class="flex flex-col items-center">
               <button type="button" class="text-muted-foreground hover:text-foreground p-0.5" @click="incrementSecond(1)">
                 <ChevronLeft class="h-3.5 w-3.5 rotate-90" />
@@ -490,11 +481,10 @@ function clearValue() {
               </button>
             </div>
 
-            <!-- AM/PM toggle -->
             <button
               v-if="use12Hour"
               type="button"
-              class="ml-2 px-2 h-8 rounded bg-muted text-sm font-semibold text-foreground hover:bg-accent transition-colors"
+              class="ms-2 px-2 h-8 rounded bg-muted text-sm font-semibold text-foreground hover:bg-accent transition-colors"
               @click="toggleAmPm"
             >
               {{ amPm }}
@@ -502,7 +492,6 @@ function clearValue() {
           </div>
         </div>
 
-        <!-- Footer Actions -->
         <div class="flex items-center justify-between px-3 pb-3 pt-1 border-t border-border">
           <div class="flex items-center gap-1">
             <Button

@@ -52,7 +52,7 @@
 								{{ formatTime(inv.created_at) }}
 							</p>
 						</div>
-						<div class="text-right">
+						<div class="text-end">
 							<p class="text-sm font-bold">
 								{{ formatAmount(inv.grand_total) }}
 							</p>

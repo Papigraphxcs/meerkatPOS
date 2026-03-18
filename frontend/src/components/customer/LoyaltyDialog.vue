@@ -49,7 +49,7 @@
 
                         <div v-if="customerStore.customerLoyaltyInfo.current_tier" class="text-sm">
                             <span class="text-muted-foreground">{{ __("Current Tier") }}:</span>
-                            <Badge variant="outline" class="ml-2">
+                            <Badge variant="outline" class="ms-2">
                                 {{ customerStore.customerLoyaltyInfo.current_tier }}
                             </Badge>
                         </div>
@@ -78,7 +78,7 @@
                             <div class="space-y-2">
                                 <button v-for="program in customerStore.loyaltyPrograms" :key="program.name"
                                     @click="selectedProgram = program.name"
-                                    class="w-full p-3 rounded-xl border-2 text-left transition-all duration-150" :class="selectedProgram === program.name
+                                    class="w-full p-3 rounded-xl border-2 text-start transition-all duration-150" :class="selectedProgram === program.name
                                         ? 'border-violet-500 bg-violet-500/5'
                                         : 'border-border hover:border-violet-500/30'">
                                     <div class="flex items-center justify-between mb-1">

@@ -70,7 +70,7 @@
 
 				<template v-if="posStore.allowEditItemDiscount">
 					<button @click="showDiscountInput = !showDiscountInput"
-						class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all" :class="hasItemDiscount
+						class="ms-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all" :class="hasItemDiscount
 							? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
 							: 'bg-muted text-muted-foreground hover:bg-emerald-50 dark:hover:bg-emerald-900/20'">
 						<Percent class="w-3 h-3 inline-block" />

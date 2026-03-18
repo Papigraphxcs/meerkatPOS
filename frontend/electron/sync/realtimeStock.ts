@@ -1,16 +1,3 @@
-/**
- * Real-time stock synchronization via Socket.IO.
- *
- * Connects to the ERPNext server's Socket.IO endpoint and listens for
- * stock-related doctype events (Stock Ledger Entry, Bin updates).
- * When a stock change is detected, updates the local stock_cache table
- * and notifies the renderer so the Vue stores refresh.
- *
- * Architecture:
- *   ERPNext Server (socket.io) → Electron Main Process → local MariaDB
- *                                                       → renderer (IPC event)
- */
-
 import { BrowserWindow, session } from "electron";
 import { io, Socket } from "socket.io-client";
 import { execute, queryOne } from "../database/dbService";
@@ -30,10 +17,6 @@ function emitToRenderer(channel: string, data: unknown): void {
   }
 }
 
-/**
- * Initialize Socket.IO connection to ERPNext server.
- * Call this after the user authenticates.
- */
 export async function initRealtimeStock(url: string): Promise<void> {
   if (socket?.connected) {
     socket.disconnect();
@@ -41,7 +24,6 @@ export async function initRealtimeStock(url: string): Promise<void> {
 
   serverUrl = url;
 
-  // Get session cookies for authentication
   let cookieHeader = "";
   try {
     const cookies = await session.defaultSession.cookies.get({ url: serverUrl });
@@ -61,7 +43,6 @@ export async function initRealtimeStock(url: string): Promise<void> {
   socket.on("connect", () => {
     log.info(`Connected to ${serverUrl}`);
 
-    // Subscribe to doctype rooms for stock events
     socket!.emit("doctype_subscribe", "Bin");
     socket!.emit("doctype_subscribe", "Stock Ledger Entry");
   });
@@ -70,21 +51,18 @@ export async function initRealtimeStock(url: string): Promise<void> {
     log.info(`Disconnected: ${reason}`);
   });
 
-  // ERPNext emits "list_update" when a doctype list changes
   socket.on("list_update", async (data: { doctype: string; name?: string }) => {
     if (data.doctype === "Bin") {
       await handleBinUpdate(data.name);
     }
   });
 
-  // ERPNext emits "doc_update" for individual document changes
   socket.on("doc_update", async (data: { doctype: string; name: string }) => {
     if (data.doctype === "Bin") {
       await handleBinUpdate(data.name);
     }
   });
 
-  // Custom event: if the server emits xpos_stock_update (custom hook)
   socket.on("xpos_stock_update", async (data: {
     warehouse: string;
     item_code: string;
@@ -98,7 +76,6 @@ export async function initRealtimeStock(url: string): Promise<void> {
 async function handleBinUpdate(binName?: string): Promise<void> {
   if (!binName) return;
 
-  // Fetch the updated Bin data from server
   try {
     const response = await fetch(`${serverUrl}/api/resource/Bin/${encodeURIComponent(binName)}`, {
       headers: { Accept: "application/json" },
@@ -133,9 +110,6 @@ async function updateLocalStock(warehouse: string, itemCode: string, actualQty: 
   }
 }
 
-/**
- * Disconnect the Socket.IO connection.
- */
 export function disconnectRealtime(): void {
   if (socket) {
     socket.disconnect();
@@ -144,9 +118,6 @@ export function disconnectRealtime(): void {
   log.info("Disconnected");
 }
 
-/**
- * Check if the realtime connection is active.
- */
 export function isRealtimeConnected(): boolean {
   return socket?.connected ?? false;
 }

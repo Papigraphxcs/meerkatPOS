@@ -12,9 +12,9 @@
             <div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
                 <div v-if="!selectedInvoice">
                     <div class="relative mb-3">
-                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input v-model="searchTerm" type="text" :placeholder="__('Search by invoice number, customer...')"
-                            class="pl-9" @input="debouncedSearch" />
+                            class="ps-9" @input="debouncedSearch" />
                     </div>
 
                     <div v-if="isSearching" class="flex items-center justify-center py-8">
@@ -23,7 +23,7 @@
 
                     <div v-else-if="invoices.length > 0" class="space-y-2 max-h-60 overflow-y-auto xpos-scrollbar">
                         <button v-for="inv in invoices" :key="inv.name" @click="selectInvoice(inv.name)"
-                            class="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary/40 transition-all text-left">
+                            class="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary/40 transition-all text-start">
                             <div>
                                 <span class="font-semibold text-foreground text-sm">{{ inv.name }}</span>
                                 <p class="text-xs text-muted-foreground">{{ inv.customer_name }} &bull; {{
@@ -57,10 +57,10 @@
                         <table class="w-full text-sm">
                             <thead class="bg-muted">
                                 <tr>
-                                    <th class="text-left px-3 py-2 text-muted-foreground font-medium">{{ __("Item") }}</th>
+                                    <th class="text-start px-3 py-2 text-muted-foreground font-medium">{{ __("Item") }}</th>
                                     <th class="text-center px-3 py-2 text-muted-foreground font-medium">{{ __("Sold") }}</th>
                                     <th class="text-center px-3 py-2 text-muted-foreground font-medium">{{ __("Return Qty") }}</th>
-                                    <th class="text-right px-3 py-2 text-muted-foreground font-medium">{{ __("Amount") }}</th>
+                                    <th class="text-end px-3 py-2 text-muted-foreground font-medium">{{ __("Amount") }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -74,7 +74,7 @@
                                         <NumberInput v-model="item.return_qty" :min="0" :max="item.max_qty"
                                             :precision="0" class="w-20 text-center text-sm mx-auto" />
                                     </td>
-                                    <td class="px-3 py-2 text-right font-medium text-foreground">
+                                    <td class="px-3 py-2 text-end font-medium text-foreground">
                                         {{ formatPrice(item.rate * (item.return_qty || 0)) }}
                                     </td>
                                 </tr>

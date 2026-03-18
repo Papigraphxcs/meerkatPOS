@@ -1,23 +1,3 @@
-/**
- * Hub Local API Server
- *
- * Lightweight HTTP server exposed on the LAN so till clients can:
- *   - Pull master data (items, customers, suppliers, item groups, stock)
- *   - Push pending invoices / purchase orders
- *   - Query sync state
- *
- * Runs inside the Electron main process on the hub machine.
- * Uses Node's built-in http module — no Express dependency.
- *
- * Routes:
- *   GET  /api/pull/:table?since=<ISO>&limit=<N>&offset=<N>
- *   GET  /api/stock/:warehouse
- *   POST /api/push/invoice     { data, local_id, till_id }
- *   POST /api/push/purchase    { data, local_id, till_id, type }
- *   GET  /api/sync-state
- *   GET  /api/health
- */
-
 import http from "http";
 import { query, execute, upsertBatch, getMeta, setMeta } from "../database/dbService";
 import { DEFAULT_HUB_PORT } from "./nodeConfig";
@@ -28,8 +8,6 @@ const log = createLogger("HubAPI");
 
 let server: http.Server | null = null;
 let hubSecret: string | null = null;
-
-// ── Auth helpers ──────────────────────────────────────────────────
 
 async function getOrCreateHubSecret(): Promise<string> {
   if (hubSecret) return hubSecret;
@@ -45,7 +23,7 @@ async function getOrCreateHubSecret(): Promise<string> {
 }
 
 function isAuthorized(req: http.IncomingMessage): boolean {
-  if (!hubSecret) return true; // Not yet initialized — allow health check
+  if (!hubSecret) return true;
   const auth = req.headers["authorization"] || "";
   if (auth.startsWith("Bearer ")) {
     return crypto.timingSafeEqual(
@@ -55,8 +33,6 @@ function isAuthorized(req: http.IncomingMessage): boolean {
   }
   return false;
 }
-
-// ── Route helpers ─────────────────────────────────────────────────
 
 function json(res: http.ServerResponse, data: unknown, status = 200): void {
   res.writeHead(status, {
@@ -89,9 +65,7 @@ function readBody(req: http.IncomingMessage): Promise<string> {
   });
 }
 
-// Allowed pull tables (whitelist to prevent arbitrary table reads)
 const PULL_TABLES: Record<string, { primaryKey: string; modifiedCol?: string }> = {
-  // Lookup tables
   companies: { primaryKey: "name", modifiedCol: "modified" },
   countries: { primaryKey: "name", modifiedCol: "modified" },
   currencies: { primaryKey: "name", modifiedCol: "modified" },
@@ -99,7 +73,6 @@ const PULL_TABLES: Record<string, { primaryKey: string; modifiedCol?: string }> 
   brands: { primaryKey: "name", modifiedCol: "modified" },
   industries: { primaryKey: "name", modifiedCol: "modified" },
   modes_of_payment: { primaryKey: "name", modifiedCol: "modified" },
-  // Company-based master data
   cost_centers: { primaryKey: "name", modifiedCol: "modified" },
   warehouses: { primaryKey: "name", modifiedCol: "modified" },
   accounts: { primaryKey: "name", modifiedCol: "modified" },
@@ -107,7 +80,6 @@ const PULL_TABLES: Record<string, { primaryKey: string; modifiedCol?: string }> 
   mode_of_payment_accounts: { primaryKey: "name", modifiedCol: "modified" },
   pos_profiles: { primaryKey: "name", modifiedCol: "modified" },
   pos_payment_methods: { primaryKey: "name", modifiedCol: "modified" },
-  // Items & related
   items: { primaryKey: "item_code", modifiedCol: "modified" },
   item_groups: { primaryKey: "name", modifiedCol: "modified" },
   item_barcodes: { primaryKey: "name", modifiedCol: "modified" },
@@ -116,30 +88,23 @@ const PULL_TABLES: Record<string, { primaryKey: string; modifiedCol?: string }> 
   item_taxes: { primaryKey: "name", modifiedCol: "modified" },
   item_vendors: { primaryKey: "name", modifiedCol: "modified" },
   item_reorder_levels: { primaryKey: "name", modifiedCol: "modified" },
-  // Tax templates
   item_tax_templates: { primaryKey: "name", modifiedCol: "modified" },
   item_tax_template_details: { primaryKey: "name", modifiedCol: "modified" },
   sales_taxes_templates: { primaryKey: "name", modifiedCol: "modified" },
   sales_taxes_charges: { primaryKey: "name", modifiedCol: "modified" },
-  // Pricing rules
   pricing_rules: { primaryKey: "name", modifiedCol: "modified" },
   pricing_rule_item_codes: { primaryKey: "name", modifiedCol: "modified" },
   pricing_rule_item_groups: { primaryKey: "name", modifiedCol: "modified" },
   pricing_rule_brands: { primaryKey: "name", modifiedCol: "modified" },
-  // Parties
   customers: { primaryKey: "name", modifiedCol: "modified" },
   suppliers: { primaryKey: "name", modifiedCol: "modified" },
-  // Stock
   bins: { primaryKey: "name", modifiedCol: "modified" },
-  // POS users (offline auth)
   pos_users: { primaryKey: "name", modifiedCol: "modified" },
-  // Cache tables
+  pos_users: { primaryKey: "name", modifiedCol: "modified" },
   pos_profile_cache: { primaryKey: "name" },
   item_tax_cache: { primaryKey: "cache_key" },
   stock_cache: { primaryKey: "cache_key" },
 };
-
-// ── Request Router ────────────────────────────────────────────────
 
 async function handleRequest(
   req: http.IncomingMessage,
@@ -149,7 +114,6 @@ async function handleRequest(
   const path = url.pathname;
   const method = req.method?.toUpperCase();
 
-  // CORS preflight
   if (method === "OPTIONS") {
     res.writeHead(204, {
       "Access-Control-Allow-Origin": "*",
@@ -161,19 +125,16 @@ async function handleRequest(
   }
 
   try {
-    // GET /api/health (public — used for discovery)
     if (method === "GET" && path === "/api/health") {
       json(res, { status: "ok", role: "hub", timestamp: new Date().toISOString() });
       return;
     }
 
-    // All other routes require authorization
     if (!isAuthorized(req)) {
       error(res, "Unauthorized", 401);
       return;
     }
 
-    // GET /api/sync-state
     if (method === "GET" && path === "/api/sync-state") {
       const rows = await query<{ key: string; value: string }>(
         "SELECT `key`, `value` FROM `sync_meta`"
@@ -184,7 +145,6 @@ async function handleRequest(
       return;
     }
 
-    // GET /api/pull/:table
     const pullMatch = path.match(/^\/api\/pull\/([a-z_]+)$/);
     if (method === "GET" && pullMatch) {
       const table = pullMatch[1];
@@ -218,7 +178,6 @@ async function handleRequest(
       return;
     }
 
-    // GET /api/stock/:warehouse
     const stockMatch = path.match(/^\/api\/stock\/(.+)$/);
     if (method === "GET" && stockMatch) {
       const warehouse = decodeURIComponent(stockMatch[1]);
@@ -230,7 +189,6 @@ async function handleRequest(
       return;
     }
 
-    // GET /api/deletions?since=<ISO>
     if (method === "GET" && path === "/api/deletions") {
       const since = url.searchParams.get("since");
       let sql = "SELECT * FROM `deletion_log`";
@@ -245,7 +203,6 @@ async function handleRequest(
       return;
     }
 
-    // POST /api/push/invoice
     if (method === "POST" && path === "/api/push/invoice") {
       const body = JSON.parse(await readBody(req));
       const localId = body.local_id || crypto.randomUUID();
@@ -267,7 +224,6 @@ async function handleRequest(
       return;
     }
 
-    // POST /api/push/purchase
     if (method === "POST" && path === "/api/push/purchase") {
       const body = JSON.parse(await readBody(req));
       const localId = body.local_id || crypto.randomUUID();
@@ -290,7 +246,6 @@ async function handleRequest(
       return;
     }
 
-    // POST /api/push/expense
     if (method === "POST" && path === "/api/push/expense") {
       const body = JSON.parse(await readBody(req));
       const localId = body.local_id || crypto.randomUUID();
@@ -315,7 +270,6 @@ async function handleRequest(
       return;
     }
 
-    // POST /api/push/bank-drop
     if (method === "POST" && path === "/api/push/bank-drop") {
       const body = JSON.parse(await readBody(req));
       const localId = body.local_id || crypto.randomUUID();
@@ -339,7 +293,6 @@ async function handleRequest(
       return;
     }
 
-    // POST /api/push/stock-adjustment
     if (method === "POST" && path === "/api/push/stock-adjustment") {
       const body = JSON.parse(await readBody(req));
       const localId = body.local_id || crypto.randomUUID();
@@ -361,7 +314,6 @@ async function handleRequest(
       return;
     }
 
-    // Not found
     error(res, "Not found", 404);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Internal error";
@@ -370,12 +322,6 @@ async function handleRequest(
   }
 }
 
-// ── Public API ────────────────────────────────────────────────────
-
-/**
- * Start the hub API server on the given port.
- * Call this only when the node role is "hub".
- */
 export function startHubServer(port = DEFAULT_HUB_PORT): Promise<void> {
   return new Promise(async (resolve, reject) => {
     if (server) {
@@ -383,7 +329,6 @@ export function startHubServer(port = DEFAULT_HUB_PORT): Promise<void> {
       return;
     }
 
-    // Initialize the shared secret for till auth
     await getOrCreateHubSecret();
 
     server = http.createServer(handleRequest);
@@ -418,9 +363,6 @@ export function isHubRunning(): boolean {
   return server !== null && server.listening;
 }
 
-/**
- * Get the hub API secret for sharing with till clients during setup.
- */
 export async function getHubApiSecret(): Promise<string> {
   return getOrCreateHubSecret();
 }

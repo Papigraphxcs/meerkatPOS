@@ -4,12 +4,11 @@
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-xl font-bold text-foreground">{{ __("Expenses") }}</h1>
         <Button size="sm" @click="showForm = true" :disabled="!canAddExpense">
-          <Plus class="w-4 h-4 mr-1" />
+          <Plus class="w-4 h-4 me-1" />
           {{ __("New Expense") }}
         </Button>
       </div>
 
-      <!-- Filters -->
       <div class="flex items-center gap-3">
         <input
           type="date"
@@ -28,7 +27,6 @@
       </div>
     </div>
 
-    <!-- List -->
     <div class="flex-1 overflow-y-auto px-4 xpos-scrollbar">
       <div v-if="isLoading" class="grid gap-3">
         <div v-for="i in 4" :key="i" class="skeleton h-16 w-full rounded-xl"></div>
@@ -56,7 +54,7 @@
                 <span v-if="exp.description" class="truncate max-w-[200px]">{{ exp.description }}</span>
               </div>
             </div>
-            <div class="text-right">
+            <div class="text-end">
               <span class="font-bold text-foreground">{{ formatCurrency(exp.amount) }}</span>
             </div>
             <Button
@@ -64,7 +62,7 @@
               variant="ghost"
               size="icon"
               class="text-destructive h-8 w-8"
-              @click="handleDelete(exp.id)"
+              @click="handleDelete(exp.id as number)"
             >
               <Trash2 class="w-4 h-4" />
             </Button>
@@ -73,7 +71,6 @@
       </div>
     </div>
 
-    <!-- New Expense Dialog -->
     <Dialog :open="showForm" @update:open="showForm = $event">
       <DialogContent class="sm:max-w-md">
         <DialogHeader>
@@ -113,7 +110,7 @@
           </div>
           <Button class="w-full" :disabled="!form.expense_type || !form.amount || isSaving" @click="handleSave">
             <template v-if="isSaving">
-              <Loader2 class="w-4 h-4 animate-spin mr-2" /> {{ __("Saving...") }}
+              <Loader2 class="w-4 h-4 animate-spin me-2" /> {{ __("Saving...") }}
             </template>
             <template v-else>{{ __("Save Expense") }}</template>
           </Button>

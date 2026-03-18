@@ -1,0 +1,3315 @@
+# pt_BR translations for X POS.
+# Copyright (C) 2026 Ali Raza
+# This file is distributed under the same license as the X POS project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: X POS VERSION\n"
+"Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
+"POT-Creation-Date: 2026-03-06 14:29+0428\n"
+"PO-Revision-Date: 2026-03-18 18:32\n"
+"Last-Translator: ar.frappe.dev@gmail.com\n"
+"Language: pt_BR\n"
+"Language-Team: ar.frappe.dev@gmail.com\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.13.1\n"
+
+
+#. Description of the 'Item code starting position' (Int) field in DocType
+#. 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"1-indexed start position of item code in the full barcode. Example: for item code 3310100 in 3310100010009, start is 1."
+msgstr ""
+
+#. Description of the 'Weight starting position' (Int) field in DocType 'Scale
+#. Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"1-indexed start position of weight segment. Example: in 3310100010009, weight starts at position 8."
+msgstr ""
+
+#. Header text in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "<span class=\"h4\">X POS</span>"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:342
+msgid "Accept Qty"
+msgstr ""
+
+#. Label of a Link field in DocType 'XPOS Allowed Expense Account'
+#. Label of a Link field in DocType 'XPOS Allowed Source Account'
+#: xpos/x_pos/doctype/pos_allowed_expense_account/pos_allowed_expense_account.json
+#: xpos/x_pos/doctype/pos_allowed_source_account/pos_allowed_source_account.json
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:95
+msgid "Account"
+msgstr "Conta"
+
+#. Label of a Link field in DocType 'XPOS Closing Shift Taxes'
+#: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
+msgid "Account Head"
+msgstr "Conta"
+
+#. Name of a role
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Accounts Manager"
+msgstr "Gerente de Contas"
+
+#. Name of a role
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Accounts User"
+msgstr "Usuário de Contas"
+
+#: frontend/src/components/orders/ListFilters.vue:73
+msgid "Add Filter"
+msgstr "Adicionar Filtro"
+
+#: frontend/src/components/purchase/SupplierSelector.vue:103
+msgid "Add New Supplier"
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:146
+msgid "Add a new supplier to the system"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:248
+msgid "Add items to pay"
+msgstr ""
+
+#: frontend/src/components/items/ItemDetailDialog.vue:94
+msgid "Add to Cart"
+msgstr "Adicionar Ao Carrinho"
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.js:40
+msgid "Add/Edit Coupon Conditions"
+msgstr "Adicionar / Editar Condições do Cupom"
+
+#: frontend/src/components/cart/CartSummary.vue:47
+msgid "Additional Discount"
+msgstr "Desconto Adicional"
+
+#. Name of a role
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Administrator"
+msgstr "Administrador"
+
+#. Label of a Data field in DocType 'POS Cash Movement'
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Against Name"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:349
+#: frontend/src/components/purchase/StockReceiving.vue:362
+#: frontend/src/components/purchase/StockReceiving.vue:445
+#: frontend/src/components/purchase/StockReceiving.vue:458
+msgid "All"
+msgstr "Todos"
+
+#: frontend/src/views/PosView.vue:36 frontend/src/views/PosView.vue:104
+msgid "All Groups"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:523
+msgid "All orders have been received"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:443
+msgid "Allocated {0} across {1} payment(s)."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:242
+msgid "Allocation amount for payment {0} exceeds outstanding invoices"
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Cash Movement'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
+#. Label of a Link field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Amended From"
+msgstr "Alterado De"
+
+#. Label of a Currency field in DocType 'POS Cash Movement'
+#. Label of a Currency field in DocType 'XPOS Closing Shift Taxes'
+#. Label of a Currency field in DocType 'POS Payment Entry Reference'
+#. Label of a Currency field in DocType 'Sales Invoice Reference'
+#: frontend/src/components/shift/CashMovementDialog.vue:60
+#: frontend/src/views/OrdersView.vue:154
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:59
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:97
+#: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
+#: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
+#: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
+msgid "Amount"
+msgstr "Montante"
+
+#: frontend/src/components/payment/PaymentDialog.vue:38
+msgid "Amount Due"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:50
+msgid "Amount exceeds POS Profile cash movement max amount."
+msgstr ""
+
+#: xpos/api/cash_movements.py:87 xpos/api/cash_movements.py:169
+msgid "Amount must be greater than zero"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/posting.py:18
+#: xpos/x_pos/api/cash_movement/validation.py:46
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:55
+msgid "Amount must be greater than zero."
+msgstr ""
+
+#. Label of a Check field in DocType 'POS Coupon Detail'
+#: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
+msgid "Applied"
+msgstr "Aplicado"
+
+#: frontend/src/components/cart/CartSummary.vue:177
+#: frontend/src/components/orders/ListFilters.vue:128
+msgid "Apply"
+msgstr "Aplicar"
+
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Apply For"
+msgstr ""
+
+#. Label of a Section Break field in DocType 'Delivery Charges'
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+msgid "Apply For POS Profiles"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Offer Detail'
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Apply On"
+msgstr "Aplicar Em"
+
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Apply Rule On Brand"
+msgstr "Aplique a Regra na Marca"
+
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Apply Rule On Item Code"
+msgstr "Aplicar Regra no Código do Item"
+
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Apply Rule On Item Group"
+msgstr "Aplicar Regra no Grupo de Itens"
+
+#. Label of a Select field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Apply Type"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:186
+msgid "Are you sure you want to delete this draft?"
+msgstr ""
+
+#: xpos/api/invoices.py:32
+msgid "At least one item is required"
+msgstr ""
+
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Auto Apply"
+msgstr ""
+
+#: frontend/src/views/PurchaseView.vue:173
+msgid "Auto-receive"
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:76
+msgid "Available Programs"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:154
+msgid ""
+"Back Office Cash Account is fixed by POS Profile and cannot be overridden."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:161
+msgid "Back Office Cash Account is required for cash deposit."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:164
+msgid "Back Office Cash Account must be a Cash account."
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:56
+#: frontend/src/views/ResetPasswordView.vue:113
+msgid "Back to Sign In"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:132
+msgid "Barcode"
+msgstr "Código de Barras"
+
+#: frontend/src/views/BarcodePrintView.vue:6
+msgid "Barcode Printer"
+msgstr ""
+
+#. Label of a Section Break field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Barcode Structure"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:38
+msgid "Barcode Type"
+msgstr "Tipo de Código de Barras"
+
+#: frontend/src/views/PosView.vue:181
+msgid "Barcode lookup failed"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:290
+msgid "Barcode {0} already exists."
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:38
+msgid "Barcodes"
+msgstr "Códigos de Barra"
+
+#. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
+#. 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Brand"
+msgstr "Marca"
+
+#. Label of a Link field in DocType 'POS Coupon'
+#. Label of a Link field in DocType 'Referral Code'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Campaign"
+msgstr "Campanha"
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:101
+#: frontend/src/components/payment/PaymentDialog.vue:233
+#: frontend/src/components/payment/PaymentDialog.vue:236
+#: frontend/src/components/purchase/StockReceiving.vue:379
+#: frontend/src/components/purchase/StockReceiving.vue:484
+#: frontend/src/components/purchase/SupplierSelector.vue:189
+#: frontend/src/components/shift/CashMovementDialog.vue:98
+#: frontend/src/components/shift/ClosingDialog.vue:125
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Cancelled"
+msgstr "Cancelado"
+
+#: xpos/x_pos/api/cash_movement/permissions.py:24
+msgid "Cancelling submitted cash movements is disabled for this POS Profile."
+msgstr ""
+
+#: frontend/src/views/PosView.vue:255
+msgid "Cannot add item to cart"
+msgstr ""
+
+#: frontend/src/components/cart/Cart.vue:22
+msgid "Cart"
+msgstr "Carrinho"
+
+#: frontend/src/components/cart/Cart.vue:83
+msgid "Cart is empty"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:53
+#: frontend/src/components/shift/CashMovementDialog.vue:14
+msgid "Cash Deposit"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/permissions.py:19
+msgid "Cash Deposit is disabled for this POS Profile."
+msgstr ""
+
+#. Label of a Card Break in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Cash Movement"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/permissions.py:11
+msgid "Cash Movement is disabled for this POS Profile."
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:251
+msgid "Cash deposit recorded"
+msgstr ""
+
+#. Description of a Card Break in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Cash flow tracking"
+msgstr ""
+
+#: xpos/api/cash_movements.py:279
+msgid "Cash movement is already cancelled"
+msgstr ""
+
+#: xpos/api/cash_movements.py:276
+msgid "Cash movement {0} not found"
+msgstr ""
+
+#. Label of a Link field in DocType 'XPOS Closing Shift'
+#. Label of a Link field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Cashier"
+msgstr "Caixa"
+
+#: frontend/src/components/payment/PaymentDialog.vue:191
+msgid "Change"
+msgstr "Alteração"
+
+#: frontend/src/views/OrdersView.vue:240
+msgid "Change Given"
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:18
+msgid "Check your email for reset instructions"
+msgstr ""
+
+#: frontend/src/components/orders/ListFilters.vue:125
+#: frontend/src/views/BarcodePrintView.vue:14
+msgid "Clear All"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:124
+msgid "Clear cart"
+msgstr ""
+
+#: frontend/src/components/cart/Cart.vue:84
+msgid "Click on items to add them here"
+msgstr ""
+
+#: frontend/src/components/cart/Cart.vue:64
+msgid "Click to change customer"
+msgstr ""
+
+#: frontend/src/components/cart/Cart.vue:68
+msgid "Click to select customer"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Cash Movement'
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Client Request ID"
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:130
+#: frontend/src/views/OrdersView.vue:286
+msgid "Close"
+msgstr "Fechar"
+
+#: frontend/src/components/Navbar.vue:132
+#: frontend/src/components/Navbar.vue:134
+#: frontend/src/components/shift/ClosingDialog.vue:5
+#: frontend/src/components/shift/ClosingDialog.vue:131
+msgid "Close Shift"
+msgstr ""
+
+#. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Closed"
+msgstr "Fechado"
+
+#: frontend/src/components/shift/ClosingDialog.vue:89
+msgid "Closing"
+msgstr ""
+
+#. Label of a Currency field in DocType 'XPOS Closing Shift Detail'
+#: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
+msgid "Closing Amount"
+msgstr "Valor de Fechamento"
+
+#: frontend/src/components/shift/ClosingDialog.vue:129
+msgid "Closing..."
+msgstr ""
+
+#. Label of a Link field in DocType 'Delivery Charges'
+#. Label of a Link field in DocType 'POS Cash Movement'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
+#. Label of a Link field in DocType 'POS Coupon'
+#. Label of a Link field in DocType 'POS Offer'
+#. Label of a Link field in DocType 'POS Opening Shift'
+#. Label of a Link field in DocType 'Referral Code'
+#: frontend/src/components/purchase/SupplierSelector.vue:161
+#: frontend/src/views/PurchaseView.vue:183
+#: xpos/x_pos/api/payment_processing/data.py:68
+#: xpos/x_pos/api/payment_processing/data.py:168
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Company"
+msgstr "Empresa"
+
+#: xpos/api/taxes.py:30 xpos/x_pos/api/payment_processing/processor.py:29
+#: xpos/x_pos/api/payment_processing/reconciliation.py:25
+#: xpos/x_pos/api/pricing_rules.py:181
+msgid "Company is required"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:448
+msgid "Company is required."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:72
+msgid "Company must match the selected POS Opening Shift company."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:60
+msgid "Company must match the selected POS Profile company."
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:122
+msgid "Contact administrator to set up loyalty programs"
+msgstr ""
+
+#: xpos/x_pos/api/pricing_rules.py:396
+msgid "Context is required"
+msgstr ""
+
+#. Label of a Link field in DocType 'Delivery Charges'
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+msgid "Cost Center"
+msgstr "Centro de Custos"
+
+#: xpos/x_pos/api/payments.py:223
+msgid "Cost Center is not set in pos profile {0}"
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Coupon Detail'
+#. Label of a Link field in DocType 'POS Offer Detail'
+#: frontend/src/components/cart/Cart.vue:119
+#: frontend/src/components/cart/CartSummary.vue:115
+#: frontend/src/views/OrdersView.vue:132
+#: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Coupon"
+msgstr ""
+
+#. Label of a Check field in DocType 'POS Offer Detail'
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Coupon Based"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Coupon'
+#. Label of a Data field in DocType 'POS Coupon Detail'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
+msgid "Coupon Code"
+msgstr "Código do Cupom"
+
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Coupon Code Based"
+msgstr "Baseado Em Código de Cupom"
+
+#. Label of a Text Editor field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Coupon Description"
+msgstr "Descrição do Cupom"
+
+#. Label of a Data field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Coupon Name"
+msgstr "Nome do Cupom"
+
+#. Label of a Select field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Coupon Type"
+msgstr "Tipo de Cupom"
+
+#: xpos/api/offers.py:105
+msgid "Coupon has expired"
+msgstr ""
+
+#: xpos/api/offers.py:107
+msgid "Coupon is not valid for this customer"
+msgstr ""
+
+#: xpos/api/offers.py:103
+msgid "Coupon is not yet valid"
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:144
+msgid "Create New Supplier"
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:192
+msgid "Create Supplier"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:268
+msgid "Create items"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:206
+msgid "Create suppliers"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:124
+msgid "Created By"
+msgstr "Criado por"
+
+#: frontend/src/components/purchase/SupplierSelector.vue:192
+msgid "Creating..."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/data.py:269
+#: xpos/x_pos/api/payment_processing/data.py:403
+msgid "Credit Note"
+msgstr "Nota de Crédito"
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:116
+msgid "Credit Note {0} has no remaining balance to allocate."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:127
+msgid "Credit note {0} is already fully allocated"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:210
+msgid "Credit note {0} still has an unapplied balance of {1}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/data.py:69
+#: xpos/x_pos/api/payment_processing/data.py:169
+msgid "Currency"
+msgstr "Moeda"
+
+#: xpos/x_pos/api/payment_processing/creation.py:41
+msgid ""
+"Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:31
+msgid "Currency is required"
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Coupon'
+#. Label of a Link field in DocType 'POS Coupon Detail'
+#. Label of a Link field in DocType 'POS Payment Entry Reference'
+#. Label of a Link field in DocType 'Referral Code'
+#. Label of a Link field in DocType 'Sales Invoice Reference'
+#: frontend/src/views/OrdersView.vue:105
+#: xpos/x_pos/api/payment_processing/data.py:67
+#: xpos/x_pos/api/payment_processing/data.py:167
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
+#: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+#: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
+msgid "Customer"
+msgstr "Cliente"
+
+#. Label of a Link field in DocType 'POS Print Format Rule'
+#: xpos/x_pos/doctype/pos_print_format_rule/pos_print_format_rule.json
+msgid "Customer Group"
+msgstr "Grupo de Clientes"
+
+#. Label of a Data field in DocType 'POS Coupon'
+#. Label of a Data field in DocType 'Referral Code'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Customer Name"
+msgstr "Nome do Cliente"
+
+#: xpos/x_pos/api/customers.py:314
+msgid "Customer already exists"
+msgstr ""
+
+#: xpos/api/customers.py:569
+msgid "Customer is already enrolled in {0}"
+msgstr ""
+
+#: xpos/api/customers.py:573
+msgid ""
+"Customer is already enrolled in {0}. Please unenroll from the current program first."
+msgstr ""
+
+#: xpos/api/customers.py:619
+msgid "Customer is not enrolled in any loyalty program"
+msgstr ""
+
+#: xpos/api/customers.py:554 xpos/api/customers.py:611 xpos/api/invoices.py:30
+#: xpos/x_pos/api/payment_processing/processor.py:27
+#: xpos/x_pos/api/payment_processing/reconciliation.py:23
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:68
+msgid "Customer is required"
+msgstr "O Cliente é obrigatório"
+
+#: xpos/api/customers.py:366
+msgid "Customer is required to create an address"
+msgstr ""
+
+#: frontend/src/components/cart/Cart.vue:64
+msgid "Customer locked for return"
+msgstr ""
+
+#: xpos/api/invoices.py:1268
+msgid ""
+"Customer mismatch: Return must be for the same customer ({0}) as the original invoice"
+msgstr ""
+
+#: xpos/api/customers.py:206
+msgid "Customer name is required"
+msgstr ""
+
+#: xpos/api/customers.py:559 xpos/api/customers.py:614
+msgid "Customer {0} not found"
+msgstr ""
+
+#: xpos/api/payments.py:180
+msgid "Customer, Company, Amount, and Mode of Payment are required"
+msgstr ""
+
+#. Label of a Date field in DocType 'POS Payment Entry Reference'
+#. Label of a Date field in DocType 'Sales Invoice Reference'
+#: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
+#: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
+msgid "Date"
+msgstr "Data"
+
+#: frontend/src/views/OrdersView.vue:109
+msgid "Date & Time"
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Default Loyalty Program"
+msgstr ""
+
+#. Label of a Currency field in DocType 'Delivery Charges'
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+msgid "Default Rate"
+msgstr ""
+
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.py:31
+msgid "Default Rate is required"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:80
+msgid "Delete draft"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/permissions.py:29
+msgid "Deleting cancelled cash movements is disabled for this POS Profile."
+msgstr ""
+
+#. Name of a DocType
+#. Label of a Card Break in the X POS Workspace
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Delivery Charges"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
+msgid "Delivery Charges POS Profile"
+msgstr ""
+
+#. Option for the 'Movement Type' (Select) field in DocType 'POS Cash Movement'
+#: frontend/src/components/Navbar.vue:55
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Deposit"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:46
+msgid "Deposit To"
+msgstr ""
+
+#. Label of a Small Text field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Description"
+msgstr "Descrição"
+
+#. Label of a Section Break field in DocType 'XPOS Closing Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "Details"
+msgstr "Detalhes"
+
+#. Label of a Currency field in DocType 'XPOS Closing Shift Detail'
+#: frontend/src/components/shift/ClosingDialog.vue:92
+#: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
+msgid "Difference"
+msgstr "Diferença"
+
+#. Description of the 'Weight decimals' (Int) field in DocType 'Scale Barcode
+#. Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Digits after decimal. Example: 1.000 => decimals 3."
+msgstr ""
+
+#. Description of the 'Weight digits' (Int) field in DocType 'Scale Barcode
+#. Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"Digits before decimal. Example: for 1.000, use 1 (or 2 if your scale encodes 01.000)."
+msgstr ""
+
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Disable"
+msgstr "Desativar"
+
+#. Label of a Check field in DocType 'Delivery Charges'
+#. Label of a Check field in DocType 'Referral Code'
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Disabled"
+msgstr "Desativado"
+
+#: frontend/src/components/cart/CartSummary.vue:101
+#: frontend/src/views/OrdersView.vue:164 frontend/src/views/OrdersView.vue:196
+msgid "Discount"
+msgstr "Desconto"
+
+#: frontend/src/components/cart/CartSummary.vue:155
+msgid "Discount %"
+msgstr ""
+
+#. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Discount Amount"
+msgstr "Valor do Desconto"
+
+#. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Discount Percentage"
+msgstr "Percentagem de Desconto"
+
+#. Label of a Select field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Discount Type"
+msgstr "Tipo de Desconto"
+
+#: frontend/src/components/cart/CartSummary.vue:155
+msgid "Discount amount"
+msgstr ""
+
+#. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:49
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Draft"
+msgstr "Rascunho"
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:194
+msgid "Draft invoice deleted"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:174
+msgid "Draft invoice restored to cart"
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:182
+msgid "Email"
+msgstr "Email"
+
+#: frontend/src/views/ResetPasswordView.vue:74
+msgid "Email Address"
+msgstr "Endereço de Email"
+
+#. Label of a Data field in DocType 'POS Coupon'
+#. Label of a Data field in DocType 'Referral Code'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Email ID"
+msgstr "Email ID"
+
+#: frontend/src/views/ResetPasswordView.vue:30
+msgid "Email Sent Successfully"
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:184
+msgid "Email address"
+msgstr "Endereço de Email"
+
+#: frontend/src/views/LoginView.vue:27
+msgid "Email or Username"
+msgstr ""
+
+#. Description of the 'Price' (Section Break) field in DocType 'Scale Barcode
+#. Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Enable only if barcode also contains price segment."
+msgstr ""
+
+#. Description of the 'Prefix included in barcode' (Check) field in DocType
+#. 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"Enable when your barcode starts with a fixed prefix value (for example, 331)."
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:136
+msgid "Enroll Customer"
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:25
+msgid "Enrolled"
+msgstr "Inscrito"
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:136
+msgid "Enrolling..."
+msgstr "Inscrevendo..."
+
+#: frontend/src/components/cart/CartSummary.vue:169
+msgid "Enter coupon code..."
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:71
+msgid "Enter reason for this transaction..."
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:153
+msgid "Enter supplier name"
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:90
+msgid "Enter the email address associated with your account"
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:82
+msgid "Enter your email address"
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:35
+msgid "Enter your email or username"
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:19
+msgid "Enter your email to receive a password reset link"
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:54
+msgid "Enter your password"
+msgstr "Digite sua senha"
+
+#: frontend/src/components/shift/ClosingDialog.vue:86
+msgid "Expected"
+msgstr ""
+
+#. Label of a Currency field in DocType 'XPOS Closing Shift Detail'
+#: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
+msgid "Expected Amount"
+msgstr "Quantidade Esperada"
+
+#. Option for the 'Movement Type' (Select) field in DocType 'POS Cash Movement'
+#: frontend/src/components/Navbar.vue:49
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Expense"
+msgstr "Despesa"
+
+#. Label of a Link field in DocType 'POS Cash Movement'
+#: frontend/src/components/shift/CashMovementDialog.vue:31
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Expense Account"
+msgstr "Conta de Despesas"
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:99
+msgid "Expense Account is required for expense entries."
+msgstr ""
+
+#: xpos/api/cash_movements.py:89
+msgid "Expense account is required"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:144
+msgid "Expense account is required for POS Expense."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:101
+msgid "Expense target account must match Expense Account."
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:97
+msgid "Expires"
+msgstr ""
+
+#: xpos/api/payments.py:281
+msgid "Failed to create payment request: {0}"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:198
+msgid "Failed to delete draft invoice"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:159
+msgid "Failed to fetch draft invoices"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:177
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:181
+msgid "Failed to load draft invoice"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:195
+msgid "Failed to reconcile Credit Note {0}: {1}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:295
+msgid "Failed to reconcile Journal Entry {0}: {1}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:404
+msgid "Failed to reconcile Payment Entry {0}: {1}"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:265
+msgid "Failed to record cash movement"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:340
+msgid "Failed to save draft: {0}"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:273
+msgid "Failed to validate coupon"
+msgstr ""
+
+#. Label of a Link field in DocType 'Referral Code'
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Final Customer Offer"
+msgstr ""
+
+#. Description of the 'Prefix' (Data) field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored."
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:76
+msgid "Forgot password?"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:8
+msgid "Generate and print barcode labels for items"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:18
+msgid "Generating..."
+msgstr ""
+
+#. Option for the 'Coupon Type' (Select) field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Gift Card"
+msgstr "Cartão Presente"
+
+#. Label of a Link field in DocType 'POS Offer Detail'
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Give Item"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Offer Detail'
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Give Item Row ID"
+msgstr ""
+
+#. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Give Product"
+msgstr ""
+
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Given Quantity"
+msgstr ""
+
+#. Label of a Currency field in DocType 'XPOS Closing Shift'
+#. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
+#: frontend/src/components/shift/ClosingDialog.vue:25
+#: frontend/src/views/OrdersView.vue:209
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:15
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Grand Total"
+msgstr "Total Geral"
+
+#: frontend/src/components/purchase/StockReceiving.vue:429
+#: frontend/src/components/purchase/StockReceiving.vue:601
+msgid "In Transit"
+msgstr "Em Trânsito"
+
+#: frontend/src/components/purchase/StockReceiving.vue:293
+msgid "In-Transit"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:557
+msgid "In-Transit Stock"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:70
+msgid "Include QR Code"
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:162
+msgid "Individual"
+msgstr "Pessoa Física"
+
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:83
+msgid "Invalid Opening Entry"
+msgstr "Entrada de Abertura Inválida"
+
+#: xpos/x_pos/doctype/pos_closing_shift/closing_processing/overview.py:40
+msgid "Invalid POS Opening Shift data provided."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:77
+msgid "Invalid Period"
+msgstr "Período Inválido"
+
+#: xpos/x_pos/api/utilities.py:773
+msgid "Invalid language code"
+msgstr ""
+
+#: xpos/x_pos/api/utilities.py:776
+msgid "Invalid language code format: {0}"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/posting.py:22
+msgid "Invalid movement type for journal entry."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:167
+msgid "Invalid movement type."
+msgstr ""
+
+#: xpos/api/offers.py:95
+msgid "Invalid or already used coupon code"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:270
+msgid "Invalid or expired coupon code"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:15
+msgid "Invalid payload for cash movement."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:244
+msgid "Invalid posting date."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/data.py:15
+msgid "Invalid {0} filter"
+msgstr ""
+
+#: frontend/src/views/PurchaseView.vue:174
+msgid "Invoice"
+msgstr "Fatura"
+
+#. Label of a Currency field in DocType 'Sales Invoice Reference'
+#: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
+msgid "Invoice Amount"
+msgstr ""
+
+#. Label of a Link field in DocType 'Sales Invoice Reference'
+#: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
+msgid "Invoice Currency"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:97
+msgid "Invoice details"
+msgstr ""
+
+#: xpos/api/invoices.py:379
+msgid "Invoice name is required for update"
+msgstr ""
+
+#: xpos/x_pos/api/invoices.py:111
+msgid "Invoice {0} Deleted"
+msgstr ""
+
+#: xpos/x_pos/api/invoices.py:103
+msgid "Invoice {0} does not exist"
+msgstr ""
+
+#: xpos/api/invoices.py:1393
+msgid "Invoice {0} not found"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:129
+#: frontend/src/views/OrdersView.vue:145
+msgid "Item"
+msgstr "Item"
+
+#. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
+#. 'POS Offer'
+#. Option for the 'Apply Type' (Select) field in DocType 'POS Offer'
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Item Code"
+msgstr "Código do Item"
+
+#: xpos/x_pos/api/item_processing/price.py:10
+msgid "Item Code and Price List are required"
+msgstr ""
+
+#: xpos/api/taxes.py:28
+msgid "Item Code is required"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:15
+msgid "Item Discounts"
+msgstr ""
+
+#. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
+#. 'POS Offer'
+#. Option for the 'Apply Type' (Select) field in DocType 'POS Offer'
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Item Group"
+msgstr "Grupo de Itens"
+
+#. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Item Price"
+msgstr "Preço do Item"
+
+#: xpos/x_pos/api/item_processing/price.py:38
+msgid "Item Price has been added or updated"
+msgstr ""
+
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Item Rate Should Less Then"
+msgstr ""
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Item code digits"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:275
+msgid "Item code is required."
+msgstr ""
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Item code starting position"
+msgstr ""
+
+#: xpos/api/invoices.py:1281
+msgid "Item {0} was not in the original invoice {1}"
+msgstr ""
+
+#: xpos/api/invoices.py:1308
+msgid ""
+"Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})"
+msgstr ""
+
+#: xpos/api/invoices.py:1115
+msgid "Item {0}: Cannot return {1}, maximum returnable is {2}"
+msgstr ""
+
+#: xpos/api/invoices.py:201
+#, python-format
+msgid "Item {0}: Discount {1}% exceeds maximum allowed {2}%"
+msgstr ""
+
+#: xpos/api/invoices.py:158
+msgid "Item {0}: Quantity must be greater than zero"
+msgstr ""
+
+#: xpos/api/invoices.py:165
+msgid "Item {0}: Rate cannot be negative"
+msgstr ""
+
+#. Label of a Small Text field in DocType 'POS Offer Detail'
+#: frontend/src/views/OrdersView.vue:138
+#: frontend/src/views/PurchaseView.vue:117
+#: frontend/src/views/PurchaseView.vue:152
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Items"
+msgstr "Itens"
+
+#. Label of a Link field in DocType 'POS Cash Movement'
+#: xpos/x_pos/api/payment_processing/data.py:271
+#: xpos/x_pos/api/payment_processing/data.py:354
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Journal Entry"
+msgstr "Lançamento no Livro Diário"
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:226
+msgid "Journal Entry {0} has no unallocated amount remaining."
+msgstr ""
+
+#. Label of a Data field in DocType 'Delivery Charges'
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+msgid "Label"
+msgstr "Rótulo"
+
+#: frontend/src/views/BarcodePrintView.vue:52
+msgid "Label Size"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:58
+msgid "Large (60×40mm)"
+msgstr ""
+
+#. Label of a Section Break field in DocType 'XPOS Closing Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "Linked Invoices"
+msgstr "Faturas Vinculadas"
+
+#: frontend/src/components/purchase/StockReceiving.vue:574
+msgid "Loading in-transit stock..."
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:516
+msgid "Loading pending orders..."
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:97
+msgid "Loading suppliers..."
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:62
+msgid "Loyalty"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:248
+msgid "Loyalty Information"
+msgstr ""
+
+#. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Loyalty Point"
+msgstr ""
+
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Loyalty Point Scheme"
+msgstr ""
+
+#. Label of a Int field in DocType 'POS Offer'
+#: frontend/src/components/payment/PaymentDialog.vue:157
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Loyalty Points"
+msgstr "Pontos de Fidelidade"
+
+#: frontend/src/views/OrdersView.vue:204
+msgid "Loyalty Points Redeemed"
+msgstr ""
+
+#: frontend/src/components/cart/Cart.vue:31
+msgid "Loyalty Program"
+msgstr "Programa de Lealdade"
+
+#: xpos/api/customers.py:556
+msgid "Loyalty Program is required"
+msgstr ""
+
+#: xpos/api/customers.py:562
+msgid "Loyalty Program {0} not found"
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:10
+msgid "Manage loyalty for"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:567
+msgid "Material transfers awaiting receipt at your warehouse"
+msgstr ""
+
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Max Amount"
+msgstr "Quantidade Máxima"
+
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Max Quantity"
+msgstr ""
+
+#. Label of a Int field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Maximum Use"
+msgstr "Uso Máximo"
+
+#: frontend/src/views/BarcodePrintView.vue:57
+msgid "Medium (50×30mm)"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:70
+#: frontend/src/components/shift/ClosingDialog.vue:81
+msgid "Method"
+msgstr "Método"
+
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Min Amount"
+msgstr "Quantidade Mínima"
+
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Min Quantity"
+msgstr ""
+
+#: xpos/x_pos/api/qz.py:50
+msgid "Missing Dependency"
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:174
+msgid "Mobile"
+msgstr "Móvel"
+
+#. Label of a Data field in DocType 'POS Coupon'
+#. Label of a Data field in DocType 'Referral Code'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Mobile NO"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Payment Entry Reference'
+#: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
+msgid "Mode Of Payment"
+msgstr "Forma de Pagamento"
+
+#. Label of a Link field in DocType 'XPOS Closing Shift Detail'
+#. Label of a Link field in DocType 'XPOS Opening Shift Detail'
+#: xpos/x_pos/api/payment_processing/data.py:170
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:58
+#: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
+#: xpos/x_pos/doctype/pos_opening_shift_detail/pos_opening_shift_detail.json
+msgid "Mode of Payment"
+msgstr "Forma de Pagamento"
+
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:53
+msgid "Mode of Payments"
+msgstr "Modo de Pagamento"
+
+#. Label of a Section Break field in DocType 'XPOS Closing Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "Modes of Payment"
+msgstr "Modos de Pagamento"
+
+#. Label of a Select field in DocType 'POS Cash Movement'
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Movement Type"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:95
+msgid "Movement Type must be Expense or Deposit."
+msgstr ""
+
+#. Label of a Currency field in DocType 'XPOS Closing Shift'
+#: frontend/src/components/shift/ClosingDialog.vue:35
+#: frontend/src/views/OrdersView.vue:184
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:28
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "Net Total"
+msgstr "Total Líquido"
+
+#: xpos/x_pos/api/payment_processing/processor.py:195
+msgid "No allocation made for credit note {0}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:288
+msgid "No allocation made for payment {0}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:207
+msgid "No allocation was recorded for Credit Note {0}."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:307
+msgid "No allocation was recorded for Journal Entry {0}."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:417
+msgid "No allocation was recorded for Payment Entry {0}."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:448
+msgid "No allocations were made."
+msgstr ""
+
+#: xpos/x_pos/api/invoice_processing/stock.py:163
+msgid "No batches available in {0} for {1}."
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:30
+msgid "No draft invoices found"
+msgstr ""
+
+#: frontend/src/views/PosView.vue:30
+msgid "No groups found"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:580
+msgid "No in-transit stock"
+msgstr ""
+
+#: frontend/src/components/items/ItemGrid.vue:15
+#: frontend/src/views/BarcodePrintView.vue:82
+msgid "No items found"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:330
+msgid "No items in cart to save."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:113
+msgid "No items selected"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:757
+msgid ""
+"No items to invoice. Please ensure there are items on the Purchase Order."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:889 xpos/x_pos/api/stock_transfer.py:249
+msgid "No items to receive."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:193
+msgid "No items to receive. Please enter received quantities."
+msgstr ""
+
+#: xpos/x_pos/api/stock_transfer.py:365
+msgid "No items to return."
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:121
+msgid "No loyalty programs available"
+msgstr ""
+
+#: frontend/src/components/ui/link/LinkField.vue:37
+msgid "No matches found"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:581
+msgid "No material transfers pending receipt"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:310
+msgid "No open shift found. Please open a shift first."
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:31
+msgid "No orders found"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:133
+msgid "No outstanding invoices available for allocation of credit note {0}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:234
+msgid "No outstanding invoices available for allocation of payment {0}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:184
+msgid "No outstanding invoices were available to reconcile Credit Note {0}."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:284
+msgid "No outstanding invoices were available to reconcile Journal Entry {0}."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:393
+msgid "No outstanding invoices were available to reconcile Payment Entry {0}."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:42
+msgid "No outstanding invoices were found for {0}."
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:522
+msgid "No pending stock"
+msgstr ""
+
+#: frontend/src/components/orders/ListFilters.vue:119
+msgid "No query filters. Click \"Add Filter\" to add one."
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:100
+msgid "No suppliers found"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:56
+msgid "No unallocated payments were available for reconciliation."
+msgstr ""
+
+#: xpos/x_pos/api/invoice_processing/stock.py:190
+msgid "No valid batches available in {0} for {1}."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:945 xpos/x_pos/api/stock_transfer.py:310
+msgid "No valid items to receive."
+msgstr ""
+
+#: xpos/x_pos/api/stock_transfer.py:420
+msgid "No valid items to return."
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:68
+msgid "Not Enrolled"
+msgstr ""
+
+#. Description of the 'Price decimals' (Int) field in DocType 'Scale Barcode
+#. Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Number of decimal places encoded for the price."
+msgstr ""
+
+#. Description of the 'Price digits' (Int) field in DocType 'Scale Barcode
+#. Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Number of digits representing the price before decimal places."
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:208
+msgid "Numpad"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Offer Detail'
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Offer"
+msgstr ""
+
+#. Label of a Check field in DocType 'POS Offer Detail'
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Offer Applied"
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Offer Detail'
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Offer Name"
+msgstr ""
+
+#. Label of a Card Break in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Offers &amp; Coupons"
+msgstr ""
+
+#: frontend/src/views/PurchaseView.vue:74
+msgid "Offline"
+msgstr "Offline"
+
+#. Label of a Check field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Only One Use Per Customer"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:51
+msgid "Only cancelled POS Cash Movement records can be deleted."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:209
+msgid "Only cancelled cash movements can be deleted."
+msgstr ""
+
+#: xpos/api/sales_orders.py:179
+msgid "Only draft Quotations can be updated"
+msgstr ""
+
+#: xpos/api/sales_orders.py:76
+msgid "Only draft Sales Orders can be updated"
+msgstr ""
+
+#: xpos/api/invoices.py:871
+msgid "Only draft invoices can be deleted"
+msgstr ""
+
+#: xpos/api/invoices.py:385
+msgid "Only draft invoices can be updated"
+msgstr ""
+
+#: xpos/api/invoices.py:53
+msgid "Only draft invoices can be updated and submitted"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:193
+msgid "Only submitted cash movements can be cancelled."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:224
+msgid "Only submitted or cancelled cash movements can be duplicated."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:26
+msgid "Only the shift owner can create cash movement entries."
+msgstr ""
+
+#. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Open"
+msgstr "Aberto"
+
+#: frontend/src/components/shift/ClosingDialog.vue:83
+msgid "Opening"
+msgstr "Abertura"
+
+#. Label of a Currency field in DocType 'XPOS Closing Shift Detail'
+#. Label of a Currency field in DocType 'XPOS Opening Shift Detail'
+#: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
+#: xpos/x_pos/doctype/pos_opening_shift_detail/pos_opening_shift_detail.json
+msgid "Opening Amount"
+msgstr "Quantidade de Abertura"
+
+#. Label of a Table field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Opening Balance Details"
+msgstr "Detalhes do Saldo Inicial"
+
+#: frontend/src/views/OrdersView.vue:5
+msgid "Order History"
+msgstr ""
+
+#: frontend/src/views/PurchaseView.vue:173
+msgid "Order only"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:338
+msgid "Order saved as draft"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:22
+msgid "Orders"
+msgstr "Pedidos"
+
+#: xpos/api/invoices.py:1262
+msgid "Original invoice {0} not found"
+msgstr ""
+
+#: frontend/src/components/items/ItemCard.vue:27
+#: frontend/src/components/items/ItemListRow.vue:33
+#: frontend/src/components/items/ItemListRow.vue:36
+msgid "Out of Stock"
+msgstr "Fora de Estoque"
+
+#: xpos/x_pos/api/stock_transfer.py:226 xpos/x_pos/api/stock_transfer.py:354
+msgid "Outgoing Stock Entry is required."
+msgstr ""
+
+#. Label of a Card Break in the X POS Workspace
+#: frontend/src/components/Navbar.vue:14 xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "POS"
+msgstr "PDV"
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_allowed_expense_account/pos_allowed_expense_account.json
+msgid "POS Allowed Expense Account"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_allowed_source_account/pos_allowed_source_account.json
+msgid "XPOS Allowed Source Account"
+msgstr ""
+
+#. Name of a DocType
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/api/cash_movement/posting.py:30
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "POS Cash Movement"
+msgstr ""
+
+#. Name of a DocType
+#. Label of a Data field in DocType 'POS Opening Shift'
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "XPOS Closing Shift"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
+msgid "XPOS Closing Shift Detail"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
+msgid "XPOS Closing Shift Taxes"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:74
+msgid "XPOS Closing Shift {} against {} between selected period"
+msgstr ""
+
+#. Name of a DocType
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "POS Coupon"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
+msgid "POS Coupon Detail"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:47
+#: frontend/src/components/shift/CashMovementDialog.vue:14
+msgid "POS Expense"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/permissions.py:17
+msgid "POS Expense is disabled for this POS Profile."
+msgstr ""
+
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "POS Invoice"
+msgstr "Fatura PDV"
+
+#. Label of a Link field in DocType 'POS Coupon'
+#. Label of a Link field in DocType 'POS Coupon Detail'
+#. Name of a DocType
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "POS Offer"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "POS Offer Detail"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:60
+msgid "POS Offer is disabled."
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Cash Movement'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
+#. Name of a DocType
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "POS Opening Shift"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_opening_shift_detail/pos_opening_shift_detail.json
+msgid "XPOS Opening Shift Detail"
+msgstr ""
+
+#: xpos/api/cash_movements.py:85 xpos/api/cash_movements.py:167
+#: xpos/x_pos/api/payment_processing/processor.py:35
+msgid "POS Opening Shift is required"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_closing_shift/closing_processing/overview.py:16
+msgid "POS Opening Shift is required to compute the overview."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:20
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:69
+msgid "POS Opening Shift is required."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:24
+msgid "POS Opening Shift must be submitted and open."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:33
+msgid "POS Opening Shift not found."
+msgstr ""
+
+#: xpos/x_pos/api/invoice.py:315
+msgid "POS Opening Shift {0} is not for the same POS Profile"
+msgstr ""
+
+#: xpos/x_pos/api/invoice.py:318
+msgid "POS Opening Shift {0} is not for the same company"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
+msgid "POS Payment Entry Reference"
+msgstr ""
+
+#. Label of a Table field in DocType 'XPOS Closing Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "POS Payments"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_print_format_rule/pos_print_format_rule.json
+msgid "POS Print Format Rule"
+msgstr ""
+
+#. Label of a Link field in DocType 'Delivery Charges POS Profile'
+#. Label of a Link field in DocType 'POS Cash Movement'
+#. Label of a Link field in DocType 'XPOS Closing Shift'
+#. Label of a Link field in DocType 'POS Offer'
+#. Label of a Link field in DocType 'POS Opening Shift'
+#. Label of a Link in the X POS Workspace
+#: frontend/src/views/OrdersView.vue:120
+#: xpos/x_pos/api/payment_processing/data.py:70
+#: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "POS Profile"
+msgstr "Perfil do PDV"
+
+#: xpos/x_pos/api/cash_movement/validation.py:40
+msgid "POS Profile company must match active POS Opening Shift company."
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:305
+msgid "POS Profile is not set. Please close and reopen the shift."
+msgstr ""
+
+#: xpos/api/invoices.py:28 xpos/x_pos/api/payment_processing/processor.py:33
+msgid "POS Profile is required"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:35
+msgid "POS Profile is required to create purchase documents."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:111
+#: xpos/x_pos/api/cash_movement/validation.py:32
+msgid "POS Profile is required."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:38
+msgid "POS Profile must match the active POS Opening Shift profile."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:75
+msgid "POS Profile must match the selected POS Opening Shift profile."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.py:41
+msgid "POS Profile {} does not belongs to company {}"
+msgstr "Perfil de PDV {} não pertence à empresa {}"
+
+#: xpos/api/invoices.py:457 xpos/api/sales_orders.py:68
+#: xpos/api/sales_orders.py:171
+msgid "POS Profile, Customer, and Items are required"
+msgstr ""
+
+#. Label of a Table field in DocType 'Delivery Charges'
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+msgid "POS Profiles"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_sales_person_filter/pos_sales_person_filter.json
+msgid "POS Sales Person Filter"
+msgstr ""
+
+#: xpos/x_pos/api/invoice.py:312
+msgid "POS Shift {0} is not open"
+msgstr ""
+
+#. Label of a Table field in DocType 'XPOS Closing Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "POS Transactions"
+msgstr "Transações PDV"
+
+#: xpos/x_pos/api/payments.py:19
+msgid "POS credit redemption for Sales Invoice {0}"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:241
+msgid "POS expense recorded"
+msgstr ""
+
+#: xpos/x_pos/api/utils.py:106
+msgid "POS profile data is missing or invalid."
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:46
+msgid "Password"
+msgstr "Senha"
+
+#: frontend/src/components/cart/CartSummary.vue:251
+msgid "Pay {0}"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:13
+msgid "Payment"
+msgstr "Pagamento"
+
+#. Label of a Link field in DocType 'POS Payment Entry Reference'
+#: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
+msgid "Payment Entry"
+msgstr "Pagamentos"
+
+#: xpos/x_pos/api/payments.py:212
+msgid "Payment Entry is already created or payment account is not matched"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:336
+msgid "Payment Entry {0} has no unallocated amount remaining."
+msgstr ""
+
+#: xpos/x_pos/api/payments.py:104
+msgid "Payment Gateway Account not found"
+msgstr ""
+
+#. Label of a Table field in DocType 'XPOS Closing Shift'
+#: frontend/src/components/shift/ClosingDialog.vue:76
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "Payment Reconciliation"
+msgstr "Conciliação de Pagamento"
+
+#: xpos/x_pos/api/payments.py:172
+msgid "Payment Request for {0}"
+msgstr "Pedido de Pagamento Para {0}"
+
+#: xpos/api/payments.py:232 xpos/x_pos/api/payments.py:28
+msgid "Payment amount cannot be less than or equal to 0"
+msgstr "O valor do pagamento não pode ser menor ou igual a 0"
+
+#: xpos/api/invoices.py:278
+msgid "Payment amount must be greater than zero"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:228
+msgid "Payment {0} is already fully allocated"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:230
+msgid "Payments"
+msgstr "Pagamentos"
+
+#: frontend/src/components/purchase/StockReceiving.vue:333
+#: frontend/src/views/PurchaseView.vue:80
+msgid "Pending"
+msgstr "Pendente"
+
+#. Label of a Datetime field in DocType 'XPOS Closing Shift'
+#. Label of a Date field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Period End Date"
+msgstr "Data de Término do Período"
+
+#. Label of a Datetime field in DocType 'XPOS Closing Shift'
+#. Label of a Datetime field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Period Start Date"
+msgstr "Data de Início do Período"
+
+#: frontend/src/components/purchase/SupplierSelector.vue:176
+msgid "Phone number"
+msgstr ""
+
+#: xpos/api/payments.py:235 xpos/x_pos/api/payments.py:31
+msgid "Please enter the phone number first"
+msgstr "Por favor insira o número de telefone primeiro"
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:58
+msgid "Please select Coupon Code Based POS Offer."
+msgstr ""
+
+#: frontend/src/views/PosView.vue:244
+msgid "Please select a customer before adding items to the cart"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:325
+msgid "Please select a customer before holding the order."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:56
+msgid "Please select the correct POS Offer with the same company."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:53
+msgid "Please select the customer."
+msgstr "Por favor selecione o cliente."
+
+#: xpos/x_pos/api/purchase_orders.py:398
+msgid "Please set Default Payable Account in Company {0}"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:350
+msgid "Please set default account for Mode of Payment {0} in company {1}"
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:8
+#: frontend/src/views/ResetPasswordView.vue:9
+msgid "Point of Sale System"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:255
+msgid "Points Earned"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:259
+msgid "Points Redeemed"
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:46
+msgid "Points Value"
+msgstr ""
+
+#. Description of the 'Barcode Structure' (Section Break) field in DocType
+#. 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"Positions are 1-indexed and counted on the full barcode. Example: 3310100010009 => prefix 331, item code 3310100, weight 1.000, check digit 9."
+msgstr ""
+
+#. Label of a Date field in DocType 'POS Cash Movement'
+#. Label of a Date field in DocType 'XPOS Closing Shift'
+#. Label of a Date field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Posting Date"
+msgstr "Data da Postagem"
+
+#. Label of a Data field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Prefix"
+msgstr "Prefixo"
+
+#. Label of a Check field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Prefix included in barcode"
+msgstr ""
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Prefix length"
+msgstr ""
+
+#. Description of the 'Prefix length' (Int) field in DocType 'Scale Barcode
+#. Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"Prefix length (for example, prefix 331 => length 3). Item/weight start positions still use full barcode positions."
+msgstr ""
+
+#. Label of a Section Break field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Price"
+msgstr "Preço"
+
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Price Discount Scheme "
+msgstr ""
+
+#: xpos/x_pos/api/pricing_rules.py:183
+msgid "Price List is required"
+msgstr ""
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Price decimals"
+msgstr ""
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Price digits"
+msgstr ""
+
+#. Label of a Check field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Price included in barcode"
+msgstr ""
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Price starting position"
+msgstr ""
+
+#. Label of a Link field in DocType 'Referral Code'
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Primary Customer Offer"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:276
+msgid "Print"
+msgstr "Impressão"
+
+#. Label of a Link field in DocType 'POS Print Format Rule'
+#: xpos/x_pos/doctype/pos_print_format_rule/pos_print_format_rule.json
+msgid "Print Format"
+msgstr "Formato de Impressão"
+
+#: frontend/src/views/BarcodePrintView.vue:18
+msgid "Print Labels"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:73
+msgid "Print Last Invoice"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:66
+msgid "Process Return"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:251
+msgid "Process Return {0}"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:252
+#: frontend/src/components/purchase/StockReceiving.vue:488
+msgid "Processing..."
+msgstr "Em processamento..."
+
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Product Discount Scheme"
+msgstr "Esquema de Desconto do Produto"
+
+#. Label of a Card Break in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Profile"
+msgstr ""
+
+#. Label of a Code field in DocType 'Delivery Charges'
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+msgid "Profiles List"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:251
+msgid "Program"
+msgstr "Programa"
+
+#. Label of a Select field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Promo Type"
+msgstr ""
+
+#. Option for the 'Coupon Type' (Select) field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Promotional"
+msgstr "Promocional"
+
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Promotional Schemes"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:30
+msgid "Purchase"
+msgstr "Compras"
+
+#: xpos/x_pos/api/purchase_orders.py:878
+msgid "Purchase Order is required."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:820
+msgid "Purchase Order {0} does not exist."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:882
+msgid "Purchase Order {0} is not submitted."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:572
+msgid "Purchase Order {0} processing failed: {1}"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:281
+msgid "Purchase Orders"
+msgstr "Ordens de Compra"
+
+#: frontend/src/components/purchase/StockReceiving.vue:509
+msgid "Purchase Orders pending receipt at"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:536
+msgid "Purchase order requires at least one item with quantity."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:456
+msgid "Purchase order requires at least one item."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:432
+msgid "Purchase orders"
+msgstr ""
+
+#: xpos/x_pos/api/qz.py:46
+msgid ""
+"Python package 'cryptography' is required for QZ Tray signing. Please install it on the server and retry."
+msgstr ""
+
+#: xpos/x_pos/api/qz.py:76
+msgid "QZ Certificate Missing"
+msgstr ""
+
+#: xpos/x_pos/api/qz.py:168
+msgid "QZ Certificate Ready"
+msgstr ""
+
+#: xpos/x_pos/api/qz.py:163
+msgid ""
+"QZ Tray certificate generated successfully.<br><br>Download the certificate from POS Awesome and import it into QZ Tray on each POS machine, then restart QZ Tray."
+msgstr ""
+
+#: xpos/x_pos/api/qz.py:75
+msgid ""
+"QZ Tray certificate not found. Ask an administrator to run Setup QZ Certificate."
+msgstr ""
+
+#: xpos/x_pos/api/qz.py:116
+msgid "QZ certificate already exists."
+msgstr ""
+
+#: xpos/x_pos/api/qz.py:174
+msgid "QZ certificate generated successfully."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:134
+#: frontend/src/views/OrdersView.vue:148
+msgid "Qty"
+msgstr "Qtd"
+
+#. Label of a Select field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Qualifying Transaction / Item"
+msgstr ""
+
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Quantity and Amount Conditions"
+msgstr ""
+
+#: xpos/api/sales_orders.py:222
+msgid "Quotation name is required"
+msgstr ""
+
+#. Label of a Currency field in DocType 'Delivery Charges POS Profile'
+#. Label of a Percent field in DocType 'XPOS Closing Shift Taxes'
+#. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
+#. Label of a Float field in DocType 'POS Offer'
+#: frontend/src/views/OrdersView.vue:151
+#: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:96
+#: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Rate"
+msgstr "Valor"
+
+#: frontend/src/components/shift/CashMovementDialog.vue:67
+msgid "Reason / Notes"
+msgstr ""
+
+#: frontend/src/views/PurchaseView.vue:122
+#: frontend/src/views/PurchaseView.vue:157
+msgid "Receive"
+msgstr "Receber"
+
+#: frontend/src/components/purchase/StockReceiving.vue:488
+msgid "Receive & Return"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:438
+msgid "Receive Qty"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:382
+msgid "Receive Stock"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:436
+msgid "Receive stock"
+msgstr ""
+
+#: xpos/x_pos/api/stock_transfer.py:262
+msgid "Received at {0}"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:413
+msgid "Receiving at"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:382
+msgid "Receiving..."
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:76
+msgid "Recent Movements"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:107
+msgid "Record Deposit"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:107
+msgid "Record Expense"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:17
+msgid "Record a cash deposit"
+msgstr ""
+
+#: frontend/src/components/shift/CashMovementDialog.vue:17
+msgid "Record a cash withdrawal"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:168
+msgid "Redeem Points"
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Coupon'
+#. Name of a DocType
+#. Label of a Data field in DocType 'Referral Code'
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Referral Code"
+msgstr "Código de Referencia"
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:70
+msgid "Referral Code is required"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:78
+msgid "Referral Code {0} does not exist"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:80
+msgid "Referral Code {0} is disabled"
+msgstr ""
+
+#. Label of a Data field in DocType 'Referral Code'
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Referral Name"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:109
+#: frontend/src/components/purchase/StockReceiving.vue:505
+#: frontend/src/components/purchase/StockReceiving.vue:563
+msgid "Refresh"
+msgstr "Atualizar"
+
+#: frontend/src/components/payment/PaymentDialog.vue:38
+msgid "Refund Amount"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:355
+msgid "Reject Qty"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:199
+msgid "Remaining"
+msgstr "Remanescente"
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:451
+msgid "Remaining outstanding: {0} across {1} invoice(s)."
+msgstr ""
+
+#. Label of a Small Text field in DocType 'POS Cash Movement'
+#: frontend/src/views/OrdersView.vue:266
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Remarks"
+msgstr "Observações"
+
+#: frontend/src/components/purchase/StockReceiving.vue:377
+msgid "Remarks (optional, e.g. items damaged)"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:481
+msgid "Remarks (optional, e.g. missing or damaged items)"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:56
+msgid "Remarks are required for cash movement in this POS Profile."
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:172
+msgid "Remove Loyalty"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:62
+msgid "Repeat"
+msgstr "Repetir"
+
+#: frontend/src/components/Navbar.vue:60
+msgid "Repeat Invoice (Ctrl+G)"
+msgstr ""
+
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Replace Cheapest Item"
+msgstr ""
+
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Replace Same Item"
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:15
+msgid "Reset Password"
+msgstr "Redefinir Senha"
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:12
+msgid "Restore Draft Invoice"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:121
+msgid "Restore draft"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:68
+#: frontend/src/components/payment/PaymentDialog.vue:20
+#: frontend/src/views/OrdersView.vue:283
+msgid "Return"
+msgstr "Devolução"
+
+#: frontend/src/components/payment/PaymentDialog.vue:256
+msgid "Return & Print"
+msgstr ""
+
+#: xpos/api/invoices.py:100
+msgid "Return Against invoice is required for returns"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:13
+msgid "Return Payment"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:451
+msgid "Return Qty"
+msgstr ""
+
+#: frontend/src/components/shift/ClosingDialog.vue:47
+msgid "Returns"
+msgstr "Devoluções"
+
+#: xpos/x_pos/api/invoice_processing/utils.py:67
+msgid "Returns are only allowed until {0}"
+msgstr ""
+
+#: frontend/src/components/shift/ClosingDialog.vue:6
+msgid "Review and reconcile your shift"
+msgstr ""
+
+#: xpos/x_pos/api/utilities.py:131
+msgid ""
+"Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches"
+msgstr ""
+"Linha # {0}: o lote {1} tem apenas {2} qty. Selecione outro lote com {3} qty disponível ou dividido a linha em várias linhas, para entregar / emitir de vários lotes"
+
+#. Label of a Data field in DocType 'POS Offer Detail'
+#: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
+msgid "Row ID"
+msgstr ""
+
+#. Label of a Link field in DocType 'Sales Invoice Reference'
+#: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
+msgid "Sales Invoice"
+msgstr "Fatura de Venda"
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
+msgid "Sales Invoice Reference"
+msgstr ""
+
+#. Name of a role
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Sales Manager"
+msgstr "Gerente de Vendas"
+
+#. Name of a role
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Sales Master Manager"
+msgstr "Gerente de Cadastros de Vendas"
+
+#: xpos/x_pos/api/invoice.py:119
+msgid "Sales Order Created"
+msgstr ""
+
+#: xpos/x_pos/api/invoice.py:118
+msgid "Sales Order Created at <a href='{0}'>{1}</a>"
+msgstr ""
+
+#: xpos/api/sales_orders.py:132
+msgid "Sales Order name is required"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:128
+msgid "Sales Partner"
+msgstr "Parceiro de Vendas"
+
+#. Label of a Link field in DocType 'POS Sales Person Filter'
+#: xpos/x_pos/doctype/pos_sales_person_filter/pos_sales_person_filter.json
+msgid "Sales Person"
+msgstr "Vendedor"
+
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:8
+msgid "Sales Summary"
+msgstr "Resumo de Vendas"
+
+#. Name of a role
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Sales User"
+msgstr "Usuário de Vendas"
+
+#: frontend/src/components/payment/PaymentDialog.vue:227
+#: frontend/src/components/payment/PaymentDialog.vue:256
+msgid "Save & Print"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:230
+#: frontend/src/components/payment/PaymentDialog.vue:245
+msgid "Save Only"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:118
+msgid "Save as draft"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:31
+msgid "Save your current order to create a draft"
+msgstr ""
+
+#. Name of a DocType
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Scale Barcode Settings"
+msgstr ""
+
+#: frontend/src/components/items/BarcodeScanner.vue:6
+msgid "Scan barcode..."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:114
+msgid "Search and add items from the left panel"
+msgstr ""
+
+#: frontend/src/components/customer/CustomerSelect.vue:12
+msgid "Search by name, phone, email..."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:86
+msgid "Search for items to add barcode labels"
+msgstr ""
+
+#: frontend/src/components/customer/CustomerSelect.vue:8
+msgid "Search for or create a customer"
+msgstr ""
+
+#: frontend/src/views/PosView.vue:27
+msgid "Search item groups..."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:30
+msgid "Search items by name, code, or barcode..."
+msgstr ""
+
+#: frontend/src/components/items/SearchBar.vue:5
+msgid "Search items, scan barcode..."
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:86
+msgid "Search suppliers..."
+msgstr ""
+
+#: frontend/src/components/ui/link/LinkField.vue:250
+msgid "Searching..."
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:95
+msgid "Secure login powered by Frappe Framework"
+msgstr ""
+
+#: frontend/src/components/customer/CustomerSelect.vue:6
+msgid "Select Customer"
+msgstr "Selecione o Cliente"
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:15
+msgid "Select a draft invoice to restore to cart"
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:70
+msgid "Select a loyalty program to enroll this customer"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:249
+msgid "Select customer first"
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:90
+msgid "Selected"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:82
+msgid "Selected POS Opening Shift should be open."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:140
+msgid "Selected expense account is not allowed for this POS Profile."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:113
+#: xpos/x_pos/api/cash_movement/validation.py:120
+msgid "Selected source account is not allowed for this POS Profile."
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:103
+msgid "Send Reset Link"
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:103
+msgid "Sending..."
+msgstr ""
+
+#. Label of a Check field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Set Posting Date"
+msgstr "Definir Data de Postagem"
+
+#. Label of a Card Break in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "Shift"
+msgstr ""
+
+#: frontend/src/components/shift/ClosingDialog.vue:237
+msgid "Shift closed successfully!"
+msgstr ""
+
+#. Label of a Link field in DocType 'Delivery Charges'
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+msgid "Shipping Account"
+msgstr "Conta de Envio"
+
+#: xpos/x_pos/api/stock_transfer.py:377
+msgid "Shortage return from transit to source"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:66
+msgid "Show Price"
+msgstr "Mostrar Preço"
+
+#: frontend/src/views/LoginView.vue:88
+msgid "Sign In"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:125
+msgid "Sign Out"
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:14
+msgid "Sign in to your account to continue"
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:88
+msgid "Signing in..."
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:56
+msgid "Small (38×25mm)"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:181
+msgid "Small remaining amounts"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:141
+msgid "Sorry, this coupon code cannot be used by this company"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:137
+msgid "Sorry, this coupon code cannot be used by this customer"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:120
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:124
+msgid "Sorry, this coupon code is no longer valid"
+msgstr "Desculpe, este código de cupom não é mais válido"
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:105
+msgid "Sorry, this coupon code not exists"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:117
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:132
+msgid "Sorry, this coupon code's validity has expired"
+msgstr "A validade deste código de cupom expirou"
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:113
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:128
+msgid "Sorry, this coupon code's validity has not started"
+msgstr "A validade deste código de cupom não começou"
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:155
+msgid "Sorry, {0} have used this coupon before"
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Cash Movement'
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Source Account"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:62
+msgid "Source account"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:124
+msgid "Source account must be a Cash account."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:88
+msgid "Source account must belong to the selected company."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:110
+msgid "Source account override is disabled for this POS Profile."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:82
+msgid "Source and target accounts are required."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:66
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:104
+msgid "Source and target accounts cannot be the same for cash deposit."
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:100
+msgid "Split Payment"
+msgstr ""
+
+#. Description of the 'Price starting position' (Int) field in DocType 'Scale
+#. Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Starting position (1-indexed) of the price segment."
+msgstr ""
+
+#. Label of a Select field in DocType 'POS Opening Shift'
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+msgid "Status"
+msgstr "Status"
+
+#: xpos/x_pos/api/status_updater.py:18
+msgid "Status must be one of {0}"
+msgstr "Status deve ser um dos {0}"
+
+#: xpos/x_pos/api/stock_transfer.py:154
+msgid "Stock Entry {0} does not exist."
+msgstr ""
+
+#: xpos/x_pos/api/stock_transfer.py:237
+msgid "Stock Entry {0} has already been fully received."
+msgstr ""
+
+#: xpos/x_pos/api/stock_transfer.py:159
+msgid "Stock Entry {0} is not a Material Transfer with in-transit."
+msgstr ""
+
+#: xpos/x_pos/api/stock_transfer.py:234
+msgid "Stock Entry {0} is not a valid in-transit transfer."
+msgstr ""
+
+#: xpos/x_pos/api/stock_transfer.py:231 xpos/x_pos/api/stock_transfer.py:359
+msgid "Stock Entry {0} is not submitted."
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:499
+msgid "Stock Receiving"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:277
+msgid "Stock UOM is required."
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:6
+#: frontend/src/components/payment/PaymentDialog.vue:48
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#: xpos/api/customers.py:594
+msgid "Successfully enrolled {0} in {1}"
+msgstr ""
+
+#: xpos/api/customers.py:630
+msgid "Successfully unenrolled {0} from {1}"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:181
+msgid "Summary"
+msgstr "Resumo"
+
+#: frontend/src/components/purchase/SupplierSelector.vue:152
+msgid "Supplier Name"
+msgstr "Nome do Fornecedor"
+
+#: xpos/x_pos/api/purchase_orders.py:440
+msgid "Supplier is required."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:210
+msgid "Supplier name is required."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:444
+msgid "Supplier {0} was not found."
+msgstr ""
+
+#: frontend/src/views/PurchaseView.vue:109
+#: frontend/src/views/PurchaseView.vue:147
+msgid "Suppliers"
+msgstr "Fornecedores"
+
+#: frontend/src/views/PurchaseView.vue:85
+msgid "Sync"
+msgstr "Sincronizar"
+
+#. Name of a role
+#: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "System Manager"
+msgstr "Administrador do Sistema"
+
+#. Label of a Link field in DocType 'POS Cash Movement'
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "Target Account"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:63
+msgid "Target account"
+msgstr ""
+
+#: xpos/api/cash_movements.py:171
+msgid "Target account is required"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:90
+msgid "Target account must belong to the selected company."
+msgstr ""
+
+#: xpos/x_pos/api/stock_transfer.py:243
+msgid "Target warehouse is required."
+msgstr ""
+
+#: frontend/src/components/shift/ClosingDialog.vue:64
+msgid "Tax Breakdown"
+msgstr ""
+
+#: frontend/src/components/purchase/SupplierSelector.vue:166
+#: frontend/src/components/purchase/SupplierSelector.vue:167
+msgid "Tax ID"
+msgstr "Cpf/cnpj"
+
+#. Label of a Table field in DocType 'XPOS Closing Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:90
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "Taxes"
+msgstr "Impostos"
+
+#: frontend/src/views/OrdersView.vue:189
+msgid "Taxes & Charges"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:218
+msgid "Taxes Breakdown"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:97
+msgid "Tendered"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:186
+msgid "Theme: Dark (click to switch to System)"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:185
+msgid "Theme: Light (click to switch to Dark)"
+msgstr ""
+
+#: frontend/src/components/Navbar.vue:187
+msgid "Theme: System ({0}) (click to switch to Light)"
+msgstr ""
+
+#: xpos/x_pos/api/customer.py:60
+msgid "This Referral Code {0} not exists"
+msgstr ""
+
+#: xpos/x_pos/api/invoices.py:108
+msgid "This invoice {0} cannot be deleted"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Title"
+msgstr "Título"
+
+#: frontend/src/components/cart/CartSummary.vue:80
+msgid "Total"
+msgstr "Total"
+
+#: frontend/src/components/shift/ClosingDialog.vue:18
+msgid "Total Invoices"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:134
+msgid "Total Paid"
+msgstr ""
+
+#. Label of a Float field in DocType 'XPOS Closing Shift'
+#: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:41
+#: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
+msgid "Total Quantity"
+msgstr "Quantidade Total"
+
+#: frontend/src/components/shift/ClosingDialog.vue:55
+msgid "Total Taxes"
+msgstr ""
+
+#. Description of the 'Item code digits' (Int) field in DocType 'Scale Barcode
+#. Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"Total item code digits to extract. Example: item code 3310100 => digits 7."
+msgstr ""
+
+#. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
+#. 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Transaction"
+msgstr "Transação"
+
+#: frontend/src/components/items/ItemGrid.vue:16
+msgid "Try a different search or category"
+msgstr ""
+
+#: frontend/src/views/OrdersView.vue:32
+msgid "Try adjusting your filters"
+msgstr ""
+
+#: frontend/src/views/ResetPasswordView.vue:45
+msgid "Try again"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Coupon Detail'
+#: frontend/src/components/purchase/SupplierSelector.vue:158
+#: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
+msgid "Type"
+msgstr "Tipo"
+
+#: xpos/x_pos/api/invoice.py:69
+msgid ""
+"Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again."
+msgstr ""
+
+#: xpos/x_pos/api/payments.py:275
+msgid "Unable to create Journal Entry for customer credit."
+msgstr ""
+
+#: xpos/x_pos/api/invoice_processing/payment.py:69
+msgid "Unable to determine cash account for change payment entry."
+msgstr ""
+
+#: xpos/x_pos/api/invoice_processing/payment.py:75
+msgid ""
+"Unable to determine customer receivable account for change payment entry."
+msgstr ""
+
+#: xpos/x_pos/api/invoice_processing/creation.py:286
+#: xpos/x_pos/api/invoice_processing/creation.py:300
+msgid ""
+"Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:109
+msgid "Unable to load Credit Note {0}: {1}"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:326
+msgid "Unable to load Payment Entry {0}: {1}"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_closing_shift/closing_processing/overview.py:44
+msgid "Unable to resolve POS Opening Shift."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:100
+msgid ""
+"Unable to resolve POS cash account from POS Profile cash mode of payment."
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:61
+msgid "Unenroll from Program"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:280
+msgid "Unknown error"
+msgstr ""
+
+#. Label of a Int field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Used"
+msgstr "Usava"
+
+#. Label of a Link field in DocType 'POS Cash Movement'
+#: frontend/src/components/Navbar.vue:118
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
+msgid "User"
+msgstr "Usuário"
+
+#: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:78
+msgid "User must match the selected POS Opening Shift user."
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.py:45
+msgid "User {} has been disabled. Please select valid user/cashier"
+msgstr ""
+
+#. Label of a Date field in DocType 'POS Coupon'
+#. Label of a Date field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Valid From"
+msgstr "Válido De"
+
+#. Label of a Date field in DocType 'POS Coupon'
+#. Label of a Date field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Valid Upto"
+msgstr "Válido Até"
+
+#. Label of a Section Break field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "Validity and Usage"
+msgstr "Validade e Uso"
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:56
+msgid "Walk-in Customer"
+msgstr ""
+
+#. Label of a Link field in DocType 'POS Offer'
+#: frontend/src/views/PurchaseView.vue:180
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "Warehouse"
+msgstr "Armazém"
+
+#. Name of a role
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/referral_code/referral_code.json
+msgid "Website Manager"
+msgstr "Administrador do Site"
+
+#. Label of a Section Break field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Weight"
+msgstr "Peso"
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Weight decimals"
+msgstr ""
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Weight digits"
+msgstr ""
+
+#. Label of a Int field in DocType 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Weight starting position"
+msgstr ""
+
+#. Description of the 'Weight' (Section Break) field in DocType 'Scale Barcode
+#. Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid "Weight value is parsed as: [weight digits].[weight decimals]."
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:13
+msgid "Welcome back"
+msgstr ""
+
+#. Description of the 'Price included in barcode' (Check) field in DocType
+#. 'Scale Barcode Settings'
+#: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
+msgid ""
+"When enabled, price is extracted using the price start/digits/decimals fields below."
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:163
+msgid "Worth {0}"
+msgstr ""
+
+#: frontend/src/components/cart/CartSummary.vue:71
+#: frontend/src/components/payment/PaymentDialog.vue:180
+msgid "Write Off"
+msgstr "Abatimento"
+
+#: xpos/x_pos/api/invoice_processing/creation.py:105
+msgid ""
+"Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount."
+msgstr ""
+
+#. Name of a Workspace
+#. Label of a Link in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "X POS"
+msgstr ""
+
+#. Label of a shortcut in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "X POS App"
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/processor.py:17
+msgid "X POS Payments is not enabled for this POS Profile"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:570
+msgid "X POS Purchase Order Flow Failed"
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/service.py:35
+msgid "You are not allowed to access this shift."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/permissions.py:35
+msgid "You are not allowed to manage this cash movement record."
+msgstr ""
+
+#: xpos/x_pos/api/invoice_processing/returns.py:389
+msgid "You are trying to return more quantity for item {0} than was sold."
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:97
+msgid "days"
+msgstr ""
+
+#. Description of the 'Coupon Name' (Data) field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "e.g. \"Summer Holiday 2019 Offer 20\""
+msgstr "por exemplo, &quot;Oferta de férias de verão 2019 20&quot;"
+
+#: frontend/src/components/cart/CartSummary.vue:32
+#: frontend/src/components/payment/PaymentDialog.vue:57
+msgid "incl."
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:66
+msgid "item"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:120
+msgid "item(s)"
+msgstr ""
+
+#: frontend/src/components/cart/DraftInvoiceDialog.vue:66
+#: frontend/src/components/purchase/StockReceiving.vue:537
+#: frontend/src/components/purchase/StockReceiving.vue:597
+msgid "items"
+msgstr ""
+
+#: xpos/x_pos/api/barcode_generator.py:333
+msgid "items must be a list"
+msgstr ""
+
+#: frontend/src/views/BarcodePrintView.vue:121
+msgid "label(s)"
+msgstr ""
+
+#: xpos/x_pos/api/customers.py:108 xpos/x_pos/api/item_processing/search.py:113
+msgid "modified_after must be a valid ISO datetime"
+msgstr ""
+
+#: frontend/src/components/customer/LoyaltyDialog.vue:113
+msgid "more"
+msgstr ""
+
+#: frontend/src/components/payment/PaymentDialog.vue:159
+msgid "pts"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:316
+#: frontend/src/components/purchase/StockReceiving.vue:544
+#: frontend/src/components/purchase/StockReceiving.vue:606
+msgid "received"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:405
+msgid "transferred"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:474
+msgid "unaccounted"
+msgstr ""
+
+#. Description of the 'Coupon Code' (Data) field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "unique e.g. SAVE20  To be used to get discount"
+msgstr "exclusivo por exemplo SAVE20 Para ser usado para obter desconto"
+
+#: frontend/src/components/purchase/StockReceiving.vue:370
+msgid "will be rejected"
+msgstr ""
+
+#: frontend/src/components/purchase/StockReceiving.vue:466
+msgid "will be returned to"
+msgstr ""
+
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:177
+msgid "{0} Coupon used are {1}. Allowed quantity is exhausted"
+msgstr "{0} o cupom usado é {1}. a quantidade permitida está esgotada"
+
+#: xpos/x_pos/api/purchase_orders.py:41
+msgid "{0} is disabled for this POS Profile."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:172
+msgid "{0} is invalid."
+msgstr ""
+
+#: xpos/x_pos/api/cash_movement/validation.py:175
+msgid "{0} must belong to company {1}."
+msgstr ""
+
+#: xpos/x_pos/api/payment_processing/reconciliation.py:457
+msgid "{0} payment(s) were skipped."
+msgstr ""
+
+#: xpos/x_pos/api/invoice_processing/payment.py:29
+msgid "{0} {1} must be submitted before creating change payment entries."
+msgstr ""
+
+#. Count format of shortcut in the X POS Workspace
+#: xpos/x_pos/workspace/x_pos/x_pos.json
+msgid "{} Active"
+msgstr ""

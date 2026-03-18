@@ -68,7 +68,7 @@
                             </div>
                         </div>
 
-                        <div class="text-right shrink-0">
+                        <div class="text-end shrink-0">
                             <div class="font-bold text-foreground text-lg">
                                 {{ posStore.currencySymbol }}{{ formatNumber(order.grand_total) }}
                             </div>
@@ -150,16 +150,16 @@
                                 <thead class="bg-muted/50">
                                     <tr>
                                         <th
-                                            class="text-left px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
+                                            class="text-start px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
                                             {{ __("Item") }}</th>
                                         <th
-                                            class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
+                                            class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
                                             {{ __("Qty") }}</th>
                                         <th
-                                            class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
+                                            class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
                                             {{ __("Rate") }}</th>
                                         <th
-                                            class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
+                                            class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase tracking-wide">
                                             {{ __("Amount") }}</th>
                                     </tr>
                                 </thead>
@@ -174,11 +174,11 @@
                                                     posStore.currencySymbol + formatNumber(item.discount_amount || 0) }}
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3 text-right text-muted-foreground">{{ item.qty }} {{
+                                        <td class="px-4 py-3 text-end text-muted-foreground">{{ item.qty }} {{
                                             item.uom }}</td>
-                                        <td class="px-4 py-3 text-right text-muted-foreground">{{
+                                        <td class="px-4 py-3 text-end text-muted-foreground">{{
                                             formatNumber(item.rate) }}</td>
-                                        <td class="px-4 py-3 text-right font-medium text-foreground">{{
+                                        <td class="px-4 py-3 text-end font-medium text-foreground">{{
                                             formatNumber(item.amount ?? 0) }}</td>
                                     </tr>
                                 </tbody>

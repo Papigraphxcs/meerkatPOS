@@ -111,15 +111,15 @@ onUnmounted(() => {
             <div v-else-if="purchaseStore.suppliers.length === 0" class="p-4 text-center text-muted-foreground">
                 <p>{{ __("No suppliers found") }}</p>
                 <Button @click="openNewSupplierForm" variant="link" class="mt-2">
-                    <Plus class="w-4 h-4 mr-1" />
+                    <Plus class="w-4 h-4 me-1" />
                     {{ __("Add New Supplier") }}
                 </Button>
             </div>
             <div v-else class="divide-y divide-border">
                 <button v-for="supplier in purchaseStore.suppliers" :key="supplier.name"
                     @click="selectSupplier(supplier)"
-                    class="w-full p-4 text-left hover:bg-muted transition-colors flex items-center gap-3" :class="{
-                        'bg-primary/10 border-l-2 border-l-primary': purchaseStore.selectedSupplier?.name === supplier.name
+                    class="w-full p-4 text-start hover:bg-muted transition-colors flex items-center gap-3" :class="{
+                        'bg-primary/10 border-s-2 border-s-primary': purchaseStore.selectedSupplier?.name === supplier.name
                     }">
                     <div class="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                         <User class="w-5 h-5 text-muted-foreground" />

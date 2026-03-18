@@ -1,9 +1,3 @@
-/**
- * Composable that subscribes to Electron sync engine IPC events and
- * exposes reactive sync state to components.
- *
- * No-op in browser / PWA mode.
- */
 import { ref, onMounted, onUnmounted } from "vue";
 import { isElectron } from "@/services/electronBridge";
 
@@ -13,10 +7,6 @@ export function useSyncStatus() {
   const syncTable = ref<string | null>(null);
   const lastSyncTime = ref<string | null>(null);
   const lastError = ref<string | null>(null);
-  /**
-   * Increments every time a sync cycle completes successfully.
-   * Components can watch this to react to fresh data.
-   */
   const syncCompleteCount = ref(0);
 
   const cleanups: Array<() => void> = [];
@@ -24,14 +14,12 @@ export function useSyncStatus() {
   onMounted(async () => {
     if (!isElectron() || !window.electronAPI) return;
 
-    // Restore last sync time from engine state
     try {
       const state = await window.electronAPI.getSyncState();
       if (state?.lastSyncTime) {
         lastSyncTime.value = new Date(state.lastSyncTime).toLocaleTimeString();
       }
     } catch {
-      // not critical
     }
 
     const offStatus = window.electronAPI.onSyncStatus((status) => {

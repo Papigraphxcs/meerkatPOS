@@ -7,8 +7,6 @@
 
     <ScrollArea class="flex-1 p-4">
       <div class="max-w-2xl mx-auto space-y-6">
-
-        <!-- Server Connection -->
         <Card class="p-5">
           <div class="flex items-center gap-2 mb-4">
             <Globe class="w-5 h-5 text-primary" />
@@ -24,7 +22,7 @@
             </div>
             <div class="flex gap-2">
               <Button size="sm" variant="outline" @click="testServerConnection" :disabled="testingServer">
-                <Loader2 v-if="testingServer" class="w-4 h-4 mr-1 animate-spin" />
+                <Loader2 v-if="testingServer" class="w-4 h-4 me-1 animate-spin" />
                 {{ __("Test Connection") }}
               </Button>
               <Button size="sm" @click="saveServerUrl" :disabled="!settings.serverUrl">
@@ -34,7 +32,6 @@
           </div>
         </Card>
 
-        <!-- Database Configuration (Electron only) -->
         <Card v-if="isElectronMode" class="p-5">
           <div class="flex items-center gap-2 mb-4">
             <Database class="w-5 h-5 text-primary" />
@@ -64,7 +61,7 @@
           </div>
           <div class="flex gap-2 mt-3">
             <Button size="sm" variant="outline" @click="testDbConnection" :disabled="testingDb">
-              <Loader2 v-if="testingDb" class="w-4 h-4 mr-1 animate-spin" />
+              <Loader2 v-if="testingDb" class="w-4 h-4 me-1 animate-spin" />
               {{ __("Test Connection") }}
             </Button>
             <Button size="sm" @click="saveDbConfig">
@@ -73,7 +70,6 @@
           </div>
         </Card>
 
-        <!-- Sync Settings (Electron only) -->
         <Card v-if="isElectronMode" class="p-5">
           <div class="flex items-center gap-2 mb-4">
             <RefreshCw class="w-5 h-5 text-primary" />
@@ -104,7 +100,7 @@
             </div>
             <div class="flex gap-2">
               <Button size="sm" variant="outline" @click="triggerSync" :disabled="syncState.isSyncing">
-                <Loader2 v-if="syncState.isSyncing" class="w-4 h-4 mr-1 animate-spin" />
+                <Loader2 v-if="syncState.isSyncing" class="w-4 h-4 me-1 animate-spin" />
                 {{ syncState.isSyncing ? __("Syncing...") : __("Sync Now") }}
               </Button>
               <Button size="sm" @click="saveSyncSettings">{{ __("Save") }}</Button>
@@ -112,7 +108,6 @@
           </div>
         </Card>
 
-        <!-- POS Profile -->
         <Card class="p-5">
           <div class="flex items-center gap-2 mb-4">
             <Monitor class="w-5 h-5 text-primary" />
@@ -134,7 +129,6 @@
           </div>
         </Card>
 
-        <!-- Data Management (Electron only) -->
         <Card v-if="isElectronMode" class="p-5">
           <div class="flex items-center gap-2 mb-4">
             <HardDrive class="w-5 h-5 text-primary" />
@@ -160,7 +154,6 @@
           </div>
         </Card>
 
-        <!-- About -->
         <Card class="p-5">
           <div class="flex items-center gap-2 mb-4">
             <Info class="w-5 h-5 text-primary" />

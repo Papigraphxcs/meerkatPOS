@@ -1,43 +1,26 @@
-/**
- * User Rights / Permissions Service
- *
- * Mirrors deskpos UserRights.cs — checks role-based POS permissions
- * stored in the local `pos_users` table (synced from ERPNext).
- *
- * Permissions are fetched once at login and cached in-memory.
- * The POS profile and user role determine what actions are allowed.
- */
-
 import { ref, computed } from "vue";
 import { isElectron } from "./electronBridge";
 
 export interface PosPermissions {
-  // Billing
   close_bill: boolean;
   allow_reprint_invoice: boolean;
   allow_cancel_invoice: boolean;
   unsettled_invoices: boolean;
-  // Pricing / Discounts
   apply_additional_discount: boolean;
   apply_standard_discount: boolean;
   show_edit_discount_field: boolean;
   edit_tax_template: boolean;
   allow_change_price: boolean;
-  // Sales
   quotation: boolean;
   sale_return: boolean;
-  // Purchasing
   local_purchase: boolean;
   purchase_order: boolean;
   purchase_invoice: boolean;
-  // Inventory
   stock_adjustment: boolean;
   stock_entry: boolean;
   near_expiry_items: boolean;
-  // Finance
   expense: boolean;
   bank_drop: boolean;
-  // List Views
   list_of_invoices: boolean;
   list_of_cancelled_invoices: boolean;
   list_of_errors: boolean;
@@ -48,7 +31,6 @@ export interface PosPermissions {
   list_of_stock_adjustments: boolean;
   list_of_expense: boolean;
   list_of_bank_drops: boolean;
-  // Reports
   invoice_settlement_report: boolean;
   sales_report_by_time: boolean;
   sales_summary_by_hour: boolean;
@@ -99,15 +81,8 @@ const currentRole = ref<string>("");
 const permissions = ref<PosPermissions>({ ...DEFAULT_PERMISSIONS });
 const isLoaded = ref(false);
 
-/**
- * Load permissions for the given user role.
- * In Electron mode, reads from the `pos_users` table which contains
- * the user's role and permission flags synced from ERPNext.
- * In browser mode, grants all permissions (online validation via Frappe).
- */
 export async function loadPermissions(userEmail: string): Promise<void> {
   if (!isElectron()) {
-    // Browser mode: all permissions ON (server validates per-request)
     permissions.value = Object.keys(DEFAULT_PERMISSIONS).reduce((acc, key) => {
       (acc as Record<string, boolean>)[key] = true;
       return acc;
@@ -123,7 +98,6 @@ export async function loadPermissions(userEmail: string): Promise<void> {
       const userPerms = (posUser as Record<string, unknown>).permissions;
 
       if (userPerms && typeof userPerms === "object") {
-        // Merge with defaults — only override keys that exist
         const merged = { ...DEFAULT_PERMISSIONS };
         for (const [key, val] of Object.entries(userPerms as Record<string, unknown>)) {
           if (key in merged) {
@@ -132,11 +106,9 @@ export async function loadPermissions(userEmail: string): Promise<void> {
         }
         permissions.value = merged;
       } else {
-        // User exists but no permissions data → use defaults
         permissions.value = { ...DEFAULT_PERMISSIONS };
       }
     } else {
-      // User not found in local DB → use defaults
       permissions.value = { ...DEFAULT_PERMISSIONS };
     }
   } catch (err) {

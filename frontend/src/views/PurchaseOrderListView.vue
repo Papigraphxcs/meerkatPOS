@@ -1,8 +1,4 @@
 <script setup lang="ts">
-/**
- * Purchase Order List View
- * Shows list of purchase orders with filtering and actions
- */
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore } from "@/stores/purchaseStore";
@@ -44,19 +40,15 @@ const router = useRouter();
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
 
-// Filters
 const searchTerm = ref("");
 const supplierFilter = ref("");
 const statusFilter = ref("");
 const fromDate = ref("");
 const toDate = ref("");
-
-// Selected order for detail view
 const selectedOrder = ref<PurchaseOrder | null>(null);
 const showDetailDialog = ref(false);
 const isLoadingDetail = ref(false);
 
-// Draft orders from server (docstatus=0 Purchase Orders)
 const draftOrders = ref<Array<{
     name: string;
     supplier: string;
@@ -179,7 +171,6 @@ async function loadDrafts(): Promise<void> {
 }
 
 function editSubmittedOrder(order: PurchaseOrder): void {
-    // Load the order into the store for editing (amend)
     purchaseStore.loadFromOrder(order);
     router.push("/purchase-order");
 }
@@ -193,7 +184,6 @@ onMounted(() => {
 
 <template>
     <div class="h-full flex flex-col bg-background overflow-hidden">
-        <!-- Header -->
         <header class="bg-card border-b border-border px-4 py-3 shrink-0">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -202,23 +192,22 @@ onMounted(() => {
                 </div>
                 <div class="flex items-center gap-2">
                     <Button @click="fetchOrders" variant="outline" size="sm">
-                        <RefreshCw class="w-4 h-4 mr-1" />
+                        <RefreshCw class="w-4 h-4 me-1" />
                         {{ __("Refresh") }}
                     </Button>
                     <Button @click="createNewOrder">
-                        <Plus class="w-4 h-4 mr-1" />
+                        <Plus class="w-4 h-4 me-1" />
                         {{ __("New Order") }}
                     </Button>
                 </div>
             </div>
         </header>
 
-        <!-- Filters -->
         <div class="bg-card border-b border-border px-4 py-3 shrink-0">
             <div class="grid grid-cols-5 gap-3">
                 <div class="relative">
-                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input v-model="searchTerm" :placeholder="__('Search orders...')" class="pl-8 h-8 text-sm" />
+                    <Search class="absolute start-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input v-model="searchTerm" :placeholder="__('Search orders...')" class="ps-8 h-8 text-sm" />
                 </div>
                 <LinkField v-model="supplierFilter" doctype="Supplier" class="h-8 text-sm"
                     @update:model-value="fetchOrders" />
@@ -231,10 +220,8 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="flex-1 flex min-h-0 overflow-hidden">
-            <!-- Draft Orders Panel (Left) -->
-            <div v-if="draftOrders.length > 0" class="w-72 border-r border-border bg-card flex flex-col shrink-0">
+            <div v-if="draftOrders.length > 0" class="w-72 border-e border-border bg-card flex flex-col shrink-0">
                 <div class="px-3 py-2 border-b border-border bg-muted">
                     <span class="text-sm font-medium text-foreground">
                         {{ __("Drafts") }} ({{ draftOrders.length }})
@@ -255,7 +242,7 @@ onMounted(() => {
                             </div>
                             <div class="flex gap-1">
                                 <Button @click="editDraftOrder(draft)" variant="outline" size="sm" class="flex-1 h-7">
-                                    <Edit class="w-3 h-3 mr-1" />
+                                    <Edit class="w-3 h-3 me-1" />
                                     {{ __("Edit") }}
                                 </Button>
                                 <Button @click="deleteDraftOrder(draft.name)" variant="ghost" size="icon"
@@ -268,7 +255,6 @@ onMounted(() => {
                 </ScrollArea>
             </div>
 
-            <!-- Orders List (Right) -->
             <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <ScrollArea class="flex-1 min-h-0 p-4">
                     <div v-if="purchaseStore.isLoadingOrders" class="grid gap-3">
@@ -305,7 +291,7 @@ onMounted(() => {
                                     </div>
                                 </div>
 
-                                <div class="text-right shrink-0">
+                                <div class="text-end shrink-0">
                                     <div class="font-bold text-foreground text-lg">
                                         {{ formatCurrency(order.grand_total) }}
                                     </div>
@@ -322,7 +308,6 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Order Detail Dialog -->
         <Dialog v-model:open="showDetailDialog">
             <DialogContent class="max-w-2xl p-0">
                 <DialogHeader class="p-6 pb-4 border-b border-border">
@@ -331,7 +316,7 @@ onMounted(() => {
                             <DialogTitle class="text-lg">
                                 {{ selectedOrder?.name }}
                                 <Badge v-if="selectedOrder" :variant="statusVariant(selectedOrder.status)"
-                                    class="text-xs ml-2">
+                                    class="text-xs ms-2">
                                     {{ selectedOrder.status }}
                                 </Badge>
                             </DialogTitle>
@@ -365,16 +350,16 @@ onMounted(() => {
                             <table class="w-full text-sm">
                                 <thead class="bg-muted/50">
                                     <tr>
-                                        <th class="text-left px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase">
+                                        <th class="text-start px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase">
                                             {{ __("Item") }}
                                         </th>
-                                        <th class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase">
+                                        <th class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase">
                                             {{ __("Qty") }}
                                         </th>
-                                        <th class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase">
+                                        <th class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase">
                                             {{ __("Rate") }}
                                         </th>
-                                        <th class="text-right px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase">
+                                        <th class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase">
                                             {{ __("Amount") }}
                                         </th>
                                     </tr>
@@ -386,9 +371,9 @@ onMounted(() => {
                                             <div class="text-foreground font-medium">{{ item.item_name }}</div>
                                             <div class="text-xs text-muted-foreground">{{ item.item_code }}</div>
                                         </td>
-                                        <td class="px-4 py-3 text-right text-muted-foreground">{{ item.qty }} {{ item.uom }}</td>
-                                        <td class="px-4 py-3 text-right text-muted-foreground">{{ formatCurrency(item.rate) }}</td>
-                                        <td class="px-4 py-3 text-right font-medium text-foreground">
+                                        <td class="px-4 py-3 text-end text-muted-foreground">{{ item.qty }} {{ item.uom }}</td>
+                                        <td class="px-4 py-3 text-end text-muted-foreground">{{ formatCurrency(item.rate) }}</td>
+                                        <td class="px-4 py-3 text-end font-medium text-foreground">
                                             {{ formatCurrency((item.qty || 0) * (item.rate || 0)) }}
                                         </td>
                                     </tr>
@@ -407,7 +392,7 @@ onMounted(() => {
 
                 <DialogFooter class="p-4 border-t border-border">
                     <Button v-if="selectedOrder?.docstatus === 0" @click="editSubmittedOrder(selectedOrder)" variant="outline">
-                        <Edit class="w-4 h-4 mr-1" />
+                        <Edit class="w-4 h-4 me-1" />
                         {{ __("Edit") }}
                     </Button>
                     <Button @click="showDetailDialog = false">{{ __("Close") }}</Button>

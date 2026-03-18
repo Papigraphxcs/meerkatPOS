@@ -1,7 +1,7 @@
 <template>
 	<div class="flex h-full overflow-hidden">
 		<div
-			class="flex-1 flex flex-col min-w-0 border-r border-border bg-background max-w-[calc(100%-560px)] xl:max-w-[calc(100%-520px)]">
+			class="flex-1 flex flex-col min-w-0 border-e border-border bg-background max-w-[calc(100%-560px)] xl:max-w-[calc(100%-520px)]">
 			<div class="shrink-0 p-4 pb-2 space-y-3">
 				<div class="flex items-center gap-2">
 					<div class="flex-1">

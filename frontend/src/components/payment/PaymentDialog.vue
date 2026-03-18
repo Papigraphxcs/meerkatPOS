@@ -214,7 +214,7 @@
 					</div>
 				</div>
 
-				<div class="hidden lg:flex flex-col w-64 border-l border-border p-4 gap-3">
+				<div class="hidden lg:flex flex-col w-64 border-s border-border p-4 gap-3">
 					<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{{ __('Numpad') }}
 					</h3>
 					<div class="grid grid-cols-3 gap-1.5 flex-1">

@@ -36,24 +36,20 @@ const router = useRouter();
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
 
-// Search states
 const itemSearchTerm = ref("");
 const supplierSearchTerm = ref("");
 const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 const highlightedItemIndex = ref(-1);
 const itemSearchInputRef = ref<HTMLInputElement | null>(null);
 
-// Barcode scanner
 const barcodeValue = ref("");
 const isBarcodeScan = ref(false);
 const barcodeFlash = ref<"" | "success" | "error">("");
 let barcodeFlashTimer: ReturnType<typeof setTimeout> | null = null;
 
-// New item / supplier dialog visibility
 const showNewItemDialog = ref(false);
 const showNewSupplierDialog = ref(false);
 
-// PO Categories
 const poCategories = [
     "Against Purchase Quotation",
     "Against Sale Order",
@@ -61,7 +57,6 @@ const poCategories = [
     "Reorder Level",
 ];
 
-// Computed
 const grandTotal = computed(() => {
     return purchaseStore.cartItems.reduce((sum, item) => {
         const gross = item.qty * item.rate;
@@ -84,7 +79,6 @@ function getItemAmount(item: PurchaseCartItem): number {
     return gross * (1 - disc / 100);
 }
 
-// Item search
 function onItemSearch(): void {
     if (debounceTimer.value) clearTimeout(debounceTimer.value);
     highlightedItemIndex.value = -1;
@@ -93,7 +87,6 @@ function onItemSearch(): void {
     }, 300);
 }
 
-// Handle key navigation in item search list
 function handleItemSearchKeyDown(event: KeyboardEvent): void {
     const items = purchaseStore.purchaseItems;
     if (items.length === 0) return;
@@ -124,7 +117,6 @@ function scrollHighlightedItemIntoView(): void {
     });
 }
 
-// Barcode scan
 async function onBarcodeScan(): Promise<void> {
     const code = barcodeValue.value.trim();
     if (!code) return;
@@ -155,7 +147,6 @@ function onBarcodePaste(): void {
     }, 50);
 }
 
-// Supplier search
 function onSupplierSearch(): void {
     if (debounceTimer.value) clearTimeout(debounceTimer.value);
     debounceTimer.value = setTimeout(() => {
@@ -167,18 +158,15 @@ function selectSupplier(supplier: Supplier): void {
     purchaseStore.selectSupplier(supplier);
 }
 
-// Add item to cart
 function addItem(item: SearchItem): void {
     purchaseStore.addToCart(item, 1);
 }
 
-// Delete row
 function deleteRow(index: number): void {
     purchaseStore.removeFromCart(index);
 }
 
 function deleteRows(indices: number[]): void {
-    // indices come sorted descending from ChildTable
     for (const i of indices) {
         purchaseStore.removeFromCart(i);
     }
@@ -200,7 +188,6 @@ function moveRow(index: number, direction: -1 | 1): void {
     items[target] = temp;
 }
 
-// Cell change handler for ChildTable — routes to store methods
 function onPOCellChange(payload: { rowIndex: number; fieldname: string; value: any }): void {
     const { rowIndex, fieldname, value } = payload;
     switch (fieldname) {
@@ -229,7 +216,6 @@ function onPOCellChange(payload: { rowIndex: number; fieldname: string; value: a
     }
 }
 
-// Get UOM options for item
 function getUOMOptions(item: PurchaseCartItem): Array<{ uom: string; conversion_factor: number }> {
     if (item.item_uoms && item.item_uoms.length > 0) {
         return item.item_uoms;
@@ -389,7 +375,7 @@ onMounted(() => {
                 </div>
                 <div class="flex items-center gap-2">
                     <Button @click="goToList" variant="outline" size="sm">
-                        <List class="w-4 h-4 mr-1" />
+                        <List class="w-4 h-4 me-1" />
                         {{ __("View Orders") }}
                     </Button>
                     <Badge variant="secondary" class="gap-1.5">
@@ -431,8 +417,8 @@ onMounted(() => {
                     <label class="text-xs text-muted-foreground mb-1 block">&nbsp;</label>
                     <Button @click="fetchCategoryItems" variant="secondary" size="sm" class="w-full h-8"
                         :disabled="purchaseStore.isFetchingCategoryItems">
-                        <Download v-if="!purchaseStore.isFetchingCategoryItems" class="w-3.5 h-3.5 mr-1" />
-                        <Loader2 v-else class="w-3.5 h-3.5 mr-1 animate-spin" />
+                        <Download v-if="!purchaseStore.isFetchingCategoryItems" class="w-3.5 h-3.5 me-1" />
+                        <Loader2 v-else class="w-3.5 h-3.5 me-1 animate-spin" />
                         {{ __("Get Items") }}
                     </Button>
                 </div>
@@ -456,27 +442,27 @@ onMounted(() => {
         </div>
 
         <div class="flex-1 flex min-h-0 overflow-hidden">
-            <div class="w-72 border-r border-border bg-card flex flex-col shrink-0 overflow-hidden">
+            <div class="w-72 border-e border-border bg-card flex flex-col shrink-0 overflow-hidden">
                 <div class="px-3 pt-3 pb-2 border-b border-border">
                     <div class="relative">
-                        <ScanBarcode class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input v-model="barcodeValue" class="pl-8 h-8 text-sm" :class="{
+                        <ScanBarcode class="absolute start-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input v-model="barcodeValue" class="ps-8 h-8 text-sm" :class="{
                             'ring-2 ring-green-500/50 border-green-500': barcodeFlash === 'success',
                             'ring-2 ring-red-500/50 border-red-500': barcodeFlash === 'error'
                         }" :placeholder="__('Scan barcode...')" @keydown.enter.prevent="onBarcodeScan"
                             @paste="onBarcodePaste" />
                         <Loader2 v-if="isBarcodeScan"
-                            class="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin" />
+                            class="absolute end-2.5 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin" />
                     </div>
                 </div>
 
                 <div class="p-3 border-b border-border">
                     <div class="flex gap-1">
                         <div class="relative flex-1">
-                            <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Search class="absolute start-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input v-model="itemSearchTerm" @input="onItemSearch"
                                 @keydown="handleItemSearchKeyDown" :placeholder="__('Search items...')"
-                                class="pl-8 h-8 text-sm" ref="itemSearchInputRef" />
+                                class="ps-8 h-8 text-sm" ref="itemSearchInputRef" />
                         </div>
                         <Button @click="showNewItemDialog = true" variant="outline" size="icon" class="h-8 w-8 shrink-0">
                             <Plus class="w-4 h-4" />
@@ -496,7 +482,7 @@ onMounted(() => {
                     <div v-else class="divide-y divide-border">
                         <button v-for="(item, index) in purchaseStore.purchaseItems" :key="item.item_code" @click="addItem(item)"
                             :data-purchase-item-index="index"
-                            class="w-full p-3 text-left hover:bg-muted transition-colors"
+                            class="w-full p-3 text-start hover:bg-muted transition-colors"
                             :class="{ 'bg-primary/10 ring-1 ring-primary/30': index === highlightedItemIndex }">
                             <p class="font-medium text-sm truncate text-foreground">{{ item.item_name }}</p>
                             <p class="text-xs text-muted-foreground truncate">{{ item.item_code }}</p>
@@ -536,7 +522,7 @@ onMounted(() => {
                     <template #toolbar>
                         <Button v-if="purchaseStore.cartItems.length > 0" @click="purchaseStore.refreshAllStock()"
                             variant="outline" size="sm" class="h-7 text-xs">
-                            <RefreshCw class="w-3.5 h-3.5 mr-1" />
+                            <RefreshCw class="w-3.5 h-3.5 me-1" />
                             {{ __("Refresh Stock") }}
                         </Button>
                     </template>
@@ -560,23 +546,23 @@ onMounted(() => {
                                 purchaseStore.cartItemCount }}</strong></span>
                         </div>
                         <div class="flex items-center gap-4">
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-sm text-muted-foreground">{{ __("Grand Total") }}</span>
                                 <div class="text-xl font-bold text-green-600">{{ formatCurrency(grandTotal) }}</div>
                             </div>
                             <div class="flex gap-2">
                                 <Button @click="clearForm" variant="outline">
-                                    <X class="w-4 h-4 mr-1" />
+                                    <X class="w-4 h-4 me-1" />
                                     {{ __("Clear") }}
                                 </Button>
                                 <Button @click="saveDraft" variant="secondary"
                                     :disabled="purchaseStore.cartItems.length === 0 || purchaseStore.isDraftSaving">
-                                    <FileText class="w-4 h-4 mr-1" />
+                                    <FileText class="w-4 h-4 me-1" />
                                     {{ purchaseStore.isDraftSaving ? __("Saving...") : __("Save Draft") }}
                                 </Button>
                                 <Button @click="createOrder()"
                                     :disabled="!purchaseStore.canCreateOrder || purchaseStore.isProcessing">
-                                    <Send class="w-4 h-4 mr-1" />
+                                    <Send class="w-4 h-4 me-1" />
                                     {{ purchaseStore.isProcessing ? __("Creating...") : __("Submit") }}
                                 </Button>
                             </div>

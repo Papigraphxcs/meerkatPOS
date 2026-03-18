@@ -73,12 +73,9 @@ const isBarcodeScan = ref(false);
 const barcodeFlash = ref<"" | "success" | "error">("");
 let barcodeFlashTimer: ReturnType<typeof setTimeout> | null = null;
 
-// New item / supplier dialog visibility
 const showNewItemDialog = ref(false);
 const showNewSupplierDialog = ref(false);
 const isProcessing = ref(false);
-
-// Computed
 
 function getValueExTax(item: InvoiceItem): number {
     const gross = (item.qty + item.bonus_qty) * item.rate;
@@ -206,7 +203,6 @@ function removeItem(index: number): void {
 }
 
 function removeItems(indices: number[]): void {
-    // indices come sorted descending from ChildTable
     for (const i of indices) {
         invoiceItems.value.splice(i, 1);
     }
@@ -232,7 +228,6 @@ function onCellChange(payload: { rowIndex: number; fieldname: string; value: any
     }
 }
 
-// Column definitions for the invoice child table
 const invoiceColumns = computed<TableColumn[]>(() => [
     {
         fieldname: "item_name",
@@ -492,10 +487,10 @@ onMounted(() => {
                     <label class="text-xs text-muted-foreground mb-1 block">{{ __("Supplier") }} *</label>
                     <div class="flex gap-1">
                         <div class="relative flex-1">
-                            <Search class="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                            <Search class="absolute start-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                             <Input v-model="supplierSearchTerm" @input="onSupplierSearch"
                                 :placeholder="purchaseStore.selectedSupplier || __('Search supplier...')"
-                                class="h-8 text-sm pl-7" />
+                                class="h-8 text-sm ps-7" />
                         </div>
                         <Button @click="showNewSupplierDialog = true" variant="outline" size="icon" class="h-8 w-8 shrink-0">
                             <Plus class="w-3.5 h-3.5" />
@@ -505,7 +500,7 @@ onMounted(() => {
                         class="absolute z-50 mt-1 w-64 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-auto">
                         <button v-for="sup in purchaseStore.suppliers" :key="sup.name"
                             @click="selectSupplier(sup); supplierSearchTerm = ''"
-                            class="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors">
+                            class="w-full px-3 py-2 text-start text-sm hover:bg-muted transition-colors">
                             {{ sup.supplier_name }}
                         </button>
                     </div>
@@ -542,26 +537,26 @@ onMounted(() => {
         </div>
 
         <div class="flex-1 flex min-h-0 overflow-hidden">
-            <div class="w-72 border-r border-border bg-card flex flex-col shrink-0 overflow-hidden">
+            <div class="w-72 border-e border-border bg-card flex flex-col shrink-0 overflow-hidden">
                 <div class="px-3 pt-3 pb-2 border-b border-border">
                     <div class="relative">
-                        <ScanBarcode class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input v-model="barcodeValue" class="pl-8 h-8 text-sm"
+                        <ScanBarcode class="absolute start-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input v-model="barcodeValue" class="ps-8 h-8 text-sm"
                             :class="{
                                 'ring-2 ring-green-500/50 border-green-500': barcodeFlash === 'success',
                                 'ring-2 ring-red-500/50 border-red-500': barcodeFlash === 'error'
                             }"
                             :placeholder="__('Scan barcode...')" @keydown.enter.prevent="onBarcodeScan" @paste="onBarcodePaste" />
-                        <Loader2 v-if="isBarcodeScan" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin" />
+                        <Loader2 v-if="isBarcodeScan" class="absolute end-2.5 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin" />
                     </div>
                 </div>
 
                 <div class="p-3 border-b border-border">
                     <div class="flex gap-1">
                         <div class="relative flex-1">
-                            <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Search class="absolute start-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input v-model="itemSearchTerm" @input="onItemSearch" :placeholder="__('Search items...')"
-                                class="pl-8 h-8 text-sm" />
+                                class="ps-8 h-8 text-sm" />
                         </div>
                         <Button @click="showNewItemDialog = true" variant="outline" size="icon" class="h-8 w-8 shrink-0">
                             <Plus class="w-4 h-4" />
@@ -579,7 +574,7 @@ onMounted(() => {
                     </div>
                     <div v-else class="divide-y divide-border">
                         <button v-for="item in purchaseStore.purchaseItems" :key="item.item_code" @click="addItemToInvoice(item)"
-                            class="w-full p-3 text-left hover:bg-muted transition-colors">
+                            class="w-full p-3 text-start hover:bg-muted transition-colors">
                             <p class="font-medium text-sm truncate text-foreground">{{ item.item_name }}</p>
                             <p class="text-xs text-muted-foreground truncate">{{ item.item_code }}</p>
                             <div class="flex gap-2 mt-1 text-xs text-muted-foreground/70">
@@ -617,7 +612,7 @@ onMounted(() => {
                 >
                     <template #toolbar>
                         <Button @click="recalculate" variant="outline" size="sm" class="h-7 text-xs">
-                            <Calculator class="w-3.5 h-3.5 mr-1" />
+                            <Calculator class="w-3.5 h-3.5 me-1" />
                             {{ __("Re-Calculate") }}
                         </Button>
                     </template>
@@ -665,17 +660,17 @@ onMounted(() => {
                             <span class="text-muted-foreground">{{ __("GST") }}: <strong>{{ formatCurrency(totalGst) }}</strong></span>
                         </div>
                         <div class="flex items-center gap-4">
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-sm text-muted-foreground">{{ __("Grand Total") }}</span>
                                 <div class="text-xl font-bold text-green-600">{{ formatCurrency(grandTotal) }}</div>
                             </div>
                             <div class="flex gap-2">
                                 <Button @click="clearForm" variant="outline">
-                                    <X class="w-4 h-4 mr-1" />
+                                    <X class="w-4 h-4 me-1" />
                                     {{ __("Clear") }}
                                 </Button>
                                 <Button @click="createInvoice" :disabled="!purchaseStore.selectedSupplier || invoiceItems.length === 0 || isProcessing">
-                                    <Save class="w-4 h-4 mr-1" />
+                                    <Save class="w-4 h-4 me-1" />
                                     {{ isProcessing ? __("Creating...") : __("Create Invoice") }}
                                 </Button>
                             </div>

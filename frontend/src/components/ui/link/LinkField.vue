@@ -229,10 +229,10 @@ function clearSelection() {
         <div class="relative">
           <input :value="query" type="text" autocomplete="off" :placeholder="`Search ${doctype}`" :disabled="disabled" :class="cn(
             'flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
-            clearable && hasSelection ? 'pr-14' : 'pr-8'
+            clearable && hasSelection ? 'pe-14' : 'pe-8'
           )" @input="onInput" @focus="onFocus" @keydown="onKeydown" />
 
-          <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          <div class="absolute end-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <button v-if="clearable && hasSelection" type="button" tabindex="-1"
               class="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
               @mousedown.prevent="clearSelection">
@@ -254,7 +254,7 @@ function clearSelection() {
           @open-auto-focus.prevent>
           <div v-if="loading" class="flex items-center justify-center py-4 text-sm text-muted-foreground">
             <Loader2 class="h-4 w-4 animate-spin" />
-            <span class="ml-2">{{ __("Searching...") }}</span>
+            <span class="ms-2">{{ __("Searching...") }}</span>
           </div>
 
           <div v-else-if="options.length === 0" class="py-3 px-2 text-sm text-muted-foreground">
@@ -262,7 +262,7 @@ function clearSelection() {
           </div>
 
           <button v-for="(option, index) in options" :key="option.value" type="button"
-            class="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm transition-colors" :class="[
+            class="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-start text-sm transition-colors" :class="[
               index === highlightedIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50',
               option.value === modelValue ? 'font-medium' : '',
             ]" @mouseenter="highlightedIndex = index" @mousedown.prevent="selectOption(option)">

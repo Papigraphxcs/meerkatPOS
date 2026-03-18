@@ -15,7 +15,7 @@
 			</div>
 
 			<Badge v-if="showStock && item.actual_qty !== undefined" :variant="stockVariant"
-				class="absolute top-2 right-2 text-[10px]">
+				class="absolute top-2 end-2 text-[10px]">
 				{{ stockLabel }}
 			</Badge>
 
@@ -54,7 +54,7 @@
 				<span class="text-sm font-bold text-primary dark:text-primary-foreground tabular-nums">
 					{{ currencySymbol }}{{ formatPrice(item.rate) }}
 				</span>
-				<span class="text-[10px] text-muted-foreground dark:text-muted-foreground/90 truncate ml-1">
+				<span class="text-[10px] text-muted-foreground dark:text-muted-foreground/90 truncate ms-1">
 					{{ item.item_group }}
 				</span>
 			</div>

@@ -20,7 +20,7 @@
                                     ? 'border-primary bg-primary/10 text-primary'
                                     : 'border-border text-muted-foreground hover:border-primary/40'">
                                 {{ u.uom }}
-                                <span v-if="u.conversion_factor !== 1" class="text-[10px] ml-1 text-muted-foreground">
+                                <span v-if="u.conversion_factor !== 1" class="text-[10px] ms-1 text-muted-foreground">
                                     (&times;{{ u.conversion_factor }})
                                 </span>
                             </button>
@@ -42,7 +42,7 @@
                                     : 'border-border hover:border-primary/40'">
                                 <div>
                                     <span class="font-medium text-foreground">{{ batch.batch_no }}</span>
-                                    <span v-if="batch.expiry_date" class="text-[11px] text-muted-foreground ml-2">
+                                    <span v-if="batch.expiry_date" class="text-[11px] text-muted-foreground ms-2">
                                         Exp: {{ batch.expiry_date }}
                                     </span>
                                 </div>
@@ -60,9 +60,9 @@
                                 available)</span>
                         </label>
                         <div class="relative mb-2">
-                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input v-model="serialSearch" type="text" placeholder="Search serial numbers..."
-                                class="pl-9 text-sm" />
+                                class="ps-9 text-sm" />
                         </div>
                         <div class="space-y-1 max-h-40 overflow-y-auto xpos-scrollbar">
                             <button v-for="sn in filteredSerials" :key="sn" @click="toggleSerial(sn)"

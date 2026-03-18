@@ -1,0 +1,717 @@
+"1-indexed start position of item code in the full barcode. Example: for item code 3310100 in 3310100010009, start is 1.",
+"1-indexed start position of weight segment. Example: in 3310100010009, weight starts at position 8.",
+"<span class=\""h4\"">X POS</span>",
+Accept Qty,
+Account,கணக்கு
+Account Head,கணக்கு ஒதுக்கும் தலைப்பு - பிரிவு
+Accounts Manager,கணக்குகள் மேலாளர்
+Accounts User,பயனர் கணக்குகள்
+Add Filter,வடிகட்டி
+Add New Supplier,
+Add a new supplier to the system,
+Add items to pay,
+Add to Cart,வணிக வண்டியில் சேர்
+Add/Edit Coupon Conditions,கூப்பன் நிபந்தனைகளைச் சேர்க்கவும் / திருத்தவும்
+Additional Discount,கூடுதல் தள்ளுபடி
+Administrator,நிர்வாகி
+Against Name,
+All,எல்லாம்
+All Groups,
+All orders have been received,
+Allocated {0} across {1} payment(s).,
+Allocation amount for payment {0} exceeds outstanding invoices,
+Amended From,முதல் திருத்தப்பட்ட
+Amount,தொகை
+Amount Due,
+Amount exceeds POS Profile cash movement max amount.,
+Amount must be greater than zero,
+Amount must be greater than zero.,
+Applied,பிரயோக
+Apply,விண்ணப்பிக்கவும்
+Apply For,
+Apply For POS Profiles,
+Apply On,விண்ணப்பிக்க
+Apply Rule On Brand,பிராண்டில் விதியைப் பயன்படுத்துங்கள்
+Apply Rule On Item Code,பொருள் குறியீட்டில் விதியைப் பயன்படுத்துங்கள்
+Apply Rule On Item Group,உருப்படி குழுவில் விதியைப் பயன்படுத்துங்கள்
+Apply Type,
+Are you sure you want to delete this draft?,
+At least one item is required,
+Auto Apply,
+Auto-receive,
+Available Programs,
+Back Office Cash Account is fixed by POS Profile and cannot be overridden.,
+Back Office Cash Account is required for cash deposit.,
+Back Office Cash Account must be a Cash account.,
+Back to Sign In,
+Barcode,பார்கோடு
+Barcode Printer,
+Barcode Structure,
+Barcode Type,பட்டை குறியீடு வகை
+Barcode lookup failed,
+Barcode {0} already exists.,
+Barcodes,பட்டை குறியீடுகள்
+Brand,பிராண்ட்
+Campaign,பிரச்சாரம்
+Cancel,ரத்து
+Cancelled,ரத்து செய்யப்பட்டது
+Cancelling submitted cash movements is disabled for this POS Profile.,
+Cannot add item to cart,
+Cart,வண்டியில்
+Cart is empty,
+Cash Deposit,
+Cash Deposit is disabled for this POS Profile.,
+Cash Movement,
+Cash Movement is disabled for this POS Profile.,
+Cash deposit recorded,
+Cash flow tracking,
+Cash movement is already cancelled,
+Cash movement {0} not found,
+Cashier,காசாளர்
+Change,மாற்றம்
+Change Given,
+Check your email for reset instructions,
+Clear All,
+Clear cart,
+Click on items to add them here,
+Click to change customer,
+Click to select customer,
+Client Request ID,
+Close,மூடவும்
+Close Shift,
+Closed,மூடப்பட்ட
+Closing,
+Closing Amount,நிறைவு தொகை
+Closing...,
+Company,நிறுவனம்
+Company is required,
+Company is required.,
+Company must match the selected POS Opening Shift company.,
+Company must match the selected POS Profile company.,
+Contact administrator to set up loyalty programs,
+Context is required,
+Cost Center,செலவு மையம்
+Cost Center is not set in pos profile {0},
+Coupon,
+Coupon Based,
+Coupon Code,கூப்பன் குறியீடு
+Coupon Code Based,கூப்பன் குறியீடு அடிப்படையிலானது
+Coupon Description,கூப்பன் விளக்கம்
+Coupon Name,கூப்பன் பெயர்
+Coupon Type,கூப்பன் வகை
+Coupon has expired,
+Coupon is not valid for this customer,
+Coupon is not yet valid,
+Create New Supplier,
+Create Supplier,
+Create items,
+Create suppliers,
+Created By,மூலம் உருவாக்கப்பட்டது
+Creating...,
+Credit Note,வரவுக்குறிப்பு
+Credit Note {0} has no remaining balance to allocate.,
+Credit note {0} is already fully allocated,
+Credit note {0} still has an unapplied balance of {1},
+Currency,நாணய
+"Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}",
+Currency is required,
+Customer,வாடிக்கையாளர்
+Customer Group,வாடிக்கையாளர் பிரிவு
+Customer Name,வாடிக்கையாளர் பெயர்
+Customer already exists,
+Customer is already enrolled in {0},
+Customer is already enrolled in {0}. Please unenroll from the current program first.,
+Customer is not enrolled in any loyalty program,
+Customer is required,வாடிக்கையாளர் தேவை
+Customer is required to create an address,
+Customer locked for return,
+Customer mismatch: Return must be for the same customer ({0}) as the original invoice,
+Customer name is required,
+Customer {0} not found,
+"Customer, Company, Amount, and Mode of Payment are required",
+Date,தேதி
+Date & Time,
+Default Loyalty Program,
+Default Rate,
+Default Rate is required,
+Delete draft,
+Deleting cancelled cash movements is disabled for this POS Profile.,
+Delivery Charges,
+Delivery Charges POS Profile,
+Deposit,
+Deposit To,
+Description,விளக்கம்
+Details,விவரம்
+Difference,வேறுபாடு
+Digits after decimal. Example: 1.000 => decimals 3.,
+"Digits before decimal. Example: for 1.000, use 1 (or 2 if your scale encodes 01.000).",
+Disable,முடக்கு
+Disabled,முடக்கப்பட்டது
+Discount,தள்ளுபடி
+Discount %,
+Discount Amount,தள்ளுபடி தொகை
+Discount Percentage,தள்ளுபடி சதவீதம்
+Discount Type,தள்ளுபடி வகை
+Discount amount,
+Draft,வரைவு
+Draft invoice deleted,
+Draft invoice restored to cart,
+Email,மின்னஞ்சல்
+Email Address,மின்னஞ்சல் முகவரி
+Email ID,மின்னஞ்சல் முகவரி
+Email Sent Successfully,
+Email address,மின்னஞ்சல் முகவரி
+Email or Username,
+Enable only if barcode also contains price segment.,
+"Enable when your barcode starts with a fixed prefix value (for example, 331).",
+Enroll Customer,
+Enrolled,சேர்ந்தார்
+Enrolling...,பதிவுசெய்கிறது ...
+Enter coupon code...,
+Enter reason for this transaction...,
+Enter supplier name,
+Enter the email address associated with your account,
+Enter your email address,
+Enter your email or username,
+Enter your email to receive a password reset link,
+Enter your password,உங்கள் கடவுச்சொல்லை உள்ளிடவும்
+Expected,
+Expected Amount,எதிர்பார்த்த தொகை
+Expense,செலவு
+Expense Account,செலவு கணக்கு
+Expense Account is required for expense entries.,
+Expense account is required,
+Expense account is required for POS Expense.,
+Expense target account must match Expense Account.,
+Expires,
+Failed to create payment request: {0},
+Failed to delete draft invoice,
+Failed to fetch draft invoices,
+Failed to load draft invoice,
+Failed to reconcile Credit Note {0}: {1},
+Failed to reconcile Journal Entry {0}: {1},
+Failed to reconcile Payment Entry {0}: {1},
+Failed to record cash movement,
+Failed to save draft: {0},
+Failed to validate coupon,
+Final Customer Offer,
+"Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored.",
+Forgot password?,
+Generate and print barcode labels for items,
+Generating...,
+Gift Card,பரிசு அட்டை
+Give Item,
+Give Item Row ID,
+Give Product,
+Given Quantity,
+Grand Total,ஆக மொத்தம்
+In Transit,நடு வழியில்
+In-Transit,
+In-Transit Stock,
+Include QR Code,
+Individual,தனிப்பட்ட
+Invalid Opening Entry,தவறான திறப்பு நுழைவு
+Invalid POS Opening Shift data provided.,
+Invalid Period,தவறான காலம்
+Invalid language code,
+Invalid language code format: {0},
+Invalid movement type for journal entry.,
+Invalid movement type.,
+Invalid or already used coupon code,
+Invalid or expired coupon code,
+Invalid payload for cash movement.,
+Invalid posting date.,
+Invalid {0} filter,
+Invoice,விலைப்பட்டியல்
+Invoice Amount,
+Invoice Currency,
+Invoice details,
+Invoice name is required for update,
+Invoice {0} Deleted,
+Invoice {0} does not exist,
+Invoice {0} not found,
+Item,பொருள்
+Item Code,பொருள்  குறியீடு
+Item Code and Price List are required,
+Item Code is required,
+Item Discounts,
+Item Group,பொருள் குழு
+Item Price,பொருள் விலை
+Item Price has been added or updated,
+Item Rate Should Less Then,
+Item code digits,
+Item code is required.,
+Item code starting position,
+Item {0} was not in the original invoice {1},
+"Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})",
+"Item {0}: Cannot return {1}, maximum returnable is {2}",
+Item {0}: Discount {1}% exceeds maximum allowed {2}%,
+Item {0}: Quantity must be greater than zero,
+Item {0}: Rate cannot be negative,
+Items,பொருட்கள்
+Journal Entry,பத்திரிகை நுழைவு
+Journal Entry {0} has no unallocated amount remaining.,
+Label,சிட்டை
+Label Size,
+Large (60×40mm),
+Linked Invoices,இணைக்கப்பட்ட பற்றுச்சீட்டுகள்
+Loading in-transit stock...,
+Loading pending orders...,
+Loading suppliers...,
+Loyalty,
+Loyalty Information,
+Loyalty Point,
+Loyalty Point Scheme,
+Loyalty Points,விசுவாச புள்ளிகள்
+Loyalty Points Redeemed,
+Loyalty Program,விசுவாசம் திட்டம்
+Loyalty Program is required,
+Loyalty Program {0} not found,
+Manage loyalty for,
+Material transfers awaiting receipt at your warehouse,
+Max Amount,அதிகபட்ச தொகை
+Max Quantity,
+Maximum Use,அதிகபட்ச பயன்பாடு
+Medium (50×30mm),
+Method,வகை
+Min Amount,குறைந்தபட்ச தொகை
+Min Quantity,
+Missing Dependency,
+Mobile,மொபைல்
+Mobile NO,
+Mode Of Payment,கட்டணம் செலுத்தும் முறை
+Mode of Payment,கட்டணம் செலுத்தும் முறை
+Mode of Payments,கொடுப்பனவு முறை
+Modes of Payment,கட்டணம் முறைகள்
+Movement Type,
+Movement Type must be Expense or Deposit.,
+Net Total,நிகர மொத்தம்
+No allocation made for credit note {0},
+No allocation made for payment {0},
+No allocation was recorded for Credit Note {0}.,
+No allocation was recorded for Journal Entry {0}.,
+No allocation was recorded for Payment Entry {0}.,
+No allocations were made.,
+No batches available in {0} for {1}.,
+No draft invoices found,
+No groups found,
+No in-transit stock,
+No items found,
+No items in cart to save.,
+No items selected,
+No items to invoice. Please ensure there are items on the Purchase Order.,
+No items to receive.,
+No items to receive. Please enter received quantities.,
+No items to return.,
+No loyalty programs available,
+No matches found,
+No material transfers pending receipt,
+No open shift found. Please open a shift first.,
+No orders found,
+No outstanding invoices available for allocation of credit note {0},
+No outstanding invoices available for allocation of payment {0},
+No outstanding invoices were available to reconcile Credit Note {0}.,
+No outstanding invoices were available to reconcile Journal Entry {0}.,
+No outstanding invoices were available to reconcile Payment Entry {0}.,
+No outstanding invoices were found for {0}.,
+No pending stock,
+"No query filters. Click \""Add Filter\"" to add one.",
+No suppliers found,
+No unallocated payments were available for reconciliation.,
+No valid batches available in {0} for {1}.,
+No valid items to receive.,
+No valid items to return.,
+Not Enrolled,
+Number of decimal places encoded for the price.,
+Number of digits representing the price before decimal places.,
+Numpad,
+Offer,
+Offer Applied,
+Offer Name,
+Offers &amp; Coupons,
+Offline,ஆஃப்லைன்
+Only One Use Per Customer,
+Only cancelled POS Cash Movement records can be deleted.,
+Only cancelled cash movements can be deleted.,
+Only draft Quotations can be updated,
+Only draft Sales Orders can be updated,
+Only draft invoices can be deleted,
+Only draft invoices can be updated,
+Only draft invoices can be updated and submitted,
+Only submitted cash movements can be cancelled.,
+Only submitted or cancelled cash movements can be duplicated.,
+Only the shift owner can create cash movement entries.,
+Open,திறந்த
+Opening,திறப்பு
+Opening Amount,திறக்கும் தொகை
+Opening Balance Details,இருப்பு விவரங்களைத் திறத்தல்
+Order History,
+Order only,
+Order saved as draft,
+Orders,ஆணைகள்
+Original invoice {0} not found,
+Out of Stock,பங்கு இல்லை
+Outgoing Stock Entry is required.,
+POS,பிஓஎஸ்
+POS Allowed Expense Account,
+XPOS Allowed Source Account,
+POS Cash Movement,
+XPOS Closing Shift,
+XPOS Closing Shift Detail,
+XPOS Closing Shift Taxes,
+XPOS Closing Shift {} against {} between selected period,
+POS Coupon,
+POS Coupon Detail,
+POS Expense,
+POS Expense is disabled for this POS Profile.,
+POS Invoice,பிஓஎஸ் விலைப்பட்டியல்
+POS Offer,
+POS Offer Detail,
+POS Offer is disabled.,
+POS Opening Shift,
+XPOS Opening Shift Detail,
+POS Opening Shift is required,
+POS Opening Shift is required to compute the overview.,
+POS Opening Shift is required.,
+POS Opening Shift must be submitted and open.,
+POS Opening Shift not found.,
+POS Opening Shift {0} is not for the same POS Profile,
+POS Opening Shift {0} is not for the same company,
+POS Payment Entry Reference,
+POS Payments,
+POS Print Format Rule,
+POS Profile,பிஓஎஸ் செய்தது
+POS Profile company must match active POS Opening Shift company.,
+POS Profile is not set. Please close and reopen the shift.,
+POS Profile is required,
+POS Profile is required to create purchase documents.,
+POS Profile is required.,
+POS Profile must match the active POS Opening Shift profile.,
+POS Profile must match the selected POS Opening Shift profile.,
+POS Profile {} does not belongs to company {},POS சுயவிவரம் company company நிறுவனத்திற்கு சொந்தமானது அல்ல}}
+"POS Profile, Customer, and Items are required",
+POS Profiles,
+POS Sales Person Filter,
+POS Shift {0} is not open,
+POS Transactions,பிஓஎஸ் பரிவர்த்தனைகள்
+POS credit redemption for Sales Invoice {0},
+POS expense recorded,
+POS profile data is missing or invalid.,
+Password,கடவுச்சொல்
+Pay {0},
+Payment,கொடுப்பனவு
+Payment Entry,கொடுப்பனவு நுழைவு
+Payment Entry is already created or payment account is not matched,
+Payment Entry {0} has no unallocated amount remaining.,
+Payment Gateway Account not found,
+Payment Reconciliation,கொடுப்பனவு நல்லிணக்க
+Payment Request for {0},{0} க்கான கட்டண வேண்டுதல்
+Payment amount cannot be less than or equal to 0,கொடுப்பனவு தொகை 0 ஐ விட குறைவாகவோ அல்லது சமமாகவோ இருக்கக்கூடாது
+Payment amount must be greater than zero,
+Payment {0} is already fully allocated,
+Payments,பணம்
+Pending,முடிவுபெறாத
+Period End Date,காலம் முடிவு தேதி
+Period Start Date,காலம் தொடங்கும் தேதி
+Phone number,
+Please enter the phone number first,முதலில் தொலைபேசி எண்ணை உள்ளிடவும்
+Please select Coupon Code Based POS Offer.,
+Please select a customer before adding items to the cart,
+Please select a customer before holding the order.,
+Please select the correct POS Offer with the same company.,
+Please select the customer.,வாடிக்கையாளரைத் தேர்ந்தெடுக்கவும்.
+Please set Default Payable Account in Company {0},
+Please set default account for Mode of Payment {0} in company {1},
+Point of Sale System,
+Points Earned,
+Points Redeemed,
+Points Value,
+"Positions are 1-indexed and counted on the full barcode. Example: 3310100010009 => prefix 331, item code 3310100, weight 1.000, check digit 9.",
+Posting Date,தேதி தகவல்களுக்கு
+Prefix,முற்சேர்க்கை
+Prefix included in barcode,
+Prefix length,
+"Prefix length (for example, prefix 331 => length 3). Item/weight start positions still use full barcode positions.",
+Price,விலை
+Price Discount Scheme ,
+Price List is required,
+Price decimals,
+Price digits,
+Price included in barcode,
+Price starting position,
+Primary Customer Offer,
+Print,அச்சிடுக
+Print Format,வடிவமைப்பு அச்சிட
+Print Labels,
+Print Last Invoice,
+Process Return,
+Process Return {0},
+Processing...,செயலாக்கும் ...
+Product Discount Scheme,தயாரிப்பு தள்ளுபடி திட்டம்
+Profile,
+Profiles List,
+Program,திட்டம்
+Promo Type,
+Promotional,ஊக்குவிப்பு
+Promotional Schemes,
+Purchase,கொள்முதல்
+Purchase Order is required.,
+Purchase Order {0} does not exist.,
+Purchase Order {0} is not submitted.,
+Purchase Order {0} processing failed: {1},
+Purchase Orders,கொள்முதல் ஆணைகள்
+Purchase Orders pending receipt at,
+Purchase order requires at least one item with quantity.,
+Purchase order requires at least one item.,
+Purchase orders,
+Python package 'cryptography' is required for QZ Tray signing. Please install it on the server and retry.,
+QZ Certificate Missing,
+QZ Certificate Ready,
+"QZ Tray certificate generated successfully.<br><br>Download the certificate from POS Awesome and import it into QZ Tray on each POS machine, then restart QZ Tray.",
+QZ Tray certificate not found. Ask an administrator to run Setup QZ Certificate.,
+QZ certificate already exists.,
+QZ certificate generated successfully.,
+Qty,அளவு
+Qualifying Transaction / Item,
+Quantity and Amount Conditions,
+Quotation name is required,
+Rate,விலை
+Reason / Notes,
+Receive,பெறவும்
+Receive & Return,
+Receive Qty,
+Receive Stock,
+Receive stock,
+Received at {0},
+Receiving at,
+Receiving...,
+Recent Movements,
+Record Deposit,
+Record Expense,
+Record a cash deposit,
+Record a cash withdrawal,
+Redeem Points,
+Referral Code,பரிந்துரை குறியீடு
+Referral Code is required,
+Referral Code {0} does not exist,
+Referral Code {0} is disabled,
+Referral Name,
+Refresh,இளைப்பா (ற்) று
+Refund Amount,
+Reject Qty,
+Remaining,மீதமுள்ள
+Remaining outstanding: {0} across {1} invoice(s).,
+Remarks,கருத்துக்கள்
+"Remarks (optional, e.g. items damaged)",
+"Remarks (optional, e.g. missing or damaged items)",
+Remarks are required for cash movement in this POS Profile.,
+Remove Loyalty,
+Repeat,ஒப்பி
+Repeat Invoice (Ctrl+G),
+Replace Cheapest Item,
+Replace Same Item,
+Reset Password,கடவுச்சொல் மீட்டமை
+Restore Draft Invoice,
+Restore draft,
+Return,திரும்ப
+Return & Print,
+Return Against invoice is required for returns,
+Return Payment,
+Return Qty,
+Returns,ரிட்டர்ன்ஸ்
+Returns are only allowed until {0},
+Review and reconcile your shift,
+"Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches","ரோ # {0}: தொகுதி {1} மட்டுமே {2} கொத்தமல்லி உள்ளது. கிடைக்க கொண்ட {3} கொத்தமல்லி மற்றொரு தொகுதி தேர்ந்தெடுக்கவும் அல்லது / பல தொகுப்புகளும் இருந்து பிரச்சினை வழங்க, பல வரிசைகள் ஒரு வரிசையில் பிரிக்கவும்"
+Row ID,
+Sales Invoice,விற்பனை விலை விவரம்
+Sales Invoice Reference,
+Sales Manager,விற்பனை மேலாளர்
+Sales Master Manager,விற்பனை மாஸ்டர் மேலாளர்
+Sales Order Created,
+Sales Order Created at <a href='{0}'>{1}</a>,
+Sales Order name is required,
+Sales Partner,விற்பனை வரன்வாழ்க்கை துணை
+Sales Person,விற்பனையாளர்
+Sales Summary,விற்பனை சுருக்கம்
+Sales User,விற்பனை பயனர்
+Save & Print,
+Save Only,
+Save as draft,
+Save your current order to create a draft,
+Scale Barcode Settings,
+Scan barcode...,
+Search and add items from the left panel,
+"Search by name, phone, email...",
+Search for items to add barcode labels,
+Search for or create a customer,
+Search item groups...,
+"Search items by name, code, or barcode...",
+"Search items, scan barcode...",
+Search suppliers...,
+Searching...,
+Secure login powered by Frappe Framework,
+Select Customer,வாடிக்கையாளரைத் தேர்ந்தெடுக்கவும்
+Select a draft invoice to restore to cart,
+Select a loyalty program to enroll this customer,
+Select customer first,
+Selected,
+Selected POS Opening Shift should be open.,
+Selected expense account is not allowed for this POS Profile.,
+Selected source account is not allowed for this POS Profile.,
+Send Reset Link,
+Sending...,
+Set Posting Date,இடுகையிடும் தேதியை அமைக்கவும்
+Shift,
+Shift closed successfully!,
+Shipping Account,கப்பல் கணக்கு
+Shortage return from transit to source,
+Show Price,விலை காட்டு
+Sign In,
+Sign Out,
+Sign in to your account to continue,
+Signing in...,
+Small (38×25mm),
+Small remaining amounts,
+"Sorry, this coupon code cannot be used by this company",
+"Sorry, this coupon code cannot be used by this customer",
+"Sorry, this coupon code is no longer valid","மன்னிக்கவும், இந்த கூப்பன் குறியீடு இனி செல்லுபடியாகாது"
+"Sorry, this coupon code not exists",
+"Sorry, this coupon code's validity has expired","மன்னிக்கவும், இந்த கூப்பன் குறியீட்டின் செல்லுபடியாகும் காலாவதியானது"
+"Sorry, this coupon code's validity has not started","மன்னிக்கவும், இந்த கூப்பன் குறியீட்டின் செல்லுபடியாகும் தன்மை தொடங்கப்படவில்லை"
+"Sorry, {0} have used this coupon before",
+Source Account,
+Source account,
+Source account must be a Cash account.,
+Source account must belong to the selected company.,
+Source account override is disabled for this POS Profile.,
+Source and target accounts are required.,
+Source and target accounts cannot be the same for cash deposit.,
+Split Payment,
+Starting position (1-indexed) of the price segment.,
+Status,அந்தஸ்து
+Status must be one of {0},நிலைமை ஒன்றாக இருக்க வேண்டும் {0}
+Stock Entry {0} does not exist.,
+Stock Entry {0} has already been fully received.,
+Stock Entry {0} is not a Material Transfer with in-transit.,
+Stock Entry {0} is not a valid in-transit transfer.,
+Stock Entry {0} is not submitted.,
+Stock Receiving,
+Stock UOM is required.,
+Subtotal,கூட்டுத்தொகை
+Successfully enrolled {0} in {1},
+Successfully unenrolled {0} from {1},
+Summary,சுருக்கம்
+Supplier Name,வழங்குபவர் பெயர்
+Supplier is required.,
+Supplier name is required.,
+Supplier {0} was not found.,
+Suppliers,சப்ளையர்கள்
+Sync,ஒத்திசைவு
+System Manager,கணினி மேலாளர்
+Target Account,
+Target account,
+Target account is required,
+Target account must belong to the selected company.,
+Target warehouse is required.,
+Tax Breakdown,
+Tax ID,வரி ஐடி
+Taxes,வரி
+Taxes & Charges,
+Taxes Breakdown,
+Tendered,
+Theme: Dark (click to switch to System),
+Theme: Light (click to switch to Dark),
+Theme: System ({0}) (click to switch to Light),
+This Referral Code {0} not exists,
+This invoice {0} cannot be deleted,
+Title,தலைப்பு
+Total,மொத்தம்
+Total Invoices,
+Total Paid,
+Total Quantity,மொத்த அளவு
+Total Taxes,
+Total item code digits to extract. Example: item code 3310100 => digits 7.,
+Transaction,பரிவர்த்தனை
+Try a different search or category,
+Try adjusting your filters,
+Try again,
+Type,மாதிரி
+Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again.,
+Unable to create Journal Entry for customer credit.,
+Unable to determine cash account for change payment entry.,
+Unable to determine customer receivable account for change payment entry.,
+Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually,
+Unable to load Credit Note {0}: {1},
+Unable to load Payment Entry {0}: {1},
+Unable to resolve POS Opening Shift.,
+Unable to resolve POS cash account from POS Profile cash mode of payment.,
+Unenroll from Program,
+Unknown error,
+Used,பயன்படுத்திய
+User,பயனர்
+User must match the selected POS Opening Shift user.,
+User {} has been disabled. Please select valid user/cashier,
+Valid From,செல்லுபடியாகும்
+Valid Upto,செல்லுபடியாகும்
+Validity and Usage,செல்லுபடியாகும் பயன்பாடு
+Walk-in Customer,
+Warehouse,கிடங்கு
+Website Manager,இணைய மேலாளர்
+Weight,எடை
+Weight decimals,
+Weight digits,
+Weight starting position,
+Weight value is parsed as: [weight digits].[weight decimals].,
+Welcome back,
+"When enabled, price is extracted using the price start/digits/decimals fields below.",
+Worth {0},
+Write Off,இனிய எழுதவும்
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,
+X POS,
+X POS App,
+X POS Payments is not enabled for this POS Profile,
+X POS Purchase Order Flow Failed,
+You are not allowed to access this shift.,
+You are not allowed to manage this cash movement record.,
+You are trying to return more quantity for item {0} than was sold.,
+days,
+"e.g. \""Summer Holiday 2019 Offer 20\""",
+incl.,
+item,
+item(s),
+items,
+items must be a list,
+label(s),
+modified_after must be a valid ISO datetime,
+more,
+pts,
+received,
+transferred,
+unaccounted,
+unique e.g. SAVE20  To be used to get discount,தனித்துவமான எ.கா. SAVE20 தள்ளுபடி பெற பயன்படுத்தப்பட வேண்டும்
+will be rejected,
+will be returned to,
+{0} Coupon used are {1}. Allowed quantity is exhausted,{0 used பயன்படுத்தப்படும் கூப்பன் {1 are. அனுமதிக்கப்பட்ட அளவு தீர்ந்துவிட்டது
+{0} is disabled for this POS Profile.,
+{0} is invalid.,
+{0} must belong to company {1}.,
+{0} payment(s) were skipped.,
+{0} {1} must be submitted before creating change payment entries.,
+{} Active,
+Default Currency,முன்னிருப்பு நாணயத்தின்
+"e.g. ""Summer Holiday 2019 Offer 20""",எ.கா. &quot;கோடை விடுமுறை 2019 சலுகை 20&quot;
+Failed,தோல்வி
+First Name,முதல் பெயர்
+Full Name,முழு பெயர்
+Invoice Number,விலைப்பட்டியல் எண்
+Keyboard Shortcuts,விசைப்பலகை குறுக்குவழிகள்
+Last Name,கடந்த பெயர்
+Middle Name,மத்திய பெயர்
+Mpesa Settings,Mpesa அமைப்புகள்
+Posting Time,நேரம் தகவல்களுக்கு
+Reload,Reload
+Session Defaults,அமர்வு இயல்புநிலைகள்
+Success,வெற்றி
+Till Number,எண் வரை
+Transaction Type,பரிவர்த்தனை வகை
+View Website,இணையத்தளம் பார்வையிட

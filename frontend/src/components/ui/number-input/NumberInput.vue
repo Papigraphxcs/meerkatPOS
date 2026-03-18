@@ -14,7 +14,6 @@ export interface NumberInputProps {
     class?: HTMLAttributes["class"];
     allowDecimal?: boolean;
     selectOnFocus?: boolean;
-    /** Disables ArrowUp/ArrowDown key increment/decrement spinner behaviour */
     disableSpinner?: boolean;
 }
 

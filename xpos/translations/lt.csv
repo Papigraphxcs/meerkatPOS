@@ -1,0 +1,717 @@
+"1-indexed start position of item code in the full barcode. Example: for item code 3310100 in 3310100010009, start is 1.",
+"1-indexed start position of weight segment. Example: in 3310100010009, weight starts at position 8.",
+"<span class=\""h4\"">X POS</span>",
+Accept Qty,
+Account,sąskaita
+Account Head,sąskaita vadovas
+Accounts Manager,sąskaitos direktorius
+Accounts User,Sąskaitos vartotoją
+Add Filter,Pridėti filtrą
+Add New Supplier,
+Add a new supplier to the system,
+Add items to pay,
+Add to Cart,Į krepšelį
+Add/Edit Coupon Conditions,Pridėti / redaguoti kupono sąlygas
+Additional Discount,Papildoma nuolaida
+Administrator,administratorius
+Against Name,
+All,VISOS
+All Groups,
+All orders have been received,
+Allocated {0} across {1} payment(s).,
+Allocation amount for payment {0} exceeds outstanding invoices,
+Amended From,Iš dalies pakeistas Nuo
+Amount,Suma
+Amount Due,
+Amount exceeds POS Profile cash movement max amount.,
+Amount must be greater than zero,
+Amount must be greater than zero.,
+Applied,taikomas
+Apply,taikyti
+Apply For,
+Apply For POS Profiles,
+Apply On,taikyti ant
+Apply Rule On Brand,Taikyti prekės ženklo taisyklę
+Apply Rule On Item Code,Taikyti prekės kodo taisyklę
+Apply Rule On Item Group,Taikyti taisyklę daiktų grupėje
+Apply Type,
+Are you sure you want to delete this draft?,
+At least one item is required,
+Auto Apply,
+Auto-receive,
+Available Programs,
+Back Office Cash Account is fixed by POS Profile and cannot be overridden.,
+Back Office Cash Account is required for cash deposit.,
+Back Office Cash Account must be a Cash account.,
+Back to Sign In,
+Barcode,Brūkšninis kodas
+Barcode Printer,
+Barcode Structure,
+Barcode Type,Brūkšninio kodo tipas
+Barcode lookup failed,
+Barcode {0} already exists.,
+Barcodes,Brūkšniniai kodai
+Brand,markė
+Campaign,Kampanija
+Cancel,Atšaukti
+Cancelled,Atšauktas
+Cancelling submitted cash movements is disabled for this POS Profile.,
+Cannot add item to cart,
+Cart,Krepšelis
+Cart is empty,
+Cash Deposit,
+Cash Deposit is disabled for this POS Profile.,
+Cash Movement,
+Cash Movement is disabled for this POS Profile.,
+Cash deposit recorded,
+Cash flow tracking,
+Cash movement is already cancelled,
+Cash movement {0} not found,
+Cashier,Kasininkas
+Change,pokytis
+Change Given,
+Check your email for reset instructions,
+Clear All,
+Clear cart,
+Click on items to add them here,
+Click to change customer,
+Click to select customer,
+Client Request ID,
+Close,Uždaryti
+Close Shift,
+Closed,Uždaryta
+Closing,
+Closing Amount,Uždarymo suma
+Closing...,
+Company,Bendrovė
+Company is required,
+Company is required.,
+Company must match the selected POS Opening Shift company.,
+Company must match the selected POS Profile company.,
+Contact administrator to set up loyalty programs,
+Context is required,
+Cost Center,kaina centras
+Cost Center is not set in pos profile {0},
+Coupon,
+Coupon Based,
+Coupon Code,Kupono kodas
+Coupon Code Based,Kupono kodas pagrįstas
+Coupon Description,Kupono aprašymas
+Coupon Name,Kupono pavadinimas
+Coupon Type,Kupono tipas
+Coupon has expired,
+Coupon is not valid for this customer,
+Coupon is not yet valid,
+Create New Supplier,
+Create Supplier,
+Create items,
+Create suppliers,
+Created By,Sukurta
+Creating...,
+Credit Note,Kredito pastaba
+Credit Note {0} has no remaining balance to allocate.,
+Credit note {0} is already fully allocated,
+Credit note {0} still has an unapplied balance of {1},
+Currency,valiuta
+"Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}",
+Currency is required,
+Customer,Klientas
+Customer Group,Klientų grupė
+Customer Name,Klientas
+Customer already exists,
+Customer is already enrolled in {0},
+Customer is already enrolled in {0}. Please unenroll from the current program first.,
+Customer is not enrolled in any loyalty program,
+Customer is required,Klientas turi
+Customer is required to create an address,
+Customer locked for return,
+Customer mismatch: Return must be for the same customer ({0}) as the original invoice,
+Customer name is required,
+Customer {0} not found,
+"Customer, Company, Amount, and Mode of Payment are required",
+Date,Data
+Date & Time,
+Default Loyalty Program,
+Default Rate,
+Default Rate is required,
+Delete draft,
+Deleting cancelled cash movements is disabled for this POS Profile.,
+Delivery Charges,
+Delivery Charges POS Profile,
+Deposit,
+Deposit To,
+Description,apibūdinimas
+Details,detalės
+Difference,Skirtumas
+Digits after decimal. Example: 1.000 => decimals 3.,
+"Digits before decimal. Example: for 1.000, use 1 (or 2 if your scale encodes 01.000).",
+Disable,Išjungti
+Disabled,neįgalusis
+Discount,Nuolaida
+Discount %,
+Discount Amount,Nuolaida suma
+Discount Percentage,Nuolaida procentas
+Discount Type,Nuolaidos tipas
+Discount amount,
+Draft,Juodraštis
+Draft invoice deleted,
+Draft invoice restored to cart,
+Email,El. Paštas
+Email Address,Elektroninio pašto adresas
+Email ID,Elektroninio pašto ID
+Email Sent Successfully,
+Email address,Elektroninio pašto adresas
+Email or Username,
+Enable only if barcode also contains price segment.,
+"Enable when your barcode starts with a fixed prefix value (for example, 331).",
+Enroll Customer,
+Enrolled,Užregistruotas
+Enrolling...,Registruojama ...
+Enter coupon code...,
+Enter reason for this transaction...,
+Enter supplier name,
+Enter the email address associated with your account,
+Enter your email address,
+Enter your email or username,
+Enter your email to receive a password reset link,
+Enter your password,Įveskite savo slaptažodį
+Expected,
+Expected Amount,Numatoma suma
+Expense,Išlaidos
+Expense Account,Kompensuojamos paskyra
+Expense Account is required for expense entries.,
+Expense account is required,
+Expense account is required for POS Expense.,
+Expense target account must match Expense Account.,
+Expires,
+Failed to create payment request: {0},
+Failed to delete draft invoice,
+Failed to fetch draft invoices,
+Failed to load draft invoice,
+Failed to reconcile Credit Note {0}: {1},
+Failed to reconcile Journal Entry {0}: {1},
+Failed to reconcile Payment Entry {0}: {1},
+Failed to record cash movement,
+Failed to save draft: {0},
+Failed to validate coupon,
+Final Customer Offer,
+"Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored.",
+Forgot password?,
+Generate and print barcode labels for items,
+Generating...,
+Gift Card,Dovanų kortelė
+Give Item,
+Give Item Row ID,
+Give Product,
+Given Quantity,
+Grand Total,Bendra suma
+In Transit,Tranzitu
+In-Transit,
+In-Transit Stock,
+Include QR Code,
+Individual,Individualus
+Invalid Opening Entry,Neteisingas atidarymo įrašas
+Invalid POS Opening Shift data provided.,
+Invalid Period,Neteisingas laikotarpis
+Invalid language code,
+Invalid language code format: {0},
+Invalid movement type for journal entry.,
+Invalid movement type.,
+Invalid or already used coupon code,
+Invalid or expired coupon code,
+Invalid payload for cash movement.,
+Invalid posting date.,
+Invalid {0} filter,
+Invoice,faktūra
+Invoice Amount,
+Invoice Currency,
+Invoice details,
+Invoice name is required for update,
+Invoice {0} Deleted,
+Invoice {0} does not exist,
+Invoice {0} not found,
+Item,Prekė
+Item Code,Prekės kodas
+Item Code and Price List are required,
+Item Code is required,
+Item Discounts,
+Item Group,Prekė grupė
+Item Price,Prekė Kaina
+Item Price has been added or updated,
+Item Rate Should Less Then,
+Item code digits,
+Item code is required.,
+Item code starting position,
+Item {0} was not in the original invoice {1},
+"Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})",
+"Item {0}: Cannot return {1}, maximum returnable is {2}",
+Item {0}: Discount {1}% exceeds maximum allowed {2}%,
+Item {0}: Quantity must be greater than zero,
+Item {0}: Rate cannot be negative,
+Items,Daiktai
+Journal Entry,žurnalo įrašą
+Journal Entry {0} has no unallocated amount remaining.,
+Label,Etiketė
+Label Size,
+Large (60×40mm),
+Linked Invoices,Susietos sąskaitos faktūros
+Loading in-transit stock...,
+Loading pending orders...,
+Loading suppliers...,
+Loyalty,
+Loyalty Information,
+Loyalty Point,
+Loyalty Point Scheme,
+Loyalty Points,Lojalumo taškai
+Loyalty Points Redeemed,
+Loyalty Program,Lojalumo programa
+Loyalty Program is required,
+Loyalty Program {0} not found,
+Manage loyalty for,
+Material transfers awaiting receipt at your warehouse,
+Max Amount,Didžiausia suma
+Max Quantity,
+Maximum Use,Maksimalus naudojimas
+Medium (50×30mm),
+Method,metodas
+Min Amount,Min. Suma
+Min Quantity,
+Missing Dependency,
+Mobile,Mobilus
+Mobile NO,
+Mode Of Payment,Mokėjimo būdas
+Mode of Payment,Mokėjimo būdas
+Mode of Payments,Mokėjimų būdas
+Modes of Payment,Mokėjimo būdai
+Movement Type,
+Movement Type must be Expense or Deposit.,
+Net Total,grynasis Iš viso
+No allocation made for credit note {0},
+No allocation made for payment {0},
+No allocation was recorded for Credit Note {0}.,
+No allocation was recorded for Journal Entry {0}.,
+No allocation was recorded for Payment Entry {0}.,
+No allocations were made.,
+No batches available in {0} for {1}.,
+No draft invoices found,
+No groups found,
+No in-transit stock,
+No items found,
+No items in cart to save.,
+No items selected,
+No items to invoice. Please ensure there are items on the Purchase Order.,
+No items to receive.,
+No items to receive. Please enter received quantities.,
+No items to return.,
+No loyalty programs available,
+No matches found,
+No material transfers pending receipt,
+No open shift found. Please open a shift first.,
+No orders found,
+No outstanding invoices available for allocation of credit note {0},
+No outstanding invoices available for allocation of payment {0},
+No outstanding invoices were available to reconcile Credit Note {0}.,
+No outstanding invoices were available to reconcile Journal Entry {0}.,
+No outstanding invoices were available to reconcile Payment Entry {0}.,
+No outstanding invoices were found for {0}.,
+No pending stock,
+"No query filters. Click \""Add Filter\"" to add one.",
+No suppliers found,
+No unallocated payments were available for reconciliation.,
+No valid batches available in {0} for {1}.,
+No valid items to receive.,
+No valid items to return.,
+Not Enrolled,
+Number of decimal places encoded for the price.,
+Number of digits representing the price before decimal places.,
+Numpad,
+Offer,
+Offer Applied,
+Offer Name,
+Offers &amp; Coupons,
+Offline,Atsijungęs
+Only One Use Per Customer,
+Only cancelled POS Cash Movement records can be deleted.,
+Only cancelled cash movements can be deleted.,
+Only draft Quotations can be updated,
+Only draft Sales Orders can be updated,
+Only draft invoices can be deleted,
+Only draft invoices can be updated,
+Only draft invoices can be updated and submitted,
+Only submitted cash movements can be cancelled.,
+Only submitted or cancelled cash movements can be duplicated.,
+Only the shift owner can create cash movement entries.,
+Open,Atviras
+Opening,Atidarymas
+Opening Amount,Pradinė suma
+Opening Balance Details,Išsami pradinio likučio informacija
+Order History,
+Order only,
+Order saved as draft,
+Orders,Užsakymai
+Original invoice {0} not found,
+Out of Stock,Išparduota
+Outgoing Stock Entry is required.,
+POS,POS
+POS Allowed Expense Account,
+XPOS Allowed Source Account,
+POS Cash Movement,
+XPOS Closing Shift,
+XPOS Closing Shift Detail,
+XPOS Closing Shift Taxes,
+XPOS Closing Shift {} against {} between selected period,
+POS Coupon,
+POS Coupon Detail,
+POS Expense,
+POS Expense is disabled for this POS Profile.,
+POS Invoice,POS sąskaita faktūra
+POS Offer,
+POS Offer Detail,
+POS Offer is disabled.,
+POS Opening Shift,
+XPOS Opening Shift Detail,
+POS Opening Shift is required,
+POS Opening Shift is required to compute the overview.,
+POS Opening Shift is required.,
+POS Opening Shift must be submitted and open.,
+POS Opening Shift not found.,
+POS Opening Shift {0} is not for the same POS Profile,
+POS Opening Shift {0} is not for the same company,
+POS Payment Entry Reference,
+POS Payments,
+POS Print Format Rule,
+POS Profile,POS profilis
+POS Profile company must match active POS Opening Shift company.,
+POS Profile is not set. Please close and reopen the shift.,
+POS Profile is required,
+POS Profile is required to create purchase documents.,
+POS Profile is required.,
+POS Profile must match the active POS Opening Shift profile.,
+POS Profile must match the selected POS Opening Shift profile.,
+POS Profile {} does not belongs to company {},POS profilis {} nepriklauso įmonei {}
+"POS Profile, Customer, and Items are required",
+POS Profiles,
+POS Sales Person Filter,
+POS Shift {0} is not open,
+POS Transactions,POS sandoriai
+POS credit redemption for Sales Invoice {0},
+POS expense recorded,
+POS profile data is missing or invalid.,
+Password,slaptažodis
+Pay {0},
+Payment,Mokėjimas
+Payment Entry,Mokėjimo įrašas
+Payment Entry is already created or payment account is not matched,
+Payment Entry {0} has no unallocated amount remaining.,
+Payment Gateway Account not found,
+Payment Reconciliation,Mokėjimo suderinimas
+Payment Request for {0},{0} mokėjimo užklausa
+Payment amount cannot be less than or equal to 0,Mokėjimo suma negali būti mažesnė arba lygi 0
+Payment amount must be greater than zero,
+Payment {0} is already fully allocated,
+Payments,Mokėjimai
+Pending,kol
+Period End Date,Laikotarpio pabaigos data
+Period Start Date,Laikotarpio pradžios data
+Phone number,
+Please enter the phone number first,Pirmiausia įveskite telefono numerį
+Please select Coupon Code Based POS Offer.,
+Please select a customer before adding items to the cart,
+Please select a customer before holding the order.,
+Please select the correct POS Offer with the same company.,
+Please select the customer.,Pasirinkite klientą.
+Please set Default Payable Account in Company {0},
+Please set default account for Mode of Payment {0} in company {1},
+Point of Sale System,
+Points Earned,
+Points Redeemed,
+Points Value,
+"Positions are 1-indexed and counted on the full barcode. Example: 3310100010009 => prefix 331, item code 3310100, weight 1.000, check digit 9.",
+Posting Date,Išsiuntimo data
+Prefix,priešdėlis
+Prefix included in barcode,
+Prefix length,
+"Prefix length (for example, prefix 331 => length 3). Item/weight start positions still use full barcode positions.",
+Price,Kaina
+Price Discount Scheme ,
+Price List is required,
+Price decimals,
+Price digits,
+Price included in barcode,
+Price starting position,
+Primary Customer Offer,
+Print,Spausdinti
+Print Format,Spausdinti Formatas
+Print Labels,
+Print Last Invoice,
+Process Return,
+Process Return {0},
+Processing...,Apdorojimas...
+Product Discount Scheme,Produkto nuolaidų schema
+Profile,
+Profiles List,
+Program,Programa
+Promo Type,
+Promotional,Reklaminė
+Promotional Schemes,
+Purchase,pirkti
+Purchase Order is required.,
+Purchase Order {0} does not exist.,
+Purchase Order {0} is not submitted.,
+Purchase Order {0} processing failed: {1},
+Purchase Orders,Pirkimo užsakymai
+Purchase Orders pending receipt at,
+Purchase order requires at least one item with quantity.,
+Purchase order requires at least one item.,
+Purchase orders,
+Python package 'cryptography' is required for QZ Tray signing. Please install it on the server and retry.,
+QZ Certificate Missing,
+QZ Certificate Ready,
+"QZ Tray certificate generated successfully.<br><br>Download the certificate from POS Awesome and import it into QZ Tray on each POS machine, then restart QZ Tray.",
+QZ Tray certificate not found. Ask an administrator to run Setup QZ Certificate.,
+QZ certificate already exists.,
+QZ certificate generated successfully.,
+Qty,Kiekis
+Qualifying Transaction / Item,
+Quantity and Amount Conditions,
+Quotation name is required,
+Rate,Kaina
+Reason / Notes,
+Receive,gauti
+Receive & Return,
+Receive Qty,
+Receive Stock,
+Receive stock,
+Received at {0},
+Receiving at,
+Receiving...,
+Recent Movements,
+Record Deposit,
+Record Expense,
+Record a cash deposit,
+Record a cash withdrawal,
+Redeem Points,
+Referral Code,Kreipimosi kodas
+Referral Code is required,
+Referral Code {0} does not exist,
+Referral Code {0} is disabled,
+Referral Name,
+Refresh,atnaujinti
+Refund Amount,
+Reject Qty,
+Remaining,Likęs
+Remaining outstanding: {0} across {1} invoice(s).,
+Remarks,Pastabos
+"Remarks (optional, e.g. items damaged)",
+"Remarks (optional, e.g. missing or damaged items)",
+Remarks are required for cash movement in this POS Profile.,
+Remove Loyalty,
+Repeat,pakartoti
+Repeat Invoice (Ctrl+G),
+Replace Cheapest Item,
+Replace Same Item,
+Reset Password,Atstatyti slaptažodį
+Restore Draft Invoice,
+Restore draft,
+Return,sugrįžimas
+Return & Print,
+Return Against invoice is required for returns,
+Return Payment,
+Return Qty,
+Returns,grąžinimas
+Returns are only allowed until {0},
+Review and reconcile your shift,
+"Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches","Eilutė # {0}: Partija {1} turi tik {2} vnt. Prašome pasirinkti kitą partiją, kuri turi gauti {3} Kiekis arba padalinti eilutę į kelias eilutes, pristatyti / problemą iš kelių partijų"
+Row ID,
+Sales Invoice,pardavimų sąskaita faktūra
+Sales Invoice Reference,
+Sales Manager,Pardavimų vadybininkas
+Sales Master Manager,Pardavimų magistras direktorius
+Sales Order Created,
+Sales Order Created at <a href='{0}'>{1}</a>,
+Sales Order name is required,
+Sales Partner,Partneriai pardavimo
+Sales Person,Pardavėjas
+Sales Summary,Pardavimų suvestinė
+Sales User,pardavimų Vartotojas
+Save & Print,
+Save Only,
+Save as draft,
+Save your current order to create a draft,
+Scale Barcode Settings,
+Scan barcode...,
+Search and add items from the left panel,
+"Search by name, phone, email...",
+Search for items to add barcode labels,
+Search for or create a customer,
+Search item groups...,
+"Search items by name, code, or barcode...",
+"Search items, scan barcode...",
+Search suppliers...,
+Searching...,
+Secure login powered by Frappe Framework,
+Select Customer,Pasirinkite klientą
+Select a draft invoice to restore to cart,
+Select a loyalty program to enroll this customer,
+Select customer first,
+Selected,
+Selected POS Opening Shift should be open.,
+Selected expense account is not allowed for this POS Profile.,
+Selected source account is not allowed for this POS Profile.,
+Send Reset Link,
+Sending...,
+Set Posting Date,Nustatykite paskelbimo datą
+Shift,
+Shift closed successfully!,
+Shipping Account,Pristatymas paskyra
+Shortage return from transit to source,
+Show Price,Rodyti kainą
+Sign In,
+Sign Out,
+Sign in to your account to continue,
+Signing in...,
+Small (38×25mm),
+Small remaining amounts,
+"Sorry, this coupon code cannot be used by this company",
+"Sorry, this coupon code cannot be used by this customer",
+"Sorry, this coupon code is no longer valid","Deja, šis kupono kodas nebegalioja"
+"Sorry, this coupon code not exists",
+"Sorry, this coupon code's validity has expired","Deja, šio kupono kodo galiojimo laikas baigėsi"
+"Sorry, this coupon code's validity has not started","Deja, šio kupono kodo galiojimas neprasidėjo"
+"Sorry, {0} have used this coupon before",
+Source Account,
+Source account,
+Source account must be a Cash account.,
+Source account must belong to the selected company.,
+Source account override is disabled for this POS Profile.,
+Source and target accounts are required.,
+Source and target accounts cannot be the same for cash deposit.,
+Split Payment,
+Starting position (1-indexed) of the price segment.,
+Status,Statusas
+Status must be one of {0},Statusas turi būti vienas iš {0}
+Stock Entry {0} does not exist.,
+Stock Entry {0} has already been fully received.,
+Stock Entry {0} is not a Material Transfer with in-transit.,
+Stock Entry {0} is not a valid in-transit transfer.,
+Stock Entry {0} is not submitted.,
+Stock Receiving,
+Stock UOM is required.,
+Subtotal,Tarpinė suma
+Successfully enrolled {0} in {1},
+Successfully unenrolled {0} from {1},
+Summary,Santrauka
+Supplier Name,tiekėjas Vardas
+Supplier is required.,
+Supplier name is required.,
+Supplier {0} was not found.,
+Suppliers,Tiekėjai
+Sync,Sinchronizuoti
+System Manager,sistemos direktorius
+Target Account,
+Target account,
+Target account is required,
+Target account must belong to the selected company.,
+Target warehouse is required.,
+Tax Breakdown,
+Tax ID,Mokesčių ID
+Taxes,Mokesčiai
+Taxes & Charges,
+Taxes Breakdown,
+Tendered,
+Theme: Dark (click to switch to System),
+Theme: Light (click to switch to Dark),
+Theme: System ({0}) (click to switch to Light),
+This Referral Code {0} not exists,
+This invoice {0} cannot be deleted,
+Title,Pavadinimas
+Total,visas
+Total Invoices,
+Total Paid,
+Total Quantity,Bendras kiekis
+Total Taxes,
+Total item code digits to extract. Example: item code 3310100 => digits 7.,
+Transaction,Sandoris
+Try a different search or category,
+Try adjusting your filters,
+Try again,
+Type,tipas
+Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again.,
+Unable to create Journal Entry for customer credit.,
+Unable to determine cash account for change payment entry.,
+Unable to determine customer receivable account for change payment entry.,
+Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually,
+Unable to load Credit Note {0}: {1},
+Unable to load Payment Entry {0}: {1},
+Unable to resolve POS Opening Shift.,
+Unable to resolve POS cash account from POS Profile cash mode of payment.,
+Unenroll from Program,
+Unknown error,
+Used,Naudota
+User,Vartotojas
+User must match the selected POS Opening Shift user.,
+User {} has been disabled. Please select valid user/cashier,
+Valid From,Galioja nuo
+Valid Upto,Galioja iki
+Validity and Usage,Galiojimas ir naudojimas
+Walk-in Customer,
+Warehouse,sandėlis
+Website Manager,Interneto svetainė direktorius
+Weight,svoris
+Weight decimals,
+Weight digits,
+Weight starting position,
+Weight value is parsed as: [weight digits].[weight decimals].,
+Welcome back,
+"When enabled, price is extracted using the price start/digits/decimals fields below.",
+Worth {0},
+Write Off,Nusirašinėti
+Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount.,
+X POS,
+X POS App,
+X POS Payments is not enabled for this POS Profile,
+X POS Purchase Order Flow Failed,
+You are not allowed to access this shift.,
+You are not allowed to manage this cash movement record.,
+You are trying to return more quantity for item {0} than was sold.,
+days,
+"e.g. \""Summer Holiday 2019 Offer 20\""",
+incl.,
+item,
+item(s),
+items,
+items must be a list,
+label(s),
+modified_after must be a valid ISO datetime,
+more,
+pts,
+received,
+transferred,
+unaccounted,
+unique e.g. SAVE20  To be used to get discount,unikalus pvz. SAVE20. Bus naudojamas norint gauti nuolaidą
+will be rejected,
+will be returned to,
+{0} Coupon used are {1}. Allowed quantity is exhausted,Naudojamas {0} kuponas yra {1}. Leistinas kiekis išnaudotas
+{0} is disabled for this POS Profile.,
+{0} is invalid.,
+{0} must belong to company {1}.,
+{0} payment(s) were skipped.,
+{0} {1} must be submitted before creating change payment entries.,
+{} Active,
+Default Currency,Pirminė kainoraščio valiuta
+"e.g. ""Summer Holiday 2019 Offer 20""","pvz., „Vasaros atostogos 2019 m. pasiūlymas 20“"
+Failed,Nepavyko
+First Name,Pirmas vardas
+Full Name,Pilnas vardas
+Invoice Number,Sąskaitos numeris
+Keyboard Shortcuts,Klaviatūros nuorodos
+Last Name,Pavardė
+Middle Name,Antras vardas
+Mpesa Settings,„Mpesa“ nustatymai
+Posting Time,Siunčiamos laikas
+Reload,Perkrauti
+Session Defaults,Sesijos numatytieji nustatymai
+Success,Sėkmė
+Till Number,Till Number
+Transaction Type,Sandorio tipas
+View Website,Peržiūrėti svetainė

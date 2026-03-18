@@ -67,7 +67,7 @@
                                 </div>
                             </div>
 
-                            <div class="ml-3 flex items-center gap-2">
+                            <div class="ms-3 flex items-center gap-2">
                                 <TooltipWrapper :content="__('Delete draft')">
                                 <Button 
                                     variant="ghost" 
@@ -101,7 +101,7 @@
                     @click="refreshDrafts"
                     :disabled="isLoading"
                 >
-                    <RefreshCw class="w-4 h-4 mr-2" :class="{ 'animate-spin': isLoading }" />
+                    <RefreshCw class="w-4 h-4 me-2" :class="{ 'animate-spin': isLoading }" />
                     {{ __("Refresh") }}
                 </Button>
             </DialogFooter>

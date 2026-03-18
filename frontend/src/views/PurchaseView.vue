@@ -1,8 +1,4 @@
 <script setup lang="ts">
-/**
- * Purchase View
- * Main view for purchasing functionality with stock receiving
- */
 import { onMounted, onUnmounted, ref } from "vue";
 import { usePurchaseStore } from "@/stores/purchaseStore";
 import { usePosStore } from "@/stores/posStore";
@@ -33,11 +29,9 @@ const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
 const offlineStore = useOfflineStore();
 
-// Active tab
 type TabType = "suppliers" | "items" | "receive";
 const activeTab = ref<TabType>("suppliers");
 
-// PO header collapsed state
 const poHeaderExpanded = ref(true);
 
 const poCategories = [
@@ -48,7 +42,6 @@ const poCategories = [
     "Reorder Level",
 ];
 
-// Online status listener
 function handleOnlineStatus(): void {
     if (isOnline() && purchaseStore.hasPendingPurchases) {
         purchaseStore.syncPendingPurchases();
@@ -95,7 +88,7 @@ function goBack(): void {
                     </Badge>
                     <Button v-if="isOnline()" @click="purchaseStore.syncPendingPurchases()" variant="outline" size="sm"
                         :disabled="purchaseStore.isSyncing">
-                        <RefreshCw class="w-4 h-4 mr-1" :class="{ 'animate-spin': purchaseStore.isSyncing }" />
+                        <RefreshCw class="w-4 h-4 me-1" :class="{ 'animate-spin': purchaseStore.isSyncing }" />
                         {{ __("Sync") }}
                     </Button>
                 </div>
@@ -104,13 +97,12 @@ function goBack(): void {
                     class="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-lg">
                     <Users class="w-4 h-4 text-primary" />
                     <span class="text-sm font-medium text-primary">
-                        {{ purchaseStore.selectedSupplier.supplier_name }}
+                        {{ purchaseStore.selectedSupplier }}
                     </span>
                 </div>
             </div>
         </header>
 
-        <!-- XPOS PO Header Fields -->
         <div v-if="activeTab !== 'receive'" class="bg-card border-b border-border shrink-0">
             <button @click="poHeaderExpanded = !poHeaderExpanded"
                 class="w-full px-4 py-2 flex items-center justify-between text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
@@ -158,7 +150,7 @@ function goBack(): void {
 
         <div class="flex-1 flex min-h-0 overflow-hidden">
             <template v-if="activeTab !== 'receive'">
-                <div class="w-80 border-r border-border bg-card flex flex-col min-h-0 overflow-hidden shrink-0">
+                <div class="w-80 border-e border-border bg-card flex flex-col min-h-0 overflow-hidden shrink-0">
                     <div class="flex border-b border-border shrink-0">
                         <button @click="activeTab = 'suppliers'"
                             class="flex-1 px-3 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5"
@@ -183,23 +175,19 @@ function goBack(): void {
                         </button>
                     </div>
 
-                    <!-- Tab Content -->
                     <div class="flex-1 min-h-0 overflow-hidden">
                         <SupplierSelector v-show="activeTab === 'suppliers'" class="h-full" />
                         <PurchaseItemList v-show="activeTab === 'items'" class="h-full" />
                     </div>
                 </div>
 
-                <!-- Right Panel - Cart (wider for table) -->
                 <div class="flex-1 flex flex-col min-h-0">
                     <PurchaseCart class="h-full" />
                 </div>
             </template>
 
-            <!-- Full-width Stock Receiving layout -->
             <template v-else>
                 <div class="w-full flex flex-col min-h-0 overflow-hidden">
-                    <!-- Tab bar for navigation back -->
                     <div class="flex border-b border-border shrink-0 bg-card">
                         <button @click="activeTab = 'suppliers'"
                             class="px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 text-muted-foreground hover:bg-muted">
@@ -218,7 +206,6 @@ function goBack(): void {
                         </button>
                     </div>
 
-                    <!-- Stock Receiving Content (full width) -->
                     <div class="flex-1 min-h-0 overflow-hidden">
                         <StockReceiving class="h-full" />
                     </div>

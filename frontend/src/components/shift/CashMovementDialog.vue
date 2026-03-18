@@ -80,7 +80,7 @@
                                 class="flex items-center justify-between text-sm bg-muted rounded-lg px-3 py-2">
                                 <div>
                                     <span class="text-foreground font-medium">{{ mov.movement_type }}</span>
-                                    <span v-if="mov.reason" class="text-muted-foreground ml-2 text-xs">
+                                    <span v-if="mov.reason" class="text-muted-foreground ms-2 text-xs">
                                         {{ mov.reason }}
                                     </span>
                                 </div>

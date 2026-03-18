@@ -10,11 +10,11 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <Button variant="outline" size="sm" @click="clearAll" :disabled="items.length === 0">
-                        <Trash2 class="w-4 h-4 mr-1" />
+                        <Trash2 class="w-4 h-4 me-1" />
                         {{ __('Clear All') }}
                     </Button>
                     <Button size="sm" @click="printLabels" :disabled="items.length === 0 || isPrinting">
-                        <Printer class="w-4 h-4 mr-1" />
+                        <Printer class="w-4 h-4 me-1" />
                         {{ isPrinting ? __('Generating...') : __('Print Labels') }}
                     </Button>
                 </div>
@@ -22,13 +22,13 @@
         </div>
 
         <div class="flex-1 flex overflow-hidden">
-            <div class="w-[420px] flex flex-col border-r border-border shrink-0">
+            <div class="w-[420px] flex flex-col border-e border-border shrink-0">
                 <div class="p-4 pb-2 space-y-3">
                     <div class="relative">
-                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Search class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <input ref="searchInput" v-model="searchQuery" type="text"
                             :placeholder="__('Search items by name, code, or barcode...')"
-                            class="w-full h-9 pl-9 pr-3 text-sm border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                            class="w-full h-9 ps-9 pe-3 text-sm border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                             @input="onSearch" @keydown.enter="onSearchEnter" />
                     </div>
 
@@ -87,14 +87,14 @@
                     </div>
                     <div v-else class="space-y-1">
                         <button v-for="item in searchResults" :key="item.item_code"
-                            class="w-full text-left px-3 py-2.5 rounded-md border border-transparent hover:border-border hover:bg-muted/50 transition-colors"
+                            class="w-full text-start px-3 py-2.5 rounded-md border border-transparent hover:border-border hover:bg-muted/50 transition-colors"
                             @click="addItem(item)">
                             <div class="flex items-center justify-between">
                                 <div class="min-w-0 flex-1">
                                     <div class="text-sm font-medium truncate">{{ item.item_name }}</div>
                                     <div class="text-xs text-muted-foreground">{{ item.item_code }}</div>
                                 </div>
-                                <div class="flex items-center gap-2 shrink-0 ml-2">
+                                <div class="flex items-center gap-2 shrink-0 ms-2">
                                     <span v-if="item.barcode" class="text-xs text-muted-foreground font-mono">{{
                                         item.barcode }}</span>
                                     <Plus class="w-4 h-4 text-primary" />
@@ -126,7 +126,7 @@
                             <table class="w-full text-sm">
                                 <thead class="bg-muted/50">
                                     <tr>
-                                        <th class="text-left px-3 py-2 font-medium text-muted-foreground">{{ __('Item')
+                                        <th class="text-start px-3 py-2 font-medium text-muted-foreground">{{ __('Item')
                                         }}</th>
                                         <th class="text-center px-3 py-2 font-medium text-muted-foreground w-28">{{
                                             __('Barcode') }}</th>

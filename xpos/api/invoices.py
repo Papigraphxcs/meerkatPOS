@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 import json
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.utils import flt, nowdate, now_datetime, getdate, cint
@@ -95,7 +97,7 @@ def create_invoice(data):
         invoice_doc.is_return = 1
         if return_against:
             invoice_doc.return_against = return_against
-            _validate_return_invoice(return_against, customer, items)
+            items = _validate_return_invoice(return_against, customer, items)
         else:
             frappe.throw(_("Return Against invoice is required for returns"))
     else:
@@ -189,6 +191,24 @@ def create_invoice(data):
         item.qty = item_qty
         item.uom = item_data.get("uom") or item_data.get("stock_uom")
         item.warehouse = item_data.get("warehouse") or pos.warehouse
+
+        if is_return:
+            item.warehouse = item_data.get("warehouse") or item_data.get("source_warehouse") or item.warehouse
+            for fieldname in (
+                "sales_invoice_item",
+                "pos_invoice_item",
+                "sales_order",
+                "delivery_note",
+                "so_detail",
+                "dn_detail",
+                "expense_account",
+                "pos_invoice",
+            ):
+                if item_data.get(fieldname) is not None:
+                    try:
+                        setattr(item, fieldname, item_data.get(fieldname))
+                    except Exception:
+                        pass
 
         disc_pct = flt(item_data.get("discount_percentage", 0), 2)
         disc_amt = flt(item_data.get("discount_amount", 0), 2)
@@ -1306,7 +1326,7 @@ def _build_invoice_response(invoice_doc):
 
 
 def _validate_return_invoice(return_against, customer, items):
-    """Validate return invoice data against the original invoice."""
+    """Validate return invoice data against the original invoice and attach source row references."""
     doctype = "Sales Invoice"
     if not frappe.db.exists(doctype, return_against):
         doctype = "POS Invoice"
@@ -1322,40 +1342,81 @@ def _validate_return_invoice(return_against, customer, items):
             ).format(original.customer_name or original.customer)
         )
 
-    original_items = {item.item_code: item for item in original.items}
+    original_items_by_code = defaultdict(list)
+    for original_item in original.items:
+        original_items_by_code[original_item.item_code].append(original_item)
+
+    link_field = "sales_invoice_item" if doctype == "Sales Invoice" else "pos_invoice_item"
+    child_doctype = "Sales Invoice Item" if doctype == "Sales Invoice" else "POS Invoice Item"
+
+    returned_rows = frappe.db.sql(
+        f"""
+        SELECT {link_field} AS row_name, COALESCE(SUM(ABS(qty)), 0) AS returned_qty
+        FROM `tab{child_doctype}`
+        WHERE parent IN (
+            SELECT name FROM `tab{doctype}` WHERE return_against = %s AND docstatus = 1
+        )
+            AND IFNULL({link_field}, '') != ''
+        GROUP BY {link_field}
+        """,
+        return_against,
+        as_dict=True,
+    )
+    returned_qty_by_row = {
+        row.row_name: flt(row.returned_qty) for row in returned_rows if row.row_name
+    }
+    allocated_qty_by_row = defaultdict(float)
+    prepared_items = []
 
     for item in items:
         item_code = item.get("item_code")
         return_qty = abs(flt(item.get("qty", 0)))
 
-        if item_code not in original_items:
+        if item_code not in original_items_by_code:
             frappe.throw(
                 _("Item {0} was not in the original invoice {1}").format(
                     item_code, return_against
                 )
             )
 
-        orig_item = original_items[item_code]
-
-        already_returned = frappe.db.sql(
-            """
-			SELECT COALESCE(SUM(ABS(si_item.qty)), 0) as returned_qty
-			FROM `tabSales Invoice Item` si_item
-			JOIN `tabSales Invoice` si ON si.name = si_item.parent
-			WHERE si.return_against = %s
-				AND si.docstatus = 1
-				AND si_item.item_code = %s
-		""",
-            (return_against, item_code),
-            as_dict=True,
+        remaining_to_allocate = return_qty
+        total_original_qty = sum(flt(source_item.qty) for source_item in original_items_by_code[item_code])
+        total_returned = sum(
+            returned_qty_by_row.get(source_item.name, 0)
+            for source_item in original_items_by_code[item_code]
         )
 
-        total_returned = (
-            flt(already_returned[0].returned_qty) if already_returned else 0
-        )
-        remaining_returnable = flt(orig_item.qty) - total_returned
+        for source_item in original_items_by_code[item_code]:
+            already_returned = returned_qty_by_row.get(source_item.name, 0)
+            already_allocated = allocated_qty_by_row.get(source_item.name, 0)
+            remaining_on_row = flt(source_item.qty) - already_returned - already_allocated
 
-        if return_qty > remaining_returnable:
+            if remaining_on_row <= 0:
+                continue
+
+            allocated_qty = min(remaining_to_allocate, remaining_on_row)
+            prepared_item = dict(item)
+            prepared_item["qty"] = -allocated_qty
+            prepared_item[link_field] = source_item.name
+            prepared_item["sales_order"] = source_item.get("sales_order")
+            prepared_item["delivery_note"] = source_item.get("delivery_note")
+            prepared_item["so_detail"] = source_item.get("so_detail")
+            prepared_item["dn_detail"] = source_item.get("dn_detail")
+            prepared_item["expense_account"] = source_item.get("expense_account")
+            prepared_item["source_warehouse"] = source_item.get("warehouse")
+            if doctype == "Sales Invoice":
+                prepared_item["pos_invoice"] = source_item.get("pos_invoice")
+                prepared_item["pos_invoice_item"] = source_item.get("pos_invoice_item")
+
+            prepared_items.append(prepared_item)
+            allocated_qty_by_row[source_item.name] += allocated_qty
+            remaining_to_allocate -= allocated_qty
+
+            if remaining_to_allocate <= 0:
+                break
+
+        remaining_returnable = total_original_qty - total_returned
+        if remaining_to_allocate > 0:
             frappe.throw(
                 _(
                     "Item {0}: Cannot return {1} units. Only {2} units remaining for return "
@@ -1364,10 +1425,12 @@ def _validate_return_invoice(return_against, customer, items):
                     item_code,
                     return_qty,
                     remaining_returnable,
-                    orig_item.qty,
+                    total_original_qty,
                     total_returned,
                 )
             )
+
+    return prepared_items
 
 
 @frappe.whitelist()

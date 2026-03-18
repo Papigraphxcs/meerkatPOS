@@ -169,7 +169,7 @@ def get_customer_info(customer):
     birthday = getattr(cust, "birthday", None)
 
     credit_limit = 0
-    from erpnext.accounts.party import get_credit_limit
+    from erpnext.selling.doctype.customer.customer import get_credit_limit
     credit_limit = flt(get_credit_limit(customer, frappe.defaults.get_user_default("Company")))
 
     return {

@@ -113,7 +113,7 @@ function setNow() {
         type="button"
         variant="outline"
         :disabled="disabled"
-        :class="cn('h-8 w-full justify-start gap-2 px-2 text-left font-normal', !localValue && 'text-muted-foreground', props.class)"
+        :class="cn('h-8 w-full justify-start gap-2 px-2 text-start font-normal', !localValue && 'text-muted-foreground', props.class)"
       >
         <CalendarClock class="h-3.5 w-3.5" />
         <span class="truncate">{{ displayValue }}</span>

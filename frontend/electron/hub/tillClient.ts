@@ -1,12 +1,3 @@
-/**
- * Till Client — Sync adapter for spoke/till mode.
- *
- * Instead of calling ERPNext directly, tills pull master data from
- * the hub's local API and push pending records to it.
- *
- * The hub then handles upstream sync to ERPNext.
- */
-
 import { net } from "electron";
 import { upsertBatch, query, execute, getMeta, setMeta } from "../database/dbService";
 import { createLogger } from "../logger";
@@ -14,14 +5,12 @@ import { createLogger } from "../logger";
 const log = createLogger("TillClient");
 
 interface TillSyncContext {
-  hubUrl: string;   // e.g. http://192.168.1.100:6789
-  tillId: string;   // e.g. "TILL-01"
-  hubSecret?: string; // Shared API secret for hub auth
+  hubUrl: string;
+  tillId: string;
+  hubSecret?: string;
 }
 
 let context: TillSyncContext | null = null;
-
-// ── HTTP helper ───────────────────────────────────────────────────
 
 function hubFetch<T = unknown>(
   path: string,
@@ -66,10 +55,7 @@ function hubFetch<T = unknown>(
   });
 }
 
-// ── Pull master data from hub ─────────────────────────────────────
-
 const PULL_TABLES = [
-  // Lookup tables
   { table: "companies", primaryKey: "name" },
   { table: "countries", primaryKey: "name" },
   { table: "currencies", primaryKey: "name" },
@@ -77,7 +63,6 @@ const PULL_TABLES = [
   { table: "brands", primaryKey: "name" },
   { table: "industries", primaryKey: "name" },
   { table: "modes_of_payment", primaryKey: "name" },
-  // Company-based master data
   { table: "cost_centers", primaryKey: "name" },
   { table: "warehouses", primaryKey: "name" },
   { table: "accounts", primaryKey: "name" },
@@ -85,7 +70,6 @@ const PULL_TABLES = [
   { table: "mode_of_payment_accounts", primaryKey: "name" },
   { table: "pos_profiles", primaryKey: "name" },
   { table: "pos_payment_methods", primaryKey: "name" },
-  // Items & related
   { table: "items", primaryKey: "item_code" },
   { table: "item_groups", primaryKey: "name" },
   { table: "item_barcodes", primaryKey: "name" },
@@ -94,22 +78,17 @@ const PULL_TABLES = [
   { table: "item_taxes", primaryKey: "name" },
   { table: "item_vendors", primaryKey: "name" },
   { table: "item_reorder_levels", primaryKey: "name" },
-  // Tax templates
   { table: "item_tax_templates", primaryKey: "name" },
   { table: "item_tax_template_details", primaryKey: "name" },
   { table: "sales_taxes_templates", primaryKey: "name" },
   { table: "sales_taxes_charges", primaryKey: "name" },
-  // Pricing rules
   { table: "pricing_rules", primaryKey: "name" },
   { table: "pricing_rule_item_codes", primaryKey: "name" },
   { table: "pricing_rule_item_groups", primaryKey: "name" },
   { table: "pricing_rule_brands", primaryKey: "name" },
-  // Parties
   { table: "customers", primaryKey: "name" },
   { table: "suppliers", primaryKey: "name" },
-  // Stock
   { table: "bins", primaryKey: "name" },
-  // POS users (offline auth)
   { table: "pos_users", primaryKey: "name" },
 ] as const;
 
@@ -147,8 +126,6 @@ async function pullFromHub(): Promise<number> {
   return totalPulled;
 }
 
-// ── Pull deletions from hub ───────────────────────────────────────
-
 async function pullDeletionsFromHub(): Promise<number> {
   const since = await getMeta("till_last_deletion_sync");
 
@@ -178,13 +155,10 @@ async function pullDeletionsFromHub(): Promise<number> {
   return deleted;
 }
 
-// ── Push pending records to hub ───────────────────────────────────
-
 async function pushToHub(): Promise<{ invoices: number; purchases: number }> {
   let invoices = 0;
   let purchases = 0;
 
-  // Push pending invoices
   const pendingInvoices = await query<{
     id: number; local_id: string; data: string; status: string;
   }>(
@@ -217,7 +191,6 @@ async function pushToHub(): Promise<{ invoices: number; purchases: number }> {
     }
   }
 
-  // Push pending purchases
   const pendingPurchases = await query<{
     id: number; local_id: string; data: string; type: string; status: string;
   }>(
@@ -251,7 +224,6 @@ async function pushToHub(): Promise<{ invoices: number; purchases: number }> {
     }
   }
 
-  // Push pending expenses
   const pendingExpenses = await query<{
     id: number; local_id: string; sync_status: string;
     expense_type: string; amount: number; description: string;
@@ -288,7 +260,6 @@ async function pushToHub(): Promise<{ invoices: number; purchases: number }> {
     }
   }
 
-  // Push pending bank drops
   const pendingBankDrops = await query<{
     id: number; local_id: string; sync_status: string;
     amount: number; description: string; posting_date: string;
@@ -323,7 +294,6 @@ async function pushToHub(): Promise<{ invoices: number; purchases: number }> {
     }
   }
 
-  // Push pending stock adjustments
   const pendingAdjustments = await query<{
     id: number; local_id: string; sync_status: string;
     item_code: string; warehouse: string; qty: number;
@@ -360,17 +330,12 @@ async function pushToHub(): Promise<{ invoices: number; purchases: number }> {
   return { invoices, purchases };
 }
 
-// ── Public API ────────────────────────────────────────────────────
-
 export async function initTillClient(hubUrl: string, tillId: string): Promise<void> {
   const hubSecret = await getMeta("hub_api_secret") || undefined;
   context = { hubUrl: hubUrl.replace(/\/$/, ""), tillId, hubSecret };
   log.info(`Initialized — hub: ${context.hubUrl}, till: ${tillId}, auth: ${hubSecret ? "yes" : "no"}`);
 }
 
-/**
- * Run a full till sync cycle: pull from hub, apply deletions, push to hub.
- */
 export async function runTillSync(): Promise<{
   pulled: number;
   deleted: number;
@@ -385,9 +350,6 @@ export async function runTillSync(): Promise<{
   return { pulled, deleted, pushed };
 }
 
-/**
- * Check if the hub is reachable.
- */
 export async function pingHub(): Promise<boolean> {
   try {
     const result = await hubFetch<{ status: string }>("/api/health");

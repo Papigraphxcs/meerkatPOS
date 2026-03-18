@@ -1,23 +1,18 @@
 <template>
     <div class="relative">
-        <!-- Toggle Button -->
         <button @click="isOpen = !isOpen"
-            class="fixed left-0 top-1/2 -translate-y-1/2 z-50 bg-primary text-primary-foreground p-1.5 rounded-r-md shadow-lg hover:bg-primary/90 transition-all"
-            :class="{ 'left-64': isOpen }">
-            <ChevronRight v-if="!isOpen" class="w-4 h-4" />
-            <ChevronLeft v-else class="w-4 h-4" />
+            class="fixed start-0 top-1/2 -translate-y-1/2 z-50 bg-primary text-primary-foreground p-1.5 ltr:rounded-r-md rtl:rounded-l-md shadow-lg hover:bg-primary/90 transition-all"
+            :class="{ 'start-64': isOpen }">
+            <component :is="toggleIcon" class="w-4 h-4" />
         </button>
 
-        <!-- Sidebar Overlay -->
         <Transition name="fade">
             <div v-if="isOpen" class="fixed inset-0 bg-black/50 z-40 lg:hidden" @click="isOpen = false" />
         </Transition>
 
-        <!-- Sidebar Panel -->
         <Transition name="slide">
             <aside v-show="isOpen"
-                class="fixed left-0 top-0 h-full w-64 bg-card border-r border-border z-50 flex flex-col shadow-xl">
-                <!-- Header -->
+                class="fixed start-0 top-0 h-full w-64 bg-card ltr:border-r rtl:border-l border-border z-50 flex flex-col shadow-xl">
                 <div class="p-4 border-b border-border flex items-center gap-3">
                     <img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-8 h-8" />
                     <div>
@@ -26,7 +21,6 @@
                     </div>
                 </div>
 
-                <!-- Navigation -->
                 <ScrollArea class="flex-1">
                     <nav class="p-2 space-y-1">
                         <p class="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -83,7 +77,6 @@
                     </nav>
                 </ScrollArea>
 
-                <!-- Footer -->
                 <div class="p-3 border-t border-border">
                     <div class="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
                         <Building2 class="w-3.5 h-3.5" />
@@ -127,6 +120,12 @@ const isDark = inject<Ref<boolean>>("isDark")!;
 
 const isOpen = ref(false);
 
+const isRtl = computed(() => document.documentElement.dir === "rtl");
+const toggleIcon = computed(() => {
+    if (isOpen.value) return isRtl.value ? ChevronRight : ChevronLeft;
+    return isRtl.value ? ChevronLeft : ChevronRight;
+});
+
 const mainNavItems = [
     { route: "/pos", label: __("POS"), icon: LayoutGrid },
     { route: "/orders", label: __("Orders"), icon: FileText },
@@ -162,6 +161,11 @@ function isActive(path: string): boolean {
 .slide-enter-from,
 .slide-leave-to {
     transform: translateX(-100%);
+}
+
+[dir="rtl"] .slide-enter-from,
+[dir="rtl"] .slide-leave-to {
+    transform: translateX(100%);
 }
 
 .fade-enter-active,
