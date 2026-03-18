@@ -36,9 +36,12 @@ def get_customers(search_term="", limit=20, pos_profile=None):
                         )
                 if allowed_groups:
                     allowed_groups = list(set(allowed_groups))
-                    conditions += " AND c.customer_group IN ({})".format(
-                        ", ".join([frappe.db.escape(g) for g in allowed_groups])
-                    )
+                    group_params = {}
+                    for idx, g in enumerate(allowed_groups):
+                        group_params[f"grp_{idx}"] = g
+                    in_clause = ", ".join([f"%(grp_{i})s" for i in range(len(allowed_groups))])
+                    conditions += f" AND c.customer_group IN ({in_clause})"
+                    values.update(group_params)
         except Exception:
             pass
 
@@ -102,27 +105,34 @@ def get_customer_info(customer):
         },
         fields=["parent"],
     )
+    address_names = [_row_value(addr, "parent") for addr in addresses if _row_value(addr, "parent")]
     address_list = []
-    for addr in addresses:
-        address_name = _row_value(addr, "parent")
-        if not address_name:
-            continue
-        a = frappe.get_doc("Address", address_name)
-        address_list.append(
-            {
-                "name": a.name,
-                "address_title": a.address_title,
-                "address_line1": a.address_line1,
-                "address_line2": a.address_line2,
-                "city": a.city,
-                "state": a.state,
-                "country": a.country,
-                "pincode": a.pincode,
-                "phone": a.phone,
-                "is_primary_address": a.is_primary_address,
-                "is_shipping_address": getattr(a, "is_shipping_address", 0),
-            }
+    if address_names:
+        address_docs = frappe.get_all(
+            "Address",
+            filters={"name": ["in", address_names]},
+            fields=[
+                "name", "address_title", "address_line1", "address_line2",
+                "city", "state", "country", "pincode", "phone",
+                "is_primary_address", "is_shipping_address",
+            ],
         )
+        for a in address_docs:
+            address_list.append(
+                {
+                    "name": a.name,
+                    "address_title": a.address_title,
+                    "address_line1": a.address_line1,
+                    "address_line2": a.address_line2,
+                    "city": a.city,
+                    "state": a.state,
+                    "country": a.country,
+                    "pincode": a.pincode,
+                    "phone": a.phone,
+                    "is_primary_address": a.is_primary_address,
+                    "is_shipping_address": a.get("is_shipping_address", 0),
+                }
+            )
 
     pos_discount = flt(getattr(cust, "discount", 0))
 
@@ -158,6 +168,10 @@ def get_customer_info(customer):
     referral_code = getattr(cust, "referral_code", None)
     birthday = getattr(cust, "birthday", None)
 
+    credit_limit = 0
+    from erpnext.accounts.party import get_credit_limit
+    credit_limit = flt(get_credit_limit(customer, frappe.defaults.get_user_default("Company")))
+
     return {
         "name": cust.name,
         "customer_name": cust.customer_name,
@@ -172,6 +186,7 @@ def get_customer_info(customer):
         "customer_type": cust.customer_type,
         "gender": getattr(cust, "gender", None),
         "balance": balance,
+        "credit_limit": credit_limit,
         "loyalty_points": loyalty,
         "loyalty_program": loyalty_program,
         "discount": pos_discount,
@@ -331,9 +346,22 @@ def get_customer_addresses(customer):
         fields=["parent"],
     )
 
+    address_names = [link.parent for link in links if link.parent]
+    if not address_names:
+        return []
+
+    address_docs = frappe.get_all(
+        "Address",
+        filters={"name": ["in", address_names]},
+        fields=[
+            "name", "address_title", "address_line1", "address_line2",
+            "city", "state", "country", "pincode", "phone",
+            "is_primary_address", "is_shipping_address",
+        ],
+    )
+
     addresses = []
-    for link in links:
-        a = frappe.get_doc("Address", link.parent)
+    for a in address_docs:
         addresses.append(
             {
                 "name": a.name,
@@ -346,7 +374,7 @@ def get_customer_addresses(customer):
                 "pincode": a.pincode,
                 "phone": a.phone,
                 "is_primary_address": a.is_primary_address,
-                "is_shipping_address": getattr(a, "is_shipping_address", 0),
+                "is_shipping_address": a.get("is_shipping_address", 0),
             }
         )
 

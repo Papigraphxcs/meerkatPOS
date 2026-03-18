@@ -157,7 +157,6 @@ def update_invoice(data):
     data = json.loads(data)
     _sanitize_delivery_dates(data)
     _strip_client_freebies_from_payload(data)
-    # Determine doctype based on POS Profile setting
     pos_profile = data.get("pos_profile")
     doctype = "Sales Invoice"
     if pos_profile and frappe.db.get_value(
@@ -165,7 +164,6 @@ def update_invoice(data):
     ):
         doctype = "POS Invoice"
 
-    # Ensure the document type is set for new invoices to prevent validation errors
     data.setdefault("doctype", doctype)
 
     return_validity_enabled, default_validity_days = _get_return_validity_settings(pos_profile)
@@ -176,10 +174,7 @@ def update_invoice(data):
     else:
         invoice_doc = frappe.get_doc(data)
 
-    # Set currency from data before set_missing_values
-    # Validate return items if this is a return invoice
     if (data.get("is_return") or invoice_doc.is_return) and invoice_doc.get("return_against"):
-        # We need to import this here to avoid circular imports if possible, or just import it at top if safe
         from xpos.x_pos.api.invoice_processing.returns import validate_return_items
         validation = validate_return_items(
             invoice_doc.return_against,
@@ -191,7 +186,6 @@ def update_invoice(data):
 
     _validate_return_window(invoice_doc, doctype, return_validity_enabled)
 
-    # Ensure customer exists before setting missing values
     customer_name = invoice_doc.get("customer")
     if customer_name and not frappe.db.exists("Customer", customer_name):
         try:
@@ -224,7 +218,6 @@ def update_invoice(data):
     if not price_list_currency and invoice_doc.get("selling_price_list"):
         price_list_currency = frappe.db.get_value("Price List", invoice_doc.selling_price_list, "currency")
 
-    # Preserve provided item names for manual overrides
     overrides = {d.idx: {"item_name": d.item_name} for d in invoice_doc.items}
     locked_items = {}
     if invoice_doc.is_return:
@@ -243,17 +236,14 @@ def update_invoice(data):
 
     _deduplicate_free_items(invoice_doc)
 
-    # Set missing values first
     invoice_doc.set_missing_values()
     if effective_price_list:
         invoice_doc.selling_price_list = effective_price_list
 
     _set_return_valid_upto(invoice_doc, return_validity_enabled, default_validity_days)
 
-    # Reapply any custom item names after defaults are set
     _apply_item_name_overrides(invoice_doc, overrides)
 
-    # Remove duplicate taxes from item and profile templates
     _merge_duplicate_taxes(invoice_doc)
 
     if locked_items:
@@ -268,7 +258,6 @@ def update_invoice(data):
         or invoice_doc.currency
     )
 
-    # Ensure selected currency is preserved after set_missing_values
     if selected_currency:
         invoice_doc.currency = selected_currency
     price_list_currency = price_list_currency or company_currency
@@ -281,7 +270,7 @@ def update_invoice(data):
             company_currency,
             cache=currency_cache,
         )
-        if not conversion_rate:
+        if not conversion_rate or flt(conversion_rate) <= 0:
             frappe.throw(
                 _(
                     "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
@@ -295,7 +284,7 @@ def update_invoice(data):
                 invoice_doc.currency,
                 cache=currency_cache,
             )
-            if not plc_conversion_rate:
+            if not plc_conversion_rate or flt(plc_conversion_rate) <= 0:
                 frappe.throw(
                     _(
                         "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
@@ -306,7 +295,6 @@ def update_invoice(data):
         invoice_doc.plc_conversion_rate = plc_conversion_rate
         invoice_doc.price_list_currency = price_list_currency
 
-        # Update rates and amounts for all items using multiplication
         for item in invoice_doc.items:
             if item.price_list_rate:
                 item.base_price_list_rate = flt(
@@ -318,11 +306,9 @@ def update_invoice(data):
             if item.amount:
                 item.base_amount = flt(item.amount * conversion_rate, item.precision("base_amount"))
 
-        # Update payment amounts
         for payment in invoice_doc.payments:
             payment.base_amount = flt(payment.amount * conversion_rate, payment.precision("base_amount"))
 
-        # Update invoice level amounts
         invoice_doc.base_total = flt(invoice_doc.total * conversion_rate, invoice_doc.precision("base_total"))
         invoice_doc.base_net_total = flt(
             invoice_doc.net_total * conversion_rate,
@@ -338,7 +324,6 @@ def update_invoice(data):
         )
         invoice_doc.base_in_words = money_in_words(invoice_doc.base_rounded_total, company_currency)
 
-        # Update data to be sent back to frontend
         data["conversion_rate"] = conversion_rate
         data["plc_conversion_rate"] = plc_conversion_rate
         data["exchange_rate_date"] = exchange_rate_date
@@ -351,7 +336,6 @@ def update_invoice(data):
             else:
                 tax.included_in_print_rate = 1 if inclusive else 0
 
-    # For return invoices, payments should be negative amounts
     if invoice_doc.is_return:
         for payment in invoice_doc.payments:
             payment.amount = -abs(payment.amount)
@@ -365,7 +349,6 @@ def update_invoice(data):
     invoice_doc.docstatus = 0
     invoice_doc.save()
 
-    # Return both the invoice doc and the updated data
     response = invoice_doc.as_dict()
     response["conversion_rate"] = invoice_doc.conversion_rate
     response["plc_conversion_rate"] = invoice_doc.plc_conversion_rate
@@ -394,10 +377,15 @@ def submit_invoice(invoice, data, submit_in_background=False):
         invoice_name = created.get("name")
         invoice_doc = frappe.get_doc(doctype, invoice_name)
     else:
-        # Prevent TimestampMismatchError by relying on server-side timestamp
         if "modified" in invoice:
             del invoice["modified"]
         invoice_doc = frappe.get_doc(doctype, invoice_name)
+
+        if invoice_doc.docstatus == 1:
+            return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
+        if invoice_doc.docstatus == 2:
+            frappe.throw(_("Invoice {0} has been cancelled and cannot be submitted.").format(invoice_name))
+
         invoice_doc.update(invoice)
 
     _deduplicate_free_items(invoice_doc)
@@ -416,7 +404,6 @@ def submit_invoice(invoice, data, submit_in_background=False):
                 "POS Profile", pos_profile, "cost_center"
             )
 
-    # Ensure item name overrides are respected on submit
     _apply_item_name_overrides(invoice_doc)
     if invoice.get("pos_delivery_date"):
         invoice_doc.update_stock = 0
@@ -432,7 +419,6 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
     invoice_doc.remarks = _build_invoice_remarks(invoice_doc)
 
-    # calculating cash
     total_cash = 0
     if data.get("redeemed_customer_credit"):
         total_cash = invoice_doc.total - float(data.get("redeemed_customer_credit"))
@@ -469,8 +455,6 @@ def submit_invoice(invoice, data, submit_in_background=False):
 
     _auto_set_return_batches(invoice_doc)
 
-    # if frappe.get_value("POS Profile", invoice_doc.pos_profile, "pos_auto_set_batch"):
-    #     set_batch_nos(invoice_doc, "warehouse", throw=True)
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
 
     _validate_stock_on_invoice(invoice_doc)
@@ -541,7 +525,6 @@ def submit_in_background_job(kwargs):
         invoice_doc.flags.ignore_permissions = True
         frappe.flags.ignore_account_permission = True
 
-        # Re-run validations that may be impacted while queued (stock, credit limits)
         _validate_stock_on_invoice(invoice_doc)
         if hasattr(invoice_doc, "validate_credit_limit"):
             invoice_doc.validate_credit_limit()

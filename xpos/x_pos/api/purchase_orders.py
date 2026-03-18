@@ -88,7 +88,12 @@ def _resolve_buying_price_list():
         # Fallback to standard default if exists
         if frappe.db.exists("Price List", "Standard Buying"):
             buying_price_list = "Standard Buying"
-            
+
+    if not buying_price_list:
+        frappe.throw(
+            _("No buying price list found. Please configure one in Buying Settings or create a Price List with 'Buying' enabled.")
+        )
+
     return buying_price_list
 
 

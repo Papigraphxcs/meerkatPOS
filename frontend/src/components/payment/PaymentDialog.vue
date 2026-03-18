@@ -16,6 +16,14 @@
 					</div>
 				</div>
 				<div class="flex items-center gap-2">
+					<div v-if="customerBalance !== null && !cartStore.isReturnMode" class="hidden sm:flex items-center gap-2 text-[10px]">
+						<span v-if="customerBalance > 0" class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 font-medium">
+							{{ __('Outstanding') }}: {{ posStore.currencySymbol }}{{ formatPrice(customerBalance) }}
+						</span>
+						<span v-if="customerCreditLimit > 0" class="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 font-medium">
+							{{ __('Credit Limit') }}: {{ posStore.currencySymbol }}{{ formatPrice(customerCreditLimit) }}
+						</span>
+					</div>
 					<Badge v-if="cartStore.isReturnMode" variant="warning" class="text-[10px]">
 						<RotateCcw class="w-3 h-3" /> {{ __('Return') }}
 					</Badge>
@@ -282,7 +290,7 @@ import { Badge } from "@/components/ui/badge";
 import { Wallet, X, Check, Loader2, Delete, Gift, RotateCcw, Plus, Save, Printer } from "lucide-vue-next";
 
 import type { InvoicePayment } from "@/types/pos.types";
-import { isOnline } from "@/utils";
+import { isOnline, extractErrorMessage } from "@/utils";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
@@ -306,6 +314,8 @@ const splitPayments = ref<InvoicePayment[]>([]);
 
 const customerLoyaltyPoints = ref(0);
 const customerLoyaltyAmount = ref(0);
+const customerBalance = ref<number | null>(null);
+const customerCreditLimit = ref(0);
 
 const numpadKeys = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "C", "0", "⌫"];
 
@@ -361,23 +371,6 @@ const canSubmit = computed(() => {
 	);
 });
 
-function extractErrorMessage(error: unknown): string {
-	if (!error) return "Unknown error";
-	if (typeof error === "string") return error;
-	const err = error as Record<string, unknown>;
-	if (err._server_messages) {
-		try {
-			const msgs = JSON.parse(err._server_messages as string);
-			const parsed = typeof msgs === "string" ? [msgs] : msgs;
-			return parsed.map((m: string) => {
-				try { return JSON.parse(m).message || m; } catch { return m; }
-			}).join(", ");
-		} catch { /* fallthrough */ }
-	}
-	if (err.message && typeof err.message === "string") return err.message;
-	if (err.exc_type && typeof err.exc_type === "string") return err.exc_type;
-	try { return JSON.stringify(error); } catch { return String(error); }
-}
 
 onMounted(async () => {
 	tenderedAmount.value = roundCurrency(Math.abs(cartStore.grandTotal));
@@ -399,6 +392,17 @@ onMounted(async () => {
 				customerLoyaltyAmount.value = credit.loyalty_amount || 0;
 			}
 		} catch { /* ignore */ }
+
+		try {
+			const info = await call<{ balance?: number; credit_limit?: number }>(
+				"xpos.api.customers.get_customer_info",
+				{ customer: cartStore.customer.name }
+			);
+			if (info) {
+				customerBalance.value = info.balance ?? null;
+				customerCreditLimit.value = info.credit_limit ?? 0;
+			}
+		} catch { /* non-critical */ }
 	}
 
 	document.addEventListener("keydown", handleGlobalKeydown);

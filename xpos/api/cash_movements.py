@@ -89,6 +89,10 @@ def create_pos_expense(payload):
         frappe.throw(_("Expense account is required"))
 
     opening = frappe.get_doc("XPOS Opening Shift", pos_opening_shift)
+
+    if opening.user != frappe.session.user and "POS Manager" not in frappe.get_roles():
+        frappe.throw(_("{0} can only create expenses for their own shift").format(frappe.session.user))
+
     company = company or opening.company
     cost_center = cost_center or frappe.db.get_value("Company", company, "cost_center")
 
@@ -171,6 +175,10 @@ def create_cash_deposit(payload):
         frappe.throw(_("Target account is required"))
 
     opening = frappe.get_doc("XPOS Opening Shift", pos_opening_shift)
+
+    if opening.user != frappe.session.user and "POS Manager" not in frappe.get_roles():
+        frappe.throw(_("{0} can only create deposits for their own shift").format(frappe.session.user))
+
     company = company or opening.company
     cost_center = cost_center or frappe.db.get_value("Company", company, "cost_center")
 
@@ -272,6 +280,9 @@ def cancel_cash_movement(name):
         movement = frappe.get_doc("XPOS Cash Movement", name)
     except Exception:
         frappe.throw(_("Cash movement {0} not found").format(name))
+
+    if movement.user != frappe.session.user and "POS Manager" not in frappe.get_roles():
+        frappe.throw(_("You do not have permission to cancel this cash movement"))
 
     if movement.status == "Cancelled":
         frappe.throw(_("Cash movement is already cancelled"))

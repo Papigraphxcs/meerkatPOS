@@ -6,6 +6,33 @@ import frappe, requests
 from frappe import _
 from requests.auth import HTTPBasicAuth
 import json
+import re
+
+
+def _sanitize_mpesa_field(value, max_length=100):
+    """Sanitize M-Pesa webhook field to prevent injection."""
+    if value is None:
+        return None
+    value = str(value).strip()[:max_length]
+    # Remove any control characters
+    value = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', value)
+    return value or None
+
+
+def _validate_mpesa_webhook_token():
+    """Validate M-Pesa webhook request using a configured token.
+
+    If no token is configured, allows the request (backward-compatible).
+    If a token is configured, checks X-Mpesa-Token header.
+    """
+    token = frappe.db.get_single_value("Mpesa Settings", "webhook_token", cache=True) if frappe.db.exists("DocType", "Mpesa Settings") else None
+    if not token:
+        return  # No token configured — allow (backward-compatible)
+
+    request_token = frappe.request.headers.get("X-Mpesa-Token", "") if frappe.request else ""
+    if not request_token or request_token != token:
+        frappe.log_error("M-Pesa webhook token mismatch", "M-Pesa Security")
+        raise frappe.AuthenticationError(_("Invalid webhook token"))
 
 
 def get_token(app_key, app_secret, base_url):
@@ -20,21 +47,30 @@ def get_token(app_key, app_secret, base_url):
 @frappe.whitelist(allow_guest=True)
 def confirmation(**kwargs):
     try:
+        _validate_mpesa_webhook_token()
+
         args = frappe._dict(kwargs)
+
+        trans_id = _sanitize_mpesa_field(args.get("TransID"), max_length=50)
+        trans_amount = _sanitize_mpesa_field(args.get("TransAmount"), max_length=20)
+        if not trans_id or not trans_amount:
+            frappe.log_error("M-Pesa confirmation missing TransID or TransAmount", "M-Pesa Webhook")
+            return {"ResultCode": 1, "ResultDesc": "Missing required fields"}
+
         doc = frappe.new_doc("Mpesa Payment Register")
-        doc.transactiontype = args.get("TransactionType")
-        doc.transid = args.get("TransID")
-        doc.transtime = args.get("TransTime")
-        doc.transamount = args.get("TransAmount")
-        doc.businessshortcode = args.get("BusinessShortCode")
-        doc.billrefnumber = args.get("BillRefNumber")
-        doc.invoicenumber = args.get("InvoiceNumber")
-        doc.orgaccountbalance = args.get("OrgAccountBalance")
-        doc.thirdpartytransid = args.get("ThirdPartyTransID")
-        doc.msisdn = args.get("MSISDN")
-        doc.firstname = args.get("FirstName")
-        doc.middlename = args.get("MiddleName")
-        doc.lastname = args.get("LastName")
+        doc.transactiontype = _sanitize_mpesa_field(args.get("TransactionType"), max_length=50)
+        doc.transid = trans_id
+        doc.transtime = _sanitize_mpesa_field(args.get("TransTime"), max_length=20)
+        doc.transamount = trans_amount
+        doc.businessshortcode = _sanitize_mpesa_field(args.get("BusinessShortCode"), max_length=20)
+        doc.billrefnumber = _sanitize_mpesa_field(args.get("BillRefNumber"), max_length=50)
+        doc.invoicenumber = _sanitize_mpesa_field(args.get("InvoiceNumber"), max_length=50)
+        doc.orgaccountbalance = _sanitize_mpesa_field(args.get("OrgAccountBalance"), max_length=20)
+        doc.thirdpartytransid = _sanitize_mpesa_field(args.get("ThirdPartyTransID"), max_length=50)
+        doc.msisdn = _sanitize_mpesa_field(args.get("MSISDN"), max_length=20)
+        doc.firstname = _sanitize_mpesa_field(args.get("FirstName"), max_length=100)
+        doc.middlename = _sanitize_mpesa_field(args.get("MiddleName"), max_length=100)
+        doc.lastname = _sanitize_mpesa_field(args.get("LastName"), max_length=100)
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
         context = {"ResultCode": 0, "ResultDesc": "Accepted"}
@@ -47,8 +83,20 @@ def confirmation(**kwargs):
 
 @frappe.whitelist(allow_guest=True)
 def validation(**kwargs):
-    context = {"ResultCode": 0, "ResultDesc": "Accepted"}
-    return dict(context)
+    try:
+        _validate_mpesa_webhook_token()
+    except frappe.AuthenticationError:
+        return {"ResultCode": 1, "ResultDesc": "Rejected"}
+
+    args = frappe._dict(kwargs)
+    trans_id = args.get("TransID", "")
+    bill_ref = args.get("BillRefNumber", "")
+
+    if not trans_id:
+        frappe.log_error("M-Pesa validation: missing TransID", "M-Pesa Webhook")
+        return {"ResultCode": 1, "ResultDesc": "Rejected - Missing TransID"}
+
+    return {"ResultCode": 0, "ResultDesc": "Accepted"}
 
 
 @frappe.whitelist()

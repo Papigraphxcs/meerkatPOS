@@ -4,6 +4,7 @@
 """Public invoice API facade backed by `invoice_processing` modules."""
 
 import frappe
+from frappe import _
 import time
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from xpos.x_pos.api.invoice_processing.utils import (
@@ -116,7 +117,7 @@ def fetch_exchange_rate_pair(from_currency, to_currency):
     """Return exchange rate payload expected by POS multi-currency UI."""
 
     if not from_currency or not to_currency:
-        frappe.throw("from_currency and to_currency are required")
+        frappe.throw(_("from_currency and to_currency are required"))
 
     if from_currency == to_currency:
         from frappe.utils import nowdate
@@ -138,10 +139,10 @@ def create_sales_invoice_from_order(sales_order):
     """Backward-compatible facade for legacy frontend method path."""
 
     if not sales_order:
-        frappe.throw("sales_order is required")
+        frappe.throw(_("sales_order is required"))
 
     if not frappe.db.exists("Sales Order", sales_order):
-        frappe.throw(f"Sales Order {sales_order} does not exist")
+        frappe.throw(_("Sales Order {0} does not exist").format(sales_order))
 
     invoice_doc = make_sales_invoice(sales_order)
     invoice_doc.flags.ignore_permissions = True
@@ -155,7 +156,7 @@ def delete_sales_invoice(sales_invoice):
     """Backward-compatible facade for legacy frontend method path."""
 
     if not sales_invoice:
-        frappe.throw("sales_invoice is required")
+        frappe.throw(_("sales_invoice is required"))
 
     if frappe.db.exists("Sales Invoice", sales_invoice):
         frappe.delete_doc("Sales Invoice", sales_invoice, force=1)

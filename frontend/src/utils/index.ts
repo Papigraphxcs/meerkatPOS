@@ -97,3 +97,30 @@ export async function getCustomer(customerId: string) {
     });
     return customer;
 }
+
+/**
+ * Extract a human-readable error message from any error object.
+ * Handles Frappe server messages, standard Error objects, and raw strings.
+ */
+export function extractErrorMessage(error: unknown): string {
+    if (!error) return "Unknown error";
+    if (typeof error === "string") return error;
+
+    const err = error as Record<string, unknown>;
+
+    if (err._server_messages) {
+        try {
+            const msgs = JSON.parse(err._server_messages as string);
+            const parsed = typeof msgs === "string" ? [msgs] : msgs;
+            const messages = parsed.map((m: string) => {
+                try { return JSON.parse(m).message || m; } catch { return m; }
+            }).filter(Boolean);
+            if (messages.length > 0) return messages.join(", ");
+        } catch { /* fallthrough */ }
+    }
+
+    if (err.message && typeof err.message === "string") return err.message;
+    if (err.exc_type && typeof err.exc_type === "string") return err.exc_type;
+
+    try { return JSON.stringify(error); } catch { return String(error); }
+}

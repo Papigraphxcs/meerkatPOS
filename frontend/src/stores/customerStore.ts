@@ -123,6 +123,14 @@ export const useCustomerStore = defineStore("customers", () => {
         data
       );
       showNewCustomerForm.value = false;
+
+      if (result && result.name) {
+        const exists = customers.value.some(c => c.name === result.name);
+        if (!exists) {
+          customers.value.unshift(result);
+        }
+      }
+
       return result;
     } catch (error) {
       console.error("Error creating customer:", error);
