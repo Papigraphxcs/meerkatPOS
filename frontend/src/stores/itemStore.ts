@@ -66,8 +66,8 @@ export const useItemStore = defineStore("items", () => {
   });
 
   async function cacheAllItems(posProfile: string): Promise<void> {
-    // In Electron mode the sync engine populates the local MariaDB — no direct API caching needed.
     if (isElectron()) return;
+    if (!usePosStore().useOfflineMode) return;
     try {
       const batchSize = 200;
       let start = 0;
@@ -90,7 +90,7 @@ export const useItemStore = defineStore("items", () => {
       } while (batch.length === batchSize);
 
       await idbCacheItems(allItems);
-      
+
       const posStoreRef = usePosStore();
       const warehouse = posStoreRef.warehouse;
       if (warehouse && allItems.length > 0) {
@@ -102,7 +102,6 @@ export const useItemStore = defineStore("items", () => {
   }
 
   async function cacheAllStock(posProfile: string, warehouse: string, allItems?: POSItem[]): Promise<void> {
-    // In Electron mode the sync engine syncs Bin data — stock_cache is managed separately.
     if (isElectron()) return;
     if (!isOnline()) {
       console.warn("[XPOS Offline] Cannot cache stock - system is offline");
@@ -151,7 +150,6 @@ export const useItemStore = defineStore("items", () => {
     isLoading.value = true;
 
     try {
-      // Electron: always read items from local MariaDB (sync engine keeps it up to date)
       if (isElectron()) {
         const posStoreRef = usePosStore();
         const results = await window.electronAPI!.db.getItems({
@@ -173,7 +171,7 @@ export const useItemStore = defineStore("items", () => {
         return;
       }
 
-      if (!isOnline()) {
+      if (!isOnline() && usePosStore().useOfflineMode) {
         const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
 
         if (append) {
@@ -224,20 +222,25 @@ export const useItemStore = defineStore("items", () => {
         hasMore.value = result.length === pageLength.value;
 
         if (!searchTerm.value && !append && selectedGroup.value === "All Item Groups") {
-          cacheAllItems(posProfile).catch(() => { });
+          const posStoreRef = usePosStore();
+          if (posStoreRef.useOfflineMode) {
+            cacheAllItems(posProfile).catch(() => { });
+          }
         }
       }
     } catch (error) {
-      try {
-        const cached = await idbGetCachedItems();
-        if (cached.length > 0) {
-          const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
-          items.value = filtered.slice(0, pageLength.value);
-          hasMore.value = filtered.length > pageLength.value;
-          console.log("[XPOS Offline] Serving items from idb cache after fetch failure");
-          return;
-        }
-      } catch { /* ignore */ }
+      if (usePosStore().useOfflineMode) {
+        try {
+          const cached = await idbGetCachedItems();
+          if (cached.length > 0) {
+            const filtered = await idbSearchCachedItems(searchTerm.value, selectedGroup.value);
+            items.value = filtered.slice(0, pageLength.value);
+            hasMore.value = filtered.length > pageLength.value;
+            console.log("[XPOS Offline] Serving items from idb cache after fetch failure");
+            return;
+          }
+        } catch { /* ignore */ }
+      }
       console.error("Error fetching items:", error);
     } finally {
       isLoading.value = false;
@@ -246,7 +249,6 @@ export const useItemStore = defineStore("items", () => {
 
   async function fetchItemGroups(): Promise<void> {
     try {
-      // Electron: read item groups from local MariaDB
       if (isElectron()) {
         const all = await window.electronAPI!.db.getItemGroups() as ItemGroup[];
         itemGroups.value = all;
@@ -254,7 +256,7 @@ export const useItemStore = defineStore("items", () => {
         return;
       }
 
-      if (!isOnline()) {
+      if (!isOnline() && usePosStore().useOfflineMode) {
         const cached = await idbGetCachedGroups();
         itemGroups.value = cached.groups;
         parentGroups.value = cached.parentGroups;
@@ -268,17 +270,21 @@ export const useItemStore = defineStore("items", () => {
         itemGroups.value = result.groups || [];
         parentGroups.value = result.parent_groups || [];
 
-        idbCacheGroups(itemGroups.value, parentGroups.value).catch(() => { });
+        if (usePosStore().useOfflineMode) {
+          idbCacheGroups(itemGroups.value, parentGroups.value).catch(() => { });
+        }
       }
     } catch (error) {
-      try {
-        const cached = await idbGetCachedGroups();
-        if (cached.groups.length > 0) {
-          itemGroups.value = cached.groups;
-          parentGroups.value = cached.parentGroups;
-          return;
-        }
-      } catch { /* ignore */ }
+      if (usePosStore().useOfflineMode) {
+        try {
+          const cached = await idbGetCachedGroups();
+          if (cached.groups.length > 0) {
+            itemGroups.value = cached.groups;
+            parentGroups.value = cached.parentGroups;
+            return;
+          }
+        } catch { /* ignore */ }
+      }
       console.error("Error fetching item groups:", error);
     }
   }
@@ -288,7 +294,6 @@ export const useItemStore = defineStore("items", () => {
     _posProfile?: string
   ): Promise<POSItem | null> {
     try {
-      // Electron: lookup barcode in local MariaDB (item_barcodes joined to items)
       if (isElectron()) {
         const lower = barcode.toLowerCase();
         const posStoreRef = usePosStore();
@@ -500,7 +505,7 @@ export const useItemStore = defineStore("items", () => {
       return [];
     }
   }
-  
+
   function setSearchTerm(term: string): void {
     searchTerm.value = term;
   }
@@ -524,7 +529,6 @@ export const useItemStore = defineStore("items", () => {
   }
 
   return {
-    // State
     items,
     isLoading,
     searchTerm,
@@ -542,9 +546,7 @@ export const useItemStore = defineStore("items", () => {
     variants,
     variantAttributes,
     isLoadingVariants,
-    // Computed
     filteredItems,
-    // Actions
     fetchItems,
     fetchItemGroups,
     searchByBarcode,

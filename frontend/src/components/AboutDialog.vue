@@ -10,7 +10,7 @@
 
             <div class="space-y-4">
                 <div class="text-center py-4">
-                    <p class="text-lg font-semibold text-foreground">{{ __("X POS Desktop") }}</p>
+                    <p class="text-lg font-semibold text-foreground">{{ isElectronEnv ? __("X POS Desktop") : __("X POS") }}</p>
                     <p class="text-sm text-muted-foreground">{{ __("Point of Sale Application for ERPNext") }}</p>
                 </div>
 

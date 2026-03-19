@@ -6,6 +6,7 @@ import {
   getCachedERPSettings,
 } from "@/services/dbBridge";
 import { isOnline } from "@/utils";
+import { isElectron } from "@/services/electronBridge";
 import type {
   ERPSettings,
   SellingSettings,
@@ -175,28 +176,51 @@ export const useSettingsStore = defineStore("settings", () => {
   }
 
   async function fetchSettings(): Promise<void> {
+    if (!isElectron() && window.xpos?.boot) {
+      const boot = window.xpos.boot;
+      if (boot.selling_settings || boot.buying_settings || boot.stock_settings || boot.accounts_settings) {
+        const data: ERPSettings = {
+          selling_settings: boot.selling_settings || {},
+          buying_settings: boot.buying_settings || {},
+          stock_settings: boot.stock_settings || {},
+          accounts_settings: boot.accounts_settings || {},
+          global_defaults: boot.sysdefaults || {},
+          currency_precision: boot.currency_precision || {},
+        } as ERPSettings;
+        _applySettings(data);
+        return;
+      }
+    }
+
     try {
       if (isOnline()) {
         const data = await call<ERPSettings>(
           "xpos.api.settings.get_erp_settings"
         );
         _applySettings(data);
-        await cacheERPSettings(data).catch((err) =>
-          console.warn("[XPOS] Failed to cache ERP settings:", err)
-        );
+
+        const { usePosStore } = await import("@/stores/posStore");
+        if (usePosStore().useOfflineMode) {
+          await cacheERPSettings(data).catch((err) =>
+            console.warn("[XPOS] Failed to cache ERP settings:", err)
+          );
+        }
         return;
       }
     } catch (error) {
       console.warn("[XPOS] Failed to fetch ERP settings from server:", error);
     }
 
-    try {
-      const cached = (await getCachedERPSettings()) as ERPSettings | null;
-      if (cached) {
-        _applySettings(cached);
+    const { usePosStore } = await import("@/stores/posStore");
+    if (usePosStore().useOfflineMode) {
+      try {
+        const cached = (await getCachedERPSettings()) as ERPSettings | null;
+        if (cached) {
+          _applySettings(cached);
+        }
+      } catch (error) {
+        console.warn("[XPOS] Failed to load cached ERP settings:", error);
       }
-    } catch (error) {
-      console.warn("[XPOS] Failed to load cached ERP settings:", error);
     }
   }
 

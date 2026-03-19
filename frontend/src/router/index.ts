@@ -79,6 +79,11 @@ router.beforeEach(async (to, _from, next) => {
     return;
   }
 
+  if (to.name === "settings" && !isElectron()) {
+    next({ name: "pos" });
+    return;
+  }
+
   if (to.meta.title) {
     document.title = `${to.meta.title} | X POS`;
   }

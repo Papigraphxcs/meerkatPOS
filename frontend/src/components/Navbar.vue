@@ -123,6 +123,12 @@
 					<p class="text-xs text-muted-foreground">{{ authStore.userEmail }}</p>
 				</div>
 				<Button variant="ghost" size="sm"
+					class="w-full justify-start gap-2"
+					@click="showAboutDialog = true">
+					<Info class="w-4 h-4" />
+					{{ __('About X POS') }}
+				</Button>
+				<Button variant="ghost" size="sm"
 					class="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
 					@click="handleSignOut">
 					<Power class="w-4 h-4" />
@@ -143,6 +149,8 @@
 		<ReturnDialog :open="showReturnDialog" @close="showReturnDialog = false" />
 
 		<RepeatInvoiceDialog :open="showRepeatDialog" @close="showRepeatDialog = false" />
+
+		<AboutDialog :open="showAboutDialog" @close="showAboutDialog = false" />
 	</header>
 </template>
 
@@ -163,9 +171,10 @@ import {
 	Building2, Sun, Moon, Monitor, User, LogOut,
 	ArrowDownCircle, ArrowUpCircle, RotateCcw, Repeat, Printer, Power,
 	Wifi, WifiOff, CloudUpload, Loader2,
-	LayoutGrid, FileText, Search
+	LayoutGrid, FileText, Search, Info
 } from "lucide-vue-next";
 import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
+import AboutDialog from "@/components/AboutDialog.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
@@ -200,6 +209,7 @@ const offlineStore = useOfflineStore();
 const showReturnDialog = ref(false);
 const showRepeatDialog = ref(false);
 const showOfflinePanel = ref(false);
+const showAboutDialog = ref(false);
 
 function handleOfflineAction() {
 	if (offlineStore.hasPending) {

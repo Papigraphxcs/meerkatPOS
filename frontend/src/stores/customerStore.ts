@@ -47,11 +47,11 @@ export const useCustomerStore = defineStore("customers", () => {
   async function searchCustomers(term = "", posProfile?: string): Promise<void> {
     if (isLoading.value) return;
     isLoading.value = true;
-    
+
     try {
       const searchText = term || searchTerm.value;
 
-      if (!isOnline()) {
+      if (!isOnline() && usePosStore().useOfflineMode) {
         const cached = await searchCachedCustomers(searchText);
         customers.value = cached;
         return;
@@ -67,7 +67,7 @@ export const useCustomerStore = defineStore("customers", () => {
           }
         );
         customers.value = result || [];
-        if (customers.value.length > 0) {
+        if (customers.value.length > 0 && usePosStore().useOfflineMode) {
           try {
             await cacheCustomers(customers.value);
           } catch (error) {
@@ -78,24 +78,26 @@ export const useCustomerStore = defineStore("customers", () => {
     } catch (error) {
       console.error("Error searching customers:", error);
 
-      try {
-        const cached = await searchCachedCustomers(term || searchTerm.value);
-        if (cached.length > 0) {
-          customers.value = cached;
-          return;
+      if (usePosStore().useOfflineMode) {
+        try {
+          const cached = await searchCachedCustomers(term || searchTerm.value);
+          if (cached.length > 0) {
+            customers.value = cached;
+            return;
+          }
+        } catch (cacheError) {
+          console.warn("[XPOS Offline] Failed to load cached customers:", cacheError);
         }
-      } catch (cacheError) {
-        console.warn("[XPOS Offline] Failed to load cached customers:", cacheError);
       }
       customers.value = [];
     } finally {
       isLoading.value = false;
     }
   }
-  
+
   async function cacheAllCustomers(posProfile?: string): Promise<void> {
     if (!isOnline()) return;
-    
+
     try {
       const result = await call<Customer[]>(
         "xpos.api.customers.get_customers",
@@ -105,7 +107,7 @@ export const useCustomerStore = defineStore("customers", () => {
           limit: 1000,
         }
       );
-      
+
       if (result && result.length > 0) {
         await cacheCustomers(result);
       }
@@ -159,14 +161,14 @@ export const useCustomerStore = defineStore("customers", () => {
   ): Promise<Customer | null> {
     isLoadingDetail.value = true;
     try {
-      if (!isOnline()) {
+      if (!isOnline() && usePosStore().useOfflineMode) {
 
         const cached = await getCachedCustomers();
         const customer = cached.find(c => c.name === customerName || c.customer_name === customerName);
         selectedCustomerInfo.value = customer || null;
         return selectedCustomerInfo.value;
       }
-      
+
       if (isOnline()) {
         const result = await call<Customer>(
           "xpos.api.customers.get_customer_info",
@@ -177,7 +179,7 @@ export const useCustomerStore = defineStore("customers", () => {
         selectedCustomerInfo.value = result;
         return result;
       }
-      
+
       return null;
     } catch (error) {
       console.error("Error fetching customer info:", error);
@@ -323,7 +325,7 @@ export const useCustomerStore = defineStore("customers", () => {
         "xpos.api.customers.unenroll_customer_loyalty",
         { customer: customerName }
       );
-      
+
       customerLoyaltyInfo.value = null;
       return { success: true, message: result?.message };
     } catch (error) {

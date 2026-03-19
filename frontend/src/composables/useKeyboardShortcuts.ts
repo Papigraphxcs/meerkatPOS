@@ -77,7 +77,7 @@ export function useKeyboardShortcuts() {
             description: "Open Settings",
             category: "General",
             global: true,
-            action: () => { router.push("/settings"); },
+            action: () => { if (isElectron()) router.push("/settings"); },
         },
         {
             id: "fullscreen",
