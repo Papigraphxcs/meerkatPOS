@@ -17,16 +17,16 @@ X POS is a feature-rich, offline-first Point of Sale application built on [Frapp
 
 ## Highlights
 
-| | Feature | Description |
-|---|---|---|
-| 🔌 | **Offline-First** | Full POS operation without internet. Background sync when reconnected. |
-| 🖥️ | **Electron Desktop** | Standalone app for Windows, macOS, and Linux with local database and hardware access. |
-| 🌐 | **PWA Ready** | Install from browser on any device. Works offline with service-worker caching. |
-| ⌨️ | **Keyboard-Driven** | 15+ shortcuts, command palette (Ctrl+K), and full keyboard navigation. |
-| 🌙 | **Dark Mode & RTL** | System theme detection, manual toggle, and full Right-to-Left layout support. |
-| 💳 | **Multi-Payment** | Split payments across cash, card, mobile money, and custom modes in one transaction. |
-| 🏪 | **Hub & Spoke** | Multi-terminal architecture for networked stores with centralized sync. |
-| 📦 | **Full Purchasing** | Purchase orders, purchase invoices, and stock receiving — all from the POS. |
+| Feature | Description |
+|---|---|
+| **Offline-First** | Full POS operation without internet. Background sync when reconnected. |
+| **Electron Desktop** | Standalone app for Windows, macOS, and Linux with local database and hardware access. |
+| **PWA Ready** | Install from browser on any device. Works offline with service-worker caching. |
+| **Keyboard-Driven** | 15+ shortcuts, command palette (Ctrl+K), and full keyboard navigation. |
+| **Dark Mode & RTL** | System theme detection, manual toggle, and full Right-to-Left layout support. |
+| **Multi-Payment** | Split payments across cash, card, mobile money, and custom modes in one transaction. |
+| **Hub & Spoke** | Multi-terminal architecture for networked stores with centralized sync. |
+| **Full Purchasing** | Purchase orders, purchase invoices, and stock receiving — all from the POS. |
 
 ---
 
