@@ -20,7 +20,6 @@ build/
 
 # Node / Frontend
 node_modules/
-frontend/yarn.lock
 frontend/dev-dist/
 frontend/dist/
 frontend/release/

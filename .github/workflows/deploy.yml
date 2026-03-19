@@ -124,6 +124,7 @@ jobs:
             echo "    Installing Node dependencies..."
             if [ -f "apps/${APP_NAME}/frontend/package.json" ]; then
               cd "apps/${APP_NAME}/frontend"
+              test -f yarn.lock || { echo "ERROR: apps/${APP_NAME}/frontend/yarn.lock is missing"; exit 1; }
               yarn install --frozen-lockfile --production=false 2>&1 | tail -3
               cd "${BENCH_PATH}"
             fi

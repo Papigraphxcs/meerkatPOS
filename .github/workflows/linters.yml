@@ -57,6 +57,7 @@ jobs:
       - name: Install frontend dependencies
         run: |
           cd frontend
+          test -f yarn.lock || { echo "::error::frontend/yarn.lock is missing. Commit the lockfile to keep CI reproducible."; exit 1; }
           yarn install --frozen-lockfile
 
       - name: TypeScript type check
