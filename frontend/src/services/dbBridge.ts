@@ -1,4 +1,5 @@
 import { isElectron } from "./electronBridge";
+import type { PendingPurchase } from "./idbService";
 
 function getDb() {
   return window.electronAPI!.db;
@@ -1017,8 +1018,8 @@ export async function getAllPendingInvoices() {
   return getPendingInvoices();
 }
 
-export async function getAllPendingPurchases() {
-  return getPendingPurchases();
+export async function getAllPendingPurchases(): Promise<PendingPurchase[]> {
+  return getPendingPurchases() as Promise<PendingPurchase[]>;
 }
 
 export async function countPendingPurchases(): Promise<number> {

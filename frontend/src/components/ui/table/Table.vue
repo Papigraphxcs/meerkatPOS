@@ -17,8 +17,8 @@ import {
 } from "lucide-vue-next";
 import __ from "@/lib/translate";
 import type {
-    ChildTableColumn,
-    ChildTableRow,
+    TableColumn as ChildTableColumn,
+    TableRow as ChildTableRow,
     SelectOption,
 } from "./types";
 import Checkbox from "../checkbox/Checkbox.vue";

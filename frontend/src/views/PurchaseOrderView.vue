@@ -15,7 +15,6 @@ import {
     Plus,
     RefreshCw,
     Package,
-    Save,
     X,
     ShoppingCart,
     ScanBarcode,
@@ -26,7 +25,7 @@ import {
     Send,
 } from "lucide-vue-next";
 import type { SearchItem, Supplier } from "@/types/pos.types";
-import { showError, showSuccess } from "@/services/api";
+import { showError } from "@/services/api";
 import __ from "@/lib/translate";
 import LinkField from "@/components/ui/link/LinkField.vue";
 import { CreateItemDialog, CreateSupplierDialog } from "@/components/purchase";
@@ -394,7 +393,7 @@ onMounted(() => {
                     <label class="text-xs text-muted-foreground mb-1 block">{{ __("Supplier") }} *</label>
                     <div class="flex gap-1">
                         <div class="flex-1">
-                            <LinkField v-model="purchaseStore.selectedSupplier" doctype="Supplier"
+                            <LinkField v-model="purchaseStore.selectedSupplierName" doctype="Supplier"
                                 class="h-8 text-sm" />
                         </div>
                         <Button @click="showNewSupplierDialog = true" variant="outline" size="icon" class="h-8 w-8 shrink-0">

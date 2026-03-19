@@ -207,6 +207,14 @@ function handlePrintLast() {
 	);
 }
 
+function handleShowShortcutsDialog() {
+	showShortcutsDialog.value = true;
+}
+
+function handleShowAboutDialog() {
+	showAboutDialog.value = true;
+}
+
 const theme = ref<"light" | "dark" | "system">("system");
 const systemPrefersDark = ref(window.matchMedia("(prefers-color-scheme: dark)").matches);
 
@@ -290,6 +298,8 @@ onMounted(() => {
 	window.addEventListener("xpos:cash-expense", handleCashExpense as EventListener);
 	window.addEventListener("xpos:cash-deposit", handleCashDeposit as EventListener);
 	window.addEventListener("xpos:print-last", handlePrintLast as EventListener);
+	window.addEventListener("xpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
+	window.addEventListener("xpos:show-about-dialog", handleShowAboutDialog as EventListener);
 });
 
 watch(isAuthPage, (isAuth, wasAuth) => {
@@ -330,5 +340,7 @@ onUnmounted(() => {
 	window.removeEventListener("xpos:cash-expense", handleCashExpense as EventListener);
 	window.removeEventListener("xpos:cash-deposit", handleCashDeposit as EventListener);
 	window.removeEventListener("xpos:print-last", handlePrintLast as EventListener);
+	window.removeEventListener("xpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
+	window.removeEventListener("xpos:show-about-dialog", handleShowAboutDialog as EventListener);
 });
 </script>

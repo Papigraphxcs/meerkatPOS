@@ -24,7 +24,7 @@ withDefaults(
       </TooltipTrigger>
       <TooltipContent :side="side">
         {{ content }}
-        <TooltipArrow as="svg" :width="8" />
+        <TooltipArrow class="fill-primary" :width="8" />
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>

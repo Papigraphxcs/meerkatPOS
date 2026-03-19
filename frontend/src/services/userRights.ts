@@ -84,9 +84,9 @@ const isLoaded = ref(false);
 export async function loadPermissions(userEmail: string): Promise<void> {
   if (!isElectron()) {
     permissions.value = Object.keys(DEFAULT_PERMISSIONS).reduce((acc, key) => {
-      (acc as Record<string, boolean>)[key] = true;
+      acc[key] = true;
       return acc;
-    }, {} as PosPermissions);
+    }, {} as Record<string, boolean>) as unknown as PosPermissions;
     isLoaded.value = true;
     return;
   }

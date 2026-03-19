@@ -139,10 +139,20 @@ const __ = (s: string) => s;
 const posStore = usePosStore();
 const authStore = useAuthStore();
 
+interface Expense {
+  id: number;
+  expense_type?: string;
+  amount: number;
+  mode_of_payment?: string;
+  description?: string;
+  posting_date?: string;
+  sync_status?: string;
+}
+
 const isLoading = ref(false);
 const isSaving = ref(false);
 const showForm = ref(false);
-const expenses = ref<Record<string, unknown>[]>([]);
+const expenses = ref<Expense[]>([]);
 const paymentModes = ref<string[]>([]);
 
 const today = new Date().toISOString().slice(0, 10);
@@ -170,7 +180,7 @@ async function loadExpenses() {
       user: authStore.userEmail,
       fromDate: fromDate.value,
       toDate: toDate.value,
-    });
+    }) as Expense[];
   } catch (err) {
     console.error("Failed to load expenses:", err);
   } finally {

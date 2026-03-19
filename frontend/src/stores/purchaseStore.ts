@@ -51,12 +51,22 @@ export interface PurchaseCartItem {
     discount_percent?: number;
     item_packing?: string;
     item_uoms?: Array<{ uom: string; conversion_factor: number }>;
+    custom_alias?: string;
+    custom_stock_in_hand?: number;
+    custom_transit_stock?: number;
+    custom_required_loose?: number;
+    custom_required_packs?: number;
+    custom_generic_item?: string;
+    custom_category?: string;
+    custom_class?: string;
+    custom_item_packing?: string;
+    custom_pack_units?: number;
 }
 
 export const usePurchaseStore = defineStore("purchase", () => {
     const suppliers = ref<Supplier[]>([]);
     const isLoadingSuppliers = ref(false);
-    const selectedSupplier = ref("");
+    const selectedSupplier = ref<Supplier | null>(null);
     const showSupplierDialog = ref(false);
     const showNewSupplierForm = ref(false);
     const supplierSearchTerm = ref("");
@@ -116,6 +126,17 @@ export const usePurchaseStore = defineStore("purchase", () => {
     const canCreateOrder = computed(() =>
         !!selectedSupplier.value && cartItems.value.length > 0
     );
+
+    const selectedSupplierName = computed({
+        get: () => selectedSupplier.value?.name ?? "",
+        set: (name: string) => {
+            if (!name) {
+                selectedSupplier.value = null;
+            } else if (selectedSupplier.value?.name !== name) {
+                selectedSupplier.value = { name, supplier_name: name } as Supplier;
+            }
+        },
+    });
 
     const hasPendingPurchases = computed(() => pendingCount.value > 0);
 
@@ -222,7 +243,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
             });
 
             await searchSuppliers();
-            selectedSupplier.value = result.name;
+            selectedSupplier.value = result;
 
             return result;
         } catch (error) {
@@ -233,12 +254,12 @@ export const usePurchaseStore = defineStore("purchase", () => {
     }
 
     function selectSupplier(supplier: Supplier): void {
-        selectedSupplier.value = supplier.name;
+        selectedSupplier.value = supplier;
         showSupplierDialog.value = false;
     }
 
     function clearSupplier(): void {
-        selectedSupplier.value = "";
+        selectedSupplier.value = null;
     }
 
     let itemSearchAbort: AbortController | null = null;
@@ -388,6 +409,10 @@ export const usePurchaseStore = defineStore("purchase", () => {
         recalcQtyFromPacks(index);
     }
 
+    function updateCartItemLoose(index: number, loose: number): void {
+        cartItems.value[index].custom_required_loose = loose;
+    }
+
     function recalcQtyFromPacks(index: number): void {
         const item = cartItems.value[index];
         const packs = item.required_packs || 0;
@@ -424,7 +449,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 
             const orderData: PurchaseOrderData = {
                 pos_profile: posStore.profileName,
-                supplier: selectedSupplier.value,
+                supplier: selectedSupplier.value?.name ?? "",
                 company: posStore.companyName,
                 warehouse: selectedWarehouse.value || posStore.warehouse,
                 items: cartItems.value.map((item) => ({
@@ -549,7 +574,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
         const record = {
             type: "purchase_order" as const,
             data,
-            supplier_name: selectedSupplier.value,
+            supplier_name: selectedSupplier.value?.supplier_name ?? "",
             grand_total: cartTotal.value,
         };
 
@@ -646,7 +671,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 
         try {
             purchase.status = "syncing";
-            await updatePendingPurchase(purchase.id!, { status: "syncing" });
+            if (purchase.id) await updatePendingPurchase(purchase.id, { status: "syncing" });
 
             await call<PurchaseOrderResult>(
                 "xpos.x_pos.api.purchase_orders.create_purchase_order",
@@ -662,7 +687,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
             purchase.status = "failed";
             purchase.retry_count = (purchase.retry_count || 0) + 1;
             purchase.error = error instanceof Error ? error.message : String(error);
-            await updatePendingPurchase(purchase.id!, {
+            if (purchase.id) await updatePendingPurchase(purchase.id, {
                 status: "failed",
                 retry_count: purchase.retry_count,
                 error: purchase.error,
@@ -877,7 +902,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
         selectedTransit.value = null;
     }
 
-    // Draft management — server-side (Frappe Purchase Order, docstatus=0)
     async function getAllDrafts(): Promise<Array<{
         name: string;
         supplier: string;
@@ -917,7 +941,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
             const posStore = usePosStore();
             const payload = {
                 draft_name: currentDraftName.value || undefined,
-                supplier: selectedSupplier.value,
+                supplier: selectedSupplier.value?.name ?? "",
                 company: posStore.companyName,
                 warehouse: posStore.warehouse,
                 items: cartItems.value.map((item) => ({
@@ -973,7 +997,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
             clearCart();
             clearSupplier();
             currentDraftName.value = result.draft_name;
-            selectedSupplier.value = result.supplier || "";
+            selectedSupplier.value = result.supplier ? { name: result.supplier, supplier_name: result.supplier } as Supplier : null;
             cartItems.value = result.items || [];
             poCategory.value = result.po_category || "";
             poType.value = result.po_type || "";
@@ -1009,7 +1033,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
         clearSupplier();
         currentDraftName.value = null;
 
-        selectedSupplier.value = order.supplier;
+        selectedSupplier.value = order.supplier ? { name: order.supplier, supplier_name: order.supplier } as Supplier : null;
         
         for (const item of order.items || []) {
             cartItems.value.push({
@@ -1038,7 +1062,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
         }
     }
 
-    // Fetch items based on PO Category
     async function fetchCategoryItems(): Promise<void> {
         if (!poCategory.value || !selectedSupplier.value) {
             showError(__("Please select a supplier and PO Category first"));
@@ -1052,7 +1075,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
             const result = await call<Array<SearchItem & { qty?: number }>>(
                 "xpos.x_pos.api.purchase_orders.get_category_items",
                 {
-                    supplier: selectedSupplier.value,
+                    supplier: selectedSupplier.value?.name ?? "",
                     po_category: poCategory.value,
                     warehouse: posStore.warehouse,
                 }
@@ -1063,7 +1086,6 @@ export const usePurchaseStore = defineStore("purchase", () => {
                 return;
             }
 
-            // Clear current items and add new ones
             cartItems.value = [];
             for (const item of result) {
                 addToCart(item, item.qty || 1);
@@ -1082,6 +1104,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
         suppliers,
         isLoadingSuppliers,
         selectedSupplier,
+        selectedSupplierName,
         showSupplierDialog,
         showNewSupplierForm,
         supplierSearchTerm,
@@ -1138,6 +1161,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
         updateCartItemRate,
         updateCartItemUOM,
         updateCartItemPacks,
+        updateCartItemLoose,
         updateCartItemDiscount,
         updateCartItemField,
         fetchStockForItems,

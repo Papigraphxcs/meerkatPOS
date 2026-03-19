@@ -11,9 +11,90 @@ POS Utilities API.
 - Language options
 """
 
+import platform
+import subprocess
+
 import frappe
 from frappe import _
 from frappe.utils import cint
+
+
+@frappe.whitelist()
+def get_version_info():
+	"""Returns version and system info for the About dialog."""
+
+	xpos_version = "0.0.1"
+	try:
+		import xpos
+
+		xpos_version = xpos.__version__
+	except Exception:
+		pass
+
+	frappe_version = ""
+	erpnext_version = ""
+	try:
+		import frappe as _frappe
+
+		frappe_version = _frappe.__version__
+	except Exception:
+		pass
+	try:
+		import erpnext
+
+		erpnext_version = erpnext.__version__
+	except Exception:
+		pass
+
+	# Git info for xpos app
+	git_branch = ""
+	git_hash = ""
+	git_date = ""
+	try:
+		import os
+
+		app_path = os.path.join(frappe.get_app_path("xpos"), "..")
+		git_branch = (
+			subprocess.check_output(
+				["git", "rev-parse", "--abbrev-ref", "HEAD"],
+				cwd=app_path,
+				stderr=subprocess.DEVNULL,
+			)
+			.decode()
+			.strip()
+		)
+		git_hash = (
+			subprocess.check_output(
+				["git", "rev-parse", "--short", "HEAD"],
+				cwd=app_path,
+				stderr=subprocess.DEVNULL,
+			)
+			.decode()
+			.strip()
+		)
+		git_date = (
+			subprocess.check_output(
+				["git", "log", "-1", "--format=%ci"],
+				cwd=app_path,
+				stderr=subprocess.DEVNULL,
+			)
+			.decode()
+			.strip()
+		)
+	except Exception:
+		pass
+
+	return {
+		"xpos_version": xpos_version,
+		"frappe_version": frappe_version,
+		"erpnext_version": erpnext_version,
+		"git_branch": git_branch,
+		"git_hash": git_hash,
+		"git_date": git_date,
+		"python_version": platform.python_version(),
+		"os_info": f"{platform.system()} {platform.release()}",
+		"site_name": frappe.local.site,
+	}
 
 
 @frappe.whitelist()

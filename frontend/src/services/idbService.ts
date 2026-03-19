@@ -121,6 +121,7 @@ export interface CachedSupplier {
   default_currency?: string;
   mobile_no?: string;
   email_id?: string;
+  [key: string]: unknown;
 }
 
 export interface SyncIdMap {

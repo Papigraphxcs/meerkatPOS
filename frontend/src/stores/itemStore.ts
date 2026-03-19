@@ -250,7 +250,7 @@ export const useItemStore = defineStore("items", () => {
   async function fetchItemGroups(): Promise<void> {
     try {
       if (isElectron()) {
-        const all = await window.electronAPI!.db.getItemGroups() as ItemGroup[];
+        const all = await window.electronAPI!.db.getItemGroups() as unknown as ItemGroup[];
         itemGroups.value = all;
         parentGroups.value = all.filter(g => !!g.is_group);
         return;

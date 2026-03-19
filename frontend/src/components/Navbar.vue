@@ -124,6 +124,12 @@
 				</div>
 				<Button variant="ghost" size="sm"
 					class="w-full justify-start gap-2"
+					@click="showShortcutsDialog = true">
+					<Keyboard class="w-4 h-4" />
+					{{ __('Keyboard Shortcuts') }}
+				</Button>
+				<Button variant="ghost" size="sm"
+					class="w-full justify-start gap-2"
 					@click="showAboutDialog = true">
 					<Info class="w-4 h-4" />
 					{{ __('About X POS') }}
@@ -151,6 +157,7 @@
 		<RepeatInvoiceDialog :open="showRepeatDialog" @close="showRepeatDialog = false" />
 
 		<AboutDialog :open="showAboutDialog" @close="showAboutDialog = false" />
+		<KeyboardShortcutsDialog :open="showShortcutsDialog" @close="showShortcutsDialog = false" />
 	</header>
 </template>
 
@@ -171,10 +178,11 @@ import {
 	Building2, Sun, Moon, Monitor, User, LogOut,
 	ArrowDownCircle, ArrowUpCircle, RotateCcw, Repeat, Printer, Power,
 	Wifi, WifiOff, CloudUpload, Loader2,
-	LayoutGrid, FileText, Search, Info
+	LayoutGrid, FileText, Search, Info, Keyboard
 } from "lucide-vue-next";
 import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
 import AboutDialog from "@/components/AboutDialog.vue";
+import KeyboardShortcutsDialog from "@/components/KeyboardShortcutsDialog.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
@@ -210,6 +218,7 @@ const showReturnDialog = ref(false);
 const showRepeatDialog = ref(false);
 const showOfflinePanel = ref(false);
 const showAboutDialog = ref(false);
+const showShortcutsDialog = ref(false);
 
 function handleOfflineAction() {
 	if (offlineStore.hasPending) {
