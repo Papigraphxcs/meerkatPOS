@@ -1,13 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
 
-/**
- * Secure bridge between Electron main process and renderer (Vue app).
- * Only expose what the renderer actually needs — never expose ipcRenderer directly.
- */
-
-// ── Forward sync data channels to renderer via window.postMessage ──
-// These channels carry bulk data (pull batches, status updates) that the
-// renderer's syncIpcHandler.ts listens for via window "message" events.
 const SYNC_DATA_CHANNELS = [
   "sync-pull-batch",
   "sync-update-meta",
@@ -76,7 +68,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return () => ipcRenderer.removeListener("sync-complete", handler);
   },
 
-  // ── Real-time Stock Updates (main → renderer) ────────────────
   onStockUpdated: (callback: (data: { warehouse: string; item_code: string; actual_qty: number }) => void) => {
     const handler = (
       _event: Electron.IpcRendererEvent,
@@ -86,7 +77,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return () => ipcRenderer.removeListener("stock-updated", handler);
   },
 
-  // ── Sync Control (renderer → main) ──────────────────────────
   triggerSync: (): Promise<boolean> => ipcRenderer.invoke("trigger-sync"),
   startSyncEngine: (opts?: { csrfToken?: string; sessionCookies?: string }): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke("start-sync-engine", opts),
@@ -96,9 +86,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     pendingPushCount: number;
   }> => ipcRenderer.invoke("get-sync-state"),
 
-  // ── Database API (renderer → main → local MariaDB) ──────────
   db: {
-    // Settings
     getSetting: (key: string): Promise<string | null> =>
       ipcRenderer.invoke("db:get-setting", key),
     setSetting: (key: string, value: string, category?: string): Promise<boolean> =>
@@ -107,14 +95,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.invoke("db:get-settings-by-category", category),
     getAllSettings: () => ipcRenderer.invoke("db:get-all-settings"),
 
-    // Database config
     testConnection: (config: Record<string, unknown>) =>
       ipcRenderer.invoke("db:test-connection", config),
     getConfig: () => ipcRenderer.invoke("db:get-config"),
     reinit: (config: Record<string, unknown>) =>
       ipcRenderer.invoke("db:reinit", config),
 
-    // Items
     getItems: (opts?: { search?: string; group?: string; limit?: number; offset?: number; priceList?: string; warehouse?: string }) =>
       ipcRenderer.invoke("db:get-items", opts),
     getItem: (itemCode: string) => ipcRenderer.invoke("db:get-item", itemCode),
@@ -123,12 +109,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     countItems: (): Promise<number> => ipcRenderer.invoke("db:count-items"),
     clearItems: () => ipcRenderer.invoke("db:clear-items"),
 
-    // Item Groups
     getItemGroups: () => ipcRenderer.invoke("db:get-item-groups"),
     upsertItemGroups: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-item-groups", rows),
 
-    // Customers
     getCustomers: (opts?: { search?: string; limit?: number }) =>
       ipcRenderer.invoke("db:get-customers", opts),
     getCustomer: (name: string) => ipcRenderer.invoke("db:get-customer", name),
@@ -137,13 +121,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     addLocalCustomer: (customer: Record<string, unknown>) =>
       ipcRenderer.invoke("db:add-local-customer", customer),
 
-    // Suppliers
     getSuppliers: (opts?: { search?: string; limit?: number }) =>
       ipcRenderer.invoke("db:get-suppliers", opts),
     upsertSuppliers: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-suppliers", rows),
 
-    // Stock
     getStock: (warehouse: string, itemCode?: string) =>
       ipcRenderer.invoke("db:get-stock", warehouse, itemCode),
     upsertStock: (warehouse: string, entries: { item_code: string; actual_qty: number }[]) =>
@@ -151,7 +133,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     updateStockQty: (warehouse: string, itemCode: string, qty: number) =>
       ipcRenderer.invoke("db:update-stock-qty", warehouse, itemCode, qty),
 
-    // Pending Invoices
     addPendingInvoice: (record: { data: unknown; customer_name?: string; grand_total?: number }) =>
       ipcRenderer.invoke("db:add-pending-invoice", record),
     getPendingInvoice: (id: number) =>
@@ -165,7 +146,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     countPendingInvoices: (): Promise<number> =>
       ipcRenderer.invoke("db:count-pending-invoices"),
 
-    // Pending Purchases
     addPendingPurchase: (record: { type: string; data: unknown; supplier_name?: string; grand_total?: number }) =>
       ipcRenderer.invoke("db:add-pending-purchase", record),
     getPendingPurchases: (opts?: { type?: string; status?: string }) =>
@@ -177,110 +157,89 @@ contextBridge.exposeInMainWorld("electronAPI", {
     countPendingPurchases: (): Promise<number> =>
       ipcRenderer.invoke("db:count-pending-purchases"),
 
-    // Sync ID Map
     addSyncId: (localId: string, serverName: string, doctype: string) =>
       ipcRenderer.invoke("db:add-sync-id", localId, serverName, doctype),
     getServerName: (localId: string): Promise<string | null> =>
       ipcRenderer.invoke("db:get-server-name", localId),
 
-    // Sync Metadata
     getMeta: (key: string): Promise<string | null> =>
       ipcRenderer.invoke("db:get-meta", key),
     setMeta: (key: string, value: string) =>
       ipcRenderer.invoke("db:set-meta", key, value),
 
-    // POS Profile Cache
     cachePosData: (name: string, data: unknown) =>
       ipcRenderer.invoke("db:cache-pos-data", name, data),
     getCachedPosData: (name: string) =>
       ipcRenderer.invoke("db:get-cached-pos-data", name),
 
-    // Item Tax Cache
     cacheItemTax: (itemCode: string, company: string, data: { item_tax_template: string | null; item_tax_map: Record<string, number> }) =>
       ipcRenderer.invoke("db:cache-item-tax", itemCode, company, data),
     getCachedItemTax: (itemCode: string, company: string) =>
       ipcRenderer.invoke("db:get-cached-item-tax", itemCode, company),
 
-    // ── New Master Data Tables ──────────────────────────────────
-
-    // Companies
     getCompanies: () => ipcRenderer.invoke("db:get-companies"),
     upsertCompanies: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-companies", rows),
 
-    // Cost Centers
     getCostCenters: (company?: string) =>
       ipcRenderer.invoke("db:get-cost-centers", company),
     upsertCostCenters: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-cost-centers", rows),
 
-    // Countries
     getCountries: () => ipcRenderer.invoke("db:get-countries"),
     upsertCountries: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-countries", rows),
 
-    // Currencies
     getCurrencies: () => ipcRenderer.invoke("db:get-currencies"),
     upsertCurrencies: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-currencies", rows),
 
-    // Warehouses
     getWarehouses: (opts?: { company?: string; isGroup?: boolean }) =>
       ipcRenderer.invoke("db:get-warehouses", opts),
     upsertWarehouses: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-warehouses", rows),
 
-    // Accounts
     getAccounts: (opts?: { company?: string; accountType?: string; rootType?: string }) =>
       ipcRenderer.invoke("db:get-accounts", opts),
     upsertAccounts: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-accounts", rows),
 
-    // Price Lists
     getPriceLists: (selling?: boolean) =>
       ipcRenderer.invoke("db:get-price-lists", selling),
     upsertPriceLists: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-price-lists", rows),
 
-    // UOM
     getUom: () => ipcRenderer.invoke("db:get-uom"),
     upsertUom: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-uom", rows),
 
-    // UOM Conversion Details
     getUomConversions: (itemCode: string) =>
       ipcRenderer.invoke("db:get-uom-conversions", itemCode),
     upsertUomConversions: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-uom-conversions", rows),
 
-    // Brands
     getBrands: () => ipcRenderer.invoke("db:get-brands"),
     upsertBrands: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-brands", rows),
 
-    // Industries
     getIndustries: () => ipcRenderer.invoke("db:get-industries"),
     upsertIndustries: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-industries", rows),
 
-    // Modes of Payment
     getModesOfPayment: () => ipcRenderer.invoke("db:get-modes-of-payment"),
     upsertModesOfPayment: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-modes-of-payment", rows),
 
-    // Mode of Payment Accounts
     getModeOfPaymentAccounts: (company: string) =>
       ipcRenderer.invoke("db:get-mode-of-payment-accounts", company),
     upsertModeOfPaymentAccounts: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-mode-of-payment-accounts", rows),
 
-    // Item Barcodes
     getItemByBarcode: (barcode: string) =>
       ipcRenderer.invoke("db:get-item-by-barcode", barcode),
     upsertItemBarcodes: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-item-barcodes", rows),
 
-    // Item Prices
     getItemPrice: (itemCode: string, priceList: string) =>
       ipcRenderer.invoke("db:get-item-price", itemCode, priceList),
     getItemPrices: (opts?: { priceList?: string; selling?: boolean }) =>
@@ -288,37 +247,31 @@ contextBridge.exposeInMainWorld("electronAPI", {
     upsertItemPrices: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-item-prices", rows),
 
-    // Item Tax Templates
     getItemTaxTemplates: (company?: string) =>
       ipcRenderer.invoke("db:get-item-tax-templates", company),
     upsertItemTaxTemplates: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-item-tax-templates", rows),
 
-    // Item Tax Template Details
     getItemTaxTemplateDetails: (templateName: string) =>
       ipcRenderer.invoke("db:get-item-tax-template-details", templateName),
     upsertItemTaxTemplateDetails: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-item-tax-template-details", rows),
 
-    // Item Taxes
     getItemTaxes: (itemCode: string) =>
       ipcRenderer.invoke("db:get-item-taxes", itemCode),
     upsertItemTaxes: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-item-taxes", rows),
 
-    // Item Vendors
     getItemVendors: (itemCode: string) =>
       ipcRenderer.invoke("db:get-item-vendors", itemCode),
     upsertItemVendors: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-item-vendors", rows),
 
-    // Item Reorder Levels
     getItemReorderLevels: (itemCode: string) =>
       ipcRenderer.invoke("db:get-item-reorder-levels", itemCode),
     upsertItemReorderLevels: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-item-reorder-levels", rows),
 
-    // POS Profiles
     getPosProfiles: (company?: string) =>
       ipcRenderer.invoke("db:get-pos-profiles", company),
     getPosProfile: (name: string) =>
@@ -326,13 +279,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     upsertPosProfiles: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-pos-profiles", rows),
 
-    // POS Payment Methods
     getPosPaymentMethods: (posProfile: string) =>
       ipcRenderer.invoke("db:get-pos-payment-methods", posProfile),
     upsertPosPaymentMethods: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-pos-payment-methods", rows),
 
-    // POS Users
     getPosUsers: () => ipcRenderer.invoke("db:get-pos-users"),
     getPosUser: (username: string) => ipcRenderer.invoke("db:get-pos-user", username),
     upsertPosUsers: (rows: Record<string, unknown>[]) =>
@@ -340,19 +291,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
     createLocalUser: (user: { username: string; password: string; fullName: string; role?: string }) =>
       ipcRenderer.invoke("db:create-local-user", user),
 
-    // Sales Tax Templates
     getSalesTaxTemplates: (company?: string) =>
       ipcRenderer.invoke("db:get-sales-tax-templates", company),
     upsertSalesTaxTemplates: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-sales-tax-templates", rows),
 
-    // Sales Tax Charges
     getSalesTaxCharges: (templateName: string) =>
       ipcRenderer.invoke("db:get-sales-tax-charges", templateName),
     upsertSalesTaxCharges: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-sales-tax-charges", rows),
 
-    // Pricing Rules
     getPricingRules: (opts?: { company?: string; itemCode?: string }) =>
       ipcRenderer.invoke("db:get-pricing-rules", opts),
     getPricingRuleItems: (parent: string) =>
@@ -370,7 +318,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     upsertPricingRuleBrands: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-pricing-rule-brands", rows),
 
-    // Bins (Stock)
     getBin: (itemCode: string, warehouse: string) =>
       ipcRenderer.invoke("db:get-bin", itemCode, warehouse),
     getBins: (warehouse?: string) =>
@@ -378,16 +325,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     upsertBins: (rows: Record<string, unknown>[]) =>
       ipcRenderer.invoke("db:upsert-bins", rows),
 
-    // ── POS Shifts ─────────────────────────────────────────────
-
     createPosOpeningShift: (shift: Record<string, unknown>) =>
       ipcRenderer.invoke("db:create-pos-opening-shift", shift),
     getOpenShift: (user: string) =>
       ipcRenderer.invoke("db:get-open-shift", user),
-    // Composite query: returns full ShiftCheckResult from local tables
     checkOpenShift: (user: string) =>
       ipcRenderer.invoke("db:check-open-shift", user),
-    // Composite query: returns OpeningData (profiles + companies) from local tables
     getOpeningData: () =>
       ipcRenderer.invoke("db:get-opening-data"),
     closePosShift: (localId: string) =>
@@ -395,15 +338,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getPosOpeningShifts: (opts?: { user?: string; status?: string }) =>
       ipcRenderer.invoke("db:get-pos-opening-shifts", opts),
 
-    // POS Closing Entries
     createPosClosingEntry: (entry: Record<string, unknown>) =>
       ipcRenderer.invoke("db:create-pos-closing-entry", entry),
     getPosClosingEntries: (opts?: { user?: string; status?: string }) =>
       ipcRenderer.invoke("db:get-pos-closing-entries", opts),
     getPosClosingEntryDetails: (parentId: number) =>
       ipcRenderer.invoke("db:get-pos-closing-entry-details", parentId),
-
-    // ── Sales Invoices ─────────────────────────────────────────
 
     saveSalesInvoice: (invoice: Record<string, unknown>) =>
       ipcRenderer.invoke("db:save-sales-invoice", invoice),
@@ -416,8 +356,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getShiftSalesSummary: (shiftLocalId: string) =>
       ipcRenderer.invoke("db:get-shift-sales-summary", shiftLocalId),
 
-    // ── Expenses ───────────────────────────────────────────────
-
     createExpense: (expense: Record<string, unknown>) =>
       ipcRenderer.invoke("db:create-expense", expense),
     getExpenses: (opts?: {
@@ -426,8 +364,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     }) => ipcRenderer.invoke("db:get-expenses", opts),
     deleteExpense: (id: number) =>
       ipcRenderer.invoke("db:delete-expense", id),
-
-    // ── Bank Drops ─────────────────────────────────────────────
 
     createBankDrop: (drop: Record<string, unknown>) =>
       ipcRenderer.invoke("db:create-bank-drop", drop),
@@ -438,15 +374,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     deleteBankDrop: (id: number) =>
       ipcRenderer.invoke("db:delete-bank-drop", id),
 
-    // ── Stock Adjustments ──────────────────────────────────────
-
     createStockAdjustment: (adj: Record<string, unknown>) =>
       ipcRenderer.invoke("db:create-stock-adjustment", adj),
     getStockAdjustments: (opts?: {
       warehouse?: string; syncStatus?: string; fromDate?: string; toDate?: string;
     }) => ipcRenderer.invoke("db:get-stock-adjustments", opts),
-
-    // ── Quotations ─────────────────────────────────────────────
 
     saveQuotation: (quotation: Record<string, unknown>) =>
       ipcRenderer.invoke("db:save-quotation", quotation),
@@ -455,19 +387,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
       status?: string; limit?: number;
     }) => ipcRenderer.invoke("db:get-quotations", opts),
 
-    // ── Generic Sync Helpers ───────────────────────────────────
-
     upsertTable: (table: string, rows: Record<string, unknown>[], keyField: string) =>
       ipcRenderer.invoke("db:upsert-table", table, rows, keyField),
     clearTable: (table: string) =>
       ipcRenderer.invoke("db:clear-table", table),
 
-    // Bulk Operations
+    clearCachedData: () => ipcRenderer.invoke("db:clear-cached-data"),
     clearAllData: () => ipcRenderer.invoke("db:clear-all-data"),
     clearPendingData: () => ipcRenderer.invoke("db:clear-pending-data"),
   },
 
-  // ── Auto-Update API ──────────────────────────────────────────
   update: {
     check: (): Promise<{ success: boolean; version?: string; error?: string }> =>
       ipcRenderer.invoke("update:check"),
@@ -482,7 +411,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
   },
 
-  // ── Print API ────────────────────────────────────────────────
   print: {
     printInvoice: (data: {
       localId: number;
@@ -499,7 +427,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.invoke("print:report", html, options),
   },
 
-  // ── Hub / Till Role API ──────────────────────────────────────
   node: {
     getRole: (): Promise<string> => ipcRenderer.invoke("node:get-role"),
     setRole: (config: {

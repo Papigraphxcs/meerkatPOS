@@ -97,9 +97,9 @@ export function registerDbHandlers(): void {
       params.push(opts.group);
     }
     if (opts?.search) {
-      sql += " AND (i.`item_code` LIKE ? OR i.`item_name` LIKE ? OR ib.`barcode` LIKE ? OR i.`description` LIKE ?)";
+      sql += " AND (i.`item_code` LIKE ? OR i.`item_name` LIKE ? OR i.`local_item_name` LIKE ? OR ib.`barcode` LIKE ? OR i.`description` LIKE ?)";
       const like = `%${opts.search}%`;
-      params.push(like, like, like, like);
+      params.push(like, like, like, like, like);
     }
     sql += " ORDER BY i.`item_name` ASC";
     if (opts?.limit) {
@@ -1203,6 +1203,26 @@ export function registerDbHandlers(): void {
       throw new Error(`Table "${table}" is not allowed for clear`);
     }
     await execute(`DELETE FROM \`${table}\``);
+    return true;
+  });
+
+  ipcMain.handle("db:clear-cached-data", async () => {
+    const tables = [
+      "items", "item_groups", "item_barcodes", "item_prices",
+      "item_tax_templates", "item_tax_template_details", "item_taxes", "item_vendors",
+      "item_reorder_levels", "uom_conversion_details",
+      "customers", "suppliers", "stock_cache", "bins",
+      "companies", "cost_centers", "countries", "currencies",
+      "warehouses", "accounts", "price_lists", "uom", "brands", "industries",
+      "modes_of_payment", "mode_of_payment_accounts",
+      "pos_profiles", "pos_payment_methods", "pos_users",
+      "sales_taxes_templates", "sales_taxes_charges",
+      "pricing_rules", "pricing_rule_item_codes", "pricing_rule_item_groups", "pricing_rule_brands",
+      "sync_meta", "pos_profile_cache", "item_tax_cache", "sync_id_map",
+    ];
+    for (const t of tables) {
+      await execute(`DELETE FROM \`${t}\``);
+    }
     return true;
   });
 

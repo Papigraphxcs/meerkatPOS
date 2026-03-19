@@ -188,6 +188,7 @@ def create_invoice(data):
         item = invoice_doc.append("items", {})
         item.item_code = item_data.get("item_code")
         item.item_name = item_data.get("item_name")
+        item.local_item_name = frappe.db.get_value("Item", item_data.get("item_code"), "local_item_name") or item_data.get("item_name")
         item.qty = item_qty
         item.uom = item_data.get("uom") or item_data.get("stock_uom")
         item.warehouse = item_data.get("warehouse") or pos.warehouse

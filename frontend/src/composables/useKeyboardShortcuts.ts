@@ -1,13 +1,18 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { isElectron } from "@/services/electronBridge";
+import { clearCachedData } from "@/services/dbBridge";
+import { isOnline } from "@/utils";
+import { showError, showSuccess } from "@/services/api";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { usePosStore } from "@/stores/posStore";
 
 export interface Shortcut {
     id: string;
     keys: string[];
     description: string;
     category: string;
-    action: () => void;
+    action: () => void | Promise<void>;
     global?: boolean;
 }
 
@@ -16,6 +21,35 @@ const showAboutDialog = ref(false);
 
 export function useKeyboardShortcuts() {
     const router = useRouter();
+    const settingsStore = useSettingsStore();
+
+    async function handleClearCachedData(): Promise<void> {
+        const confirmed = window.confirm(
+            "Clear cached data? Pending invoices and purchases will be kept."
+        );
+
+        if (!confirmed) return;
+
+        try {
+            if (usePosStore().posProfile?.use_offline_mode) {
+                await clearCachedData();
+            }
+
+            settingsStore.reset();
+
+            showSuccess("Cached data cleared. Pending invoices and purchases were kept.");
+            window.dispatchEvent(new CustomEvent("xpos:cached-data-cleared"));
+
+            if (isOnline()) {
+                void Promise.allSettled([
+                    settingsStore.fetchSettings(),
+                ]);
+            }
+        } catch (error) {
+            console.error("Failed to clear cached data:", error);
+            showError("Failed to clear cached data");
+        }
+    }
 
     const shortcuts: Shortcut[] = [
         {
@@ -236,6 +270,14 @@ export function useKeyboardShortcuts() {
                 }
             },
         },
+        {
+            id: "clear-cached-data",
+            keys: ["ctrl", "shift", "r"],
+            description: "Clear Cached Data",
+            category: "Sync",
+            global: true,
+            action: () => handleClearCachedData(),
+        },
     ];
 
     function normalizeKey(key: string): string {
@@ -301,7 +343,10 @@ export function useKeyboardShortcuts() {
                 
                 e.preventDefault();
                 e.stopPropagation();
-                shortcut.action();
+                const result = shortcut.action();
+                if (result instanceof Promise) {
+                    void result;
+                }
                 return;
             }
         }

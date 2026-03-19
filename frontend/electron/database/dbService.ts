@@ -195,7 +195,18 @@ async function runMigrations(): Promise<void> {
     log.warn("Migration check for items.barcode failed", err);
   }
 
-  // Add missing operational columns to pos_profiles (existing installs lack these)
+  try {
+    const [cols] = await db.execute<RowDataPacket[]>(
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'items' AND COLUMN_NAME = 'local_item_name'"
+    );
+    if ((cols as RowDataPacket[]).length === 0) {
+      await db.execute("ALTER TABLE `items` ADD COLUMN `local_item_name` VARCHAR(255) DEFAULT NULL AFTER `item_name`");
+      log.info("Migration: added items.local_item_name column");
+    }
+  } catch (err) {
+    log.warn("Migration for items.local_item_name failed", err);
+  }
+
   const posProfileMigrations: [string, string][] = [
     ["allow_rate_change",            "TINYINT(1) NOT NULL DEFAULT 0"],
     ["hide_images",                  "TINYINT(1) NOT NULL DEFAULT 0"],

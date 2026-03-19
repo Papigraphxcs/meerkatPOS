@@ -743,26 +743,3 @@ def get_customer_groups():
         order_by="name asc",
         limit_page_length=0,
     )
-
-
-@frappe.whitelist()
-def get_territories():
-    """Return list of territory names for dropdown."""
-    return frappe.get_all(
-        "Territory",
-        filters={"is_group": 0},
-        pluck="name",
-        order_by="name asc",
-        limit_page_length=0,
-    )
-
-
-@frappe.whitelist()
-def get_countries():
-    """Return list of country names for dropdown."""
-    return frappe.get_all(
-        "Country",
-        pluck="name",
-        order_by="name asc",
-        limit_page_length=0,
-    )

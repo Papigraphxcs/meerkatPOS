@@ -50,6 +50,8 @@ doctype_js = {
     "Company": "x_pos/api/company.js",
     "Purchase Order": "x_pos/api/purchase_order.js",
 }
+
+extend_bootinfo = "xpos.startup.boot.extend_bootinfo"
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

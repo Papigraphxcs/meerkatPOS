@@ -40,7 +40,7 @@
 			</div>
 
 			<div class="flex-1 overflow-y-auto p-4 pt-2 xpos-scrollbar">
-				<ItemGrid ref="gridRef" :items="itemStore.filteredItems" :is-loading="itemStore.isLoading"
+				<ItemGrid :items="itemStore.filteredItems" :is-loading="itemStore.isLoading"
 					:currency-symbol="posStore.currencySymbol" :view-mode="viewMode"
 					:highlighted-index="highlightedIndex" @select-item="handleAddItem" @show-detail="handleShowDetail"
 					@load-more="handleLoadMore" />
@@ -90,8 +90,6 @@ watch(() => posStore.defaultView, (defaultView) => {
 	}
 }, { immediate: true });
 
-const gridRef = ref();
-
 const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null);
 const barcodeScannerRef = ref<InstanceType<typeof BarcodeScanner> | null>(null);
 const commandSearchRef = ref<InstanceType<typeof CommandSearch> | null>(null);
@@ -113,9 +111,6 @@ const groupAutocompleteOptions = computed(() => {
 });
 
 onMounted(() => {
-	nextTick(() => {
-		gridRef.value?.focus();
-	});
 	if (posStore.isReady) {
 		loadInitialData();
 	}

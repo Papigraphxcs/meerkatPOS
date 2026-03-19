@@ -320,6 +320,7 @@ import { FileText, ChevronRight, Printer, RotateCcw, User, Calendar as CalendarI
 import ListFilters from "@/components/orders/ListFilters.vue";
 import Pagination from "@/components/orders/Pagination.vue";
 import __ from "@/lib/translate";
+import { get_full_url } from "@/utils";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
@@ -334,7 +335,6 @@ const pageSize = ref(20);
 const totalOrders = ref(0);
 const selectedOrder = ref<Invoice | null>(null);
 
-// Customer filter autocomplete
 const customerFilter = ref("");
 const customerFilterOptions = ref<AutocompleteOption[]>([]);
 const invoiceSearch = ref("");
@@ -494,11 +494,7 @@ async function viewOrder(order: Invoice) {
 
 function printInvoice(name: string) {
     const url = `/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=XPOS+Thermal+Receipt&no_letterhead=0&trigger_print=1`;
-    if (typeof frappe !== "undefined" && frappe.urllib) {
-        window.open(frappe.urllib.get_full_url(url), "_blank");
-    } else {
-        window.open(url, "_blank");
-    }
+    window.open(get_full_url(url), "_blank");
 }
 
 async function returnFromOrder(order: Invoice) {

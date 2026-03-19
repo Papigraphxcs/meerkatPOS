@@ -1,6 +1,21 @@
 import Dexie, { type Table } from "dexie";
 import type { POSItem, ItemGroup, Customer } from "@/types/pos.types";
 
+const DB_NAME = "xpos_offline_v3";
+
+function isRecoverableDbError(error: unknown): boolean {
+  const name = error instanceof Error ? error.name : "";
+  const message = error instanceof Error ? error.message : String(error || "");
+
+  return (
+    name === "DatabaseClosedError" ||
+    name === "OpenFailedError" ||
+    name === "UnknownError" ||
+    message.includes("UnknownError") ||
+    message.includes("Internal error")
+  );
+}
+
 function sanitizeForIdb<T>(value: T): T {
   const visited = new WeakMap<object, unknown>();
 
@@ -127,7 +142,7 @@ class XPosDB extends Dexie {
   syncIdMap!: Table<SyncIdMap, string>;
 
   constructor() {
-    super("xpos_offline_v3");
+    super(DB_NAME);
 
     this.version(1).stores({
       items: "item_code, item_name, item_group, barcode",
@@ -155,6 +170,46 @@ class XPosDB extends Dexie {
 }
 
 const db = new XPosDB();
+let dbReadyPromise: Promise<void> | null = null;
+
+async function resetDatabaseConnection(): Promise<void> {
+  try {
+    db.close();
+  } catch {
+    // Ignore close failures during recovery.
+  }
+
+  await Dexie.delete(DB_NAME);
+  await db.open();
+}
+
+export async function ensureDatabaseReady(forceReset = false): Promise<void> {
+  if (forceReset) {
+    dbReadyPromise = null;
+  }
+
+  if (!dbReadyPromise) {
+    dbReadyPromise = (async () => {
+      try {
+        if (!db.isOpen()) {
+          await db.open();
+        }
+      } catch (error) {
+        if (!isRecoverableDbError(error)) {
+          throw error;
+        }
+
+        console.warn("[XPOS] IndexedDB open failed, resetting local browser cache", error);
+        await resetDatabaseConnection();
+      }
+    })().catch((error) => {
+      dbReadyPromise = null;
+      throw error;
+    });
+  }
+
+  await dbReadyPromise;
+}
 
 export async function cacheItems(allItems: POSItem[]): Promise<void> {
   const safeItems = sanitizeForIdb(allItems);
@@ -191,6 +246,7 @@ export async function searchCachedItems(
       (i) =>
         i.item_code.toLowerCase().includes(lower) ||
         i.item_name.toLowerCase().includes(lower) ||
+        (i.local_item_name && i.local_item_name.toLowerCase().includes(lower)) ||
         (i.barcode && i.barcode.toLowerCase().includes(lower)) ||
         (i.description && i.description.toLowerCase().includes(lower))
     );
@@ -479,6 +535,24 @@ export async function getCachedCountries(): Promise<string[]> {
   return val ? (val as string[]) : [];
 }
 
+export async function cacheCurrencies(currencies: string[]): Promise<void> {
+  await setMeta("currencies", currencies);
+}
+
+export async function getCachedCurrencies(): Promise<string[]> {
+  const val = await getMeta("currencies");
+  return val ? (val as string[]) : [];
+}
+
+export async function cacheLanguages(languages: string[]): Promise<void> {
+  await setMeta("languages", languages);
+}
+
+export async function getCachedLanguages(): Promise<string[]> {
+  const val = await getMeta("languages");
+  return val ? (val as string[]) : [];
+}
+
 export async function cacheItemTax(
   itemCode: string,
   company: string,
@@ -519,6 +593,10 @@ export async function clearAllData(): Promise<void> {
     await db.meta.clear();
     await db.syncIdMap.clear();
   });
+}
+
+export async function clearCachedData(): Promise<void> {
+  await clearAllData();
 }
 
 export async function cacheERPSettings(settings: unknown): Promise<void> {

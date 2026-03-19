@@ -66,17 +66,15 @@ export default defineConfig({
         ],
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff,woff2,ttf,eot}"],
         navigateFallback: "index.html",
         navigateFallbackAllowlist: [/^\/xpos/],
-        // Increase limits for POS app
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         runtimeCaching: [
           {
-            // Cache the xpos HTML page itself
             urlPattern: /^https?:\/\/[^/]+\/xpos\/?$/,
             handler: "NetworkFirst",
             options: {
@@ -92,9 +90,6 @@ export default defineConfig({
             },
           },
           {
-            // Note: Frappe API uses POST requests which are not cacheable by service worker.
-            // Offline API data is handled by IndexedDB (idbService) instead.
-            // Cache Frappe GET endpoints (e.g. /api/method/ for GET-based calls if any)
             urlPattern: /^https?:\/\/.*\/api\/method\//,
             handler: "NetworkFirst",
             method: "GET",

@@ -65,7 +65,7 @@
                         <p class="px-3 py-2 pt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                             {{ __("Tools") }}
                         </p>
-                        <router-link v-for="item in toolsNavItems" :key="item.route" :to="item.route"
+                        <router-link v-for="item in toolsNavItems.filter(it => it.show)" :key="item.route" :to="item.route"
                             @click="isOpen = false"
                             :class="cn('flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors no-underline',
                                 isActive(item.route)
@@ -113,6 +113,7 @@ import {
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
+import { isElectron } from "@/services/electronBridge";
 
 const route = useRoute();
 const posStore = usePosStore();
@@ -138,8 +139,8 @@ const purchaseNavItems = [
 ];
 
 const toolsNavItems = [
-    { route: "/barcode-print", label: __("Barcode Printer"), icon: Printer },
-    { route: "/settings", label: __("Settings"), icon: Settings },
+    { route: "/barcode-print", label: __("Barcode Printer"), icon: Printer, show: true },
+    { route: "/settings", label: __("Settings"), icon: Settings, show: isElectron() },
 ];
 
 const financeNavItems = [

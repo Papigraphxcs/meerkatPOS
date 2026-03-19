@@ -23,7 +23,6 @@ export const useAuthStore = defineStore("auth", () => {
       isLoading.value = true;
       error.value = "";
 
-      // Electron: restore session from local DB — never hit ERPNext
       if (isElectron()) {
         return await checkOfflineAuth();
       }
@@ -64,7 +63,6 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function checkOfflineAuth(): Promise<boolean> {
-    // Always require fresh credentials — never restore session from cache
     return false;
   }
 
@@ -73,13 +71,11 @@ export const useAuthStore = defineStore("auth", () => {
       isLoading.value = true;
       error.value = "";
 
-      // Electron always authenticates against the local MariaDB
       if (isElectron()) {
         return await loginOffline(username, password);
       }
 
-      // Web/PWA: authenticate via ERPNext
-      const response = await call("login", {
+      await call("login", {
         usr: username,
         pwd: password,
       });
@@ -131,7 +127,6 @@ export const useAuthStore = defineStore("auth", () => {
         user_fullname: (userData.full_name as string) || username,
       };
 
-      // Remember last user and start sync
       await window.electronAPI!.db.setSetting("last_logged_user", username, "auth");
       window.electronAPI!.startSyncEngine().then((result) => {
         if (!result.success) {
@@ -191,7 +186,6 @@ export const useAuthStore = defineStore("auth", () => {
       user.value = null;
       resetPermissions();
 
-      // Clear cached credentials so next startup forces fresh login
       if (isElectron()) {
         try {
           await window.electronAPI!.db.setSetting("last_logged_user", "", "auth");
@@ -223,19 +217,16 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   return {
-    // State
     isLoading,
     isAuthenticated,
     isOfflineAuth,
     user,
     error,
     resetEmailSent,
-    // Computed
     userName,
     userEmail,
     userFullName,
     isGuest,
-    // Actions
     checkAuth,
     login,
     sendResetPasswordEmail,

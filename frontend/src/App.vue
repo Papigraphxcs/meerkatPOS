@@ -120,6 +120,7 @@ import { initSyncListeners } from "@/services/syncIpcHandler";
 import { useSyncStatus } from "@/composables/useSyncStatus";
 import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
 import { isElectron } from "@/services/electronBridge";
+import { get_full_url } from "@/utils";
 import { getCustomer } from "./utils";
 
 const route = useRoute();
@@ -200,12 +201,10 @@ function handleCashDeposit() {
 function handlePrintLast() {
     const name = posStore.lastInvoiceName;
     if (!name) return;
-    if (typeof frappe !== "undefined" && frappe.urllib) {
-        const url = frappe.urllib.get_full_url(
-            `/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`
-        );
-        window.open(url, "_blank");
-    }
+	window.open(
+		get_full_url(`/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`),
+		"_blank"
+	);
 }
 
 const theme = ref<"light" | "dark" | "system">("system");

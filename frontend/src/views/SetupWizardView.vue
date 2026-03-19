@@ -533,7 +533,7 @@ async function completeSetup() {
     await api.db.createLocalUser({
       username: adminUser.username,
       password: adminUser.password,
-      fullName: adminUser.fullName,
+      full_name: adminUser.fullName,
       role: "Manager",
     });
 

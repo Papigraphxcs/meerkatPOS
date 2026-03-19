@@ -73,6 +73,7 @@ const emptyGlobalDefaults: GlobalDefaults = {
   default_currency: "",
   default_company: "",
   country: "",
+  language: "",
   disable_rounded_total: 0,
   disable_in_words: 0,
 };
@@ -109,6 +110,10 @@ export const useSettingsStore = defineStore("settings", () => {
 
   const country = computed(
     () => globalDefaults.value.country
+  );
+
+  const language = computed(
+    () => globalDefaults.value.language
   );
 
   const allowNegativeStock = computed(
@@ -169,6 +174,14 @@ export const useSettingsStore = defineStore("settings", () => {
     isLoaded.value = true;
   }
 
+  async function warmReferenceStores(): Promise<void> {
+    await Promise.allSettled([
+      import("@/stores/countryStore").then(({ useCountryStore }) => useCountryStore().fetchCountries()),
+      import("@/stores/currencyStore").then(({ useCurrencyStore }) => useCurrencyStore().fetchCurrencies()),
+      import("@/stores/languageStore").then(({ useLanguageStore }) => useLanguageStore().fetchLanguages()),
+    ]);
+  }
+
   async function fetchSettings(): Promise<void> {
     try {
       if (isOnline()) {
@@ -176,6 +189,7 @@ export const useSettingsStore = defineStore("settings", () => {
           "xpos.api.settings.get_erp_settings"
         );
         _applySettings(data);
+        void warmReferenceStores();
         await cacheERPSettings(data).catch((err) =>
           console.warn("[XPOS] Failed to cache ERP settings:", err)
         );
@@ -189,6 +203,7 @@ export const useSettingsStore = defineStore("settings", () => {
       const cached = (await getCachedERPSettings()) as ERPSettings | null;
       if (cached) {
         _applySettings(cached);
+        void warmReferenceStores();
       }
     } catch (error) {
       console.warn("[XPOS] Failed to load cached ERP settings:", error);
@@ -218,6 +233,7 @@ export const useSettingsStore = defineStore("settings", () => {
     defaultCurrency,
     defaultCompany,
     country,
+    language,
     allowNegativeStock,
     valuationMethod,
     showBarcodeField,

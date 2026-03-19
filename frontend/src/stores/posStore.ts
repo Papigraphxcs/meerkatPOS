@@ -18,7 +18,6 @@ import {
   type CurrencySymbolMap,
   type TaxDetail,
   type PrintSettings,
-  currencySymbols,
 } from "@/types/pos.types";
 import { isOnline } from "@/utils";
 
@@ -41,21 +40,18 @@ export const usePosStore = defineStore("pos", () => {
   const printFormats = ref<PrintFormat[]>([]);
   const lastInvoiceName = ref("");
   const isShiftOpen = computed(() => !!posOpeningShift.value);
-  const profileName = computed(
-    () => posProfile.value?.name || ""
-  );
+  
+  const profileName = computed(() => posProfile.value?.name || "");
+  const warehouse = computed(() => posProfile.value?.warehouse || "");
+  const currency = computed(() => posProfile.value?.currency);
 
-  const warehouse = computed(
-    () => posProfile.value?.warehouse || ""
-  );
-
-  const currency = computed(
-    () => posProfile.value?.currency
-  );
-
-  const currencySymbol = computed(
-    () => currencySymbols[currency.value ?? ""] || currency.value + " "
-  );
+  const currencySymbol = computed(() => {
+    const _currency = xpos.boot?.currencies.find((c: any) => c.name === posProfile.value?.currency);
+    if (_currency) {
+      return _currency.symbol || _currency.name;
+    }
+    return currency.value || "$";
+  });
 
   const paymentMethods = computed(() => {
     if (!posProfile.value?.payments) return [];

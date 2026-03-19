@@ -262,6 +262,7 @@ export const useCartStore = defineStore("cart", () => {
       items.value.push({
         item_code: item.item_code,
         item_name: item.item_name,
+        local_item_name: item.local_item_name,
         rate: item.rate || 0,
         qty: isReturnMode.value ? -1 : 1,
         uom: item.uom || item.stock_uom,
@@ -357,6 +358,7 @@ export const useCartStore = defineStore("cart", () => {
     items.value.push({
       item_code: item.item_code,
       item_name: item.item_name,
+      local_item_name: item.local_item_name,
       rate,
       qty: isReturnMode.value ? -Math.abs(qty) : qty,
       uom: uom || item.uom || item.stock_uom,
@@ -667,6 +669,7 @@ export const useCartStore = defineStore("cart", () => {
           items.value.push({
             item_code: item.item_code,
             item_name: item.item_name,
+            local_item_name: item.local_item_name,
             rate: item.rate || 0,
             qty: item.qty || 1,
             uom: item.uom || item.stock_uom || "",
@@ -724,6 +727,7 @@ export const useCartStore = defineStore("cart", () => {
     items: Array<{
       item_code: string;
       item_name: string;
+      local_item_name?: string;
       qty: number;
       rate: number;
       uom: string;
@@ -743,6 +747,7 @@ export const useCartStore = defineStore("cart", () => {
       items.value.push({
         item_code: item.item_code,
         item_name: item.item_name,
+        local_item_name: item.local_item_name,
         rate: item.rate || 0,
         qty: item.qty || 1,
         uom: item.uom || item.stock_uom || "",
@@ -771,6 +776,7 @@ export const useCartStore = defineStore("cart", () => {
         (item: CartItem): InvoiceItem => ({
           item_code: item.item_code,
           item_name: item.item_name,
+          local_item_name: item.local_item_name,
           qty: item.qty,
           rate: item.rate,
           uom: item.uom || item.stock_uom,
@@ -795,38 +801,31 @@ export const useCartStore = defineStore("cart", () => {
       data.name = currentDraftName.value;
     }
 
-    // Payments
     if (payments.value.length > 0) {
       data.payments = payments.value;
     }
 
-    // Notes, delivery date, auth code
     if (orderNotes.value) data.pos_notes = orderNotes.value;
     if (deliveryDate.value) data.pos_delivery_date = deliveryDate.value;
     if (authorizationCode.value) data.authorization_code = authorizationCode.value;
 
-    // Sales person
     if (salesPerson.value) data.sales_person = salesPerson.value;
 
-    // Loyalty
     if (redeemLoyaltyPoints.value) {
       data.redeem_loyalty_points = true;
       data.loyalty_points = loyaltyPoints.value;
       data.loyalty_amount = loyaltyAmount.value;
     }
 
-    // Return
     if (isReturnMode.value && returnAgainst.value) {
       data.is_return = true;
       data.return_against = returnAgainst.value;
     }
 
-    // Write-off
     if (writeOffAmount.value > 0) {
       data.write_off_amount = writeOffAmount.value;
     }
 
-    // Multi-currency
     if (currency.value && conversionRate.value !== 1) {
       data.currency = currency.value;
       data.conversion_rate = conversionRate.value;
@@ -868,7 +867,6 @@ export const useCartStore = defineStore("cart", () => {
   }
 
   return {
-    // State
     items,
     customer,
     discountPercentage,
@@ -896,7 +894,6 @@ export const useCartStore = defineStore("cart", () => {
     currency,
     conversionRate,
     selectedDeliveryCharge,
-    // Computed
     itemCount,
     subtotal,
     calculatedTaxes,
@@ -909,7 +906,6 @@ export const useCartStore = defineStore("cart", () => {
     totalPayments,
     remainingPayment,
     hasOffers,
-    // Actions
     canAddItem,
     canAddItemWithDetails,
     addItem,

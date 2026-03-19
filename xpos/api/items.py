@@ -86,6 +86,7 @@ def get_pos_items(
         search_conds = """(
 			i.name LIKE %(search)s
 			OR i.item_name LIKE %(search)s
+            OR COALESCE(i.local_item_name, '') LIKE %(search)s
 			OR i.item_code LIKE %(search)s
 			OR EXISTS (
 				SELECT 1 FROM `tabItem Barcode` ib
@@ -109,6 +110,7 @@ def get_pos_items(
 		SELECT
 			i.name AS item_code,
 			i.item_name,
+            i.local_item_name,
 			i.item_group,
 			i.stock_uom,
 			i.image,
@@ -168,6 +170,7 @@ def get_items_count(pos_profile, search_term="", item_group=""):
         conditions += """ AND (
 			i.name LIKE %(search)s
 			OR i.item_name LIKE %(search)s
+            OR COALESCE(i.local_item_name, '') LIKE %(search)s
 			OR i.item_code LIKE %(search)s
 		)"""
         values["search"] = f"%{search_term}%"
@@ -246,6 +249,7 @@ def search_barcode(barcode, pos_profile=None):
         return {
             "item_code": item.name,
             "item_name": item.item_name,
+            "local_item_name": item.get("local_item_name"),
             "barcode": barcode_data.barcode,
             "uom": barcode_data.uom or item.stock_uom,
             "stock_uom": item.stock_uom,
@@ -261,6 +265,7 @@ def search_barcode(barcode, pos_profile=None):
         return {
             "item_code": item.name,
             "item_name": item.item_name,
+            "local_item_name": item.get("local_item_name"),
             "barcode": barcode,
             "uom": item.stock_uom,
             "stock_uom": item.stock_uom,
@@ -294,6 +299,7 @@ def get_item_detail(
     result = {
         "item_code": item.name,
         "item_name": item.item_name,
+        "local_item_name": item.get("local_item_name"),
         "description": item.description,
         "stock_uom": item.stock_uom,
         "image": item.image,
@@ -371,6 +377,7 @@ def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=N
         fields=[
             "name as item_code",
             "item_name",
+            "local_item_name",
             "description",
             "stock_uom",
             "image",

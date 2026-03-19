@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2024, yosys solutions and contributors
+# Copyright (c) 2026, Ali Raxa and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 
 @frappe.whitelist()

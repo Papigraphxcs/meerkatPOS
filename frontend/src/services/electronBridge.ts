@@ -83,6 +83,54 @@ export interface ElectronNodeAPI {
 }
 
 export interface ElectronDbAPI {
+  getItemPrice(itemCode: string, priceList: string): unknown;
+  getItemPrices(opts: { priceList?: string; selling?: boolean; } | undefined): unknown;
+  getItemByBarcode(barcode: string): unknown;
+  getItemTaxTemplates(company: string | undefined): unknown;
+  getItemTaxTemplateDetails(templateName: string): unknown;
+  getSalesTaxTemplates(company: string | undefined): unknown;
+  getSalesTaxCharges(templateName: string): unknown;
+  getPricingRules(opts: { company?: string; itemCode?: string; } | undefined): unknown;
+  getPricingRuleItems(parent: string): unknown;
+  getPricingRuleGroups(parent: string): unknown;
+  getPricingRuleBrands(parent: string): unknown;
+  getBin(itemCode: string, warehouse: string): unknown;
+  getBins(warehouse: string | undefined): unknown;
+  closePosShift(localId: string): unknown;
+  getPosOpeningShifts(opts: { user?: string; status?: string; } | undefined): unknown;
+  createPosClosingEntry(entry: Record<string, unknown>): unknown;
+  getPosClosingEntries(opts: { user?: string; status?: string; } | undefined): unknown;
+  getPosClosingEntryDetails(parentId: number): unknown;
+  saveSalesInvoice(invoice: Record<string, unknown>): unknown;
+  getSalesInvoices(opts: { customer?: string; posProfile?: string; shiftLocalId?: string; fromDate?: string; toDate?: string; limit?: number; } | undefined): unknown;
+  getSalesInvoice(localId: string): unknown;
+  getShiftSalesSummary(shiftLocalId: string): unknown;
+  createExpense(expense: Record<string, unknown>): unknown;
+  getExpenses(opts: { user?: string; fromDate?: string; toDate?: string; shiftLocalId?: string; syncStatus?: string; } | undefined): unknown;
+  deleteExpense(id: number): unknown;
+  createBankDrop(drop: Record<string, unknown>): unknown;
+  getBankDrops(opts: { user?: string; fromDate?: string; toDate?: string; shiftLocalId?: string; syncStatus?: string; } | undefined): unknown;
+  deleteBankDrop(id: number): unknown;
+  createStockAdjustment(adj: Record<string, unknown>): unknown;
+  getStockAdjustments(opts: { warehouse?: string; syncStatus?: string; fromDate?: string; toDate?: string; } | undefined): unknown;
+  saveQuotation(quotation: Record<string, unknown>): unknown;
+  getQuotations(opts: { customer?: string; fromDate?: string; toDate?: string; status?: string; limit?: number; } | undefined): unknown;
+  getBrands(): unknown;
+  getUom(): unknown;
+  getUomConversions(itemCode: string): unknown;
+  upsertTable(table: string, rows: Record<string, unknown>[], keyField: string): unknown;
+  clearTable(table: string): unknown;
+  getPosUsers(): unknown;
+  getPosPaymentMethods(posProfile: string): unknown;
+  getPosProfile(name: string): unknown;
+  getPosProfiles(company: string | undefined): unknown;
+  getModeOfPaymentAccounts(company: string): unknown;
+  getModesOfPayment(): unknown;
+  getPriceLists(selling: boolean | undefined): unknown;
+  getCostCenters(company: string | undefined): unknown;
+  getAccounts(opts: { company?: string; accountType?: string; rootType?: string; } | undefined): unknown;
+  getWarehouses(opts: { company?: string; isGroup?: boolean; } | undefined): unknown;
+  getCompanies(): unknown;
   getSetting: (key: string) => Promise<string | null>;
   setSetting: (key: string, value: string, category?: string) => Promise<boolean>;
   getSettingsByCategory: (category: string) => Promise<{ key: string; value: string }[]>;
@@ -140,6 +188,9 @@ export interface ElectronDbAPI {
   getOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
   checkOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
   getOpeningData: () => Promise<Record<string, unknown>>;
+  getCountries: () => Promise<Record<string, unknown>[]>;
+  getCurrencies: () => Promise<Record<string, unknown>[]>;
+  clearCachedData: () => Promise<boolean>;
   clearAllData: () => Promise<boolean>;
   clearPendingData: () => Promise<boolean>;
 }

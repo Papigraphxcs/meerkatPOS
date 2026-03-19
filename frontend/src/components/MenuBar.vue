@@ -1,5 +1,4 @@
 <template>
-    <!-- ref lets the document-click handler detect clicks outside the menu bar -->
     <div ref="menuBarRef"
         class="h-7 flex items-center bg-[#3c3c3c] dark:bg-[#1e1e1e] shrink-0 z-50 px-1 select-none border-b border-[#252526] dark:border-[#252526]"
         @click.self="closeAll">
@@ -57,6 +56,7 @@ import { useCustomerStore } from "@/stores/customerStore";
 import { useAuthStore } from "@/stores/authStore";
 import { isElectron } from "@/services/electronBridge";
 import __ from "@/lib/translate";
+import { get_full_url } from "@/utils";
 import AboutDialog from "@/components/AboutDialog.vue";
 import KeyboardShortcutsDialog from "@/components/KeyboardShortcutsDialog.vue";
 import {
@@ -79,23 +79,18 @@ const theme = inject<Ref<"light" | "dark" | "system">>("theme")!;
 
 const menuBarRef = ref<HTMLElement | null>(null);
 const activeMenu = ref<string | null>(null);
-// Index of the highlighted top-level menu (keyboard or hover tracking)
 const focusedMenuIndex = ref<number>(-1);
-// ID of the highlighted dropdown item (keyboard or hover tracking)
 const focusedItemId = ref<string | null>(null);
-// True when the menu bar has keyboard focus (Alt pressed)
 const isMenuBarFocused = ref(false);
 const isFullscreen = ref(false);
 const showAboutDialog = ref(false);
 const showShortcutsDialog = ref(false);
 
-// Index of the currently open top-level menu
 const activeMenuIdx = computed(() => {
     if (!activeMenu.value) return -1;
     return menus.value.findIndex(m => m.label === activeMenu.value);
 });
 
-// Non-separator, non-disabled items from the currently open menu (for keyboard nav)
 function getNavigableItems(): MenuItem[] {
     const idx = activeMenuIdx.value;
     if (idx < 0) return [];
@@ -104,7 +99,6 @@ function getNavigableItems(): MenuItem[] {
 
 function toggleMenu(label: string, menuIndex: number) {
     if (activeMenu.value === label) {
-        // Close the open menu but keep keyboard focus on the button
         activeMenu.value = null;
         focusedItemId.value = null;
         focusedMenuIndex.value = menuIndex;
@@ -117,8 +111,6 @@ function toggleMenu(label: string, menuIndex: number) {
     }
 }
 
-// Called when the mouse enters a top-level menu button.
-// If another menu is already open, switch to this one immediately (desktop-app behaviour).
 function handleMenuHover(label: string, menuIndex: number) {
     focusedMenuIndex.value = menuIndex;
     if (activeMenu.value !== null && activeMenu.value !== label) {
@@ -127,7 +119,6 @@ function handleMenuHover(label: string, menuIndex: number) {
     }
 }
 
-// Track which dropdown item the mouse is over (for visual highlight + keyboard continuity)
 function handleItemHover(itemId: string) {
     focusedItemId.value = itemId;
 }
@@ -144,7 +135,6 @@ function run(item: MenuItem) {
     item.action?.();
 }
 
-// Move keyboard focus left / right between top-level menus
 function navigateMenus(delta: number) {
     const total = menus.value.length;
     const current = activeMenuIdx.value >= 0
@@ -154,16 +144,13 @@ function navigateMenus(delta: number) {
     focusedMenuIndex.value = next;
     isMenuBarFocused.value = true;
     if (activeMenu.value !== null) {
-        // A menu is open — switch it to the adjacent one
         activeMenu.value = menus.value[next].label;
         focusedItemId.value = null;
     }
 }
 
-// Move keyboard focus up / down through dropdown items
 function navigateItems(delta: number) {
     if (!activeMenu.value) {
-        // No menu open yet — open the focused top-level menu
         const idx = focusedMenuIndex.value >= 0 ? focusedMenuIndex.value : 0;
         activeMenu.value = menus.value[idx]?.label ?? null;
         focusedMenuIndex.value = idx;
@@ -186,9 +173,8 @@ function navigateItems(delta: number) {
 }
 
 function handleKeyDown(e: KeyboardEvent) {
-    // Only intercept when the menu bar has focus or a dropdown is open
     if (!isMenuBarFocused.value && !activeMenu.value) return;
-    // Never intercept while the user is typing in an input
+
     const target = e.target as HTMLElement;
     if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
@@ -223,7 +209,6 @@ function handleKeyDown(e: KeyboardEvent) {
                     run(item);
                 }
             } else if (!activeMenu.value && isMenuBarFocused.value && focusedMenuIndex.value >= 0) {
-                // Open the highlighted top-level menu
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 activeMenu.value = menus.value[focusedMenuIndex.value]?.label ?? null;
@@ -234,29 +219,24 @@ function handleKeyDown(e: KeyboardEvent) {
             e.preventDefault();
             e.stopImmediatePropagation();
             if (activeMenu.value) {
-                // Close dropdown but keep focus on the menu bar
                 activeMenu.value = null;
                 focusedItemId.value = null;
-                // isMenuBarFocused stays true so arrows still work
             } else {
                 closeAll();
             }
             break;
         case 'Tab':
-            // Tab always escapes the menu bar
             closeAll();
             break;
     }
 }
 
-// Close when the user clicks anywhere outside the menu bar container
 function handleDocumentClick(e: MouseEvent) {
     if (menuBarRef.value && !menuBarRef.value.contains(e.target as Node)) {
         closeAll();
     }
 }
 
-// Toggle keyboard focus on the menu bar when Alt is pressed (from useKeyboardShortcuts)
 function focusMenuBar() {
     if (activeMenu.value || isMenuBarFocused.value) {
         closeAll();
@@ -351,12 +331,10 @@ const menus = computed<Menu[]>(() => [
                 action: () => {
                     const name = posStore.lastInvoiceName;
                     if (!name) return;
-                    if (typeof frappe !== "undefined" && frappe.urllib) {
-                        const url = frappe.urllib.get_full_url(
-                            `/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`
-                        );
-                        window.open(url, "_blank");
-                    }
+                    window.open(
+                        get_full_url(`/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`),
+                        "_blank"
+                    );
                 },
             },
             { id: "sep-f1", separator: true },

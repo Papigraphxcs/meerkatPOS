@@ -171,6 +171,7 @@ import { useOfflineStore } from "@/stores/offlineStore";
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
 import { isOnline } from "@/utils";
+import { get_full_url } from "@/utils";
 import { cn } from "@/lib/utils";
 import { useRouter } from "vue-router";
 
@@ -247,12 +248,10 @@ onUnmounted(() => {
 function printLastInvoice() {
 	const name = posStore.lastInvoiceName;
 	if (!name) return;
-	if (typeof frappe !== "undefined" && frappe.urllib) {
-		const url = frappe.urllib.get_full_url(
-			`/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`
-		);
-		window.open(url, "_blank");
-	}
+	window.open(
+		get_full_url(`/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`),
+		"_blank"
+	);
 }
 
 function handleSignOut() {

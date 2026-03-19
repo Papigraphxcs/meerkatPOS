@@ -131,6 +131,7 @@ CREATE TABLE IF NOT EXISTS `industries` (
 CREATE TABLE IF NOT EXISTS `items` (
   `item_code` VARCHAR(255) NOT NULL PRIMARY KEY,
   `item_name` VARCHAR(255) NOT NULL,
+  `local_item_name` VARCHAR(255) DEFAULT NULL,
   `item_group` VARCHAR(255) DEFAULT NULL,
   `brand` VARCHAR(255) DEFAULT NULL,
   `description` TEXT,

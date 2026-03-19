@@ -98,6 +98,21 @@ export async function getCustomer(customerId: string) {
     return customer;
 }
 
+export function get_base_url(): string {
+    var url = window.location.origin;
+    if (url.substring(url.length - 1, 1) == "/") url = url.substring(0, url.length - 1);
+    return url;
+}
+
+export function get_full_url(url: string): string {
+    if (url.indexOf("http://") === 0 || url.indexOf("https://") === 0) {
+        return url;
+    }
+    return url.substring(0, 1) === "/"
+        ? get_base_url() + url
+        : get_base_url() + "/" + url;
+}
+
 /**
  * Extract a human-readable error message from any error object.
  * Handles Frappe server messages, standard Error objects, and raw strings.

@@ -362,6 +362,7 @@ export const useItemStore = defineStore("items", () => {
             const basicDetail = {
               item_code: cached.item_code,
               item_name: cached.item_name,
+              local_item_name: cached.local_item_name,
               description: cached.description || "",
               stock_uom: cached.stock_uom || "Nos",
               image: cached.image || "",

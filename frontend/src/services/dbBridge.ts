@@ -219,19 +219,19 @@ export async function getPendingInvoices(status?: string) {
   if (isElectron()) {
     return getDb().getPendingInvoices(status);
   }
-  const { db } = await import("./idbService");
-  if (status) {
-    return db.table("pendingInvoices").where("status").equals(status).toArray();
-  }
-  return db.table("pendingInvoices").toArray();
+  const idb = await import("./idbService");
+  return status ? idb.getPendingInvoicesByStatus(status as any) : idb.getAllPendingInvoices();
 }
 
 export async function updatePendingInvoice(id: number, updates: Record<string, unknown>) {
   if (isElectron()) {
     return getDb().updatePendingInvoice(id, updates);
   }
-  const { db } = await import("./idbService");
-  await db.table("pendingInvoices").update(id, updates);
+  const idb = await import("./idbService");
+  const existing = await idb.getAllPendingInvoices();
+  const record = existing.find((entry) => entry.id === id);
+  if (!record) return false;
+  await idb.updatePendingInvoice({ ...record, ...updates, id });
   return true;
 }
 
@@ -239,8 +239,8 @@ export async function deletePendingInvoice(id: number) {
   if (isElectron()) {
     return getDb().deletePendingInvoice(id);
   }
-  const { db } = await import("./idbService");
-  await db.table("pendingInvoices").delete(id);
+  const idb = await import("./idbService");
+  await idb.deletePendingInvoice(id);
   return true;
 }
 
@@ -248,8 +248,9 @@ export async function countPendingInvoices() {
   if (isElectron()) {
     return getDb().countPendingInvoices();
   }
-  const { db } = await import("./idbService");
-  return db.table("pendingInvoices").where("status").anyOf(["pending", "failed"]).count();
+  const idb = await import("./idbService");
+  const records = await idb.getAllPendingInvoices();
+  return records.filter((record) => record.status === "pending" || record.status === "failed").length;
 }
 
 export async function addPendingPurchase(record: {
@@ -279,11 +280,11 @@ export async function getPendingPurchases(opts?: { type?: string; status?: strin
   if (isElectron()) {
     return getDb().getPendingPurchases(opts);
   }
-  const { db } = await import("./idbService");
-  let col = db.table("pendingPurchases").toCollection();
-  if (opts?.type) col = db.table("pendingPurchases").where("type").equals(opts.type);
-  let results = await col.toArray();
-  if (opts?.status) results = results.filter((r: Record<string, unknown>) => r.status === opts.status);
+  const idb = await import("./idbService");
+  let results = opts?.type
+    ? await idb.getPendingPurchasesByType(opts.type as any)
+    : await idb.getAllPendingPurchases();
+  if (opts?.status) results = results.filter((r) => r.status === opts.status);
   return results;
 }
 
@@ -291,8 +292,11 @@ export async function updatePendingPurchase(id: number, updates: Record<string, 
   if (isElectron()) {
     return getDb().updatePendingPurchase(id, updates);
   }
-  const { db } = await import("./idbService");
-  await db.table("pendingPurchases").update(id, updates);
+  const idb = await import("./idbService");
+  const existing = await idb.getAllPendingPurchases();
+  const record = existing.find((entry) => entry.id === id);
+  if (!record) return false;
+  await idb.updatePendingPurchase({ ...record, ...updates, id });
   return true;
 }
 
@@ -300,8 +304,8 @@ export async function deletePendingPurchase(id: number) {
   if (isElectron()) {
     return getDb().deletePendingPurchase(id);
   }
-  const { db } = await import("./idbService");
-  await db.table("pendingPurchases").delete(id);
+  const idb = await import("./idbService");
+  await idb.deletePendingPurchase(id);
   return true;
 }
 
@@ -326,17 +330,16 @@ export async function getSyncMeta(key: string) {
   if (isElectron()) {
     return getDb().getMeta(key);
   }
-  const { db } = await import("./idbService");
-  const row = await db.table("syncMeta").get(key);
-  return row?.value ?? null;
+  const idb = await import("./idbService");
+  return idb.getMeta(key);
 }
 
 export async function setSyncMeta(key: string, value: string) {
   if (isElectron()) {
     return getDb().setMeta(key, value);
   }
-  const { db } = await import("./idbService");
-  await db.table("syncMeta").put({ key, value });
+  const idb = await import("./idbService");
+  await idb.setMeta(key, value);
   return true;
 }
 
@@ -377,8 +380,8 @@ export async function cachePosData(name: string, data: unknown) {
   if (isElectron()) {
     return getDb().cachePosData(name, data);
   }
-  const { db } = await import("./idbService");
-  await db.table("posProfileCache").put({ name, data: JSON.stringify(data) });
+  const idb = await import("./idbService");
+  await idb.setMeta(`pos_profile_cache::${name}`, data);
   return true;
 }
 
@@ -386,9 +389,8 @@ export async function getCachedPosData(name: string) {
   if (isElectron()) {
     return getDb().getCachedPosData(name);
   }
-  const { db } = await import("./idbService");
-  const row = await db.table("posProfileCache").get(name);
-  return row ? JSON.parse(row.data) : null;
+  const idb = await import("./idbService");
+  return idb.getMeta(`pos_profile_cache::${name}`);
 }
 
 export async function clearAllData() {
@@ -400,19 +402,45 @@ export async function clearAllData() {
   return true;
 }
 
+export async function clearCachedData() {
+  if (isElectron()) {
+    return getDb().clearCachedData();
+  }
+  const idb = await import("./idbService");
+  await idb.clearCachedData();
+  return true;
+}
+
 export async function clearPendingData() {
   if (isElectron()) {
     return getDb().clearPendingData();
   }
-  const { db } = await import("./idbService");
-  await db.table("pendingInvoices").clear();
-  await db.table("pendingPurchases").clear();
+  const idb = await import("./idbService");
+  await idb.clearPendingData();
   return true;
 }
 
 export async function getCompanies() {
   if (isElectron()) return getDb().getCompanies();
   return [];
+}
+
+export async function getCountries(): Promise<string[]> {
+  if (isElectron()) {
+    const rows = await getDb().getCountries() as Record<string, unknown>[];
+    return rows.map((row) => String(row.name || "")).filter(Boolean);
+  }
+  const idb = await import("./idbService");
+  return idb.getCachedCountries();
+}
+
+export async function getCurrencies(): Promise<string[]> {
+  if (isElectron()) {
+    const rows = await getDb().getCurrencies() as Record<string, unknown>[];
+    return rows.map((row) => String(row.name || row.currency_name || "")).filter(Boolean);
+  }
+  const idb = await import("./idbService");
+  return idb.getCachedCurrencies();
 }
 
 export async function getWarehouses(opts?: { company?: string; isGroup?: boolean }) {
@@ -949,6 +977,42 @@ export async function getCachedCountries(): Promise<string[]> {
   return idb.getCachedCountries();
 }
 
+export async function cacheCurrencies(currencies: string[]): Promise<void> {
+  if (isElectron()) {
+    await getDb().setMeta("currencies", JSON.stringify(currencies));
+    return;
+  }
+  const idb = await import("./idbService");
+  await idb.cacheCurrencies(currencies);
+}
+
+export async function getCachedCurrencies(): Promise<string[]> {
+  if (isElectron()) {
+    const val = await getDb().getMeta("currencies");
+    return val ? JSON.parse(val) : [];
+  }
+  const idb = await import("./idbService");
+  return idb.getCachedCurrencies();
+}
+
+export async function cacheLanguages(languages: string[]): Promise<void> {
+  if (isElectron()) {
+    await getDb().setMeta("languages", JSON.stringify(languages));
+    return;
+  }
+  const idb = await import("./idbService");
+  await idb.cacheLanguages(languages);
+}
+
+export async function getCachedLanguages(): Promise<string[]> {
+  if (isElectron()) {
+    const val = await getDb().getMeta("languages");
+    return val ? JSON.parse(val) : [];
+  }
+  const idb = await import("./idbService");
+  return idb.getCachedLanguages();
+}
+
 export async function getAllPendingInvoices() {
   return getPendingInvoices();
 }
@@ -961,8 +1025,9 @@ export async function countPendingPurchases(): Promise<number> {
   if (isElectron()) {
     return getDb().countPendingPurchases();
   }
-  const { db } = await import("./idbService");
-  return db.table("pendingPurchases").where("status").anyOf(["pending", "failed"]).count();
+  const idb = await import("./idbService");
+  const records = await idb.getAllPendingPurchases();
+  return records.filter((record) => record.status === "pending" || record.status === "failed").length;
 }
 
 export async function cacheERPSettings(settings: unknown): Promise<void> {
