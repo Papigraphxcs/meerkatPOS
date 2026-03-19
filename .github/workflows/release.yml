@@ -1,12 +1,24 @@
 name: Generate Semantic Release
+
 on:
   push:
     branches:
       - develop
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: release-xpos
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout Entire Repository
         uses: actions/checkout@v4
@@ -18,6 +30,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Setup dependencies
         run: |

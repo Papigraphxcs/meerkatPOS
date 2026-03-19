@@ -3,9 +3,19 @@ name: Linters
 on:
   pull_request: {}
 
+permissions:
+  contents: read
+
+concurrency:
+  group: linters-xpos-${{ github.event.number }}
+  cancel-in-progress: true
+
 jobs:
-  linters:
-    name: Linters
+  # -------------------------------------------------------------------
+  # Backend linters (Python)
+  # -------------------------------------------------------------------
+  backend-linters:
+    name: Backend Linters
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,3 +37,34 @@ jobs:
 
       - name: Run Semgrep rules
         run: semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness
+
+  # -------------------------------------------------------------------
+  # Frontend linters (Vue.js / TypeScript)
+  # -------------------------------------------------------------------
+  frontend-linters:
+    name: Frontend Linters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          yarn install --frozen-lockfile
+
+      - name: TypeScript type check
+        run: |
+          cd frontend
+          yarn typecheck
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          yarn test:run
