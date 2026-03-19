@@ -24,7 +24,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: true
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,6 +35,14 @@ jobs:
       - name: Setup dependencies
         run: |
           npm install @semantic-release/git @semantic-release/exec --no-save
+
+      - name: Validate release token
+        run: |
+          set -e
+          if [ -z "${{ secrets.RELEASE_TOKEN }}" ]; then
+            echo "::error::RELEASE_TOKEN is missing"
+            exit 1
+          fi
 
       - name: Create Release
         env:
