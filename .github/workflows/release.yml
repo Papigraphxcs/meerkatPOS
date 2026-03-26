@@ -18,6 +18,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    environment: pos.xconsol.com
     timeout-minutes: 15
     env:
       RELEASE_AUTH_TOKEN: ${{ secrets.RELEASE_TOKEN != '' && secrets.RELEASE_TOKEN || github.token }}
