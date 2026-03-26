@@ -6,7 +6,7 @@ const forwarded = useForwardProps(props);
 </script>
 
 <template>
-  <TooltipRoot v-bind="forwarded">
-    <slot />
-  </TooltipRoot>
+	<TooltipRoot v-bind="forwarded">
+		<slot />
+	</TooltipRoot>
 </template>

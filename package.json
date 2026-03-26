@@ -25,6 +25,7 @@
   ],
   "scripts": {
     "dev": "cd frontend && yarn dev",
-    "build": "cd frontend && yarn install && yarn build"
+    "build": "cd frontend && yarn install && yarn build",
+    "prepare": "pre-commit install && pre-commit install --hook-type commit-msg"
   }
 }

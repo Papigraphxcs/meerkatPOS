@@ -1,12 +1,27 @@
 <template>
 	<div class="relative flex items-center">
 		<ScanBarcode class="absolute start-3 w-4 h-4 text-muted-foreground pointer-events-none" />
-		<Input ref="inputRef" v-model="barcodeValue" class="ps-9 pe-9 h-9 text-sm"
-			:class="{ 'ring-2 ring-green-500/50 border-green-500': flashSuccess, 'ring-2 ring-red-500/50 border-red-500': flashError }"
-			:placeholder="__('Scan barcode...')" autocomplete="off" @keydown.enter.prevent="onScan" @paste="onPaste" />
+		<Input
+			ref="inputRef"
+			v-model="barcodeValue"
+			class="ps-9 pe-9 h-9 text-sm"
+			:class="{
+				'ring-2 ring-green-500/50 border-green-500': flashSuccess,
+				'ring-2 ring-red-500/50 border-red-500': flashError,
+			}"
+			:placeholder="__('Scan barcode...')"
+			autocomplete="off"
+			@keydown.enter.prevent="onScan"
+			@paste="onPaste"
+		/>
 		<Loader2 v-if="isScanning" class="absolute end-3 w-4 h-4 text-muted-foreground animate-spin" />
-		<Button v-else-if="barcodeValue" variant="ghost" size="icon" class="absolute end-1 h-7 w-7"
-			@click="clearInput">
+		<Button
+			v-else-if="barcodeValue"
+			variant="ghost"
+			size="icon"
+			class="absolute end-1 h-7 w-7"
+			@click="clearInput"
+		>
 			<X class="w-3.5 h-3.5 text-muted-foreground" />
 		</Button>
 	</div>

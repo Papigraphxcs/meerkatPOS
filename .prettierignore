@@ -1,0 +1,12 @@
+node_modules
+build
+dist
+dist-electron
+dev-dist
+*.min.js
+*.min.css
+xpos/public/dist
+xpos/templates/includes
+xpos/public/js/lib
+*.svg
+*.md

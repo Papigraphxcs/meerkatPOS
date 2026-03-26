@@ -1,9 +1,13 @@
 <template>
-	<div class="fixed inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/95 z-50 flex flex-col items-center overflow-y-auto p-4">
+	<div
+		class="fixed inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/95 z-50 flex flex-col items-center overflow-y-auto p-4"
+	>
 		<div class="w-full max-w-md animate-in fade-in zoom-in-95 duration-300 my-auto">
 			<!-- Logo & Title -->
 			<div class="text-center mb-8">
-				<div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 shadow-lg">
+				<div
+					class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 shadow-lg"
+				>
 					<Zap class="w-8 h-8 text-primary-foreground" />
 				</div>
 				<h1 class="text-2xl font-bold text-primary-foreground mb-1">X POS</h1>
@@ -22,18 +26,22 @@
 						<!-- Header row: POS Profile label + refresh button -->
 						<div class="flex items-center justify-between">
 							<label class="text-sm font-semibold text-foreground">POS Profile</label>
-						<TooltipWrapper :content="syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh profiles'">
-						<button
-							type="button"
-							class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-							:class="{ 'animate-spin pointer-events-none': syncStatus.isSyncing.value }"
-							:disabled="isLoadingData"
-							@click="loadProfiles"
-						>
-							<RefreshCw class="w-3.5 h-3.5" />
-							<span>{{ syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh' }}</span>
-						</button>
-						</TooltipWrapper>
+							<TooltipWrapper
+								:content="syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh profiles'"
+							>
+								<button
+									type="button"
+									class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+									:class="{
+										'animate-spin pointer-events-none': syncStatus.isSyncing.value,
+									}"
+									:disabled="isLoadingData"
+									@click="loadProfiles"
+								>
+									<RefreshCw class="w-3.5 h-3.5" />
+									<span>{{ syncStatus.isSyncing.value ? "Syncing..." : "Refresh" }}</span>
+								</button>
+							</TooltipWrapper>
 						</div>
 
 						<!-- POS Profile Select -->
@@ -44,36 +52,44 @@
 								@change="onProfileChange"
 							>
 								<option value="" disabled>Select POS Profile</option>
-								<option
-									v-for="profile in profiles"
-									:key="profile.name"
-									:value="profile.name"
-								>
+								<option v-for="profile in profiles" :key="profile.name" :value="profile.name">
 									{{ profile.name }} ({{ profile.company }})
 								</option>
 							</select>
 							<!-- No profiles hint -->
 							<p v-if="profiles.length === 0" class="mt-1 text-xs text-muted-foreground">
-								{{ syncStatus.isSyncing.value ? 'Downloading profiles from server…' : 'No profiles found. Check server connection or click Refresh.' }}
+								{{
+									syncStatus.isSyncing.value
+										? "Downloading profiles from server…"
+										: "No profiles found. Check server connection or click Refresh."
+								}}
 							</p>
 						</div>
 
 						<!-- Company (auto-filled) -->
 						<div v-if="selectedCompany">
 							<label class="text-sm font-semibold text-foreground mb-1.5 block">Company</label>
-							<div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground">{{ selectedCompany }}</div>
+							<div
+								class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground"
+							>
+								{{ selectedCompany }}
+							</div>
 						</div>
 
 						<!-- Opening Balance -->
 						<div v-if="paymentMethodsList.length > 0">
-							<label class="text-sm font-semibold text-foreground mb-2 block">Opening Cash Balance</label>
+							<label class="text-sm font-semibold text-foreground mb-2 block"
+								>Opening Cash Balance</label
+							>
 							<div class="space-y-2">
 								<div
 									v-for="method in paymentMethodsList"
 									:key="method.mode_of_payment"
 									class="flex items-center gap-3"
 								>
-									<span class="text-sm text-muted-foreground w-28 truncate">{{ method.mode_of_payment }}</span>
+									<span class="text-sm text-muted-foreground w-28 truncate">{{
+										method.mode_of_payment
+									}}</span>
 									<NumberInput
 										v-model="method.opening_amount"
 										:min="0"
@@ -107,7 +123,10 @@
 
 			<!-- Back to desk link — hidden in Electron (no Frappe desk available) -->
 			<div v-if="!isElectronMode" class="text-center mt-4">
-				<a href="/app" class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline">
+				<a
+					href="/app"
+					class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline"
+				>
 					← Back to Desk
 				</a>
 			</div>
@@ -185,7 +204,7 @@ function onProfileChange() {
 
 		const openingData = posStore.openingData as Record<string, unknown> | null;
 		const methods = ((openingData?.payment_methods || []) as PaymentMethodEntry[]).filter(
-			(m) => m.parent === selectedProfile.value
+			(m) => m.parent === selectedProfile.value,
 		);
 		paymentMethodsList.value = methods.map((m) => ({
 			mode_of_payment: m.mode_of_payment,
@@ -209,7 +228,7 @@ async function handleOpenShift() {
 			paymentMethodsList.value.map((m) => ({
 				mode_of_payment: m.mode_of_payment,
 				opening_amount: m.opening_amount || 0,
-			}))
+			})),
 		);
 	} catch (error: unknown) {
 		showError("Failed to open shift: " + ((error as Error)?.message || error));

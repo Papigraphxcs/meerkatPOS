@@ -1,5 +1,13 @@
 <template>
-	<div id="xpos-app" :class="['h-screen w-screen font-sans', isDark ? 'dark' : '', isAuthPage ? 'overflow-y-auto' : 'overflow-hidden', isRtl ? 'rtl' : 'ltr']">
+	<div
+		id="xpos-app"
+		:class="[
+			'h-screen w-screen font-sans',
+			isDark ? 'dark' : '',
+			isAuthPage ? 'overflow-y-auto' : 'overflow-hidden',
+			isRtl ? 'rtl' : 'ltr',
+		]"
+	>
 		<template v-if="isAuthPage">
 			<router-view v-slot="{ Component }">
 				<transition name="fade" mode="out-in">
@@ -14,8 +22,8 @@
 					<div class="relative w-16 h-16 mx-auto mb-4">
 						<div class="absolute inset-0 rounded-full border-4 border-muted"></div>
 						<div
-							class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin">
-						</div>
+							class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"
+						></div>
 					</div>
 					<h2 class="text-xl font-semibold text-foreground">Loading X POS</h2>
 					<p class="text-muted-foreground mt-1">Preparing your workspace...</p>
@@ -63,31 +71,46 @@
 		<Transition name="fade">
 			<TooltipWrapper
 				v-if="!isAuthPage && isElectronEnv"
-				:content="syncStatus.lastError.value || (syncStatus.lastSyncTime.value ? 'Last sync: ' + syncStatus.lastSyncTime.value : 'Not synced yet')"
+				:content="
+					syncStatus.lastError.value ||
+					(syncStatus.lastSyncTime.value
+						? 'Last sync: ' + syncStatus.lastSyncTime.value
+						: 'Not synced yet')
+				"
 				side="right"
 			>
-			<div
-				class="fixed bottom-3 start-3 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium shadow-md select-none"
-				:class="syncStatus.isSyncing.value
-					? 'bg-blue-600 text-white'
-					: syncStatus.lastError.value
-					? 'bg-destructive text-destructive-foreground'
-					: 'bg-muted text-muted-foreground'"
-			>
-				<span
-					v-if="syncStatus.isSyncing.value"
-					class="w-2 h-2 rounded-full bg-white animate-ping"
-				/>
-				<span v-else class="w-2 h-2 rounded-full" :class="syncStatus.lastError.value ? 'bg-white' : 'bg-green-400'" />
-				<span>
-					<template v-if="syncStatus.isSyncing.value">
-						Syncing{{ syncStatus.syncTable.value ? ': ' + syncStatus.syncTable.value : '...' }}
-					</template>
-					<template v-else-if="syncStatus.lastError.value">Sync error</template>
-					<template v-else-if="syncStatus.lastSyncTime.value">Synced {{ syncStatus.lastSyncTime.value }}</template>
-					<template v-else>Sync pending</template>
-				</span>
-			</div>
+				<div
+					class="fixed bottom-3 start-3 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium shadow-md select-none"
+					:class="
+						syncStatus.isSyncing.value
+							? 'bg-blue-600 text-white'
+							: syncStatus.lastError.value
+								? 'bg-destructive text-destructive-foreground'
+								: 'bg-muted text-muted-foreground'
+					"
+				>
+					<span
+						v-if="syncStatus.isSyncing.value"
+						class="w-2 h-2 rounded-full bg-white animate-ping"
+					/>
+					<span
+						v-else
+						class="w-2 h-2 rounded-full"
+						:class="syncStatus.lastError.value ? 'bg-white' : 'bg-green-400'"
+					/>
+					<span>
+						<template v-if="syncStatus.isSyncing.value">
+							Syncing{{
+								syncStatus.syncTable.value ? ": " + syncStatus.syncTable.value : "..."
+							}}
+						</template>
+						<template v-else-if="syncStatus.lastError.value">Sync error</template>
+						<template v-else-if="syncStatus.lastSyncTime.value"
+							>Synced {{ syncStatus.lastSyncTime.value }}</template
+						>
+						<template v-else>Sync pending</template>
+					</span>
+				</div>
 			</TooltipWrapper>
 		</Transition>
 	</div>
@@ -136,74 +159,78 @@ const isElectronEnv = isElectron();
 const isRtl = computed(() => document.documentElement.dir === "rtl");
 
 const keyboardShortcuts = useKeyboardShortcuts();
-const { 
-    showShortcutsDialog, 
-    showAboutDialog, 
-    init: initKeyboardShortcuts,
-    destroy: destroyKeyboardShortcuts
+const {
+	showShortcutsDialog,
+	showAboutDialog,
+	init: initKeyboardShortcuts,
+	destroy: destroyKeyboardShortcuts,
 } = keyboardShortcuts;
 
 const isAuthPage = computed(() => route.meta.isAuthPage === true || route.meta.isSetupPage === true);
 
 async function handleClearCart() {
-    cartStore.clearCart();
-    if (!cartStore.customer && posStore.defaultCustomer) {
-        const customer = await getCustomer(posStore.defaultCustomer);
+	cartStore.clearCart();
+	if (!cartStore.customer && posStore.defaultCustomer) {
+		const customer = await getCustomer(posStore.defaultCustomer);
 		cartStore.setCustomer(customer as any);
-    }
+	}
 }
 
 function handleProcessPayment() {
-    if (cartStore.items.length > 0 && posStore.isShiftOpen) {
-        cartStore.showPaymentDialog = true;
-    }
+	if (cartStore.items.length > 0 && posStore.isShiftOpen) {
+		cartStore.showPaymentDialog = true;
+	}
 }
 
 function handleSelectCustomer() {
-    customerStore.showCustomerDialog = true;
+	customerStore.showCustomerDialog = true;
 }
 
 function handleShowDrafts() {
-    cartStore.showDraftDialog = true;
+	cartStore.showDraftDialog = true;
 }
 
 function handleHoldInvoice() {
-    if (cartStore.items.length > 0) {
-        cartStore.openDraftDialog();
-    }
+	if (cartStore.items.length > 0) {
+		cartStore.openDraftDialog();
+	}
 }
 
 function handleRemoveLastItem() {
-    if (cartStore.items.length > 0) {
-        cartStore.removeItem(cartStore.items.length - 1);
-    }
+	if (cartStore.items.length > 0) {
+		cartStore.removeItem(cartStore.items.length - 1);
+	}
 }
 
 function handleCloseShift() {
-    if (posStore.isShiftOpen) {
-        posStore.showClosingDialog = true;
-        posStore.fetchClosingData();
-    }
+	if (posStore.isShiftOpen) {
+		posStore.showClosingDialog = true;
+		posStore.fetchClosingData();
+	}
 }
 
 function handleCashExpense() {
-    if (posStore.allowPosExpense && posStore.isShiftOpen) {
-        paymentStore.openCashMovement("expense");
-    }
+	if (posStore.allowPosExpense && posStore.isShiftOpen) {
+		paymentStore.openCashMovement("expense");
+	}
 }
 
 function handleCashDeposit() {
-    if (posStore.allowCashDeposit && posStore.isShiftOpen) {
-        paymentStore.openCashMovement("deposit");
-    }
+	if (posStore.allowCashDeposit && posStore.isShiftOpen) {
+		paymentStore.openCashMovement("deposit");
+	}
 }
 
 function handlePrintLast() {
-    const name = posStore.lastInvoiceName;
-    if (!name) return;
+	const name = posStore.lastInvoiceName;
+	if (!name) return;
 	window.open(
-		get_full_url(`/printview?doctype=Sales+Invoice&name=${encodeURIComponent(name)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`),
-		"_blank"
+		get_full_url(
+			`/printview?doctype=Sales+Invoice&name=${encodeURIComponent(
+				name,
+			)}&format=POS+Invoice&no_letterhead=0&trigger_print=1`,
+		),
+		"_blank",
 	);
 }
 
@@ -236,9 +263,13 @@ function applyThemeToDocument(dark: boolean) {
 	}
 }
 
-watch(isDark, (dark) => {
-	applyThemeToDocument(dark);
-}, { immediate: true });
+watch(
+	isDark,
+	(dark) => {
+		applyThemeToDocument(dark);
+	},
+	{ immediate: true },
+);
 
 function toggleDarkMode() {
 	if (theme.value === "light") {
@@ -308,17 +339,20 @@ watch(isAuthPage, (isAuth, wasAuth) => {
 	}
 });
 
-watch(() => posStore.isReady, async (ready, wasReady) => {
-	if (wasReady && !ready) {
-		cartStore.clearAll();
-	}
-	if (ready && !wasReady) {
-		if (!cartStore.customer && posStore.defaultCustomer) {
-			const customer = await getCustomer(posStore.defaultCustomer);
-			cartStore.setCustomer(customer as any);
+watch(
+	() => posStore.isReady,
+	async (ready, wasReady) => {
+		if (wasReady && !ready) {
+			cartStore.clearAll();
 		}
-	}
-});
+		if (ready && !wasReady) {
+			if (!cartStore.customer && posStore.defaultCustomer) {
+				const customer = await getCustomer(posStore.defaultCustomer);
+				cartStore.setCustomer(customer as any);
+			}
+		}
+	},
+);
 
 onUnmounted(() => {
 	if (mediaQuery) {
