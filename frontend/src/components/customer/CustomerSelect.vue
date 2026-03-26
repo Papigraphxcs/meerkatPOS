@@ -156,9 +156,7 @@
                         </div>
                         <div>
                             <label class="text-xs font-medium text-muted-foreground mb-1 block">{{ __("Birthday") }}</label>
-                            <Input v-model="newCustomer.birthday" type="text" :placeholder="__('DD-MM-YYYY')"
-                                @focus="(e: FocusEvent) => { (e.target as HTMLInputElement).type = 'date' }"
-                                @blur="(e: FocusEvent) => { if (!(e.target as HTMLInputElement).value) (e.target as HTMLInputElement).type = 'text' }" />
+                            <DateTimePicker v-model="newCustomer.birthday" :placeholder="__('Select birthday')" />
                         </div>
                     </div>
                 </div>
@@ -199,6 +197,8 @@ import type { AutocompleteOption } from "@/components/ui/autocomplete";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, ChevronRight, Users, UserPlus, ArrowLeft, Loader2 } from "lucide-vue-next";
 import __ from "@/lib/translate";
+import DateTimeInput from "../ui/date-time-input/DateTimeInput.vue";
+import DateTimePicker from "../ui/datetime-picker/DateTimePicker.vue";
 
 const cartStore = useCartStore();
 const customerStore = useCustomerStore();
