@@ -154,6 +154,16 @@ watch(() => itemStore.filteredItems, () => {
 	highlightedIndex.value = -1;
 });
 
+watch(() => itemStore.showItemDetail, (open) => {
+	if (!open && highlightedIndex.value >= 0) {
+		nextTick(() => {
+			searchBarRef.value?.focus();
+			const el = document.querySelector(`[data-item-index="${highlightedIndex.value}"]`);
+			el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+		});
+	}
+});
+
 async function loadInitialData() {
 	await Promise.all([
 		itemStore.fetchItems(posStore.profileName),
@@ -170,8 +180,7 @@ function onSearch(term: string) {
 
 async function onSearchEnter(val: string) {
 	if (highlightedIndex.value >= 0 && highlightedIndex.value < itemStore.filteredItems.length) {
-		handleAddItem(itemStore.filteredItems[highlightedIndex.value]);
-		highlightedIndex.value = -1;
+		handleShowDetail(itemStore.filteredItems[highlightedIndex.value]);
 		return;
 	}
 
@@ -274,11 +283,10 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 
 	if (e.key === "Enter" && highlightedIndex.value >= 0) {
 		e.preventDefault();
-		const item = itemStore.filteredItems[highlightedIndex.value]; // use filteredItems
+		const item = itemStore.filteredItems[highlightedIndex.value];
 		if (item) {
 			handleShowDetail(item);
 		}
-		highlightedIndex.value = -1;
 	}
 }
 
