@@ -5,10 +5,9 @@ on:
     branches:
       - main
 
-# Prevent overlapping deployments — only one deploy at a time
 concurrency:
   group: production-deploy
-  cancel-in-progress: false  # Let running deploys finish; don't cancel mid-migration
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -24,15 +23,9 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # ------------------------------------------------------------------
-      # 1. Checkout — needed for build context and potential SCP uploads
-      # ------------------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ------------------------------------------------------------------
-      # 2. Validate required secrets
-      # ------------------------------------------------------------------
       - name: Validate deployment secrets
         run: |
           set -e
@@ -47,11 +40,6 @@ jobs:
           fi
           echo "✓ All required secrets are configured"
 
-      # ------------------------------------------------------------------
-      # 3A. Deploy — Vue INSIDE Frappe app (bench build handles everything)
-      #     This is the DEFAULT for xpos since frontend/ builds into
-      #     xpos/public/xpos/ and bench build --app xpos triggers it.
-      # ------------------------------------------------------------------
       - name: "Deploy: Frappe app with integrated Vue frontend"
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -75,17 +63,11 @@ jobs:
             echo "  Site:    ${SITE_NAME}"
             echo "============================================"
 
-            # ----------------------------------------------------------
-            # Step 1: Navigate to bench directory
-            # ----------------------------------------------------------
             echo ""
             echo ">>> [1/7] Navigating to bench directory..."
             cd "${BENCH_PATH}" || { echo "::error::Bench path not found: ${BENCH_PATH}"; exit 1; }
             echo "    Working directory: $(pwd)"
 
-            # ----------------------------------------------------------
-            # Step 2: Pull latest code for xpos app
-            # ----------------------------------------------------------
             echo ""
             echo ">>> [2/7] Pulling latest code for ${APP_NAME}..."
             cd "apps/${APP_NAME}"
@@ -95,24 +77,15 @@ jobs:
             echo "    Message: $(git log -1 --pretty=%s)"
             cd "${BENCH_PATH}"
 
-            # ----------------------------------------------------------
-            # Step 3: Put site in maintenance mode
-            # ----------------------------------------------------------
             echo ""
             echo ">>> [3/7] Enabling maintenance mode..."
             bench --site "${SITE_NAME}" set-maintenance-mode on || true
 
-            # ----------------------------------------------------------
-            # Step 4: Backup before migration (safety net)
-            # ----------------------------------------------------------
             echo ""
             echo ">>> [4/7] Creating pre-deployment backup..."
             bench --site "${SITE_NAME}" backup --with-files 2>&1 | tail -3
             echo "    Backup completed at: $(date -u '+%H:%M:%S UTC')"
 
-            # ----------------------------------------------------------
-            # Step 5: Install dependencies & run migrations
-            # ----------------------------------------------------------
             echo ""
             echo ">>> [5/7] Installing dependencies and running migrations..."
 
@@ -134,17 +107,11 @@ jobs:
             bench --site "${SITE_NAME}" migrate 2>&1 | tail -5
             echo "    Migrations completed at: $(date -u '+%H:%M:%S UTC')"
 
-            # ----------------------------------------------------------
-            # Step 6: Build frontend assets
-            # ----------------------------------------------------------
             echo ""
             echo ">>> [6/7] Building frontend assets..."
             bench build --app "${APP_NAME}" 2>&1 | tail -10
             echo "    Build completed at: $(date -u '+%H:%M:%S UTC')"
 
-            # ----------------------------------------------------------
-            # Step 7: Restart services and disable maintenance mode
-            # ----------------------------------------------------------
             echo ""
             echo ">>> [7/7] Restarting services..."
 
@@ -165,9 +132,6 @@ jobs:
             echo "  Commit:   $(cd apps/${APP_NAME} && git rev-parse --short HEAD)"
             echo "============================================"
 
-  # ====================================================================
-  # Post-deployment health check
-  # ====================================================================
   health-check:
     name: Post-Deployment Health Check
     runs-on: ubuntu-latest

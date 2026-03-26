@@ -52,8 +52,8 @@ jobs:
         env:
           GH_TOKEN: ${{ env.RELEASE_AUTH_TOKEN }}
           GITHUB_TOKEN: ${{ env.RELEASE_AUTH_TOKEN }}
-          GIT_AUTHOR_NAME: "Ali Raza"
+          GIT_AUTHOR_NAME: "POS Bot"
           GIT_AUTHOR_EMAIL: "ar.frappe.dev@gmail.com"
-          GIT_COMMITTER_NAME: "Ali Raza"
+          GIT_COMMITTER_NAME: "POS Bot"
           GIT_COMMITTER_EMAIL: "ar.frappe.dev@gmail.com"
         run: npx semantic-release
