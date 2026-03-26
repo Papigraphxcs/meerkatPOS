@@ -5,23 +5,23 @@ import { buttonVariants, type ButtonVariants } from ".";
 import { cn } from "@/lib/utils";
 
 interface Props extends PrimitiveProps {
-  variant?: ButtonVariants["variant"];
-  size?: ButtonVariants["size"];
-  class?: HTMLAttributes["class"];
+	variant?: ButtonVariants["variant"];
+	size?: ButtonVariants["size"];
+	class?: HTMLAttributes["class"];
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  as: "button",
+	as: "button",
 });
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props;
-  return delegated;
+	const { class: _, ...delegated } = props;
+	return delegated;
 });
 </script>
 
 <template>
-  <Primitive v-bind="delegatedProps" :class="cn(buttonVariants({ variant, size }), props.class)">
-    <slot />
-  </Primitive>
+	<Primitive v-bind="delegatedProps" :class="cn(buttonVariants({ variant, size }), props.class)">
+		<slot />
+	</Primitive>
 </template>

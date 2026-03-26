@@ -1,7 +1,7 @@
 <template>
-  <PopoverRoot v-model:open="open">
-    <slot />
-  </PopoverRoot>
+	<PopoverRoot v-model:open="open">
+		<slot />
+	</PopoverRoot>
 </template>
 
 <script setup lang="ts">

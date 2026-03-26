@@ -1,15 +1,21 @@
 <template>
-	<div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+	<div
+		class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-muted p-4"
+	>
 		<div class="mb-8 text-center">
-			<img :src="isDark ? LogoLight : LogoDark" alt="X POS Logo" class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center" />
+			<img
+				:src="isDark ? LogoLight : LogoDark"
+				alt="X POS Logo"
+				class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center"
+			/>
 			<h1 class="text-2xl font-bold text-foreground">X POS</h1>
-			<p class="text-muted-foreground text-sm mt-1">{{ __('Point of Sale System') }}</p>
+			<p class="text-muted-foreground text-sm mt-1">{{ __("Point of Sale System") }}</p>
 		</div>
 
 		<Card class="w-full max-w-md">
 			<CardHeader class="text-center">
-				<CardTitle class="text-xl">{{ __('Welcome back') }}</CardTitle>
-				<CardDescription>{{ __('Sign in to your account to continue') }}</CardDescription>
+				<CardTitle class="text-xl">{{ __("Welcome back") }}</CardTitle>
+				<CardDescription>{{ __("Sign in to your account to continue") }}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<form @submit.prevent="handleLogin" class="space-y-4">
@@ -22,10 +28,12 @@
 					</div>
 					<div class="space-y-2">
 						<label for="username" class="text-sm font-medium text-foreground">
-							{{ __('Email or Username') }}
+							{{ __("Email or Username") }}
 						</label>
 						<div class="relative">
-							<User class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+							<User
+								class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+							/>
 							<Input
 								id="username"
 								v-model="username"
@@ -38,13 +46,15 @@
 							/>
 						</div>
 					</div>
-					
+
 					<div class="space-y-2">
 						<label for="password" class="text-sm font-medium text-foreground">
-							{{ __('Password') }}
+							{{ __("Password") }}
 						</label>
 						<div class="relative">
-							<Lock class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+							<Lock
+								class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+							/>
 							<Input
 								id="password"
 								v-model="password"
@@ -67,11 +77,8 @@
 					</div>
 
 					<div class="flex justify-end">
-						<RouterLink
-							to="/reset-password"
-							class="text-sm text-primary hover:underline"
-						>
-							{{ __('Forgot password?') }}
+						<RouterLink to="/reset-password" class="text-sm text-primary hover:underline">
+							{{ __("Forgot password?") }}
 						</RouterLink>
 					</div>
 
@@ -83,14 +90,14 @@
 					>
 						<Loader2 v-if="authStore.isLoading" class="w-4 h-4 animate-spin" />
 						<LogIn v-else class="w-4 h-4" />
-						{{ authStore.isLoading ? __('Signing in...') : __('Sign In') }}
+						{{ authStore.isLoading ? __("Signing in...") : __("Sign In") }}
 					</Button>
 				</form>
 			</CardContent>
 		</Card>
 
 		<p class="mt-8 text-center text-sm text-muted-foreground">
-			{{ __('Secure login powered by Frappe Framework') }}
+			{{ __("Secure login powered by Frappe Framework") }}
 		</p>
 	</div>
 </template>
@@ -103,20 +110,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { __ } from "@/lib/translate";
-import {
-	Store,
-	User,
-	Lock,
-	Eye,
-	EyeOff,
-	LogIn,
-	Loader2,
-	AlertCircle,
-} from "lucide-vue-next";
+import { Store, User, Lock, Eye, EyeOff, LogIn, Loader2, AlertCircle } from "lucide-vue-next";
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
 const isDark = inject("isDark")! as boolean;
-	
+
 const router = useRouter();
 const authStore = useAuthStore();
 
@@ -129,7 +127,7 @@ async function handleLogin() {
 
 	const success = await authStore.login(username.value, password.value);
 	if (success) {
-		const redirectTo = router.currentRoute.value.query.redirect as string || "/pos";
+		const redirectTo = (router.currentRoute.value.query.redirect as string) || "/pos";
 		router.push(redirectTo);
 	}
 }

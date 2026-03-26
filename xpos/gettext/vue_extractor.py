@@ -26,64 +26,62 @@ from io import BufferedReader
 #   __("message", null, "context")
 # ---------------------------------------------------------------------------
 _CALL_PATTERN = re.compile(
-    r"""__\(\s*"""
-    # ── message ──────────────────────────────────────────────────────────
-    r"""(?P<q1>["'])"""  # opening quote (single or double)
-    r"""(?P<message>(?:(?!(?P=q1)).)*?)"""  # message body (non-greedy)
-    r"""(?P=q1)"""  # closing quote (must match opener)
-    # ── optional second arg (array / null) ───────────────────────────────
-    r"""(?:\s*,\s*(?:\[.*?\]|null))?"""
-    # ── optional context string (3rd positional arg) ─────────────────────
-    r"""(?:\s*,\s*"""
-    r"""(?P<q2>["'])"""
-    r"""(?P<context>(?:(?!(?P=q2)).)*?)"""
-    r"""(?P=q2)"""
-    r""")?"""
-    # ── closing paren ────────────────────────────────────────────────────
-    r"""\s*\)""",
-    re.DOTALL,
+	r"""__\(\s*"""
+	# ── message ──────────────────────────────────────────────────────────
+	r"""(?P<q1>["'])"""  # opening quote (single or double)
+	r"""(?P<message>(?:(?!(?P=q1)).)*?)"""  # message body (non-greedy)
+	r"""(?P=q1)"""  # closing quote (must match opener)
+	# ── optional second arg (array / null) ───────────────────────────────
+	r"""(?:\s*,\s*(?:\[.*?\]|null))?"""
+	# ── optional context string (3rd positional arg) ─────────────────────
+	r"""(?:\s*,\s*"""
+	r"""(?P<q2>["'])"""
+	r"""(?P<context>(?:(?!(?P=q2)).)*?)"""
+	r"""(?P=q2)"""
+	r""")?"""
+	# ── closing paren ────────────────────────────────────────────────────
+	r"""\s*\)""",
+	re.DOTALL,
 )
 
 
 def extract(
-    fileobj: BufferedReader,
-    keywords: list[str],
-    comment_tags: tuple[str, ...],
-    options: dict,
+	fileobj: BufferedReader,
+	keywords: list[str],
+	comment_tags: tuple[str, ...],
+	options: dict,
 ):
-    """Babel extraction interface.
+	"""Babel extraction interface.
 
-    Yields ``(lineno, funcname, message(s), comments)`` tuples that Babel's
-    catalog builder understands.
-    """
-    code = fileobj.read().decode("utf-8")
+	Yields ``(lineno, funcname, message(s), comments)`` tuples that Babel's
+	catalog builder understands.
+	"""
+	code = fileobj.read().decode("utf-8")
 
-    for m in _CALL_PATTERN.finditer(code):
-        message = m.group("message")
-        if not message or not _is_translatable(message):
-            continue
+	for m in _CALL_PATTERN.finditer(code):
+		message = m.group("message")
+		if not message or not _is_translatable(message):
+			continue
 
-        context = m.group("context")
-        lineno = code[: m.start()].count("\n") + 1
+		context = m.group("context")
+		lineno = code[: m.start()].count("\n") + 1
 
-        if context:
-            yield lineno, "pgettext", (context, message), []
-        else:
-            yield lineno, "gettext", message, []
+		if context:
+			yield lineno, "pgettext", (context, message), []
+		else:
+			yield lineno, "gettext", message, []
 
 
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
-_NON_TRANSLATABLE = re.compile(
-    r"^(fa fa-|eval:)|px$"
-)
+_NON_TRANSLATABLE = re.compile(r"^(fa fa-|eval:)|px$")
 
 
 def _is_translatable(text: str) -> bool:
-    """Return *True* if *text* looks like a real translatable string."""
-    if not re.search(r"[a-zA-Z]", text):
-        return False
-    if _NON_TRANSLATABLE.search(text):
-        return False
-    return True
+	"""Return *True* if *text* looks like a real translatable string."""
+	if not re.search(r"[a-zA-Z]", text):
+		return False
+	if _NON_TRANSLATABLE.search(text):
+		return False
+	return True

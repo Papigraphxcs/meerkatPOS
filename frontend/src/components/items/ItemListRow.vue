@@ -1,20 +1,31 @@
 <template>
-	<div class="flex items-center gap-3 p-2 rounded-lg transition-colors group border" :class="[
-		isOutOfStock && !allowNegativeStock
-			? 'cursor-not-allowed opacity-60 bg-muted/30 border-border'
-			: highlighted
-				? 'cursor-pointer bg-orange-50 dark:bg-orange-500/10 border-orange-400 dark:border-orange-500 ring-2 ring-orange-400/50 dark:ring-orange-500/40'
-				: 'cursor-pointer hover:bg-muted/50 border-transparent hover:border-border'
-	]" @click="handleClick">
+	<div
+		class="flex items-center gap-3 p-2 rounded-lg transition-colors group border"
+		:class="[
+			isOutOfStock && !allowNegativeStock
+				? 'cursor-not-allowed opacity-60 bg-muted/30 border-border'
+				: highlighted
+					? 'cursor-pointer bg-orange-50 dark:bg-orange-500/10 border-orange-400 dark:border-orange-500 ring-2 ring-orange-400/50 dark:ring-orange-500/40'
+					: 'cursor-pointer hover:bg-muted/50 border-transparent hover:border-border',
+		]"
+		@click="handleClick"
+	>
 		<div class="w-14 h-14 shrink-0 rounded-lg bg-muted overflow-hidden relative">
-			<img v-if="item.image && !hideImages" :src="item.image" :alt="item.item_name"
-				class="w-full h-full object-cover" loading="lazy" />
+			<img
+				v-if="item.image && !hideImages"
+				:src="item.image"
+				:alt="item.item_name"
+				class="w-full h-full object-cover"
+				loading="lazy"
+			/>
 			<div v-else class="w-full h-full flex items-center justify-center">
 				<Package class="w-6 h-6 text-muted-foreground/40" />
 			</div>
 
-			<div v-if="isOutOfStock && !allowNegativeStock"
-				class="absolute inset-0 bg-background/70 flex items-center justify-center">
+			<div
+				v-if="isOutOfStock && !allowNegativeStock"
+				class="absolute inset-0 bg-background/70 flex items-center justify-center"
+			>
 				<AlertCircle class="w-5 h-5 text-destructive" />
 			</div>
 		</div>
@@ -30,16 +41,19 @@
 			</div>
 		</div>
 
-		<TooltipWrapper v-if="showStock && item.actual_qty !== undefined" :content="String(isOutOfStock ? __('Out of Stock') : item.actual_qty)">
-		<Badge :variant="stockVariant" class="shrink-0 text-[10px]">
-			<template v-if="isOutOfStock">
-				<AlertCircle class="w-3 h-3 me-1" />
-				{{ __("Out of Stock") }}
-			</template>
-			<template v-else>
-				{{ stockLabel }}
-			</template>
-		</Badge>
+		<TooltipWrapper
+			v-if="showStock && item.actual_qty !== undefined"
+			:content="String(isOutOfStock ? __('Out of Stock') : item.actual_qty)"
+		>
+			<Badge :variant="stockVariant" class="shrink-0 text-[10px]">
+				<template v-if="isOutOfStock">
+					<AlertCircle class="w-3 h-3 me-1" />
+					{{ __("Out of Stock") }}
+				</template>
+				<template v-else>
+					{{ stockLabel }}
+				</template>
+			</Badge>
 		</TooltipWrapper>
 
 		<div class="shrink-0 text-end">
@@ -48,18 +62,23 @@
 			</span>
 		</div>
 
-		<button class="shrink-0 w-8 h-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center
-					opacity-0 group-hover:opacity-100 transition-opacity hover:bg-secondary/80"
-			@click.stop="$emit('showDetail', item)">
+		<button
+			class="shrink-0 w-8 h-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-secondary/80"
+			@click.stop="$emit('showDetail', item)"
+		>
 			<Info class="w-4 h-4" />
 		</button>
 
-		<div v-if="!isOutOfStock || allowNegativeStock" class="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center
-					opacity-0 group-hover:opacity-100 transition-opacity">
+		<div
+			v-if="!isOutOfStock || allowNegativeStock"
+			class="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+		>
 			<Plus class="w-4 h-4" />
 		</div>
-		<div v-else
-			class="shrink-0 w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+		<div
+			v-else
+			class="shrink-0 w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center"
+		>
 			<Ban class="w-4 h-4" />
 		</div>
 	</div>

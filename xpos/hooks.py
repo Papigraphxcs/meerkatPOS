@@ -1,9 +1,7 @@
 app_name = "xpos"
 app_title = "X POS"
 app_publisher = "Ali Raza"
-app_description = (
-    "A modern, offline-capable Point of Sale application for Frappe and ERPNext"
-)
+app_description = "A modern, offline-capable Point of Sale application for Frappe and ERPNext"
 app_email = "ar.frappe.dev@gmail.com"
 app_license = "mit"
 
@@ -14,12 +12,12 @@ required_apps = ["frappe", "erpnext"]
 
 # Each item in the list will be shown as an app in the apps page
 add_to_apps_screen = [
-    {
-        "name": "xpos",
-        "logo": "/assets/xpos/images/xpos-logo.svg",
-        "title": "X POS",
-        "route": "/xpos",
-    }
+	{
+		"name": "xpos",
+		"logo": "/assets/xpos/images/xpos-logo.svg",
+		"title": "X POS",
+		"route": "/xpos",
+	}
 ]
 
 # Includes in <head>
@@ -45,10 +43,10 @@ add_to_apps_screen = [
 
 # include js in doctype views
 doctype_js = {
-    "POS Profile": "x_pos/api/pos_profile.js",
-    "Sales Invoice": "x_pos/api/invoice.js",
-    "Company": "x_pos/api/company.js",
-    "Purchase Order": "x_pos/api/purchase_order.js",
+	"POS Profile": "x_pos/api/pos_profile.js",
+	"Sales Invoice": "x_pos/api/invoice.js",
+	"Company": "x_pos/api/company.js",
+	"Purchase Order": "x_pos/api/purchase_order.js",
 }
 
 extend_bootinfo = "xpos.startup.boot.extend_bootinfo"
@@ -83,13 +81,13 @@ extend_bootinfo = "xpos.startup.boot.extend_bootinfo"
 
 # add methods and filters to jinja environment
 jinja = {
-    "methods": [
-        "xpos.x_pos.api.jinja_helpers.xpos_barcode",
-        "xpos.x_pos.api.jinja_helpers.xpos_barcode_uri",
-        "xpos.x_pos.api.jinja_helpers.xpos_qrcode",
-        "xpos.x_pos.api.jinja_helpers.xpos_qrcode_uri",
-        "xpos.x_pos.api.jinja_helpers.xpos_item_barcode",
-    ],
+	"methods": [
+		"xpos.x_pos.api.jinja_helpers.xpos_barcode",
+		"xpos.x_pos.api.jinja_helpers.xpos_barcode_uri",
+		"xpos.x_pos.api.jinja_helpers.xpos_qrcode",
+		"xpos.x_pos.api.jinja_helpers.xpos_qrcode_uri",
+		"xpos.x_pos.api.jinja_helpers.xpos_item_barcode",
+	],
 }
 
 # Installation
@@ -142,8 +140,8 @@ after_uninstall = "xpos.uninstall.after_uninstall"
 # Override standard doctype classes
 
 override_doctype_class = {
-    "POS Invoice": "xpos.x_pos.overrides.pos_invoice.CustomPOSInvoice",
-    "POS Invoice Merge Log": "xpos.x_pos.overrides.pos_invoice_merge_log.CustomPOSInvoiceMergeLog",
+	"POS Invoice": "xpos.x_pos.overrides.pos_invoice.CustomPOSInvoice",
+	"POS Invoice Merge Log": "xpos.x_pos.overrides.pos_invoice_merge_log.CustomPOSInvoiceMergeLog",
 }
 
 # Document Events
@@ -151,22 +149,22 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
-    "Sales Invoice": {
-        "validate": "xpos.x_pos.api.invoice.validate",
-        "before_submit": "xpos.x_pos.api.invoice.before_submit",
-        "before_cancel": "xpos.x_pos.api.invoice.before_cancel",
-        "on_cancel": "xpos.x_pos.api.invoice.on_cancel",
-    },
-    "POS Invoice": {
-        "validate": "xpos.x_pos.api.invoice.validate",
-        "before_submit": "xpos.x_pos.api.invoice.before_submit",
-        "before_cancel": "xpos.x_pos.api.invoice.before_cancel",
-        "on_cancel": "xpos.x_pos.api.invoice.on_cancel",
-    },
-    "Customer": {
-        "validate": "xpos.x_pos.api.customer.validate",
-        "after_insert": "xpos.x_pos.api.customer.after_insert",
-    },
+	"Sales Invoice": {
+		"validate": "xpos.x_pos.api.invoice.validate",
+		"before_submit": "xpos.x_pos.api.invoice.before_submit",
+		"before_cancel": "xpos.x_pos.api.invoice.before_cancel",
+		"on_cancel": "xpos.x_pos.api.invoice.on_cancel",
+	},
+	"POS Invoice": {
+		"validate": "xpos.x_pos.api.invoice.validate",
+		"before_submit": "xpos.x_pos.api.invoice.before_submit",
+		"before_cancel": "xpos.x_pos.api.invoice.before_cancel",
+		"on_cancel": "xpos.x_pos.api.invoice.on_cancel",
+	},
+	"Customer": {
+		"validate": "xpos.x_pos.api.customer.validate",
+		"after_insert": "xpos.x_pos.api.customer.after_insert",
+	},
 }
 
 # Scheduled Tasks
@@ -272,6 +270,6 @@ export_python_type_annotations = True
 # Serve the X POS SPA for deep links under /xpos
 
 website_route_rules = [
-    {"from_route": "/xpos", "to_route": "xpos"},
-    {"from_route": "/xpos/<path:app_path>", "to_route": "xpos"},
+	{"from_route": "/xpos", "to_route": "xpos"},
+	{"from_route": "/xpos/<path:app_path>", "to_route": "xpos"},
 ]

@@ -1,5 +1,12 @@
 <template>
-	<Dialog :open="posStore.showClosingDialog" @update:open="(val: boolean) => { if (!val) close() }">
+	<Dialog
+		:open="posStore.showClosingDialog"
+		@update:open="
+			(val: boolean) => {
+				if (!val) close();
+			}
+		"
+	>
 		<DialogScrollContent class="max-w-2xl p-0 gap-0 overflow-hidden">
 			<DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
 				<DialogTitle>{{ __("Close Shift") }}</DialogTitle>
@@ -15,8 +22,12 @@
 					<div class="grid grid-cols-3 gap-3">
 						<Card class="bg-primary/5 border-primary/20">
 							<CardContent class="p-4 text-center">
-								<p class="text-xs font-medium text-primary/70 mb-1">{{ __("Total Invoices") }}</p>
-								<p class="text-2xl font-extrabold text-primary">{{ summary.total_invoices }}</p>
+								<p class="text-xs font-medium text-primary/70 mb-1">
+									{{ __("Total Invoices") }}
+								</p>
+								<p class="text-2xl font-extrabold text-primary">
+									{{ summary.total_invoices }}
+								</p>
 							</CardContent>
 						</Card>
 						<Card class="bg-emerald-500/5 border-emerald-500/20">
@@ -42,43 +53,66 @@
 					</div>
 
 					<div class="grid grid-cols-2 gap-3">
-						<Card v-if="(summary as any).returns_count > 0" class="bg-amber-500/5 border-amber-500/20">
+						<Card
+							v-if="(summary as any).returns_count > 0"
+							class="bg-amber-500/5 border-amber-500/20"
+						>
 							<CardContent class="p-3 text-center">
-								<p class="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">{{ __("Returns") }}</p>
+								<p class="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">
+									{{ __("Returns") }}
+								</p>
 								<p class="text-lg font-bold text-amber-700 dark:text-amber-300">
 									{{ (summary as any).returns_count }}
 								</p>
 							</CardContent>
 						</Card>
-						<Card v-if="(summary as any).total_taxes > 0" class="bg-violet-500/5 border-violet-500/20">
+						<Card
+							v-if="(summary as any).total_taxes > 0"
+							class="bg-violet-500/5 border-violet-500/20"
+						>
 							<CardContent class="p-3 text-center">
-								<p class="text-xs font-medium text-violet-600 dark:text-violet-400 mb-1">{{ __("Total Taxes") }}</p>
+								<p class="text-xs font-medium text-violet-600 dark:text-violet-400 mb-1">
+									{{ __("Total Taxes") }}
+								</p>
 								<p class="text-lg font-bold text-violet-700 dark:text-violet-300">
-									{{ posStore.currencySymbol }}{{ formatPrice((summary as any).total_taxes ?? 0) }}
+									{{ posStore.currencySymbol
+									}}{{ formatPrice((summary as any).total_taxes ?? 0) }}
 								</p>
 							</CardContent>
 						</Card>
 					</div>
 
 					<div v-if="(summary as any).tax_summary && (summary as any).tax_summary.length > 0">
-						<h3 class="text-sm font-semibold text-foreground mb-2">{{ __("Tax Breakdown") }}</h3>
+						<h3 class="text-sm font-semibold text-foreground mb-2">
+							{{ __("Tax Breakdown") }}
+						</h3>
 						<div class="space-y-1">
-							<div v-for="tax in (summary as any).tax_summary" :key="tax.account_head || tax.description"
-								class="flex items-center justify-between text-sm bg-muted rounded-lg px-3 py-2">
-								<span class="text-muted-foreground">{{ tax.description || tax.account_head }}</span>
-								<span class="font-medium text-foreground">{{ posStore.currencySymbol }}{{
-									formatPrice(tax.tax_amount ?? 0) }}</span>
+							<div
+								v-for="tax in (summary as any).tax_summary"
+								:key="tax.account_head || tax.description"
+								class="flex items-center justify-between text-sm bg-muted rounded-lg px-3 py-2"
+							>
+								<span class="text-muted-foreground">{{
+									tax.description || tax.account_head
+								}}</span>
+								<span class="font-medium text-foreground"
+									>{{ posStore.currencySymbol }}{{ formatPrice(tax.tax_amount ?? 0) }}</span
+								>
 							</div>
 						</div>
 					</div>
 
 					<div>
-						<h3 class="text-sm font-semibold text-foreground mb-3">{{ __("Payment Reconciliation") }}</h3>
+						<h3 class="text-sm font-semibold text-foreground mb-3">
+							{{ __("Payment Reconciliation") }}
+						</h3>
 						<div class="border border-border rounded-lg overflow-hidden">
 							<table class="w-full text-sm">
 								<thead class="bg-muted">
 									<tr>
-										<th class="text-start px-4 py-2.5 text-muted-foreground font-medium">{{ __("Method") }}</th>
+										<th class="text-start px-4 py-2.5 text-muted-foreground font-medium">
+											{{ __("Method") }}
+										</th>
 										<th class="text-end px-4 py-2.5 text-muted-foreground font-medium">
 											{{ __("Opening") }}
 										</th>
@@ -94,9 +128,13 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr v-for="(detail, index) in closingDetails" :key="detail.mode_of_payment"
-										class="border-t border-border">
-										<td class="px-4 py-2.5 font-medium text-foreground">{{ detail.mode_of_payment }}
+									<tr
+										v-for="(detail, index) in closingDetails"
+										:key="detail.mode_of_payment"
+										class="border-t border-border"
+									>
+										<td class="px-4 py-2.5 font-medium text-foreground">
+											{{ detail.mode_of_payment }}
 										</td>
 										<td class="px-4 py-2.5 text-end text-muted-foreground">
 											{{ formatPrice(detail.opening_amount) }}
@@ -105,13 +143,24 @@
 											{{ formatPrice(detail.expected_amount) }}
 										</td>
 										<td class="px-4 py-2.5 text-end">
-											<NumberInput v-model="closingDetails[index].closing_amount"
-												:min="0" :precision="2" class="w-28 text-end text-sm ms-auto"
-												@change="calculateDifference(index)" />
+											<NumberInput
+												v-model="closingDetails[index].closing_amount"
+												:min="0"
+												:precision="2"
+												class="w-28 text-end text-sm ms-auto"
+												@change="calculateDifference(index)"
+											/>
 										</td>
-										<td class="px-4 py-2.5 text-end font-bold"
-											:class="detail.difference >= 0 ? 'text-emerald-600' : 'text-destructive'">
-											{{ detail.difference >= 0 ? '+' : '' }}{{ formatPrice(detail.difference) }}
+										<td
+											class="px-4 py-2.5 text-end font-bold"
+											:class="
+												detail.difference >= 0
+													? 'text-emerald-600'
+													: 'text-destructive'
+											"
+										>
+											{{ detail.difference >= 0 ? "+" : ""
+											}}{{ formatPrice(detail.difference) }}
 										</td>
 									</tr>
 								</tbody>
@@ -123,7 +172,12 @@
 
 			<DialogFooter class="shrink-0 border-t border-border px-5 py-4">
 				<template v-if="shiftClosed">
-					<Button v-if="closedShiftName" variant="outline" class="gap-1.5" @click="printShiftSummary">
+					<Button
+						v-if="closedShiftName"
+						variant="outline"
+						class="gap-1.5"
+						@click="printShiftSummary"
+					>
 						<Printer class="w-4 h-4" />
 						{{ __("Print Summary") }}
 					</Button>
@@ -131,7 +185,12 @@
 				</template>
 				<template v-else>
 					<Button variant="outline" @click="close">{{ __("Cancel") }}</Button>
-					<Button variant="destructive" class="font-bold" :disabled="isClosing" @click="handleCloseShift">
+					<Button
+						variant="destructive"
+						class="font-bold"
+						:disabled="isClosing"
+						@click="handleCloseShift"
+					>
 						<template v-if="isClosing">
 							<Loader2 class="w-4 h-4 animate-spin" />
 							{{ __("Closing...") }}
@@ -149,7 +208,12 @@ import { ref, onMounted } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { showSuccess, showError } from "@/services/api";
 import {
-	Dialog, DialogScrollContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+	Dialog,
+	DialogScrollContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
@@ -185,7 +249,7 @@ const closingDetails = ref<ClosingDetail[]>([]);
 
 onMounted(async () => {
 	try {
-		const data = await posStore.fetchClosingData() as ClosingSummary | undefined;
+		const data = (await posStore.fetchClosingData()) as ClosingSummary | undefined;
 		summary.value = data || null;
 
 		if (data) {
@@ -203,13 +267,15 @@ onMounted(async () => {
 						difference: 0,
 					}));
 				} else {
-					closingDetails.value = [{
-						mode_of_payment: "Cash",
-						opening_amount: 0,
-						expected_amount: 0,
-						closing_amount: 0,
-						difference: 0,
-					}];
+					closingDetails.value = [
+						{
+							mode_of_payment: "Cash",
+							opening_amount: 0,
+							expected_amount: 0,
+							closing_amount: 0,
+							difference: 0,
+						},
+					];
 				}
 			} else {
 				const paymentSummary = (data.payment_summary || {}) as Record<string, number>;
@@ -244,7 +310,7 @@ async function handleCloseShift() {
 	isClosing.value = true;
 
 	try {
-		const result = await posStore.closeShift(closingDetails.value) as { name?: string } | undefined;
+		const result = (await posStore.closeShift(closingDetails.value)) as { name?: string } | undefined;
 		closedShiftName.value = result?.name || "";
 		shiftClosed.value = true;
 		showSuccess(__("Shift closed successfully!"));
@@ -258,7 +324,9 @@ async function handleCloseShift() {
 function printShiftSummary() {
 	const name = closedShiftName.value;
 	if (!name) return;
-	const url = `/printview?doctype=POS+Closing+Entry&name=${encodeURIComponent(name)}&no_letterhead=0&trigger_print=1`;
+	const url = `/printview?doctype=POS+Closing+Entry&name=${encodeURIComponent(
+		name,
+	)}&no_letterhead=0&trigger_print=1`;
 	window.open(url, "_blank");
 }
 

@@ -8,6 +8,7 @@ Returns component items for Product Bundles used in POS.
 """
 
 import json
+
 import frappe
 from frappe import _
 
@@ -42,14 +43,16 @@ def get_bundle_components(bundles):
 				as_dict=True,
 			)
 			uom = row.uom or (item.stock_uom if item else None)
-			components.append({
-				"item_code": row.item_code,
-				"qty": row.qty,
-				"uom": uom,
-				"is_batch": item.has_batch_no if item else 0,
-				"is_serial": item.has_serial_no if item else 0,
-				"is_stock_item": item.is_stock_item if item else 0,
-			})
+			components.append(
+				{
+					"item_code": row.item_code,
+					"qty": row.qty,
+					"uom": uom,
+					"is_batch": item.has_batch_no if item else 0,
+					"is_serial": item.has_serial_no if item else 0,
+					"is_stock_item": item.is_stock_item if item else 0,
+				}
+			)
 		result[code] = components
 
 	return result

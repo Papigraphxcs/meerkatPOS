@@ -1,7 +1,7 @@
 <template>
-  <SelectRoot v-model="modelValue">
-    <slot />
-  </SelectRoot>
+	<SelectRoot v-model="modelValue">
+		<slot />
+	</SelectRoot>
 </template>
 
 <script setup lang="ts">

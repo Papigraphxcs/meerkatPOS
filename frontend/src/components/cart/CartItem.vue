@@ -1,8 +1,17 @@
 <template>
-	<div class="group flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors duration-150 dark:hover:bg-accent/50"
-		:data-cart-index="index" tabindex="0" @keydown.delete="handleDeleteKey">
+	<div
+		class="group flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors duration-150 dark:hover:bg-accent/50"
+		:data-cart-index="index"
+		tabindex="0"
+		@keydown.delete="handleDeleteKey"
+	>
 		<div class="w-9 h-9 rounded-md bg-muted overflow-hidden shrink-0 flex items-center justify-center">
-			<img v-if="item.image" :src="item.image" :alt="item.item_name" class="w-full h-full object-cover" />
+			<img
+				v-if="item.image"
+				:src="item.image"
+				:alt="item.item_name"
+				class="w-full h-full object-cover"
+			/>
 			<Package v-else class="w-4 h-4 text-muted-foreground/40" />
 		</div>
 
@@ -14,21 +23,29 @@
 			<div class="flex items-center gap-1 mt-0.5 flex-wrap">
 				<template v-if="posStore.allowEditRate">
 					<span class="text-[11px] text-muted-foreground">{{ currencySymbol }}</span>
-					<input ref="rateInput" :value="item.rate" type="number" min="0" step="0.01"
-						class="w-16 h-5 text-[11px] font-medium text-foreground bg-transparent border-b border-dashed border-border
-								 focus:outline-none focus:border-primary dark:border-muted-foreground/40
-								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" @change="onRateChange"
+					<input
+						ref="rateInput"
+						:value="item.rate"
+						type="number"
+						min="0"
+						step="0.01"
+						class="w-16 h-5 text-[11px] font-medium text-foreground bg-transparent border-b border-dashed border-border focus:outline-none focus:border-primary dark:border-muted-foreground/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+						@change="onRateChange"
 						@keydown.up.prevent="focusAdjacentItem(-1, 'rate')"
 						@keydown.down.prevent="focusAdjacentItem(1, 'rate')"
-						@keydown="blockInvalidNumericKeys" />
+						@keydown="blockInvalidNumericKeys"
+					/>
 				</template>
 				<p v-else class="text-[11px] text-muted-foreground">
 					{{ currencySymbol }}{{ formatPrice(item.rate) }}
 				</p>
 
 				<span class="text-[11px] text-muted-foreground">/</span>
-				<button v-if="posStore.allowEditRate && hasMultipleUOMs" @click="showUOMSelector = !showUOMSelector"
-					class="text-[11px] text-primary hover:underline focus:outline-none">
+				<button
+					v-if="posStore.allowEditRate && hasMultipleUOMs"
+					@click="showUOMSelector = !showUOMSelector"
+					class="text-[11px] text-primary hover:underline focus:outline-none"
+				>
 					{{ item.uom || item.stock_uom }}
 					<ChevronDown class="w-3 h-3 inline-block" />
 				</button>
@@ -39,10 +56,17 @@
 
 			<div v-if="showUOMSelector && itemUOMs.length > 0" class="mt-1 p-1.5 bg-muted rounded-md">
 				<div class="flex flex-wrap gap-1">
-					<button v-for="u in itemUOMs" :key="u.uom" @click="selectUOM(u)"
-						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all" :class="(item.uom || item.stock_uom) === u.uom
-							? 'bg-primary text-primary-foreground'
-							: 'bg-background border border-border hover:border-primary/40'">
+					<button
+						v-for="u in itemUOMs"
+						:key="u.uom"
+						@click="selectUOM(u)"
+						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all"
+						:class="
+							(item.uom || item.stock_uom) === u.uom
+								? 'bg-primary text-primary-foreground'
+								: 'bg-background border border-border hover:border-primary/40'
+						"
+					>
 						{{ u.uom }}
 						<span v-if="u.conversion_factor !== 1" class="text-[9px] opacity-70">
 							(×{{ u.conversion_factor }})
@@ -55,52 +79,81 @@
 				<Button variant="secondary" size="icon-sm" class="w-5 h-5" @click="decrementQty">
 					<Minus class="w-2.5 h-2.5" />
 				</Button>
-				<input ref="qtyInput" :value="item.qty" type="number" min="0"
-					class="w-9 h-5 text-center text-[10px] font-semibold text-foreground bg-muted/50 rounded
-								 border border-border focus:outline-none focus:ring-1 focus:ring-ring
-								 dark:bg-accent/50 dark:border-muted-foreground/30
-								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none px-1" @change="onQtyChange"
+				<input
+					ref="qtyInput"
+					:value="item.qty"
+					type="number"
+					min="0"
+					class="w-9 h-5 text-center text-[10px] font-semibold text-foreground bg-muted/50 rounded border border-border focus:outline-none focus:ring-1 focus:ring-ring dark:bg-accent/50 dark:border-muted-foreground/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none px-1"
+					@change="onQtyChange"
 					@keydown.up.prevent="focusAdjacentItem(-1, 'qty')"
 					@keydown.down.prevent="focusAdjacentItem(1, 'qty')"
-					@keydown="blockInvalidNumericKeys" />
-				<Button variant="secondary" size="icon-sm"
-					class="w-5 h-5 bg-primary/10 text-primary hover:bg-primary/20" @click="incrementQty">
+					@keydown="blockInvalidNumericKeys"
+				/>
+				<Button
+					variant="secondary"
+					size="icon-sm"
+					class="w-5 h-5 bg-primary/10 text-primary hover:bg-primary/20"
+					@click="incrementQty"
+				>
 					<Plus class="w-2.5 h-2.5" />
 				</Button>
 
 				<template v-if="posStore.allowEditItemDiscount">
-					<button @click="showDiscountInput = !showDiscountInput"
-						class="ms-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all" :class="hasItemDiscount
-							? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
-							: 'bg-muted text-muted-foreground hover:bg-emerald-50 dark:hover:bg-emerald-900/20'">
+					<button
+						@click="showDiscountInput = !showDiscountInput"
+						class="ms-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all"
+						:class="
+							hasItemDiscount
+								? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
+								: 'bg-muted text-muted-foreground hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+						"
+					>
 						<Percent class="w-3 h-3 inline-block" />
-						{{ hasItemDiscount ? formatDiscount : 'Disc' }}
+						{{ hasItemDiscount ? formatDiscount : "Disc" }}
 					</button>
 				</template>
 			</div>
 
-			<div v-if="showDiscountInput && posStore.allowEditItemDiscount"
-				class="mt-1.5 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-md border border-emerald-200 dark:border-emerald-800">
+			<div
+				v-if="showDiscountInput && posStore.allowEditItemDiscount"
+				class="mt-1.5 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-md border border-emerald-200 dark:border-emerald-800"
+			>
 				<div class="flex items-center gap-2">
-					<button @click="discountType = 'percentage'"
-						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all" :class="discountType === 'percentage'
-							? 'bg-emerald-600 text-white'
-							: 'bg-white dark:bg-muted border border-emerald-300 dark:border-emerald-700'">
+					<button
+						@click="discountType = 'percentage'"
+						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all"
+						:class="
+							discountType === 'percentage'
+								? 'bg-emerald-600 text-white'
+								: 'bg-white dark:bg-muted border border-emerald-300 dark:border-emerald-700'
+						"
+					>
 						%
 					</button>
-					<button @click="discountType = 'amount'"
-						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all" :class="discountType === 'amount'
-							? 'bg-emerald-600 text-white'
-							: 'bg-white dark:bg-muted border border-emerald-300 dark:border-emerald-700'">
+					<button
+						@click="discountType = 'amount'"
+						class="px-2 py-0.5 rounded text-[10px] font-medium transition-all"
+						:class="
+							discountType === 'amount'
+								? 'bg-emerald-600 text-white'
+								: 'bg-white dark:bg-muted border border-emerald-300 dark:border-emerald-700'
+						"
+					>
 						{{ currencySymbol }}
 					</button>
-					<input v-model.number="discountInput" type="number" min="0"
-						:max="discountType === 'percentage' ? (maxDiscount || 100) : undefined" step="0.5"
+					<input
+						v-model.number="discountInput"
+						type="number"
+						min="0"
+						:max="discountType === 'percentage' ? maxDiscount || 100 : undefined"
+						step="0.5"
 						placeholder="0"
-						class="flex-1 h-6 text-center text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-white dark:bg-muted rounded
-								 border border-emerald-300 dark:border-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-400
-								 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-						@blur="applyDiscount" @keydown.enter="applyDiscount" @keydown="blockInvalidNumericKeys" />
+						class="flex-1 h-6 text-center text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-white dark:bg-muted rounded border border-emerald-300 dark:border-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+						@blur="applyDiscount"
+						@keydown.enter="applyDiscount"
+						@keydown="blockInvalidNumericKeys"
+					/>
 				</div>
 			</div>
 		</div>
@@ -112,9 +165,12 @@
 			<span v-if="hasItemDiscount" class="text-[9px] text-emerald-600 dark:text-emerald-400">
 				-{{ currencySymbol }}{{ formatPrice(discountAmount) }}
 			</span>
-			<Button variant="ghost" size="icon-sm"
+			<Button
+				variant="ghost"
+				size="icon-sm"
 				class="opacity-0 group-hover:opacity-100 w-4 h-4 hover:text-destructive transition-all"
-				@click="$emit('remove', index)">
+				@click="$emit('remove', index)"
+			>
 				<Trash2 class="w-3.5 h-3.5" />
 			</Button>
 		</div>
@@ -152,8 +208,8 @@ const maxDiscount = computed(() => posStore.maxDiscountAllowed);
 
 const hasMultipleUOMs = computed(() => itemUOMs.value.length > 1);
 
-const hasItemDiscount = computed(() =>
-	(props.item.discount_percentage || 0) > 0 || (props.item.discount_amount || 0) > 0
+const hasItemDiscount = computed(
+	() => (props.item.discount_percentage || 0) > 0 || (props.item.discount_amount || 0) > 0,
 );
 
 const formatDiscount = computed(() => {
@@ -163,7 +219,7 @@ const formatDiscount = computed(() => {
 	if (props.item.discount_amount > 0) {
 		return `${props.currencySymbol}${props.item.discount_amount}`;
 	}
-	return '';
+	return "";
 });
 
 const discountAmount = computed(() => {
@@ -195,18 +251,21 @@ onMounted(async () => {
 	}
 });
 
-watch(() => props.item.item_code, async () => {
-	if (posStore.allowEditRate) {
-		await loadItemUOMs();
-	}
-});
+watch(
+	() => props.item.item_code,
+	async () => {
+		if (posStore.allowEditRate) {
+			await loadItemUOMs();
+		}
+	},
+);
 
 async function loadItemUOMs() {
 	try {
 		const detail = await itemStore.fetchItemDetail(
 			props.item.item_code,
 			posStore.profileName,
-			posStore.warehouse
+			posStore.warehouse,
 		);
 		if (detail?.uoms) {
 			itemUOMs.value = detail.uoms;
@@ -252,15 +311,15 @@ function applyDiscount() {
 	emit("update-discount", props.index, discountType.value, val);
 }
 
-function focusAdjacentItem(direction: number, field: 'qty' | 'rate') {
+function focusAdjacentItem(direction: number, field: "qty" | "rate") {
 	const targetIndex = props.index + direction;
-	const container = qtyInput.value?.closest('[data-cart-index]')?.parentElement;
+	const container = qtyInput.value?.closest("[data-cart-index]")?.parentElement;
 	if (!container) return;
 
 	const targetEl = container.querySelector(`[data-cart-index="${targetIndex}"]`);
 	if (!targetEl) return;
 
-	if (field === 'qty') {
+	if (field === "qty") {
 		const inputs = targetEl.querySelectorAll('input[type="number"]');
 		const qtyEl = inputs.length > 1 ? inputs[1] : inputs[0];
 		if (qtyEl) {

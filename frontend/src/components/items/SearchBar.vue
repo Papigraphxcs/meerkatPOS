@@ -2,16 +2,33 @@
 	<div ref="rootEl" class="relative">
 		<div class="relative flex items-center">
 			<Search class="absolute start-3.5 w-5 h-5 text-muted-foreground pointer-events-none" />
-			<Input v-model="localSearch" class="ps-10 pe-10 sm:pe-14" :placeholder="__('Search items, scan barcode...')" @input="onInput"
-				@keydown.enter.prevent="onEnter" @keydown.down.prevent="emit('navigate', 'down')"
-				@keydown.up.prevent="emit('navigate', 'up')" />
-			<Button v-if="localSearch" variant="ghost" size="icon-sm" class="absolute end-3" @click="clearSearch">
+			<Input
+				v-model="localSearch"
+				class="ps-10 pe-10 sm:pe-14"
+				:placeholder="__('Search items, scan barcode...')"
+				@input="onInput"
+				@keydown.enter.prevent="onEnter"
+				@keydown.down.prevent="emit('navigate', 'down')"
+				@keydown.up.prevent="emit('navigate', 'up')"
+			/>
+			<Button
+				v-if="localSearch"
+				variant="ghost"
+				size="icon-sm"
+				class="absolute end-3"
+				@click="clearSearch"
+			>
 				<X class="w-4 h-4 text-muted-foreground" />
 			</Button>
 		</div>
-		<div v-if="!localSearch" class="absolute end-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1">
+		<div
+			v-if="!localSearch"
+			class="absolute end-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1"
+		>
 			<kbd
-				class="px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-muted rounded border border-border">/</kbd>
+				class="px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-muted rounded border border-border"
+				>/</kbd
+			>
 		</div>
 	</div>
 </template>

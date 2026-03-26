@@ -12,10 +12,10 @@ import frappe
 
 @frappe.whitelist()
 def get_print_formats(doctype="Sales Invoice"):
-    """Returns available print format names for a doctype."""
-    print_formats = frappe.get_all(
-        "Print Format",
-        filters={"doc_type": doctype, "disabled": 0},
-        fields=["name"],
-    )
-    return [p.name for p in print_formats]
+	"""Returns available print format names for a doctype."""
+	print_formats = frappe.get_all(
+		"Print Format",
+		filters={"doc_type": doctype, "disabled": 0},
+		fields=["name"],
+	)
+	return [p.name for p in print_formats]
