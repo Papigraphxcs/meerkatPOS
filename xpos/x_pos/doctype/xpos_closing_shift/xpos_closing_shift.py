@@ -36,7 +36,7 @@ class XPOSClosingShift(Document):
 			XPOSClosingShiftTaxes,
 		)
 		from xpos.x_pos.doctype.xpos_payment_entry_reference.xpos_payment_entry_reference import (
-			POSPaymentEntryReference,
+			XPOSPaymentEntryReference,
 		)
 
 		amended_from: DF.Link | None
@@ -47,7 +47,7 @@ class XPOSClosingShift(Document):
 		period_end_date: DF.Datetime
 		period_start_date: DF.Datetime
 		pos_opening_shift: DF.Link
-		pos_payments: DF.Table[POSPaymentEntryReference]
+		pos_payments: DF.Table[XPOSPaymentEntryReference]
 		pos_profile: DF.Link
 		pos_transactions: DF.Table[SalesInvoiceReference]
 		posting_date: DF.Date

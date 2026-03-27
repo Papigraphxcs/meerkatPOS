@@ -135,20 +135,6 @@ def create_invoice(data: str | dict):
 		item_rate = flt(item_data.get("rate", 0), 2)
 		item_qty = flt(item_data.get("qty", 1), 3)
 
-		if not is_return and item_qty <= 0:
-			frappe.throw(
-				_("Item {0}: Quantity must be greater than zero").format(
-					item_data.get("item_code") or item_data.get("item_name")
-				)
-			)
-
-		if not is_return and item_rate < 0:
-			frappe.throw(
-				_("Item {0}: Rate cannot be negative").format(
-					item_data.get("item_code") or item_data.get("item_name")
-				)
-			)
-
 		if not cint(pos.get("allow_rate_change")):
 			price_list = pos.get("selling_price_list")
 			if price_list:
@@ -272,9 +258,6 @@ def create_invoice(data: str | dict):
 			)
 			total_payment += pay_amount
 
-	if not is_return and total_payment <= 0 and not cint(pos.get("allow_credit_sale")):
-		frappe.throw(_("Payment amount must be greater than zero"))
-
 	change_amount = flt(data.get("change_amount", 0))
 	if change_amount > 0:
 		invoice_doc.change_amount = change_amount
@@ -370,80 +353,6 @@ def _submit_invoice_job(invoice_name: str, doctype: str = "Sales Invoice"):
 	except Exception:
 		frappe.log_error(f"Failed to submit {doctype} {invoice_name}", "X POS Invoice Submission")
 		frappe.db.rollback()
-
-
-@frappe.whitelist()
-def update_draft_invoice(data: str | dict):
-	"""Update an existing draft invoice"""
-	data = json.loads(data) if isinstance(data, str) else data
-
-	invoice_name = data.get("name")
-	if not invoice_name:
-		frappe.throw(_("Invoice name is required for update"))
-
-	doctype = data.get("doctype", "Sales Invoice")
-	doc = frappe.get_doc(doctype, invoice_name)
-
-	if doc.docstatus != 0:
-		frappe.throw(_("Only draft invoices can be updated"))
-
-	if data.get("customer"):
-		doc.customer = data["customer"]
-
-	if data.get("currency"):
-		doc.currency = data["currency"]
-	if data.get("conversion_rate"):
-		doc.conversion_rate = flt(data["conversion_rate"])
-
-	if "additional_discount_percentage" in data:
-		doc.additional_discount_percentage = flt(data["additional_discount_percentage"])
-		doc.apply_discount_on = data.get("apply_discount_on") or "Grand Total"
-	if "discount_amount" in data:
-		doc.discount_amount = flt(data["discount_amount"])
-		doc.apply_discount_on = data.get("apply_discount_on") or "Grand Total"
-
-	if data.get("items"):
-		doc.set("items", [])
-		pos = frappe.get_cached_doc("POS Profile", doc.pos_profile)
-		for item_data in data["items"]:
-			item = doc.append("items", {})
-			item.item_code = item_data.get("item_code")
-			item.item_name = item_data.get("item_name")
-			item.qty = flt(item_data.get("qty", 1))
-			item.rate = flt(item_data.get("rate", 0))
-			item.uom = item_data.get("uom") or item_data.get("stock_uom")
-			item.warehouse = item_data.get("warehouse") or pos.warehouse
-			if item_data.get("discount_percentage"):
-				item.discount_percentage = flt(item_data["discount_percentage"])
-			if item_data.get("discount_amount"):
-				item.discount_amount = flt(item_data["discount_amount"])
-			if item_data.get("serial_no"):
-				item.serial_no = item_data["serial_no"]
-			if item_data.get("batch_no"):
-				item.batch_no = item_data["batch_no"]
-
-	if data.get("payments"):
-		doc.set("payments", [])
-		for payment in data["payments"]:
-			pay_amount = flt(payment.get("amount", 0))
-			if pay_amount != 0:
-				doc.append(
-					"payments",
-					{
-						"mode_of_payment": payment.get("mode_of_payment"),
-						"amount": pay_amount,
-					},
-				)
-
-	doc.save(ignore_permissions=True)
-
-	return {
-		"name": doc.name,
-		"grand_total": doc.grand_total,
-		"net_total": doc.net_total,
-		"customer": doc.customer,
-		"customer_name": doc.customer_name,
-	}
 
 
 @frappe.whitelist()
@@ -1099,108 +1008,6 @@ def get_invoice_for_return(invoice_name: str, pos_profile: str = "", doctype: st
 		"return_expired": return_expired,
 		"payments": [{"mode_of_payment": p.mode_of_payment, "amount": p.amount} for p in doc.payments],
 	}
-
-
-@frappe.whitelist()
-def validate_return_items(
-	original_invoice_name: str, return_items: str | list, doctype: str = "Sales Invoice"
-):
-	"""Validate return items don't exceed original sold quantities."""
-	if isinstance(return_items, str):
-		return_items = json.loads(return_items)
-
-	doc = frappe.get_doc(doctype, original_invoice_name)
-
-	return_invoices = frappe.get_all(
-		doctype,
-		filters={
-			"return_against": original_invoice_name,
-			"docstatus": 1,
-			"is_return": 1,
-		},
-		pluck="name",
-	)
-
-	returned_qty_map = {}
-	for ret_name in return_invoices:
-		ret_doc = frappe.get_doc(doctype, ret_name)
-		for item in ret_doc.items:
-			key = item.item_code
-			returned_qty_map[key] = returned_qty_map.get(key, 0) + abs(item.qty)
-
-	errors = []
-	for ret_item in return_items:
-		item_code = ret_item.get("item_code")
-		return_qty = abs(flt(ret_item.get("qty", 0)))
-
-		original_qty = 0
-		for item in doc.items:
-			if item.item_code == item_code:
-				original_qty += item.qty
-
-		already_returned = returned_qty_map.get(item_code, 0)
-		max_returnable = original_qty - already_returned
-
-		if return_qty > max_returnable:
-			errors.append(
-				_("Item {0}: Cannot return {1}, maximum returnable is {2}").format(
-					item_code, return_qty, max_returnable
-				)
-			)
-
-	return {
-		"valid": len(errors) == 0,
-		"errors": errors,
-	}
-
-
-@frappe.whitelist()
-def validate_cart_items(items: str | list, pos_profile: str):
-	"""Pre-submission stock validation for cart items."""
-	if isinstance(items, str):
-		items = json.loads(items)
-
-	pos = frappe.get_cached_doc("POS Profile", pos_profile)
-	warehouse = pos.warehouse
-
-	errors = []
-	for item_data in items:
-		item_code = item_data.get("item_code")
-		qty = flt(item_data.get("qty", 0))
-
-		if not item_code:
-			continue
-
-		is_stock = frappe.db.get_value("Item", item_code, "is_stock_item")
-		if not is_stock:
-			continue
-
-		actual_qty = 0
-		item_warehouse = item_data.get("warehouse") or warehouse
-		batch_no = item_data.get("batch_no")
-
-		if batch_no:
-			from erpnext.stock.doctype.batch.batch import get_batch_qty
-
-			actual_qty = flt(get_batch_qty(batch_no, item_warehouse))
-		else:
-			from xpos.api.items import get_stock_qty
-
-			actual_qty = get_stock_qty(item_code, item_warehouse)
-
-		if qty > actual_qty:
-			errors.append(
-				{
-					"item_code": item_code,
-					"item_name": item_data.get("item_name", item_code),
-					"required_qty": qty,
-					"available_qty": actual_qty,
-					"warehouse": item_warehouse,
-					"batch_no": batch_no,
-				}
-			)
-
-	return errors
 
 
 @frappe.whitelist()

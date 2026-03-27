@@ -53,31 +53,6 @@
 			</Button>
 		</TooltipWrapper>
 
-		<div v-if="posStore.enableCashMovement" class="hidden md:flex items-center gap-1">
-			<TooltipWrapper v-if="posStore.allowPosExpense" :content="__('POS Expense')">
-				<Button
-					variant="ghost"
-					size="sm"
-					class="text-muted-foreground hover:text-red-500 gap-1"
-					@click="paymentStore.openCashMovement('expense')"
-				>
-					<ArrowDownCircle class="w-4 h-4" />
-					<span class="hidden lg:inline text-xs">{{ __("Expense") }}</span>
-				</Button>
-			</TooltipWrapper>
-			<TooltipWrapper v-if="posStore.allowCashDeposit" :content="__('Cash Deposit')">
-				<Button
-					variant="ghost"
-					size="sm"
-					class="text-muted-foreground hover:text-emerald-500 gap-1"
-					@click="paymentStore.openCashMovement('deposit')"
-				>
-					<ArrowUpCircle class="w-4 h-4" />
-					<span class="hidden lg:inline text-xs">{{ __("Deposit") }}</span>
-				</Button>
-			</TooltipWrapper>
-		</div>
-
 		<TooltipWrapper :content="__('Repeat Invoice (Ctrl+G)')">
 			<Button
 				variant="ghost"

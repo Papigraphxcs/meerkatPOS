@@ -69,7 +69,7 @@
 
 			<div class="flex-1 overflow-y-auto p-4 pt-2 xpos-scrollbar">
 				<ItemGrid
-					:items="itemStore.filteredItems"
+					:items="itemStore.items"
 					:is-loading="itemStore.isLoading"
 					:currency-symbol="posStore.currencySymbol"
 					:view-mode="viewMode"
@@ -194,7 +194,7 @@ watch(
 );
 
 watch(
-	() => itemStore.filteredItems,
+	() => itemStore.items,
 	() => {
 		highlightedIndex.value = -1;
 	},
@@ -225,8 +225,8 @@ function onSearch(term: string) {
 }
 
 async function onSearchEnter(val: string) {
-	if (highlightedIndex.value >= 0 && highlightedIndex.value < itemStore.filteredItems.length) {
-		handleShowDetail(itemStore.filteredItems[highlightedIndex.value]);
+	if (highlightedIndex.value >= 0 && highlightedIndex.value < itemStore.items.length) {
+		handleShowDetail(itemStore.items[highlightedIndex.value]);
 		return;
 	}
 
@@ -267,7 +267,7 @@ async function onBarcodeScan(barcode: string) {
 }
 
 function onNavigate(direction: "up" | "down") {
-	const items = itemStore.filteredItems;
+	const items = itemStore.items;
 	if (items.length === 0) return;
 
 	if (direction === "down") {
@@ -329,7 +329,7 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 
 	if (e.key === "Enter" && highlightedIndex.value >= 0) {
 		e.preventDefault();
-		const item = itemStore.filteredItems[highlightedIndex.value];
+		const item = itemStore.items[highlightedIndex.value];
 		if (item) {
 			handleShowDetail(item);
 		}
