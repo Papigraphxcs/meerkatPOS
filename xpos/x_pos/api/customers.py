@@ -83,10 +83,10 @@ def get_customer_balance(customer: str) -> dict:
 @frappe.whitelist()
 def get_customer_names(
 	pos_profile: str,
-	limit: int = None,
-	offset: int = None,
-	start_after: str = None,
-	modified_after: str = None,
+	limit: int | None = None,
+	offset: int | None = None,
+	start_after: str | None = None,
+	modified_after: str | None = None,
 ) -> list:
 	_pos_profile = json.loads(pos_profile)
 	ttl = _pos_profile.get("server_cache_duration")
@@ -96,19 +96,19 @@ def get_customer_names(
 	@redis_cache(ttl=ttl or 1800)
 	def __get_customer_names(
 		pos_profile: str,
-		limit: int = None,
-		offset: int = None,
-		start_after: str = None,
-		modified_after: str = None,
+		limit: int | None = None,
+		offset: int | None = None,
+		start_after: str | None = None,
+		modified_after: str | None = None,
 	) -> list:
 		return _get_customer_names(pos_profile, limit, offset, start_after, modified_after)
 
 	def _get_customer_names(
 		pos_profile: str,
-		limit: int = None,
-		offset: int = None,
-		start_after: str = None,
-		modified_after: str = None,
+		limit: int | None = None,
+		offset: int | None = None,
+		start_after: str | None = None,
+		modified_after: str | None = None,
 	) -> list:
 		pos_profile = json.loads(pos_profile)
 		filters = {"disabled": 0}
@@ -161,7 +161,7 @@ def get_customers_count(pos_profile: str) -> int:
 
 
 @frappe.whitelist()
-def get_customer_info(customer: str = None) -> dict:
+def get_customer_info(customer: str | None = None) -> dict:
 	customer = cstr(customer or "").strip()
 	if not customer:
 		return {}
@@ -245,20 +245,20 @@ def create_customer(
 	customer_name: str,
 	company: str,
 	pos_profile_doc: str,
-	customer_id: str = None,
-	tax_id: str = None,
-	mobile_no: str = None,
-	email_id: str = None,
-	referral_code: str = None,
-	birthday: str = None,
-	customer_group: str = None,
-	territory: str = None,
-	customer_type: str = None,
-	gender: str = None,
+	customer_id: str | None = None,
+	tax_id: str | None = None,
+	mobile_no: str | None = None,
+	email_id: str | None = None,
+	referral_code: str | None = None,
+	birthday: str | None = None,
+	customer_group: str | None = None,
+	territory: str | None = None,
+	customer_type: str | None = None,
+	gender: str | None = None,
 	method: str = "create",
-	address_line1: str = None,
-	city: str = None,
-	country: str = None,
+	address_line1: str | None = None,
+	city: str | None = None,
+	country: str | None = None,
 ):
 	pos_profile = json.loads(pos_profile_doc)
 
@@ -373,7 +373,7 @@ def create_customer(
 
 
 @frappe.whitelist()
-def set_customer_info(customer: str, fieldname: str, value: str = None):
+def set_customer_info(customer: str, fieldname: str, value: str | None = None):
 	if fieldname == "loyalty_program":
 		frappe.db.set_value("Customer", customer, "loyalty_program", value)
 

@@ -104,7 +104,7 @@ def _create_cash_movement(payload: dict, movement_type: str):
 
 
 @frappe.whitelist()
-def get_cash_movement_context(pos_profile: str = None, pos_opening_shift: str = None):
+def get_cash_movement_context(pos_profile: str | None = None, pos_opening_shift: str | None = None):
 	profile_name = pos_profile
 	if not profile_name and pos_opening_shift:
 		profile_name = frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "pos_profile")
@@ -155,9 +155,9 @@ def create_cash_deposit(payload: dict):
 @frappe.whitelist()
 def get_shift_cash_movements(
 	pos_opening_shift: str,
-	movement_type: str = None,
+	movement_type: str | None = None,
 	status: str = "submitted",
-	search_text: str = None,
+	search_text: str | None = None,
 	limit_start: int = 0,
 	limit_page_length: int = 50,
 ):
@@ -214,7 +214,7 @@ def delete_cash_movement(name: str):
 
 
 @frappe.whitelist()
-def duplicate_cash_movement(name: str, posting_date: str = None):
+def duplicate_cash_movement(name: str, posting_date: str | None = None):
 	movement_doc = frappe.get_doc("XPOS Cash Movement", name)
 	ensure_owner_or_manager(movement_doc)
 	if movement_doc.docstatus not in (1, 2):

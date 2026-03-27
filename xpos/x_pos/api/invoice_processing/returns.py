@@ -16,18 +16,18 @@ from xpos.x_pos.api.utils import log_perf_event
 
 @frappe.whitelist()
 def search_invoices_for_return(
-	invoice_name: str = None,
-	company: str = None,
-	customer_name: str = None,
-	customer_id: str = None,
-	mobile_no: str = None,
-	tax_id: str = None,
-	from_date: str = None,
-	to_date: str = None,
-	min_amount: float = None,
-	max_amount: float = None,
+	invoice_name: str | None = None,
+	company: str | None = None,
+	customer_name: str | None = None,
+	customer_id: str | None = None,
+	mobile_no: str | None = None,
+	tax_id: str | None = None,
+	from_date: str | None = None,
+	to_date: str | None = None,
+	min_amount: float | None = None,
+	max_amount: float | None = None,
 	page: int = 1,
-	pos_profile: str = None,
+	pos_profile: str | None = None,
 	doctype: str = "Sales Invoice",
 ):
 	"""
@@ -188,7 +188,7 @@ def search_invoices_for_return(
 
 
 @frappe.whitelist()
-def get_invoice_for_return(invoice_name: str, pos_profile: str = None, doctype: str = "Sales Invoice"):
+def get_invoice_for_return(invoice_name: str, pos_profile: str | None = None, doctype: str = "Sales Invoice"):
 	"""Return one invoice with returnable item quantities after past returns."""
 	started_at = time.perf_counter()
 	enforce_return_validity, _ = _get_return_validity_settings(pos_profile)

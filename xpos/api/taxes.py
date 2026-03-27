@@ -10,7 +10,7 @@ from frappe.utils import cstr, flt, getdate, nowdate
 
 
 @frappe.whitelist()
-def get_item_tax_template(item_code: str, company: str, tax_category: str = None):
+def get_item_tax_template(item_code: str, company: str, tax_category: str | None = None):
 	"""Resolve the applicable Item Tax Template for an item.
 
 	Follows ERPNext's resolution order:
@@ -115,7 +115,7 @@ def _resolve_tax_template(taxes: list, company: str, tax_category: str, today: s
 
 
 @frappe.whitelist()
-def get_item_tax_templates_bulk(items_json: str, company: str, tax_category: str = None) -> dict:
+def get_item_tax_templates_bulk(items_json: str, company: str, tax_category: str | None = None) -> dict:
 	"""Resolve Item Tax Templates for multiple items in a single call.
 
 	Args:

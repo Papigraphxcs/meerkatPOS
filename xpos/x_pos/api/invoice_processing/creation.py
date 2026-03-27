@@ -572,7 +572,7 @@ def submit_in_background_job(*args, **kwargs):
 
 
 @frappe.whitelist()
-def validate_cart_items(items: list, pos_profile: str = None):
+def validate_cart_items(items: list, pos_profile: str | None = None):
 	"""Validate cart items for available stock.
 
 	Returns a list of item dicts where requested quantity exceeds availability.

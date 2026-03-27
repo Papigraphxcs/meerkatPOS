@@ -139,7 +139,7 @@ def get_item_groups():
 
 
 @frappe.whitelist()
-def search_barcode(barcode: str, pos_profile: str = None):
+def search_barcode(barcode: str, pos_profile: str | None = None):
 	"""Search item by barcode.
 
 	Also supports scale barcodes (weighted items) if configured on the POS Profile.
@@ -221,9 +221,9 @@ def search_barcode(barcode: str, pos_profile: str = None):
 def get_item_detail(
 	item_code: str,
 	pos_profile: str,
-	warehouse: str = None,
-	price_list: str = None,
-	customer: str = None,
+	warehouse: str | None = None,
+	price_list: str | None = None,
+	customer: str | None = None,
 ):
 	"""Get detailed info for a single item including batches, serial nos, UOMs, and pricing."""
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
@@ -304,8 +304,8 @@ def get_item_detail(
 def get_item_variants(
 	pos_profile: str,
 	parent_item_code: str,
-	price_list: str = None,
-	customer: str = None,
+	price_list: str | None = None,
+	customer: str | None = None,
 ):
 	"""Return all variants of a template item with attribute metadata."""
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
@@ -394,7 +394,7 @@ def get_item_attributes(item_code: str):
 
 
 @frappe.whitelist()
-def get_stock_availability(items: str | list, warehouse: str = None):
+def get_stock_availability(items: str | list, warehouse: str | None = None):
 	"""Bulk-fetch stock for multiple items.
 
 	Accepts two calling conventions:
@@ -436,7 +436,7 @@ def get_stock_availability(items: str | list, warehouse: str = None):
 
 
 @frappe.whitelist()
-def update_price_list_rate(item_code: str, price_list: str, rate: float, uom: str = None):
+def update_price_list_rate(item_code: str, price_list: str, rate: float, uom: str | None = None):
 	"""Create or update an Item Price record."""
 	filters = {"item_code": item_code, "price_list": price_list, "selling": 1}
 	if uom:
@@ -495,7 +495,7 @@ def get_stock_qty(item_code: str, warehouse: str):
 	return flt(rows[0].actual_qty) if rows else 0
 
 
-def _get_batch_data(item_code: str, warehouse: str, today: str = None):
+def _get_batch_data(item_code: str, warehouse: str, today: str | None = None):
 	"""Fetch available (non-expired) batches for an item in warehouse."""
 	today = today or nowdate()
 	batches = frappe.db.sql(

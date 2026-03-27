@@ -3,7 +3,7 @@ from frappe import _
 
 
 @frappe.whitelist()
-def get_last_invoice_rates(customer: str, item_codes: list, company: str = None):
+def get_last_invoice_rates(customer: str, item_codes: list, company: str | None = None):
 	"""
 	Get the last invoice rate for a list of items for a specific customer.
 	"""

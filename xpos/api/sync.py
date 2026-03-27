@@ -26,8 +26,8 @@ ALLOWED_CHILD_DOCTYPES = {
 @frappe.whitelist()
 def get_child_table_data(
 	doctype: str,
-	fields: str | list = None,
-	filters: str | dict = None,
+	fields: str | list | None = None,
+	filters: str | dict | None = None,
 	order_by: str = "modified asc",
 	limit_start: int = 0,
 	limit_page_length: int = 500,
@@ -80,8 +80,8 @@ def get_child_table_data(
 
 @frappe.whitelist()
 def get_item_prices(
-	fields: str | list = None,
-	filters: str | dict = None,
+	fields: str | list | None = None,
+	filters: str | dict | None = None,
 	order_by: str = "modified asc",
 	limit_start: int = 0,
 	limit_page_length: int = 500,

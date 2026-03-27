@@ -26,7 +26,7 @@ def get_cashiers(
 
 
 @frappe.whitelist()
-def get_pos_invoices(pos_opening_shift: str, doctype: str = None):
+def get_pos_invoices(pos_opening_shift: str, doctype: str | None = None):
 	if not pos_opening_shift:
 		return []
 

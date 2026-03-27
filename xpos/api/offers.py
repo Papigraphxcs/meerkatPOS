@@ -135,8 +135,8 @@ def get_delivery_charges(pos_profile: str):
 def get_applicable_delivery_charges(
 	company: str,
 	pos_profile: str,
-	customer: str = None,
-	shipping_address_name: str = None,
+	customer: str | None = None,
+	shipping_address_name: str | None = None,
 ):
 	"""Returns applicable delivery charges"""
 	try:

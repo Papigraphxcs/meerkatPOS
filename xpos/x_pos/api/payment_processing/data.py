@@ -439,9 +439,9 @@ def get_available_pos_profiles(company: str, currency: str):
 def get_unreconciled_entries(
 	customer: str,
 	company: str,
-	currency: str = None,
-	pos_profile: str = None,
-	mode_of_payment: str = None,
+	currency: str | None = None,
+	pos_profile: str | None = None,
+	mode_of_payment: str | None = None,
 	include_all_currencies: bool = False,
 ):
 	return {
