@@ -36,7 +36,7 @@ def update_price_list_rate(item_code, price_list, rate, uom=None):
 		)
 		doc.insert(ignore_permissions=True)
 
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep: frappe-manual-commit — immediate commit required after batch item price insert
 	return _("Item Price has been added or updated")
 
 

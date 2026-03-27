@@ -84,7 +84,7 @@ def create_direct_journal_entry(
 
 		if not bank_account:
 			frappe.throw(
-				"Could not determine bank/cash account for payment. Please set default cash account for company."
+				_("Could not determine bank/cash account for payment. Please set default cash account for company.")
 			)
 
 		frappe.log_error(f"Final bank/cash account: {bank_account}", "Direct JE Debug")

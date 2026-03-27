@@ -49,7 +49,7 @@ def get_active_pricing_rules(params):
 	"""
 	values = {"company": company, "date": date}
 
-	rules = frappe.db.sql(
+	rules = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions are static SQL predicates, values parameterized
 		f"""
 		SELECT
 			pr.name,

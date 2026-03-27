@@ -152,12 +152,7 @@ def get_default_warehouse(company=None):
 	if not company:
 		return None
 
-	return frappe.db.get_value(
-		"Stock Settings",
-		None,
-		"default_warehouse",
-	) or frappe.db.get_value(
-		"Company",
-		company,
-		"default_warehouse_for_sales",
-	)
+	warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+	if warehouse:
+		return warehouse
+	return frappe.db.get_value("Company", company, "default_warehouse_for_sales")

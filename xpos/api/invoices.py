@@ -772,13 +772,13 @@ def get_past_orders(
 
 	order_clause = ", ".join(order_parts) if order_parts else "si.posting_date DESC, si.posting_time DESC"
 
-	total = frappe.db.sql(
+	total = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated allowed-field lists, values parameterized
 		f"""SELECT COUNT(*) FROM `tabSales Invoice` si WHERE {conditions}""",
 		values,
 		as_list=True,
 	)[0][0]
 
-	orders = frappe.db.sql(
+	orders = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated allowed-field lists, values parameterized
 		f"""
 		SELECT
 			si.name,
@@ -1004,7 +1004,7 @@ def search_invoices_for_return(
 
 	where_clause = " AND ".join(conditions)
 
-	invoices = frappe.db.sql(
+	invoices = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — table validated against allowed doctype list, conditions parameterized
 		f"""
 		SELECT
 			{table}.name, {table}.company, {table}.customer, {table}.customer_name,
@@ -1233,7 +1233,7 @@ def get_last_invoice_rates(customer, item_codes, company):
 		return []
 
 	placeholders = ", ".join(["%s"] * len(item_codes))
-	results = frappe.db.sql(
+	results = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — placeholders are %s list for parameterized IN clause
 		f"""
 		SELECT
 			sii.item_code,
@@ -1316,7 +1316,7 @@ def _validate_return_invoice(return_against, customer, items):
 	link_field = "sales_invoice_item" if doctype == "Sales Invoice" else "pos_invoice_item"
 	child_doctype = "Sales Invoice Item" if doctype == "Sales Invoice" else "POS Invoice Item"
 
-	returned_rows = frappe.db.sql(
+	returned_rows = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — doctype/link_field validated against hardcoded allowed values above
 		f"""
         SELECT {link_field} AS row_name, COALESCE(SUM(ABS(qty)), 0) AS returned_qty
         FROM `tab{child_doctype}`

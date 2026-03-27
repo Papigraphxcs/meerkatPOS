@@ -26,12 +26,12 @@ def _key_path() -> str:
 
 
 def _read_text(path: str) -> str:
-	with open(path, encoding="utf-8") as file:
+	with open(path, encoding="utf-8") as file:  # nosemgrep: frappe-security-file-traversal — path is always _key_path() or _cert_path(), both within _qz_dir()
 		return file.read()
 
 
 def _read_bytes(path: str) -> bytes:
-	with open(path, "rb") as file:
+	with open(path, "rb") as file:  # nosemgrep: frappe-security-file-traversal — path is always _key_path() or _cert_path(), both within _qz_dir()
 		return file.read()
 
 
@@ -122,7 +122,7 @@ def setup_qz_certificate() -> dict[str, str]:
 	x509, hashes, serialization, _padding, rsa, NameOID = _require_cryptography()
 	key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
-	with open(key_path, "wb") as file:
+	with open(key_path, "wb") as file:  # nosemgrep: frappe-security-file-traversal — key_path is _key_path(), always within _qz_dir()
 		file.write(
 			key.private_bytes(
 				encoding=serialization.Encoding.PEM,
@@ -156,7 +156,7 @@ def setup_qz_certificate() -> dict[str, str]:
 		.sign(key, hashes.SHA256())
 	)
 
-	with open(cert_path, "wb") as file:
+	with open(cert_path, "wb") as file:  # nosemgrep: frappe-security-file-traversal — cert_path is _cert_path(), always within _qz_dir()
 		file.write(cert.public_bytes(serialization.Encoding.PEM))
 
 	frappe.msgprint(

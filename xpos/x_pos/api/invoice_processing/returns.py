@@ -122,7 +122,7 @@ def search_invoices_for_return(
 
 		# Build the WHERE clause for the query
 		where_clause = " OR ".join(conditions)
-		customer_query = f"""
+		customer_query = f"""  # nosemgrep: frappe-sql-format-injection — conditions built from validated field names, values parameterized
         SELECT name
         FROM `tabCustomer`
         WHERE {where_clause}

@@ -217,7 +217,7 @@ export const useOfflineStore = defineStore("offline", () => {
                 error: invoice.error,
             });
             await loadPendingInvoices();
-            showError(__("Sync failed: ") + invoice.error);
+            showError(__("Sync failed:") + " " + invoice.error);
             return false;
         }
     }

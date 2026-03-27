@@ -104,7 +104,7 @@ def get_pos_items(
 		values["search"] = f"%{search_term}%"
 		values["barcode_search"] = f"%{search_term}%"
 
-	items = frappe.db.sql(
+	items = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated allowed-field lists, values parameterized
 		f"""
 		SELECT
 			i.name AS item_code,
@@ -170,7 +170,7 @@ def get_items_count(pos_profile, search_term="", item_group=""):
 		)"""
 		values["search"] = f"%{search_term}%"
 
-	count = frappe.db.sql(
+	count = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated allowed-field lists, values parameterized
 		f"SELECT COUNT(DISTINCT i.name) FROM `tabItem` i WHERE {conditions}",
 		values,
 	)

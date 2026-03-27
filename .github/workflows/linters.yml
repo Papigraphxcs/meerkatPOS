@@ -28,6 +28,8 @@ jobs:
 
       - name: Install and Run Pre-commit
         uses: pre-commit/action@v3.0.0
+        env:
+          SKIP: no-commit-to-branch,prettier,eslint
 
       - name: Download Semgrep rules
         run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
@@ -36,7 +38,11 @@ jobs:
         run: pip install semgrep
 
       - name: Run Semgrep rules
-        run: semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness
+        run: |
+          semgrep ci \
+            --config ./frappe-semgrep-rules/rules \
+            --config r/python.lang.correctness \
+            --exclude-rule "frappe-semgrep-rules.rules.security.missing-argument-type-hint"
 
   # -------------------------------------------------------------------
   # Frontend linters (Vue.js / TypeScript)

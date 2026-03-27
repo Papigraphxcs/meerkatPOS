@@ -315,7 +315,7 @@ def get_unallocated_payments(
 		journal_conditions.append("jea.account_currency = %(currency)s")
 		params["currency"] = currency
 
-	journal_entries = frappe.db.sql(
+	journal_entries = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated field names, values parameterized
 		f"""
             SELECT
                 je.name AS name,

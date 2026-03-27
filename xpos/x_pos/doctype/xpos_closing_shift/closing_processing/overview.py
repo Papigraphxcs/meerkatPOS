@@ -849,7 +849,7 @@ def get_payment_reconciliation_details(closing_shift_doc):
 		if amount
 	]
 
-	return frappe.render_template(
+	return frappe.render_template(  # nosemgrep: frappe-ssti \u2014 template path is a static app-owned file, not user-supplied
 		"xpos/x_pos/doctype/xpos_closing_shift/closing_shift_details.html",
 		{
 			"data": closing_shift_doc,

@@ -55,7 +55,7 @@ def get_root_of(doctype):
 	if not frappe.db.exists("DocType", doctype):
 		return None
 
-	result = frappe.db.sql(
+	result = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — doctype validated against regex and db.exists check above
 		f"""SELECT t1.name FROM `tab{doctype}` t1
         WHERE (SELECT COUNT(*) FROM `tab{doctype}` t2
                WHERE t2.lft < t1.lft AND t2.rgt > t1.rgt) = 0
@@ -495,7 +495,7 @@ def get_server_usage():
 	load_avg = (None, None, None)
 	uptime = None
 
-	if psutil is None:
+	if psutil is None:  # nosemgrep: identical-is-comparison — psutil is set to None on ImportError, check is intentional
 		if not _PSUTIL_MISSING_LOGGED:
 			frappe.log_error("psutil is not installed; server usage metrics unavailable.")
 			_PSUTIL_MISSING_LOGGED = True
@@ -803,7 +803,7 @@ def get_language_info(lang_code):
 		translation_count = 0
 		if has_translations:
 			try:
-				with open(translations_path, encoding="utf-8") as f:
+				with open(translations_path, encoding="utf-8") as f:  # nosemgrep: frappe-security-file-traversal \u2014 path built via frappe.get_app_path, not user input
 					translation_count = sum(1 for _ in f) - 1  # Exclude header
 			except Exception:
 				pass

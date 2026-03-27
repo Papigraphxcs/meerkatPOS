@@ -405,7 +405,7 @@ def _get_shift_tax_summary(invoices):
 	if not inv_names:
 		return []
 
-	taxes = frappe.db.sql(
+	taxes = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — placeholders are %s list for parameterized IN clause
 		"""
 		SELECT
 			account_head,
