@@ -29,7 +29,7 @@
 					<Loader2 class="w-5 h-5 animate-spin text-muted-foreground" />
 				</div>
 
-				<div v-else class="space-y-4 text-sm overflow-hidden max-h-[200px]">
+				<div v-else class="space-y-4 text-sm overflow-y-auto max-h-[200px]">
 					<div class="flex justify-between py-2 mr-2 border-b border-border">
 						<span class="text-muted-foreground">{{ __("Version") }}</span>
 						<span class="font-medium">{{ version }}</span>
@@ -66,18 +66,6 @@
 							{{ nodeRole === "hub" ? __("Hub") : __("Till") }}
 						</Badge>
 					</div>
-					<div v-if="pythonVersion" class="flex justify-between mr-2 py-2 border-b border-border">
-						<span class="text-muted-foreground">{{ __("Python") }}</span>
-						<span class="font-medium">{{ pythonVersion }}</span>
-					</div>
-					<div v-if="osInfo" class="flex justify-between mr-2 py-2 border-b border-border">
-						<span class="text-muted-foreground">{{ __("Server OS") }}</span>
-						<span class="font-medium">{{ osInfo }}</span>
-					</div>
-					<div v-if="siteName" class="flex justify-between mr-2 py-2 border-b border-border">
-						<span class="text-muted-foreground">{{ __("Site") }}</span>
-						<span class="font-medium">{{ siteName }}</span>
-					</div>
 					<div class="flex justify-between mr-2 py-2 border-b border-border">
 						<span class="text-muted-foreground">{{ __("Company") }}</span>
 						<span class="font-medium">{{ companyName || __("Not Set") }}</span>
@@ -85,8 +73,8 @@
 				</div>
 
 				<div class="pt-4 text-center text-xs text-muted-foreground">
-					<p>&copy; {{ currentYear }} {{ __("X POS Team") }}</p>
-					<p class="mt-1">{{ __("Built with Vue.js, Electron, and ERPNext") }}</p>
+					<p>&copy; {{ currentYear }} X POS Team and contributors</p>
+					<p class="mt-1">{{ __("Built with ❤️, using VueJS") }}</p>
 				</div>
 			</div>
 
@@ -130,9 +118,6 @@ const gitBranch = ref("");
 const gitHash = ref("");
 const frappeVersion = ref("");
 const erpnextVersion = ref("");
-const pythonVersion = ref("");
-const osInfo = ref("");
-const siteName = ref("");
 const platformInfo = ref<{ platform: string; arch: string } | null>(null);
 const nodeRole = ref<string | null>(null);
 const isLoadingInfo = ref(false);
@@ -150,9 +135,6 @@ async function fetchVersionInfo() {
 			git_branch: string;
 			git_hash: string;
 			git_date: string;
-			python_version: string;
-			os_info: string;
-			site_name: string;
 		}>("xpos.api.utilities.get_version_info");
 
 		if (info) {
@@ -161,9 +143,6 @@ async function fetchVersionInfo() {
 			gitHash.value = info.git_hash || "";
 			frappeVersion.value = info.frappe_version || "";
 			erpnextVersion.value = info.erpnext_version || "";
-			pythonVersion.value = info.python_version || "";
-			osInfo.value = info.os_info || "";
-			siteName.value = info.site_name || "";
 		}
 	} catch (e) {
 		console.warn("Could not fetch version info:", e);
