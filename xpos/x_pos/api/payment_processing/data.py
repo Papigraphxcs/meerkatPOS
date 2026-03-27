@@ -1,14 +1,18 @@
 import frappe
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_outstanding_invoices as get_erpnext_outstanding_invoices
-from erpnext.controllers.accounts_controller import get_advance_payment_entries_for_regional
+from erpnext.accounts.utils import (
+	get_outstanding_invoices as get_erpnext_outstanding_invoices,
+)
+from erpnext.controllers.accounts_controller import (
+	get_advance_payment_entries_for_regional,
+)
 from frappe import _
 from frappe.utils import cint, flt, getdate, nowdate
 
 MAX_OUTSTANDING_PAGE_LENGTH = 500
 
 
-def _coerce_text_filter(value, field_label):
+def _coerce_text_filter(value: str, field_label: str) -> str | None:
 	if value is None:
 		return None
 	if isinstance(value, (list, tuple, dict, set)):
@@ -20,7 +24,7 @@ def _coerce_text_filter(value, field_label):
 	return coerced
 
 
-def _coerce_non_negative_int(value, default=0):
+def _coerce_non_negative_int(value, default=0) -> int:
 	try:
 		parsed = cint(value)
 	except Exception:
@@ -28,7 +32,7 @@ def _coerce_non_negative_int(value, default=0):
 	return max(parsed, 0)
 
 
-def _coerce_bool(value, default=False):
+def _coerce_bool(value: str | bool | int | float | None, default=False) -> bool:
 	if value is None:
 		return default
 
@@ -56,13 +60,13 @@ def _coerce_bool(value, default=False):
 
 @frappe.whitelist()
 def get_outstanding_invoices(
-	customer=None,
-	company=None,
-	currency=None,
-	pos_profile=None,
-	include_all_currencies=False,
-	page_start=0,
-	page_length=None,
+	customer: str | None = None,
+	company: str | None = None,
+	currency: str | None = None,
+	pos_profile: str | None = None,
+	include_all_currencies: bool = False,
+	page_start: int = 0,
+	page_length: int | None = None,
 ):
 	"""
 	Fetch outstanding invoices with optional multi-currency support.
@@ -148,7 +152,7 @@ def get_outstanding_invoices(
 		normalized_rows = sorted(
 			normalized_rows,
 			key=lambda inv: (
-				getdate(inv.get("posting_date")) if inv.get("posting_date") else getdate(nowdate()),
+				(getdate(inv.get("posting_date")) if inv.get("posting_date") else getdate(nowdate())),
 				inv.get("voucher_no"),
 			),
 			reverse=True,
@@ -165,11 +169,11 @@ def get_outstanding_invoices(
 
 @frappe.whitelist()
 def get_unallocated_payments(
-	customer,
-	company,
-	currency=None,
-	mode_of_payment=None,
-	include_all_currencies=False,
+	customer: str | None = None,
+	company: str | None = None,
+	currency: str | None = None,
+	mode_of_payment: str | None = None,
+	include_all_currencies: bool = False,
 ):
 	customer = _coerce_text_filter(customer, _("Customer"))
 	company = _coerce_text_filter(company, _("Company"))
@@ -212,8 +216,6 @@ def get_unallocated_payments(
 		order_by="posting_date asc",
 	)
 
-	# Keep POSPay parity with ERPNext reconciliation tool: if strict currency
-	# filter produced no rows, fallback to all currencies for visibility.
 	if not include_all_currencies and currency and not unallocated_payment:
 		fallback_filters = dict(filters)
 		fallback_filters.pop("paid_from_account_currency", None)
@@ -237,8 +239,6 @@ def get_unallocated_payments(
 		payment["voucher_type"] = "Payment Entry"
 		payment["is_credit_note"] = 0
 
-	# ERPNext-style reconciliation fetch (includes advances linked to Sales Order,
-	# not only Payment Entries with unallocated_amount > 0).
 	condition = frappe._dict(
 		{
 			"company": company,
@@ -295,28 +295,13 @@ def get_unallocated_payments(
 		)
 		existing_keys.add(key)
 
-	journal_conditions = [
-		"je.docstatus = 1",
-		"je.company = %(company)s",
-		"jea.party_type = 'Customer'",
-		"jea.party = %(customer)s",
-		"jea.account = %(party_account)s",
-		"(jea.reference_type IS NULL OR jea.reference_type = '' OR jea.reference_type = 'Sales Order')",
-		"(jea.reference_name IS NULL OR jea.reference_name = '')",
-		"(jea.credit_in_account_currency - jea.debit_in_account_currency) > 0",
-	]
 	params = {
 		"company": company,
 		"customer": customer,
 		"party_account": party_account,
 	}
 
-	if currency and not include_all_currencies:
-		journal_conditions.append("jea.account_currency = %(currency)s")
-		params["currency"] = currency
-
-	journal_entries = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated field names, values parameterized
-		f"""
+	query = """
             SELECT
                 je.name AS name,
                 je.posting_date AS posting_date,
@@ -330,9 +315,23 @@ def get_unallocated_payments(
                 jea.is_advance AS is_advance
             FROM `tabJournal Entry` je
             INNER JOIN `tabJournal Entry Account` jea ON jea.parent = je.name
-            WHERE {' AND '.join(journal_conditions)}
+            WHERE je.docstatus = 1
+            AND je.company = %(company)s
+            AND jea.party_type = 'Customer'
+            AND jea.party = %(customer)s
+            AND jea.account = %(party_account)s
+            AND (jea.reference_type IS NULL OR jea.reference_type = '' OR jea.reference_type = 'Sales Order')
+            AND (jea.reference_name IS NULL OR jea.reference_name = '')
+            AND (jea.credit_in_account_currency - jea.debit_in_account_currency) > 0
             ORDER BY je.posting_date ASC
-        """,
+        """
+
+	if currency and not include_all_currencies:
+		query += " AND jea.account_currency = %(currency)s"
+		params["currency"] = currency
+
+	journal_entries = frappe.db.sql(
+		query,
 		params,
 		as_dict=True,
 	)
@@ -417,7 +416,7 @@ def get_unallocated_payments(
 	unallocated_payment = sorted(
 		unallocated_payment,
 		key=lambda pay: (
-			getdate(pay.get("posting_date")) if pay.get("posting_date") else getdate(nowdate()),
+			(getdate(pay.get("posting_date")) if pay.get("posting_date") else getdate(nowdate())),
 			pay.get("name"),
 		),
 	)
@@ -426,7 +425,7 @@ def get_unallocated_payments(
 
 
 @frappe.whitelist()
-def get_available_pos_profiles(company, currency):
+def get_available_pos_profiles(company: str, currency: str):
 	pos_profiles_list = frappe.get_list(
 		"POS Profile",
 		filters={"disabled": 0, "company": company, "currency": currency},
@@ -438,12 +437,12 @@ def get_available_pos_profiles(company, currency):
 
 @frappe.whitelist()
 def get_unreconciled_entries(
-	customer,
-	company,
-	currency=None,
-	pos_profile=None,
-	mode_of_payment=None,
-	include_all_currencies=False,
+	customer: str,
+	company: str,
+	currency: str = None,
+	pos_profile: str = None,
+	mode_of_payment: str = None,
+	include_all_currencies: bool = False,
 ):
 	return {
 		"invoices": get_outstanding_invoices(

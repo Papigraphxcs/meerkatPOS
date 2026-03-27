@@ -15,7 +15,7 @@ from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.utils import (
 
 
 @frappe.whitelist()
-def make_closing_shift_from_opening(opening_shift):
+def make_closing_shift_from_opening(opening_shift: dict):
 	opening_shift = json.loads(opening_shift)
 	use_pos_invoice = frappe.db.get_value(
 		"POS Profile",
@@ -190,7 +190,7 @@ def make_closing_shift_from_opening(opening_shift):
 
 
 @frappe.whitelist()
-def submit_closing_shift(closing_shift):
+def submit_closing_shift(closing_shift: dict):
 	closing_shift = json.loads(closing_shift)
 	closing_shift_doc = frappe.get_doc(closing_shift)
 	closing_shift_doc.flags.ignore_permissions = True

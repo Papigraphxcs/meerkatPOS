@@ -2,7 +2,7 @@ import json
 import time
 
 import frappe
-from frappe import _, as_json
+from frappe import _
 from frappe.utils import nowdate
 
 from xpos.x_pos.api.item_fetchers import ItemDetailAggregator, get_batches
@@ -11,7 +11,12 @@ from xpos.x_pos.api.utils import _ensure_pos_profile, log_perf_event
 
 
 @frappe.whitelist()
-def get_items_details(pos_profile, items_data, price_list=None, customer=None):
+def get_items_details(
+	pos_profile: str | dict,
+	items_data: str,
+	price_list: str | None = None,
+	customer: str | None = None,
+):
 	"""Bulk fetch item details for a list of items."""
 
 	started_at = time.perf_counter()
@@ -43,7 +48,13 @@ def get_items_details(pos_profile, items_data, price_list=None, customer=None):
 
 
 @frappe.whitelist()
-def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=None):
+def get_item_detail(
+	item: str,
+	doc: dict | None = None,
+	warehouse: str | None = None,
+	price_list: str | None = None,
+	company: str | None = None,
+):
 	from erpnext.stock.get_item_details import get_item_details
 
 	item = json.loads(item)
@@ -84,16 +95,12 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
 
 	item["selling_price_list"] = price_list
 
-	# Determine if multi-currency is enabled on the POS Profile
 	allow_multi_currency = False
 	if item.get("pos_profile"):
 		allow_multi_currency = (
 			frappe.db.get_value("POS Profile", item.get("pos_profile"), "allow_multi_currency") or 0
 		)
 
-	# Ensure conversion rate exists when price list currency differs from
-	# company currency to avoid ValidationError from ERPNext. Also provide
-	# sensible defaults when price list or currency is missing.
 	if company:
 		company_currency = frappe.db.get_value("Company", company, "default_currency")
 		price_list_currency = company_currency
@@ -123,14 +130,11 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
 			doc.plc_conversion_rate = exchange_rate
 			doc.conversion_rate = exchange_rate
 
-	# Add company and doctype to the item args for ERPNext validation
 	if company:
 		item["company"] = company
 
-	# Set doctype for ERPNext validation
 	item["doctype"] = "Sales Invoice"
 
-	# Create a proper doc structure with company for ERPNext validation
 	if not doc and company:
 		doc = frappe._dict({"doctype": "Sales Invoice", "company": company})
 
@@ -160,14 +164,12 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
 	res["serial_no_data"] = serial_no_data
 	res["allow_negative_stock"] = item_meta.get("allow_negative_stock")
 
-	# Add UOMs data directly from item document
 	uoms = frappe.get_all(
 		"UOM Conversion Detail",
 		filters={"parent": item_code},
 		fields=["uom", "conversion_factor"],
 	)
 
-	# Add stock UOM if not already in uoms list
 	stock_uom = item_meta.get("stock_uom")
 	if stock_uom:
 		stock_uom_exists = False
@@ -185,7 +187,12 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None, company=Non
 
 
 @frappe.whitelist()
-def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=None):
+def get_item_variants(
+	pos_profile: str | dict,
+	parent_item_code: str,
+	price_list: str | None = None,
+	customer: str | None = None,
+):
 	"""Return variants of an item along with attribute metadata."""
 	pos_profile, pos_profile_json = _ensure_pos_profile(pos_profile)
 	price_list = price_list or pos_profile.get("selling_price_list")
@@ -235,9 +242,6 @@ def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=N
 			item.setdefault("item_barcode", [])
 		result.append(item)
 
-	# --------------------------
-	# Build attributes meta *and* per-item attribute list
-	# --------------------------
 	attr_rows = frappe.get_all(
 		"Item Variant Attribute",
 		filters={"parent": ["in", [d["item_code"] for d in items_data]]},
@@ -258,11 +262,10 @@ def get_item_variants(pos_profile, parent_item_code, price_list=None, customer=N
 	for item in result:
 		item["item_attributes"] = item_attr_map.get(item["item_code"], [])
 
-	# Ensure attributes_meta is always a dictionary
 	return {"variants": result, "attributes_meta": attributes_meta or {}}
 
 
-def get_item_optional_attributes(item_code):
+def get_item_optional_attributes(item_code: str):
 	"""Get optional attributes for an item."""
 	return frappe.get_all(
 		"Item Variant Attribute",
@@ -272,7 +275,7 @@ def get_item_optional_attributes(item_code):
 
 
 @frappe.whitelist()
-def get_item_attributes(item_code):
+def get_item_attributes(item_code: str):
 	"""Get item attributes."""
 	return frappe.get_all(
 		"Item Attribute",

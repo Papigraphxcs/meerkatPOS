@@ -28,7 +28,7 @@ from .validation import (
 )
 
 
-def _enforce_shift_access(pos_opening_shift):
+def _enforce_shift_access(pos_opening_shift: str):
 	shift_user = frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "user")
 	if not shift_user:
 		frappe.throw(_("POS Opening Shift not found."))
@@ -36,7 +36,7 @@ def _enforce_shift_access(pos_opening_shift):
 		frappe.throw(_("You are not allowed to access this shift."))
 
 
-def _create_cash_movement(payload, movement_type):
+def _create_cash_movement(payload: dict, movement_type: str):
 	data = parse_payload(payload)
 	opening_shift_name = data.get("pos_opening_shift") or data.get("pos_opening_shift_name")
 	opening_shift = get_opening_shift(opening_shift_name)
@@ -104,7 +104,7 @@ def _create_cash_movement(payload, movement_type):
 
 
 @frappe.whitelist()
-def get_cash_movement_context(pos_profile=None, pos_opening_shift=None):
+def get_cash_movement_context(pos_profile: str = None, pos_opening_shift: str = None):
 	profile_name = pos_profile
 	if not profile_name and pos_opening_shift:
 		profile_name = frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "pos_profile")
@@ -143,23 +143,23 @@ def get_cash_movement_context(pos_profile=None, pos_opening_shift=None):
 
 
 @frappe.whitelist()
-def create_pos_expense(payload):
+def create_pos_expense(payload: dict):
 	return _create_cash_movement(payload, "Expense")
 
 
 @frappe.whitelist()
-def create_cash_deposit(payload):
+def create_cash_deposit(payload: dict):
 	return _create_cash_movement(payload, "Deposit")
 
 
 @frappe.whitelist()
 def get_shift_cash_movements(
-	pos_opening_shift,
-	movement_type=None,
-	status="submitted",
-	search_text=None,
-	limit_start=0,
-	limit_page_length=50,
+	pos_opening_shift: str,
+	movement_type: str = None,
+	status: str = "submitted",
+	search_text: str = None,
+	limit_start: int = 0,
+	limit_page_length: int = 50,
 ):
 	_enforce_shift_access(pos_opening_shift)
 	return get_shift_movements(
@@ -173,7 +173,7 @@ def get_shift_cash_movements(
 
 
 @frappe.whitelist()
-def get_submitted_expenses(pos_opening_shift, limit_start=0, limit_page_length=50):
+def get_submitted_expenses(pos_opening_shift: str, limit_start: int = 0, limit_page_length: int = 50):
 	_enforce_shift_access(pos_opening_shift)
 	return query_submitted_expenses(
 		pos_opening_shift=pos_opening_shift,
@@ -183,7 +183,7 @@ def get_submitted_expenses(pos_opening_shift, limit_start=0, limit_page_length=5
 
 
 @frappe.whitelist()
-def cancel_cash_movement(name):
+def cancel_cash_movement(name: str):
 	movement_doc = frappe.get_doc("XPOS Cash Movement", name)
 	ensure_owner_or_manager(movement_doc)
 	if movement_doc.docstatus != 1:
@@ -199,7 +199,7 @@ def cancel_cash_movement(name):
 
 
 @frappe.whitelist()
-def delete_cash_movement(name):
+def delete_cash_movement(name: str):
 	movement_doc = frappe.get_doc("XPOS Cash Movement", name)
 	ensure_owner_or_manager(movement_doc)
 	if movement_doc.docstatus != 2:
@@ -214,7 +214,7 @@ def delete_cash_movement(name):
 
 
 @frappe.whitelist()
-def duplicate_cash_movement(name, posting_date=None):
+def duplicate_cash_movement(name: str, posting_date: str = None):
 	movement_doc = frappe.get_doc("XPOS Cash Movement", name)
 	ensure_owner_or_manager(movement_doc)
 	if movement_doc.docstatus not in (1, 2):

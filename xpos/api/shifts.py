@@ -4,11 +4,11 @@
 import json
 
 import frappe
-from frappe import _
+from frappe import Any, _
 from frappe.utils import cint, flt, now_datetime, nowdate
 
 
-def _row_value(row, key, default=None):
+def _row_value(row: dict | object, key: str, default: Any | None = None):
 	if isinstance(row, dict):
 		return row.get(key, default)
 	return getattr(row, key, default)
@@ -27,10 +27,10 @@ def get_opening_data():
 		SELECT DISTINCT p.name, p.company, p.currency, p.warehouse
 		FROM `tabPOS Profile` p
 		INNER JOIN `tabPOS Profile User` u ON u.parent = p.name
-		WHERE p.disabled = 0 AND u.user = %s
+		WHERE p.disabled = 0 AND u.user = %(user)s
 		ORDER BY p.name
 		""",
-		frappe.session.user,
+		{"user": frappe.session.user},
 		as_dict=True,
 	)
 
@@ -63,7 +63,7 @@ def get_opening_data():
 
 
 @frappe.whitelist()
-def open_shift(pos_profile, company, balance_details):
+def open_shift(pos_profile: str, company: str, balance_details: str | list[dict] | None = None):
 	"""Create and submit a POS Opening Shift."""
 
 	balance_details = json.loads(balance_details) if isinstance(balance_details, str) else balance_details
@@ -94,7 +94,7 @@ def open_shift(pos_profile, company, balance_details):
 
 
 @frappe.whitelist()
-def check_open_shift(user=None):
+def check_open_shift(user: str | None = None):
 	"""Check if the current user has an open POS shift."""
 
 	user = user or frappe.session.user
@@ -127,7 +127,7 @@ def check_open_shift(user=None):
 
 
 @frappe.whitelist()
-def close_shift(opening_shift, closing_details):
+def close_shift(opening_shift: str, closing_details: str | list[dict] | None):
 	"""Create a XPOS Closing Shift and close the opening shift.
 
 	- Aggregates invoices by POS opening shift reference
@@ -251,7 +251,7 @@ def close_shift(opening_shift, closing_details):
 
 
 @frappe.whitelist()
-def get_shift_summary(opening_shift):
+def get_shift_summary(opening_shift: str):
 	"""Get summary of the current shift for closing.
 
 	Enhanced version with tax breakdown and return info.
@@ -346,7 +346,7 @@ def get_shift_summary(opening_shift):
 	}
 
 
-def _enrich_shift_data(data, pos_profile):
+def _enrich_shift_data(data: dict, pos_profile: str):
 	"""Add profile, company, settings, and tax template data to shift response."""
 	try:
 		profile = frappe.get_cached_doc("POS Profile", pos_profile)
@@ -396,7 +396,7 @@ def _enrich_shift_data(data, pos_profile):
 	}
 
 
-def _get_shift_tax_summary(invoices):
+def _get_shift_tax_summary(invoices: list) -> list:
 	"""Aggregate tax info across all shift invoices."""
 	if not invoices:
 		return []
@@ -405,27 +405,19 @@ def _get_shift_tax_summary(invoices):
 	if not inv_names:
 		return []
 
-	taxes = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — placeholders are %s list for parameterized IN clause
-		"""
-		SELECT
-			account_head,
-			rate,
-			SUM(tax_amount) AS amount
-		FROM `tabSales Taxes and Charges`
-		WHERE parent IN ({placeholders})
-			AND parenttype = 'Sales Invoice'
-		GROUP BY account_head, rate
-		ORDER BY account_head
-		""".format(placeholders=", ".join(["%s"] * len(inv_names))),
-		inv_names,
-		as_dict=True,
+	taxes = frappe.get_all(
+		"Sales Taxes and Charges",
+		filters={"parent": ["in", inv_names], "parenttype": "Sales Invoice"},
+		fields=["account_head", "rate", "SUM(tax_amount) AS amount"],
+		group_by="account_head, rate",
+		order_by="account_head",
 	)
 
 	return taxes
 
 
 @frappe.whitelist()
-def create_opening_shift(data, local_id=None):
+def create_opening_shift(data: str | dict, local_id: str | None = None) -> dict:
 	"""Create XPOS Opening Shift from desktop app sync.
 
 	Used by the sync engine to push locally-created shifts to the server.
@@ -439,7 +431,6 @@ def create_opening_shift(data, local_id=None):
 	"""
 	data = json.loads(data) if isinstance(data, str) else data
 
-	# Check for duplicate via local_id (xpos_local_id custom field)
 	if local_id:
 		existing = frappe.db.get_value("XPOS Opening Shift", {"xpos_local_id": local_id}, "name")
 		if existing:
@@ -475,7 +466,7 @@ def create_opening_shift(data, local_id=None):
 
 
 @frappe.whitelist()
-def create_closing_shift(data, local_id=None):
+def create_closing_shift(data: str | dict, local_id: str | None = None) -> dict:
 	"""Create XPOS Closing Shift from desktop app sync.
 
 	Used by the sync engine to push locally-created closing shifts to the server.
@@ -489,18 +480,15 @@ def create_closing_shift(data, local_id=None):
 	"""
 	data = json.loads(data) if isinstance(data, str) else data
 
-	# Check for duplicate via local_id (xpos_local_id custom field)
 	if local_id:
 		existing = frappe.db.get_value("XPOS Closing Shift", {"xpos_local_id": local_id}, "name")
 		if existing:
 			return {"name": existing, "duplicate": True}
 
-	# Get the opening shift server name
 	opening_shift = data.get("pos_opening_shift")
 	if not opening_shift:
 		frappe.throw(_("Opening Shift is required"))
 
-	# Try to get opening shift doc
 	try:
 		opening = frappe.get_doc("XPOS Opening Shift", opening_shift)
 	except frappe.DoesNotExistError:
@@ -524,7 +512,6 @@ def create_closing_shift(data, local_id=None):
 		}
 	)
 
-	# Add payment reconciliation details
 	payment_details = data.get("payment_reconciliation") or data.get("closing_details") or []
 	for detail in payment_details:
 		closing_shift.append(

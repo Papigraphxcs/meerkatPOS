@@ -378,9 +378,9 @@ def get_translation_dict(lang: str) -> dict:
 			"""
 	        SELECT source_text, translated_text
 	        FROM `tabTranslation`
-	        WHERE language = %s
+	        WHERE language = %(lang)s
 	    """,
-			(lang,),
+			{"lang": lang},
 		)
 		for source, target in rows:
 			translations[source] = target
@@ -412,7 +412,7 @@ def get_database_usage():
 		db_version = frappe.db.sql("SELECT VERSION();")[0][0]
 		if db_type == "postgres":
 			db_name = frappe.conf.get("db_name") or frappe.db.get_database_name()
-			db_size = frappe.db.sql("SELECT pg_database_size(%s)", (db_name,))[0][0]
+			db_size = frappe.db.sql("SELECT pg_database_size(%(db_name)s)", {"db_name": db_name})[0][0]
 			db_size = int(db_size)
 			db_connections = frappe.db.sql("SELECT count(*) FROM pg_stat_activity;")[0][0]
 			db_slow_queries = frappe.db.sql(
@@ -435,8 +435,8 @@ def get_database_usage():
 		elif db_type == "mariadb" or db_type == "mysql":
 			db_name = frappe.conf.get("db_name") or frappe.db.get_database_name()
 			db_size = frappe.db.sql(
-				"SELECT SUM(data_length + index_length) FROM information_schema.tables WHERE table_schema = %s",
-				(db_name,),
+				"SELECT SUM(data_length + index_length) FROM information_schema.tables WHERE table_schema = %(db_name)s",
+				{"db_name": db_name},
 			)[0][0]
 			db_size = int(db_size)
 			db_connections = frappe.db.sql("SHOW STATUS WHERE variable_name = 'Threads_connected';")[0][1]
@@ -444,21 +444,21 @@ def get_database_usage():
 			db_slow_queries = frappe.db.sql("SHOW GLOBAL STATUS WHERE variable_name = 'Slow_queries';")[0][1]
 			db_slow_queries = int(db_slow_queries)
 			db_table_count = frappe.db.sql(
-				"SELECT count(*) FROM information_schema.tables WHERE table_schema = %s",
-				(db_name,),
+				"SELECT count(*) FROM information_schema.tables WHERE table_schema = %(db_name)s",
+				{"db_name": db_name},
 			)[0][0]
 			db_total_rows = frappe.db.sql(
-				"SELECT SUM(TABLE_ROWS) FROM information_schema.tables WHERE table_schema = %s",
-				(db_name,),
+				"SELECT SUM(TABLE_ROWS) FROM information_schema.tables WHERE table_schema = %(db_name)s",
+				{"db_name": db_name},
 			)[0][0]
 			db_top_tables = frappe.db.sql(
 				"""
                 SELECT table_name, (data_length + index_length) AS size
                 FROM information_schema.tables
-                WHERE table_schema = %s
+                WHERE table_schema = %(db_name)s
                 ORDER BY size DESC LIMIT 3
             """,
-				(db_name,),
+				{"db_name": db_name},
 			)
 			db_top_tables = [{"name": t[0], "size": int(t[1])} for t in db_top_tables]
 	except Exception as db_exc:
@@ -495,7 +495,9 @@ def get_server_usage():
 	load_avg = (None, None, None)
 	uptime = None
 
-	if psutil is None:  # nosemgrep: identical-is-comparison — psutil is set to None on ImportError, check is intentional
+	if (
+		psutil is None
+	):  # nosemgrep: identical-is-comparison — psutil is set to None on ImportError, check is intentional
 		if not _PSUTIL_MISSING_LOGGED:
 			frappe.log_error("psutil is not installed; server usage metrics unavailable.")
 			_PSUTIL_MISSING_LOGGED = True
@@ -735,7 +737,7 @@ def get_current_user_language():
 
 
 @frappe.whitelist()
-def set_current_user_language(lang_code):
+def set_current_user_language(lang_code: str):
 	"""Set language with optimized database operations."""
 	try:
 		user = frappe.session.user
@@ -775,7 +777,7 @@ def set_current_user_language(lang_code):
 		return {"success": False, "message": "Failed to set language"}
 
 
-def _validate_language_code(lang_code):
+def _validate_language_code(lang_code: str) -> tuple[bool, str | None]:
 	"""Validate a language code string. Returns (is_valid, error_message)."""
 	if not lang_code or not isinstance(lang_code, str):
 		return False, _("Invalid language code")
@@ -786,7 +788,7 @@ def _validate_language_code(lang_code):
 
 
 @frappe.whitelist()
-def get_language_info(lang_code):
+def get_language_info(lang_code: str):
 	"""Get detailed information about a specific language."""
 	try:
 		is_valid, error_msg = _validate_language_code(lang_code)
@@ -803,7 +805,9 @@ def get_language_info(lang_code):
 		translation_count = 0
 		if has_translations:
 			try:
-				with open(translations_path, encoding="utf-8") as f:  # nosemgrep: frappe-security-file-traversal \u2014 path built via frappe.get_app_path, not user input
+				with (
+					open(translations_path, encoding="utf-8") as f
+				):  # nosemgrep: frappe-security-file-traversal \u2014 path built via frappe.get_app_path, not user input
 					translation_count = sum(1 for _ in f) - 1  # Exclude header
 			except Exception:
 				pass
@@ -821,7 +825,7 @@ def get_language_info(lang_code):
 
 
 @frappe.whitelist()
-def log_client_error(payload=None):
+def log_client_error(payload: str | dict | None = None):
 	"""Capture frontend runtime errors in server logs for debugging."""
 	try:
 		if isinstance(payload, str):

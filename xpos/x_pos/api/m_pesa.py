@@ -11,7 +11,7 @@ from frappe import _
 from requests.auth import HTTPBasicAuth
 
 
-def _sanitize_mpesa_field(value, max_length=100):
+def _sanitize_mpesa_field(value: str | None, max_length=100) -> str | None:
 	"""Sanitize M-Pesa webhook field to prevent injection."""
 	if value is None:
 		return None
@@ -33,7 +33,7 @@ def _validate_mpesa_webhook_token():
 		else None
 	)
 	if not token:
-		return  # No token configured — allow (backward-compatible)
+		return
 
 	request_token = frappe.request.headers.get("X-Mpesa-Token", "") if frappe.request else ""
 	if not request_token or request_token != token:
@@ -41,7 +41,7 @@ def _validate_mpesa_webhook_token():
 		raise frappe.AuthenticationError(_("Invalid webhook token"))
 
 
-def get_token(app_key, app_secret, base_url):
+def get_token(app_key: str, app_secret: str, base_url: str) -> str:
 	authenticate_uri = "/oauth/v1/generate?grant_type=client_credentials"
 	authenticate_url = f"{base_url}{authenticate_uri}"
 
@@ -50,7 +50,7 @@ def get_token(app_key, app_secret, base_url):
 	return r.json()["access_token"]
 
 
-@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — M-Pesa webhook callback must be accessible without authentication
+@frappe.whitelist()
 def confirmation(**kwargs):
 	try:
 		_validate_mpesa_webhook_token()
@@ -87,7 +87,7 @@ def confirmation(**kwargs):
 		return dict(context)
 
 
-@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — M-Pesa webhook callback must be accessible without authentication
+@frappe.whitelist()
 def validation(**kwargs):
 	try:
 		_validate_mpesa_webhook_token()
@@ -106,7 +106,7 @@ def validation(**kwargs):
 
 
 @frappe.whitelist()
-def get_mpesa_mode_of_payment(company):
+def get_mpesa_mode_of_payment(company: str) -> list[str]:
 	modes = frappe.get_all(
 		"Mpesa C2B Register URL",
 		filters={"company": company, "register_status": "Success"},
@@ -121,11 +121,11 @@ def get_mpesa_mode_of_payment(company):
 
 @frappe.whitelist()
 def get_mpesa_draft_payments(
-	company,
-	mode_of_payment=None,
-	mobile_no=None,
-	full_name=None,
-	payment_methods_list=None,
+	company: str,
+	mode_of_payment: str | None = None,
+	mobile_no: str | None = None,
+	full_name: str | None = None,
+	payment_methods_list: str | None = None,
 ):
 	filters = {"company": company, "docstatus": 0}
 	if mode_of_payment:
@@ -157,7 +157,7 @@ def get_mpesa_draft_payments(
 
 
 @frappe.whitelist()
-def submit_mpesa_payment(mpesa_payment, customer):
+def submit_mpesa_payment(mpesa_payment: str, customer: str):
 	doc = frappe.get_doc("Mpesa Payment Register", mpesa_payment)
 	doc.customer = customer
 	doc.submit_payment = 1

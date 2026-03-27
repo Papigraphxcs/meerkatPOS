@@ -1,7 +1,9 @@
 import json
 
 import frappe
-from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import reconcile_dr_cr_note
+from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
+	reconcile_dr_cr_note,
+)
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import reconcile_against_document
 from frappe import _
@@ -13,19 +15,17 @@ from xpos.x_pos.api.payment_processing.data import get_outstanding_invoices
 
 
 @frappe.whitelist()
-def process_pos_payment(payload):
+def process_pos_payment(payload: str):
 	data = json.loads(payload)
 	data = frappe._dict(data)
 	if not data.pos_profile.get("use_pos_payments"):
 		frappe.throw(_("X POS Payments is not enabled for this POS Profile"))
 
-	# Log short summary only to avoid truncation
 	frappe.log_error(
 		f"Payment request from {data.customer} for {data.total_payment_methods} amount with {len(data.selected_invoices)} invoices",
 		"POS Payment Debug",
 	)
 
-	# validate data
 	if not data.customer:
 		frappe.throw(_("Customer is required"))
 	if not data.company:
@@ -46,7 +46,6 @@ def process_pos_payment(payload):
 	allow_mpesa_reconcile_payments = data.pos_profile.get("allow_mpesa_reconcile_payments")
 	today = nowdate()
 
-	# prepare invoice list once so allocations can update remaining amounts
 	remaining_invoices = []
 
 	def add_remaining_invoices(invoices):
@@ -99,7 +98,6 @@ def process_pos_payment(payload):
 	reconciled_payments = []
 	errors = []
 
-	# first process mpesa payments
 	if (
 		allow_mpesa_reconcile_payments
 		and len(data.selected_mpesa_payments) > 0
@@ -113,7 +111,6 @@ def process_pos_payment(payload):
 			except Exception as e:
 				errors.append(str(e))
 
-	# then reconcile selected payments with invoices
 	if allow_reconcile_payments and len(data.selected_payments) > 0 and data.total_selected_payments > 0:
 		for pay in data.selected_payments:
 			payment_name = pay.get("name")
@@ -209,7 +206,10 @@ def process_pos_payment(payload):
 						errors.append(
 							_("Credit note {0} still has an unapplied balance of {1}").format(
 								payment_name,
-								fmt_money(remaining_credit, currency=credit_note_doc.currency or currency),
+								fmt_money(
+									remaining_credit,
+									currency=credit_note_doc.currency or currency,
+								),
 							)
 						)
 
@@ -307,7 +307,6 @@ def process_pos_payment(payload):
 					"POS Payment Error",
 				)
 
-	# then process the new payments and allocate invoices
 	if allow_make_new_payments and len(data.payment_methods) > 0 and data.total_payment_methods > 0:
 		for payment_method in data.payment_methods:
 			try:
@@ -366,8 +365,6 @@ def process_pos_payment(payload):
 				errors.append(str(e))
 				frappe.log_error(f"Error creating payment entry: {e!s}", "POS Payment Error")
 
-	# Old allocation logic disabled
-	# then show the results
 	msg = ""
 	if len(new_payments_entry) > 0:
 		msg += "<h4>New Payments</h4>"

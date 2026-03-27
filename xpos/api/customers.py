@@ -8,14 +8,14 @@ from frappe import _
 from frappe.utils import cint, flt
 
 
-def _row_value(row, key, default=None):
+def _row_value(row: dict | object, key: str, default=None):
 	if isinstance(row, dict):
 		return row.get(key, default)
 	return getattr(row, key, default)
 
 
 @frappe.whitelist()
-def get_customers(search_term="", limit=20, pos_profile=None):
+def get_customers(search_term: str = "", limit: int = 20, pos_profile: str = None):
 	"""Search customers by name, mobile, email, or tax ID.
 
 	If a POS Profile is provided, respects customer group restrictions.
@@ -82,7 +82,7 @@ def get_customers(search_term="", limit=20, pos_profile=None):
 
 
 @frappe.whitelist()
-def get_customer_info(customer):
+def get_customer_info(customer: str):
 	"""
 	Get detailed customer information including loyalty, addresses, balance, credit, and discount.
 	"""
@@ -198,21 +198,21 @@ def get_customer_info(customer):
 
 @frappe.whitelist()
 def create_customer(
-	customer_name,
-	mobile_no="",
-	email_id="",
-	customer_group=None,
-	territory=None,
-	customer_type="Individual",
-	gender=None,
-	tax_id=None,
-	referral_code=None,
-	birthday=None,
-	company=None,
-	pos_profile=None,
-	address_line1=None,
-	city=None,
-	country=None,
+	customer_name: str,
+	mobile_no: str = "",
+	email_id: str = "",
+	customer_group: str = None,
+	territory: str = None,
+	customer_type: str = "Individual",
+	gender: str = None,
+	tax_id: str = None,
+	referral_code: str = None,
+	birthday: str = None,
+	company: str = None,
+	pos_profile: str = None,
+	address_line1: str = None,
+	city: str = None,
+	country: str = None,
 ):
 	"""
 	Create a new customer with optional address.
@@ -281,7 +281,7 @@ def create_customer(
 
 
 @frappe.whitelist()
-def update_customer(customer, data):
+def update_customer(customer: str, data: str | dict):
 	"""
 	Update an existing customer.
 	"""
@@ -324,7 +324,7 @@ def update_customer(customer, data):
 
 
 @frappe.whitelist()
-def get_customer_addresses(customer):
+def get_customer_addresses(customer: str):
 	"""
 	List all addresses for a customer.
 	"""
@@ -385,7 +385,7 @@ def get_customer_addresses(customer):
 
 
 @frappe.whitelist()  # nosemgrep: overusing-args — args is a JSON-encoded dict from the client, standard Frappe pattern
-def make_address(args):
+def make_address(args: str | dict):
 	"""
 	Create a new address linked to a customer.
 	"""
@@ -431,7 +431,7 @@ def make_address(args):
 
 
 @frappe.whitelist()
-def get_customer_credit(customer, company):
+def get_customer_credit(customer: str, company: str):
 	"""
 	Return all available credit (outstanding returns + unallocated advances) for a customer.
 	"""
@@ -497,15 +497,15 @@ def get_sales_person_names():
 	)
 
 
-def get_customer_balance(customer):
+def get_customer_balance(customer: str):
 	"""Get outstanding balance for a customer."""
 	balance = frappe.db.sql(
 		"""
 		SELECT SUM(debit - credit) AS balance
 		FROM `tabGL Entry`
-		WHERE party_type = 'Customer' AND party = %s AND docstatus = 1
+		WHERE party_type = 'Customer' AND party = %(customer)s AND docstatus = 1
 		""",
-		(customer,),
+		{"customer": customer},
 		as_dict=True,
 	)
 	if not balance:
@@ -519,16 +519,16 @@ def get_customer_balance(customer):
 	return flt(first_row or 0)
 
 
-def get_loyalty_points(customer):
+def get_loyalty_points(customer: str):
 	"""Get loyalty points balance for a customer."""
 	try:
 		points = frappe.db.sql(
 			"""
 			SELECT SUM(loyalty_points) AS points
 			FROM `tabLoyalty Point Entry`
-			WHERE customer = %s AND expiry_date >= CURDATE()
+			WHERE customer = %(customer)s AND expiry_date >= CURDATE()
 			""",
-			(customer,),
+			{"customer": customer},
 			as_dict=True,
 		)
 		return flt(points[0].get("points", 0)) if points else 0
@@ -537,7 +537,7 @@ def get_loyalty_points(customer):
 
 
 @frappe.whitelist()
-def get_loyalty_programs(company=None):
+def get_loyalty_programs(company: str = None):
 	"""Get all active loyalty programs for the given company."""
 	filters = {}
 	if company:
@@ -570,7 +570,7 @@ def get_loyalty_programs(company=None):
 
 
 @frappe.whitelist()
-def register_customer_loyalty(customer, loyalty_program):
+def register_customer_loyalty(customer: str, loyalty_program: str):
 	"""Register a customer for a loyalty program.
 
 	Args:
@@ -623,7 +623,7 @@ def register_customer_loyalty(customer, loyalty_program):
 
 
 @frappe.whitelist()
-def unenroll_customer_loyalty(customer):
+def unenroll_customer_loyalty(customer: str):
 	"""Remove a customer from their loyalty program.
 
 	Args:
@@ -657,7 +657,7 @@ def unenroll_customer_loyalty(customer):
 
 
 @frappe.whitelist()
-def get_customer_loyalty_info(customer):
+def get_customer_loyalty_info(customer: str):
 	"""Get detailed loyalty information for a customer.
 
 	Args:
@@ -713,7 +713,7 @@ def get_customer_loyalty_info(customer):
 	}
 
 
-def _get_child_groups(group_type, root):
+def _get_child_groups(group_type: str, root: str):
 	"""Get all child groups including self."""
 	if not root:
 		return []

@@ -1,7 +1,6 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""API endpoints for item-level and item-group-level tax template resolution."""
 
 import json
 
@@ -11,7 +10,7 @@ from frappe.utils import cstr, flt, getdate, nowdate
 
 
 @frappe.whitelist()
-def get_item_tax_template(item_code, company, tax_category=None):
+def get_item_tax_template(item_code: str, company: str, tax_category: str = None):
 	"""Resolve the applicable Item Tax Template for an item.
 
 	Follows ERPNext's resolution order:
@@ -55,7 +54,7 @@ def get_item_tax_template(item_code, company, tax_category=None):
 	}
 
 
-def _resolve_tax_template(taxes, company, tax_category, today):
+def _resolve_tax_template(taxes: list, company: str, tax_category: str, today: str):
 	"""Find the best matching Item Tax Template from a list of tax rows.
 
 	Args:
@@ -116,7 +115,7 @@ def _resolve_tax_template(taxes, company, tax_category, today):
 
 
 @frappe.whitelist()
-def get_item_tax_templates_bulk(items_json, company, tax_category=None):
+def get_item_tax_templates_bulk(items_json: str, company: str, tax_category: str = None) -> dict:
 	"""Resolve Item Tax Templates for multiple items in a single call.
 
 	Args:

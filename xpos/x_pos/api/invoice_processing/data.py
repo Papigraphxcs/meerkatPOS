@@ -3,7 +3,7 @@ from frappe import _
 
 
 @frappe.whitelist()
-def get_last_invoice_rates(customer, item_codes, company=None):
+def get_last_invoice_rates(customer: str, item_codes: list, company: str = None):
 	"""
 	Get the last invoice rate for a list of items for a specific customer.
 	"""
@@ -21,42 +21,39 @@ def get_last_invoice_rates(customer, item_codes, company=None):
 	if not item_codes:
 		return []
 
-	placeholders = ", ".join(["%s"] * len(item_codes))
+	data = frappe.get_all(
+		"Sales Invoice Item",
+		fields=[
+			"item_code",
+			"rate",
+			"parent",
+			"uom",
+		],
+		filters=[
+			["Sales Invoice", "customer", "=", customer],
+			["Sales Invoice", "company", "=", company],
+			["Sales Invoice", "docstatus", "=", 1],
+			["item_code", "in", item_codes],
+		],
+		order_by="`tabSales Invoice`.posting_date desc, `tabSales Invoice`.creation desc",
+	)
 
-	query = f"""  # nosemgrep: frappe-sql-format-injection — placeholders are %s list for parameterized IN clause
-        SELECT
-            item.item_code,
-            item.rate,
-            inv.currency,
-            inv.name as invoice,
-            item.uom,
-            inv.posting_date
-        FROM
-            `tabSales Invoice` inv
-        JOIN
-            `tabSales Invoice Item` item ON item.parent = inv.name
-        WHERE
-            inv.customer = %s
-            AND inv.company = %s
-            AND inv.docstatus = 1
-            AND item.item_code IN ({placeholders})
-        ORDER BY
-            inv.posting_date DESC, inv.creation DESC
-    """
-
-	# We need the *latest* rate per item. MySQL doesn't have DISTINCT ON.
-	# We can fetch all and filter in python, or use a window function if available (MariaDB 10.2+).
-	# Frappe usually supports MariaDB 10.2+.
-	# Let's try a simpler approach: fetch rows and dedup in Python to be safe and compatible.
-
-	# Executing query
-	params = [customer, company] + list(item_codes)
-	data = frappe.db.sql(query, tuple(params), as_dict=True)
-
-	# Dedup to keep only the first (latest) entry per item_code
 	latest_rates = {}
 	for row in data:
 		if row.item_code not in latest_rates:
+			invoice = frappe.db.get_value(
+				"Sales Invoice",
+				row.parent,
+				["posting_date", "currency"],
+				as_dict=True,
+			)
+			row.update(
+				{
+					"invoice": row.parent,
+					"currency": invoice.currency,
+					"posting_date": invoice.posting_date,
+				}
+			)
 			latest_rates[row.item_code] = row
 
 	return list(latest_rates.values())

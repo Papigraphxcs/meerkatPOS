@@ -15,10 +15,9 @@ from frappe.utils.caching import redis_cache
 from .utils import fetch_sales_person_names
 
 
-def get_customer_groups(pos_profile):
+def get_customer_groups(pos_profile: dict) -> list:
 	customer_groups = []
 	if pos_profile.get("customer_groups"):
-		# Get items based on the item groups defined in the POS profile
 		for data in pos_profile.get("customer_groups"):
 			group_name = data.get("customer_group") if data else None
 			if not group_name:
@@ -28,7 +27,7 @@ def get_customer_groups(pos_profile):
 	return list(set(customer_groups))
 
 
-def get_child_nodes(group_type, root):
+def get_child_nodes(group_type: str, root: str) -> list:
 	if not root:
 		return []
 	result = frappe.db.get_value(group_type, root, ["lft", "rgt"])
@@ -43,7 +42,7 @@ def get_child_nodes(group_type, root):
 	)
 
 
-def get_customer_group_condition(pos_profile):
+def get_customer_group_condition(pos_profile: dict) -> str:
 	cond = "disabled = 0"
 	customer_groups = get_customer_groups(pos_profile)
 	if customer_groups:
@@ -54,7 +53,7 @@ def get_customer_group_condition(pos_profile):
 
 
 @frappe.whitelist()
-def get_customer_balance(customer):
+def get_customer_balance(customer: str) -> dict:
 	if not customer:
 		return {"balance": 0, "customer_name": None}
 
@@ -66,9 +65,9 @@ def get_customer_balance(customer):
 			"""
             SELECT SUM(debit - credit) AS balance
             FROM `tabGL Entry`
-            WHERE party_type = 'Customer' AND party = %s AND docstatus = 1
+            WHERE party_type = 'Customer' AND party = %(customer)s AND docstatus = 1
         """,
-			(customer,),
+			{"customer": customer},
 			as_dict=True,
 		)
 
@@ -82,17 +81,35 @@ def get_customer_balance(customer):
 
 
 @frappe.whitelist()
-def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
+def get_customer_names(
+	pos_profile: str,
+	limit: int = None,
+	offset: int = None,
+	start_after: str = None,
+	modified_after: str = None,
+) -> list:
 	_pos_profile = json.loads(pos_profile)
 	ttl = _pos_profile.get("server_cache_duration")
 	if ttl:
 		ttl = int(ttl) * 60
 
 	@redis_cache(ttl=ttl or 1800)
-	def __get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
+	def __get_customer_names(
+		pos_profile: str,
+		limit: int = None,
+		offset: int = None,
+		start_after: str = None,
+		modified_after: str = None,
+	) -> list:
 		return _get_customer_names(pos_profile, limit, offset, start_after, modified_after)
 
-	def _get_customer_names(pos_profile, limit=None, offset=None, start_after=None, modified_after=None):
+	def _get_customer_names(
+		pos_profile: str,
+		limit: int = None,
+		offset: int = None,
+		start_after: str = None,
+		modified_after: str = None,
+	) -> list:
 		pos_profile = json.loads(pos_profile)
 		filters = {"disabled": 0}
 
@@ -134,7 +151,7 @@ def get_customer_names(pos_profile, limit=None, offset=None, start_after=None, m
 
 
 @frappe.whitelist()
-def get_customers_count(pos_profile):
+def get_customers_count(pos_profile: str) -> int:
 	pos_profile = json.loads(pos_profile)
 	filters = {"disabled": 0}
 	customer_groups = get_customer_groups(pos_profile)
@@ -144,7 +161,7 @@ def get_customers_count(pos_profile):
 
 
 @frappe.whitelist()
-def get_customer_info(customer=None):
+def get_customer_info(customer: str = None) -> dict:
 	customer = cstr(customer or "").strip()
 	if not customer:
 		return {}
@@ -202,13 +219,13 @@ def get_customer_info(customer=None):
 	    ON (address.name = link.parent)
 	WHERE
 	    link.link_doctype = 'Customer'
-	    AND link.link_name = %s
+	    AND link.link_name = %(customer_name)s
 	    AND address.disabled = 0
 	    AND address.address_type = 'Shipping'
 	ORDER BY address.creation DESC
 	LIMIT 1
 	""",
-		(customer.name,),
+		{"customer_name": customer.name},
 		as_dict=True,
 	)
 
@@ -225,37 +242,34 @@ def get_customer_info(customer=None):
 
 @frappe.whitelist()
 def create_customer(
-	customer_name,
-	company,
-	pos_profile_doc,
-	customer_id=None,
-	tax_id=None,
-	mobile_no=None,
-	email_id=None,
-	referral_code=None,
-	birthday=None,
-	customer_group=None,
-	territory=None,
-	customer_type=None,
-	gender=None,
-	method="create",
-	address_line1=None,
-	city=None,
-	country=None,
+	customer_name: str,
+	company: str,
+	pos_profile_doc: str,
+	customer_id: str = None,
+	tax_id: str = None,
+	mobile_no: str = None,
+	email_id: str = None,
+	referral_code: str = None,
+	birthday: str = None,
+	customer_group: str = None,
+	territory: str = None,
+	customer_type: str = None,
+	gender: str = None,
+	method: str = "create",
+	address_line1: str = None,
+	city: str = None,
+	country: str = None,
 ):
 	pos_profile = json.loads(pos_profile_doc)
 
-	# Format birthday to MySQL compatible format (YYYY-MM-DD) if provided
 	formatted_birthday = None
 	if birthday:
 		try:
-			# Try to parse date in DD-MM-YYYY format
 			if "-" in birthday:
 				date_parts = birthday.split("-")
 				if len(date_parts) == 3:
 					day, month, year = date_parts
 					formatted_birthday = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
-			# If format is already YYYY-MM-DD, use as is
 			elif len(birthday) == 10 and birthday[4] == "-" and birthday[7] == "-":
 				formatted_birthday = birthday
 		except Exception:
@@ -319,7 +333,6 @@ def create_customer(
 		customer_doc.gender = gender
 		customer_doc.save()
 
-		# ensure contact details are synced correctly
 		if mobile_no:
 			set_customer_info(customer_doc.name, "mobile_no", mobile_no)
 		if email_id:
@@ -360,7 +373,7 @@ def create_customer(
 
 
 @frappe.whitelist()
-def set_customer_info(customer, fieldname, value=""):
+def set_customer_info(customer: str, fieldname: str, value: str = None):
 	if fieldname == "loyalty_program":
 		frappe.db.set_value("Customer", customer, "loyalty_program", value)
 
@@ -395,7 +408,7 @@ def set_customer_info(customer, fieldname, value=""):
 
 
 @frappe.whitelist()
-def get_customer_addresses(customer):
+def get_customer_addresses(customer: str) -> list:
 	return frappe.db.sql(
 		"""
         SELECT
@@ -411,18 +424,17 @@ def get_customer_addresses(customer):
         INNER JOIN `tabDynamic Link` AS link
                                 ON address.name = link.parent
         WHERE link.link_doctype = 'Customer'
-            AND link.link_name = %s
+            AND link.link_name = %(customer)s
             AND address.disabled = 0
         ORDER BY address.name
         """,
-		(customer,),
+		{"customer": customer},
 		as_dict=1,
 	)
 
 
-@frappe.whitelist()  # nosemgrep: overusing-args — args is a JSON-encoded dict from the client, standard Frappe pattern
-def make_address(args):
-	args = json.loads(args)
+@frappe.whitelist()
+def make_address(*args: str) -> dict:
 	address = frappe.get_doc(
 		{
 			"doctype": "Address",
@@ -442,5 +454,5 @@ def make_address(args):
 
 
 @frappe.whitelist()
-def get_sales_person_names():
+def get_sales_person_names() -> list:
 	return fetch_sales_person_names()

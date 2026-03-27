@@ -43,7 +43,7 @@ def _get_return_validity_settings(pos_profile: str | None = None):
 	return enable_validity, default_days
 
 
-def _set_return_valid_upto(invoice_doc, enabled, default_days):
+def _set_return_valid_upto(invoice_doc: dict, enabled: int, default_days: int):
 	if not enabled or invoice_doc.is_return:
 		return
 
@@ -57,7 +57,7 @@ def _set_return_valid_upto(invoice_doc, enabled, default_days):
 		invoice_doc.return_valid_upto = posting_date
 
 
-def _validate_return_window(invoice_doc, doctype, enabled):
+def _validate_return_window(invoice_doc: dict, doctype: str, enabled: int):
 	if not enabled or not invoice_doc.is_return or not invoice_doc.get("return_against"):
 		return
 
@@ -95,7 +95,7 @@ def _resolve_effective_price_list(
 	return fallback_price_list
 
 
-def _build_invoice_remarks(invoice_doc):
+def _build_invoice_remarks(invoice_doc: dict):
 	"""Generate the invoice remarks string with item totals and grand total."""
 
 	if not invoice_doc or not getattr(invoice_doc, "items", None):
@@ -140,10 +140,10 @@ def get_latest_rate(from_currency: str, to_currency: str, cache=None):
 
 
 @frappe.whitelist()
-def get_price_list_currency(price_list):
+def get_price_list_currency(price_list: str) -> str:
 	return frappe.db.get_value("Price List", price_list, "currency")
 
 
 @frappe.whitelist()
-def get_available_currencies():
+def get_available_currencies() -> list[dict]:
 	return frappe.get_all("Currency", filters={"enabled": 1}, fields=["name"])

@@ -1,6 +1,7 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 import frappe
+from frappe import _
 from frappe.utils import cint, cstr, flt
 
 
@@ -16,7 +17,7 @@ def _get_scale_barcode_settings():
 		return None
 
 
-def _get_scale_settings_metadata(settings) -> dict[str, Any]:
+def _get_scale_settings_metadata(settings: Any) -> dict[str, Any]:
 	"""Return a normalized dictionary for the scale barcode settings."""
 
 	if not settings:
@@ -45,7 +46,7 @@ def _segment_end(start: int, digits: int, decimals: int = 0) -> int:
 	return start + digits + max(decimals, 0) - 1
 
 
-def _replace_segment(target_chars, start_index: int, value: str):
+def _replace_segment(target_chars: list[str], start_index: int, value: str):
 	"""Replace a contiguous segment in ``target_chars``."""
 
 	needed_len = start_index + len(value)
@@ -379,7 +380,7 @@ def build_scale_barcode(
 
 
 @frappe.whitelist()
-def get_items_from_barcode(selling_price_list, currency, barcode):
+def get_items_from_barcode(selling_price_list: str, currency: str, barcode: str):
 	scale_data = _parse_scale_barcode_data(barcode)
 	item_code = None
 	scale_qty = None
@@ -408,9 +409,6 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
 		return None
 
 	try:
-		# OPTIMIZE: Remove redundant DB query from exists()
-		# frappe.get_cached_doc will raise DoesNotExistError if item is missing
-		# saving one DB round-trip per scan.
 		item_doc = frappe.get_cached_doc("Item", item_code)
 	except frappe.DoesNotExistError:
 		return None
@@ -446,9 +444,10 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
 
 
 @frappe.whitelist()
-def search_serial_or_batch_or_barcode_number(search_value, search_serial_no=None, search_batch_no=None):
+def search_serial_or_batch_or_barcode_number(
+	search_value: str, search_serial_no: bool = False, search_batch_no: bool = False
+):
 	"""Search for items by serial number, batch number, or barcode."""
-	# Search by barcode
 	barcode_data = frappe.db.get_value(
 		"Item Barcode",
 		{"barcode": search_value},
@@ -458,7 +457,6 @@ def search_serial_or_batch_or_barcode_number(search_value, search_serial_no=None
 	if barcode_data:
 		return {"item_code": barcode_data.item_code, "barcode": barcode_data.barcode}
 
-	# Search by batch number if enabled
 	if search_batch_no:
 		batch_data = frappe.db.get_value(
 			"Batch",
@@ -472,7 +470,6 @@ def search_serial_or_batch_or_barcode_number(search_value, search_serial_no=None
 				"batch_no": batch_data.batch_no,
 			}
 
-	# Search by serial number if enabled
 	if search_serial_no:
 		serial_data = frappe.db.get_value(
 			"Serial No",

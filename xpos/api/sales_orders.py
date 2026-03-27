@@ -18,7 +18,7 @@ from frappe.utils import flt, nowdate
 
 
 @frappe.whitelist()
-def search_orders(company, currency=None, order_name=None):
+def search_orders(company: str, currency: str | None = None, order_name: str | None = None):
 	"""Searches for unbilled Sales Orders."""
 	filters = {
 		"company": company,
@@ -55,7 +55,7 @@ def search_orders(company, currency=None, order_name=None):
 
 
 @frappe.whitelist()
-def create_sales_order(data):
+def create_sales_order(data: str | dict):
 	"""Creates or updates a Sales Order from POS."""
 	if isinstance(data, str):
 		data = json.loads(data)
@@ -120,7 +120,7 @@ def create_sales_order(data):
 
 
 @frappe.whitelist()
-def submit_sales_order(data):
+def submit_sales_order(data: str | dict):
 	"""Submits a Sales Order."""
 
 	if isinstance(data, str):
@@ -141,7 +141,7 @@ def submit_sales_order(data):
 
 
 @frappe.whitelist()
-def create_sales_invoice_from_order(sales_order):
+def create_sales_invoice_from_order(sales_order: str):
 	"""Creates a Sales Invoice from a Sales Order."""
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
@@ -157,7 +157,7 @@ def create_sales_invoice_from_order(sales_order):
 
 
 @frappe.whitelist()
-def create_quotation(data):
+def create_quotation(data: str | dict):
 	"""Creates or updates a Quotation from POS."""
 	if isinstance(data, str):
 		data = json.loads(data)
@@ -210,7 +210,7 @@ def create_quotation(data):
 
 
 @frappe.whitelist()
-def submit_quotation(data):
+def submit_quotation(data: str | dict):
 	"""Submits a Quotation."""
 
 	if isinstance(data, str):

@@ -4,21 +4,19 @@
 import json
 
 import frappe
-from erpnext.accounts.party import get_party_account
-from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from frappe.utils import getdate, nowdate
 
 from xpos.x_pos.api.payment_entry import create_payment_entry
 
 
-def _payment_entry_job(order_name, payments):
+def _payment_entry_job(order_name: str, payments: list[dict]):
 	"""Background task to create payment entries."""
 	so_doc = frappe.get_doc("Sales Order", order_name)
 	_create_payment_entries(so_doc, payments)
 
 
 @frappe.whitelist()
-def search_orders(company, currency, order_name=None):
+def search_orders(company: str, currency: str | None = None, order_name: str | None = None):
 	filters = {
 		"billing_status": ["in", ["Not Billed", "Partly Billed"]],
 		"docstatus": 1,
@@ -40,7 +38,7 @@ def search_orders(company, currency, order_name=None):
 	return data
 
 
-def _map_delivery_dates(data):
+def _map_delivery_dates(data: dict):
 	"""Ensure mandatory delivery_date fields are populated."""
 
 	def parse_date(value):
@@ -84,9 +82,10 @@ def _map_delivery_dates(data):
 
 
 @frappe.whitelist()
-def update_sales_order(data):
+def update_sales_order(data: str | dict):
 	"""Create or update a Sales Order document."""
-	data = json.loads(data)
+	if isinstance(data, str):
+		data = json.loads(data)
 	_map_delivery_dates(data)
 	if data.get("name") and frappe.db.exists("Sales Order", data.get("name")):
 		so_doc = frappe.get_doc("Sales Order", data.get("name"))
@@ -101,7 +100,7 @@ def update_sales_order(data):
 	return so_doc
 
 
-def _create_payment_entries(so_doc, payments):
+def _create_payment_entries(so_doc: dict, payments: list[dict]):
 	"""Create payment entries referencing the sales order."""
 	for pay in payments or []:
 		if not pay.get("amount"):
@@ -137,9 +136,10 @@ def _create_payment_entries(so_doc, payments):
 
 
 @frappe.whitelist()
-def submit_sales_order(order):
+def submit_sales_order(order: str | dict):
 	"""Submit sales order and create payment entries."""
-	order = json.loads(order)
+	if isinstance(order, str):
+		order = json.loads(order)
 	_map_delivery_dates(order)
 	if order.get("name") and frappe.db.exists("Sales Order", order.get("name")):
 		so_doc = frappe.get_doc("Sales Order", order.get("name"))

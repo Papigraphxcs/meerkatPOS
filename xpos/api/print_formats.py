@@ -11,7 +11,7 @@ import frappe
 
 
 @frappe.whitelist()
-def get_print_formats(doctype="Sales Invoice"):
+def get_print_formats(doctype: str = "Sales Invoice"):
 	"""Returns available print format names for a doctype."""
 	print_formats = frappe.get_all(
 		"Print Format",

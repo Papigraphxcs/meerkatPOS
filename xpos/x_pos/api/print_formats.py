@@ -5,6 +5,6 @@ import frappe
 
 
 @frappe.whitelist()
-def get_print_formats(doctype):
+def get_print_formats(doctype: str = "Sales Invoice") -> list[str]:
 	print_formats = frappe.get_all("Print Format", filters={"doc_type": doctype}, fields=["name"])
 	return [p.name for p in print_formats]

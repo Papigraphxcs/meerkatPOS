@@ -1,28 +1,21 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""
-POS Offers, Coupons, and Delivery Charges API.
-
-- Active POS Offers retrieval (including Promotional Scheme offers)
-- Coupon validation (gift cards, discount coupons)
-- Active gift coupons per customer
-- Delivery charges calculation
-"""
+from typing import Any
 
 import frappe
-from frappe import _
+from frappe import Document, _
 from frappe.utils import cstr, flt, getdate, nowdate
 
 
-def _row_value(row, key, default=None):
+def _row_value(row: dict | object, key: str, default=None):
 	if isinstance(row, dict):
 		return row.get(key, default)
 	return getattr(row, key, default)
 
 
 @frappe.whitelist()
-def get_offers(pos_profile):
+def get_offers(pos_profile: str):
 	"""Return all active POS Offers + promotional scheme offers for a profile."""
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
 	company = pos.company
@@ -73,7 +66,7 @@ def get_offers(pos_profile):
 
 
 @frappe.whitelist()
-def get_pos_coupon(coupon, customer, company):
+def get_pos_coupon(coupon: str, customer: str, company: str):
 	"""Validate and return a XPOS coupon."""
 	coupon_doc = frappe.db.get_value(
 		"XPOS Coupon",
@@ -110,7 +103,7 @@ def get_pos_coupon(coupon, customer, company):
 
 
 @frappe.whitelist()
-def get_active_gift_coupons(customer, company):
+def get_active_gift_coupons(customer: str, company: str):
 	"""Returns all active gift card coupons for a customer."""
 
 	today = getdate(nowdate())
@@ -129,7 +122,7 @@ def get_active_gift_coupons(customer, company):
 
 
 @frappe.whitelist()
-def get_delivery_charges(pos_profile):
+def get_delivery_charges(pos_profile: str):
 	"""Backward-compatible delivery charges API."""
 	return frappe.get_all(
 		"Delivery Charges",
@@ -139,7 +132,12 @@ def get_delivery_charges(pos_profile):
 
 
 @frappe.whitelist()
-def get_applicable_delivery_charges(company, pos_profile, customer=None, shipping_address_name=None):
+def get_applicable_delivery_charges(
+	company: str,
+	pos_profile: str,
+	customer: str = None,
+	shipping_address_name: str = None,
+):
 	"""Returns applicable delivery charges"""
 	try:
 		from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
@@ -156,7 +154,7 @@ def get_applicable_delivery_charges(company, pos_profile, customer=None, shippin
 		return charges
 
 
-def _is_coupon_active(coupon_data, today):
+def _is_coupon_active(coupon_data: dict | object, today: Any):
 	"""Return True if the coupon is valid for the provided date."""
 	valid_from = _row_value(coupon_data, "valid_from")
 	valid_upto = _row_value(coupon_data, "valid_upto")
@@ -167,14 +165,14 @@ def _is_coupon_active(coupon_data, today):
 	return True
 
 
-def _normalize_discount_fields(offer):
+def _normalize_discount_fields(offer: dict):
 	"""Ensure discount fields are numeric."""
 	for field in ("discount_percentage", "discount_amount", "rate"):
 		if field in offer:
 			offer[field] = flt(offer[field])
 
 
-def _get_promotional_scheme_offers(pos_profile_doc):
+def _get_promotional_scheme_offers(pos_profile_doc: Any) -> list[dict]:
 	"""Convert Promotional Scheme records into POS Offer-compatible dicts."""
 	company = pos_profile_doc.company
 	today = nowdate()

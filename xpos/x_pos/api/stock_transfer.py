@@ -22,7 +22,7 @@ from .utils import get_default_warehouse
 
 
 @frappe.whitelist()
-def get_in_transit_transfers(warehouse=None, limit=50):
+def get_in_transit_transfers(warehouse: str | None = None, limit: int = 50):
 	"""
 	Get Stock Entries that are in-transit and destined for the given warehouse.
 
@@ -146,7 +146,7 @@ def get_in_transit_transfers(warehouse=None, limit=50):
 	return result
 
 
-def _get_received_qty(outgoing_entry, ste_detail):
+def _get_received_qty(outgoing_entry: str, ste_detail: str) -> float:
 	"""Get how much quantity has already been received against an outgoing entry item."""
 	received = frappe.db.sql(
 		"""
@@ -155,16 +155,16 @@ def _get_received_qty(outgoing_entry, ste_detail):
         JOIN `tabStock Entry` se ON se.name = sed.parent
         WHERE se.docstatus = 1
           AND se.purpose = 'Material Transfer'
-          AND se.outgoing_stock_entry = %s
-          AND sed.ste_detail = %s
+          AND se.outgoing_stock_entry = %(outgoing_entry)s
+          AND sed.ste_detail = %(ste_detail)s
         """,
-		(outgoing_entry, ste_detail),
+		{"outgoing_entry": outgoing_entry, "ste_detail": ste_detail},
 	)
 	return flt(received[0][0]) if received else 0
 
 
 @frappe.whitelist()
-def get_transfer_detail(stock_entry):
+def get_transfer_detail(stock_entry: str):
 	"""Get detailed info for a single in-transit stock entry."""
 	if not stock_entry or not frappe.db.exists("Stock Entry", stock_entry):
 		frappe.throw(_("Stock Entry {0} does not exist.").format(stock_entry))
@@ -213,7 +213,7 @@ def get_transfer_detail(stock_entry):
 
 
 @frappe.whitelist()
-def receive_transit_stock(data):
+def receive_transit_stock(data: str | dict):
 	"""
 	Receive in-transit stock at the target warehouse.
 
@@ -350,7 +350,7 @@ def receive_transit_stock(data):
 
 
 @frappe.whitelist()
-def return_shortage_to_source(data):
+def return_shortage_to_source(data: str | dict):
 	"""
 	Return shortage stock from transit warehouse back to source warehouse.
 

@@ -8,7 +8,6 @@ from frappe.utils import (
 	flt,
 	getdate,
 	money_in_words,
-	nowdate,
 )
 from frappe.utils.background_jobs import enqueue
 
@@ -30,12 +29,14 @@ from xpos.x_pos.api.invoice_processing.utils import (
 	_validate_return_window,
 	get_latest_rate,
 )
-from xpos.x_pos.api.payment_processing.utils import get_bank_cash_account as get_bank_account
+from xpos.x_pos.api.payment_processing.utils import (
+	get_bank_cash_account as get_bank_account,
+)
 from xpos.x_pos.api.payments import redeeming_customer_credit
 from xpos.x_pos.api.utilities import ensure_child_doctype, set_batch_nos_for_bundels
 
 
-def _resolve_write_off_limit(pos_profile_doc):
+def _resolve_write_off_limit(pos_profile_doc: dict) -> float | None:
 	if not pos_profile_doc:
 		return None
 
@@ -58,7 +59,7 @@ def _resolve_write_off_limit(pos_profile_doc):
 	return None
 
 
-def _apply_write_off_settings(invoice_doc, data):
+def _apply_write_off_settings(invoice_doc: dict, data: dict):
 	enable_write_off = cint(data.get("is_write_off_change"))
 
 	if invoice_doc.is_return or not enable_write_off:
@@ -117,7 +118,7 @@ def _apply_write_off_settings(invoice_doc, data):
 	invoice_doc.base_write_off_amount = flt(effective_write_off * conversion_rate, precision_base_write_off)
 
 
-def _safe_date_string(value):
+def _safe_date_string(value: str) -> str | None:
 	if value in (None, ""):
 		return None
 
@@ -135,7 +136,7 @@ def _safe_date_string(value):
 		return None
 
 
-def _sanitize_delivery_dates(payload):
+def _sanitize_delivery_dates(payload: dict):
 	if not isinstance(payload, dict):
 		return
 
@@ -152,7 +153,7 @@ def _sanitize_delivery_dates(payload):
 
 
 @frappe.whitelist()
-def update_invoice(data):
+def update_invoice(data: str) -> dict:
 	currency_cache = {}
 	data = json.loads(data)
 	_sanitize_delivery_dates(data)
@@ -357,11 +358,14 @@ def update_invoice(data):
 
 
 @frappe.whitelist()
-def submit_invoice(invoice, data, submit_in_background=False):
+def submit_invoice(invoice: str, data: str | dict, submit_in_background: bool = False) -> dict:
 	from xpos.x_pos.api.invoice_processing.payment import _create_change_payment_entries
 
-	data = json.loads(data)
-	invoice = json.loads(invoice)
+	if isinstance(data, str):
+		data = json.loads(data)
+	if isinstance(invoice, str):
+		invoice = json.loads(invoice)
+
 	_sanitize_delivery_dates(invoice)
 	submit_in_background = cint(submit_in_background)
 	_strip_client_freebies_from_payload(invoice)
@@ -507,7 +511,7 @@ def submit_invoice(invoice, data, submit_in_background=False):
 	return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
 
 
-def submit_in_background_job(kwargs):
+def submit_in_background_job(*args, **kwargs):
 	from xpos.x_pos.api.invoice_processing.payment import _create_change_payment_entries
 
 	invoice = kwargs.get("invoice")
@@ -568,7 +572,7 @@ def submit_in_background_job(kwargs):
 
 
 @frappe.whitelist()
-def validate_cart_items(items, pos_profile=None):
+def validate_cart_items(items: list, pos_profile: str = None):
 	"""Validate cart items for available stock.
 
 	Returns a list of item dicts where requested quantity exceeds availability.

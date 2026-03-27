@@ -19,7 +19,7 @@ from frappe.utils import flt, nowdate
 
 
 @frappe.whitelist()
-def get_available_credit(customer, company):
+def get_available_credit(customer: str, company: str) -> list[dict]:
 	"""Return all available credit (outstanding returns + unallocated advances) for a customer."""
 	if not customer or not company:
 		return []
@@ -72,8 +72,13 @@ def get_available_credit(customer, company):
 
 @frappe.whitelist()
 def get_outstanding_invoices(
-	customer, company, currency=None, pos_profile=None, page_start=0, page_length=20
-):
+	customer: str,
+	company: str,
+	currency: str | None = None,
+	pos_profile: str | None = None,
+	page_start: int = 0,
+	page_length: int = 20,
+) -> list[dict]:
 	"""Fetch outstanding invoices for a customer"""
 	filters = {
 		"customer": customer,
@@ -107,7 +112,9 @@ def get_outstanding_invoices(
 
 
 @frappe.whitelist()
-def get_unallocated_payments(customer, company, currency=None, mode_of_payment=None):
+def get_unallocated_payments(
+	customer: str, company: str, currency: str | None = None, mode_of_payment: str | None = None
+) -> list[dict]:
 	"""Returns unallocated payments, journal entries, and credit notes for a customer."""
 	payments = []
 
@@ -163,7 +170,7 @@ def get_unallocated_payments(customer, company, currency=None, mode_of_payment=N
 
 
 @frappe.whitelist()
-def create_payment_entry(data):
+def create_payment_entry(data: str | dict) -> dict:
 	"""
 	Create a payment entry for a customer.
 
@@ -222,7 +229,7 @@ def create_payment_entry(data):
 
 
 @frappe.whitelist()
-def create_payment_request(doc):
+def create_payment_request(doc: str | dict) -> dict | None:
 	"""Creates a phone payment request (M-Pesa, etc.)."""
 	if isinstance(doc, str):
 		doc = json.loads(doc)

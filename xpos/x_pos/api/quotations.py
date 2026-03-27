@@ -4,7 +4,7 @@ import frappe
 from frappe.utils import getdate
 
 
-def _map_delivery_dates(data):
+def _map_delivery_dates(data: dict):
 	"""Ensure mandatory delivery_date fields are populated."""
 
 	def parse_date(value):
@@ -45,9 +45,10 @@ def _ensure_customer_fields(data):
 
 
 @frappe.whitelist()
-def update_quotation(data):
+def update_quotation(data: str | dict):
 	"""Create or update a Quotation document."""
-	data = json.loads(data)
+	if isinstance(data, str):
+		data = json.loads(data)
 	_map_delivery_dates(data)
 	_ensure_customer_fields(data)
 	if data.get("name") and frappe.db.exists("Quotation", data.get("name")):
@@ -64,9 +65,10 @@ def update_quotation(data):
 
 
 @frappe.whitelist()
-def submit_quotation(order):
+def submit_quotation(order: str | dict):
 	"""Submit quotation document."""
-	order = json.loads(order)
+	if isinstance(order, str):
+		order = json.loads(order)
 	_map_delivery_dates(order)
 	_ensure_customer_fields(order)
 	if order.get("name") and frappe.db.exists("Quotation", order.get("name")):
