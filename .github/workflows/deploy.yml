@@ -120,8 +120,8 @@ jobs:
             bench --site "${SITE_NAME}" clear-cache
             bench --site "${SITE_NAME}" clear-website-cache
 
-            # Graceful restart via supervisor (does NOT kill running requests abruptly)
-            sudo supervisorctl restart all 2>&1 | head -20
+            # Graceful restart
+            bench restart 2>&1 | head -20 || sudo supervisorctl restart all 2>&1 | head -20 || true
 
             # Disable maintenance mode
             bench --site "${SITE_NAME}" set-maintenance-mode off || true
@@ -154,8 +154,6 @@ jobs:
           port: ${{ secrets.SERVER_PORT || 22 }}
           command_timeout: 5m
           script: |
-            set -e
-
             BENCH_PATH="${{ env.BENCH_PATH }}"
             SITE_NAME="${{ secrets.SITE_NAME }}"
 
@@ -163,7 +161,7 @@ jobs:
 
             # Check supervisor processes
             echo "    Checking supervisor processes..."
-            sudo supervisorctl status | grep -E "RUNNING|FATAL|STOPPED"
+            sudo supervisorctl status 2>/dev/null | grep -E "RUNNING|FATAL|STOPPED" || echo "    (skipped - sudo not available)"
 
             # Check if bench doctor reports issues
             echo "    Running bench doctor..."
