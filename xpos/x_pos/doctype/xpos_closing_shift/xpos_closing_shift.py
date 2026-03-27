@@ -36,7 +36,7 @@ class XPOSClosingShift(Document):
 			XPOSClosingShiftTaxes,
 		)
 		from xpos.x_pos.doctype.xpos_payment_entry_reference.xpos_payment_entry_reference import (
-			POSPaymentEntryReference,
+			XPOSPaymentEntryReference,
 		)
 
 		amended_from: DF.Link | None
@@ -47,7 +47,7 @@ class XPOSClosingShift(Document):
 		period_end_date: DF.Datetime
 		period_start_date: DF.Datetime
 		pos_opening_shift: DF.Link
-		pos_payments: DF.Table[POSPaymentEntryReference]
+		pos_payments: DF.Table[XPOSPaymentEntryReference]
 		pos_profile: DF.Link
 		pos_transactions: DF.Table[SalesInvoiceReference]
 		posting_date: DF.Date
@@ -88,7 +88,7 @@ class XPOSClosingShift(Document):
 
 	def on_submit(self):
 		opening_entry = frappe.get_doc("XPOS Opening Shift", self.pos_opening_shift)
-		opening_entry.xpos_closing_shift = self.name
+		opening_entry.pos_closing_shift = self.name
 		opening_entry.set_status()
 		self.delete_draft_invoices()
 		opening_entry.save()
@@ -98,8 +98,8 @@ class XPOSClosingShift(Document):
 	def on_cancel(self):
 		if frappe.db.exists("XPOS Opening Shift", self.pos_opening_shift):
 			opening_entry = frappe.get_doc("XPOS Opening Shift", self.pos_opening_shift)
-			if opening_entry.xpos_closing_shift == self.name:
-				opening_entry.xpos_closing_shift = ""
+			if opening_entry.pos_closing_shift == self.name:
+				opening_entry.pos_closing_shift = ""
 				opening_entry.set_status()
 				opening_entry.save()
 

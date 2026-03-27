@@ -9,7 +9,7 @@
 		</button>
 
 		<Transition name="fade">
-			<div v-if="isOpen" class="fixed inset-0 bg-black/50 z-40 lg:hidden" @click="isOpen = false" />
+			<div v-if="isOpen" class="fixed inset-0 bg-black/50 z-40" @click="isOpen = false" />
 		</Transition>
 
 		<Transition name="slide">
