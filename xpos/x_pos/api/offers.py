@@ -11,13 +11,13 @@ from xpos.x_pos.doctype.xpos_coupon.xpos_coupon import check_coupon_code
 
 
 @frappe.whitelist()
-def get_pos_coupon(coupon, customer, company):
+def get_pos_coupon(coupon: str, customer: str, company: str):
 	res = check_coupon_code(coupon, customer, company)
 	return res
 
 
 @frappe.whitelist()
-def get_active_gift_coupons(customer, company):
+def get_active_gift_coupons(customer: str, company: str):
 	coupons = []
 	today = getdate(nowdate())
 	coupons_data = frappe.get_all(
@@ -35,7 +35,7 @@ def get_active_gift_coupons(customer, company):
 	return coupons
 
 
-def _is_coupon_active(coupon_data, today):
+def _is_coupon_active(coupon_data: dict, today: str) -> bool:
 	"""Return True if the coupon is valid for the provided date."""
 
 	if coupon_data.valid_from and getdate(coupon_data.valid_from) > today:
@@ -48,7 +48,7 @@ def _is_coupon_active(coupon_data, today):
 
 
 @frappe.whitelist()
-def get_offers(profile):
+def get_offers(profile: str):
 	pos_profile = frappe.get_doc("POS Profile", profile)
 	company = pos_profile.company
 	warehouse = pos_profile.warehouse
@@ -81,7 +81,6 @@ def get_offers(profile):
 	)
 
 	for offer in data:
-		# Ensure deterministic identifier for frontend offer lifecycle logic.
 		offer["row_id"] = cstr(offer.get("row_id") or offer.get("name"))
 		offer["offer_applied"] = flt(offer.get("offer_applied") or 0)
 		offer["auto"] = flt(offer.get("auto") or 0)
@@ -101,16 +100,21 @@ def get_offers(profile):
 
 
 @frappe.whitelist()
-def get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name=None):
+def get_applicable_delivery_charges(
+	company: str,
+	pos_profile: str,
+	customer: str,
+	shipping_address_name: str | None = None,
+):
 	return _get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name)
 
 
-def _get_promotional_scheme_offers(pos_profile):
+def _get_promotional_scheme_offers(pos_profile: dict):
 	if not frappe.db.table_exists("Promotional Scheme"):
 		return []
 
 	date = nowdate()
-	values = {"company": pos_profile.company, "date": date}
+	values = {"company": pos_profile.get("company"), "date": date}
 
 	try:
 		promotional_schemes = frappe.db.sql(
@@ -147,8 +151,7 @@ def _get_promotional_scheme_offers(pos_profile):
 	return offers
 
 
-def _prepare_promotional_scheme_offers(scheme, pos_profile):
-	# Skip schemes with party specific or unsupported configurations for POS logic
+def _prepare_promotional_scheme_offers(scheme: dict, pos_profile: dict):
 	if scheme.applicable_for or scheme.apply_rule_on_other:
 		return []
 
@@ -161,7 +164,7 @@ def _prepare_promotional_scheme_offers(scheme, pos_profile):
 	return [offer for offer in offers if offer]
 
 
-def _build_price_discount_offers(scheme, pos_profile):
+def _build_price_discount_offers(scheme: dict, pos_profile: dict):
 	slabs = getattr(scheme, "price_discount_slabs", [])
 	if not slabs:
 		return []
@@ -191,8 +194,8 @@ def _build_price_discount_offers(scheme, pos_profile):
 			"pos_profile": pos_profile.name,
 			"warehouse": slab.warehouse,
 			"apply_on": scheme.apply_on,
-			"apply_type": scheme.apply_on if scheme.apply_on in ("Item Code", "Item Group") else "",
-			"offer": "Grand Total" if scheme.apply_on == "Transaction" else "Item Price",
+			"apply_type": (scheme.apply_on if scheme.apply_on in ("Item Code", "Item Group") else ""),
+			"offer": ("Grand Total" if scheme.apply_on == "Transaction" else "Item Price"),
 			"auto": 1,
 			"coupon_based": 0,
 			"offer_applied": 0,
@@ -240,7 +243,7 @@ def _build_price_discount_offers(scheme, pos_profile):
 	return offers
 
 
-def _build_product_discount_offers(scheme, pos_profile):
+def _build_product_discount_offers(scheme: dict, pos_profile: dict):
 	slabs = getattr(scheme, "product_discount_slabs", [])
 	if not slabs:
 		return []
@@ -278,7 +281,7 @@ def _build_product_discount_offers(scheme, pos_profile):
 			"min_amt": flt(slab.min_amount),
 			"max_amt": flt(slab.max_amount),
 			"given_qty": flt(slab.free_qty),
-			"discount_type": "Rate" if flt(slab.free_item_rate) else "Discount Percentage",
+			"discount_type": ("Rate" if flt(slab.free_item_rate) else "Discount Percentage"),
 			"rate": flt(slab.free_item_rate),
 			"discount_amount": 0,
 			"discount_percentage": 100 if not flt(slab.free_item_rate) else 0,
@@ -332,16 +335,15 @@ def _build_product_discount_offers(scheme, pos_profile):
 	return offers
 
 
-def _get_scheme_targets(scheme):
+def _get_scheme_targets(scheme: dict):
 	targets = []
-	if scheme.apply_on == "Item Code":
-		targets = [row.item_code for row in scheme.items if row.item_code]
-	elif scheme.apply_on == "Item Group":
-		targets = [row.item_group for row in scheme.item_groups if row.item_group]
-	elif scheme.apply_on == "Brand":
-		targets = [row.brand for row in scheme.brands if row.brand]
+	if scheme.get("apply_on") == "Item Code":
+		targets = [row.get("item_code") for row in scheme.get("items", []) if row.get("item_code")]
+	elif scheme.get("apply_on") == "Item Group":
+		targets = [row.get("item_group") for row in scheme.get("item_groups", []) if row.get("item_group")]
+	elif scheme.get("apply_on") == "Brand":
+		targets = [row.get("brand") for row in scheme.get("brands", []) if row.get("brand")]
 
-	# Remove duplicates while preserving order
 	seen = set()
 	unique_targets = []
 	for target in targets:
@@ -353,7 +355,7 @@ def _get_scheme_targets(scheme):
 	return unique_targets
 
 
-def _map_discount_type(rate_or_discount):
+def _map_discount_type(rate_or_discount: str) -> str:
 	mapping = {
 		"Rate": "Rate",
 		"Discount Percentage": "Discount Percentage",
@@ -362,7 +364,7 @@ def _map_discount_type(rate_or_discount):
 	return mapping.get(rate_or_discount, "Discount Percentage")
 
 
-def _infer_discount_type_from_values(offer):
+def _infer_discount_type_from_values(offer: dict) -> str | None:
 	if flt(offer.get("rate")) > 0:
 		return "Rate"
 	if flt(offer.get("discount_amount")) > 0:
@@ -372,7 +374,7 @@ def _infer_discount_type_from_values(offer):
 	return None
 
 
-def _normalize_discount_fields(offer):
+def _normalize_discount_fields(offer: dict) -> dict:
 	discount_type = offer.get("discount_type")
 
 	if discount_type != "Rate":
@@ -387,7 +389,7 @@ def _normalize_discount_fields(offer):
 	return offer
 
 
-def _make_offer_identifier(*parts):
+def _make_offer_identifier(*parts: str) -> str:
 	cleaned = [frappe.scrub(cstr(part)) for part in parts if part]
 	if not cleaned:
 		cleaned = [frappe.generate_hash(length=10)]

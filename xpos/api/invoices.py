@@ -11,7 +11,7 @@ from frappe.utils.background_jobs import enqueue
 
 
 @frappe.whitelist()
-def create_invoice(data):
+def create_invoice(data: str | dict):
 	"""Create a POS Sales Invoice from cart data."""
 	data = json.loads(data) if isinstance(data, str) else data
 
@@ -106,31 +106,17 @@ def create_invoice(data):
 		invoice_doc.discount_amount = discount_amount
 		invoice_doc.apply_discount_on = data.get("apply_discount_on") or "Grand Total"
 
-	try:
-		invoice_doc.pos_notes = data.get("pos_notes") or ""
-	except Exception:
-		pass
-	try:
-		invoice_doc.authorization_code = data.get("authorization_code") or ""
-	except Exception:
-		pass
-
-	try:
-		invoice_doc.pos_delivery_date = data.get("pos_delivery_date") or None
-	except Exception:
-		pass
-
-	if data.get("sales_person"):
-		try:
-			invoice_doc.append(
-				"sales_team",
-				{
-					"sales_person": data["sales_person"],
-					"allocated_percentage": 100,
-				},
-			)
-		except Exception:
-			pass
+	invoice_doc.pos_notes = data.get("pos_notes", "")
+	invoice_doc.authorization_code = data.get("authorization_code", "") or ""
+	invoice_doc.pos_delivery_date = data.get("pos_delivery_date", None) or None
+	if data.get("sales_person", None):
+		invoice_doc.append(
+			"sales_team",
+			{
+				"sales_person": data["sales_person"],
+				"allocated_percentage": 100,
+			},
+		)
 
 	if data.get("redeem_loyalty_points") and data.get("loyalty_points"):
 		invoice_doc.redeem_loyalty_points = 1
@@ -176,7 +162,6 @@ def create_invoice(data):
 					"price_list_rate",
 				)
 				if price_list_rate is not None and flt(price_list_rate, 2) != item_rate:
-					# Use the price list rate instead of overriding
 					item_rate = flt(price_list_rate, 2)
 
 		item = invoice_doc.append("items", {})
@@ -245,7 +230,6 @@ def create_invoice(data):
 			except Exception:
 				pass
 
-	# Apply taxes from POS profile
 	existing_account_heads = set()
 	if pos.taxes_and_charges:
 		invoice_doc.taxes_and_charges = pos.taxes_and_charges
@@ -377,7 +361,7 @@ def create_invoice(data):
 	return _build_invoice_response(invoice_doc)
 
 
-def _submit_invoice_job(invoice_name, doctype="Sales Invoice"):
+def _submit_invoice_job(invoice_name: str, doctype: str = "Sales Invoice"):
 	"""Background job to submit an invoice."""
 	try:
 		doc = frappe.get_doc(doctype, invoice_name)
@@ -389,7 +373,7 @@ def _submit_invoice_job(invoice_name, doctype="Sales Invoice"):
 
 
 @frappe.whitelist()
-def update_draft_invoice(data):
+def update_draft_invoice(data: str | dict):
 	"""Update an existing draft invoice"""
 	data = json.loads(data) if isinstance(data, str) else data
 
@@ -463,7 +447,7 @@ def update_draft_invoice(data):
 
 
 @frappe.whitelist()
-def save_draft_invoice(data):
+def save_draft_invoice(data: str | dict):
 	"""Save invoice as draft without submitting.
 
 	If data contains a ``name`` field that matches an existing draft invoice,
@@ -491,7 +475,6 @@ def save_draft_invoice(data):
 	if not debit_to:
 		debit_to = frappe.db.get_value("Company", pos.company, "default_receivable_account")
 
-	# If an existing draft name is provided, update it instead of creating a new one
 	is_update = False
 	if invoice_name and frappe.db.exists(doctype, invoice_name):
 		invoice_doc = frappe.get_doc(doctype, invoice_name)
@@ -575,7 +558,7 @@ def save_draft_invoice(data):
 
 
 @frappe.whitelist()
-def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
+def get_draft_invoices(pos_opening_shift: str, doctype: str = "Sales Invoice"):
 	"""Get draft invoices for the current shift."""
 	filters = {"docstatus": 0, "is_pos": 1}
 
@@ -608,14 +591,14 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 
 @frappe.whitelist()
 def get_past_orders(
-	pos_profile="",
-	from_date="",
-	to_date="",
-	search_term="",
-	page=0,
-	limit=20,
-	filters=None,
-	order_by="posting_date desc, posting_time desc",
+	pos_profile: str = "",
+	from_date: str = "",
+	to_date: str = "",
+	search_term: str = "",
+	page: int = 0,
+	limit: int = 20,
+	filters: str | None = None,
+	order_by: str = "posting_date desc, posting_time desc",
 ):
 	"""Get past submitted invoices with advanced filtering and pagination.
 
@@ -772,15 +755,14 @@ def get_past_orders(
 
 	order_clause = ", ".join(order_parts) if order_parts else "si.posting_date DESC, si.posting_time DESC"
 
-	total = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated allowed-field lists, values parameterized
-		f"""SELECT COUNT(*) FROM `tabSales Invoice` si WHERE {conditions}""",
+	total = frappe.db.sql(
+		"""SELECT COUNT(*) FROM `tabSales Invoice` si WHERE """ + conditions,
 		values,
 		as_list=True,
 	)[0][0]
 
-	orders = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated allowed-field lists, values parameterized
-		f"""
-		SELECT
+	orders = frappe.db.sql(
+		"""SELECT
 			si.name,
 			si.customer,
 			si.customer_name,
@@ -797,8 +779,12 @@ def get_past_orders(
 			si.owner,
 			si.modified
 		FROM `tabSales Invoice` si
-		WHERE {conditions}
-		ORDER BY {order_clause}
+		WHERE """
+		+ conditions
+		+ """
+		ORDER BY """
+		+ order_clause
+		+ """
 		LIMIT %(offset)s, %(limit)s
 		""",
 		values,
@@ -809,7 +795,7 @@ def get_past_orders(
 
 
 @frappe.whitelist()
-def get_invoices(pos_opening_shift=None, is_return=None, limit=50):
+def get_invoices(pos_opening_shift: str | None = None, is_return: int | None = None, limit: int = 50):
 	"""Return POS invoices filtered by opening shift and optional return flag."""
 	filters = {"docstatus": 1, "is_pos": 1}
 	if pos_opening_shift:
@@ -839,7 +825,7 @@ def get_invoices(pos_opening_shift=None, is_return=None, limit=50):
 
 
 @frappe.whitelist()
-def get_invoice_details(invoice_name, doctype="Sales Invoice"):
+def get_invoice_details(invoice_name: str, doctype: str = "Sales Invoice"):
 	"""Get full invoice details including items and payments."""
 	doc = frappe.get_doc(doctype, invoice_name)
 
@@ -910,7 +896,7 @@ def get_invoice_details(invoice_name, doctype="Sales Invoice"):
 
 
 @frappe.whitelist()
-def delete_draft_invoice(invoice_name, doctype="Sales Invoice"):
+def delete_draft_invoice(invoice_name: str, doctype: str = "Sales Invoice"):
 	"""Delete a draft invoice."""
 	doc = frappe.get_doc(doctype, invoice_name)
 	if doc.docstatus != 0:
@@ -921,18 +907,18 @@ def delete_draft_invoice(invoice_name, doctype="Sales Invoice"):
 
 @frappe.whitelist()
 def search_invoices_for_return(
-	company,
-	invoice_name="",
-	customer_name="",
-	customer_id="",
-	mobile_no="",
-	from_date="",
-	to_date="",
-	min_amount=None,
-	max_amount=None,
-	page=1,
-	pos_profile="",
-	doctype="Sales Invoice",
+	company: str,
+	invoice_name: str = "",
+	customer_name: str = "",
+	customer_id: str = "",
+	mobile_no: str = "",
+	from_date: str = "",
+	to_date: str = "",
+	min_amount: float | None = None,
+	max_amount: float | None = None,
+	page: int = 1,
+	pos_profile: str = "",
+	doctype: str = "Sales Invoice",
 ):
 	"""Search for invoices that can be returned.
 
@@ -941,6 +927,9 @@ def search_invoices_for_return(
 	page = max(cint(page), 1)
 	page_length = 50
 	start = (page - 1) * page_length
+
+	if doctype not in ("Sales Invoice", "POS Invoice"):
+		frappe.throw(_("Invalid doctype for return search"))
 
 	table = f"`tab{doctype}`"
 
@@ -1003,9 +992,8 @@ def search_invoices_for_return(
 		conditions.append(f"({' OR '.join(or_parts)})")
 
 	where_clause = " AND ".join(conditions)
-
-	invoices = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — table validated against allowed doctype list, conditions parameterized
-		f"""
+	# nosemgrep: frappe-sql-format-injection — table/column from validated doctype allowlist, all values parameterized
+	sql = f"""
 		SELECT
 			{table}.name, {table}.company, {table}.customer, {table}.customer_name,
 			{table}.posting_date, {table}.posting_time, {table}.grand_total, {table}.currency,
@@ -1015,7 +1003,9 @@ def search_invoices_for_return(
 		WHERE {where_clause}
 		ORDER BY {table}.posting_date DESC, {table}.name DESC
 		LIMIT %(limit)s OFFSET %(offset)s
-		""",
+		"""
+	invoices = frappe.db.sql(
+		sql,
 		{**params, "limit": page_length + 1, "offset": start},
 		as_dict=True,
 	)
@@ -1040,7 +1030,7 @@ def search_invoices_for_return(
 
 
 @frappe.whitelist()
-def get_invoice_for_return(invoice_name, pos_profile="", doctype="Sales Invoice"):
+def get_invoice_for_return(invoice_name: str, pos_profile: str = "", doctype: str = "Sales Invoice"):
 	"""Fetch a single invoice with remaining returnable item quantities.
 
 	Accounts for past returns to show only what can still be returned.
@@ -1112,7 +1102,9 @@ def get_invoice_for_return(invoice_name, pos_profile="", doctype="Sales Invoice"
 
 
 @frappe.whitelist()
-def validate_return_items(original_invoice_name, return_items, doctype="Sales Invoice"):
+def validate_return_items(
+	original_invoice_name: str, return_items: str | list, doctype: str = "Sales Invoice"
+):
 	"""Validate return items don't exceed original sold quantities."""
 	if isinstance(return_items, str):
 		return_items = json.loads(return_items)
@@ -1163,7 +1155,7 @@ def validate_return_items(original_invoice_name, return_items, doctype="Sales In
 
 
 @frappe.whitelist()
-def validate_cart_items(items, pos_profile):
+def validate_cart_items(items: str | list, pos_profile: str):
 	"""Pre-submission stock validation for cart items."""
 	if isinstance(items, str):
 		items = json.loads(items)
@@ -1212,7 +1204,7 @@ def validate_cart_items(items, pos_profile):
 
 
 @frappe.whitelist()
-def fetch_exchange_rate(from_currency, to_currency):
+def fetch_exchange_rate(from_currency: str, to_currency: str):
 	"""Returns exchange rate between two currencies."""
 	from erpnext.setup.utils import get_exchange_rate
 
@@ -1224,7 +1216,7 @@ def fetch_exchange_rate(from_currency, to_currency):
 
 
 @frappe.whitelist()
-def get_last_invoice_rates(customer, item_codes, company):
+def get_last_invoice_rates(customer: str, item_codes: str | list, company: str):
 	"""Get the most recent invoice rates for items by customer."""
 	if isinstance(item_codes, str):
 		item_codes = json.loads(item_codes)
@@ -1232,8 +1224,11 @@ def get_last_invoice_rates(customer, item_codes, company):
 	if not item_codes:
 		return []
 
-	placeholders = ", ".join(["%s"] * len(item_codes))
-	results = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — placeholders are %s list for parameterized IN clause
+	item_params = {}
+	for idx, code in enumerate(item_codes):
+		item_params[f"item_{idx}"] = code
+	item_placeholders = ", ".join([f"%(item_{i})s" for i in range(len(item_codes))])
+	results = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — item_placeholders is built from %(name)s named params, all values parameterized
 		f"""
 		SELECT
 			sii.item_code,
@@ -1243,14 +1238,14 @@ def get_last_invoice_rates(customer, item_codes, company):
 			si.posting_date
 		FROM `tabSales Invoice Item` sii
 		INNER JOIN `tabSales Invoice` si ON si.name = sii.parent
-		WHERE si.customer = %s
-			AND si.company = %s
+		WHERE si.customer = %(customer)s
+			AND si.company = %(company)s
 			AND si.docstatus = 1
 			AND si.is_return = 0
-			AND sii.item_code IN ({placeholders})
+			AND sii.item_code IN ({item_placeholders})
 		ORDER BY si.posting_date DESC, si.creation DESC
 		""",
-		[customer, company] + item_codes,
+		{"customer": customer, "company": company, **item_params},
 		as_dict=True,
 	)
 
@@ -1264,7 +1259,7 @@ def get_last_invoice_rates(customer, item_codes, company):
 	return latest
 
 
-def _build_invoice_response(invoice_doc):
+def _build_invoice_response(invoice_doc: dict) -> dict:
 	"""Build a standard invoice response dict."""
 	return {
 		"name": invoice_doc.name,
@@ -1292,7 +1287,7 @@ def _build_invoice_response(invoice_doc):
 	}
 
 
-def _validate_return_invoice(return_against, customer, items):
+def _validate_return_invoice(return_against: str, customer: str, items: str | list) -> list:
 	"""Validate return invoice data against the original invoice and attach source row references."""
 	doctype = "Sales Invoice"
 	if not frappe.db.exists(doctype, return_against):
@@ -1315,18 +1310,20 @@ def _validate_return_invoice(return_against, customer, items):
 
 	link_field = "sales_invoice_item" if doctype == "Sales Invoice" else "pos_invoice_item"
 	child_doctype = "Sales Invoice Item" if doctype == "Sales Invoice" else "POS Invoice Item"
-
-	returned_rows = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — doctype/link_field validated against hardcoded allowed values above
-		f"""
+	# nosemgrep: frappe-sql-format-injection — doctype/child_doctype/link_field from hardcoded allowlist, values parameterized
+	query = f"""
         SELECT {link_field} AS row_name, COALESCE(SUM(ABS(qty)), 0) AS returned_qty
         FROM `tab{child_doctype}`
         WHERE parent IN (
-            SELECT name FROM `tab{doctype}` WHERE return_against = %s AND docstatus = 1
+            SELECT name FROM `tab{doctype}` WHERE return_against = %(return_against)s AND docstatus = 1
         )
             AND IFNULL({link_field}, '') != ''
         GROUP BY {link_field}
-        """,
-		return_against,
+        """
+
+	returned_rows = frappe.db.sql(
+		query,
+		{"return_against": return_against},
 		as_dict=True,
 	)
 	returned_qty_by_row = {row.row_name: flt(row.returned_qty) for row in returned_rows if row.row_name}
@@ -1395,14 +1392,14 @@ def _validate_return_invoice(return_against, customer, items):
 
 @frappe.whitelist()
 def search_invoices_for_repeat(
-	company,
-	search_term="",
-	customer="",
-	from_date="",
-	to_date="",
-	pos_profile="",
-	page=1,
-	doctype="Sales Invoice",
+	company: str,
+	search_term: str = "",
+	customer: str = "",
+	from_date: str = "",
+	to_date: str = "",
+	pos_profile: str = "",
+	page: int = 1,
+	doctype: str = "Sales Invoice",
 ):
 	"""Search submitted invoices to repeat/duplicate.
 
@@ -1454,7 +1451,7 @@ def search_invoices_for_repeat(
 
 
 @frappe.whitelist()
-def get_invoice_for_repeat(invoice_name, pos_profile="", doctype="Sales Invoice"):
+def get_invoice_for_repeat(invoice_name: str, pos_profile: str = "", doctype: str = "Sales Invoice"):
 	"""Fetch invoice details for repeating/duplicating into a new cart.
 
 	Returns item details with current stock prices so the repeated

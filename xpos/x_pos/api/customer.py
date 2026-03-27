@@ -8,7 +8,7 @@ Hook handlers live here; customer CRUD/list APIs are implemented in
 """
 
 import frappe
-from frappe import _
+from frappe import Any, _
 
 from xpos.x_pos.doctype.referral_code.referral_code import (
 	create_referral_code,
@@ -17,16 +17,16 @@ from xpos.x_pos.doctype.referral_code.referral_code import (
 from . import customers
 
 
-def after_insert(doc, method):
+def after_insert(doc: Any, method: str):
 	create_customer_referral_code(doc)
 	create_gift_coupon(doc)
 
 
-def validate(doc, method):
+def validate(doc: Any, method: str):
 	validate_referral_code(doc)
 
 
-def create_customer_referral_code(doc):
+def create_customer_referral_code(doc: Any):
 	if doc.referral_company:
 		company = frappe.get_cached_doc("Company", doc.referral_company)
 		if not company.auto_referral:
@@ -40,7 +40,7 @@ def create_customer_referral_code(doc):
 		)
 
 
-def create_gift_coupon(doc):
+def create_gift_coupon(doc: Any):
 	if doc.referral_code:
 		coupon = frappe.new_doc("XPOS Coupon")
 		coupon.customer = doc.name
@@ -48,7 +48,7 @@ def create_gift_coupon(doc):
 		coupon.create_coupon_from_referral()
 
 
-def validate_referral_code(doc):
+def validate_referral_code(doc: Any):
 	referral_code = doc.referral_code
 	exist = None
 	if referral_code:
@@ -60,7 +60,7 @@ def validate_referral_code(doc):
 
 
 @frappe.whitelist()
-def get_customer_balance(customer):
+def get_customer_balance(customer: str):
 	return customers.get_customer_balance(customer)
 
 

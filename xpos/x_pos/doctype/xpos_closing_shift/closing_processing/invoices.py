@@ -94,9 +94,9 @@ def delete_draft_invoices(pos_opening_shift, pos_profile):
         from
             `tab{doctype}`
         where
-            docstatus = 0 and is_printed = 0 and pos_opening_shift = %s
+            docstatus = 0 and is_printed = 0 and pos_opening_shift = %(pos_opening_shift)s
         """,
-			(pos_opening_shift),
+			{"pos_opening_shift": pos_opening_shift},
 			as_dict=1,
 		)
 

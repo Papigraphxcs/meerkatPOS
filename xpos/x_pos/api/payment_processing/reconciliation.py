@@ -9,7 +9,9 @@ from xpos.x_pos.api.payment_processing.data import get_outstanding_invoices, get
 
 
 @frappe.whitelist()
-def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profile=None):
+def auto_reconcile_customer_invoices(
+	customer: str, company: str, currency: str | None = None, pos_profile: str | None = None
+):
 	"""Automatically reconcile all unallocated payments against outstanding invoices for a customer.
 
 	This mirrors ERPNext's payment reconciliation tool by fetching all outstanding invoices and
@@ -62,7 +64,6 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
 			"reconciled_payments": 0,
 		}
 
-	# Sort invoices by posting date (oldest first) to mimic ERPNext's reconciliation behaviour
 	outstanding_invoices = sorted(
 		outstanding_invoices,
 		key=lambda inv: (
@@ -76,7 +77,6 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
 		),
 	)
 
-	# Sort payments oldest first so that earlier payments are consumed before newer ones
 	unallocated_payments = sorted(
 		unallocated_payments,
 		key=lambda pay: (
@@ -89,8 +89,7 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
 	skipped_payments = []
 	total_allocated = 0
 
-	def _restore_outstandings(invoice_allocs):
-		# Helper to restore outstanding amounts if allocation fails mid-way
+	def _restore_outstandings(invoice_allocs: list[dict]):
 		for alloc in invoice_allocs:
 			for invoice in outstanding_invoices:
 				if invoice.get("voucher_no") == alloc.get("invoice"):
@@ -326,9 +325,6 @@ def auto_reconcile_customer_invoices(customer, company, currency=None, pos_profi
 			)
 			continue
 
-		# ERPNext payment reconciliation can allocate Payment Entries that are
-		# advances against Sales Orders even when PE.unallocated_amount is zero.
-		# So prefer the fetched reconciliation amount from payment row.
 		unallocated_before = flt(payment.get("unallocated_amount")) or flt(pe_doc.get("unallocated_amount"))
 		if unallocated_before <= 0:
 			skipped_payments.append(

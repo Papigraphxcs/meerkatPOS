@@ -1,22 +1,15 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""
-Pricing Rules API.
-
-- Fetch active selling pricing rules for the POS context
-- Reconcile line prices with ERPNext's pricing rule engine
-"""
-
 import json
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import flt, nowdate
 
 
 @frappe.whitelist()
-def get_active_pricing_rules(params):
+def get_active_pricing_rules(params: dict | str):
 	"""Return active selling pricing rules for POS context.
 
 	Args:
@@ -40,56 +33,28 @@ def get_active_pricing_rules(params):
 	if not company:
 		return []
 
-	conditions = """
-		pr.disable = 0
-		AND pr.selling = 1
-		AND pr.company = %(company)s
-		AND (pr.valid_from IS NULL OR pr.valid_from <= %(date)s)
-		AND (pr.valid_upto IS NULL OR pr.valid_upto >= %(date)s)
-	"""
-	values = {"company": company, "date": date}
-
-	rules = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions are static SQL predicates, values parameterized
-		f"""
-		SELECT
-			pr.name,
-			pr.title,
-			pr.apply_on,
-			pr.price_or_product_discount,
-			pr.selling,
-			pr.min_qty,
-			pr.max_qty,
-			pr.min_amt,
-			pr.max_amt,
-			pr.rate_or_discount,
-			pr.rate,
-			pr.discount_percentage,
-			pr.discount_amount,
-			pr.for_price_list,
-			pr.company,
-			pr.currency,
-			pr.applicable_for,
-			pr.customer,
-			pr.customer_group,
-			pr.territory,
-			pr.free_item,
-			pr.free_qty,
-			pr.free_item_rate,
-			pr.same_item,
-			pr.apply_discount_on_rate,
-			pr.priority,
-			pr.apply_multiple_pricing_rules,
-			pr.apply_recursion,
-			pr.recurse_for,
-			pr.is_recursive,
-			pr.margin_type,
-			pr.margin_rate_or_amount,
-			pr.mixed_conditions
-		FROM `tabPricing Rule` pr
-		WHERE {conditions}
-		ORDER BY pr.priority DESC, pr.name ASC
-		""",
-		values,
+	rules = frappe.db.sql(
+		"""
+        SELECT
+            pr.name, pr.title, pr.apply_on, pr.price_or_product_discount,
+            pr.selling, pr.min_qty, pr.max_qty, pr.min_amt, pr.max_amt,
+            pr.rate_or_discount, pr.rate, pr.discount_percentage,
+            pr.discount_amount, pr.for_price_list, pr.company, pr.currency,
+            pr.applicable_for, pr.customer, pr.customer_group, pr.territory,
+            pr.free_item, pr.free_qty, pr.free_item_rate, pr.same_item,
+            pr.apply_discount_on_rate, pr.priority, pr.apply_multiple_pricing_rules,
+            pr.apply_recursion, pr.recurse_for, pr.is_recursive, pr.margin_type,
+            pr.margin_rate_or_amount, pr.mixed_conditions
+        FROM `tabPricing Rule` pr
+        WHERE
+            pr.disable = 0
+            AND pr.selling = 1
+            AND pr.company = %(company)s
+            AND (pr.valid_from IS NULL OR pr.valid_from <= %(date)s)
+            AND (pr.valid_upto IS NULL OR pr.valid_upto >= %(date)s)
+        ORDER BY pr.priority DESC, pr.name ASC
+        """,
+		{"company": company, "date": date},
 		as_dict=True,
 	)
 
@@ -116,7 +81,7 @@ def get_active_pricing_rules(params):
 
 
 @frappe.whitelist()
-def reconcile_line_prices(cart_payload):
+def reconcile_line_prices(cart_payload: dict | str):
 	"""Recalculate line prices with ERPNext's pricing rule engine.
 
 	Validates cross-item rules, returns updated rates and free items.
@@ -140,7 +105,7 @@ def reconcile_line_prices(cart_payload):
 	customer = context.get("customer")
 	price_list = context.get("price_list")
 	currency = context.get("currency")
-	_pos_profile = context.get("pos_profile")  # reserved for future use
+	_pos_profile = context.get("pos_profile")
 
 	if not company or not customer:
 		return {"updates": [], "free_lines": [], "invoice_updates": {}}
@@ -217,7 +182,7 @@ def reconcile_line_prices(cart_payload):
 		return {"updates": [], "free_lines": [], "invoice_updates": {}}
 
 
-def _get_pricing_rule_items(rule_name, apply_on):
+def _get_pricing_rule_items(rule_name: str, apply_on: str) -> list:
 	"""Get the items/groups/brands a pricing rule applies to."""
 	if apply_on == "Item Code":
 		return frappe.get_all(

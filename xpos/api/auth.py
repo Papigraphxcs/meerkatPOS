@@ -1,14 +1,6 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""
-POS offline-authentication API.
-
-``get_pos_users`` returns Frappe users that are assigned to POS profiles,
-enriched with their display name, enabled status, and role-based permission
-flags stored as custom fields on the Frappe User doctype.  The data is
-synced to the local ``pos_users`` table for offline login.
-"""
 
 import json
 
@@ -16,9 +8,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
-# Custom field names on tabUser that hold per-user POS permission flags.
-# These should be created via xpos custom-field fixtures; absent fields
-# default to 0 (false) so the app remains usable without them.
 PERMISSION_FIELDS = [
 	"xpos_role",
 	"xpos_pos_profile",
@@ -73,12 +62,12 @@ def _get_user_fields():
 
 @frappe.whitelist()
 def get_pos_users(
-	doctype=None,
-	fields=None,
-	filters=None,
-	order_by="modified asc",
-	limit_start=0,
-	limit_page_length=100,
+	doctype: str | None = None,
+	fields: list | None = None,
+	filters: dict | None = None,
+	order_by: str = "modified asc",
+	limit_start: int = 0,
+	limit_page_length: int = 100,
 ):
 	"""Return POS-enabled Frappe users for offline authentication sync.
 
@@ -94,7 +83,6 @@ def get_pos_users(
 	limit_start = cint(limit_start)
 	limit_page_length = cint(limit_page_length)
 
-	# Collect users assigned to any active POS profile.
 	profile_users = frappe.db.sql(
 		"""
         SELECT DISTINCT pu.user
@@ -102,9 +90,9 @@ def get_pos_users(
         INNER JOIN `tabPOS Profile` pp ON pp.name = pu.parent
         WHERE pp.disabled = 0
         ORDER BY pu.user
-        LIMIT %s OFFSET %s
+        LIMIT %(limit)s OFFSET %(offset)s
         """,
-		(limit_page_length, limit_start),
+		{"limit": limit_page_length, "offset": limit_start},
 		as_dict=True,
 	)
 
@@ -113,7 +101,6 @@ def get_pos_users(
 
 	user_names = [r.user for r in profile_users]
 
-	# Build field list for tabUser query.
 	base_fields = ["name", "username", "full_name", "enabled", "modified"]
 	available_xpos_fields = _get_user_fields()
 	all_fields = base_fields + available_xpos_fields
@@ -133,15 +120,12 @@ def get_pos_users(
 			"full_name": user.full_name or user.name,
 			"enabled": cint(user.enabled),
 			"modified": str(user.modified) if user.modified else None,
-			# password_hash is intentionally empty – offline PIN auth is
-			# set up separately via db:create-local-user.
 			"password_hash": "",
 			"role": user.get("xpos_role") or "Cashier",
 			"pos_profile": user.get("xpos_pos_profile") or "",
 			"warehouse": user.get("xpos_warehouse") or "",
 			"company": user.get("xpos_company") or "",
 			"theme": user.get("xpos_theme") or "Default",
-			# Permission flags – fall back to 0 when custom fields absent.
 			"close_bill": cint(user.get("xpos_close_bill", 1)),
 			"allow_reprint_invoice": cint(user.get("xpos_allow_reprint_invoice", 0)),
 			"stock_adjustment": cint(user.get("xpos_stock_adjustment", 0)),

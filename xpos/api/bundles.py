@@ -1,12 +1,6 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""
-Product Bundles API.
-
-Returns component items for Product Bundles used in POS.
-"""
-
 import json
 
 import frappe
@@ -14,7 +8,7 @@ from frappe import _
 
 
 @frappe.whitelist()
-def get_bundle_components(bundles):
+def get_bundle_components(bundles: str | list) -> dict:
 	"""Return component items for Product Bundles.
 
 	Args:

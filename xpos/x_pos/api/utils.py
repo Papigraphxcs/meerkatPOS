@@ -14,7 +14,7 @@ HAS_VARIANTS_EXCLUSION = {"has_variants": 0}
 logger = logging.getLogger(__name__)
 
 
-def expand_item_groups(item_groups):
+def expand_item_groups(item_groups: list[str] | None):
 	"""Expand any parent item groups to include their children.
 
 	This function takes a list of item groups and expands any parent groups
@@ -56,7 +56,7 @@ def expand_item_groups(item_groups):
 	return list(expanded_groups)
 
 
-def _ensure_pos_profile(pos_profile):
+def _ensure_pos_profile(pos_profile: str | dict | None):
 	"""Return a ``(profile_dict, profile_json)`` tuple for the given input.
 
 	The POS profile parameter can arrive as a JSON string, a python ``dict``,
@@ -108,7 +108,7 @@ def _ensure_pos_profile(pos_profile):
 
 
 @frappe.whitelist()
-def get_active_pos_profile(user=None):
+def get_active_pos_profile(user: str | None = None):
 	"""Return the active POS profile for the given user."""
 	user = user or frappe.session.user
 	profile = frappe.db.get_value("POS Profile User", {"user": user}, "parent")
@@ -120,7 +120,7 @@ def get_active_pos_profile(user=None):
 
 
 @frappe.whitelist()
-def get_default_warehouse(company=None):
+def get_default_warehouse(company: str | None = None):
 	"""Return the default warehouse for the given company."""
 	company = company or frappe.defaults.get_default("company")
 	if not company:

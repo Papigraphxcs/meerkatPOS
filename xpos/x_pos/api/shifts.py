@@ -21,10 +21,10 @@ def get_opening_dialog_data():
         SELECT DISTINCT p.name, p.company, p.currency
         FROM `tabPOS Profile` p
         INNER JOIN `tabPOS Profile User` u ON u.parent = p.name
-        WHERE p.disabled = 0 AND u.user = %s
+        WHERE p.disabled = 0 AND u.user = %(user)s
         ORDER BY p.name
     """,
-		frappe.session.user,
+		{"user": frappe.session.user},
 		as_dict=1,
 	)
 
@@ -58,7 +58,7 @@ def get_opening_dialog_data():
 
 
 @frappe.whitelist()
-def create_opening_voucher(pos_profile, company, balance_details):
+def create_opening_voucher(pos_profile: str, company: str, balance_details: str):
 	balance_details = json.loads(balance_details)
 
 	new_pos_opening = frappe.get_doc(
@@ -82,7 +82,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
 
 
 @frappe.whitelist()
-def check_opening_shift(user):
+def check_opening_shift(user: str | None = None):
 	open_vouchers = frappe.db.get_all(
 		"XPOS Opening Shift",
 		filters={
@@ -102,7 +102,7 @@ def check_opening_shift(user):
 	return data
 
 
-def update_opening_shift_data(data, pos_profile):
+def update_opening_shift_data(data: dict, pos_profile: str):
 	data["pos_profile"] = frappe.get_doc("POS Profile", pos_profile)
 	data["company"] = frappe.get_doc("Company", data["pos_profile"].company)
 	allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0)

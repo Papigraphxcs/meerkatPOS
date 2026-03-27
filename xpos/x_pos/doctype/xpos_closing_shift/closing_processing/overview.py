@@ -12,7 +12,7 @@ from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.utils import get_b
 
 
 @frappe.whitelist()
-def get_closing_shift_overview(pos_opening_shift):
+def get_closing_shift_overview(pos_opening_shift: str | dict):
 	"""Return invoice and payment totals for the provided POS Opening Shift."""
 
 	if not pos_opening_shift:
@@ -703,7 +703,7 @@ def get_closing_shift_overview(pos_opening_shift):
 
 
 @frappe.whitelist()
-def get_payment_reconciliation_details(closing_shift_doc):
+def get_payment_reconciliation_details(closing_shift_doc: frappe._dict):
 	company_currency = frappe.get_cached_value("Company", closing_shift_doc.company, "default_currency")
 
 	sales_breakdown = defaultdict(float)

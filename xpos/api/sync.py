@@ -1,25 +1,12 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""
-Generic child-table data endpoint for the xpos sync engine.
-
-Frappe v14+ blocks direct ``frappe.client.get_list`` access to child-table
-doctypes (they raise ``PermissionError`` via ``check_parent_permission``).
-This whitelisted endpoint provides access to a curated allowlist of child
-tables that the POS needs for offline operation, using ``frappe.get_all``
-with ``ignore_permissions=True``.
-
-Only doctypes explicitly listed in ALLOWED_CHILD_DOCTYPES are accessible.
-"""
-
 import json
 
 import frappe
 from frappe import _
 from frappe.utils import cint
 
-# Exhaustive list of child-table doctypes the POS sync engine may request.
 ALLOWED_CHILD_DOCTYPES = {
 	"Mode of Payment Account",
 	"POS Payment Method",
@@ -38,12 +25,12 @@ ALLOWED_CHILD_DOCTYPES = {
 
 @frappe.whitelist()
 def get_child_table_data(
-	doctype,
-	fields=None,
-	filters=None,
-	order_by="modified asc",
-	limit_start=0,
-	limit_page_length=500,
+	doctype: str,
+	fields: str | list | None = None,
+	filters: str | dict | None = None,
+	order_by: str = "modified asc",
+	limit_start: int = 0,
+	limit_page_length: int = 500,
 ):
 	"""Return records from a whitelisted child-table doctype.
 
@@ -93,11 +80,11 @@ def get_child_table_data(
 
 @frappe.whitelist()
 def get_item_prices(
-	fields=None,
-	filters=None,
-	order_by="modified asc",
-	limit_start=0,
-	limit_page_length=500,
+	fields: str | list | None = None,
+	filters: str | dict | None = None,
+	order_by: str = "modified asc",
+	limit_start: int = 0,
+	limit_page_length: int = 500,
 ):
 	"""Return Item Price records for the sync engine.
 
@@ -125,7 +112,6 @@ def get_item_prices(
 	limit_start = cint(limit_start)
 	limit_page_length = cint(limit_page_length)
 
-	# Default to the full set of fields the sync engine needs
 	if not fields:
 		fields = [
 			"name",

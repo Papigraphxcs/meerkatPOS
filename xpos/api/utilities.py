@@ -110,7 +110,7 @@ def get_selling_price_lists():
 
 
 @frappe.whitelist()
-def get_pos_profile_tax_inclusive(pos_profile):
+def get_pos_profile_tax_inclusive(pos_profile: str):
 	"""Returns tax inclusive flag for a POS Profile."""
 
 	try:
@@ -120,7 +120,7 @@ def get_pos_profile_tax_inclusive(pos_profile):
 
 
 @frappe.whitelist()
-def get_active_pos_profile(user=None):
+def get_active_pos_profile(user: str | None = None):
 	"""Returns the active POS Profile for a user."""
 
 	user = user or frappe.session.user
@@ -130,11 +130,11 @@ def get_active_pos_profile(user=None):
 		SELECT DISTINCT p.name, p.company, p.currency, p.warehouse
 		FROM `tabPOS Profile` p
 		INNER JOIN `tabPOS Profile User` u ON u.parent = p.name
-		WHERE p.disabled = 0 AND u.user = %s
+		WHERE p.disabled = 0 AND u.user = %(user)s
 		ORDER BY u.default DESC, p.name ASC
 		LIMIT 1
 		""",
-		user,
+		{"user": user},
 		as_dict=True,
 	)
 
@@ -144,7 +144,7 @@ def get_active_pos_profile(user=None):
 
 
 @frappe.whitelist()
-def get_default_warehouse(company=None):
+def get_default_warehouse(company: str | None = None):
 	"""Returns default warehouse for a company."""
 
 	if not company:

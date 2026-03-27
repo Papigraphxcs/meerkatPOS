@@ -2,7 +2,7 @@ import frappe
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 
 
-def get_party_account(party_type, party, company):
+def get_party_account(party_type: str, party: str, company: str) -> str | None:
 	try:
 		# First try to get from Party Account
 		account = frappe.get_cached_value(
@@ -12,7 +12,6 @@ def get_party_account(party_type, party, company):
 		)
 
 		if not account:
-			# Try to get default account from company
 			account = frappe.get_cached_value(
 				"Company",
 				company,
@@ -31,7 +30,7 @@ def get_party_account(party_type, party, company):
 		return None
 
 
-def get_bank_cash_account(company, mode_of_payment, bank_account=None):
+def get_bank_cash_account(company: str, mode_of_payment: str, bank_account: str | None = None) -> dict | None:
 	bank = get_default_bank_cash_account(
 		company, "Bank", mode_of_payment=mode_of_payment, account=bank_account
 	)
@@ -45,12 +44,12 @@ def get_bank_cash_account(company, mode_of_payment, bank_account=None):
 
 
 def set_paid_amount_and_received_amount(
-	party_account_currency,
-	bank,
-	outstanding_amount,
-	payment_type,
-	bank_amount,
-	conversion_rate,
+	party_account_currency: str,
+	bank: dict,
+	outstanding_amount: float,
+	payment_type: str,
+	bank_amount: float | None,
+	conversion_rate: float | None,
 ):
 	paid_amount = received_amount = 0
 	if party_account_currency == bank.account_currency:
@@ -67,14 +66,13 @@ def set_paid_amount_and_received_amount(
 		if bank_amount:
 			paid_amount = bank_amount
 		else:
-			# if party account currency and bank currency is different then populate paid amount as well
 			paid_amount = received_amount * conversion_rate
 
 	return paid_amount, received_amount
 
 
 @frappe.whitelist()
-def get_mode_of_payment_accounts(company, mode_of_payments):
+def get_mode_of_payment_accounts(company: str, mode_of_payments: str | list) -> dict:
 	import json
 
 	if isinstance(mode_of_payments, str):

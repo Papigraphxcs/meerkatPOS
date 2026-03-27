@@ -16,19 +16,19 @@ from xpos.x_pos.api.utils import log_perf_event
 
 @frappe.whitelist()
 def search_invoices_for_return(
-	invoice_name,
-	company,
-	customer_name=None,
-	customer_id=None,
-	mobile_no=None,
-	tax_id=None,
-	from_date=None,
-	to_date=None,
-	min_amount=None,
-	max_amount=None,
-	page=1,
-	pos_profile=None,
-	doctype="Sales Invoice",
+	invoice_name: str | None = None,
+	company: str | None = None,
+	customer_name: str | None = None,
+	customer_id: str | None = None,
+	mobile_no: str | None = None,
+	tax_id: str | None = None,
+	from_date: str | None = None,
+	to_date: str | None = None,
+	min_amount: float | None = None,
+	max_amount: float | None = None,
+	page: int = 1,
+	pos_profile: str | None = None,
+	doctype: str = "Sales Invoice",
 ):
 	"""
 	Search for invoices that can be returned with separate customer search fields and pagination
@@ -38,7 +38,7 @@ def search_invoices_for_return(
 	    company: Company to search in
 	    customer_name: Customer name to search for
 	    customer_id: Customer ID to search for
-	    mobile_no: Mobile number to search for
+	    mobile_no: Mobile number to search
 	    tax_id: Tax ID to search for
 	    from_date: Start date for filtering
 	    to_date: End date for filtering
@@ -54,14 +54,12 @@ def search_invoices_for_return(
 	started_at = time.perf_counter()
 	enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
 
-	# Start with base filters
 	filters = {
 		"company": company,
 		"docstatus": 1,
 		"is_return": 0,
 	}
 
-	# Normalize page number input
 	try:
 		page = int(page or 1)
 	except (TypeError, ValueError):
@@ -69,15 +67,12 @@ def search_invoices_for_return(
 	if page < 1:
 		page = 1
 
-	# Items per page - can be adjusted based on performance requirements
 	page_length = 100
 	start = (page - 1) * page_length
 
-	# Add invoice name filter if provided
 	if invoice_name:
 		filters["name"] = ["like", f"%{invoice_name}%"]
 
-	# Add date range filters if provided
 	if from_date:
 		filters["posting_date"] = [">=", from_date]
 
@@ -87,68 +82,42 @@ def search_invoices_for_return(
 		else:
 			filters["posting_date"] = ["<=", to_date]
 
-	# Add amount filters if provided
 	if min_amount:
-		filters["grand_total"] = [">=", float(min_amount)]
+		filters["grand_total"] = [">=", flt(min_amount)]
 
 	if max_amount:
 		if "grand_total" in filters:
-			# If min_amount was already set, change to between
-			filters["grand_total"] = ["between", [float(min_amount), float(max_amount)]]
+			filters["grand_total"] = ["between", [flt(min_amount), flt(max_amount)]]
 		else:
-			filters["grand_total"] = ["<=", float(max_amount)]
+			filters["grand_total"] = ["<=", flt(max_amount)]
 
-	# If any customer search criteria is provided, find matching customers
 	customer_ids = []
-	if customer_name or customer_id or mobile_no or tax_id:
-		conditions = []
-		params = {}
+	if any([customer_name, customer_id, mobile_no, tax_id]):
+		customer_filters = []
 
 		if customer_name:
-			conditions.append("customer_name LIKE %(customer_name)s")
-			params["customer_name"] = f"%{customer_name}%"
-
+			customer_filters.append(["customer_name", "like", f"%{customer_name}%"])
 		if customer_id:
-			conditions.append("name LIKE %(customer_id)s")
-			params["customer_id"] = f"%{customer_id}%"
-
+			customer_filters.append(["name", "like", f"%{customer_id}%"])
 		if mobile_no:
-			conditions.append("mobile_no LIKE %(mobile_no)s")
-			params["mobile_no"] = f"%{mobile_no}%"
-
+			customer_filters.append(["mobile_no", "like", f"%{mobile_no}%"])
 		if tax_id:
-			conditions.append("tax_id LIKE %(tax_id)s")
-			params["tax_id"] = f"%{tax_id}%"
+			customer_filters.append(["tax_id", "like", f"%{tax_id}%"])
 
-		# Build the WHERE clause for the query
-		where_clause = " OR ".join(conditions)
-		customer_query = f"""  # nosemgrep: frappe-sql-format-injection — conditions built from validated field names, values parameterized
-        SELECT name
-        FROM `tabCustomer`
-        WHERE {where_clause}
-        LIMIT 100
-    """
+		customers = frappe.get_list(
+			"Customer",
+			filters=customer_filters,
+			or_filters=True,
+			limit=100,
+			pluck="name",
+		)
+		customer_ids = customers
 
-		customers = frappe.db.sql(customer_query, params, as_dict=True)
-		customer_ids = [c.name for c in customers]
-
-		# If we found matching customers, add them to the filter
 		if customer_ids:
 			filters["customer"] = ["in", customer_ids]
-		# If customer search criteria provided but no matches found, return empty
-		elif any([customer_name, customer_id, mobile_no, tax_id]):
-			log_perf_event(
-				"search_invoices_for_return",
-				started_at,
-				doctype=doctype,
-				page=page,
-				rows=0,
-				customer_matches=0,
-				early_exit=1,
-			)
+		else:
 			return {"invoices": [], "has_more": False}
 
-	# Get invoices matching all criteria with pagination (+1 row for has_more)
 	invoices_list = frappe.get_list(
 		doctype,
 		filters=filters,
@@ -191,7 +160,6 @@ def search_invoices_for_return(
 	for invoice in invoices_list:
 		invoice["doctype"] = doctype
 
-		# Validation checks logic
 		validity_date = invoice.get("return_valid_upto")
 		expired = False
 		if enforce_return_validity and validity_date:
@@ -220,7 +188,7 @@ def search_invoices_for_return(
 
 
 @frappe.whitelist()
-def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoice"):
+def get_invoice_for_return(invoice_name: str, pos_profile: str | None = None, doctype: str = "Sales Invoice"):
 	"""Return one invoice with returnable item quantities after past returns."""
 	started_at = time.perf_counter()
 	enforce_return_validity, _ = _get_return_validity_settings(pos_profile)
@@ -342,7 +310,7 @@ def get_invoice_for_return(invoice_name, pos_profile=None, doctype="Sales Invoic
 
 
 @frappe.whitelist()
-def validate_return_items(original_invoice_name, return_items, doctype="Sales Invoice"):
+def validate_return_items(original_invoice_name: str, return_items: list, doctype: str = "Sales Invoice"):
 	"""
 	Ensure that return items do not exceed the quantity from the original invoice.
 	"""

@@ -1,3 +1,5 @@
+from warnings import filters
+
 import frappe
 
 from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.invoices import (
@@ -6,19 +8,28 @@ from xpos.x_pos.doctype.xpos_closing_shift.closing_processing.invoices import (
 
 
 @frappe.whitelist()
-def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
+def get_cashiers(
+	doctype: str,
+	txt: str,
+	searchfield: str | None,
+	start: int | 0,
+	page_len: int | 20,
+	filters: dict | None,
+):
 	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=["user"])
 	result = []
 	for cashier in cashiers_list:
 		user_email = frappe.get_value("User", cashier.user, "email")
 		if user_email:
-			# Return list of tuples in format (value, label) where value is user ID and label shows both ID and email
 			result.append([cashier.user, f"{cashier.user} ({user_email})"])
 	return result
 
 
 @frappe.whitelist()
-def get_pos_invoices(pos_opening_shift, doctype=None):
+def get_pos_invoices(pos_opening_shift: str, doctype: str | None = None):
+	if not pos_opening_shift:
+		return []
+
 	if not doctype:
 		pos_profile = frappe.db.get_value("XPOS Opening Shift", pos_opening_shift, "pos_profile")
 		use_pos_invoice = frappe.db.get_value(
@@ -27,28 +38,24 @@ def get_pos_invoices(pos_opening_shift, doctype=None):
 			"create_pos_invoice_instead_of_sales_invoice",
 		)
 		doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
+
 	submit_printed_invoices(pos_opening_shift, doctype)
-	cond = " and ifnull(consolidated_invoice,'') = ''" if doctype == "POS Invoice" else ""
-	data = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — doctype set from validated db lookup, cond is static SQL
-		f"""
-	select
-		name
-	from
-		`tab{doctype}`
-	where
-		docstatus = 1 and pos_opening_shift = %s{cond}
-	""",
-		(pos_opening_shift),
-		as_dict=1,
-	)
 
-	data = [frappe.get_doc(doctype, d.name).as_dict() for d in data]
+	filters = {"pos_opening_shift": pos_opening_shift, "docstatus": 1}
 
-	return data
+	if doctype == "POS Invoice":
+		filters["consolidated_invoice"] = ["in", ["", None]]
+
+	names = frappe.get_all(doctype, filters=filters, pluck="name")
+
+	return [frappe.get_doc(doctype, name).as_dict() for name in names]
 
 
 @frappe.whitelist()
-def get_payments_entries(pos_opening_shift):
+def get_payments_entries(pos_opening_shift: str):
+	if not pos_opening_shift:
+		return []
+
 	return frappe.get_all(
 		"Payment Entry",
 		filters={

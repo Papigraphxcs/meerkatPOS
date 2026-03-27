@@ -2,11 +2,9 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from xpos.x_pos.api.item_processing.barcode import _parse_scale_barcode_data
-
 
 @frappe.whitelist()
-def update_price_list_rate(item_code, price_list, rate, uom=None):
+def update_price_list_rate(item_code: str, price_list: str, rate: float, uom: str | None = None):
 	"""Create or update Item Price for the given item and price list."""
 	if not item_code or not price_list:
 		frappe.throw(_("Item Code and Price List are required"))
@@ -36,12 +34,11 @@ def update_price_list_rate(item_code, price_list, rate, uom=None):
 		)
 		doc.insert(ignore_permissions=True)
 
-	frappe.db.commit()  # nosemgrep: frappe-manual-commit — immediate commit required after batch item price insert
 	return _("Item Price has been added or updated")
 
 
 @frappe.whitelist()
-def get_price_for_uom(item_code, price_list, uom):
+def get_price_for_uom(item_code: str, price_list: str, uom: str) -> float | None:
 	"""Return Item Price for the given item, price list and UOM if it exists."""
 	if not (item_code and price_list and uom):
 		return None

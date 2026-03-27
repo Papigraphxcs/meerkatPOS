@@ -11,7 +11,7 @@ from frappe.utils import cint, flt, getdate, nowdate
 from .utils import get_active_pos_profile, get_default_warehouse
 
 
-def _resolve_pos_profile(pos_profile):
+def _resolve_pos_profile(pos_profile: str | dict | None) -> dict:
 	if isinstance(pos_profile, dict):
 		return pos_profile
 
@@ -34,12 +34,12 @@ def _resolve_pos_profile(pos_profile):
 	return profile
 
 
-def _ensure_allowed(profile, flag, label):
+def _ensure_allowed(profile: dict, flag: str, label: str):
 	if not cint(profile.get(flag)):
 		frappe.throw(_("{0} is disabled for this POS Profile.").format(label))
 
 
-def _resolve_supplier(supplier_value):
+def _resolve_supplier(supplier_value: str | dict | None) -> str | None:
 	if isinstance(supplier_value, dict):
 		supplier_value = (
 			supplier_value.get("name")
@@ -58,16 +58,15 @@ def _resolve_supplier(supplier_value):
 	if supplier_by_label:
 		return supplier_by_label
 
-	# Fallback: case-insensitive lookup by name/supplier_name
 	ci_match = frappe.db.sql(
 		"""
         select name
         from `tabSupplier`
-        where lower(name) = lower(%s)
-           or lower(supplier_name) = lower(%s)
+        where lower(name) = lower(%(supplier)s)
+           or lower(supplier_name) = lower(%(supplier)s)
         limit 1
         """,
-		(supplier, supplier),
+		{"supplier": supplier},
 	)
 	if ci_match and ci_match[0]:
 		return ci_match[0][0]
@@ -75,13 +74,12 @@ def _resolve_supplier(supplier_value):
 	return None
 
 
-def _resolve_buying_price_list():
+def _resolve_buying_price_list() -> str:
 	buying_price_list = frappe.db.get_single_value("Buying Settings", "buying_price_list")
 	if not buying_price_list:
 		buying_price_list = frappe.db.get_value("Price List", {"buying": 1}, "name")
 
 	if not buying_price_list:
-		# Fallback to standard default if exists
 		if frappe.db.exists("Price List", "Standard Buying"):
 			buying_price_list = "Standard Buying"
 
@@ -95,7 +93,14 @@ def _resolve_buying_price_list():
 	return buying_price_list
 
 
-def _upsert_item_price(item_code, price_list, rate, uom=None, buying=False, selling=False):
+def _upsert_item_price(
+	item_code: str,
+	price_list: str,
+	rate: float,
+	uom: str | None = None,
+	buying: bool = False,
+	selling: bool = False,
+) -> str | None:
 	if not price_list or rate is None:
 		return None
 
@@ -128,7 +133,7 @@ def _upsert_item_price(item_code, price_list, rate, uom=None, buying=False, sell
 	return doc.name
 
 
-def _build_items_map(items):
+def _build_items_map(items: list[dict]) -> dict[str, list[dict]]:
 	items_by_code = {}
 	for row in items or []:
 		item_code = row.get("item_code")
@@ -138,14 +143,16 @@ def _build_items_map(items):
 	return items_by_code
 
 
-def _resolve_input_row(items_by_code, item_code):
+def _resolve_input_row(items_by_code: dict[str, list[dict]], item_code: str) -> dict:
 	rows = items_by_code.get(item_code)
 	if not rows:
 		return {}
 	return rows.pop(0)
 
 
-def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_date):
+def _create_purchase_receipt(
+	po_doc: dict, payload: dict, default_warehouse: str | None, transaction_date: str
+) -> str:
 	receipt_date = payload.get("receipt_date") or payload.get("posting_date") or transaction_date
 	receipt = frappe.get_doc(
 		{
@@ -207,7 +214,7 @@ def _create_purchase_receipt(po_doc, payload, default_warehouse, transaction_dat
 
 
 @frappe.whitelist()
-def create_supplier(data):
+def create_supplier(data: str | dict) -> dict:
 	payload = json.loads(data) if isinstance(data, str) else data
 	profile = _resolve_pos_profile(payload.get("pos_profile"))
 	_ensure_allowed(profile, "allow_create_purchase_suppliers", _("Create suppliers"))
@@ -242,7 +249,7 @@ def create_supplier(data):
 
 
 @frappe.whitelist()
-def search_suppliers(search_text=None, limit=20):
+def search_suppliers(search_text: str | None = None, limit: int = 20) -> list[dict]:
 	filters = {"disabled": 0}
 	or_filters = None
 	if search_text:
@@ -256,7 +263,13 @@ def search_suppliers(search_text=None, limit=20):
 		"Supplier",
 		filters=filters,
 		or_filters=or_filters,
-		fields=["name", "supplier_name", "supplier_group", "supplier_type", "default_currency"],
+		fields=[
+			"name",
+			"supplier_name",
+			"supplier_group",
+			"supplier_type",
+			"default_currency",
+		],
 		order_by="supplier_name asc",
 		limit_page_length=limit,
 	)
@@ -269,7 +282,7 @@ def get_buying_price_list():
 
 
 @frappe.whitelist()
-def create_purchase_item(data):
+def create_purchase_item(data: str | dict) -> dict:
 	payload = json.loads(data) if isinstance(data, str) else data
 	profile = _resolve_pos_profile(payload.get("pos_profile"))
 	_ensure_allowed(profile, "allow_create_purchase_items", _("Create items"))
@@ -346,9 +359,11 @@ def create_purchase_item(data):
 	}
 
 
-def _get_mode_of_payment_account(mode, company):
+def _get_mode_of_payment_account(mode: str, company: str) -> str:
 	account = frappe.db.get_value(
-		"Mode of Payment Account", {"parent": mode, "company": company}, "default_account"
+		"Mode of Payment Account",
+		{"parent": mode, "company": company},
+		"default_account",
 	)
 	if not account:
 		frappe.throw(
@@ -357,23 +372,21 @@ def _get_mode_of_payment_account(mode, company):
 	return account
 
 
-def _create_payment_entry(reference_doc, payments, company, transaction_date):
+def _create_payment_entry(
+	reference_doc: dict, payments: list[dict], company: str, transaction_date: str
+) -> list[str]:
 	if not payments:
 		return []
 
 	created_payments = []
 
-	# Check if reference is PO or PI
 	ref_doctype = reference_doc.doctype
 	ref_name = reference_doc.name
 
-	# Determine outstanding amount
 	outstanding_amount = 0
 	if ref_doctype == "Purchase Invoice":
 		outstanding_amount = reference_doc.outstanding_amount
 	else:
-		# For Purchase Order, use grand_total (assuming advance payment for new PO)
-		# Or calculate if some advance was already made, but here it's new.
 		outstanding_amount = reference_doc.grand_total
 
 	for pay in payments:
@@ -395,18 +408,12 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
 
 		pe.paid_from = paid_from_account
 
-		# Fetch party account
 		pe.paid_to = get_party_account("Supplier", reference_doc.supplier, company)
 		if not pe.paid_to:
 			frappe.throw(_("Please set Default Payable Account in Company {0}").format(company))
 
 		pe.paid_amount = amount
 		pe.received_amount = amount
-		# Note: If currencies differ, conversion handling is needed.
-		# Assuming base currency for simplified POS flow or that user enters converted amount.
-
-		# References
-		# Allocate only up to outstanding amount
 		allocated_amount = 0
 		if outstanding_amount > 0:
 			allocated_amount = min(amount, outstanding_amount)
@@ -431,7 +438,7 @@ def _create_payment_entry(reference_doc, payments, company, transaction_date):
 
 
 @frappe.whitelist()
-def create_purchase_order(data):
+def create_purchase_order(data: str | dict) -> dict:
 	payload = json.loads(data) if isinstance(data, str) else data
 	profile = _resolve_pos_profile(payload.get("pos_profile"))
 	_ensure_allowed(profile, "allow_purchase_order", _("Purchase orders"))
@@ -460,21 +467,19 @@ def create_purchase_order(data):
 	if not items:
 		frappe.throw(_("Purchase order requires at least one item."))
 
-	# Get supplier currency (NEW CODE)
 	supplier_doc = frappe.get_doc("Supplier", supplier)
 	supplier_currency = supplier_doc.default_currency
 	if not supplier_currency:
-		# Fallback to company currency if supplier has no default
 		supplier_currency = frappe.get_value("Company", company, "default_currency")
 
-	# Validate price list currency matches (RECOMMENDED)
 	buying_price_list = _resolve_buying_price_list()
 	price_list_currency = frappe.get_value("Price List", buying_price_list, "currency")
 
-	# If currencies don't match, try to find a matching one
 	if price_list_currency and price_list_currency != supplier_currency:
 		alternative_price_list = frappe.db.get_value(
-			"Price List", {"currency": supplier_currency, "buying": 1, "enabled": 1}, "name"
+			"Price List",
+			{"currency": supplier_currency, "buying": 1, "enabled": 1},
+			"name",
 		)
 		if alternative_price_list:
 			buying_price_list = alternative_price_list
@@ -491,7 +496,6 @@ def create_purchase_order(data):
 		}
 	)
 
-	# Set XPOS custom header fields
 	for cf in (
 		"custom_alias_name",
 		"custom_po_category",
@@ -585,7 +589,6 @@ def create_purchase_order(data):
 
 		payments = payload.get("payments")
 		if payments:
-			# Use PI if created, otherwise PO
 			ref_doc = frappe.get_doc("Purchase Invoice", invoice_name) if invoice_name else po_doc
 			_create_payment_entry(ref_doc, payments, company, transaction_date)
 
@@ -600,13 +603,12 @@ def create_purchase_order(data):
 
 
 @frappe.whitelist()
-def search_items(search_text=None, limit=20):
+def search_items(search_text: str | None = None, limit: int = 20) -> list[dict]:
 	limit = cint(limit) or 20
 	search_text = (search_text or "").strip()
 
 	if search_text:
 		like_value = f"%{search_text}%"
-		# Search by item_code, item_name and barcode using SQL for reliable OR logic
 		items = frappe.db.sql(
 			"""
             SELECT DISTINCT i.name, i.item_name, i.stock_uom, i.standard_rate,
@@ -648,7 +650,6 @@ def search_items(search_text=None, limit=20):
 			{"uom": row.uom, "conversion_factor": row.conversion_factor}
 		)
 
-	# Also fetch barcodes for each item
 	barcode_map = {}
 	if item_codes:
 		barcode_rows = frappe.get_all(
@@ -683,14 +684,14 @@ def search_items(search_text=None, limit=20):
 
 
 @frappe.whitelist()
-def search_item_by_barcode(barcode, pos_profile=None):
+def search_item_by_barcode(barcode: str, pos_profile: str | None = None) -> dict | None:
 	"""Search item specifically by barcode for purchasing."""
 	if not barcode:
 		return None
 
 	price_list = _resolve_buying_price_list()
 
-	def _get_buying_rate(item_code):
+	def _get_buying_rate(item_code: str) -> float:
 		rate = 0
 		if price_list:
 			rate = frappe.db.get_value(
@@ -702,7 +703,6 @@ def search_item_by_barcode(barcode, pos_profile=None):
 			rate = frappe.db.get_value("Item", item_code, "standard_rate")
 		return flt(rate)
 
-	# Check Item Barcode table
 	barcode_data = frappe.db.get_value(
 		"Item Barcode",
 		{"barcode": barcode},
@@ -721,7 +721,6 @@ def search_item_by_barcode(barcode, pos_profile=None):
 			"standard_rate": _get_buying_rate(item.name),
 		}
 
-	# Check if barcode matches item_code directly
 	if frappe.db.exists("Item", barcode):
 		item = frappe.get_cached_doc("Item", barcode)
 		return {
@@ -736,7 +735,13 @@ def search_item_by_barcode(barcode, pos_profile=None):
 	return None
 
 
-def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_date, receipt_doc=None):
+def _create_purchase_invoice(
+	po_doc: dict,
+	payload: dict,
+	default_warehouse: str | None,
+	transaction_date: str,
+	receipt_doc: dict | None = None,
+) -> str:
 	invoice_date = payload.get("invoice_date") or payload.get("invoice_posting_date") or transaction_date
 	invoice = frappe.get_doc(
 		{
@@ -790,7 +795,7 @@ def _create_purchase_invoice(po_doc, payload, default_warehouse, transaction_dat
 
 
 @frappe.whitelist()
-def get_pending_receipts(warehouse=None, limit=50):
+def get_pending_receipts(warehouse: str | None = None, limit: int = 50) -> list[dict]:
 	"""Get Purchase Orders that are pending stock receipt."""
 	filters = {
 		"docstatus": 1,
@@ -798,13 +803,12 @@ def get_pending_receipts(warehouse=None, limit=50):
 		"per_received": ["<", 100],
 	}
 	if warehouse:
-		# Filter POs that have items for this warehouse
 		po_names = frappe.db.sql_list(
 			"""
             SELECT DISTINCT parent FROM `tabPurchase Order Item`
-            WHERE warehouse = %s AND docstatus = 1
+            WHERE warehouse = %(warehouse)s AND docstatus = 1
             """,
-			warehouse,
+			{"warehouse": warehouse},
 		)
 		if po_names:
 			filters["name"] = ["in", po_names]
@@ -853,7 +857,7 @@ def get_pending_receipts(warehouse=None, limit=50):
 
 
 @frappe.whitelist()
-def get_purchase_order_detail(purchase_order):
+def get_purchase_order_detail(purchase_order: str) -> dict:
 	"""Get a single Purchase Order with its items for receiving."""
 
 	if not purchase_order or not frappe.db.exists("Purchase Order", purchase_order):
@@ -893,7 +897,7 @@ def get_purchase_order_detail(purchase_order):
 
 
 @frappe.whitelist()
-def receive_stock(data):
+def receive_stock(data: str | dict) -> dict:
 	"""
 	Create a Purchase Receipt from a Purchase Order.
 	Supports partial receipt and rejection.
@@ -972,7 +976,7 @@ def receive_stock(data):
 			"warehouse": item_warehouse,
 			"purchase_order": po_name,
 			"purchase_order_item": po_detail,
-			"schedule_date": str(po_item.schedule_date) if po_item.schedule_date else nowdate(),
+			"schedule_date": (str(po_item.schedule_date) if po_item.schedule_date else nowdate()),
 		}
 
 		if reject_qty > 0:
@@ -1004,7 +1008,7 @@ def receive_stock(data):
 
 
 @frappe.whitelist()
-def get_stock_and_transit(item_codes, warehouse=None):
+def get_stock_and_transit(item_codes: str | list[str], warehouse: str | None = None) -> dict:
 	"""
 	Get stock in hand and transit stock for given item codes.
 
@@ -1023,7 +1027,6 @@ def get_stock_and_transit(item_codes, warehouse=None):
 
 	result = {}
 
-	# Get actual qty (stock in hand) from Bin
 	bin_filters = {"item_code": ["in", item_codes]}
 	if warehouse:
 		bin_filters["warehouse"] = warehouse
@@ -1035,14 +1038,12 @@ def get_stock_and_transit(item_codes, warehouse=None):
 		group_by="item_code" if not warehouse else None,
 	)
 
-	# If no warehouse filter, aggregate across all warehouses
 	stock_map = {}
 	ordered_map = {}
 	for b in bins:
 		stock_map[b.item_code] = flt(stock_map.get(b.item_code, 0)) + flt(b.actual_qty)
 		ordered_map[b.item_code] = flt(ordered_map.get(b.item_code, 0)) + flt(b.ordered_qty)
 
-	# Get transit stock: qty from submitted POs not yet received
 	transit_data = frappe.db.sql(
 		"""
         SELECT poi.item_code,
@@ -1073,7 +1074,7 @@ def get_stock_and_transit(item_codes, warehouse=None):
 
 
 @frappe.whitelist()
-def get_category_items(supplier, po_category, warehouse=None):
+def get_category_items(supplier: str, po_category: str, warehouse: str | None = None) -> list[dict]:
 	"""
 	Get items based on PO category and supplier.
 
@@ -1097,22 +1098,17 @@ def get_category_items(supplier, po_category, warehouse=None):
 	items = []
 
 	if po_category == "Against Purchase Quotation":
-		# Get items from supplier's pending purchase quotations
 		items = _get_items_from_purchase_quotations(supplier)
 
 	elif po_category == "Against Sale Order":
-		# Get items from pending sales orders that need to be purchased
 		items = _get_items_from_sales_orders(supplier, warehouse)
 
 	elif po_category == "Projection Period":
-		# Get items based on sales projection (last 30 days average * projection factor)
 		items = _get_items_from_projection(supplier, warehouse)
 
 	elif po_category == "Reorder Level":
-		# Get items below reorder level for this supplier
 		items = _get_items_below_reorder(supplier, warehouse)
 
-	# Enrich items with UOM data
 	if items:
 		item_codes = [i.get("item_code") for i in items]
 		uom_data = _get_item_uoms(item_codes)
@@ -1122,7 +1118,7 @@ def get_category_items(supplier, po_category, warehouse=None):
 	return items
 
 
-def _get_items_from_purchase_quotations(supplier):
+def _get_items_from_purchase_quotations(supplier: str) -> list[dict]:
 	"""Get items from supplier's pending purchase quotations."""
 	quotations = frappe.get_all(
 		"Supplier Quotation",
@@ -1158,12 +1154,10 @@ def _get_items_from_purchase_quotations(supplier):
 	return list(items_map.values())
 
 
-def _get_items_from_sales_orders(supplier, warehouse=None):
+def _get_items_from_sales_orders(supplier: str, warehouse: str | None = None) -> list[dict]:
 	"""Get items from pending sales orders that this supplier can supply."""
-	# Get items that this supplier provides (from Item Supplier or Item Default)
 	supplier_items = set()
 
-	# From Item Supplier child table
 	supplier_item_rows = frappe.get_all(
 		"Item Supplier",
 		filters={"supplier": supplier},
@@ -1172,7 +1166,6 @@ def _get_items_from_sales_orders(supplier, warehouse=None):
 	for row in supplier_item_rows:
 		supplier_items.add(row.parent)
 
-	# From Item Default child table
 	default_supplier_rows = frappe.get_all(
 		"Item Default",
 		filters={"default_supplier": supplier},
@@ -1184,7 +1177,6 @@ def _get_items_from_sales_orders(supplier, warehouse=None):
 	if not supplier_items:
 		return []
 
-	# Get pending sales order items for these items
 	filters = {
 		"docstatus": 1,
 		"status": ["not in", ["Completed", "Cancelled", "Closed"]],
@@ -1227,14 +1219,12 @@ def _get_items_from_sales_orders(supplier, warehouse=None):
 	return items
 
 
-def _get_items_from_projection(supplier, warehouse=None):
+def _get_items_from_projection(supplier: str, warehouse: str | None = None) -> list[dict]:
 	"""Get items based on sales projection (last 30 days average)."""
-	# Get supplier's items
 	supplier_items = _get_supplier_item_codes(supplier)
 	if not supplier_items:
 		return []
 
-	# Calculate average daily sales for last 30 days
 	from_date = frappe.utils.add_days(nowdate(), -30)
 
 	sales_data = frappe.db.sql(
@@ -1258,7 +1248,7 @@ def _get_items_from_projection(supplier, warehouse=None):
 	items = []
 	for row in sales_data:
 		avg_daily = flt(row.total_qty) / 30
-		suggested_qty = max(1, int(avg_daily * 7))  # Suggest 1 week's worth
+		suggested_qty = max(1, int(avg_daily * 7))
 
 		item = frappe.get_cached_doc("Item", row.item_code)
 		items.append(
@@ -1275,13 +1265,12 @@ def _get_items_from_projection(supplier, warehouse=None):
 	return items
 
 
-def _get_items_below_reorder(supplier, warehouse=None):
+def _get_items_below_reorder(supplier: str, warehouse: str | None = None) -> list[dict]:
 	"""Get items below reorder level for this supplier."""
 	supplier_items = _get_supplier_item_codes(supplier)
 	if not supplier_items:
 		return []
 
-	# Get items with reorder level set
 	reorder_data = frappe.db.sql(
 		"""
         SELECT
@@ -1295,7 +1284,7 @@ def _get_items_below_reorder(supplier, warehouse=None):
         """,
 		{
 			"items": supplier_items,
-			"warehouse_filter": f"AND ir.warehouse = '{warehouse}'" if warehouse else "",
+			"warehouse_filter": (f"AND ir.warehouse = '{warehouse}'" if warehouse else ""),
 		},
 		as_dict=True,
 	)
@@ -1303,7 +1292,6 @@ def _get_items_below_reorder(supplier, warehouse=None):
 	if not reorder_data:
 		return []
 
-	# Get current stock for these items
 	reorder_items = {r.item_code: r for r in reorder_data}
 	stock_data = get_stock_and_transit(list(reorder_items.keys()), warehouse)
 
@@ -1334,11 +1322,10 @@ def _get_items_below_reorder(supplier, warehouse=None):
 	return items
 
 
-def _get_supplier_item_codes(supplier):
+def _get_supplier_item_codes(supplier: str) -> list[str]:
 	"""Get all item codes for a supplier."""
 	supplier_items = set()
 
-	# From Item Supplier child table
 	supplier_item_rows = frappe.get_all(
 		"Item Supplier",
 		filters={"supplier": supplier},
@@ -1347,7 +1334,6 @@ def _get_supplier_item_codes(supplier):
 	for row in supplier_item_rows:
 		supplier_items.add(row.parent)
 
-	# From Item Default child table
 	default_supplier_rows = frappe.get_all(
 		"Item Default",
 		filters={"default_supplier": supplier},
@@ -1359,7 +1345,7 @@ def _get_supplier_item_codes(supplier):
 	return list(supplier_items)
 
 
-def _get_buying_rate(item_code):
+def _get_buying_rate(item_code: str) -> float:
 	"""Get buying rate for an item."""
 	price_list = _resolve_buying_price_list()
 	rate = 0
@@ -1374,7 +1360,7 @@ def _get_buying_rate(item_code):
 	return flt(rate)
 
 
-def _get_item_uoms(item_codes):
+def _get_item_uoms(item_codes: list[str]) -> dict[str, list[dict[str, float]]]:
 	"""Get UOM conversion details for items."""
 	if not item_codes:
 		return {}
@@ -1391,7 +1377,6 @@ def _get_item_uoms(item_codes):
 			uom_map[row.parent] = []
 		uom_map[row.parent].append({"uom": row.uom, "conversion_factor": row.conversion_factor})
 
-	# Add stock_uom with conversion_factor 1 if not present
 	for item_code in item_codes:
 		if item_code not in uom_map:
 			stock_uom = frappe.get_value("Item", item_code, "stock_uom")
@@ -1405,13 +1390,8 @@ def _get_item_uoms(item_codes):
 	return uom_map
 
 
-# ---------------------------------------------------------------------------
-# Draft Purchase Order management (XPOS — save in Frappe doctype, docstatus=0)
-# ---------------------------------------------------------------------------
-
-
 @frappe.whitelist()
-def save_po_draft(data):
+def save_po_draft(data: str | dict) -> dict:
 	"""
 	Save or update a Purchase Order in Draft state (docstatus=0).
 
@@ -1535,7 +1515,7 @@ def save_po_draft(data):
 
 
 @frappe.whitelist()
-def load_po_draft(name):
+def load_po_draft(name: str) -> dict:
 	"""
 	Load a draft Purchase Order and return its data in the frontend cart format.
 
@@ -1598,7 +1578,7 @@ def load_po_draft(name):
 
 
 @frappe.whitelist()
-def delete_po_draft(name):
+def delete_po_draft(name: str) -> dict:
 	"""
 	Delete a draft Purchase Order (docstatus=0 only).
 
@@ -1620,7 +1600,7 @@ def delete_po_draft(name):
 
 
 @frappe.whitelist()
-def list_po_drafts(limit=20):
+def list_po_drafts(limit: int = 20) -> list[dict]:
 	"""
 	List draft Purchase Orders owned by the current user (docstatus=0).
 

@@ -10,22 +10,23 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
 	get_existing_payment_request_amount,
 )
 from erpnext.accounts.party import get_party_bank_account
-from frappe import _
+from frappe import Any, _
 from frappe.utils import flt, nowdate
 
 from xpos.x_pos.api.utilities import ensure_child_doctype
 
 
-def get_pos_credit_redeem_remark(invoice_name):
+def get_pos_credit_redeem_remark(invoice_name: str) -> str:
 	return _("POS credit redemption for Sales Invoice {0}").format(invoice_name)
 
 
 @frappe.whitelist()
-def create_payment_request(doc):
-	doc = json.loads(doc)
-	for pay in doc.get("payments"):
+def create_payment_request(doc: str | dict) -> dict | None:
+	if isinstance(doc, str):
+		doc = json.loads(doc)
+	for pay in doc.get("payments", []):
 		if pay.get("type") == "Phone":
-			if pay.get("amount") <= 0:
+			if flt(pay.get("amount")) <= 0:
 				frappe.throw(_("Payment amount cannot be less than or equal to 0"))
 
 			if not doc.get("contact_mobile"):
@@ -38,10 +39,10 @@ def create_payment_request(doc):
 			else:
 				pay_req.request_phone_payment()
 
-			return pay_req
+			return pay_req.as_dict()
 
 
-def get_new_payment_request(doc, mop):
+def get_new_payment_request(doc: dict, mop: dict) -> Any:
 	payment_gateway_account = frappe.db.get_value(
 		"Payment Gateway Account",
 		{
@@ -64,16 +65,20 @@ def get_new_payment_request(doc, mop):
 	return make_payment_request(**args)
 
 
-def get_payment_gateway_account(args):  # nosemgrep: overusing-args — args passed directly to frappe.db.get_value as filters, standard Frappe pattern
+def get_payment_gateway_account(gateway_account: str) -> dict | None:
+	"""Fetch gateway account details by name."""
+	if not gateway_account:
+		return None
+
 	return frappe.db.get_value(
 		"Payment Gateway Account",
-		args,
+		gateway_account,
 		["name", "payment_gateway", "payment_account", "message"],
 		as_dict=1,
 	)
 
 
-def get_existing_payment_request(doc, pay):
+def get_existing_payment_request(doc: dict, pay: dict) -> Any | None:
 	payment_gateway_account = frappe.db.get_value(
 		"Payment Gateway Account",
 		{
@@ -94,7 +99,7 @@ def get_existing_payment_request(doc, pay):
 		return frappe.get_doc("Payment Request", pr)
 
 
-def make_payment_request(**args):
+def make_payment_request(**args: dict) -> dict:
 	"""Make payment request"""
 
 	args = frappe._dict(args)
@@ -198,7 +203,7 @@ def make_payment_request(**args):
 	return pr.as_dict()
 
 
-def get_amount(ref_doc, payment_account=None):
+def get_amount(ref_doc: Any, payment_account: str | None = None) -> float:
 	"""get amount based on doctype"""
 	grand_total = 0
 	for pay in ref_doc.payments:
@@ -213,8 +218,9 @@ def get_amount(ref_doc, payment_account=None):
 		frappe.throw(_("Payment Entry is already created or payment account is not matched"))
 
 
-def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, cash_account, payments):
-	# redeeming customer credit with journal voucher
+def redeeming_customer_credit(
+	invoice_doc: Any, data: dict, is_payment_entry: bool, total_cash: float, cash_account: str, payments: list
+):
 	today = nowdate()
 	if data.get("redeemed_customer_credit"):
 		cost_center = frappe.get_value("POS Profile", invoice_doc.pos_profile, "cost_center")
@@ -314,7 +320,7 @@ def redeeming_customer_credit(invoice_doc, data, is_payment_entry, total_cash, c
 
 
 @frappe.whitelist()
-def get_available_credit(customer, company):
+def get_available_credit(customer: str, company: str) -> list[dict]:
 	total_credit = []
 
 	outstanding_invoices = frappe.get_all(
@@ -331,8 +337,11 @@ def get_available_credit(customer, company):
 	allocations = {}
 	invoice_names = [row.name for row in outstanding_invoices]
 	if invoice_names:
-		placeholders = ", ".join(["%s"] * len(invoice_names))
-		payment_allocations = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — placeholders are %s list for parameterized IN clause
+		invoice_params = {}
+		for idx, inv in enumerate(invoice_names):
+			invoice_params[f"inv_{idx}"] = inv
+		inv_placeholders = ", ".join([f"%(inv_{i})s" for i in range(len(invoice_names))])
+		payment_allocations = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — inv_placeholders is built from %(name)s named params, all values parameterized
 			f"""
                 select
                     per.reference_name,
@@ -340,12 +349,12 @@ def get_available_credit(customer, company):
                 from `tabPayment Entry Reference` per
                 inner join `tabPayment Entry` pe on pe.name = per.parent
                 where per.reference_doctype = 'Sales Invoice'
-                    and per.reference_name in ({placeholders})
+                    and per.reference_name in ({inv_placeholders})
                     and pe.docstatus = 1
                     and pe.payment_type = 'Pay'
                 group by per.reference_name
             """,
-			invoice_names,
+			invoice_params,
 			as_dict=True,
 		)
 

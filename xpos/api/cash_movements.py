@@ -1,13 +1,6 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""
-POS Cash Movement API.
-
-- POS Expense (cash out for expenses during shift)
-- Cash Deposit (deposit cash to bank/safe during shift)
-- Cash movement listing and cancellation
-"""
 
 import json
 
@@ -20,7 +13,7 @@ from frappe.utils import cint, flt, now_datetime, nowdate
 
 
 @frappe.whitelist()
-def get_cash_movement_context(pos_profile):
+def get_cash_movement_context(pos_profile: str):
 	"""Returns configuration context for cash movement dialogs."""
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
 
@@ -67,7 +60,7 @@ def get_cash_movement_context(pos_profile):
 
 
 @frappe.whitelist()
-def create_pos_expense(payload):
+def create_pos_expense(payload: str | dict):
 	"""Creates a POS Expense cash movement with journal entry."""
 
 	if isinstance(payload, str):
@@ -110,7 +103,6 @@ def create_pos_expense(payload):
 		account_info = get_bank_cash_account(cash_mop, company)
 		cash_account = account_info.get("account")
 
-	# Create Journal Entry
 	je = frappe.get_doc(
 		{
 			"doctype": "Journal Entry",
@@ -153,7 +145,7 @@ def create_pos_expense(payload):
 
 
 @frappe.whitelist()
-def create_cash_deposit(payload):
+def create_cash_deposit(payload: str | dict):
 	"""Creates a Cash Deposit movement with journal entry."""
 
 	if isinstance(payload, str):
@@ -236,12 +228,12 @@ def create_cash_deposit(payload):
 
 @frappe.whitelist()
 def get_shift_cash_movements(
-	pos_opening_shift,
-	movement_type=None,
-	status=None,
-	search_text=None,
-	limit_start=0,
-	limit_page_length=20,
+	pos_opening_shift: str,
+	movement_type: str | None = None,
+	status: str | None = None,
+	search_text: str | None = None,
+	limit_start: int = 0,
+	limit_page_length: int = 20,
 ):
 	"""
 	Lists cash movements for a shift with search and pagination.
@@ -271,7 +263,7 @@ def get_shift_cash_movements(
 
 
 @frappe.whitelist()
-def cancel_cash_movement(name):
+def cancel_cash_movement(name: str):
 	"""Cancels a submitted cash movement and its linked journal entry."""
 
 	try:
@@ -285,7 +277,6 @@ def cancel_cash_movement(name):
 	if movement.status == "Cancelled":
 		frappe.throw(_("Cash movement is already cancelled"))
 
-	# Cancel linked journal entry
 	if movement.journal_entry:
 		try:
 			je = frappe.get_doc("Journal Entry", movement.journal_entry)

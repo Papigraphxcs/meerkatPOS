@@ -4,7 +4,7 @@ from frappe import _
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from xpos.x_pos.api.invoice_processing.utils import _sanitize_item_name
-from xpos.x_pos.api.items import get_bulk_stock_availability, get_stock_availability
+from xpos.x_pos.api.item_processing.stock import get_bulk_stock_availability, get_stock_availability
 
 
 def _is_stock_item(item):

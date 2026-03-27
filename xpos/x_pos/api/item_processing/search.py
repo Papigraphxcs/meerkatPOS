@@ -3,21 +3,19 @@ import re
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import frappe
-from frappe import _, as_json
-from frappe.utils import cint, cstr, get_datetime
+from frappe import _
+from frappe.utils import cstr, get_datetime
 from frappe.utils.caching import redis_cache
 
-from xpos.x_pos.api.item_fetchers import ItemDetailAggregator
 from xpos.x_pos.api.item_processing.barcode import search_serial_or_batch_or_barcode_number
 from xpos.x_pos.api.item_processing.details import get_items_details
 from xpos.x_pos.api.utils import (
 	HAS_VARIANTS_EXCLUSION,
 	_ensure_pos_profile,
 	expand_item_groups,
-	get_active_pos_profile,
 	get_item_groups,
 	log_perf_event,
 )
@@ -84,10 +82,10 @@ def _build_search_plan(
 	pos_profile: dict[str, Any],
 	item_group: str,
 	search_value: str,
-	limit,
-	offset,
-	start_after,
-	modified_after,
+	limit: int | None,
+	offset: int | None,
+	start_after: str | None,
+	modified_after: str | None,
 	include_description: bool,
 	include_image: bool,
 	item_groups: Sequence[str] | None,
@@ -481,10 +479,10 @@ def _execute_item_search(
 	item_group: str,
 	search_value: str,
 	customer: str | None,
-	limit,
-	offset,
-	start_after,
-	modified_after,
+	limit: int | None,
+	offset: int | None,
+	start_after: str | None,
+	modified_after: str | None,
 	include_description: bool,
 	include_image: bool,
 	item_groups: Sequence[str] | None,
@@ -512,7 +510,7 @@ def _execute_item_search(
 	return _run_item_query(pos_profile, price_list, customer, plan)
 
 
-def _normalize_profile_context(pos_profile) -> ProfileContext:
+def _normalize_profile_context(pos_profile: str | dict) -> ProfileContext:
 	"""Return the active profile metadata required by :func:`get_items`."""
 
 	profile_dict, profile_json = _ensure_pos_profile(pos_profile)
@@ -532,7 +530,9 @@ def _normalize_profile_context(pos_profile) -> ProfileContext:
 	)
 
 
-def _prepare_item_groups(profile_name: str | None, item_groups) -> ItemGroupContext:
+def _prepare_item_groups(
+	profile_name: str | None, item_groups: str | Sequence[str] | None
+) -> ItemGroupContext:
 	"""Normalise incoming item group filters and expand group hierarchies."""
 
 	groups: list[str]
@@ -557,18 +557,18 @@ def _prepare_item_groups(profile_name: str | None, item_groups) -> ItemGroupCont
 
 @frappe.whitelist()
 def get_items(
-	pos_profile,
-	price_list=None,
-	item_group="",
-	search_value="",
-	customer=None,
-	limit=None,
-	offset=None,
-	start_after=None,
-	modified_after=None,
-	include_description=False,
-	include_image=False,
-	item_groups=None,
+	pos_profile: str | dict,
+	price_list: str | None = None,
+	item_group: str = "",
+	search_value: str = "",
+	customer: str | None = None,
+	limit: int | None = None,
+	offset: int | None = None,
+	start_after: str | None = None,
+	modified_after: str | None = None,
+	include_description: bool = False,
+	include_image: bool = False,
+	item_groups: str | Sequence[str] | None = None,
 ):
 	started_at = time.perf_counter()
 	profile_ctx = _normalize_profile_context(pos_profile)
@@ -668,7 +668,7 @@ def get_items_groups():
 
 
 @frappe.whitelist()
-def get_items_count(pos_profile, item_groups=None):
+def get_items_count(pos_profile: str | dict, item_groups: str | Sequence[str] | None = None):
 	pos_profile, _ = _ensure_pos_profile(pos_profile)
 	if isinstance(item_groups, str):
 		try:

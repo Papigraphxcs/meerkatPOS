@@ -1,51 +1,19 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""Public invoice API facade backed by `invoice_processing` modules."""
-
 import time
 
 import frappe
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from frappe import _
 
-from xpos.x_pos.api.invoice_processing.creation import (
-	submit_in_background_job,
-	submit_invoice,
-	update_invoice,
-	validate_cart_items,
-)
-from xpos.x_pos.api.invoice_processing.data import get_last_invoice_rates
-from xpos.x_pos.api.invoice_processing.payment import _create_change_payment_entries
-from xpos.x_pos.api.invoice_processing.returns import (
-	get_invoice_for_return,
-	search_invoices_for_return,
-	validate_return_items,
-)
-from xpos.x_pos.api.invoice_processing.stock import (
-	_apply_item_name_overrides,
-	_auto_set_return_batches,
-	_collect_stock_errors,
-	_deduplicate_free_items,
-	_merge_duplicate_taxes,
-	_should_block,
-	_strip_client_freebies_from_payload,
-	_validate_stock_on_invoice,
-)
-from xpos.x_pos.api.invoice_processing.utils import (
-	_build_invoice_remarks,
-	_get_return_validity_settings,
-	_set_return_valid_upto,
-	_validate_return_window,
-	get_available_currencies,
-	get_latest_rate,
-	get_price_list_currency,
-)
+from xpos.x_pos.api.invoice_processing.creation import update_invoice
+from xpos.x_pos.api.invoice_processing.utils import get_latest_rate
 from xpos.x_pos.api.utils import log_perf_event
 
 
 @frappe.whitelist()
-def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
+def get_draft_invoices(pos_opening_shift: str, doctype: str = "Sales Invoice"):
 	started_at = time.perf_counter()
 	filters = {
 		"pos_opening_shift": pos_opening_shift,
@@ -81,7 +49,7 @@ def get_draft_invoices(pos_opening_shift, doctype="Sales Invoice"):
 
 
 @frappe.whitelist()
-def get_draft_invoice_doc(invoice_name, doctype="Sales Invoice"):
+def get_draft_invoice_doc(invoice_name: str, doctype: str = "Sales Invoice"):
 	started_at = time.perf_counter()
 	doc = frappe.get_cached_doc(doctype, invoice_name)
 	log_perf_event(
@@ -95,9 +63,7 @@ def get_draft_invoice_doc(invoice_name, doctype="Sales Invoice"):
 
 
 @frappe.whitelist()
-def delete_invoice(invoice):
-	from frappe import _
-
+def delete_invoice(invoice: str):
 	doctype = "Sales Invoice"
 	if frappe.db.exists("POS Invoice", invoice):
 		doctype = "POS Invoice"
@@ -114,7 +80,7 @@ def delete_invoice(invoice):
 
 
 @frappe.whitelist()
-def fetch_exchange_rate_pair(from_currency, to_currency):
+def fetch_exchange_rate_pair(from_currency: str, to_currency: str):
 	"""Return exchange rate payload expected by POS multi-currency UI."""
 
 	if not from_currency or not to_currency:
@@ -136,7 +102,7 @@ def fetch_exchange_rate_pair(from_currency, to_currency):
 
 
 @frappe.whitelist()
-def create_sales_invoice_from_order(sales_order):
+def create_sales_invoice_from_order(sales_order: str):
 	"""Backward-compatible facade for legacy frontend method path."""
 
 	if not sales_order:
@@ -153,7 +119,7 @@ def create_sales_invoice_from_order(sales_order):
 
 
 @frappe.whitelist()
-def delete_sales_invoice(sales_invoice):
+def delete_sales_invoice(sales_invoice: str):
 	"""Backward-compatible facade for legacy frontend method path."""
 
 	if not sales_invoice:
@@ -165,7 +131,7 @@ def delete_sales_invoice(sales_invoice):
 
 
 @frappe.whitelist()
-def update_invoice_from_order(data):
+def update_invoice_from_order(data: dict):
 	"""Backward-compatible facade used by order-to-invoice flow."""
 
 	return update_invoice(data)

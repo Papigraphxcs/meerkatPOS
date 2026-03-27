@@ -5,7 +5,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt, json
 
 
-def get_stock_availability(item_code, warehouse):
+def get_stock_availability(item_code: str, warehouse: str) -> float:
 	"""Return total available quantity for an item in the given warehouse.
 
 	``warehouse`` can be either a single warehouse or a warehouse group.
@@ -18,7 +18,6 @@ def get_stock_availability(item_code, warehouse):
 
 	warehouses = [warehouse]
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
-		# Include all child warehouses when a group warehouse is set
 		warehouses = frappe.db.get_descendants("Warehouse", warehouse) or []
 
 	bin_doctype = DocType("Bin")
@@ -34,7 +33,7 @@ def get_stock_availability(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_bulk_stock_availability(items):
+def get_bulk_stock_availability(items: list[dict]) -> dict[tuple[str, str, str], float]:
 	"""
 	Fetch available stock for a list of items.
 
@@ -47,20 +46,18 @@ def get_bulk_stock_availability(items):
 	if not items:
 		return {}
 
-	# Separate items
-	regular_items_map = {}  # (warehouse) -> set(item_code)
+	regular_items_map = {}
 	results = {}
 
 	for d in items:
 		item_code = d.get("item_code")
 		warehouse = d.get("warehouse")
-		batch_no = cstr(d.get("batch_no"))  # Normalize to empty string
+		batch_no = cstr(d.get("batch_no"))
 
 		if not item_code or not warehouse:
 			continue
 
 		if batch_no:
-			# Fallback to existing single fetch for batches for now
 			results[(item_code, warehouse, batch_no)] = flt(get_batch_qty(batch_no, warehouse))
 		else:
 			if warehouse not in regular_items_map:
@@ -70,7 +67,6 @@ def get_bulk_stock_availability(items):
 	if not regular_items_map:
 		return results
 
-	# Identify warehouse groups
 	all_warehouses = list(regular_items_map.keys())
 	group_warehouses = set(
 		frappe.get_all("Warehouse", filters={"name": ["in", all_warehouses], "is_group": 1}, pluck="name")
@@ -91,7 +87,6 @@ def get_bulk_stock_availability(items):
 				results[(code, warehouse, "")] = 0.0
 			continue
 
-		# Chunking item_codes if too many (SQL IN limit usually 1000s, invoices are smaller)
 		item_code_list = list(item_codes)
 
 		query = (
@@ -112,7 +107,7 @@ def get_bulk_stock_availability(items):
 
 
 @frappe.whitelist()
-def get_available_qty(items):
+def get_available_qty(items: str | list[dict]) -> list[dict]:
 	"""Return available stock quantity for given items.
 
 	Args:
