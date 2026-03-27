@@ -3,7 +3,7 @@ name: Deploy to Production
 on:
   push:
     branches:
-      - main
+      - version-15
 
 concurrency:
   group: production-deploy
@@ -71,8 +71,8 @@ jobs:
             echo ""
             echo ">>> [2/7] Pulling latest code for ${APP_NAME}..."
             cd "apps/${APP_NAME}"
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch upstream version-15
+            git reset --hard upstream/version-15
             echo "    Commit: $(git rev-parse --short HEAD)"
             echo "    Message: $(git log -1 --pretty=%s)"
             cd "${BENCH_PATH}"
