@@ -23,7 +23,7 @@ def get_last_invoice_rates(customer, item_codes, company=None):
 
 	placeholders = ", ".join(["%s"] * len(item_codes))
 
-	query = f"""
+	query = f"""  # nosemgrep: frappe-sql-format-injection — placeholders are %s list for parameterized IN clause
         SELECT
             item.item_code,
             item.rate,

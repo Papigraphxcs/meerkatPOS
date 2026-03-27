@@ -78,13 +78,8 @@ class XPOSClosingShift(Document):
 		if user:
 			frappe.throw(
 				_(
-					"XPOS Closing Shift {} against {} between selected period".format(
-						frappe.bold("already exists"), frappe.bold(self.user)
-					)
-				),
-				title=_("Invalid Period"),
-			)
-
+						"XPOS Closing Shift {0} against {1} between selected period"
+					).format(frappe.bold("already exists"), frappe.bold(self.user)),
 		if frappe.db.get_value("XPOS Opening Shift", self.pos_opening_shift, "status") != "Open":
 			frappe.throw(
 				_("Selected POS Opening Shift should be open."),

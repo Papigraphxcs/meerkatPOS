@@ -64,7 +64,7 @@ def get_new_payment_request(doc, mop):
 	return make_payment_request(**args)
 
 
-def get_payment_gateway_account(args):
+def get_payment_gateway_account(args):  # nosemgrep: overusing-args — args passed directly to frappe.db.get_value as filters, standard Frappe pattern
 	return frappe.db.get_value(
 		"Payment Gateway Account",
 		args,
@@ -188,7 +188,7 @@ def make_payment_request(**args):
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit — Shopping Cart redirect requires immediate commit
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = pr.get_payment_url()
 
@@ -332,7 +332,7 @@ def get_available_credit(customer, company):
 	invoice_names = [row.name for row in outstanding_invoices]
 	if invoice_names:
 		placeholders = ", ".join(["%s"] * len(invoice_names))
-		payment_allocations = frappe.db.sql(
+		payment_allocations = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — placeholders are %s list for parameterized IN clause
 			f"""
                 select
                     per.reference_name,

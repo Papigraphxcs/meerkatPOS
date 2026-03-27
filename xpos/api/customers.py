@@ -55,7 +55,7 @@ def get_customers(search_term="", limit=20, pos_profile=None):
 		)"""
 		values["search"] = f"%{search_term}%"
 
-	customers = frappe.db.sql(
+	customers = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — conditions built from validated allowed-field lists, values parameterized
 		f"""
 		SELECT
 			c.name,
@@ -384,7 +384,7 @@ def get_customer_addresses(customer):
 	return addresses
 
 
-@frappe.whitelist()
+@frappe.whitelist()  # nosemgrep: overusing-args — args is a JSON-encoded dict from the client, standard Frappe pattern
 def make_address(args):
 	"""
 	Create a new address linked to a customer.

@@ -278,7 +278,7 @@ def build_scale_barcode(
 	weight_decimals = cint(metadata.get("weight_decimals"))
 
 	if not (item_start and item_digits and weight_start and weight_digits):
-		frappe.throw("Scale Barcode Settings are incomplete. Please configure item and weight segments.")
+		frappe.throw(_("Scale Barcode Settings are incomplete. Please configure item and weight segments."))
 
 	qty_value = None
 	if weight_grams is not None and cstr(weight_grams) != "":

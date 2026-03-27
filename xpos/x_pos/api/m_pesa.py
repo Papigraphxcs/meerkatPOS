@@ -50,7 +50,7 @@ def get_token(app_key, app_secret, base_url):
 	return r.json()["access_token"]
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — M-Pesa webhook callback must be accessible without authentication
 def confirmation(**kwargs):
 	try:
 		_validate_mpesa_webhook_token()
@@ -87,7 +87,7 @@ def confirmation(**kwargs):
 		return dict(context)
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — M-Pesa webhook callback must be accessible without authentication
 def validation(**kwargs):
 	try:
 		_validate_mpesa_webhook_token()

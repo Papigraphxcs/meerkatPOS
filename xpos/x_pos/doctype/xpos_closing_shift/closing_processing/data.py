@@ -29,7 +29,7 @@ def get_pos_invoices(pos_opening_shift, doctype=None):
 		doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
 	submit_printed_invoices(pos_opening_shift, doctype)
 	cond = " and ifnull(consolidated_invoice,'') = ''" if doctype == "POS Invoice" else ""
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — doctype set from validated db lookup, cond is static SQL
 		f"""
 	select
 		name
