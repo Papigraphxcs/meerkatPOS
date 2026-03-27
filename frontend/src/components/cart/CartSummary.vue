@@ -111,37 +111,37 @@
 		</div>
 
 		<div class="flex gap-2">
-			<Button
-				v-if="posStore.allowEditAdditionalDiscount"
-				variant="outline"
-				size="sm"
-				class="flex-1"
-				:class="{
-					'border-emerald-300 text-emerald-600 bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:bg-emerald-900/20':
-						hasDiscount,
-				}"
-				:disabled="cartStore.isEmpty"
-				@click="showDiscount = !showDiscount"
-			>
-				<Tag class="w-4 h-4" />
-				{{ __("Discount") }}
-			</Button>
+			<TooltipWrapper :content="__('Additional Discount')">
+				<Button
+					v-if="posStore.allowEditAdditionalDiscount"
+					variant="outline"
+					size="sm"
+					:class="{
+						'border-emerald-300 text-emerald-600 bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:bg-emerald-900/20':
+							hasDiscount,
+					}"
+					:disabled="cartStore.isEmpty"
+					@click="showDiscount = !showDiscount"
+				>
+					<Tag class="w-4 h-4" />
+				</Button>
+			</TooltipWrapper>
 
-			<Button
-				v-if="posStore.fetchCoupon"
-				variant="outline"
-				size="sm"
-				class="flex-1"
-				:class="{
-					'border-violet-300 text-violet-600 bg-violet-50 dark:border-violet-700 dark:text-violet-400 dark:bg-violet-900/20':
-						!!cartStore.appliedCoupon,
-				}"
-				:disabled="cartStore.isEmpty"
-				@click="showCoupon = !showCoupon"
-			>
-				<Ticket class="w-4 h-4" />
-				{{ __("Coupon") }}
-			</Button>
+			<TooltipWrapper :content="__('Coupon')">
+				<Button
+					v-if="posStore.fetchCoupon"
+					variant="outline"
+					size="sm"
+					:class="{
+						'border-violet-300 text-violet-600 bg-violet-50 dark:border-violet-700 dark:text-violet-400 dark:bg-violet-900/20':
+							!!cartStore.appliedCoupon,
+					}"
+					:disabled="cartStore.isEmpty"
+					@click="showCoupon = !showCoupon"
+				>
+					<Ticket class="w-4 h-4" />
+				</Button>
+			</TooltipWrapper>
 
 			<TooltipWrapper :content="__('Save as draft')">
 				<Button

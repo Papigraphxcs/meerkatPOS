@@ -42,6 +42,28 @@ def get_pos_items(
 			["local_item_name", "like", search_term],
 		]
 
+	hide_unavailable = pos.get("hide_unavailable_items") and warehouse
+
+	if hide_unavailable:
+		wh_list = [warehouse]
+		if frappe.db.get_value("Warehouse", warehouse, "is_group"):
+			wh_list = frappe.db.get_descendants("Warehouse", warehouse) or []
+
+		in_stock_items = frappe.get_all(
+			"Bin",
+			filters={"warehouse": ["in", wh_list], "actual_qty": [">", 0]},
+			pluck="item_code",
+		)
+		non_stock_items = frappe.get_all(
+			"Item",
+			filters={"is_stock_item": 0, "disabled": 0, "is_sales_item": 1},
+			pluck="name",
+		)
+		available_items = list(set(in_stock_items + non_stock_items))
+		if not available_items:
+			return []
+		filters["name"] = ["in", available_items]
+
 	items = frappe.get_list(
 		"Item",
 		filters=filters,
@@ -89,10 +111,16 @@ def get_pos_items(
 @frappe.whitelist()
 def get_items_count(pos_profile: str, search_term: str = "", item_group: str = ""):
 	"""Get total count of items matching the filters."""
-	frappe.get_cached_doc("POS Profile", pos_profile)
+	pos = frappe.get_cached_doc("POS Profile", pos_profile)
 
 	conditions = "i.disabled = 0 AND i.is_sales_item = 1 AND i.has_variants = 0"
 	values = {}
+	bin_join = ""
+
+	if pos.get("hide_unavailable_items") and pos.warehouse:
+		bin_join = "LEFT JOIN `tabBin` bin ON bin.item_code = i.name AND bin.warehouse = %(warehouse)s"
+		conditions += " AND (i.is_stock_item = 0 OR bin.actual_qty > 0)"
+		values["warehouse"] = pos.warehouse
 
 	if item_group and item_group != "All Item Groups":
 		ig = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"], as_dict=True)
@@ -112,7 +140,7 @@ def get_items_count(pos_profile: str, search_term: str = "", item_group: str = "
 		values["search"] = f"%{search_term}%"
 
 	count = frappe.db.sql(
-		"SELECT COUNT(DISTINCT i.name) FROM `tabItem` i WHERE " + conditions,
+		f"SELECT COUNT(DISTINCT i.name) FROM `tabItem` i {bin_join} WHERE {conditions}",
 		values,
 	)
 	return count[0][0] if count else 0
