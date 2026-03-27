@@ -136,6 +136,7 @@ jobs:
   health-check:
     name: Post-Deployment Health Check
     runs-on: ubuntu-latest
+    environment: pos.xconsol.com
     needs: deploy
     if: success()
     timeout-minutes: 5
