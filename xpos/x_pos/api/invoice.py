@@ -308,7 +308,7 @@ def validate_shift(doc):
 	if getattr(doc, "is_consolidated", None):
 		return
 	if getattr(doc, "pos_opening_shift", None) and doc.pos_profile and doc.is_pos:
-		shift = frappe.get_cached_doc("XPOS Opening Shift", doc.pos_opening_shift)
+		shift = frappe.get_cached_doc("POS Opening Shift", doc.pos_opening_shift)
 		if shift.status != "Open":
 			frappe.throw(_("POS Shift {0} is not open").format(shift.name))
 
