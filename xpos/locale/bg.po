@@ -49,8 +49,8 @@ msgstr ""
 msgid "About"
 msgstr ""
 
-#. Label of a Link field in DocType 'XPOS Allowed Expense Account'
-#. Label of a Link field in DocType 'XPOS Allowed Source Account'
+#. Label of a Link field in DocType 'POS Allowed Expense Account'
+#. Label of a Link field in DocType 'POS Allowed Source Account'
 #: xpos/x_pos/doctype/xpos_allowed_expense_account/xpos_allowed_expense_account.json
 #: xpos/x_pos/doctype/xpos_allowed_source_account/xpos_allowed_source_account.json
 #: xpos/x_pos/doctype/xpos_closing_shift/closing_shift_details.html:95
@@ -63,14 +63,14 @@ msgid "Account Head"
 msgstr "Главна Сметка"
 
 #. Name of a role
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Accounts Manager"
 msgstr "Роля Мениджър на 'Сметки'"
 
 #. Name of a role
 #: xpos/x_pos/doctype/referral_code/referral_code.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Accounts User"
 msgstr "Роля Потребител на 'Сметки'"
 
@@ -131,7 +131,7 @@ msgstr ""
 msgid "Add to Cart"
 msgstr "Добави в кошницата"
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.js:40
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.js:40
 msgid "Add/Edit Coupon Conditions"
 msgstr "Добавяне / редактиране на условия за талони"
 
@@ -261,7 +261,7 @@ msgstr ""
 msgid "Amount must be greater than zero."
 msgstr ""
 
-#. Label of a Check field in DocType 'XPOS Coupon Detail'
+#. Label of a Check field in DocType 'POS Coupon Detail'
 #: xpos/x_pos/doctype/xpos_coupon_detail/xpos_coupon_detail.json
 msgid "Applied"
 msgstr "приложен"
@@ -275,8 +275,8 @@ msgstr "Приложи"
 msgid "Apply Discount"
 msgstr ""
 
-#. Label of a Section Break field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Apply For"
 msgstr ""
 
@@ -285,28 +285,28 @@ msgstr ""
 msgid "Apply For POS Profiles"
 msgstr ""
 
-#. Label of a Data field in DocType 'XPOS Offer Detail'
+#. Label of a Data field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
 msgid "Apply On"
 msgstr "Приложи върху"
 
-#. Label of a Link field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Apply Rule On Brand"
 msgstr "Прилагане на правило на марката"
 
-#. Label of a Link field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Apply Rule On Item Code"
 msgstr "Приложете правило за кода на артикула"
 
-#. Label of a Link field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Apply Rule On Item Group"
 msgstr "Прилагане на правило за група артикули"
 
-#. Label of a Select field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Select field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Apply Type"
 msgstr ""
 
@@ -326,8 +326,8 @@ msgstr ""
 msgid "Auto"
 msgstr ""
 
-#. Label of a Check field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Auto Apply"
 msgstr ""
 
@@ -434,8 +434,8 @@ msgid "Birthday (DD-MM-YYYY)"
 msgstr ""
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
-#. 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Brand"
 msgstr "Марка"
 
@@ -449,9 +449,9 @@ msgid "Buying Price"
 msgstr ""
 
 #. Label of a Link field in DocType 'Referral Code'
-#. Label of a Link field in DocType 'XPOS Coupon'
+#. Label of a Link field in DocType 'POS Coupon'
 #: xpos/x_pos/doctype/referral_code/referral_code.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Campaign"
 msgstr "кампания"
 
@@ -695,8 +695,8 @@ msgstr ""
 #. Label of a Link field in DocType 'Referral Code'
 #. Label of a Link field in DocType 'XPOS Cash Movement'
 #. Label of a Link field in DocType 'XPOS Closing Shift'
-#. Label of a Link field in DocType 'XPOS Coupon'
-#. Label of a Link field in DocType 'XPOS Offer'
+#. Label of a Link field in DocType 'POS Coupon'
+#. Label of a Link field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'XPOS Opening Shift'
 #: frontend/src/components/AboutDialog.vue:37
 #: frontend/src/components/purchase/SupplierSelector.vue:173
@@ -709,8 +709,8 @@ msgstr ""
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 #: xpos/x_pos/doctype/xpos_cash_movement/xpos_cash_movement.json
 #: xpos/x_pos/doctype/xpos_closing_shift/xpos_closing_shift.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/doctype/xpos_opening_shift/xpos_opening_shift.json
 msgid "Company"
 msgstr "Компания"
@@ -795,8 +795,8 @@ msgstr "Разходен център"
 msgid "Cost Center is not set in pos profile {0}"
 msgstr ""
 
-#. Label of a Link field in DocType 'XPOS Coupon Detail'
-#. Label of a Link field in DocType 'XPOS Offer Detail'
+#. Label of a Link field in DocType 'POS Coupon Detail'
+#. Label of a Link field in DocType 'POS Offer Detail'
 #: frontend/src/components/cart/Cart.vue:119
 #: frontend/src/components/cart/CartSummary.vue:101
 #: frontend/src/views/OrdersView.vue:141
@@ -805,35 +805,35 @@ msgstr ""
 msgid "Coupon"
 msgstr ""
 
-#. Label of a Check field in DocType 'XPOS Offer Detail'
+#. Label of a Check field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
 msgid "Coupon Based"
 msgstr ""
 
-#. Label of a Data field in DocType 'XPOS Coupon'
-#. Label of a Data field in DocType 'XPOS Coupon Detail'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Label of a Data field in DocType 'POS Coupon'
+#. Label of a Data field in DocType 'POS Coupon Detail'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/doctype/xpos_coupon_detail/xpos_coupon_detail.json
 msgid "Coupon Code"
 msgstr "Код на талона"
 
-#. Label of a Check field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Coupon Code Based"
 msgstr "На базата на кода на купона"
 
-#. Label of a Text Editor field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Label of a Text Editor field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Coupon Description"
 msgstr "Описание на талона"
 
-#. Label of a Data field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Label of a Data field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Coupon Name"
 msgstr "Име на талон"
 
-#. Label of a Select field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Label of a Select field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Coupon Type"
 msgstr "Тип купон"
 
@@ -975,8 +975,8 @@ msgstr ""
 
 #. Label of a Link field in DocType 'Referral Code'
 #. Label of a Link field in DocType 'Sales Invoice Reference'
-#. Label of a Link field in DocType 'XPOS Coupon'
-#. Label of a Link field in DocType 'XPOS Coupon Detail'
+#. Label of a Link field in DocType 'POS Coupon'
+#. Label of a Link field in DocType 'POS Coupon Detail'
 #. Label of a Link field in DocType 'XPOS Payment Entry Reference'
 #: frontend/src/components/orders/ListFilters.vue:198
 #: frontend/src/views/OrdersView.vue:114
@@ -984,7 +984,7 @@ msgstr ""
 #: xpos/x_pos/api/payment_processing/data.py:167
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/doctype/xpos_coupon_detail/xpos_coupon_detail.json
 #: xpos/x_pos/doctype/xpos_payment_entry_reference/xpos_payment_entry_reference.json
 msgid "Customer"
@@ -1000,10 +1000,10 @@ msgid "Customer Group *"
 msgstr ""
 
 #. Label of a Data field in DocType 'Referral Code'
-#. Label of a Data field in DocType 'XPOS Coupon'
+#. Label of a Data field in DocType 'POS Coupon'
 #: frontend/src/components/orders/ListFilters.vue:199
 #: xpos/x_pos/doctype/referral_code/referral_code.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Customer Name"
 msgstr "Име на клиента"
 
@@ -1035,7 +1035,7 @@ msgstr ""
 #: xpos/api/customers.py:582 xpos/api/customers.py:639 xpos/api/invoices.py:32
 #: xpos/x_pos/api/payment_processing/processor.py:27
 #: xpos/x_pos/api/payment_processing/reconciliation.py:23
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:68
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:68
 msgid "Customer is required"
 msgstr "Изисква се Клиент"
 
@@ -1117,8 +1117,8 @@ msgstr ""
 msgid "Date (Oldest)"
 msgstr ""
 
-#. Label of a Link field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Link field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Default Loyalty Program"
 msgstr ""
 
@@ -1193,10 +1193,10 @@ msgstr ""
 msgid "Dept"
 msgstr ""
 
-#. Label of a Small Text field in DocType 'XPOS Offer'
+#. Label of a Small Text field in DocType 'POS Offer'
 #: frontend/src/views/BankDropView.vue:95
 #: frontend/src/views/ExpenseView.vue:103
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Description"
 msgstr "Описание"
 
@@ -1231,8 +1231,8 @@ msgstr ""
 msgid "Digits before decimal. Example: for 1.000, use 1 (or 2 if your scale encodes 01.000)."
 msgstr ""
 
-#. Label of a Check field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Disable"
 msgstr "Изключване"
 
@@ -1260,20 +1260,20 @@ msgstr "отстъпка"
 msgid "Discount %"
 msgstr ""
 
-#. Option for the 'Discount Type' (Select) field in DocType 'XPOS Offer'
-#. Label of a Float field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Discount Amount"
 msgstr "Отстъпка Сума"
 
-#. Option for the 'Discount Type' (Select) field in DocType 'XPOS Offer'
-#. Label of a Float field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Discount Percentage"
 msgstr "Отстъпка Процент"
 
-#. Label of a Select field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Select field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Discount Type"
 msgstr "Тип отстъпка"
 
@@ -1347,9 +1347,9 @@ msgid "Email Address"
 msgstr "Имейл адрес"
 
 #. Label of a Data field in DocType 'Referral Code'
-#. Label of a Data field in DocType 'XPOS Coupon'
+#. Label of a Data field in DocType 'POS Coupon'
 #: xpos/x_pos/doctype/referral_code/referral_code.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Email ID"
 msgstr "Имейл ID"
 
@@ -1624,28 +1624,28 @@ msgstr ""
 msgid "Get Items"
 msgstr ""
 
-#. Option for the 'Coupon Type' (Select) field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Option for the 'Coupon Type' (Select) field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Gift Card"
 msgstr "Карта за подарък"
 
-#. Label of a Link field in DocType 'XPOS Offer Detail'
+#. Label of a Link field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
 msgid "Give Item"
 msgstr ""
 
-#. Label of a Data field in DocType 'XPOS Offer Detail'
+#. Label of a Data field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
 msgid "Give Item Row ID"
 msgstr ""
 
-#. Option for the 'Promo Type' (Select) field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Give Product"
 msgstr ""
 
-#. Label of a Float field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Given Quantity"
 msgstr ""
 
@@ -1682,7 +1682,7 @@ msgid "Godown"
 msgstr ""
 
 #. Label of a Currency field in DocType 'XPOS Closing Shift'
-#. Option for the 'Promo Type' (Select) field in DocType 'XPOS Offer'
+#. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
 #: frontend/src/components/orders/ListFilters.vue:200
 #: frontend/src/components/shift/ClosingDialog.vue:25
 #: frontend/src/views/OrdersView.vue:218
@@ -1691,7 +1691,7 @@ msgstr ""
 #: frontend/src/views/PurchaseOrderView.vue:550
 #: xpos/x_pos/doctype/xpos_closing_shift/closing_shift_details.html:15
 #: xpos/x_pos/doctype/xpos_closing_shift/xpos_closing_shift.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Grand Total"
 msgstr "Общо"
 
@@ -1923,12 +1923,12 @@ msgid "Item"
 msgstr "Артикул"
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
-#. 'XPOS Offer'
-#. Option for the 'Apply Type' (Select) field in DocType 'XPOS Offer'
-#. Label of a Link field in DocType 'XPOS Offer'
+#. 'POS Offer'
+#. Option for the 'Apply Type' (Select) field in DocType 'POS Offer'
+#. Label of a Link field in DocType 'POS Offer'
 #: frontend/src/components/purchase/PurchaseItemList.vue:257
 #: frontend/src/components/purchase/dialogs/CreateItemDialog.vue:100
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Item Code"
 msgstr "Код"
 
@@ -1945,12 +1945,12 @@ msgid "Item Discounts"
 msgstr ""
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
-#. 'XPOS Offer'
-#. Option for the 'Apply Type' (Select) field in DocType 'XPOS Offer'
-#. Label of a Link field in DocType 'XPOS Offer'
+#. 'POS Offer'
+#. Option for the 'Apply Type' (Select) field in DocType 'POS Offer'
+#. Label of a Link field in DocType 'POS Offer'
 #: frontend/src/components/purchase/PurchaseItemList.vue:274
 #: frontend/src/components/purchase/dialogs/CreateItemDialog.vue:112
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Item Group"
 msgstr "Група позиции"
 
@@ -1960,8 +1960,8 @@ msgstr "Група позиции"
 msgid "Item Name"
 msgstr ""
 
-#. Option for the 'Promo Type' (Select) field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Item Price"
 msgstr "Елемент Цена"
 
@@ -1969,8 +1969,8 @@ msgstr "Елемент Цена"
 msgid "Item Price has been added or updated"
 msgstr ""
 
-#. Label of a Float field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Item Rate Should Less Then"
 msgstr ""
 
@@ -2031,7 +2031,7 @@ msgstr ""
 msgid "Item {0}: Rate cannot be negative"
 msgstr ""
 
-#. Label of a Small Text field in DocType 'XPOS Offer Detail'
+#. Label of a Small Text field in DocType 'POS Offer Detail'
 #: frontend/src/views/OrdersView.vue:147
 #: frontend/src/views/PurchaseInvoiceView.vue:658
 #: frontend/src/views/PurchaseOrderListView.vue:348
@@ -2126,19 +2126,19 @@ msgstr ""
 msgid "Loyalty Information"
 msgstr ""
 
-#. Option for the 'Promo Type' (Select) field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Loyalty Point"
 msgstr ""
 
-#. Label of a Section Break field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Loyalty Point Scheme"
 msgstr ""
 
-#. Label of a Int field in DocType 'XPOS Offer'
+#. Label of a Int field in DocType 'POS Offer'
 #: frontend/src/components/payment/PaymentDialog.vue:166
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Loyalty Points"
 msgstr "Точки на лоялност"
 
@@ -2187,18 +2187,18 @@ msgstr ""
 msgid "Material transfers awaiting receipt at your warehouse"
 msgstr ""
 
-#. Label of a Float field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Max Amount"
 msgstr "Максимална сума"
 
-#. Label of a Float field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Max Quantity"
 msgstr ""
 
-#. Label of a Int field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Label of a Int field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Maximum Use"
 msgstr "Максимална употреба"
 
@@ -2211,13 +2211,13 @@ msgstr ""
 msgid "Method"
 msgstr "Метод"
 
-#. Label of a Float field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Min Amount"
 msgstr "Минимална сума"
 
-#. Label of a Float field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Float field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Min Quantity"
 msgstr ""
 
@@ -2239,9 +2239,9 @@ msgid "Mobile"
 msgstr "Мобилен"
 
 #. Label of a Data field in DocType 'Referral Code'
-#. Label of a Data field in DocType 'XPOS Coupon'
+#. Label of a Data field in DocType 'POS Coupon'
 #: xpos/x_pos/doctype/referral_code/referral_code.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Mobile NO"
 msgstr ""
 
@@ -2573,17 +2573,17 @@ msgstr ""
 msgid "Numpad"
 msgstr ""
 
-#. Label of a Data field in DocType 'XPOS Offer Detail'
+#. Label of a Data field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
 msgid "Offer"
 msgstr ""
 
-#. Label of a Check field in DocType 'XPOS Offer Detail'
+#. Label of a Check field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
 msgid "Offer Applied"
 msgstr ""
 
-#. Label of a Link field in DocType 'XPOS Offer Detail'
+#. Label of a Link field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
 msgid "Offer Name"
 msgstr ""
@@ -2606,8 +2606,8 @@ msgstr ""
 msgid "Online"
 msgstr ""
 
-#. Label of a Check field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Label of a Check field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Only One Use Per Customer"
 msgstr ""
 
@@ -2795,16 +2795,16 @@ msgstr ""
 msgid "POS Invoice"
 msgstr "POS фактура"
 
-#. Label of a Link field in DocType 'XPOS Coupon'
-#. Label of a Link field in DocType 'XPOS Coupon Detail'
+#. Label of a Link field in DocType 'POS Coupon'
+#. Label of a Link field in DocType 'POS Coupon Detail'
 #. Label of a Link in the X POS Workspace
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/doctype/xpos_coupon_detail/xpos_coupon_detail.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "POS Offer"
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:60
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:60
 msgid "POS Offer is disabled."
 msgstr ""
 
@@ -2855,7 +2855,7 @@ msgstr ""
 #. Label of a Link field in DocType 'Delivery Charges POS Profile'
 #. Label of a Link field in DocType 'XPOS Cash Movement'
 #. Label of a Link field in DocType 'XPOS Closing Shift'
-#. Label of a Link field in DocType 'XPOS Offer'
+#. Label of a Link field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'XPOS Opening Shift'
 #. Label of a Link in the X POS Workspace
 #: frontend/src/views/OrdersView.vue:129
@@ -2864,7 +2864,7 @@ msgstr ""
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/xpos_cash_movement/xpos_cash_movement.json
 #: xpos/x_pos/doctype/xpos_closing_shift/xpos_closing_shift.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/doctype/xpos_opening_shift/xpos_opening_shift.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "POS Profile"
@@ -3059,7 +3059,7 @@ msgstr ""
 msgid "Please enter the phone number first"
 msgstr "Моля, въведете първо телефонния номер"
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:58
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:58
 msgid "Please select Coupon Code Based POS Offer."
 msgstr ""
 
@@ -3088,11 +3088,11 @@ msgstr ""
 msgid "Please select a supplier before saving a draft."
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:56
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:56
 msgid "Please select the correct POS Offer with the same company."
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:53
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:53
 msgid "Please select the customer."
 msgstr "Моля, изберете клиента."
 
@@ -3183,8 +3183,8 @@ msgstr ""
 msgid "Price"
 msgstr "Цена"
 
-#. Label of a Section Break field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Price Discount Scheme "
 msgstr ""
 
@@ -3270,8 +3270,8 @@ msgstr ""
 msgid "Processing..."
 msgstr "Обработка ..."
 
-#. Label of a Section Break field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Product Discount Scheme"
 msgstr "Схема за отстъпки на продуктите"
 
@@ -3293,13 +3293,13 @@ msgstr ""
 msgid "Program"
 msgstr "програма"
 
-#. Label of a Select field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Select field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Promo Type"
 msgstr ""
 
-#. Option for the 'Coupon Type' (Select) field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Option for the 'Coupon Type' (Select) field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Promotional"
 msgstr "Промоционални"
 
@@ -3422,13 +3422,13 @@ msgstr ""
 msgid "Qty"
 msgstr "Количество"
 
-#. Label of a Select field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Select field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Qualifying Transaction / Item"
 msgstr ""
 
-#. Label of a Section Break field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Section Break field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Quantity and Amount Conditions"
 msgstr ""
 
@@ -3442,8 +3442,8 @@ msgstr ""
 
 #. Label of a Currency field in DocType 'Delivery Charges POS Profile'
 #. Label of a Percent field in DocType 'XPOS Closing Shift Taxes'
-#. Option for the 'Discount Type' (Select) field in DocType 'XPOS Offer'
-#. Label of a Float field in DocType 'XPOS Offer'
+#. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
+#. Label of a Float field in DocType 'POS Offer'
 #: frontend/src/components/purchase/PurchaseCart.vue:65
 #: frontend/src/components/purchase/PurchaseItemList.vue:227
 #: frontend/src/views/OrdersView.vue:160
@@ -3451,7 +3451,7 @@ msgstr ""
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/xpos_closing_shift/closing_shift_details.html:96
 #: xpos/x_pos/doctype/xpos_closing_shift_taxes/xpos_closing_shift_taxes.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Rate"
 msgstr "Ед. Цена"
 
@@ -3534,24 +3534,24 @@ msgstr ""
 
 #. Name of a DocType
 #. Label of a Data field in DocType 'Referral Code'
-#. Label of a Link field in DocType 'XPOS Coupon'
+#. Label of a Link field in DocType 'POS Coupon'
 #. Label of a Link in the X POS Workspace
 #: frontend/src/components/customer/CustomerSelect.vue:104
 #: xpos/x_pos/doctype/referral_code/referral_code.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Referral Code"
 msgstr "Референтен код"
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:70
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:70
 msgid "Referral Code is required"
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:78
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:78
 msgid "Referral Code {0} does not exist"
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:80
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:80
 msgid "Referral Code {0} is disabled"
 msgstr ""
 
@@ -3636,13 +3636,13 @@ msgstr ""
 msgid "Repeat Last Invoice"
 msgstr ""
 
-#. Label of a Check field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Replace Cheapest Item"
 msgstr ""
 
-#. Label of a Check field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Check field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Replace Same Item"
 msgstr ""
 
@@ -3744,7 +3744,7 @@ msgstr ""
 msgid "Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches"
 msgstr "Ред # {0}: Партидата {1} има само {2} qty. Моля, изберете друга партида, която има {3} qty на разположение или разделете реда на няколко реда, за да достави / издаде от няколко партиди"
 
-#. Label of a Data field in DocType 'XPOS Offer Detail'
+#. Label of a Data field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
 msgid "Row ID"
 msgstr ""
@@ -3771,14 +3771,14 @@ msgstr ""
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 #: xpos/x_pos/doctype/xpos_cash_movement/xpos_cash_movement.json
 #: xpos/x_pos/doctype/xpos_closing_shift/xpos_closing_shift.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/doctype/xpos_opening_shift/xpos_opening_shift.json
 msgid "Sales Manager"
 msgstr "Мениджър Продажби"
 
 #. Name of a role
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Sales Master Manager"
 msgstr "Мениджър на данни за продажби"
 
@@ -3813,7 +3813,7 @@ msgstr "Обобщение на продажбите"
 
 #. Name of a role
 #: xpos/x_pos/doctype/xpos_cash_movement/xpos_cash_movement.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Sales User"
 msgstr "Продажби - потребител"
 
@@ -4123,34 +4123,34 @@ msgstr ""
 msgid "Some items have zero quantity. Set 'Zero Qty' to 'Yes' to keep them, or remove them."
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:141
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:141
 msgid "Sorry, this coupon code cannot be used by this company"
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:137
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:137
 msgid "Sorry, this coupon code cannot be used by this customer"
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:120
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:124
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:120
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:124
 msgid "Sorry, this coupon code is no longer valid"
 msgstr "За съжаление този код на купона вече не е валиден"
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:105
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:105
 msgid "Sorry, this coupon code not exists"
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:117
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:132
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:117
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:132
 msgid "Sorry, this coupon code's validity has expired"
 msgstr "За съжаление валидността на този код на купона е изтекла"
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:113
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:128
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:113
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:128
 msgid "Sorry, this coupon code's validity has not started"
 msgstr "За съжаление валидността на този код на купона не е започнала"
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:155
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:155
 msgid "Sorry, {0} have used this coupon before"
 msgstr ""
 
@@ -4354,8 +4354,8 @@ msgstr ""
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 #: xpos/x_pos/doctype/xpos_cash_movement/xpos_cash_movement.json
 #: xpos/x_pos/doctype/xpos_closing_shift/xpos_closing_shift.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/doctype/xpos_opening_shift/xpos_opening_shift.json
 msgid "System Manager"
 msgstr "Мениджър на система"
@@ -4479,8 +4479,8 @@ msgstr ""
 msgid "Till ID"
 msgstr ""
 
-#. Label of a Data field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Data field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Title"
 msgstr "Заглавие"
 
@@ -4547,8 +4547,8 @@ msgid "Total item code digits to extract. Example: item code 3310100 => digits 7
 msgstr ""
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
-#. 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. 'POS Offer'
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Transaction"
 msgstr "транзакция"
 
@@ -4572,7 +4572,7 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
-#. Label of a Data field in DocType 'XPOS Coupon Detail'
+#. Label of a Data field in DocType 'POS Coupon Detail'
 #: frontend/src/components/purchase/SupplierSelector.vue:170
 #: frontend/src/components/purchase/dialogs/CreateSupplierDialog.vue:83
 #: frontend/src/views/PurchaseView.vue:128
@@ -4651,8 +4651,8 @@ msgstr ""
 msgid "Use these keyboard shortcuts to navigate faster"
 msgstr ""
 
-#. Label of a Int field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Label of a Int field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Used"
 msgstr "Използва се"
 
@@ -4676,22 +4676,22 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
-#. Label of a Date field in DocType 'XPOS Coupon'
-#. Label of a Date field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Date field in DocType 'POS Coupon'
+#. Label of a Date field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Valid From"
 msgstr "Валиден от"
 
-#. Label of a Date field in DocType 'XPOS Coupon'
-#. Label of a Date field in DocType 'XPOS Offer'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#. Label of a Date field in DocType 'POS Coupon'
+#. Label of a Date field in DocType 'POS Offer'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Valid Upto"
 msgstr "Валидно до"
 
-#. Label of a Section Break field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Label of a Section Break field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Validity and Usage"
 msgstr "Валидност и употреба"
 
@@ -4713,9 +4713,9 @@ msgstr ""
 msgid "Walk-in Customer"
 msgstr ""
 
-#. Label of a Link field in DocType 'XPOS Offer'
+#. Label of a Link field in DocType 'POS Offer'
 #: frontend/src/views/PurchaseView.vue:227
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Warehouse"
 msgstr "Склад"
 
@@ -4729,7 +4729,7 @@ msgstr ""
 
 #. Name of a role
 #: xpos/x_pos/doctype/referral_code/referral_code.json
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Website Manager"
 msgstr "Сайт на мениджъра"
 
@@ -4812,12 +4812,12 @@ msgstr ""
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/xpos_allowed_expense_account/xpos_allowed_expense_account.json
-msgid "XPOS Allowed Expense Account"
+msgid "POS Allowed Expense Account"
 msgstr ""
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/xpos_allowed_source_account/xpos_allowed_source_account.json
-msgid "XPOS Allowed Source Account"
+msgid "POS Allowed Source Account"
 msgstr ""
 
 #. Name of a DocType
@@ -4847,13 +4847,13 @@ msgid "XPOS Closing Shift {} against {} between selected period"
 msgstr ""
 
 #. Name of a DocType
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
-msgid "XPOS Coupon"
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
+msgid "POS Coupon"
 msgstr ""
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/xpos_coupon_detail/xpos_coupon_detail.json
-msgid "XPOS Coupon Detail"
+msgid "POS Coupon Detail"
 msgstr ""
 
 #. Label of a Data field in DocType 'XPOS Closing Shift'
@@ -4864,13 +4864,13 @@ msgid "XPOS Local ID"
 msgstr ""
 
 #. Name of a DocType
-#: xpos/x_pos/doctype/xpos_offer/xpos_offer.json
-msgid "XPOS Offer"
+#: xpos/x_pos/doctype/pos_offer/pos_offer.json
+msgid "POS Offer"
 msgstr ""
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/xpos_offer_detail/xpos_offer_detail.json
-msgid "XPOS Offer Detail"
+msgid "POS Offer Detail"
 msgstr ""
 
 #. Name of a DocType
@@ -4946,8 +4946,8 @@ msgstr ""
 msgid "days"
 msgstr ""
 
-#. Description of the 'Coupon Name' (Data) field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Description of the 'Coupon Name' (Data) field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "e.g. \"Summer Holiday 2019 Offer 20\""
 msgstr "напр. &quot;Лятна ваканция 2019 оферта 20&quot;"
 
@@ -5027,8 +5027,8 @@ msgstr ""
 msgid "unaccounted"
 msgstr ""
 
-#. Description of the 'Coupon Code' (Data) field in DocType 'XPOS Coupon'
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.json
+#. Description of the 'Coupon Code' (Data) field in DocType 'POS Coupon'
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "unique e.g. SAVE20  To be used to get discount"
 msgstr "уникален напр. SAVE20 Да се използва за получаване на отстъпка"
 
@@ -5036,7 +5036,7 @@ msgstr "уникален напр. SAVE20 Да се използва за пол
 msgid "will be returned to"
 msgstr ""
 
-#: xpos/x_pos/doctype/xpos_coupon/xpos_coupon.py:177
+#: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:177
 msgid "{0} Coupon used are {1}. Allowed quantity is exhausted"
 msgstr "{0} Използваните талони са {1}. Позволеното количество се изчерпва"
 
@@ -5076,4 +5076,3 @@ msgstr ""
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "{} Active"
 msgstr ""
-

@@ -4,7 +4,7 @@
 from typing import Any
 
 import frappe
-from frappe import Document, _
+from frappe import _
 from frappe.utils import cstr, flt, getdate, nowdate
 
 
@@ -67,19 +67,20 @@ def get_offers(pos_profile: str):
 
 @frappe.whitelist()
 def get_pos_coupon(coupon: str, customer: str, company: str):
-	"""Validate and return a XPOS coupon."""
+	"""Validate and return a POS coupon with its linked POS Offer."""
 	coupon_doc = frappe.db.get_value(
-		"XPOS Coupon",
+		"POS Coupon",
 		{"coupon_code": coupon, "company": company, "used": 0},
 		[
 			"name",
 			"coupon_code",
 			"coupon_type",
-			"discount_percentage",
-			"discount_amount",
 			"valid_from",
 			"valid_upto",
 			"customer",
+			"pos_offer",
+			"maximum_use",
+			"used",
 		],
 		as_dict=True,
 	)
@@ -99,7 +100,23 @@ def get_pos_coupon(coupon: str, customer: str, company: str):
 	if coupon_customer and coupon_customer != customer:
 		frappe.throw(_("Coupon is not valid for this customer"))
 
-	return coupon_doc
+	offer_data = None
+	pos_offer_name = _row_value(coupon_doc, "pos_offer")
+	if pos_offer_name:
+		try:
+			offer_doc = frappe.get_doc("POS Offer", pos_offer_name)
+			offer_data = offer_doc.as_dict()
+			offer_data["row_id"] = cstr(offer_data.get("row_id") or offer_data.get("name"))
+			offer_data["auto"] = flt(offer_data.get("auto") or 0)
+			offer_data["min_qty"] = flt(offer_data.get("min_qty") or 0)
+			offer_data["max_qty"] = flt(offer_data.get("max_qty") or 0)
+			offer_data["min_amt"] = flt(offer_data.get("min_amt") or 0)
+			offer_data["max_amt"] = flt(offer_data.get("max_amt") or 0)
+			_normalize_discount_fields(offer_data)
+		except frappe.DoesNotExistError:
+			offer_data = None
+
+	return {"coupon": coupon_doc, "offer": offer_data, "msg": "Apply"}
 
 
 @frappe.whitelist()
@@ -108,7 +125,7 @@ def get_active_gift_coupons(customer: str, company: str):
 
 	today = getdate(nowdate())
 	coupons_data = frappe.get_all(
-		"XPOS Coupon",
+		"POS Coupon",
 		filters={
 			"company": company,
 			"coupon_type": "Gift Card",

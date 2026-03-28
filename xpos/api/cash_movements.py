@@ -22,7 +22,7 @@ def get_cash_movement_context(pos_profile: str):
 	allow_cash_deposit = cint(pos.get("allow_cash_deposit"))
 
 	expense_accounts = frappe.get_all(
-		"XPOS Allowed Expense Account",
+		"POS Allowed Expense Account",
 		filters={"parent": pos_profile},
 		fields=["account"],
 		order_by="idx",
@@ -36,7 +36,7 @@ def get_cash_movement_context(pos_profile: str):
 	)
 
 	source_accounts = frappe.get_all(
-		"XPOS Allowed Source Account",
+		"POS Allowed Source Account",
 		filters={"parent": pos_profile},
 		fields=["account"],
 		order_by="idx",
