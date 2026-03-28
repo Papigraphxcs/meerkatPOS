@@ -70,7 +70,7 @@ def get_pos_coupon(coupon: str, customer: str, company: str):
 	"""Validate and return a POS coupon with its linked POS Offer."""
 	coupon_doc = frappe.db.get_value(
 		"POS Coupon",
-		{"coupon_code": coupon, "company": company, "used": 0},
+		{"coupon_code": coupon, "company": company},
 		[
 			"name",
 			"coupon_code",
@@ -87,6 +87,9 @@ def get_pos_coupon(coupon: str, customer: str, company: str):
 
 	if not coupon_doc:
 		frappe.throw(_("Invalid or already used coupon code"))
+
+	if coupon_doc.get("maximum_use") and coupon_doc.get("used", 0) >= coupon_doc.get("maximum_use"):
+		frappe.throw(_("Coupon has already been used the maximum number of times"))
 
 	today = getdate(nowdate())
 	valid_from = _row_value(coupon_doc, "valid_from")
