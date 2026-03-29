@@ -431,7 +431,7 @@ export interface POSOffer {
 	title: string;
 	offer_type: string;
 	apply_on: string;
-	disable: boolean;
+	disabled: boolean;
 	items?: POSOfferDetail[];
 	[key: string]: unknown;
 }
