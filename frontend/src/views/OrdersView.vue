@@ -659,7 +659,10 @@ async function returnFromOrder(order: Invoice) {
 				batch_no?: string;
 				remaining_returnable_qty?: number;
 			}>;
-		}>("xpos.api.invoices.get_invoice_for_return", { invoice_name: order.name });
+		}>("xpos.api.invoices.get_invoice_for_return", {
+			doctype: posStore.invoiceType,
+			invoice_name: order.name,
+		});
 
 		cartStore.clearCart();
 		const allowedItemCodes = (details?.items || []).map((i) => i.item_code);
