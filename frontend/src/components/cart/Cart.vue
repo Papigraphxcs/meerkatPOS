@@ -267,7 +267,7 @@ watch(
 
 function handleCustomerClick() {
 	if (cartStore.isReturnMode) {
-		showError("Customer cannot be changed in return mode");
+		showError(__("Customer cannot be changed in return mode"));
 		return;
 	}
 	customerStore.showCustomerDialog = true;
