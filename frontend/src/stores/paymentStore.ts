@@ -140,23 +140,27 @@ export const usePaymentStore = defineStore("payment", () => {
 		movement_type: string,
 		from_date?: string,
 		to_date?: string,
-	): Promise<POSCashMovement[]> {
+		limit_start?: number,
+		limit_page_length?: number,
+	): Promise<{ data: POSCashMovement[]; total: number }> {
 		try {
-			const params: Record<string, string> = {
+			const params: Record<string, string | number> = {
 				pos_opening_shift: openingShift,
 				movement_type: movement_type,
 			};
 			if (from_date) params.from_date = from_date;
 			if (to_date) params.to_date = to_date;
-			const result = await call<POSCashMovement[]>(
+			if (limit_start !== undefined) params.limit_start = limit_start;
+			if (limit_page_length !== undefined) params.limit_page_length = limit_page_length;
+			const result = await call<{ data: POSCashMovement[]; total: number }>(
 				"xpos.api.cash_movements.get_shift_cash_movements",
 				params,
 			);
-			shiftCashMovements.value = result || [];
-			return shiftCashMovements.value;
+			shiftCashMovements.value = result?.data || [];
+			return { data: shiftCashMovements.value, total: result?.total || 0 };
 		} catch (error) {
 			console.error("Error fetching shift cash movements:", error);
-			return [];
+			return { data: [], total: 0 };
 		}
 	}
 

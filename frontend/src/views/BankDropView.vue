@@ -56,8 +56,11 @@
 						</div>
 						<div class="min-w-0 flex-1">
 							<div class="flex items-center gap-2 mb-1">
-								<span class="font-semibold text-foreground">
-									{{ drop.target_account || drop.to_account || __("Bank Drop") }}
+								<span
+									class="font-semibold text-foreground"
+									:title="drop.remarks || drop.target_account || drop.to_account"
+								>
+									{{ drop.remarks || drop.target_account || drop.to_account }}
 								</span>
 								<Badge
 									:variant="drop.docstatus === 1 ? 'default' : 'secondary'"
@@ -68,15 +71,22 @@
 							</div>
 							<div class="flex items-center gap-3 text-xs text-muted-foreground">
 								<span>{{ drop.posting_date }}</span>
-								<span v-if="drop.remarks" class="truncate max-w-[200px]">
+								<span
+									v-if="
+										!posStore.requireCashMovementRemarks &&
+										!!drop.remarks &&
+										(drop.target_account || drop.to_account)
+									"
+									class="truncate max-w-[400px]"
+								>
 									{{ drop.remarks }}
 								</span>
 							</div>
 						</div>
 						<div class="text-end">
-							<span class="font-bold text-emerald-500"
-								>{{ posStore.currencySymbol }}{{ formatPrice(drop.amount) }}</span
-							>
+							<span class="font-bold text-emerald-500">
+								{{ posStore.currencySymbol }}{{ formatPrice(drop.amount) }}
+							</span>
 						</div>
 						<Button
 							v-if="drop.docstatus === 0 || drop.can_delete"
@@ -92,6 +102,15 @@
 			</div>
 		</div>
 
+		<Pagination
+			v-if="totalDrops > 0"
+			:total="totalDrops"
+			:page-size="pageSize"
+			:current-page="currentPage"
+			@update:current-page="handlePageChange"
+			@update:page-size="handlePageSizeChange"
+		/>
+
 		<Dialog :open="showForm" @update:open="showForm = $event">
 			<DialogContent class="sm:max-w-md">
 				<DialogHeader>
@@ -103,17 +122,17 @@
 						</div>
 						<div>
 							<DialogTitle class="text-base">{{ __("Cash Deposit") }}</DialogTitle>
-							<DialogDescription class="text-xs">{{
-								__("Record a cash deposit")
-							}}</DialogDescription>
+							<DialogDescription class="text-xs">
+								{{ __("Record a cash deposit") }}
+							</DialogDescription>
 						</div>
 					</div>
 				</DialogHeader>
 				<div class="space-y-4">
 					<div>
-						<label class="text-sm font-semibold text-foreground mb-1.5 block">{{
-							__("Deposit To")
-						}}</label>
+						<label class="text-sm font-semibold text-foreground mb-1.5 block">
+							{{ __("Deposit To") }}
+						</label>
 						<Select v-model="form.target_account">
 							<SelectTriggerStyled class="h-8 w-full">
 								<SelectValue :placeholder="__('Select bank account')" />
@@ -131,9 +150,9 @@
 						</Select>
 					</div>
 					<div>
-						<label class="text-sm font-semibold text-foreground mb-1.5 block">{{
-							__("Amount")
-						}}</label>
+						<label class="text-sm font-semibold text-foreground mb-1.5 block">
+							{{ __("Amount") }}
+						</label>
 						<NumberInput
 							v-model="form.amount"
 							:min="0"
@@ -143,9 +162,9 @@
 						/>
 					</div>
 					<div>
-						<label class="text-sm font-semibold text-foreground mb-1.5 block">{{
-							__("Reason / Notes")
-						}}</label>
+						<label class="text-sm font-semibold text-foreground mb-1.5 block">
+							{{ __("Reason / Notes") }}
+						</label>
 						<textarea
 							v-model="form.reason"
 							rows="3"
@@ -155,9 +174,9 @@
 					</div>
 				</div>
 				<DialogFooter class="mt-4">
-					<Button variant="outline" class="flex-1" @click="showForm = false">{{
-						__("Cancel")
-					}}</Button>
+					<Button variant="outline" class="flex-1" @click="showForm = false">
+						{{ __("Cancel") }}
+					</Button>
 					<Button
 						class="flex-1 font-bold bg-emerald-500 hover:bg-emerald-600 text-white"
 						:disabled="!canSubmit || isSaving"
@@ -201,6 +220,7 @@ import SelectContentStyled from "@/components/ui/select/SelectContentStyled.vue"
 import SelectItemStyled from "@/components/ui/select/SelectItemStyled.vue";
 import { Plus, RefreshCw, Trash2, Landmark, Loader2, ArrowUpCircle } from "lucide-vue-next";
 import DateTimePicker from "@/components/ui/datetime-picker/DateTimePicker.vue";
+import Pagination from "@/components/orders/Pagination.vue";
 import __ from "@/lib/translate";
 import { DOCSTATUS_MAP } from "@/types/pos.types";
 
@@ -228,6 +248,11 @@ const isElectronMode = isElectron();
 const today = new Date().toISOString().slice(0, 10);
 const fromDate = ref(today);
 const toDate = ref(today);
+
+const currentPage = ref(1);
+const pageSize = ref(20);
+const totalDrops = ref(0);
+const allElectronDrops = ref<BankDrop[]>([]);
 
 const canAddBankDrop = computed(() => hasPermission("bank_drop") && posStore.allowCashDeposit);
 
@@ -269,27 +294,48 @@ function openForm() {
 	showForm.value = true;
 }
 
-watch([fromDate, toDate], () => loadDrops());
+watch([fromDate, toDate], () => {
+	currentPage.value = 1;
+	loadDrops();
+});
+
+function handlePageChange(page: number) {
+	currentPage.value = page;
+	loadDrops();
+}
+
+function handlePageSizeChange(size: number) {
+	pageSize.value = size;
+	currentPage.value = 1;
+	loadDrops();
+}
 
 async function loadDrops() {
 	isLoading.value = true;
 	try {
 		if (isElectronMode) {
-			drops.value = (await getBankDrops({
+			allElectronDrops.value = (await getBankDrops({
 				user: authStore.userEmail,
 				fromDate: fromDate.value,
 				toDate: toDate.value,
 			})) as BankDrop[];
+			totalDrops.value = allElectronDrops.value.length;
+			const start = (currentPage.value - 1) * pageSize.value;
+			drops.value = allElectronDrops.value.slice(start, start + pageSize.value);
 		} else {
 			const shift = posStore.posOpeningShift?.name;
 			if (shift) {
-				const movements = await paymentStore.fetchShiftCashMovements(
+				const limit_start = (currentPage.value - 1) * pageSize.value;
+				const { data, total } = await paymentStore.fetchShiftCashMovements(
 					shift,
 					"Deposit",
 					fromDate.value,
 					toDate.value,
+					limit_start,
+					pageSize.value,
 				);
-				drops.value = movements.map((m) => {
+				totalDrops.value = total;
+				drops.value = data.map((m) => {
 					const r = m as Record<string, unknown>;
 					return {
 						id: String(r.name || ""),

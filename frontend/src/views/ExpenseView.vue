@@ -13,7 +13,7 @@
 				<DateTimePicker
 					v-model="fromDate"
 					mode="date"
-					placeholder="From date"
+					:placeholder="__('From Date')"
 					:show-today="true"
 					:clearable="true"
 					class="w-52"
@@ -22,7 +22,7 @@
 				<DateTimePicker
 					v-model="toDate"
 					mode="date"
-					placeholder="To date"
+					:placeholder="__('To Date')"
 					:show-today="true"
 					:clearable="true"
 					class="w-52"
@@ -56,28 +56,39 @@
 						</div>
 						<div class="min-w-0 flex-1">
 							<div class="flex items-center gap-2 mb-1">
-								<span class="font-semibold text-foreground">{{
-									exp.expense_account || exp.to_account
-								}}</span>
+								<span
+									class="font-semibold text-foreground truncate max-w-[400px]"
+									:title="exp.remarks || exp.expense_account || exp.to_account"
+								>
+									{{ exp.remarks || exp.expense_account || exp.to_account }}
+								</span>
 								<Badge
-									:variant="exp.sync_status === 'synced' ? 'default' : 'secondary'"
+									:variant="exp.docstatus === 1 ? 'default' : 'secondary'"
 									class="text-[10px]"
 								>
-									{{ exp.sync_status }}
+									{{ DOCSTATUS_MAP[Number(exp.docstatus) || 0] || "Unknown" }}
 								</Badge>
 							</div>
 							<div class="flex items-center gap-3 text-xs text-muted-foreground">
 								<span>{{ exp.posting_date }}</span>
-								<span v-if="exp.remarks" class="truncate max-w-[200px]">{{
-									exp.remarks
-								}}</span>
+								<span
+									v-if="
+										!posStore.requireCashMovementRemarks &&
+										!!exp.remarks &&
+										(exp.expense_account || exp.to_account)
+									"
+								>
+									{{ exp.expense_account || exp.to_account }}
+								</span>
 							</div>
 						</div>
 						<div class="text-end">
-							<span class="font-bold text-red-500">-{{ formatPrice(exp.amount) }}</span>
+							<span class="font-bold text-red-500">
+								{{ posStore.currencySymbol }}{{ formatPrice(exp.amount) }}
+							</span>
 						</div>
 						<Button
-							v-if="exp.sync_status === 'pending' || exp.can_delete"
+							v-if="exp.docstatus === 0 || exp.can_delete"
 							variant="ghost"
 							size="icon"
 							class="text-destructive h-8 w-8"
@@ -90,6 +101,15 @@
 			</div>
 		</div>
 
+		<Pagination
+			v-if="totalExpenses > 0"
+			:total="totalExpenses"
+			:page-size="pageSize"
+			:current-page="currentPage"
+			@update:current-page="handlePageChange"
+			@update:page-size="handlePageSizeChange"
+		/>
+
 		<Dialog :open="showForm" @update:open="showForm = $event">
 			<DialogContent class="sm:max-w-md">
 				<DialogHeader>
@@ -101,9 +121,9 @@
 						</div>
 						<div>
 							<DialogTitle class="text-base">{{ __("POS Expense") }}</DialogTitle>
-							<DialogDescription class="text-xs">{{
-								__("Record a cash withdrawal")
-							}}</DialogDescription>
+							<DialogDescription class="text-xs">
+								{{ __("Record a cash withdrawal") }}
+							</DialogDescription>
 						</div>
 					</div>
 				</DialogHeader>
@@ -129,9 +149,9 @@
 						</Select>
 					</div>
 					<div>
-						<label class="text-sm font-semibold text-foreground mb-1.5 block">{{
-							__("Amount")
-						}}</label>
+						<label class="text-sm font-semibold text-foreground mb-1.5 block">
+							{{ __("Amount") }}
+						</label>
 						<NumberInput
 							v-model="form.amount"
 							:min="0"
@@ -141,9 +161,9 @@
 						/>
 					</div>
 					<div>
-						<label class="text-sm font-semibold text-foreground mb-1.5 block">{{
-							__("Reason / Notes")
-						}}</label>
+						<label class="text-sm font-semibold text-foreground mb-1.5 block">
+							{{ __("Reason / Notes") }}
+						</label>
 						<textarea
 							v-model="form.reason"
 							rows="3"
@@ -153,9 +173,9 @@
 					</div>
 				</div>
 				<DialogFooter class="mt-4">
-					<Button variant="outline" class="flex-1" @click="showForm = false">{{
-						__("Cancel")
-					}}</Button>
+					<Button variant="outline" class="flex-1" @click="showForm = false">
+						{{ __("Cancel") }}
+					</Button>
 					<Button
 						class="flex-1 font-bold bg-red-500 hover:bg-red-600 text-white"
 						:disabled="!canSubmit || isSaving"
@@ -199,7 +219,9 @@ import SelectContentStyled from "@/components/ui/select/SelectContentStyled.vue"
 import SelectItemStyled from "@/components/ui/select/SelectItemStyled.vue";
 import { Plus, RefreshCw, Trash2, Receipt, Loader2, ArrowDownCircle } from "lucide-vue-next";
 import DateTimePicker from "@/components/ui/datetime-picker/DateTimePicker.vue";
+import Pagination from "@/components/orders/Pagination.vue";
 import __ from "@/lib/translate";
+import { DOCSTATUS_MAP } from "@/types/pos.types";
 
 const posStore = usePosStore();
 const authStore = useAuthStore();
@@ -212,7 +234,7 @@ interface Expense {
 	amount: number;
 	remarks?: string;
 	posting_date?: string;
-	sync_status?: string;
+	docstatus: number;
 	can_delete?: boolean;
 }
 
@@ -225,6 +247,11 @@ const isElectronMode = isElectron();
 const today = new Date().toISOString().slice(0, 10);
 const fromDate = ref(today);
 const toDate = ref(today);
+
+const currentPage = ref(1);
+const pageSize = ref(20);
+const totalExpenses = ref(0);
+const allElectronExpenses = ref<Expense[]>([]);
 
 const canAddExpense = computed(() => hasPermission("expense") && posStore.allowPosExpense);
 
@@ -246,7 +273,16 @@ const expenseAccountOptions = computed(() => {
 });
 
 const canSubmit = computed(() => {
-	return form.value.amount > 0 && !!form.value.expense_account;
+	if (posStore.requireCashMovementRemarks && form.value.reason.trim() === "") {
+		return false;
+	}
+	if (form.value.amount <= 0) {
+		return false;
+	}
+	if (form.value.expense_account.trim() === "") {
+		return false;
+	}
+	return true;
 });
 
 function formatPrice(price: number | string) {
@@ -266,27 +302,48 @@ function openForm() {
 	showForm.value = true;
 }
 
-watch([fromDate, toDate], () => loadExpenses());
+watch([fromDate, toDate], () => {
+	currentPage.value = 1;
+	loadExpenses();
+});
+
+function handlePageChange(page: number) {
+	currentPage.value = page;
+	loadExpenses();
+}
+
+function handlePageSizeChange(size: number) {
+	pageSize.value = size;
+	currentPage.value = 1;
+	loadExpenses();
+}
 
 async function loadExpenses() {
 	isLoading.value = true;
 	try {
 		if (isElectronMode) {
-			expenses.value = (await getExpenses({
+			allElectronExpenses.value = (await getExpenses({
 				user: authStore.userEmail,
 				fromDate: fromDate.value,
 				toDate: toDate.value,
 			})) as Expense[];
+			totalExpenses.value = allElectronExpenses.value.length;
+			const start = (currentPage.value - 1) * pageSize.value;
+			expenses.value = allElectronExpenses.value.slice(start, start + pageSize.value);
 		} else {
 			const shift = posStore.posOpeningShift?.name;
 			if (shift) {
-				const movements = await paymentStore.fetchShiftCashMovements(
+				const limit_start = (currentPage.value - 1) * pageSize.value;
+				const { data, total } = await paymentStore.fetchShiftCashMovements(
 					shift,
 					"Expense",
 					fromDate.value,
 					toDate.value,
+					limit_start,
+					pageSize.value,
 				);
-				expenses.value = movements.map((m) => {
+				totalExpenses.value = total;
+				expenses.value = data.map((m) => {
 					const r = m as Record<string, unknown>;
 					return {
 						id: String(r.name || ""),

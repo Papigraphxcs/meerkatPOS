@@ -245,32 +245,38 @@ def get_shift_cash_movements(
 	if movement_type:
 		filters["movement_type"] = movement_type
 
-	if from_date:
-		filters["posting_date"] = [">=", from_date]
-	if to_date:
-		filters["posting_date"] = ["<=", to_date]
 	if from_date and to_date:
 		filters["posting_date"] = ["between", [from_date, to_date]]
+	elif from_date:
+		filters["posting_date"] = [">=", from_date]
+	elif to_date:
+		filters["posting_date"] = ["<=", to_date]
 
-	return frappe.get_list(
+	fields = [
+		"name",
+		"docstatus",
+		"movement_type",
+		"amount",
+		"remarks",
+		"posting_date",
+		"posting_time",
+		"journal_entry",
+		"expense_account",
+		"target_account",
+		"source_account",
+	]
+
+	total = frappe.db.count("POS Cash Movement", filters=filters)
+	data = frappe.get_list(
 		"POS Cash Movement",
 		filters=filters,
-		fields=[
-			"docstatus",
-			"movement_type",
-			"amount",
-			"remarks",
-			"posting_date",
-			"posting_time",
-			"journal_entry",
-			"expense_account",
-			"target_account",
-			"source_account",
-		],
+		fields=fields,
 		limit_start=cint(limit_start),
 		limit_page_length=cint(limit_page_length),
 		order_by="creation desc",
 	)
+
+	return {"data": data, "total": total}
 
 
 def _create_cash_movement_record(**kwargs):
