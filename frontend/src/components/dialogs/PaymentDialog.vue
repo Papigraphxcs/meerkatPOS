@@ -187,7 +187,10 @@
 								"
 							>
 								<div class="text-lg mb-0.5">
-									{{ getMethodIcon(method.mode_of_payment) }}
+									<component
+										:is="getMethodIcon(method.mode_of_payment)"
+										class="w-5 h-5 mx-auto"
+									/>
 								</div>
 								<p class="text-[11px] font-medium truncate">
 									{{ method.mode_of_payment }}
@@ -246,7 +249,7 @@
 								class="flex items-center justify-between bg-muted rounded-lg px-3 py-2 text-sm"
 							>
 								<div class="flex items-center gap-2">
-									<span>{{ getMethodIcon(sp.mode_of_payment) }}</span>
+									<component :is="getMethodIcon(sp.mode_of_payment)" class="w-5 h-5" />
 									<span class="font-medium text-foreground">{{ sp.mode_of_payment }}</span>
 								</div>
 								<div class="flex items-center gap-2">
@@ -295,7 +298,7 @@
 
 					<div
 						v-if="cartStore.customer && !cartStore.isReturnMode && customerLoyaltyPoints > 0"
-						class="bg-violet-500/5 border border-violet-500/20 rounded-xl p-3"
+						class="bg-violet-500/5 border border-violet-500/20 rounded-xl p-3 space-y-2"
 					>
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
@@ -304,37 +307,83 @@
 									__("Loyalty Points")
 								}}</span>
 							</div>
-							<Badge variant="secondary" class="text-[10px]"
-								>{{ customerLoyaltyPoints }} {{ __("pts") }}
+							<Badge variant="secondary" class="text-[10px]">
+								{{ customerLoyaltyPoints }} {{ __("pts") }} ({{ posStore.currencySymbol
+								}}{{ formatPrice(customerLoyaltyAmount) }})
 							</Badge>
 						</div>
-						<p class="text-xs text-muted-foreground mt-1">
-							{{
-								__("Worth {0}", [
-									posStore.currencySymbol + formatPrice(customerLoyaltyAmount),
-								])
-							}}
-						</p>
-						<div class="flex items-center gap-2 mt-2">
+
+						<template v-if="cartStore.redeemLoyaltyPoints">
+							<div class="flex items-center justify-between text-xs">
+								<span class="text-violet-700 dark:text-violet-300 font-medium">
+									{{ __("Redeeming") }}: {{ cartStore.loyaltyPoints }} {{ __("pts") }} =
+									{{ posStore.currencySymbol }}{{ formatPrice(cartStore.loyaltyAmount) }}
+								</span>
+								<Button
+									variant="ghost"
+									size="sm"
+									class="h-6 px-2 text-[10px] text-destructive"
+									@click="
+										cartStore.clearLoyalty();
+										showLoyaltyInput = false;
+									"
+								>
+									{{ __("Remove") }}
+								</Button>
+							</div>
+						</template>
+
+						<template v-else-if="showLoyaltyInput">
+							<div class="space-y-1.5">
+								<div class="flex items-center gap-1.5">
+									<NumberInput
+										v-model="redeemPointsInput"
+										:min="1"
+										:max="maxRedeemablePoints"
+										:precision="0"
+										class="flex-1 text-sm"
+									/>
+									<span class="text-xs text-muted-foreground shrink-0"
+										>/ {{ maxRedeemablePoints }} {{ __("pts") }}</span
+									>
+								</div>
+								<p class="text-[11px] text-violet-600 dark:text-violet-400">
+									{{ __("Discount") }}: {{ posStore.currencySymbol
+									}}{{ formatPrice(redeemInputAmount) }}
+								</p>
+								<div class="flex gap-1.5">
+									<Button
+										variant="default"
+										size="sm"
+										class="flex-1 bg-violet-600 hover:bg-violet-700 text-white text-xs"
+										:disabled="redeemPointsInput < 1"
+										@click="applyLoyalty"
+									>
+										{{ __("Apply") }}
+									</Button>
+									<Button
+										variant="outline"
+										size="sm"
+										class="flex-1 text-xs"
+										@click="cancelLoyaltyInput"
+									>
+										{{ __("Cancel") }}
+									</Button>
+								</div>
+							</div>
+						</template>
+
+						<template v-else>
 							<Button
-								v-if="!cartStore.redeemLoyaltyPoints"
 								variant="outline"
 								size="sm"
-								class="text-violet-600 border-violet-300 hover:bg-violet-50"
-								@click="redeemLoyalty"
+								class="w-full text-violet-600 dark:hover:bg-violet-950 text-xs"
+								@click="openLoyaltyInput"
 							>
+								<Gift class="w-3 h-3" />
 								{{ __("Redeem Points") }}
 							</Button>
-							<Button
-								v-else
-								variant="outline"
-								size="sm"
-								class="text-destructive"
-								@click="cartStore.clearLoyalty()"
-							>
-								{{ __("Remove Loyalty") }}
-							</Button>
-						</div>
+						</template>
 					</div>
 
 					<div v-if="posStore.allowWriteOffChange && !cartStore.isReturnMode" class="space-y-1">
@@ -465,7 +514,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { usePaymentStore } from "@/stores/paymentStore";
@@ -484,7 +533,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, X, Check, Loader2, Delete, Gift, RotateCcw, Plus, Save, Printer } from "lucide-vue-next";
+import {
+	Wallet,
+	X,
+	Check,
+	Loader2,
+	Delete,
+	Gift,
+	RotateCcw,
+	Plus,
+	Save,
+	Printer,
+	Banknote,
+	CreditCard,
+	Landmark,
+	Smartphone,
+	FileText,
+	DollarSign,
+} from "lucide-vue-next";
 
 import type { InvoicePayment } from "@/types/pos.types";
 import { isOnline, extractErrorMessage } from "@/utils";
@@ -511,8 +577,12 @@ const splitPayments = ref<InvoicePayment[]>([]);
 
 const customerLoyaltyPoints = ref(0);
 const customerLoyaltyAmount = ref(0);
+const customerConversionFactor = ref(1);
 const customerBalance = ref<number | null>(null);
 const customerCreditLimit = ref(0);
+
+const showLoyaltyInput = ref(false);
+const redeemPointsInput = ref(0);
 
 const numpadKeys = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "C", "0", "⌫"];
 
@@ -534,6 +604,16 @@ const quickAmounts = computed(() => {
 });
 
 const splitTotal = computed(() => splitPayments.value.reduce((sum, p) => sum + (p.amount || 0), 0));
+
+const maxRedeemablePoints = computed(() => {
+	const total = Math.abs(cartStore.grandTotal);
+	const maxByTotal = Math.floor(total * customerConversionFactor.value);
+	return Math.min(customerLoyaltyPoints.value, maxByTotal);
+});
+
+const redeemInputAmount = computed(() => {
+	return redeemPointsInput.value / (customerConversionFactor.value || 1);
+});
 
 const paymentOfferGrandDiscount = computed(() => {
 	if (cartStore.offerGrandTotalDiscountPct <= 0) return 0;
@@ -591,13 +671,21 @@ onMounted(async () => {
 		}
 
 		try {
-			const info = await call<{ balance?: number; credit_limit?: number }>(
-				"xpos.api.customers.get_customer_info",
-				{ customer: cartStore.customer.name },
-			);
+			const info = await call<{
+				balance?: number;
+				credit_limit?: number;
+				loyalty_points?: number;
+				loyalty_program?: { conversion_factor?: number };
+			}>("xpos.api.customers.get_customer_info", { customer: cartStore.customer.name });
 			if (info) {
 				customerBalance.value = info.balance ?? null;
 				customerCreditLimit.value = info.credit_limit ?? 0;
+				if ((info.loyalty_points ?? 0) > 0) {
+					const conversionFactor = info.loyalty_program?.conversion_factor || 1;
+					customerLoyaltyPoints.value = info.loyalty_points!;
+					customerConversionFactor.value = conversionFactor;
+					customerLoyaltyAmount.value = info.loyalty_points! / conversionFactor;
+				}
 			}
 		} catch {
 			/* non-critical */
@@ -606,6 +694,19 @@ onMounted(async () => {
 
 	document.addEventListener("keydown", handleGlobalKeydown);
 });
+
+watch(
+	() => cartStore.loyaltyAmount,
+	() => {
+		if (!isSplitPayment.value) {
+			const newTotal = roundCurrency(Math.abs(cartStore.grandTotal));
+			tenderedAmount.value = newTotal;
+			nextTick(() => {
+				amountInput.value?.setValue(newTotal);
+			});
+		}
+	},
+);
 
 onUnmounted(() => {
 	document.removeEventListener("keydown", handleGlobalKeydown);
@@ -697,22 +798,46 @@ function removeSplitPayment(idx: number) {
 	tenderedAmount.value = roundCurrency(Math.max(0, Math.abs(cartStore.grandTotal) - splitTotal.value));
 }
 
-function redeemLoyalty() {
-	const total = Math.abs(cartStore.grandTotal);
-	const redeemAmount = Math.min(customerLoyaltyAmount.value, total);
-	const ratio = customerLoyaltyPoints.value / (customerLoyaltyAmount.value || 1);
-	const redeemPoints = Math.floor(redeemAmount * ratio);
-	cartStore.setLoyalty(redeemPoints, redeemAmount);
+function openLoyaltyInput() {
+	if (maxRedeemablePoints.value <= 0) {
+		showInfo(__("No redeemable loyalty points for this invoice total"));
+		return;
+	}
+	redeemPointsInput.value = maxRedeemablePoints.value;
+	showLoyaltyInput.value = true;
+}
+
+function applyLoyalty() {
+	const maxPoints = maxRedeemablePoints.value;
+	if (maxPoints <= 0) return;
+
+	const points = Math.min(Math.max(Number(redeemPointsInput.value) || 0, 1), maxPoints);
+	const amount = roundCurrency(points / (customerConversionFactor.value || 1));
+	if (amount <= 0) return;
+
+	cartStore.setLoyalty(points, amount);
+	if (!isSplitPayment.value) {
+		const newTotal = roundCurrency(Math.abs(cartStore.grandTotal));
+		tenderedAmount.value = newTotal;
+		nextTick(() => {
+			amountInput.value?.setValue(newTotal);
+		});
+	}
+	showLoyaltyInput.value = false;
+}
+
+function cancelLoyaltyInput() {
+	showLoyaltyInput.value = false;
 }
 
 function getMethodIcon(method: string) {
 	const lower = method.toLowerCase();
-	if (lower.includes("cash")) return "💵";
-	if (lower.includes("card") || lower.includes("credit") || lower.includes("debit")) return "💳";
-	if (lower.includes("bank") || lower.includes("transfer")) return "🏦";
-	if (lower.includes("mobile") || lower.includes("mpesa") || lower.includes("wallet")) return "📱";
-	if (lower.includes("check") || lower.includes("cheque")) return "📝";
-	return "💰";
+	if (lower.includes("cash")) return Banknote;
+	if (lower.includes("card") || lower.includes("credit") || lower.includes("debit")) return CreditCard;
+	if (lower.includes("bank") || lower.includes("transfer")) return Landmark;
+	if (lower.includes("mobile") || lower.includes("mpesa") || lower.includes("wallet")) return Smartphone;
+	if (lower.includes("check") || lower.includes("cheque")) return FileText;
+	return DollarSign;
 }
 
 function handleNumpad(key: string) {
@@ -759,7 +884,13 @@ function validateForSubmission(): { valid: boolean; message?: string } {
 }
 
 async function submitPayment(withPrint: boolean = true) {
-	if (isSubmitting.value || !canSubmit.value) return;
+	if (isSubmitting.value) return;
+
+	if (showLoyaltyInput.value && !cartStore.redeemLoyaltyPoints && (redeemPointsInput.value || 0) > 0) {
+		applyLoyalty();
+	}
+
+	if (!canSubmit.value) return;
 
 	const validation = validateForSubmission();
 	if (!validation.valid) {

@@ -283,10 +283,27 @@ def create_invoice(data: str | dict):
 			)
 			total_payment += pay_amount
 
+	loyalty_paid = 0
+	if data.get("redeem_loyalty_points") and data.get("loyalty_amount"):
+		loyalty_paid = flt(data.get("loyalty_amount"), 2)
+
+	if loyalty_paid and hasattr(invoice_doc, "set_paid_amount"):
+		_original_set_paid_amount = invoice_doc.set_paid_amount
+
+		def _set_paid_amount_with_loyalty():
+			_original_set_paid_amount()
+			invoice_doc.paid_amount = flt(invoice_doc.paid_amount + loyalty_paid, 2)
+			invoice_doc.base_paid_amount = flt(
+				invoice_doc.base_paid_amount + (loyalty_paid * flt(invoice_doc.conversion_rate or 1)), 2
+			)
+
+		invoice_doc.set_paid_amount = _set_paid_amount_with_loyalty
+
 	if is_return and doctype == "POS Invoice":
 		invoice_doc.validate_change_amount = lambda: None
 	else:
-		invoice_doc.paid_amount = total_payment
+		invoice_doc.paid_amount = flt(total_payment + loyalty_paid, 2)
+		invoice_doc.base_paid_amount = flt(invoice_doc.paid_amount * flt(invoice_doc.conversion_rate or 1), 2)
 
 	change_amount = flt(data.get("change_amount", 0))
 	if change_amount > 0:

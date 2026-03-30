@@ -332,16 +332,26 @@ def get_shift_summary(opening_shift: str):
 
 	payment_summary = {}
 	for inv in invoices:
+		inv_name = _row_value(inv, "name")
 		payments = frappe.get_all(
 			"Sales Invoice Payment",
-			filters={"parent": _row_value(inv, "name"), "parenttype": doctype},
+			filters={"parent": inv_name, "parenttype": doctype},
 			fields=["mode_of_payment", "amount"],
 		)
+		inv_change = flt(_row_value(inv, "change_amount", 0))
+		if not inv_change:
+			inv_change = flt(frappe.db.get_value(doctype, inv_name, "change_amount") or 0)
+
+		inv_paid = sum(flt(_row_value(p, "amount", 0)) for p in payments)
+
 		for p in payments:
 			mode = _row_value(p, "mode_of_payment")
 			if mode not in payment_summary:
 				payment_summary[mode] = 0
-			payment_summary[mode] += flt(_row_value(p, "amount", 0))
+			pay_amount = flt(_row_value(p, "amount", 0))
+			if inv_paid > 0 and inv_change > 0:
+				pay_amount -= pay_amount / inv_paid * inv_change
+			payment_summary[mode] += pay_amount
 
 	opening_balances = {}
 	for detail in opening.balance_details:
