@@ -155,7 +155,7 @@
 					<div class="flex gap-3 items-start">
 						<code class="shrink-0 px-2 py-0.5 rounded bg-muted text-xs font-mono">go pos</code>
 						<span class="text-muted-foreground">{{
-							__("Navigate to a page (pos, orders, expenses...)")
+							__("Navigate to a page (pos, orders, reports, expenses...)")
 						}}</span>
 					</div>
 					<div class="flex gap-3 items-start">
@@ -217,6 +217,7 @@ import {
 	X,
 	LayoutGrid,
 	FileText,
+	BarChart3,
 	ShoppingCart,
 	ClipboardList,
 	Receipt,
@@ -309,6 +310,15 @@ const pages: CommandResult[] = [
 		shortcut: "Alt+2",
 		icon: FileText,
 		action: () => router.push("/orders"),
+	},
+	{
+		id: "page-reports",
+		type: "page",
+		label: __("Reports"),
+		description: __("Browse analytics reports"),
+		shortcut: "Alt+9",
+		icon: BarChart3,
+		action: () => router.push("/reports"),
 	},
 	{
 		id: "page-purchase-order",

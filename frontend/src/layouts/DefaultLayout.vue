@@ -1,5 +1,5 @@
 <template>
-	<div class="flex flex-col h-screen h-dvh overflow-hidden">
+	<div class="flex flex-col h-dvh overflow-hidden">
 		<MenuBar v-if="isElectron()" />
 		<Navbar v-else />
 		<div class="flex-1 relative overflow-hidden">
@@ -38,6 +38,18 @@
 					<FileText class="w-5 h-5" />
 					<span class="text-[10px] font-medium">{{ __("Orders") }}</span>
 				</router-link>
+				<router-link
+					to="/reports"
+					:class="[
+						'flex flex-col items-center justify-center gap-0.5 px-4 py-1.5 rounded-xl transition-colors no-underline min-w-[4rem]',
+						route.path.startsWith('/reports')
+							? 'text-primary bg-primary/10'
+							: 'text-muted-foreground active:bg-muted',
+					]"
+				>
+					<BarChart3 class="w-5 h-5" />
+					<span class="text-[10px] font-medium">{{ __("Reports") }}</span>
+				</router-link>
 				<button
 					@click="openSidebar"
 					class="flex flex-col items-center justify-center gap-0.5 px-4 py-1.5 rounded-xl text-muted-foreground active:bg-muted transition-colors min-w-[4rem]"
@@ -56,7 +68,7 @@ import Sidebar from "@/components/Sidebar.vue";
 import MenuBar from "@/components/MenuBar.vue";
 import { isElectron } from "@/services/electronBridge";
 import { useRoute } from "vue-router";
-import { LayoutGrid, FileText, AlignJustify } from "lucide-vue-next";
+import { LayoutGrid, FileText, BarChart3, AlignJustify } from "lucide-vue-next";
 import __ from "@/lib/translate";
 
 const route = useRoute();

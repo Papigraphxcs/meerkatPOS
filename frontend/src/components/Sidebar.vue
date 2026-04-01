@@ -156,6 +156,7 @@ import {
 	Settings,
 	Wallet,
 	Landmark,
+	BarChart3,
 } from "lucide-vue-next";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
@@ -189,6 +190,7 @@ const toggleIcon = computed(() => {
 const mainNavItems = [
 	{ route: "/pos", label: __("POS"), icon: LayoutGrid },
 	{ route: "/orders", label: __("Orders"), icon: FileText },
+	{ route: "/reports", label: __("Reports"), icon: BarChart3 },
 ];
 
 const purchaseNavItems = [
@@ -218,6 +220,9 @@ const financeNavItems = computed(() => [
 ]);
 
 function isActive(path: string): boolean {
+	if (path === "/reports") {
+		return route.path === path || route.path.startsWith("/reports/");
+	}
 	return route.path === path;
 }
 </script>

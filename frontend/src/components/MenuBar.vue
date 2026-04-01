@@ -106,6 +106,7 @@ import {
 	Pause,
 	RefreshCw,
 	Info,
+	BarChart3,
 } from "lucide-vue-next";
 
 const router = useRouter();
@@ -455,6 +456,18 @@ const menus = computed<Menu[]>(() => [
 				action: () => {
 					cartStore.showDraftDialog = true;
 				},
+			},
+		],
+	},
+	{
+		label: "Reports",
+		items: [
+			{
+				id: "goto-reports",
+				label: "Report Catalog",
+				icon: BarChart3,
+				shortcut: "Alt+8",
+				action: () => router.push("/reports"),
 			},
 		],
 	},

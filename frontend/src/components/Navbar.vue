@@ -37,6 +37,23 @@
 				<FileText class="w-4 h-4" />
 				<span>{{ __("Orders") }}</span>
 			</router-link>
+			<router-link
+				to="/reports"
+				:class="
+					cn(
+						buttonVariants({
+							variant: $route.path.startsWith('/reports') ? 'secondary' : 'ghost',
+							size: 'sm',
+						}),
+						'gap-1.5 no-underline',
+						$route.path.startsWith('/reports') &&
+							'bg-primary/10 text-primary hover:bg-primary/15',
+					)
+				"
+			>
+				<BarChart3 class="w-4 h-4" />
+				<span>{{ __("Reports") }}</span>
+			</router-link>
 		</nav>
 
 		<div class="flex-1"></div>
@@ -226,6 +243,7 @@ import {
 	LogOut,
 	ArrowDownCircle,
 	ArrowUpCircle,
+	BarChart3,
 	RotateCcw,
 	Repeat,
 	Printer,
