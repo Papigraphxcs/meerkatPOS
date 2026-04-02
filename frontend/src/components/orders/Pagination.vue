@@ -52,7 +52,7 @@
 		</div>
 
 		<div class="flex items-center gap-2">
-			<span class="text-sm text-muted-foreground">Per page:</span>
+			<span class="hidden sm:inline text-sm text-muted-foreground">Per page:</span>
 			<select
 				v-model="pageSizeStr"
 				class="h-8 w-[70px] rounded-md border border-input bg-background px-2 text-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring"
