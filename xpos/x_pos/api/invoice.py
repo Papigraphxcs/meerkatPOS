@@ -13,6 +13,7 @@ from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
 	get_applicable_delivery_charges,
 )
 from xpos.x_pos.doctype.pos_coupon.pos_coupon import update_coupon_code_count
+from xpos.x_pos.integrations.fbr import fiscalize_invoice
 
 
 def validate(doc, method):
@@ -24,6 +25,7 @@ def validate(doc, method):
 
 
 def before_submit(doc, method):
+	fiscalize_invoice(doc)
 	add_loyalty_point(doc)
 	create_sales_order(doc)
 	update_coupon(doc, "used")
