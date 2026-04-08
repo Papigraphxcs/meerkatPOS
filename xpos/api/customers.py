@@ -687,7 +687,7 @@ def get_customer_loyalty_info(customer: str):
 	points = get_loyalty_points(customer)
 
 	conversion_factor = flt(lp.conversion_factor) or 1
-	points_value = flt(points) / conversion_factor if conversion_factor else 0
+	points_value = flt(points) * conversion_factor if conversion_factor else 0
 
 	current_tier = cust_doc.loyalty_program_tier
 

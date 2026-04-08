@@ -800,6 +800,14 @@ export const useCartStore = defineStore("cart", () => {
 			if (result.pos_delivery_date) {
 				deliveryDate.value = result.pos_delivery_date;
 			}
+			if (result.pos_delivery_charges) {
+				selectedDeliveryCharge.value = {
+					name: result.pos_delivery_charges,
+					label: result.pos_delivery_charges_label || result.pos_delivery_charges,
+					rate: Number(result.pos_delivery_charges_rate || 0),
+					default_rate: Number(result.pos_delivery_charges_rate || 0),
+				};
+			}
 			currentDraftName.value = draftName;
 
 			return true;

@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"xpos_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">X POS</span>\",\"col\":12}},{\"id\":\"xpos_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"X POS App\",\"col\":3}},{\"id\":\"xpos_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"xpos_pos_card\",\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"id\":\"xpos_profile_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"id\":\"xpos_shift_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"id\":\"xpos_cash_movement_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Cash Movement\",\"col\":4}},{\"id\":\"xpos_delivery_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"id\":\"xpos_offers_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
+ "content": "[{\"id\":\"xpos_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">X POS</span>\",\"col\":12}},{\"id\":\"xpos_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"X POS App\",\"col\":3}},{\"id\":\"bExEIm8hyI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"trazJ5ah1v\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pos Invoice\",\"col\":3}},{\"id\":\"xpos_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"1adNPVupDN\",\"type\":\"card\",\"data\":{\"card_name\":\"Setup\",\"col\":4}},{\"id\":\"kCl3eJ9h7e\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers & Coupons\",\"col\":4}},{\"id\":\"UgL618YZqd\",\"type\":\"card\",\"data\":{\"card_name\":\"Cash Movement\",\"col\":4}}]",
  "creation": "2026-02-27 00:00:00",
  "custom_blocks": [],
  "docstatus": 0,
@@ -15,27 +15,18 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "X POS",
-   "link_count": 0,
-   "link_to": "xpos",
-   "link_type": "Page",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS",
+   "label": "Cash Movement",
    "link_count": 1,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "POS Invoice",
+   "label": "POS Cash Movement",
    "link_count": 0,
-   "link_to": "POS Invoice",
+   "link_to": "POS Cash Movement",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -43,82 +34,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Profile",
-   "link_count": 2,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Profile",
-   "link_count": 0,
-   "link_to": "POS Profile",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Scale Barcode Settings",
-   "link_count": 0,
-   "link_to": "Scale Barcode Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Shift",
-   "link_count": 2,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Opening Shift",
-   "link_count": 0,
-   "link_to": "POS Opening Shift",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "POS Closing Shift",
-   "link_count": 0,
-   "link_to": "POS Closing Shift",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Delivery Charges",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Delivery Charges",
-   "link_count": 0,
-   "link_to": "Delivery Charges",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Offers &amp; Coupons",
+   "label": "Offers & Coupons",
    "link_count": 4,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -135,7 +53,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Promotional Schemes",
+   "label": "Promotional Scheme",
    "link_count": 0,
    "link_to": "Promotional Scheme",
    "link_type": "DocType",
@@ -163,11 +81,10 @@
    "type": "Link"
   },
   {
-   "description": "Cash flow tracking",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Cash Movement",
-   "link_count": 1,
+   "label": "Setup",
+   "link_count": 5,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -175,15 +92,55 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "POS Cash Movement",
+   "label": "POS Profile",
    "link_count": 0,
-   "link_to": "POS Cash Movement",
+   "link_to": "POS Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scale Barcode Settings",
+   "link_count": 0,
+   "link_to": "Scale Barcode Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Opening Shift",
+   "link_count": 0,
+   "link_to": "POS Opening Shift",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Closing Shift",
+   "link_count": 0,
+   "link_to": "POS Closing Shift",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Delivery Charges",
+   "link_count": 0,
+   "link_to": "Delivery Charges",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-03-01 19:59:32.320695",
+ "modified": "2026-04-08 17:25:36.344674",
  "modified_by": "Administrator",
  "module": "X POS",
  "name": "X POS",
@@ -203,6 +160,21 @@
    "link_to": "",
    "type": "URL",
    "url": "/xpos/pos"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Pos Invoice",
+   "link_to": "POS Invoice",
+   "stats_filter": "",
+   "type": "DocType"
   }
  ],
  "title": "X POS"

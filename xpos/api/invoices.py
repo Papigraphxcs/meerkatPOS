@@ -36,6 +36,54 @@ def _detect_invoice_doctype(invoice_name: str):
 	frappe.throw(_("Invoice {0} not found").format(invoice_name))
 
 
+def _mark_xpos_delivery_charges_managed(invoice_doc):
+	"""Keep delivery-charge selection under xpos API control for this request."""
+	if getattr(invoice_doc, "flags", None) is None:
+		invoice_doc.flags = frappe._dict()
+	invoice_doc.flags.xpos_skip_auto_delivery_charges = True
+
+
+def _apply_invoice_delivery_charge_fields(invoice_doc, data: dict):
+	"""Apply the delivery-charge selection supplied by the xpos client."""
+	_mark_xpos_delivery_charges_managed(invoice_doc)
+	selected_charge = data.get("pos_delivery_charges") or None
+	invoice_doc.pos_delivery_charges = selected_charge
+	invoice_doc.pos_delivery_charges_rate = (
+		flt(data.get("pos_delivery_charges_rate", 0)) if selected_charge else 0
+	)
+
+
+def _apply_invoice_loyalty_fields(invoice_doc, data: dict):
+	"""Apply loyalty redemption fields without trusting the client amount."""
+	redeem_points = cint(data.get("loyalty_points", 0))
+	redeem_loyalty = cint(data.get("redeem_loyalty_points", 0)) and redeem_points > 0
+	invoice_doc.redeem_loyalty_points = 1 if redeem_loyalty else 0
+	invoice_doc.loyalty_points = redeem_points if redeem_loyalty else 0
+	invoice_doc.loyalty_amount = 0
+
+
+def _prepare_invoice_totals_for_loyalty_validation(invoice_doc):
+	"""Pre-calculate invoice totals before ERPNext validates loyalty redemption."""
+	from xpos.x_pos.api.invoice import apply_tax_inclusive, calc_delivery_charges
+
+	calc_delivery_charges(invoice_doc)
+	apply_tax_inclusive(invoice_doc)
+	invoice_doc.calculate_taxes_and_totals()
+
+
+def _resolve_loyalty_paid_amount(invoice_doc) -> float:
+	"""Let ERPNext derive the redeemable loyalty amount from the selected points."""
+	if not (getattr(invoice_doc, "redeem_loyalty_points", 0) and getattr(invoice_doc, "loyalty_points", 0)):
+		invoice_doc.loyalty_amount = 0
+		return 0
+
+	from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+
+	invoice_doc.loyalty_amount = 0
+	validate_loyalty_points(invoice_doc, cint(invoice_doc.loyalty_points))
+	return round(flt(invoice_doc.loyalty_amount or 0), 2)
+
+
 @frappe.whitelist()
 def create_invoice(data: str | dict):
 	"""Create a POS Sales Invoice from cart data."""
@@ -143,11 +191,7 @@ def create_invoice(data: str | dict):
 			},
 		)
 
-	if data.get("redeem_loyalty_points") and data.get("loyalty_points"):
-		invoice_doc.redeem_loyalty_points = 1
-		invoice_doc.loyalty_points = cint(data["loyalty_points"])
-		if data.get("loyalty_amount"):
-			invoice_doc.loyalty_amount = flt(data["loyalty_amount"])
+	_apply_invoice_loyalty_fields(invoice_doc, data)
 
 	if data.get("write_off_amount"):
 		invoice_doc.write_off_amount = flt(data["write_off_amount"])
@@ -268,6 +312,13 @@ def create_invoice(data: str | dict):
 				invoice_doc,
 			)
 
+	_apply_invoice_delivery_charge_fields(invoice_doc, data)
+
+	loyalty_paid = 0
+	if invoice_doc.redeem_loyalty_points and invoice_doc.loyalty_points:
+		_prepare_invoice_totals_for_loyalty_validation(invoice_doc)
+		loyalty_paid = _resolve_loyalty_paid_amount(invoice_doc)
+
 	total_payment = 0
 	for payment in payments:
 		pay_amount = flt(payment.get("amount", 0), 2)
@@ -282,10 +333,6 @@ def create_invoice(data: str | dict):
 				},
 			)
 			total_payment += pay_amount
-
-	loyalty_paid = 0
-	if data.get("redeem_loyalty_points") and data.get("loyalty_amount"):
-		loyalty_paid = flt(data.get("loyalty_amount"), 2)
 
 	if loyalty_paid and hasattr(invoice_doc, "set_paid_amount"):
 		_original_set_paid_amount = invoice_doc.set_paid_amount
@@ -314,11 +361,6 @@ def create_invoice(data: str | dict):
 			invoice_doc.pos_opening_shift = pos_opening_shift
 		except Exception:
 			pass
-
-	if data.get("pos_delivery_charges"):
-		invoice_doc.pos_delivery_charges = data["pos_delivery_charges"]
-		if data.get("pos_delivery_charges_rate"):
-			invoice_doc.pos_delivery_charges_rate = flt(data["pos_delivery_charges_rate"])
 
 	pos_coupons_data = data.get("coupons_detail") or []
 	for coupon_row in pos_coupons_data:
@@ -513,10 +555,7 @@ def save_draft_invoice(data: str | dict):
 		except Exception:
 			pass
 
-	if data.get("pos_delivery_charges"):
-		invoice_doc.pos_delivery_charges = data["pos_delivery_charges"]
-		if data.get("pos_delivery_charges_rate"):
-			invoice_doc.pos_delivery_charges_rate = flt(data["pos_delivery_charges_rate"])
+	_apply_invoice_delivery_charge_fields(invoice_doc, data)
 
 	if is_update:
 		invoice_doc.save(ignore_permissions=True)
@@ -852,6 +891,13 @@ def get_invoice_details(invoice_name: str, doctype: str = ""):
 		"pos_profile": getattr(doc, "pos_profile", None),
 		"coupon_code": getattr(doc, "coupon_code", None),
 		"remarks": getattr(doc, "remarks", None),
+		"pos_delivery_charges": getattr(doc, "pos_delivery_charges", None),
+		"pos_delivery_charges_rate": getattr(doc, "pos_delivery_charges_rate", 0),
+		"pos_delivery_charges_label": (
+			frappe.get_cached_value("Delivery Charges", doc.pos_delivery_charges, "label")
+			if getattr(doc, "pos_delivery_charges", None)
+			else None
+		),
 		"items": [
 			{
 				"item_code": i.item_code,

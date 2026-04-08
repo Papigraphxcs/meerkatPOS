@@ -607,12 +607,13 @@ const splitTotal = computed(() => splitPayments.value.reduce((sum, p) => sum + (
 
 const maxRedeemablePoints = computed(() => {
 	const total = Math.abs(cartStore.grandTotal);
-	const maxByTotal = Math.floor(total * customerConversionFactor.value);
+	const conversionFactor = customerConversionFactor.value || 1;
+	const maxByTotal = Math.floor(total / conversionFactor);
 	return Math.min(customerLoyaltyPoints.value, maxByTotal);
 });
 
 const redeemInputAmount = computed(() => {
-	return redeemPointsInput.value / (customerConversionFactor.value || 1);
+	return redeemPointsInput.value * (customerConversionFactor.value || 1);
 });
 
 const paymentOfferGrandDiscount = computed(() => {
@@ -684,7 +685,7 @@ onMounted(async () => {
 					const conversionFactor = info.loyalty_program?.conversion_factor || 1;
 					customerLoyaltyPoints.value = info.loyalty_points!;
 					customerConversionFactor.value = conversionFactor;
-					customerLoyaltyAmount.value = info.loyalty_points! / conversionFactor;
+					customerLoyaltyAmount.value = info.loyalty_points! * conversionFactor;
 				}
 			}
 		} catch {
@@ -812,7 +813,7 @@ function applyLoyalty() {
 	if (maxPoints <= 0) return;
 
 	const points = Math.min(Math.max(Number(redeemPointsInput.value) || 0, 1), maxPoints);
-	const amount = roundCurrency(points / (customerConversionFactor.value || 1));
+	const amount = roundCurrency(points * (customerConversionFactor.value || 1));
 	if (amount <= 0) return;
 
 	cartStore.setLoyalty(points, amount);

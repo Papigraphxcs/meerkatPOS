@@ -16,7 +16,7 @@ class TestCreateInvoice(unittest.TestCase):
 		"""Test that create_invoice throws error without POS profile."""
 		mock_frappe.throw.side_effect = Exception("POS Profile is required")
 
-		with self.assertRaises(Exception) as context:
+		with self.assertRaises(Exception):
 			invoices.create_invoice('{"customer": "C1", "items": []}')
 
 		mock_frappe.throw.assert_called()
@@ -26,7 +26,7 @@ class TestCreateInvoice(unittest.TestCase):
 		"""Test that create_invoice throws error without customer."""
 		mock_frappe.throw.side_effect = Exception("Customer is required")
 
-		with self.assertRaises(Exception) as context:
+		with self.assertRaises(Exception):
 			invoices.create_invoice('{"pos_profile": "POS-1", "items": []}')
 
 		mock_frappe.throw.assert_called()
@@ -36,7 +36,7 @@ class TestCreateInvoice(unittest.TestCase):
 		"""Test that create_invoice throws error without items."""
 		mock_frappe.throw.side_effect = Exception("At least one item is required")
 
-		with self.assertRaises(Exception) as context:
+		with self.assertRaises(Exception):
 			invoices.create_invoice('{"pos_profile": "POS-1", "customer": "C1", "items": []}')
 
 		mock_frappe.throw.assert_called()
@@ -66,7 +66,7 @@ class TestCreateInvoice(unittest.TestCase):
 			"pos_opening_shift": "POS-OPEN-001",
 		}
 
-		result = invoices.create_invoice(data)
+		invoices.create_invoice(data)
 
 		mock_frappe.new_doc.assert_called_once_with("Sales Invoice")
 		mock_invoice.insert.assert_called_once()
@@ -97,7 +97,7 @@ class TestCreateInvoice(unittest.TestCase):
 			"return_against": "INV-001",
 		}
 
-		result = invoices.create_invoice(data)
+		invoices.create_invoice(data)
 
 		mock_validate_return.assert_called_once()
 		self.assertEqual(mock_invoice.is_return, 1)
@@ -126,10 +126,102 @@ class TestCreateInvoice(unittest.TestCase):
 			"payments": [{"mode_of_payment": "Cash", "amount": 90}],
 			"additional_discount_percentage": 10,
 		}
-
-		result = invoices.create_invoice(data)
+		invoices.create_invoice(data)
 
 		self.assertEqual(mock_invoice.additional_discount_percentage, 10)
+
+
+class TestInvoiceDeliveryChargeFields(unittest.TestCase):
+	"""Tests for xpos-managed delivery charge handling."""
+
+	def test_apply_invoice_delivery_charge_fields_clears_stale_values(self):
+		"""Existing draft delivery-charge values should clear when xpos sends none."""
+		invoice_doc = SimpleNamespace(
+			flags=SimpleNamespace(),
+			pos_delivery_charges="Old Delivery",
+			pos_delivery_charges_rate=25,
+		)
+
+		invoices._apply_invoice_delivery_charge_fields(invoice_doc, {})
+
+		self.assertIsNone(invoice_doc.pos_delivery_charges)
+		self.assertEqual(invoice_doc.pos_delivery_charges_rate, 0)
+		self.assertTrue(invoice_doc.flags.xpos_skip_auto_delivery_charges)
+
+	def test_apply_invoice_delivery_charge_fields_sets_explicit_selection(self):
+		"""The xpos payload should remain the only source of delivery-charge selection."""
+		invoice_doc = SimpleNamespace(flags=SimpleNamespace())
+
+		invoices._apply_invoice_delivery_charge_fields(
+			invoice_doc,
+			{
+				"pos_delivery_charges": "Express Delivery",
+				"pos_delivery_charges_rate": "18.5",
+			},
+		)
+
+		self.assertEqual(invoice_doc.pos_delivery_charges, "Express Delivery")
+		self.assertEqual(invoice_doc.pos_delivery_charges_rate, 18.5)
+		self.assertTrue(invoice_doc.flags.xpos_skip_auto_delivery_charges)
+
+
+class TestInvoiceLoyaltyFields(unittest.TestCase):
+	"""Tests for xpos-managed loyalty redemption handling."""
+
+	def test_apply_invoice_loyalty_fields_clears_stale_values(self):
+		"""Existing loyalty redemption fields should clear when xpos sends none."""
+		invoice_doc = SimpleNamespace(
+			redeem_loyalty_points=1,
+			loyalty_points=50,
+			loyalty_amount=500,
+		)
+
+		invoices._apply_invoice_loyalty_fields(invoice_doc, {})
+
+		self.assertEqual(invoice_doc.redeem_loyalty_points, 0)
+		self.assertEqual(invoice_doc.loyalty_points, 0)
+		self.assertEqual(invoice_doc.loyalty_amount, 0)
+
+	def test_apply_invoice_loyalty_fields_ignores_client_amount(self):
+		"""xpos should trust loyalty points, not the client-sent monetary amount."""
+		invoice_doc = SimpleNamespace(
+			redeem_loyalty_points=0,
+			loyalty_points=0,
+			loyalty_amount=0,
+		)
+
+		invoices._apply_invoice_loyalty_fields(
+			invoice_doc,
+			{
+				"redeem_loyalty_points": 1,
+				"loyalty_points": 50,
+				"loyalty_amount": 999,
+			},
+		)
+
+		self.assertEqual(invoice_doc.redeem_loyalty_points, 1)
+		self.assertEqual(invoice_doc.loyalty_points, 50)
+		self.assertEqual(invoice_doc.loyalty_amount, 0)
+
+	@patch("erpnext.accounts.doctype.loyalty_program.loyalty_program.validate_loyalty_points")
+	def test_resolve_loyalty_paid_amount_uses_server_validation(self, mock_validate_loyalty_points):
+		"""The loyalty amount should be derived by ERPNext from the selected points."""
+		invoice_doc = SimpleNamespace(
+			redeem_loyalty_points=1,
+			loyalty_points=50,
+			loyalty_amount=999,
+		)
+
+		def _set_loyalty_amount(doc, points):
+			doc.loyalty_amount = 25
+
+		mock_validate_loyalty_points.side_effect = _set_loyalty_amount
+
+		loyalty_paid = invoices._resolve_loyalty_paid_amount(invoice_doc)
+
+		self.assertEqual(loyalty_paid, 25)
+		self.assertEqual(invoice_doc.loyalty_amount, 25)
+		mock_validate_loyalty_points.assert_called_once_with(invoice_doc, 50)
 
 
 class TestGetInvoices(unittest.TestCase):
@@ -242,9 +334,6 @@ class TestValidateReturnInvoice(unittest.TestCase):
 	def test_validate_return_checks_original_customer(self, mock_frappe):
 		"""Test that return validates customer matches original invoice."""
 		mock_frappe.db.get_value.return_value = "Customer A"
-
-		# Should not throw for matching customer
-		items = [{"item_code": "ITEM-001", "qty": -1}]
 
 		# When customer matches, no error should be raised
 		original_customer = mock_frappe.db.get_value("Sales Invoice", "INV-001", "customer")

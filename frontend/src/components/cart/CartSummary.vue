@@ -341,7 +341,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useOfferStore } from "@/stores/offerStore";
@@ -438,20 +438,81 @@ function applyDiscount() {
 	cartStore.setDiscount(discountType.value as "percentage" | "amount", discountInput.value || 0);
 }
 
+async function loadDeliveryCharges(): Promise<DeliveryCharge[]> {
+	if (!posStore.profileName || !posStore.companyName) {
+		availableDeliveryCharges.value = [];
+		return [];
+	}
+
+	isLoadingDelivery.value = true;
+	try {
+		const charges = await offerStore.fetchDeliveryCharges(
+			posStore.profileName,
+			posStore.companyName,
+			cartStore.customer?.name || "",
+		);
+		availableDeliveryCharges.value = charges;
+		return charges;
+	} finally {
+		isLoadingDelivery.value = false;
+	}
+}
+
+function syncSelectedDeliveryCharge(charges: DeliveryCharge[]) {
+	const currentCharge = cartStore.selectedDeliveryCharge;
+	const matchingCharge = currentCharge
+		? charges.find((charge) => charge.name === currentCharge.name)
+		: undefined;
+
+	if (matchingCharge) {
+		cartStore.setDeliveryCharge(matchingCharge);
+		return;
+	}
+
+	if (currentCharge) {
+		cartStore.setDeliveryCharge(null);
+	}
+
+	if (posStore.posProfile?.auto_set_delivery_charges && charges.length > 0) {
+		cartStore.setDeliveryCharge(charges[0]);
+	}
+}
+
+async function syncAutoDeliveryCharge() {
+	if (cartStore.isReturnMode || cartStore.isEmpty) {
+		availableDeliveryCharges.value = [];
+		cartStore.setDeliveryCharge(null);
+		return;
+	}
+
+	if (!posStore.posProfile?.auto_set_delivery_charges) {
+		return;
+	}
+
+	const charges = await loadDeliveryCharges();
+	syncSelectedDeliveryCharge(charges);
+}
+
+watch(
+	[
+		() => posStore.posProfile?.auto_set_delivery_charges,
+		() => posStore.profileName,
+		() => posStore.companyName,
+		() => cartStore.customer?.name || "",
+		() => cartStore.isReturnMode,
+		() => cartStore.isEmpty,
+	],
+	() => {
+		void syncAutoDeliveryCharge();
+	},
+	{ immediate: true },
+);
+
 async function toggleDelivery() {
 	showDelivery.value = !showDelivery.value;
-	if (showDelivery.value && !availableDeliveryCharges.value.length) {
-		isLoadingDelivery.value = true;
-		try {
-			const charges = await offerStore.fetchDeliveryCharges(
-				posStore.profileName,
-				posStore.companyName,
-				cartStore.customer?.name || "",
-			);
-			availableDeliveryCharges.value = charges;
-		} finally {
-			isLoadingDelivery.value = false;
-		}
+	if (showDelivery.value) {
+		const charges = await loadDeliveryCharges();
+		syncSelectedDeliveryCharge(charges);
 	}
 }
 

@@ -194,6 +194,9 @@ def set_patient(doc):
 def auto_set_delivery_charges(doc):
 	if not doc.pos_profile:
 		return
+
+	if getattr(getattr(doc, "flags", None), "xpos_skip_auto_delivery_charges", False):
+		return
 	if not frappe.get_cached_value("POS Profile", doc.pos_profile, "auto_set_delivery_charges"):
 		return
 
@@ -261,6 +264,16 @@ def calc_delivery_charges(doc):
 		)
 		if old_charges:
 			doc.taxes.remove(old_charges)
+			calculate_taxes_and_totals = True
+
+	if doc.pos_delivery_charges:
+		existing_charges = [
+			i
+			for i in list(doc.taxes)
+			if i.charge_type == "Actual" and i.description == doc.pos_delivery_charges
+		]
+		for existing_charge in existing_charges:
+			doc.taxes.remove(existing_charge)
 			calculate_taxes_and_totals = True
 
 	if doc.pos_delivery_charges:
