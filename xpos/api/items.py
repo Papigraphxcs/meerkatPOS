@@ -30,6 +30,19 @@ def get_pos_items(
 		lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
 		groups = frappe.get_all("Item Group", filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, pluck="name")
 		filters["item_group"] = ["in", groups]
+	elif pos.item_groups:
+		allowed_names = [ig.item_group for ig in pos.item_groups]
+		all_groups: set[str] = set()
+		for group_name in allowed_names:
+			lft_rgt = frappe.db.get_value("Item Group", group_name, ["lft", "rgt"])
+			if lft_rgt:
+				lft, rgt = lft_rgt
+				descendants = frappe.get_all(
+					"Item Group", filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, pluck="name"
+				)
+				all_groups.update(descendants)
+		if all_groups:
+			filters["item_group"] = ["in", list(all_groups)]
 
 	or_filters = []
 	if search_term:
@@ -151,6 +164,23 @@ def get_items_count(pos_profile: str, search_term: str = "", item_group: str = "
 			conditions += " AND i.item_group IN (SELECT name FROM `tabItem Group` WHERE lft >= %(lft)s AND rgt <= %(rgt)s)"
 			values["lft"] = ig.lft
 			values["rgt"] = ig.rgt
+	elif pos.item_groups:
+		# POS Profile restricts to specific item groups — apply as baseline filter
+		allowed_names = [ig.item_group for ig in pos.item_groups]
+		all_groups: set[str] = set()
+		for group_name in allowed_names:
+			lft_rgt = frappe.db.get_value("Item Group", group_name, ["lft", "rgt"])
+			if lft_rgt:
+				lft, rgt = lft_rgt
+				descendants = frappe.get_all(
+					"Item Group", filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, pluck="name"
+				)
+				all_groups.update(descendants)
+		if all_groups:
+			placeholders = ", ".join([f"%(ig_{i})s" for i in range(len(all_groups))])
+			for i, g in enumerate(all_groups):
+				values[f"ig_{i}"] = g
+			conditions += f" AND i.item_group IN ({placeholders})"
 
 	if search_term:
 		search_term = search_term.strip()
@@ -173,8 +203,45 @@ def get_items_count(pos_profile: str, search_term: str = "", item_group: str = "
 
 
 @frappe.whitelist()
-def get_item_groups():
-	"""Get all item groups in a tree structure."""
+def get_item_groups(pos_profile: str | None = None):
+	"""Get item groups, filtered to POS Profile item_groups when configured."""
+	if pos_profile:
+		pos = frappe.get_cached_doc("POS Profile", pos_profile)
+		allowed_names = [ig.item_group for ig in (pos.item_groups or [])]
+		if allowed_names:
+			# Use the configured groups as the display tabs (parent_groups)
+			parent_groups = frappe.get_all(
+				"Item Group",
+				filters={"name": ["in", allowed_names]},
+				fields=["name", "parent_item_group", "image"],
+				order_by="lft asc",
+				limit_page_length=0,
+			)
+			# Collect all leaf groups that are descendants of the configured groups
+			all_leaf_names: set[str] = set()
+			for group_name in allowed_names:
+				lft_rgt = frappe.db.get_value("Item Group", group_name, ["lft", "rgt"])
+				if lft_rgt:
+					lft, rgt = lft_rgt
+					descendants = frappe.get_all(
+						"Item Group",
+						filters={"lft": [">=", lft], "rgt": ["<=", rgt], "is_group": 0},
+						pluck="name",
+					)
+					all_leaf_names.update(descendants)
+			groups = (
+				frappe.get_all(
+					"Item Group",
+					filters={"name": ["in", list(all_leaf_names)]},
+					fields=["name", "parent_item_group", "image"],
+					order_by="name asc",
+					limit_page_length=0,
+				)
+				if all_leaf_names
+				else []
+			)
+			return {"groups": groups, "parent_groups": parent_groups}
+
 	groups = frappe.get_all(
 		"Item Group",
 		filters={"is_group": 0},

@@ -241,7 +241,9 @@ export const useItemStore = defineStore("items", () => {
 			}
 
 			if (isOnline()) {
-				const result = await call<ItemGroupsResult>("xpos.api.items.get_item_groups");
+				const result = await call<ItemGroupsResult>("xpos.api.items.get_item_groups", {
+					pos_profile: usePosStore().profileName,
+				});
 				itemGroups.value = result.groups || [];
 				parentGroups.value = result.parent_groups || [];
 
