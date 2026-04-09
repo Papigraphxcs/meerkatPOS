@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { call } from "@/services/api";
 import { usePosStore } from "./posStore";
+import { useSettingsStore } from "./settingsStore";
 import { getCachedItemByCode, getCachedStockForItem } from "@/services/dbBridge";
 import type {
 	CartItem,
@@ -55,13 +56,26 @@ export const useCartStore = defineStore("cart", () => {
 	const currency = ref("");
 	const conversionRate = ref(1);
 	const selectedDeliveryCharge = ref<DeliveryCharge | null>(null);
+	const settingsStore = useSettingsStore();
 
-	// --- Offer evaluation (reactive) ---
+	const itemRatePrecision = computed(() => {
+		const val = parseInt(String(settingsStore.currencyPrecision?.float_precision || ""), 10);
+		return Number.isFinite(val) && val >= 0 ? val : 3;
+	});
+
+	function normalizeItemRate(rate: number | string): number {
+		const parsed = Number(rate || 0);
+		if (!Number.isFinite(parsed)) {
+			return 0;
+		}
+		const p = itemRatePrecision.value;
+		return Math.round((parsed + Number.EPSILON) * 10 ** p) / 10 ** p;
+	}
+
 	const offerEvaluation = computed<OfferEvaluationResult>(() => {
 		return evaluateOffers(appliedOffers.value, items.value);
 	});
 
-	/** Total discount amount attributable to offers on individual items */
 	const offerItemDiscountTotal = computed(() => {
 		const eval_ = offerEvaluation.value;
 		if (!eval_.itemDiscounts.length) return 0;
@@ -82,7 +96,6 @@ export const useCartStore = defineStore("cart", () => {
 		return Math.round(total * 100) / 100;
 	});
 
-	/** Grand total discount percentage from offers */
 	const offerGrandTotalDiscountPct = computed(() =>
 		computeGrandTotalDiscountPct(offerEvaluation.value.grandTotalDiscounts),
 	);
@@ -308,7 +321,7 @@ export const useCartStore = defineStore("cart", () => {
 				item_code: item.item_code,
 				item_name: item.item_name,
 				local_item_name: item.local_item_name,
-				rate: item.rate || 0,
+				rate: normalizeItemRate(item.rate || 0),
 				qty: isReturnMode.value ? -1 : 1,
 				uom: item.uom || item.stock_uom,
 				stock_uom: item.stock_uom,
@@ -397,7 +410,7 @@ export const useCartStore = defineStore("cart", () => {
 			if (existing) {
 				const addQty = isReturnMode.value ? -Math.abs(qty) : qty;
 				existing.qty += addQty;
-				if (rate) existing.rate = rate;
+				if (rate) existing.rate = normalizeItemRate(rate);
 				return { success: true };
 			}
 		}
@@ -406,7 +419,7 @@ export const useCartStore = defineStore("cart", () => {
 			item_code: item.item_code,
 			item_name: item.item_name,
 			local_item_name: item.local_item_name,
-			rate,
+			rate: normalizeItemRate(rate),
 			qty: isReturnMode.value ? -Math.abs(qty) : qty,
 			uom: uom || item.uom || item.stock_uom,
 			stock_uom: item.stock_uom,
@@ -459,7 +472,7 @@ export const useCartStore = defineStore("cart", () => {
 	}
 
 	function updateItemRate(index: number, rate: number): void {
-		items.value[index].rate = rate;
+		items.value[index].rate = normalizeItemRate(rate);
 	}
 
 	function updateItemDiscount(index: number, type: "percentage" | "amount", value: number): void {
@@ -474,7 +487,7 @@ export const useCartStore = defineStore("cart", () => {
 
 	function updateItemUOM(index: number, uom: string, rate: number, conversionFactor: number): void {
 		items.value[index].uom = uom;
-		items.value[index].rate = rate;
+		items.value[index].rate = normalizeItemRate(rate);
 		items.value[index].conversion_factor = conversionFactor;
 	}
 
@@ -577,23 +590,17 @@ export const useCartStore = defineStore("cart", () => {
 		syncFreeItems();
 	}
 
-	/**
-	 * Synchronise free items in the cart with the current offer evaluation.
-	 * Removes stale free items and adds newly qualifying ones.
-	 */
 	function syncFreeItems(): void {
 		const eval_ = offerEvaluation.value;
 
-		// Remove existing free items added by offers
 		items.value = items.value.filter((i) => !i.pos_is_offer);
 
-		// Add free items from evaluation
 		for (const free of eval_.freeItems) {
-			if (!free.item_code) continue; // unresolved group-based free items
+			if (!free.item_code) continue;
 			items.value.push({
 				item_code: free.item_code,
 				item_name: free.item_name,
-				rate: free.rate,
+				rate: normalizeItemRate(free.rate),
 				qty: free.qty,
 				uom: "",
 				stock_uom: "",
@@ -626,7 +633,6 @@ export const useCartStore = defineStore("cart", () => {
 		appliedCoupon.value = null;
 		couponCode.value = "";
 		appliedOffers.value = [];
-		// Remove offer-added free items
 		items.value = items.value.filter((i) => !i.pos_is_offer);
 	}
 
@@ -696,9 +702,6 @@ export const useCartStore = defineStore("cart", () => {
 		showPaymentDialog.value = false;
 	}
 
-	/**
-	 * Fetch available draft invoices from the backend
-	 */
 	async function fetchDraftInvoices(): Promise<any[]> {
 		try {
 			isLoadingDrafts.value = true;
@@ -714,9 +717,6 @@ export const useCartStore = defineStore("cart", () => {
 		}
 	}
 
-	/**
-	 * Load a draft invoice into the cart
-	 */
 	async function loadDraftInvoice(draftName: string): Promise<boolean> {
 		try {
 			const result = await call<any>("xpos.api.invoices.get_invoice_details", {
@@ -727,10 +727,8 @@ export const useCartStore = defineStore("cart", () => {
 				return false;
 			}
 
-			// Clear current cart
 			clearCart();
 
-			// Set customer if available
 			if (result.customer) {
 				customer.value = {
 					name: result.customer,
@@ -769,7 +767,7 @@ export const useCartStore = defineStore("cart", () => {
 						item_code: item.item_code,
 						item_name: item.item_name,
 						local_item_name: item.local_item_name,
-						rate: item.rate || 0,
+						rate: normalizeItemRate(item.rate || 0),
 						qty: item.qty || 1,
 						uom: item.uom || item.stock_uom || "",
 						stock_uom: item.stock_uom || item.uom || "",
@@ -852,7 +850,7 @@ export const useCartStore = defineStore("cart", () => {
 				item_code: item.item_code,
 				item_name: item.item_name,
 				local_item_name: item.local_item_name,
-				rate: item.rate || 0,
+				rate: normalizeItemRate(item.rate || 0),
 				qty: item.qty || 1,
 				uom: item.uom || item.stock_uom || "",
 				stock_uom: item.stock_uom || item.uom || "",
@@ -879,7 +877,7 @@ export const useCartStore = defineStore("cart", () => {
 					item_name: item.item_name,
 					local_item_name: item.local_item_name,
 					qty: item.qty,
-					rate: item.rate,
+					rate: normalizeItemRate(item.rate),
 					uom: item.uom || item.stock_uom,
 					discount_percentage: item.discount_percentage,
 					discount_amount: item.discount_amount,
@@ -1070,5 +1068,6 @@ export const useCartStore = defineStore("cart", () => {
 		openDraftDialog,
 		closeDraftDialog,
 		setDeliveryCharge,
+		itemRatePrecision,
 	};
 });

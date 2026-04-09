@@ -12,6 +12,16 @@ from frappe.utils.background_jobs import enqueue
 from xpos.api.utilities import get_profile_setting
 
 
+def _get_item_rate_precision():
+	"""Return item rate precision from System Settings float_precision, default 3."""
+	val = frappe.db.get_default("float_precision")
+	try:
+		p = cint(val)
+		return p if p >= 0 else 3
+	except Exception:
+		return 3
+
+
 def _resolve_invoice_doctype(pos_profile: str):
 	"""Return 'POS Invoice' or 'Sales Invoice' based on POS Profile setting."""
 	if pos_profile:
@@ -200,8 +210,10 @@ def create_invoice(data: str | dict):
 			"write_off_cost_center"
 		)
 
+	rate_precision = _get_item_rate_precision()
+
 	for item_data in items:
-		item_rate = flt(item_data.get("rate", 0), 2)
+		item_rate = flt(item_data.get("rate", 0), rate_precision)
 		item_qty = flt(item_data.get("qty", 1), 3)
 
 		if not cint(pos.get("allow_rate_change")):
@@ -216,8 +228,8 @@ def create_invoice(data: str | dict):
 					},
 					"price_list_rate",
 				)
-				if price_list_rate is not None and flt(price_list_rate, 2) != item_rate:
-					item_rate = flt(price_list_rate, 2)
+				if price_list_rate is not None and flt(price_list_rate, rate_precision) != item_rate:
+					item_rate = flt(price_list_rate, rate_precision)
 
 		item = invoice_doc.append("items", {})
 		item.item_code = item_data.get("item_code")
@@ -261,10 +273,10 @@ def create_invoice(data: str | dict):
 		item.price_list_rate = item_rate
 		if disc_pct:
 			item.discount_percentage = disc_pct
-			item.rate = flt(item_rate * (1.0 - disc_pct / 100.0), 2)
+			item.rate = flt(item_rate * (1.0 - disc_pct / 100.0), rate_precision)
 		elif disc_amt:
 			item.discount_amount = disc_amt
-			item.rate = flt(item_rate - disc_amt, 2)
+			item.rate = flt(item_rate - disc_amt, rate_precision)
 		else:
 			item.rate = item_rate
 		if item_data.get("serial_no"):

@@ -28,7 +28,7 @@
 						:value="item.rate"
 						type="number"
 						min="0"
-						step="0.01"
+						:step="rateStep"
 						class="w-16 h-5 text-[11px] font-medium text-foreground bg-transparent border-b border-dashed border-border focus:outline-none focus:border-primary dark:border-muted-foreground/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 						@change="onRateChange"
 						@keydown.up.prevent="focusAdjacentItem(-1, 'rate')"
@@ -37,7 +37,7 @@
 					/>
 				</template>
 				<p v-else class="text-[11px] text-muted-foreground">
-					{{ currencySymbol }}{{ formatPrice(item.rate) }}
+					{{ currencySymbol }}{{ formatRate(item.rate) }}
 				</p>
 
 				<span class="text-[11px] text-muted-foreground">/</span>
@@ -180,6 +180,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { usePosStore } from "@/stores/posStore";
+import { useCartStore } from "@/stores/cartStore";
 import { useItemStore } from "@/stores/itemStore";
 import { Button } from "@/components/ui/button";
 import { Package, Minus, Plus, Trash2, Percent, ChevronDown } from "lucide-vue-next";
@@ -194,6 +195,7 @@ const props = defineProps({
 const emit = defineEmits(["update-qty", "update-rate", "update-discount", "update-uom", "remove"]);
 
 const posStore = usePosStore();
+const cartStore = useCartStore();
 const itemStore = useItemStore();
 
 const qtyInput = ref<HTMLInputElement | null>(null);
@@ -217,7 +219,7 @@ const formatDiscount = computed(() => {
 		return `${props.item.discount_percentage}%`;
 	}
 	if (props.item.discount_amount > 0) {
-		return `${props.currencySymbol}${props.item.discount_amount}`;
+		return `${props.currencySymbol}${formatPrice(props.item.discount_amount)}`;
 	}
 	return "";
 });
@@ -227,8 +229,6 @@ const discountAmount = computed(() => {
 	if (props.item.discount_percentage > 0) {
 		return (total * props.item.discount_percentage) / 100;
 	}
-	// For amount discount on return items (negative qty), negate the discount
-	// so calculations work correctly
 	const amt = props.item.discount_amount || 0;
 	return props.item.qty < 0 ? -amt : amt;
 });
@@ -279,7 +279,7 @@ async function loadItemUOMs() {
 
 function selectUOM(u: ItemUOM) {
 	const baseRate = props.item.rate / (props.item.conversion_factor || 1);
-	const newRate = Math.round(baseRate * u.conversion_factor * 100) / 100;
+	const newRate = roundRate(baseRate * u.conversion_factor);
 	emit("update-uom", props.index, u.uom, newRate, u.conversion_factor);
 	showUOMSelector.value = false;
 }
@@ -299,7 +299,7 @@ function onQtyChange(e: Event) {
 
 function onRateChange(e: Event) {
 	const val = parseFloat((e.target as HTMLInputElement).value) || 0;
-	emit("update-rate", props.index, Math.round(val * 100) / 100);
+	emit("update-rate", props.index, roundRate(val));
 }
 
 function applyDiscount() {
@@ -335,8 +335,36 @@ function focusAdjacentItem(direction: number, field: "qty" | "rate") {
 	}
 }
 
+const ratePrecision = computed(() => cartStore.itemRatePrecision);
+
+const rateStep = computed(() => {
+	const p = ratePrecision.value;
+	return p > 0 ? (1 / 10 ** p).toFixed(p) : "1";
+});
+
+function parseNumeric(value: number | string) {
+	const parsed = parseFloat(String(value ?? 0));
+	return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function roundRate(value: number) {
+	const p = ratePrecision.value;
+	return Math.round((value + Number.EPSILON) * 10 ** p) / 10 ** p;
+}
+
+function roundCurrency(value: number) {
+	return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+function formatRate(rate: number | string) {
+	const p = ratePrecision.value;
+	return roundRate(parseNumeric(rate))
+		.toFixed(p)
+		.replace(/\.?0+$/, "");
+}
+
 function formatPrice(price: number | string) {
-	return (Math.round((parseFloat(String(price) || "0") + Number.EPSILON) * 100) / 100).toFixed(2);
+	return roundCurrency(parseNumeric(price)).toFixed(2);
 }
 
 function blockInvalidNumericKeys(event: KeyboardEvent) {

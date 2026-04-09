@@ -1045,11 +1045,14 @@ async function printInvoice(invoiceName: string) {
 		const doctype = usePosInvoice ? "POS Invoice" : "Sales Invoice";
 
 		const baseUrl = window.location.origin;
-		const printUrl = `${baseUrl}/printview?doctype=${doctype}&name=${invoiceName}&format=${printFormat}&no_letterhead=${letterHead ? "0" : "1"}&trigger_print=1`;
-		const printWindow = window.open(printUrl, "_blank", "width=800,height=600");
+		const printUrl = `${baseUrl}/printview?doctype=${doctype}&name=${invoiceName}&format=${printFormat}&no_letterhead=${letterHead ? "0" : "1"}`;
+		const printWindow = window.open(printUrl, "_blank");
 
 		if (printWindow) {
 			printWindow.onload = () => {
+				printWindow.onafterprint = () => {
+					printWindow.close();
+				};
 				setTimeout(() => {
 					printWindow.print();
 				}, 500);

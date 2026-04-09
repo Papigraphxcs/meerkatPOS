@@ -130,6 +130,37 @@ class TestCreateInvoice(unittest.TestCase):
 
 		self.assertEqual(mock_invoice.additional_discount_percentage, 10)
 
+	@patch("xpos.api.invoices.frappe")
+	def test_create_invoice_preserves_three_decimal_item_rate(self, mock_frappe):
+		"""Item rates should retain up to three decimals when xpos creates invoices."""
+		mock_pos = MagicMock()
+		mock_pos.company = "Test Company"
+		mock_pos.warehouse = "Store - TC"
+		mock_pos.currency = "USD"
+		mock_pos.get.return_value = 0
+		mock_frappe.get_cached_doc.return_value = mock_pos
+		mock_frappe.db.get_value.return_value = "Debtors - TC"
+		mock_frappe.db.get_default.return_value = "3"
+
+		mock_item = MagicMock()
+		mock_invoice = MagicMock()
+		mock_invoice.name = "INV-003"
+		mock_invoice.as_dict.return_value = {"name": "INV-003"}
+		mock_invoice.append.side_effect = lambda table, data: mock_item if table == "items" else MagicMock()
+		mock_frappe.new_doc.return_value = mock_invoice
+
+		data = {
+			"pos_profile": "POS-PROFILE-1",
+			"customer": "Customer A",
+			"items": [{"item_code": "ITEM-001", "qty": 1, "rate": 12.3456}],
+			"payments": [{"mode_of_payment": "Cash", "amount": 12.35}],
+		}
+
+		invoices.create_invoice(data)
+
+		self.assertEqual(mock_item.price_list_rate, 12.346)
+		self.assertEqual(mock_item.rate, 12.346)
+
 
 class TestInvoiceDeliveryChargeFields(unittest.TestCase):
 	"""Tests for xpos-managed delivery charge handling."""
