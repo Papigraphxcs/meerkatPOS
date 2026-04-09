@@ -47,11 +47,14 @@
 
 		<div class="flex flex-1 overflow-hidden">
 			<div
+				ref="itemsPanelRef"
 				:class="[
 					'flex flex-col min-w-0 border-e border-border bg-background',
 					'md:flex md:flex-1 md:max-w-[calc(100%-560px)] xl:max-w-[calc(100%-520px)]',
 					activeTab === 'items' ? 'flex flex-1' : 'hidden',
 				]"
+				@focusin="activeZone = 'items'"
+				@click="activeZone = 'items'"
 			>
 				<div class="shrink-0 p-3 sm:p-4 pb-1.5 sm:pb-2 space-y-2">
 					<div class="flex items-center gap-2">
@@ -136,15 +139,23 @@
 					/>
 				</div>
 			</div>
-			<div class="hidden md:flex w-[560px] xl:w-[520px] flex-col bg-background dark:bg-card shrink-0">
+			<div
+				ref="cartPanelRef"
+				class="hidden md:flex w-[560px] xl:w-[520px] flex-col bg-background dark:bg-card shrink-0"
+				@focusin="activeZone = 'cart'"
+				@click="activeZone = 'cart'"
+			>
 				<Cart />
 			</div>
 
 			<div
+				ref="mobileCartPanelRef"
 				:class="[
 					'md:hidden flex flex-col flex-1 bg-background dark:bg-card overflow-hidden',
 					activeTab === 'cart' ? 'flex' : 'hidden',
 				]"
+				@focusin="activeZone = 'cart'"
+				@click="activeZone = 'cart'"
 			>
 				<Cart />
 			</div>
@@ -210,6 +221,10 @@ watch(
 const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null);
 const barcodeScannerRef = ref<InstanceType<typeof BarcodeScanner> | null>(null);
 const commandSearchRef = ref<InstanceType<typeof CommandSearch> | null>(null);
+const itemsPanelRef = ref<HTMLDivElement | null>(null);
+const cartPanelRef = ref<HTMLDivElement | null>(null);
+const mobileCartPanelRef = ref<HTMLDivElement | null>(null);
+const activeZone = ref<"items" | "cart">("items");
 const highlightedIndex = ref(-1);
 
 const topGroups = computed(() => {
@@ -372,11 +387,13 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 
 	if (e.key === "F1") {
 		e.preventDefault();
+		activeZone.value = "items";
 		barcodeScannerRef.value?.focus();
 		return;
 	}
 	if (e.key === "F2") {
 		e.preventDefault();
+		activeZone.value = "items";
 		searchBarRef.value?.focus();
 		return;
 	}
@@ -389,8 +406,14 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 	if (isInput) return;
 	if (isInDialog) return;
 
+	// When the cart zone is active, don't steal arrow/enter keys — the cart handles its own navigation
+	if (activeZone.value === "cart") {
+		if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter") return;
+	}
+
 	if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
 		e.preventDefault();
+		activeZone.value = "items";
 		searchBarRef.value?.setValue(e.key);
 		searchBarRef.value?.focus();
 		itemStore.setSearchTerm(e.key);

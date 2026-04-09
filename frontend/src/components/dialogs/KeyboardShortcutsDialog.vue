@@ -124,7 +124,7 @@
 						<div class="space-y-1.5">
 							<ShortcutItem
 								:shortcut="['Delete']"
-								:description="__('Remove Last Item from Cart')"
+								:description="__('Remove Selected Item from Cart')"
 							/>
 							<ShortcutItem
 								:shortcut="['Ctrl', 'Delete']"

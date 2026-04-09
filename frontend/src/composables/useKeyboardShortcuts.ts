@@ -280,7 +280,7 @@ export function useKeyboardShortcuts() {
 		{
 			id: "remove-last-item",
 			keys: ["delete"],
-			description: "Remove Last Item from Cart",
+			description: "Remove Selected Item from Cart",
 			category: "Cart",
 			action: () => {
 				window.dispatchEvent(new CustomEvent("xpos:remove-last-item"));

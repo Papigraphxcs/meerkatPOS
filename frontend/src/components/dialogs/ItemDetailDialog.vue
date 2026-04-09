@@ -21,15 +21,26 @@
 				</div>
 
 				<template v-else-if="detail">
-					<div v-if="detail.uoms && detail.uoms.length > 1">
+					<div v-if="detail.uoms && detail.uoms.length > 0">
 						<label class="text-sm font-semibold text-foreground mb-1.5 block"
-							>Unit of Measure</label
+							>Unit of Measure
+							<span class="text-[10px] font-normal text-muted-foreground ms-2"
+								>← → cycle &bull; 1–{{ detail.uoms.length }} select</span
+							>
+						</label>
+						<div
+							ref="uomContainerRef"
+							class="flex flex-wrap gap-2"
+							@keydown="handleUOMSectionKeydown"
 						>
-						<div class="flex flex-wrap gap-2">
 							<button
-								v-for="u in detail.uoms"
+								v-for="(u, i) in detail.uoms"
 								:key="u.uom"
+								:data-uom-index="i"
 								@click="selectUOM(u.uom, u.conversion_factor)"
+								@keydown.left.prevent="focusUOMButton($event, -1)"
+								@keydown.right.prevent="focusUOMButton($event, 1)"
+								@keydown.enter.prevent="selectUOM(u.uom, u.conversion_factor)"
 								class="px-3 py-1.5 rounded-lg border text-sm font-medium transition-all"
 								:class="
 									selectedUOM === u.uom
@@ -37,6 +48,7 @@
 										: 'border-border text-muted-foreground hover:border-primary/40'
 								"
 							>
+								<span class="text-[10px] opacity-40 me-1">{{ i + 1 }}</span>
 								{{ u.uom }}
 								<span
 									v-if="u.conversion_factor !== 1"
@@ -190,6 +202,8 @@ const selectedSerials = ref<string[]>([]);
 const selectedQty = ref(1);
 const serialSearch = ref("");
 const uomConversionFactor = ref(1);
+const uomRate = ref<number | null>(null);
+const uomContainerRef = ref<HTMLDivElement | null>(null);
 const qtyInputRef = ref<InstanceType<typeof NumberInput> | null>(null);
 
 const itemForDetail = computed(() => itemStore.selectedItemForDetail);
@@ -199,6 +213,7 @@ watch(detail, (d) => {
 	if (d) {
 		selectedUOM.value = d.uom || d.stock_uom;
 		uomConversionFactor.value = d.conversion_factor || 1;
+		uomRate.value = null;
 		selectedBatch.value = "";
 		selectedSerials.value = [];
 		selectedQty.value = 1;
@@ -226,11 +241,60 @@ const canAdd = computed(() => {
 	return selectedQty.value > 0;
 });
 
-function selectUOM(uom: string, cf: number): void {
+function handleUOMSectionKeydown(event: KeyboardEvent): void {
+	const uoms = detail.value?.uoms;
+	if (!uoms?.length) return;
+
+	if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+		event.preventDefault();
+		const currentIdx = uoms.findIndex((u) => u.uom === selectedUOM.value);
+		const nextIdx =
+			event.key === "ArrowRight"
+				? (currentIdx + 1) % uoms.length
+				: (currentIdx - 1 + uoms.length) % uoms.length;
+		selectUOM(uoms[nextIdx].uom, uoms[nextIdx].conversion_factor);
+		nextTick(() => {
+			const btn = uomContainerRef.value?.querySelector(
+				`[data-uom-index="${nextIdx}"]`,
+			) as HTMLButtonElement | null;
+			btn?.focus();
+		});
+		return;
+	}
+	const num = parseInt(event.key);
+	if (!isNaN(num) && num >= 1 && num <= uoms.length) {
+		event.preventDefault();
+		selectUOM(uoms[num - 1].uom, uoms[num - 1].conversion_factor);
+		nextTick(() => {
+			const btn = uomContainerRef.value?.querySelector(
+				`[data-uom-index="${num - 1}"]`,
+			) as HTMLButtonElement | null;
+			btn?.focus();
+		});
+	}
+}
+
+function focusUOMButton(event: KeyboardEvent, direction: number): void {
+	const container = uomContainerRef.value;
+	if (!container) return;
+	const buttons = Array.from(container.querySelectorAll("button[data-uom-index]")) as HTMLButtonElement[];
+	const idx = buttons.indexOf(event.target as HTMLButtonElement);
+	if (idx < 0) return;
+	const next = (idx + direction + buttons.length) % buttons.length;
+	buttons[next]?.focus();
+}
+
+async function selectUOM(uom: string, cf: number): Promise<void> {
 	selectedUOM.value = uom;
 	uomConversionFactor.value = cf;
+	uomRate.value = null;
 	if (itemForDetail.value) {
-		itemStore.fetchPriceForUOM(itemForDetail.value.item_code, uom, posStore.profileName);
+		const fetched = await itemStore.fetchPriceForUOM(
+			itemForDetail.value.item_code,
+			uom,
+			posStore.profileName,
+		);
+		uomRate.value = fetched > 0 ? fetched : null;
 	}
 }
 
@@ -249,7 +313,8 @@ function toggleSerial(sn: string): void {
 function addToCart(): void {
 	if (!itemForDetail.value || !canAdd.value) return;
 
-	const rate = detail.value?.price_list_rate || itemForDetail.value.rate || 0;
+	const baseRate = detail.value?.price_list_rate || itemForDetail.value.rate || 0;
+	const rate = uomRate.value !== null ? uomRate.value : baseRate * uomConversionFactor.value;
 
 	if (detail.value?.has_serial_no && selectedSerials.value.length > 0) {
 		for (const sn of selectedSerials.value) {

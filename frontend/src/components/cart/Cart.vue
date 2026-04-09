@@ -131,10 +131,18 @@
 				</p>
 			</div>
 
-			<TransitionGroup v-else name="list" tag="div" class="space-y-0.5 py-0.5">
+			<div v-else class="space-y-0.5 py-0.5">
 				<CartItem
 					v-for="(item, index) in cartStore.items"
-					:key="item.item_code + '-' + index"
+					:key="
+						item.item_code +
+						'-' +
+						(item.serial_no || '') +
+						'-' +
+						(item.batch_no || '') +
+						'-' +
+						index
+					"
 					:item="item"
 					:index="index"
 					:currency-symbol="posStore.currencySymbol"
@@ -144,7 +152,7 @@
 					@update-uom="cartStore.updateItemUOM"
 					@remove="cartStore.removeItem"
 				/>
-			</TransitionGroup>
+			</div>
 		</div>
 
 		<div

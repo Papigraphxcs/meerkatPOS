@@ -117,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, provide, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { Toaster } from "vue-sonner";
 import { usePosStore } from "@/stores/posStore";
@@ -197,9 +197,30 @@ function handleHoldInvoice() {
 }
 
 function handleRemoveLastItem() {
-	if (cartStore.items.length > 0) {
-		cartStore.removeItem(cartStore.items.length - 1);
-	}
+	if (cartStore.items.length === 0) return;
+
+	const activeEl = document.activeElement as HTMLElement | null;
+	const focusedRow = activeEl?.closest("[data-cart-index]") as HTMLElement | null;
+	const focusedIndexRaw = focusedRow?.getAttribute("data-cart-index") || "";
+	const focusedIndex = Number.parseInt(focusedIndexRaw, 10);
+	const selectedIndex = cartStore.selectedCartIndex;
+
+	const indexToRemove =
+		!Number.isNaN(focusedIndex) && focusedIndex >= 0
+			? focusedIndex
+			: selectedIndex >= 0
+				? selectedIndex
+				: cartStore.items.length - 1;
+
+	cartStore.removeItem(indexToRemove);
+
+	nextTick(() => {
+		const nextIndex = cartStore.selectedCartIndex;
+		if (nextIndex < 0) return;
+		const nextRow = document.querySelector(`[data-cart-index="${nextIndex}"]`) as HTMLElement | null;
+		nextRow?.focus();
+		nextRow?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+	});
 }
 
 function handleCloseShift() {

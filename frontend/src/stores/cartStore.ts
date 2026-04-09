@@ -24,6 +24,7 @@ import {
 
 export const useCartStore = defineStore("cart", () => {
 	const items = ref<CartItem[]>([]);
+	const selectedCartIndex = ref(-1);
 	const customer = ref<{
 		name: string;
 		customer_name?: string;
@@ -438,8 +439,20 @@ export const useCartStore = defineStore("cart", () => {
 	}
 
 	function removeItem(index: number): void {
+		if (index < 0 || index >= items.value.length) return;
 		items.value.splice(index, 1);
+		if (items.value.length === 0) {
+			selectedCartIndex.value = -1;
+		} else if (selectedCartIndex.value > index) {
+			selectedCartIndex.value -= 1;
+		} else if (selectedCartIndex.value === index) {
+			selectedCartIndex.value = Math.min(index, items.value.length - 1);
+		}
 		syncFreeItems();
+	}
+
+	function setSelectedCartIndex(index: number): void {
+		selectedCartIndex.value = index;
 	}
 
 	function updateItemQty(index: number, qty: number): { success: boolean; message?: string } {
@@ -660,6 +673,7 @@ export const useCartStore = defineStore("cart", () => {
 
 	function clearCart(): void {
 		items.value = [];
+		selectedCartIndex.value = -1;
 		discountPercentage.value = 0;
 		discountAmount.value = 0;
 		clearLoyalty();
@@ -1007,6 +1021,7 @@ export const useCartStore = defineStore("cart", () => {
 		appliedCoupon,
 		couponCode,
 		payments,
+		selectedCartIndex,
 		currentDraftName,
 		isSavingDraft,
 		showDraftDialog,
@@ -1034,6 +1049,7 @@ export const useCartStore = defineStore("cart", () => {
 		addItem,
 		addItemWithDetails,
 		removeItem,
+		setSelectedCartIndex,
 		updateItemQty,
 		updateItemRate,
 		updateItemDiscount,

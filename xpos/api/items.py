@@ -380,36 +380,48 @@ def get_item_detail(
 		"price_list_rate",
 	)
 	result["rate"] = flt(rate)
+	result["price_list_rate"] = flt(rate)
+	result["uom"] = item.stock_uom
+	result["conversion_factor"] = 1.0
 
 	result["actual_qty"] = get_stock_qty(item_code, warehouse) if warehouse else 0
 
-	batch_no_data = []
+	batches = []
 	if item.has_batch_no and warehouse:
-		batch_no_data = _get_batch_data(item_code, warehouse, today)
-	result["batch_no_data"] = batch_no_data
+		for b in _get_batch_data(item_code, warehouse, today):
+			batches.append(
+				{
+					"batch_no": b["batch_no"],
+					"qty": flt(b.get("batch_qty", 0)),
+					"expiry_date": b.get("expiry_date"),
+				}
+			)
+	result["batches"] = batches
 
-	serial_no_data = []
+	serial_numbers = []
 	if item.has_serial_no and warehouse:
-		serial_no_data = frappe.get_all(
+		rows = frappe.get_all(
 			"Serial No",
 			filters={
 				"item_code": item_code,
 				"status": "Active",
 				"warehouse": warehouse,
 			},
-			fields=["name as serial_no", "batch_no"],
+			fields=["name"],
 		)
-	result["serial_no_data"] = serial_no_data
+		serial_numbers = [r.name for r in rows]
+	result["serial_numbers"] = serial_numbers
 
 	uoms = frappe.get_all(
 		"UOM Conversion Detail",
 		filters={"parent": item_code},
 		fields=["uom", "conversion_factor"],
+		order_by="idx asc",
 	)
 	stock_uom_exists = any(u.get("uom") == item.stock_uom for u in uoms)
 	if not stock_uom_exists:
-		uoms.append({"uom": item.stock_uom, "conversion_factor": 1.0})
-	result["item_uoms"] = uoms
+		uoms.insert(0, {"uom": item.stock_uom, "conversion_factor": 1.0})
+	result["uoms"] = uoms
 
 	barcodes = frappe.get_all(
 		"Item Barcode",
@@ -600,14 +612,37 @@ def update_price_list_rate(item_code: str, price_list: str, rate: float, uom: st
 
 
 @frappe.whitelist()
-def get_price_for_uom(item_code: str, price_list: str, uom: str):
-	"""Return Item Price for a specific UOM."""
+def get_price_for_uom(
+	item_code: str, uom: str, pos_profile: str | None = None, price_list: str | None = None
+):
+	"""Return Item Price for a specific UOM, falling back to base rate × conversion factor."""
+	if not price_list and pos_profile:
+		price_list = frappe.db.get_value("POS Profile", pos_profile, "selling_price_list")
+	if not price_list:
+		price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list")
+
 	rate = frappe.db.get_value(
 		"Item Price",
 		{"item_code": item_code, "price_list": price_list, "selling": 1, "uom": uom},
 		"price_list_rate",
 	)
-	return flt(rate) if rate else None
+	if rate:
+		return {"rate": flt(rate)}
+
+	base_rate = frappe.db.get_value(
+		"Item Price",
+		{"item_code": item_code, "price_list": price_list, "selling": 1},
+		"price_list_rate",
+	)
+	conversion_factor = (
+		frappe.db.get_value(
+			"UOM Conversion Detail",
+			{"parent": item_code, "uom": uom},
+			"conversion_factor",
+		)
+		or 1.0
+	)
+	return {"rate": flt(base_rate) * flt(conversion_factor)}
 
 
 def get_stock_qty(item_code: str, warehouse: str, pos_profile: str | None = None):
