@@ -660,6 +660,7 @@ export interface UserSession {
 	user: string;
 	user_email?: string;
 	user_fullname?: string;
+	image?: string;
 }
 
 export interface CalculatedTax {

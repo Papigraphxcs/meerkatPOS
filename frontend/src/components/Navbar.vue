@@ -145,7 +145,8 @@
 			<PopoverTrigger as-child>
 				<Button variant="ghost" size="icon-sm" class="rounded-full">
 					<Avatar size="sm">
-						<AvatarFallback>
+						<img v-if="authStore.user?.image" :src="authStore.user.image" alt="User Avatar" />
+						<AvatarFallback v-else>
 							<User class="w-3.5 h-3.5" />
 						</AvatarFallback>
 					</Avatar>
