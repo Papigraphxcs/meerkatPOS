@@ -7,7 +7,9 @@
 			}
 		"
 	>
-		<DialogContent class="max-w-md max-h-[80vh] flex flex-col p-0 gap-0">
+		<DialogContent
+			class="w-[calc(100vw-1.25rem)] max-w-none h-[min(92svh,40rem)] sm:w-[min(92vw,44rem)] sm:h-[min(88svh,44rem)] lg:w-[min(88vw,52rem)] lg:h-[min(86svh,48rem)] flex flex-col overflow-hidden p-0 gap-0"
+		>
 			<template v-if="!showNewForm">
 				<DialogHeader class="shrink-0 px-5 pt-5 pb-3 space-y-3 border-b border-border">
 					<div class="flex items-center justify-between">
@@ -35,8 +37,8 @@
 					</div>
 				</DialogHeader>
 
-				<div ref="listContainer" class="flex-1 overflow-y-auto xpos-scrollbar">
-					<div v-if="customerStore.isLoading" class="p-4 space-y-3">
+				<div ref="listContainer" class="flex-1 min-h-0 overflow-y-auto xpos-scrollbar">
+					<div v-if="customerStore.isLoading" class="min-h-full p-4 space-y-3">
 						<div v-for="i in 5" :key="i" class="skeleton h-14 w-full rounded-xl"></div>
 					</div>
 
@@ -86,7 +88,10 @@
 						</button>
 					</div>
 
-					<div v-else class="flex flex-col items-center justify-center h-48 text-muted-foreground">
+					<div
+						v-else
+						class="flex h-full min-h-[18rem] flex-col items-center justify-center text-muted-foreground"
+					>
 						<Users class="w-12 h-12 mb-3 text-muted-foreground/30" />
 						<p class="text-sm font-medium">{{ __("No customers found") }}</p>
 					</div>
@@ -118,7 +123,7 @@
 					</div>
 				</DialogHeader>
 
-				<div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+				<div class="flex-1 min-h-0 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
 					<div>
 						<label class="text-xs font-medium text-muted-foreground mb-1 block"
 							>{{ __("Customer Name") }} *</label
