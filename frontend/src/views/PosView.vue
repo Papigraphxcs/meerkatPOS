@@ -98,14 +98,14 @@
 							:placeholder="__('Search item groups...')"
 							:show-search-icon="true"
 							:max-visible="12"
-							empty-text="__('No groups found')"
+							:empty-text="__('No groups found')"
 							class="w-40 sm:w-52 shrink-0 mt-2"
 							@update:model-value="selectGroup($event)"
 						/>
 						<Button
 							:variant="itemStore.selectedGroup === 'All Item Groups' ? 'default' : 'outline'"
 							size="sm"
-							class="rounded-full shrink-0"
+							class="rounded-full shrink-0 mt-2"
 							@click="selectGroup('All Item Groups')"
 						>
 							{{ __("All Groups") }}
@@ -115,7 +115,7 @@
 							:key="group.name"
 							:variant="itemStore.selectedGroup === group.name ? 'default' : 'outline'"
 							size="sm"
-							class="rounded-full shrink-0"
+							class="rounded-full shrink-0 mt-2"
 							@click="selectGroup(group.name)"
 						>
 							{{ __(group.name) }}

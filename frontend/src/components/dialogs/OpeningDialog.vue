@@ -10,7 +10,7 @@
 					<Zap class="w-8 h-8 text-primary-foreground" />
 				</div>
 				<h1 class="text-2xl font-bold text-primary-foreground mb-1">X POS</h1>
-				<p class="text-primary-foreground/70 text-sm">Open your shift to get started</p>
+				<p class="text-primary-foreground/70 text-sm">{{ __("Open your shift to get started") }}</p>
 			</div>
 
 			<Card>
@@ -21,9 +21,13 @@
 
 					<template v-else>
 						<div class="flex items-center justify-between">
-							<label class="text-sm font-semibold text-foreground">POS Profile</label>
+							<label class="text-sm font-semibold text-foreground">{{
+								__("POS Profile")
+							}}</label>
 							<TooltipWrapper
-								:content="syncStatus.isSyncing.value ? 'Syncing...' : 'Refresh profiles'"
+								:content="
+									syncStatus.isSyncing.value ? __('Syncing...') : __('Refresh profiles')
+								"
 							>
 								<button
 									type="button"
@@ -35,33 +39,44 @@
 									@click="loadProfiles"
 								>
 									<RefreshCw class="w-3.5 h-3.5" />
-									<span>{{ syncStatus.isSyncing.value ? "Syncing..." : "Refresh" }}</span>
+									<span>{{
+										syncStatus.isSyncing.value ? __("Syncing...") : __("Refresh")
+									}}</span>
 								</button>
 							</TooltipWrapper>
 						</div>
 
 						<div>
-							<select
+							<Select
 								v-model="selectedProfile"
-								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-								@change="onProfileChange"
+								@update:model-value="onProfileChange"
+								class="h-10 w-full px-10"
 							>
-								<option value="" disabled>Select POS Profile</option>
-								<option v-for="profile in profiles" :key="profile.name" :value="profile.name">
-									{{ profile.name }} ({{ profile.company }})
-								</option>
-							</select>
+								<SelectTriggerStyled>
+									<SelectValue :placeholder="__('POS Profile')" />
+								</SelectTriggerStyled>
+								<SelectContentStyled>
+									<SelectItemStyled
+										v-for="profile in profiles"
+										:key="profile.name"
+										:value="profile.name"
+										>{{ profile.name }} ({{ profile.company }})</SelectItemStyled
+									>
+								</SelectContentStyled>
+							</Select>
 							<p v-if="profiles.length === 0" class="mt-1 text-xs text-muted-foreground">
 								{{
 									syncStatus.isSyncing.value
-										? "Downloading profiles from server…"
-										: "No profiles found. Check server connection or click Refresh."
+										? __("Downloading profiles from server…")
+										: __("No profiles found. Check server connection or click Refresh.")
 								}}
 							</p>
 						</div>
 
 						<div v-if="selectedCompany">
-							<label class="text-sm font-semibold text-foreground mb-1.5 block">Company</label>
+							<label class="text-sm font-semibold text-foreground mb-1.5 block">{{
+								__("Company")
+							}}</label>
 							<div
 								class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground"
 							>
@@ -70,18 +85,18 @@
 						</div>
 
 						<div v-if="paymentMethodsList.length > 0">
-							<label class="text-sm font-semibold text-foreground mb-2 block"
-								>Opening Cash Balance</label
-							>
+							<label class="text-sm font-semibold text-foreground mb-2 block">
+								{{ __("Opening Cash Balance") }}
+							</label>
 							<div class="space-y-2">
 								<div
 									v-for="method in paymentMethodsList"
 									:key="method.mode_of_payment"
 									class="flex items-center gap-3"
 								>
-									<span class="text-sm text-muted-foreground w-28 truncate">{{
-										method.mode_of_payment
-									}}</span>
+									<span class="text-sm text-muted-foreground w-28 truncate">
+										{{ method.mode_of_payment }}
+									</span>
 									<NumberInput
 										v-model="method.opening_amount"
 										:min="0"
@@ -101,11 +116,11 @@
 						>
 							<template v-if="isOpening">
 								<Loader2 class="w-5 h-5 animate-spin" />
-								Opening Shift...
+								{{ __("Opening Shift...") }}
 							</template>
 							<template v-else>
 								<Lock class="w-5 h-5" />
-								Open Shift
+								{{ __("Open Shift") }}
 							</template>
 						</Button>
 					</template>
@@ -117,7 +132,7 @@
 					href="/app"
 					class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline"
 				>
-					← Back to Desk
+					← {{ __("Back to Desk") }}
 				</a>
 			</div>
 		</div>
@@ -135,6 +150,12 @@ import { TooltipWrapper } from "@/components/ui/tooltip";
 import { Zap, Loader2, Lock, RefreshCw } from "lucide-vue-next";
 import { useSyncStatus } from "@/composables/useSyncStatus";
 import { isElectron } from "@/services/electronBridge";
+import Select from "../ui/select/Select.vue";
+import SelectTriggerStyled from "../ui/select/SelectTriggerStyled.vue";
+import { SelectValue } from "radix-vue";
+import __ from "@/lib/translate";
+import SelectContentStyled from "../ui/select/SelectContentStyled.vue";
+import SelectItemStyled from "../ui/select/SelectItemStyled.vue";
 
 const isElectronMode = isElectron();
 
