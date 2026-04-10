@@ -223,7 +223,7 @@
 							:precision="2"
 							class="text-center text-xl font-bold tracking-wider py-3"
 							:select-on-focus="true"
-							@keydown.enter.prevent="isSplitPayment ? addSplitPayment() : submitPayment()"
+							@keydown.enter.stop.prevent="handleAmountInputSubmit"
 							@keydown.up.prevent="focusMethodByIndex"
 							@keydown.down.prevent="focusFirstQuickAmount"
 						/>
@@ -554,6 +554,10 @@ import {
 
 import type { InvoicePayment } from "@/types/pos.types";
 import { isOnline, extractErrorMessage } from "@/utils";
+import {
+	isPaymentDialogSaveAndPrintShortcut,
+	isPaymentDialogSaveOnlyShortcut,
+} from "@/components/dialogs/paymentDialogShortcuts";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
@@ -713,20 +717,41 @@ onUnmounted(() => {
 	document.removeEventListener("keydown", handleGlobalKeydown);
 });
 
+function handleAmountInputSubmit(event: KeyboardEvent) {
+	if (isSubmitting.value) return;
+
+	if (isPaymentDialogSaveOnlyShortcut(event)) {
+		if (canSubmit.value) {
+			submitPayment(false);
+		}
+		return;
+	}
+
+	if (isSplitPayment.value) {
+		addSplitPayment();
+		return;
+	}
+
+	if (isPaymentDialogSaveAndPrintShortcut(event) && canSubmit.value) {
+		submitPayment(true);
+	}
+}
+
 function handleGlobalKeydown(e: KeyboardEvent) {
 	if (!cartStore.showPaymentDialog || isSubmitting.value) return;
 
-	if (e.key === "Enter" && e.ctrlKey && canSubmit.value) {
+	if (isPaymentDialogSaveOnlyShortcut(e) && canSubmit.value) {
 		e.preventDefault();
 		e.stopPropagation();
 		submitPayment(false);
 		return;
 	}
 
-	if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && canSubmit.value) {
+	if (isPaymentDialogSaveAndPrintShortcut(e) && canSubmit.value) {
 		const target = e.target as HTMLElement;
 		if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
 		e.preventDefault();
+		e.stopPropagation();
 		submitPayment(true);
 	}
 }
