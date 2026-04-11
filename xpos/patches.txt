@@ -6,3 +6,4 @@
 # Patches added in this section will be executed after doctypes are migrated
 xpos.patches.add_composite_indexes
 xpos.patches.add_item_fulltext_index
+xpos.patches.remove_unused_pos_profile_discount_fields

@@ -130,8 +130,6 @@ export const usePosStore = defineStore("pos", () => {
 
 	const hideClosingShift = computed(() => !!posProfile.value?.hide_closing_shift);
 
-	const usePercentageDiscount = computed(() => !!posProfile.value?.use_percentage_discount);
-
 	const enableCashMovement = computed(() => !!posProfile.value?.enable_cash_movement);
 
 	const allowPosExpense = computed(() => !!posProfile.value?.allow_pos_expense);
@@ -508,7 +506,6 @@ export const usePosStore = defineStore("pos", () => {
 		inputQty,
 		taxInclusive,
 		hideClosingShift,
-		usePercentageDiscount,
 		enableCashMovement,
 		allowPosExpense,
 		allowCashDeposit,

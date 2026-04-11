@@ -12,7 +12,6 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 | Display Item Code | Show item codes in the POS interface |
 | Display Items in Stock | Only display items that have positive stock |
 | Display Additional Notes | Show notes input per line item and order |
-| Display Discount | Discount display format: Percentage or Amount |
 | Enable Quantity Input | Enable manual quantity input mode |
 | Hide Variant Items | Hide individual variant items in the grid |
 | Show Template Items | Show template (parent) items in the grid |
@@ -29,7 +28,6 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 | Setting | Description |
 |---|---|
 | Tax Inclusive | Item prices include tax |
-| Use Percentage Discount | Enable percentage discount mode |
 | Maximum Discount Percentage | Maximum allowed discount percentage |
 | Allow Rate Change | Allow editing item rates in the cart |
 | Allow Discount Change | Allow editing item-level discounts |
@@ -158,7 +156,9 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 
 | Setting | Description |
 |---|---|
+| Default Print Format | Default receipt/print format for the POS profile |
 | Print Format Rules | Conditional print format rules |
+| Print Discounts as Amounts | On receipts, show percentage-based discounts as currency amounts instead of percent labels |
 | Allowed Sales Persons | Restrict available sales persons |
 
 ---

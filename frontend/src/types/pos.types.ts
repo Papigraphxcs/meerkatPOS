@@ -29,7 +29,6 @@ export interface POSProfile {
 	auto_set_batch?: boolean;
 	search_serial_no?: boolean;
 	tax_inclusive?: boolean;
-	use_percentage_discount?: boolean;
 	default_view?: string;
 	default_sales_order?: boolean;
 	default_print_format?: string;

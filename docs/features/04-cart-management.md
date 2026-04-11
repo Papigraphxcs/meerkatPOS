@@ -54,7 +54,7 @@ The cart is the central workspace of X POS where items are collected, quantities
 - Toggle between **percentage (%)** and **amount** discount per line item
 - Enter the discount value — the line total updates in real time
 - The POS Profile can set a `max_discount_percentage_allowed` to cap discounts
-- Discount type display is controlled by the `display_discount` setting (Percentage or Amount)
+- Cashiers choose the discount mode directly in the cart when editing a line item
 
 ### Delete Item
 - Hover over a cart item to reveal the **Delete** (trash) button
@@ -89,7 +89,8 @@ Each tax from the POS Profile's Sales Taxes and Charges template is shown as a s
 - Available when `allow_user_to_edit_additional_discount` is enabled
 - Apply a **percentage** or **flat amount** discount to the entire order
 - Toggle between percentage and amount using the mode switch
-- Controlled by the `use_percentage_discount` POS Profile setting
+- Cashiers choose the discount mode directly in the discount panel
+- Receipt output can still be formatted from the POS Profile using the `print_discount_amount` setting
 
 ### Loyalty Redemption
 - If the customer has redeemed loyalty points, the deducted amount appears as a violet badge

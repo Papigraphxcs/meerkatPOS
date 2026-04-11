@@ -31,6 +31,7 @@ X POS supports configurable receipt printing with thermal printer compatibility,
 ### Available Print Formats
 - X POS lists all available print formats for the invoice doctype (Sales Invoice or POS Invoice)
 - The default print format is configured in the POS Profile
+- The POS Profile can also switch receipt discount labels between percentage and amount using `print_discount_amount`
 
 ### Built-in Print Formats
 X POS ships with:
