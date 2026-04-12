@@ -22,7 +22,7 @@ export const useOfflineStore = defineStore("offline", () => {
 	const pendingInvoices = ref<OfflineInvoice[]>([]);
 	const lastSyncTime = ref("");
 	const syncErrors = ref<string[]>([]);
-	const isOnline = computed(() => (typeof navigator !== "undefined" ? navigator.onLine : true));
+	const isOnline = ref(typeof navigator !== "undefined" ? navigator.onLine : true);
 
 	const MAX_RETRIES = 3;
 	const SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -64,6 +64,7 @@ export const useOfflineStore = defineStore("offline", () => {
 	}
 
 	function handleOnline() {
+		isOnline.value = true;
 		showSuccess(__("Internet connection restored"));
 
 		if (offlineModeEnabled.value && pendingCount.value > 0) {
@@ -72,6 +73,7 @@ export const useOfflineStore = defineStore("offline", () => {
 	}
 
 	function handleOffline() {
+		isOnline.value = false;
 		showError(__("You are offline. Check your internet connection."));
 	}
 
@@ -136,12 +138,14 @@ export const useOfflineStore = defineStore("offline", () => {
 				if (!isOnline.value) {
 					break;
 				}
-
+				if ((invoice.data as Record<string, unknown>)?.is_draft) {
+					continue;
+				}
 				try {
 					invoice.status = "syncing";
 					if (invoice.id) await updatePendingInvoice(invoice.id, { status: "syncing" });
 
-					const result = await call<{ name: string }>("xpos.api.invoices.create_invoice", {
+					await call<{ name: string }>("xpos.api.invoices.create_invoice", {
 						data: JSON.stringify(invoice.data),
 					});
 					if (invoice.id) await deletePendingInvoice(invoice.id);
@@ -193,6 +197,11 @@ export const useOfflineStore = defineStore("offline", () => {
 		const invoices = (await getAllPendingInvoices()) as OfflineInvoice[];
 		const invoice = invoices.find((i) => i.id === id);
 		if (!invoice) return false;
+
+		if ((invoice.data as Record<string, unknown>)?.is_draft) {
+			showError(__("Cannot sync a draft invoice. Load it to cart first."));
+			return false;
+		}
 
 		try {
 			invoice.status = "syncing";
