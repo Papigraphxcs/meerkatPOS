@@ -5,11 +5,51 @@ from __future__ import annotations
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	POSInvoiceMergeLog as ERPNextPOSInvoiceMergeLog,
 )
-from frappe.utils import flt
+from frappe.utils import flt, get_time, getdate
 
 
 class CustomPOSInvoiceMergeLog(ERPNextPOSInvoiceMergeLog):
 	"""Ensure consolidated credit notes keep payment totals within tolerance."""
+
+	def process_merging_into_sales_invoice(self, data):
+		"""Allow negative stock during POS consolidation.
+
+		Sales and returns are consolidated into separate documents.  The
+		sale SI is submitted before any credit notes, so its stock
+		deduction can temporarily exceed available qty when the shift
+		also contains returns for the same item.  Allowing negative stock
+		here is safe because the credit notes are processed immediately
+		after and restore the balance.
+		"""
+		sales_invoice = self.get_new_sales_invoice()
+		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
+
+		sales_invoice.is_consolidated = 1
+		sales_invoice.set_posting_time = 1
+		sales_invoice.update_stock = 1
+
+		if not sales_invoice.posting_date:
+			sales_invoice.posting_date = getdate(self.posting_date)
+
+		if not sales_invoice.posting_time:
+			sales_invoice.posting_time = get_time(self.posting_time)
+
+		sales_invoice.save()
+
+		# Monkey-patch the instance so update_stock_ledger passes
+		# allow_negative_stock=True during the submit cycle.
+		_orig = sales_invoice.update_stock_ledger
+
+		def _allow_negative(**kwargs):
+			kwargs["allow_negative_stock"] = True
+			return _orig(**kwargs)
+
+		sales_invoice.update_stock_ledger = _allow_negative
+		sales_invoice.submit()
+
+		self.consolidated_invoice = sales_invoice.name
+
+		return sales_invoice
 
 	def merge_pos_invoice_into(self, invoice, data):
 		invoice = super().merge_pos_invoice_into(invoice, data)

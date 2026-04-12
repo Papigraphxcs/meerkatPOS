@@ -369,7 +369,7 @@ export const useCartStore = defineStore("cart", () => {
 		if (currentQtyInCart + qty > actualQty) {
 			return {
 				allowed: false,
-				message: `Only ${actualQty - currentQtyInCart} ${item.uom || item.stock_uom} of ${item.item_name} available`,
+				message: `Only ${actualQty} ${item.uom || item.stock_uom} of ${item.item_name} available`,
 			};
 		}
 
