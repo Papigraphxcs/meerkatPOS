@@ -146,6 +146,9 @@ function onFocus() {
 	open.value = true;
 	query.value = "";
 	emit("focus");
+	if (props.remoteSearch) {
+		emit("search", "");
+	}
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -214,7 +217,7 @@ function getInputEl(): HTMLInputElement | null {
 						:disabled="disabled"
 						:class="
 							cn(
-								'flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
+								'flex h-8 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
 								showSearchIcon && 'ps-9',
 								clearable && modelValue ? 'pe-16' : 'pe-8',
 							)
@@ -256,7 +259,7 @@ function getInputEl(): HTMLInputElement | null {
 					align="start"
 					side="bottom"
 					:side-offset="4"
-					class="z-[99999] w-[var(--radix-popover-trigger-width)] max-h-[280px] overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2"
+					class="z-[99999] w-[var(--radix-popover-trigger-width)] min-w-[220px] max-h-[280px] overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2"
 					@open-auto-focus.prevent
 					@focus-outside.prevent
 				>

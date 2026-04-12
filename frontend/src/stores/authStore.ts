@@ -39,13 +39,15 @@ export const useAuthStore = defineStore("auth", () => {
 			if (loggedUser && loggedUser !== "Guest") {
 				isAuthenticated.value = true;
 				isOfflineAuth.value = false;
-				const bootUserInfo = xpos?.boot?.user_info[loggedUser] as any;
-				user.value = {
-					user: loggedUser,
-					user_email: bootUserInfo?.user_email || loggedUser,
-					user_fullname: bootUserInfo?.user_fullname || loggedUser,
-					image: bootUserInfo?.image || "",
-				};
+				if (window.xpos) {
+					const bootUserInfo = xpos?.boot?.user_info[loggedUser] as any;
+					user.value = {
+						user: loggedUser,
+						user_email: bootUserInfo?.user_email || loggedUser,
+						user_fullname: bootUserInfo?.user_fullname || loggedUser,
+						image: bootUserInfo?.image || "",
+					};
+				}
 				await loadPermissions(loggedUser);
 				return true;
 			}

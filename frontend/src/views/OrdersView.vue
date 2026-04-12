@@ -3,39 +3,42 @@
 		<div class="shrink-0 p-3 sm:p-4 pb-2 sm:pb-3">
 			<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
 				<h1 class="text-xl font-bold text-foreground">{{ __("Order History") }}</h1>
-				<div class="flex items-center gap-2 w-full sm:w-auto">
-					<Input
-						v-model="invoiceSearch"
-						:placeholder="__('Search Invoice ID...')"
-						class="flex-1 sm:w-48 h-8 text-sm"
-						@keydown.enter="onInvoiceSearch"
-						@input="onInvoiceSearchDebounced"
-					/>
-					<Autocomplete
-						v-model="customerFilter"
-						:options="customerFilterOptions"
-						placeholder="Filter by customer..."
-						:show-search-icon="true"
-						:clearable="true"
-						:max-visible="6"
-						empty-text="No customers found"
-						class="flex-1 sm:w-56"
-						@search="onCustomerSearch"
-						@update:model-value="onCustomerFilterChange"
-					/>
-				</div>
 			</div>
-
-			<ListFilters
-				:from-date="fromDate"
-				:to-date="toDate"
-				@update="handleFilterUpdate"
-				@refresh="refreshOrders"
-			/>
+			<div class="flex flex-wrap items-center gap-2">
+				<ListFilterBar
+					:fields="listView.standardFilterFields.value"
+					:model-filters="standardFilterModel"
+					@update:model-filters="onStandardFilterUpdate"
+				/>
+				<SortBy
+					:model-value="listView.orderBy.value"
+					:fields="listView.allFilterableFields.value"
+					@update:model-value="listView.setOrderBy"
+				/>
+				<div class="flex-1"></div>
+				<QueryFilterPanel
+					:fields="listView.allFilterableFields.value"
+					:model-query-filters="queryFilterModel"
+					@update:model-query-filters="onQueryFilterUpdate"
+				/>
+				<Button variant="outline" size="sm" class="h-8" @click="listView.refresh()">
+					<RefreshCw class="h-3.5 w-3.5" />
+				</Button>
+				<Button
+					v-if="hasActiveFilters"
+					variant="ghost"
+					size="sm"
+					class="h-8 text-muted-foreground hover:text-foreground"
+					@click="clearAllFilters"
+				>
+					<X class="h-3.5 w-3.5" />
+					{{ __("Clear") }}
+				</Button>
+			</div>
 		</div>
 
 		<div class="flex-1 overflow-y-auto px-3 sm:px-4 xpos-scrollbar">
-			<div v-if="isLoading && orders.length === 0" class="grid gap-3">
+			<div v-if="listView.isLoading.value && orders.length === 0" class="grid gap-3">
 				<div v-for="i in 5" :key="i" class="skeleton h-20 w-full rounded-xl"></div>
 			</div>
 			<div
@@ -47,7 +50,7 @@
 				<p class="text-sm">{{ __("Try adjusting your filters") }}</p>
 			</div>
 
-			<div v-else class="space-y-2" :class="{ 'opacity-50': isLoading }">
+			<div v-else class="space-y-2" :class="{ 'opacity-50': listView.isLoading.value }">
 				<Card
 					v-for="order in orders"
 					:key="order.name"
@@ -111,12 +114,12 @@
 		</div>
 
 		<Pagination
-			v-if="totalOrders > 0"
-			:total="totalOrders"
-			:page-size="pageSize"
-			:current-page="currentPage"
-			@update:current-page="handlePageChange"
-			@update:page-size="handlePageSizeChange"
+			v-if="listView.total.value > 0"
+			:total="listView.total.value"
+			:page-size="listView.pageSize.value"
+			:current-page="listView.currentPage.value"
+			@update:current-page="listView.setPage"
+			@update:page-size="listView.setPageSize"
 		/>
 
 		<Dialog
@@ -445,10 +448,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
+import { useListView, type QueryFilter } from "@/composables/useListView";
 import { call } from "@/services/api";
 import type { Invoice } from "@/types/pos.types";
 import {
@@ -464,8 +468,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
-import { Autocomplete } from "@/components/ui/autocomplete";
-import type { AutocompleteOption } from "@/components/ui/autocomplete";
 import {
 	FileText,
 	ChevronRight,
@@ -474,8 +476,12 @@ import {
 	User,
 	Calendar as CalendarIcon,
 	Clock,
+	RefreshCw,
+	X,
 } from "lucide-vue-next";
-import ListFilters from "@/components/orders/ListFilters.vue";
+import ListFilterBar from "@/components/core/ListFilterBar.vue";
+import QueryFilterPanel from "@/components/core/QueryFilterPanel.vue";
+import SortBy from "@/components/core/SortBy.vue";
 import Pagination from "@/components/orders/Pagination.vue";
 import __ from "@/lib/translate";
 import { get_full_url } from "@/utils";
@@ -484,65 +490,88 @@ const posStore = usePosStore();
 const cartStore = useCartStore();
 const router = useRouter();
 
-const orders = ref<Invoice[]>([]);
-const isLoading = ref(false);
-const fromDate = ref("");
-const toDate = ref("");
-const currentPage = ref(1);
-const pageSize = ref(20);
-const totalOrders = ref(0);
-const selectedOrder = ref<Invoice | null>(null);
+const listView = useListView({
+	doctype: computed(() => posStore.invoiceType),
+	fields: [
+		"name",
+		"customer",
+		"customer_name",
+		"posting_date",
+		"posting_time",
+		"grand_total",
+		"net_total",
+		"paid_amount",
+		"outstanding_amount",
+		"total_taxes_and_charges",
+		"status",
+		"is_return",
+		"return_against",
+		"pos_profile",
+		"owner",
+	],
+	baseFilters: {
+		docstatus: 1,
+		is_pos: 1,
+		pos_profile: posStore.profileName,
+	},
+	defaultOrderBy: "posting_date desc, posting_time desc",
+	defaultPageSize: 20,
+});
 
-const customerFilter = ref("");
-const customerFilterOptions = ref<AutocompleteOption[]>([]);
-const invoiceSearch = ref("");
-let invoiceSearchTimer: ReturnType<typeof setTimeout> | null = null;
+const orders = computed(() => listView.data.value as unknown as Invoice[]);
 
-function onCustomerSearch(query: string) {
-	if (!query || query.length < 2) {
-		customerFilterOptions.value = [];
-		return;
-	}
-	const seen = new Set<string>();
-	const opts: AutocompleteOption[] = [];
-	for (const order of orders.value) {
-		const name = order.customer_name || order.customer || "";
-		if (name && !seen.has(name) && name.toLowerCase().includes(query.toLowerCase())) {
-			seen.add(name);
-			opts.push({ label: name, value: name });
+const standardFilterModel = computed(() => {
+	const model: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(listView.filters)) {
+		if (value !== undefined && value !== null && value !== "") {
+			model[key] = value;
 		}
 	}
-	customerFilterOptions.value = opts;
+	return model;
+});
+
+function onStandardFilterUpdate(updated: Record<string, unknown>) {
+	for (const key of Object.keys(listView.filters)) {
+		if (!(key in updated)) {
+			listView.removeFilter(key);
+		}
+	}
+	for (const [key, value] of Object.entries(updated)) {
+		listView.setFilter(key, value);
+	}
 }
 
-function onCustomerFilterChange(val: string) {
-	customerFilter.value = val;
-	if (val) {
-		activeFilters.value.queryFilters = [
-			...activeFilters.value.queryFilters.filter((f) => f[0] !== "customer_name"),
-			["customer_name", "like", `%${val}%`],
-		];
-	} else {
-		activeFilters.value.queryFilters = activeFilters.value.queryFilters.filter(
-			(f) => f[0] !== "customer_name",
-		);
-	}
-	currentPage.value = 1;
-	fetchOrders();
+const queryFilterModel = computed(() =>
+	listView.queryFilters.value.map((qf) => ({
+		field: qf.field,
+		operator: qf.operator,
+		value: qf.value,
+	})),
+);
+
+function onQueryFilterUpdate(filters: { field: string; operator: string; value: string }[]) {
+	listView.setQueryFilters(
+		filters.map((f) => ({
+			field: f.field,
+			operator: f.operator as QueryFilter["operator"],
+			value: f.value,
+		})),
+	);
 }
+
+const invoiceSearch = ref("");
+let invoiceSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
 function onInvoiceSearch() {
 	const val = invoiceSearch.value.trim();
 	if (val) {
-		activeFilters.value.queryFilters = [
-			...activeFilters.value.queryFilters.filter((f) => f[0] !== "name"),
-			["name", "like", `%${val}%`],
-		];
+		listView.setQueryFilters([
+			...listView.queryFilters.value.filter((f) => f.field !== "name"),
+			{ field: "name", operator: "like", value: val },
+		]);
 	} else {
-		activeFilters.value.queryFilters = activeFilters.value.queryFilters.filter((f) => f[0] !== "name");
+		listView.setQueryFilters(listView.queryFilters.value.filter((f) => f.field !== "name"));
 	}
-	currentPage.value = 1;
-	fetchOrders();
 }
 
 function onInvoiceSearchDebounced() {
@@ -550,95 +579,22 @@ function onInvoiceSearchDebounced() {
 	invoiceSearchTimer = setTimeout(() => onInvoiceSearch(), 400);
 }
 
+const hasActiveFilters = computed(() => {
+	return Object.keys(listView.filters).length > 0 || listView.queryFilters.value.length > 0;
+});
+
+function clearAllFilters() {
+	invoiceSearch.value = "";
+	listView.clearFilters();
+}
+
+const selectedOrder = ref<Invoice | null>(null);
+
 function orderDateTime(order: Invoice): string {
 	const date = order.posting_date || "";
 	const time = order.posting_time ? String(order.posting_time) : "00:00:00";
 	if (!date) return "";
 	return `${date} ${time}`;
-}
-
-const activeFilters = ref<{
-	status: string;
-	isReturn: string;
-	orderBy: string;
-	queryFilters: [string, string, string][];
-}>({
-	status: "__all__",
-	isReturn: "__all__",
-	orderBy: "posting_date desc, posting_time desc",
-	queryFilters: [],
-});
-
-onMounted(() => {
-	const today = new Date().toISOString().split("T")[0];
-	fromDate.value = today;
-	toDate.value = today;
-	fetchOrders();
-});
-
-function handleFilterUpdate(filters: {
-	fromDate: string;
-	toDate: string;
-	status: string;
-	isReturn: string;
-	orderBy: string;
-	queryFilters: [string, string, string][];
-}) {
-	fromDate.value = filters.fromDate;
-	toDate.value = filters.toDate;
-	activeFilters.value = {
-		status: filters.status,
-		isReturn: filters.isReturn,
-		orderBy: filters.orderBy,
-		queryFilters: filters.queryFilters,
-	};
-	currentPage.value = 1;
-	fetchOrders();
-}
-
-function handlePageChange(page: number) {
-	currentPage.value = page;
-	fetchOrders();
-}
-
-function handlePageSizeChange(size: number) {
-	pageSize.value = size;
-	currentPage.value = 1;
-	fetchOrders();
-}
-
-function refreshOrders() {
-	currentPage.value = 1;
-	fetchOrders();
-}
-
-async function fetchOrders() {
-	isLoading.value = true;
-	try {
-		const result = await call<{ data: Invoice[]; total: number }>("xpos.api.invoices.get_past_orders", {
-			pos_profile: posStore.profileName,
-			from_date: fromDate.value,
-			to_date: toDate.value,
-			page: currentPage.value - 1,
-			limit: pageSize.value,
-			filters: JSON.stringify(activeFilters.value.queryFilters),
-			order_by: activeFilters.value.orderBy,
-		});
-
-		if (result && typeof result === "object" && "data" in result) {
-			orders.value = result.data || [];
-			totalOrders.value = result.total || 0;
-		} else {
-			orders.value = (result as unknown as Invoice[]) || [];
-			totalOrders.value = orders.value.length;
-		}
-	} catch (error) {
-		console.error("Error fetching orders:", error);
-		orders.value = [];
-		totalOrders.value = 0;
-	} finally {
-		isLoading.value = false;
-	}
 }
 
 async function viewOrder(order: Invoice) {
