@@ -348,6 +348,7 @@ import { useOfferStore } from "@/stores/offerStore";
 import { call, showSuccess, showError } from "@/services/api";
 import { __ } from "@/lib/translate";
 import { isElectron } from "@/services/electronBridge";
+import { useOfflineStore } from "@/stores/offlineStore";
 import { Button } from "@/components/ui/button";
 import { TooltipWrapper } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
@@ -371,6 +372,7 @@ import type { DeliveryCharge } from "@/types/pos.types";
 const posStore = usePosStore();
 const cartStore = useCartStore();
 const offerStore = useOfferStore();
+const offlineStore = useOfflineStore();
 
 const showDiscount = ref(false);
 const showCoupon = ref(false);
@@ -630,9 +632,7 @@ async function holdOrder() {
 			return;
 		}
 
-		// In Electron mode, save locally and don't pass local shift ID to server
 		if (isElectron() && window.electronAPI?.db) {
-			// Save to local database
 			await window.electronAPI.db.addPendingInvoice({
 				data: { ...data, is_draft: true, pos_opening_shift_local_id: shiftName },
 				customer_name: cartStore.customerName || data.customer,
@@ -641,18 +641,25 @@ async function holdOrder() {
 			cartStore.clearAll();
 			showSuccess(__("Order saved as draft locally"));
 		} else {
-			// Web mode - call server API but don't send local shift ID
-			// Server will use session user to find open shift
 			const serverData = { ...data };
-			// Don't send pos_opening_shift if it looks like a local ID (number-only)
 			if (serverData.pos_opening_shift && /^\d+$/.test(String(serverData.pos_opening_shift))) {
 				delete serverData.pos_opening_shift;
 			}
-			await call("xpos.api.invoices.save_draft_invoice", {
-				data: JSON.stringify(serverData),
-			});
-			cartStore.clearAll();
-			showSuccess(__("Order saved as draft"));
+			if (offlineStore.isOnline) {
+				await call("xpos.api.invoices.save_draft_invoice", {
+					data: JSON.stringify(serverData),
+				});
+				cartStore.clearAll();
+				showSuccess(__("Order saved as draft"));
+			} else {
+				await offlineStore.saveOffline(
+					{ ...serverData, is_draft: true } as Parameters<typeof offlineStore.saveOffline>[0],
+					cartStore.customerName || data.customer,
+					cartStore.grandTotal || 0,
+				);
+				cartStore.clearAll();
+				showSuccess(__("No connection – draft saved offline"));
+			}
 		}
 	} catch (error: unknown) {
 		showError(__("Failed to save draft: {0}", [extractErrorMessage(error)]));

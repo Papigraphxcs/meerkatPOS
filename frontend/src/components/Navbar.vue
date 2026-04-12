@@ -117,7 +117,7 @@
 					@click="handleOfflineAction"
 				>
 					<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />
-					<WifiOff v-else-if="!isOnline()" class="w-4 h-4" />
+					<WifiOff v-else-if="!offlineStore.isOnline" class="w-4 h-4" />
 					<CloudUpload v-else-if="offlineStore.hasPending" class="w-4 h-4" />
 					<Wifi v-else class="w-4 h-4" />
 					<Badge
@@ -266,7 +266,6 @@ import { useOfflineStore } from "@/stores/offlineStore";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
-import { isOnline } from "@/utils";
 import { get_full_url } from "@/utils";
 import { cn } from "@/lib/utils";
 import { useRouter } from "vue-router";
@@ -300,9 +299,7 @@ const showAboutDialog = ref(false);
 const showShortcutsDialog = ref(false);
 
 function handleOfflineAction() {
-	if (offlineStore.hasPending) {
-		showOfflinePanel.value = true;
-	} else if (!isOnline()) {
+	if (offlineStore.hasPending || !offlineStore.isOnline) {
 		showOfflinePanel.value = true;
 	}
 }

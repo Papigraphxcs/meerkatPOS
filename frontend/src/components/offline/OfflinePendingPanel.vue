@@ -7,7 +7,7 @@
 			}
 		"
 	>
-		<DialogContent class="max-w-lg max-h-[80vh] flex flex-col p-0 gap-0">
+		<DialogContent class="max-w-lg max-h-[80vh] flex flex-col p-0 gap-0" :hide-close="true">
 			<DialogHeader
 				class="shrink-0 flex-row items-center justify-between space-y-0 px-5 py-3 border-b border-border"
 			>
@@ -15,18 +15,18 @@
 					<div
 						class="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
 						:class="
-							isOnline()
+							offlineStore.isOnline
 								? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
 								: 'bg-gradient-to-br from-red-500 to-red-600'
 						"
 					>
-						<WifiOff v-if="!isOnline()" class="w-4 h-4 text-white" />
+						<WifiOff v-if="!offlineStore.isOnline" class="w-4 h-4 text-white" />
 						<Wifi v-else class="w-4 h-4 text-white" />
 					</div>
 					<div>
 						<DialogTitle class="text-base">{{ __("Offline Invoices") }}</DialogTitle>
 						<DialogDescription class="text-xs">
-							{{ isOnline() ? __("Online") : __("Offline") }} &mdash;
+							{{ offlineStore.isOnline ? __("Online") : __("Offline") }} &mdash;
 							{{ offlineStore.pendingCount }} {{ __("") }}
 						</DialogDescription>
 					</div>
@@ -42,7 +42,7 @@
 						variant="default"
 						size="sm"
 						class="flex-1 gap-1.5"
-						:disabled="!isOnline() || offlineStore.isSyncing"
+						:disabled="!offlineStore.isOnline || offlineStore.isSyncing"
 						@click="offlineStore.syncPendingInvoices()"
 					>
 						<Loader2 v-if="offlineStore.isSyncing" class="w-4 h-4 animate-spin" />
@@ -67,6 +67,7 @@
 					v-for="inv in offlineStore.pendingInvoices"
 					:key="inv.id"
 					class="rounded-xl border border-border bg-card p-3 space-y-2"
+					:class="isDraft(inv) ? 'border-amber-300 dark:border-amber-700' : ''"
 				>
 					<div class="flex items-center justify-between">
 						<div>
@@ -84,6 +85,13 @@
 							<Badge :variant="statusVariant(inv.status)" class="text-[10px]">
 								{{ inv.status }}
 							</Badge>
+							<Badge
+								v-if="isDraft(inv)"
+								variant="outline"
+								class="text-[10px] text-amber-600 border-amber-400"
+							>
+								{{ __("Draft") }}
+							</Badge>
 						</div>
 					</div>
 
@@ -96,10 +104,21 @@
 
 					<div class="flex gap-2 pt-1">
 						<Button
+							v-if="isDraft(inv)"
+							variant="default"
+							size="sm"
+							class="flex-1 gap-1 text-xs bg-amber-500 hover:bg-amber-600"
+							@click="inv.id && loadToCart(inv)"
+						>
+							<ShoppingCart class="w-3.5 h-3.5" />
+							{{ __("Load to Cart") }}
+						</Button>
+						<Button
+							v-else
 							variant="outline"
 							size="sm"
 							class="flex-1 gap-1 text-xs"
-							:disabled="!isOnline() || offlineStore.isSyncing"
+							:disabled="!offlineStore.isOnline || offlineStore.isSyncing"
 							@click="inv.id && offlineStore.retrySingle(inv.id)"
 						>
 							<RefreshCw class="w-3.5 h-3.5" />
@@ -128,21 +147,70 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useOfflineStore } from "@/stores/offlineStore";
+import { useCartStore } from "@/stores/cartStore";
+import { showSuccess, showError } from "@/services/api";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, Wifi, WifiOff, CloudUpload, Loader2, Trash2, CheckCircle2, RefreshCw } from "lucide-vue-next";
-import { isOnline } from "@/utils";
+import {
+	X,
+	Wifi,
+	WifiOff,
+	CloudUpload,
+	Loader2,
+	Trash2,
+	CheckCircle2,
+	RefreshCw,
+	ShoppingCart,
+} from "lucide-vue-next";
 import __ from "@/lib/translate";
 
 defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const offlineStore = useOfflineStore();
+const cartStore = useCartStore();
 
 onMounted(() => {
 	offlineStore.loadPendingInvoices();
 });
+
+function isDraft(inv: (typeof offlineStore.pendingInvoices)[number]): boolean {
+	const d = inv.data as Record<string, unknown> | null | undefined;
+	return !!(d && d.is_draft);
+}
+
+async function loadToCart(inv: (typeof offlineStore.pendingInvoices)[number]) {
+	try {
+		const data = inv.data as {
+			customer: string;
+			customer_name?: string;
+			items: Array<{
+				item_code: string;
+				item_name: string;
+				local_item_name?: string;
+				qty: number;
+				rate: number;
+				uom: string;
+				stock_uom?: string;
+				discount_percentage?: number;
+				discount_amount?: number;
+				serial_no?: string;
+				batch_no?: string;
+			}>;
+		};
+		cartStore.loadFromInvoice({
+			customer: data.customer,
+			customer_name: data.customer_name || data.customer,
+			items: data.items || [],
+		});
+		if (inv.id) await offlineStore.deletePending(inv.id);
+		showSuccess(__("Draft loaded into cart"));
+		emit("close");
+	} catch (e) {
+		showError(__("Failed to load draft into cart"));
+	}
+}
 
 function statusVariant(status: string) {
 	if (status === "pending") return "secondary" as const;
