@@ -184,6 +184,16 @@ export function useKeyboardShortcuts() {
 			},
 		},
 		{
+			id: "focus-cart",
+			keys: ["f3"],
+			description: "Focus Cart (First Item Qty)",
+			category: "POS",
+			global: true,
+			action: () => {
+				window.dispatchEvent(new CustomEvent("xpos:focus-cart-item"));
+			},
+		},
+		{
 			id: "payment",
 			keys: ["f4"],
 			description: "Process Payment",

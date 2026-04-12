@@ -60,6 +60,22 @@
 						</div>
 					</div>
 
+					<div>
+						<label class="text-sm font-semibold text-foreground mb-1.5 block">
+							{{ __("Price") }}
+						</label>
+						<NumberInput
+							v-if="posStore.allowEditRate"
+							v-model="priceInput"
+							:min="0"
+							:precision="2"
+							class="w-32"
+						/>
+						<span v-else class="text-base font-bold text-primary tabular-nums">
+							{{ posStore.currencySymbol }}{{ priceInput.toFixed(2) }}
+						</span>
+					</div>
+
 					<div v-if="detail.has_batch_no && detail.batches.length > 0">
 						<label class="text-sm font-semibold text-foreground mb-1.5 block">
 							Batch
@@ -203,6 +219,7 @@ const selectedQty = ref(1);
 const serialSearch = ref("");
 const uomConversionFactor = ref(1);
 const uomRate = ref<number | null>(null);
+const priceInput = ref(0);
 const uomContainerRef = ref<HTMLDivElement | null>(null);
 const qtyInputRef = ref<InstanceType<typeof NumberInput> | null>(null);
 
@@ -214,6 +231,7 @@ watch(detail, (d) => {
 		selectedUOM.value = d.uom || d.stock_uom;
 		uomConversionFactor.value = d.conversion_factor || 1;
 		uomRate.value = null;
+		priceInput.value = d.price_list_rate || itemForDetail.value?.rate || 0;
 		selectedBatch.value = "";
 		selectedSerials.value = [];
 		selectedQty.value = 1;
@@ -296,6 +314,8 @@ async function selectUOM(uom: string, cf: number): Promise<void> {
 		);
 		uomRate.value = fetched > 0 ? fetched : null;
 	}
+	const baseRate = detail.value?.price_list_rate || itemForDetail.value?.rate || 0;
+	priceInput.value = uomRate.value !== null ? uomRate.value : baseRate * cf;
 }
 
 function toggleSerial(sn: string): void {
@@ -313,8 +333,7 @@ function toggleSerial(sn: string): void {
 function addToCart(): void {
 	if (!itemForDetail.value || !canAdd.value) return;
 
-	const baseRate = detail.value?.price_list_rate || itemForDetail.value.rate || 0;
-	const rate = uomRate.value !== null ? uomRate.value : baseRate * uomConversionFactor.value;
+	const rate = priceInput.value;
 
 	if (detail.value?.has_serial_no && selectedSerials.value.length > 0) {
 		for (const sn of selectedSerials.value) {

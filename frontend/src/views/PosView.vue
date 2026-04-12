@@ -303,6 +303,15 @@ watch(
 	},
 );
 
+watch(
+	() => cartStore.showPaymentDialog,
+	(open) => {
+		if (!open) {
+			highlightedIndex.value = -1;
+		}
+	},
+);
+
 async function loadInitialData() {
 	await Promise.all([itemStore.fetchItems(posStore.profileName), itemStore.fetchItemGroups()]);
 

@@ -206,7 +206,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from "vue";
+import { ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useCustomerStore } from "@/stores/customerStore";
@@ -238,6 +238,24 @@ const cartStore = useCartStore();
 const customerStore = useCustomerStore();
 
 const cartScrollContainer = ref<HTMLElement | null>(null);
+
+onMounted(() => {
+	window.addEventListener("xpos:focus-cart-item", handleFocusCartItem);
+});
+
+onUnmounted(() => {
+	window.removeEventListener("xpos:focus-cart-item", handleFocusCartItem);
+});
+
+function handleFocusCartItem() {
+	if (cartStore.isEmpty) return;
+	const firstItemEl = document.querySelector('[data-cart-index="0"]');
+	const allInputs = firstItemEl?.querySelectorAll('input[type="number"]');
+	if (!allInputs || allInputs.length === 0) return;
+	const qtyEl = (allInputs.length > 1 ? allInputs[1] : allInputs[0]) as HTMLInputElement;
+	qtyEl.focus();
+	qtyEl.select();
+}
 
 watch(
 	() => cartStore.items.length,
