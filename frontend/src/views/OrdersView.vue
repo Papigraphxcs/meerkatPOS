@@ -428,6 +428,18 @@
 						{{ __("Print") }}
 					</Button>
 					<Button
+						v-if="selectedOrder && !selectedOrder.is_return"
+						variant="outline"
+						size="sm"
+						class="text-blue-600 border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950"
+						:disabled="isRepeatLoading"
+						@click="repeatFromOrder(selectedOrder!)"
+					>
+						<Loader2 v-if="isRepeatLoading" class="w-4 h-4 animate-spin" />
+						<Repeat v-else class="w-4 h-4" />
+						{{ __("Repeat") }}
+					</Button>
+					<Button
 						v-if="
 							selectedOrder && !selectedOrder.is_return && selectedOrder.status !== 'Cancelled'
 						"
@@ -453,7 +465,7 @@ import { useRouter } from "vue-router";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useListView, type QueryFilter } from "@/composables/useListView";
-import { call } from "@/services/api";
+import { call, showError } from "@/services/api";
 import type { Invoice } from "@/types/pos.types";
 import {
 	Dialog,
@@ -473,6 +485,8 @@ import {
 	ChevronRight,
 	Printer,
 	RotateCcw,
+	Repeat,
+	Loader2,
 	User,
 	Calendar as CalendarIcon,
 	Clock,
@@ -589,6 +603,7 @@ function clearAllFilters() {
 }
 
 const selectedOrder = ref<Invoice | null>(null);
+const isRepeatLoading = ref(false);
 
 function orderDateTime(order: Invoice): string {
 	const date = order.posting_date || "";
@@ -611,6 +626,51 @@ async function viewOrder(order: Invoice) {
 function printInvoice(name: string) {
 	const url = `/printview?doctype=${posStore.invoiceType}&name=${name}&format=${posStore.defaultPrintFormat}&no_letterhead=0&trigger_print=1`;
 	window.open(get_full_url(url), "_blank");
+}
+
+async function repeatFromOrder(order: Invoice) {
+	isRepeatLoading.value = true;
+	try {
+		const result = await call<{
+			name: string;
+			customer: string;
+			customer_name: string;
+			items: Array<{
+				item_code: string;
+				item_name: string;
+				qty: number;
+				rate: number;
+				uom: string;
+				stock_uom?: string;
+				discount_percentage?: number;
+				discount_amount?: number;
+				serial_no?: string;
+				batch_no?: string;
+			}>;
+		}>("xpos.api.invoices.get_invoice_for_repeat", {
+			invoice_name: order.name,
+			pos_profile: posStore.profileName,
+		});
+
+		if (!result || !result.items || result.items.length === 0) {
+			showError(__("No items found in this invoice"));
+			return;
+		}
+
+		cartStore.loadFromInvoice({
+			customer: result.customer,
+			customer_name: result.customer_name,
+			items: result.items,
+		});
+
+		selectedOrder.value = null;
+		router.push("/pos");
+	} catch (error) {
+		console.error("Error repeating order:", error);
+		showError(__("Failed to repeat invoice"));
+	} finally {
+		isRepeatLoading.value = false;
+	}
 }
 
 async function returnFromOrder(order: Invoice) {

@@ -4,6 +4,7 @@ import { loadPermissions, resetPermissions } from "@/services/userRights";
 import { UserSession } from "@/types/pos.types";
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { isOnline } from "@/utils";
 
 export const useAuthStore = defineStore("auth", () => {
 	const isLoading = ref(false);
@@ -57,6 +58,9 @@ export const useAuthStore = defineStore("auth", () => {
 			return false;
 		} catch (err) {
 			console.error("Auth check failed:", err);
+			if (isAuthenticated.value && !isOnline()) {
+				return true;
+			}
 			isAuthenticated.value = false;
 			user.value = null;
 			return false;
