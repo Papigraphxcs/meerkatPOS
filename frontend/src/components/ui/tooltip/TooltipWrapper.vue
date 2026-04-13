@@ -8,23 +8,25 @@ withDefaults(
 		content: string | number;
 		side?: "top" | "right" | "bottom" | "left";
 		delayDuration?: number;
+		skipDelayDuration?: number;
 	}>(),
 	{
 		side: "bottom",
-		delayDuration: 300,
+		delayDuration: 200,
+		skipDelayDuration: 100,
 	},
 );
 </script>
 
 <template>
-	<TooltipProvider :delay-duration="delayDuration">
+	<TooltipProvider :delay-duration="delayDuration" :skip-delay-duration="skipDelayDuration">
 		<Tooltip>
 			<TooltipTrigger as-child>
 				<slot />
 			</TooltipTrigger>
 			<TooltipContent :side="side">
 				{{ content }}
-				<TooltipArrow class="fill-primary" :width="8" />
+				<TooltipArrow class="fill-gray-900" :width="8" :height="5" />
 			</TooltipContent>
 		</Tooltip>
 	</TooltipProvider>
