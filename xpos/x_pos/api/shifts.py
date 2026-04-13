@@ -82,14 +82,19 @@ def create_opening_voucher(pos_profile: str, company: str, balance_details: str)
 
 @frappe.whitelist()
 def check_opening_shift(user: str | None = None):
+	user = user or frappe.session.user
+
 	open_vouchers = frappe.db.get_all(
 		"POS Opening Shift",
 		filters={
 			"user": user,
-			"pos_closing_shift": ["is", "not set"],
 			"docstatus": 1,
 			"status": "Open",
 		},
+		or_filters=[
+			{"pos_closing_shift": ["is", "not set"]},
+			{"pos_closing_shift": ""},
+		],
 		fields=["name", "pos_profile"],
 		order_by="period_start_date desc",
 	)

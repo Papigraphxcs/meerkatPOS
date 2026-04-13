@@ -19,7 +19,7 @@ def get_pos_items(
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
 	warehouse = pos.warehouse
 
-	filters = {"disabled": 0, "is_sales_item": 1}
+	filters = {"disabled": 0, "is_sales_item": 1, "is_stock_item": 1}
 
 	if not (include_templates or pos.get("show_template_items")):
 		filters["has_variants"] = 0

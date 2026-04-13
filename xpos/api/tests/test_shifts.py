@@ -146,9 +146,18 @@ class TestCheckOpenShift(unittest.TestCase):
 		mock_shift_doc.as_dict.return_value = {"name": "POS-OPEN-003"}
 		mock_frappe.get_doc.return_value = mock_shift_doc
 
+		shifts.check_open_shift(user="manager@test.com")
+
 		mock_frappe.db.get_all.assert_called_once()
 		call_args = mock_frappe.db.get_all.call_args
 		self.assertEqual(call_args.kwargs["filters"]["user"], "manager@test.com")
+		self.assertEqual(
+			call_args.kwargs["or_filters"],
+			[
+				{"pos_closing_shift": ["is", "not set"]},
+				{"pos_closing_shift": ""},
+			],
+		)
 
 
 class TestCloseShift(unittest.TestCase):

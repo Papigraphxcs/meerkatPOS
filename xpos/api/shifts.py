@@ -23,6 +23,24 @@ def _row_value(row: dict | object, key: str, default: Any | None = None):
 	return getattr(row, key, default)
 
 
+def _get_open_shift_rows(user: str):
+	return frappe.db.get_all(
+		"POS Opening Shift",
+		filters={
+			"user": user,
+			"docstatus": 1,
+			"status": "Open",
+		},
+		or_filters=[
+			{"pos_closing_shift": ["is", "not set"]},
+			{"pos_closing_shift": ""},
+		],
+		fields=["name", "pos_profile", "company"],
+		order_by="period_start_date desc",
+		limit=1,
+	)
+
+
 @frappe.whitelist()
 def get_opening_data():
 	"""Get data needed for the shift opening dialog.
@@ -108,18 +126,7 @@ def check_open_shift(user: str | None = None):
 
 	user = user or frappe.session.user
 
-	open_shifts = frappe.db.get_all(
-		"POS Opening Shift",
-		filters={
-			"user": user,
-			"pos_closing_shift": ["is", "not set"],
-			"docstatus": 1,
-			"status": "Open",
-		},
-		fields=["name", "pos_profile", "company"],
-		order_by="period_start_date desc",
-		limit=1,
-	)
+	open_shifts = _get_open_shift_rows(user)
 
 	if not open_shifts:
 		return None
