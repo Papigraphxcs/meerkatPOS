@@ -237,7 +237,7 @@ export const usePosStore = defineStore("pos", () => {
 
 			const result = await call<ShiftCheckResult | null>("xpos.api.shifts.check_open_shift");
 
-			if (result) {
+			if (result && result.pos_opening_shift) {
 				applyShiftState(result);
 
 				fetchPrintFormats();
