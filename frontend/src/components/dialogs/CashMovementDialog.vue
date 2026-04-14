@@ -50,38 +50,13 @@
 						<label class="text-sm font-semibold text-foreground mb-1.5 block">
 							{{ __("Expense Account") }}
 						</label>
-						<Select v-model="expenseAccount">
-							<SelectTriggerStyled class="h-8 w-full">
-								<SelectValue placeholder="Type" />
-							</SelectTriggerStyled>
-							<SelectContentStyled>
-								<SelectItemStyled
-									class="cursor-pointer"
-									:value="op.value"
-									v-for="op in expenseAccounts"
-									>{{ op.label }}</SelectItemStyled
-								>
-							</SelectContentStyled>
-						</Select>
+						<Select v-model="expenseAccount" :items="expenseAccounts" />
 					</div>
-
 					<div v-else>
 						<label class="text-sm font-semibold text-foreground mb-1.5 block">{{
 							__("Deposit To")
 						}}</label>
-						<Select v-model="depositAccount">
-							<SelectTriggerStyled class="h-8 w-full">
-								<SelectValue placeholder="Type" />
-							</SelectTriggerStyled>
-							<SelectContentStyled>
-								<SelectItemStyled
-									class="cursor-pointer"
-									:value="op.value"
-									v-for="op in depositAccounts"
-									>{{ op.label }}</SelectItemStyled
-								>
-							</SelectContentStyled>
-						</Select>
+						<Select v-model="depositAccount" :items="depositAccounts" />
 					</div>
 
 					<div>
@@ -185,10 +160,7 @@ import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { Loader2, ArrowDownCircle, ArrowUpCircle } from "lucide-vue-next";
 import __ from "@/lib/translate";
-import Select from "@/components/ui/select/Select.vue";
-import { SelectTriggerStyled, SelectValue } from "@/components/ui/select";
-import SelectContentStyled from "@/components/ui/select/SelectContentStyled.vue";
-import SelectItemStyled from "@/components/ui/select/SelectItemStyled.vue";
+import { Select } from "../ui/select";
 
 const posStore = usePosStore();
 const paymentStore = usePaymentStore();

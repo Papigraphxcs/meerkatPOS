@@ -132,21 +132,11 @@
 						<label class="text-sm font-semibold text-foreground mb-1.5 block">
 							{{ __("Expense Account") }}
 						</label>
-						<Select v-model="form.expense_account">
-							<SelectTriggerStyled class="h-8 w-full">
-								<SelectValue :placeholder="__('Select expense account')" />
-							</SelectTriggerStyled>
-							<SelectContentStyled>
-								<SelectItemStyled
-									class="cursor-pointer"
-									v-for="op in expenseAccountOptions"
-									:key="op.value"
-									:value="op.value"
-								>
-									{{ op.label }}
-								</SelectItemStyled>
-							</SelectContentStyled>
-						</Select>
+						<Select
+							v-model="form.expense_account"
+							:items="expenseAccountOptions"
+							:placeholder="__('Select expense account')"
+						/>
 					</div>
 					<div>
 						<label class="text-sm font-semibold text-foreground mb-1.5 block">
@@ -213,10 +203,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import Select from "@/components/ui/select/Select.vue";
-import { SelectTriggerStyled, SelectValue } from "@/components/ui/select";
-import SelectContentStyled from "@/components/ui/select/SelectContentStyled.vue";
-import SelectItemStyled from "@/components/ui/select/SelectItemStyled.vue";
+import { Select } from "@/components/ui/select";
 import { Plus, RefreshCw, Trash2, Receipt, Loader2, ArrowDownCircle } from "lucide-vue-next";
 import DateTimePicker from "@/components/ui/datetime-picker/DateTimePicker.vue";
 import Pagination from "@/components/orders/Pagination.vue";

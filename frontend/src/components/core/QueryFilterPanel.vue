@@ -52,20 +52,16 @@
 							@update:model-value="onFilterFieldChange(index)"
 						/>
 
-						<Select v-model="filter.operator" @update:model-value="emitFilters">
-							<SelectTriggerStyled class="h-8 w-[100px]">
-								<SelectValue :placeholder="__('Op')" />
-							</SelectTriggerStyled>
-							<SelectContentStyled>
-								<SelectItemStyled
-									v-for="op in getOperatorsForFilter(filter)"
-									:key="op.value"
-									:value="op.value"
-								>
-									{{ op.label }}
-								</SelectItemStyled>
-							</SelectContentStyled>
-						</Select>
+						<Select
+							v-model="filter.operator"
+							@update:model-value="emitFilters"
+							:items="
+								getOperatorsForFilter(filter).map((op) => ({
+									label: __(op.label),
+									value: op.value,
+								}))
+							"
+						/>
 
 						<Autocomplete
 							v-if="
@@ -91,36 +87,23 @@
 							"
 							v-model="filter.value"
 							@update:model-value="emitFilters"
-						>
-							<SelectTriggerStyled class="h-8 flex-1">
-								<SelectValue :placeholder="__('Value')" />
-							</SelectTriggerStyled>
-							<SelectContentStyled>
-								<SelectItemStyled
-									v-for="opt in getSelectOptionsForField(filter.field)"
-									:key="opt"
-									:value="opt"
-								>
-									{{ __(opt) }}
-								</SelectItemStyled>
-							</SelectContentStyled>
-						</Select>
+							:items="
+								getSelectOptionsForField(filter.field).map((opt) => ({
+									label: __(opt),
+									value: opt,
+								}))
+							"
+						/>
 
 						<Select
 							v-else-if="['is', 'is not'].includes(filter.operator)"
 							v-model="filter.value"
 							@update:model-value="emitFilters"
-						>
-							<SelectTriggerStyled class="h-8 flex-1">
-								<SelectValue :placeholder="__('Value')" />
-							</SelectTriggerStyled>
-							<SelectContentStyled>
-								<SelectItemStyled value="set">{{ __("Set (has value)") }}</SelectItemStyled>
-								<SelectItemStyled value="not set">{{
-									__("Not Set (empty)")
-								}}</SelectItemStyled>
-							</SelectContentStyled>
-						</Select>
+							:items="[
+								{ label: __('Set (has value)'), value: 'set' },
+								{ label: __('Not Set (empty)'), value: 'not set' },
+							]"
+						/>
 
 						<Input
 							v-else
@@ -169,18 +152,12 @@ import { Input } from "@/components/ui/input";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import type { AutocompleteOption } from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
-import {
-	Select,
-	SelectTriggerStyled,
-	SelectContentStyled,
-	SelectItemStyled,
-	SelectValue,
-} from "@/components/ui/select";
 import { Filter, Plus, X } from "lucide-vue-next";
 import type { DocField } from "@/services/doctypeMeta";
 import { getFieldOperators, parseSelectOptions } from "@/services/doctypeMeta";
 import { searchLink } from "@/services/api";
 import __ from "@/lib/translate";
+import { Select } from "../ui/select";
 
 const TEXT_FIELDTYPES = new Set(["Data", "Small Text", "Text", "Long Text"]);
 

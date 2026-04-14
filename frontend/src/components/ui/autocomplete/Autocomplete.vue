@@ -3,6 +3,7 @@ import { computed, ref, watch, nextTick, type HTMLAttributes } from "vue";
 import { Search, X, ChevronDown, Loader2, Check } from "lucide-vue-next";
 import { PopoverRoot, PopoverPortal, PopoverContent, PopoverAnchor } from "radix-vue";
 import { cn } from "@/lib/utils";
+import { call, getValue } from "@/services/api";
 
 export interface AutocompleteOption {
 	label: string;
@@ -28,6 +29,14 @@ const props = withDefaults(
 		showSearchIcon?: boolean;
 		emptyText?: string;
 		class?: HTMLAttributes["class"];
+		doctype?: string;
+		pageLength?: number;
+		filters?: Record<string, unknown>;
+		referenceDoctype?: string;
+		ignoreUserPermissions?: boolean;
+		labelField?: string;
+		openOnFocus?: boolean;
+		compact?: boolean;
 	}>(),
 	{
 		placeholder: "Search or select...",
@@ -40,6 +49,12 @@ const props = withDefaults(
 		showSearchIcon: true,
 		emptyText: "No results found",
 		options: () => [],
+		pageLength: 20,
+		filters: () => ({}),
+		ignoreUserPermissions: false,
+		labelField: "name",
+		openOnFocus: false,
+		compact: false,
 	},
 );
 
@@ -52,39 +67,35 @@ const emit = defineEmits<{
 	(e: "blur"): void;
 }>();
 
+const isLinkMode = computed(() => !!props.doctype);
+
 const rootRef = ref<HTMLElement | null>(null);
+const inputRef = ref<HTMLInputElement | null>(null);
 const open = ref(false);
 const query = ref("");
 const highlightedIndex = ref(-1);
+const linkLoading = ref(false);
+const linkOptions = ref<AutocompleteOption[]>([]);
+const resolvedLabel = ref("");
 
-const selectedOption = computed(() => props.options.find((o) => o.value === props.modelValue));
+const isLoading = computed(() => props.loading || linkLoading.value);
 
-const displayText = computed(() => selectedOption.value?.label ?? "");
+const selectedOption = computed(() => mergedOptions.value.find((o) => o.value === props.modelValue));
 
-watch(open, (isOpen) => {
-	if (!isOpen) {
-		query.value = displayText.value;
-		highlightedIndex.value = -1;
-	}
+const displayText = computed(() => {
+	if (isLinkMode.value && resolvedLabel.value) return resolvedLabel.value;
+	return selectedOption.value?.label ?? selectedOption.value?.value ?? "";
 });
 
-watch(
-	() => props.modelValue,
-	() => {
-		if (!open.value) {
-			query.value = displayText.value;
-		}
-	},
-	{ immediate: true },
-);
+const mergedOptions = computed(() => (isLinkMode.value ? linkOptions.value : props.options));
 
 const filteredOptions = computed(() => {
-	if (props.remoteSearch) return props.options;
+	if (isLinkMode.value || props.remoteSearch) return mergedOptions.value;
 
 	const q = query.value.trim().toLowerCase();
-	if (!q || q.length < props.minChars) return props.options;
+	if (!q || q.length < props.minChars) return mergedOptions.value;
 
-	return props.options.filter(
+	return mergedOptions.value.filter(
 		(opt) =>
 			opt.label.toLowerCase().includes(q) ||
 			opt.value.toLowerCase().includes(q) ||
@@ -112,6 +123,122 @@ const groupedOptions = computed(() => {
 
 const flatVisibleOptions = computed(() => filteredOptions.value.slice(0, props.maxVisible));
 
+const effectiveShowSearchIcon = computed(() => (props.compact ? false : props.showSearchIcon));
+const effectiveClearable = computed(() => (props.compact ? false : props.clearable));
+
+watch(
+	() => props.modelValue,
+	async (value) => {
+		if (!isLinkMode.value) {
+			if (!open.value) query.value = displayText.value;
+			return;
+		}
+
+		if (!value) {
+			resolvedLabel.value = "";
+			if (!open.value) query.value = "";
+			return;
+		}
+
+		if (value === resolvedLabel.value) {
+			if (!open.value) query.value = resolvedLabel.value;
+			return;
+		}
+
+		await resolveLinkLabel(value);
+		if (!open.value) query.value = resolvedLabel.value;
+	},
+	{ immediate: true },
+);
+
+watch(
+	() => props.modelValue,
+	() => {
+		if (isLinkMode.value) return;
+		if (!open.value) {
+			query.value = displayText.value;
+		}
+	},
+	{ immediate: true },
+);
+
+watch(open, (isOpen) => {
+	if (isOpen) {
+		if (isLinkMode.value) {
+			query.value = resolvedLabel.value;
+			highlightedIndex.value = -1;
+			void searchLink(query.value);
+		} else {
+			highlightedIndex.value = -1;
+		}
+		return;
+	}
+
+	query.value = displayText.value;
+	highlightedIndex.value = -1;
+});
+
+async function resolveLinkLabel(value: string) {
+	if (!props.doctype) return;
+	try {
+		const response = await getValue<Record<string, unknown>>(props.doctype, value, [props.labelField!]);
+		const maybeMessage = response as { message?: Record<string, unknown> };
+		const row = maybeMessage?.message ?? (response as Record<string, unknown>);
+		resolvedLabel.value = String(row?.[props.labelField!] ?? value);
+	} catch {
+		resolvedLabel.value = value;
+	}
+}
+
+function normalizeLinkResponse(rows: unknown[]): AutocompleteOption[] {
+	return rows
+		.map((row): AutocompleteOption | null => {
+			if (Array.isArray(row)) {
+				const value = String(row[0] ?? "");
+				if (!value) return null;
+				return { value, label: value, description: row[1] ? String(row[1]) : undefined };
+			}
+			if (row && typeof row === "object") {
+				const record = row as Record<string, unknown>;
+				const val = String(record.value ?? "");
+				if (!val) return null;
+				return {
+					value: val,
+					label: val,
+					description: record.description ? String(record.description) : undefined,
+				};
+			}
+			return null;
+		})
+		.filter((r): r is AutocompleteOption => !!r);
+}
+
+async function searchLink(text: string) {
+	if (!props.doctype) return;
+	const trimmed = (text ?? "").trim();
+	if (trimmed.length < props.minChars) {
+		linkOptions.value = [];
+		return;
+	}
+
+	linkLoading.value = true;
+	try {
+		const response = await call<unknown[]>("frappe.desk.search.search_link", {
+			doctype: props.doctype,
+			txt: trimmed,
+			page_length: props.pageLength,
+			filters: props.filters,
+			reference_doctype: props.referenceDoctype,
+			ignore_user_permissions: props.ignoreUserPermissions,
+		});
+		linkOptions.value = normalizeLinkResponse(response ?? []);
+	} catch {
+		linkOptions.value = [];
+	} finally {
+		linkLoading.value = false;
+	}
+}
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 function onInput() {
@@ -120,22 +247,34 @@ function onInput() {
 
 	if (debounceTimer) clearTimeout(debounceTimer);
 	debounceTimer = setTimeout(() => {
+		if (isLinkMode.value) {
+			void searchLink(query.value);
+		}
 		emit("search", query.value);
 	}, 250);
 }
 
 function selectOption(option: AutocompleteOption) {
 	if (option.disabled) return;
+
+	if (isLinkMode.value) {
+		resolvedLabel.value = option.description ?? option.label ?? option.value;
+		query.value = resolvedLabel.value;
+	} else {
+		query.value = option.label;
+	}
+
 	emit("update:modelValue", option.value);
 	emit("select", option);
-	query.value = option.label;
 	open.value = false;
 }
 
 function clearSelection() {
+	resolvedLabel.value = "";
 	emit("update:modelValue", "");
 	emit("clear");
 	query.value = "";
+	linkOptions.value = [];
 	open.value = false;
 	nextTick(() => {
 		getInputEl()?.focus();
@@ -143,12 +282,19 @@ function clearSelection() {
 }
 
 function onFocus() {
-	open.value = true;
-	query.value = "";
-	emit("focus");
-	if (props.remoteSearch) {
-		emit("search", "");
+	if (isLinkMode.value) {
+		if (!props.disabled) {
+			open.value = true;
+			void searchLink(query.value);
+		}
+	} else if (props.openOnFocus) {
+		open.value = true;
+		if (props.remoteSearch) emit("search", "");
+	} else {
+		open.value = true;
+		query.value = "";
 	}
+	emit("focus");
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -192,13 +338,25 @@ function scrollToHighlighted() {
 }
 
 function getInputEl(): HTMLInputElement | null {
-	return rootRef.value?.querySelector("input") ?? null;
+	return inputRef.value ?? rootRef.value?.querySelector("input") ?? null;
 }
+
+function focus() {
+	getInputEl()?.focus();
+}
+
+function select() {
+	const el = getInputEl();
+	el?.focus();
+	el?.select();
+}
+
+defineExpose({ focus, select, getInputEl, inputRef });
 </script>
 
 <template>
 	<div ref="rootRef" :class="cn('w-full', props.class)">
-		<label v-if="label" class="block text-sm font-medium text-foreground mb-1.5">
+		<label v-if="label && !compact" class="block text-sm font-medium text-foreground mb-1.5">
 			{{ label }}
 		</label>
 
@@ -206,10 +364,11 @@ function getInputEl(): HTMLInputElement | null {
 			<PopoverAnchor as-child>
 				<div class="relative">
 					<Search
-						v-if="showSearchIcon"
+						v-if="effectiveShowSearchIcon"
 						class="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none"
 					/>
 					<input
+						ref="inputRef"
 						v-model="query"
 						type="text"
 						autocomplete="new-password"
@@ -217,9 +376,10 @@ function getInputEl(): HTMLInputElement | null {
 						:disabled="disabled"
 						:class="
 							cn(
-								'flex h-8 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
-								showSearchIcon && 'ps-9',
-								clearable && modelValue ? 'pe-16' : 'pe-8',
+								'flex w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
+								compact ? 'h-7 text-xs' : 'h-8',
+								effectiveShowSearchIcon && 'ps-9',
+								effectiveClearable && modelValue ? 'pe-16' : 'pe-8',
 							)
 						"
 						@input="onInput"
@@ -229,7 +389,7 @@ function getInputEl(): HTMLInputElement | null {
 
 					<div class="absolute end-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
 						<button
-							v-if="clearable && modelValue"
+							v-if="effectiveClearable && modelValue"
 							type="button"
 							tabindex="-1"
 							class="p-0.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
@@ -237,13 +397,16 @@ function getInputEl(): HTMLInputElement | null {
 						>
 							<X class="h-3.5 w-3.5" />
 						</button>
-						<Loader2 v-if="loading" class="h-4 w-4 text-muted-foreground animate-spin" />
+						<Loader2 v-if="isLoading" class="h-4 w-4 text-muted-foreground animate-spin" />
 						<button
 							v-else
 							type="button"
 							tabindex="-1"
 							class="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-							@mousedown.prevent="open = !open"
+							@mousedown.prevent="
+								open = !open;
+								if (open && isLinkMode) void searchLink(query);
+							"
 						>
 							<ChevronDown
 								class="h-4 w-4 transition-transform duration-200"
@@ -264,7 +427,7 @@ function getInputEl(): HTMLInputElement | null {
 					@focus-outside.prevent
 				>
 					<div
-						v-if="loading && filteredOptions.length === 0"
+						v-if="isLoading && filteredOptions.length === 0"
 						class="flex items-center justify-center py-6 text-sm text-muted-foreground"
 					>
 						<Loader2 class="h-5 w-5 text-primary animate-spin" />

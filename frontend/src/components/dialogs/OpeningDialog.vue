@@ -48,22 +48,16 @@
 
 						<div>
 							<Select
+								:items="
+									profiles.map((p) => ({
+										label: `${p.name} (${p.company})`,
+										value: p.name,
+									}))
+								"
 								v-model="selectedProfile"
 								@update:model-value="onProfileChange"
 								class="h-10 w-full px-10"
-							>
-								<SelectTriggerStyled>
-									<SelectValue :placeholder="__('POS Profile')" />
-								</SelectTriggerStyled>
-								<SelectContentStyled>
-									<SelectItemStyled
-										v-for="profile in profiles"
-										:key="profile.name"
-										:value="profile.name"
-										>{{ profile.name }} ({{ profile.company }})</SelectItemStyled
-									>
-								</SelectContentStyled>
-							</Select>
+							/>
 							<p v-if="profiles.length === 0" class="mt-1 text-xs text-muted-foreground">
 								{{
 									syncStatus.isSyncing.value
@@ -150,12 +144,8 @@ import { TooltipWrapper } from "@/components/ui/tooltip";
 import { Zap, Loader2, Lock, RefreshCw } from "lucide-vue-next";
 import { useSyncStatus } from "@/composables/useSyncStatus";
 import { isElectron } from "@/services/electronBridge";
-import Select from "../ui/select/Select.vue";
-import SelectTriggerStyled from "../ui/select/SelectTriggerStyled.vue";
-import { SelectValue } from "radix-vue";
 import __ from "@/lib/translate";
-import SelectContentStyled from "../ui/select/SelectContentStyled.vue";
-import SelectItemStyled from "../ui/select/SelectItemStyled.vue";
+import { Select } from "../ui/select";
 
 const isElectronMode = isElectron();
 

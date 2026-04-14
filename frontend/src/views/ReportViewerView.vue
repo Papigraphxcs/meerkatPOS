@@ -23,15 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	Select,
-	SelectTriggerStyled,
-	SelectContentStyled,
-	SelectItemStyled,
-	SelectValue,
-} from "@/components/ui/select";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
-import LinkField from "@/components/ui/link/LinkField.vue";
 import Pagination from "@/components/orders/Pagination.vue";
 import MultiLinkInput from "@/components/reports/MultiLinkInput.vue";
 import ReportDataTable, { type ReportSortState } from "@/components/reports/ReportDataTable.vue";
@@ -54,6 +46,8 @@ import {
 	type ReportSummaryItem,
 	type ReportTone,
 } from "@/services/reports";
+import { Select } from "@/components/ui/select";
+import { Autocomplete } from "@/components/ui/autocomplete";
 
 const route = useRoute();
 const router = useRouter();
@@ -720,7 +714,7 @@ function getSortLabel(): string {
 								{{ filter.helpText }}
 							</p>
 
-							<LinkField
+							<Autocomplete
 								v-if="filter.type === 'link'"
 								:model-value="getStringFilterValue(filter.fieldname)"
 								:doctype="filter.doctype || 'DocType'"
@@ -769,21 +763,10 @@ function getSortLabel(): string {
 							<Select
 								v-else-if="filter.type === 'select'"
 								:model-value="getSelectFilterValue(filter.fieldname)"
+								:placeholder="getFilterPlaceholder(filter)"
+								:items="filter.options || []"
 								@update:model-value="(value) => setFilterValue(filter.fieldname, value)"
-							>
-								<SelectTriggerStyled class="h-10 w-full">
-									<SelectValue :placeholder="getFilterPlaceholder(filter)" />
-								</SelectTriggerStyled>
-								<SelectContentStyled>
-									<SelectItemStyled
-										v-for="option in filter.options || []"
-										:key="option.value"
-										:value="option.value"
-									>
-										{{ option.label }}
-									</SelectItemStyled>
-								</SelectContentStyled>
-							</Select>
+							/>
 						</div>
 					</div>
 				</Card>
@@ -802,22 +785,11 @@ function getSortLabel(): string {
 								/>
 							</div>
 							<Select
+								:items="sortFieldOptions"
+								:placeholder="__('Sort by')"
 								:model-value="sortState?.fieldname || ''"
 								@update:model-value="setSortField"
-							>
-								<SelectTriggerStyled class="h-10 w-52">
-									<SelectValue :placeholder="__('Sort by')" />
-								</SelectTriggerStyled>
-								<SelectContentStyled>
-									<SelectItemStyled
-										v-for="option in sortFieldOptions"
-										:key="option.value"
-										:value="option.value"
-									>
-										{{ option.label }}
-									</SelectItemStyled>
-								</SelectContentStyled>
-							</Select>
+							/>
 							<Button
 								variant="outline"
 								size="icon-sm"

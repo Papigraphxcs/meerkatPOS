@@ -3,7 +3,7 @@ import { nextTick, ref, watch } from "vue";
 import { X } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import LinkField, { type LinkFieldOption } from "@/components/ui/link/LinkField.vue";
+import { Autocomplete, AutocompleteOption } from "@/components/ui/autocomplete";
 
 const props = withDefaults(
 	defineProps<{
@@ -47,7 +47,7 @@ function syncValues() {
 	);
 }
 
-function addSelectedOption(option: LinkFieldOption) {
+function addSelectedOption(option: AutocompleteOption) {
 	if (!option.value) return;
 	if (selectedItems.value.some((item) => item.value === option.value)) {
 		activeValue.value = "";
@@ -108,7 +108,7 @@ function clearAll() {
 
 			<div class="flex items-center gap-2">
 				<div class="flex-1 min-w-0">
-					<LinkField
+					<Autocomplete
 						v-model="activeValue"
 						:doctype="doctype"
 						:filters="filters"

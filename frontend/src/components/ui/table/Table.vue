@@ -2,9 +2,23 @@
 import { ref, computed, nextTick, watch } from "vue";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
+import { Autocomplete } from "@/components/ui/autocomplete";
+import type { AutocompleteOption } from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { TooltipWrapper } from "@/components/ui/tooltip";
-import { Trash2, Plus, Package, Settings, Copy, ChevronUp, ChevronDown, X, Check } from "lucide-vue-next";
+import { Select } from "@/components/ui/select";
+import {
+	Trash2,
+	Plus,
+	Package,
+	Settings,
+	Copy,
+	ChevronUp,
+	ChevronDown,
+	X,
+	Check,
+	Pencil,
+} from "lucide-vue-next";
 import __ from "@/lib/translate";
 import type { TableColumn as ChildTableColumn, TableRow as ChildTableRow, SelectOption } from "./types";
 import Checkbox from "../checkbox/Checkbox.vue";
@@ -26,6 +40,8 @@ const props = withDefaults(
 		emptyDescription?: string;
 		showColumnSettings?: boolean;
 		highlightNewRows?: boolean;
+		showEditRow?: boolean;
+		tabToAddRow?: boolean;
 	}>(),
 	{
 		label: "Items",
@@ -41,6 +57,8 @@ const props = withDefaults(
 		emptyDescription: "Add items to get started",
 		showColumnSettings: true,
 		highlightNewRows: true,
+		showEditRow: false,
+		tabToAddRow: false,
 	},
 );
 
@@ -53,6 +71,7 @@ const emit = defineEmits<{
 	(e: "move-row", fromIndex: number, direction: -1 | 1): void;
 	(e: "cell-change", payload: { rowIndex: number; fieldname: string; value: any }): void;
 	(e: "row-click", index: number): void;
+	(e: "link-select", payload: { rowIndex: number; fieldname: string; option: AutocompleteOption }): void;
 }>();
 
 const tableContainerRef = ref<HTMLElement | null>(null);
@@ -60,6 +79,10 @@ const inputRefs = ref<Map<string, HTMLInputElement>>(new Map());
 const selectedIndices = ref<Set<number>>(new Set());
 const showColumnSettingsModal = ref(false);
 const hiddenColumns = ref<Set<string>>(new Set());
+
+const editorOpen = ref(false);
+const editorRowIndex = ref(-1);
+const editorRowData = ref<ChildTableRow>({});
 
 const visibleColumns = computed(() => {
 	return props.columns.filter((col) => col.visible !== false && !hiddenColumns.value.has(col.fieldname));
@@ -69,6 +92,14 @@ const editableColumnNames = computed(() => {
 	return visibleColumns.value
 		.filter((col) => col.editable !== false && col.type !== "readonly" && col.type !== "component")
 		.map((col) => col.fieldname);
+});
+
+const editorColumns = computed(() => {
+	return props.columns.filter((col) => {
+		if (col.showInEditor === false) return false;
+		if (col.type === "component") return false;
+		return true;
+	});
 });
 
 const isAllRowsSelected = computed((): boolean | "indeterminate" => {
@@ -84,8 +115,12 @@ const totalColSpan = computed(() => {
 	let count = visibleColumns.value.length;
 	if (props.showRowNumbers) count++;
 	if (props.showCheckboxes) count++;
-	if (props.showDeleteButton || props.allowReorder || props.allowDuplicate) count++;
+	if (props.showDeleteButton || props.allowReorder || props.allowDuplicate || props.showEditRow) count++;
 	return count;
+});
+
+const hasActions = computed(() => {
+	return props.showDeleteButton || props.allowReorder || props.allowDuplicate || props.showEditRow;
 });
 
 function registerInput(rowIndex: number, fieldname: string, el: HTMLInputElement | null): void {
@@ -152,6 +187,25 @@ function handleKeyDown(event: KeyboardEvent, rowIndex: number, fieldname: string
 			}
 			break;
 		case "Tab":
+			if (props.tabToAddRow && !event.shiftKey) {
+				const isLastCol = colIndex === cols.length - 1;
+				const isLastRow = rowIndex === totalRows - 1;
+				if (isLastCol && isLastRow) {
+					event.preventDefault();
+					emit("add-row");
+					return;
+				}
+				if (isLastCol && rowIndex < totalRows - 1) {
+					event.preventDefault();
+					focusCell(rowIndex + 1, cols[0]);
+					return;
+				}
+				if (!isLastCol) {
+					event.preventDefault();
+					focusCell(rowIndex, cols[colIndex + 1]);
+					return;
+				}
+			}
 			return;
 		default:
 			return;
@@ -226,6 +280,75 @@ function moveRow(index: number, direction: -1 | 1): void {
 
 function onCellChange(rowIndex: number, fieldname: string, value: any): void {
 	emit("cell-change", { rowIndex, fieldname, value });
+}
+
+function onLinkSelect(rowIndex: number, col: ChildTableColumn, option: AutocompleteOption): void {
+	emit("cell-change", { rowIndex, fieldname: col.fieldname, value: option.value });
+	emit("link-select", { rowIndex, fieldname: col.fieldname, option });
+
+	if (col.link?.onSelect) {
+		const row = props.rows[rowIndex];
+		const partial = col.link.onSelect(
+			option.value,
+			{ value: option.value, description: option.description },
+			row,
+			rowIndex,
+		);
+		if (partial && typeof partial === "object") {
+			for (const [key, val] of Object.entries(partial)) {
+				emit("cell-change", { rowIndex, fieldname: key, value: val });
+			}
+		}
+	}
+}
+
+function getLinkFilters(col: ChildTableColumn, row: ChildTableRow, index: number): Record<string, unknown> {
+	if (!col.link?.filters) return {};
+	if (typeof col.link.filters === "function") return col.link.filters(row, index);
+	return col.link.filters;
+}
+
+// ── Row editor dialog ──
+function openRowEditor(index: number): void {
+	editorRowIndex.value = index;
+	editorRowData.value = { ...props.rows[index] };
+	editorOpen.value = true;
+}
+
+function onEditorFieldChange(fieldname: string, value: any): void {
+	editorRowData.value[fieldname] = value;
+}
+
+function onEditorLinkSelect(col: ChildTableColumn, option: AutocompleteOption): void {
+	editorRowData.value[col.fieldname] = option.value;
+
+	if (col.link?.onSelect) {
+		const partial = col.link.onSelect(
+			option.value,
+			{ value: option.value, description: option.description },
+			editorRowData.value,
+			editorRowIndex.value,
+		);
+		if (partial && typeof partial === "object") {
+			for (const [key, val] of Object.entries(partial)) {
+				editorRowData.value[key] = val;
+			}
+		}
+	}
+}
+
+function saveRowEditor(): void {
+	const idx = editorRowIndex.value;
+	if (idx < 0) return;
+
+	for (const col of editorColumns.value) {
+		const newVal = editorRowData.value[col.fieldname];
+		const oldVal = props.rows[idx]?.[col.fieldname];
+		if (newVal !== oldVal) {
+			emit("cell-change", { rowIndex: idx, fieldname: col.fieldname, value: newVal });
+		}
+	}
+	editorOpen.value = false;
 }
 
 function toggleColumnVisibility(fieldname: string): void {
@@ -377,10 +500,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 							{{ __(col.label) }}
 							<span v-if="col.required" class="text-destructive">*</span>
 						</th>
-						<th
-							v-if="showDeleteButton || allowReorder || allowDuplicate"
-							class="px-2 py-2 w-[80px] text-center"
-						>
+						<th v-if="hasActions" class="px-2 py-2 w-[100px] text-center">
 							{{ __("") }}
 						</th>
 					</tr>
@@ -428,8 +548,27 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 								"
 								:onKeyDown="(e: KeyboardEvent) => handleKeyDown(e, rowIndex, col.fieldname)"
 							>
+								<!-- Link field -->
+								<Autocomplete
+									v-if="col.type === 'link' && col.link"
+									:model-value="row[col.fieldname] || ''"
+									@update:model-value="onCellChange(rowIndex, col.fieldname, $event)"
+									@select="(opt: AutocompleteOption) => onLinkSelect(rowIndex, col, opt)"
+									:doctype="col.link.doctype"
+									:label-field="col.link.labelField || 'name'"
+									:filters="getLinkFilters(col, row, rowIndex)"
+									:placeholder="
+										col.placeholder
+											? __(col.placeholder)
+											: `Search ${col.link.doctype}...`
+									"
+									:compact="true"
+									:show-search-icon="false"
+									:clearable="false"
+								/>
+
 								<Input
-									v-if="col.type === 'text'"
+									v-else-if="col.type === 'text'"
 									:model-value="row[col.fieldname] || ''"
 									@update:model-value="onCellChange(rowIndex, col.fieldname, $event)"
 									class="h-7 text-xs"
@@ -469,28 +608,18 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 									:ref="(el: any) => registerInput(rowIndex, col.fieldname, el?.$el || el)"
 								/>
 
-								<select
+								<Select
 									v-else-if="col.type === 'select'"
-									:value="row[col.fieldname]"
-									@change="
-										onCellChange(
-											rowIndex,
-											col.fieldname,
-											($event.target as HTMLSelectElement).value,
-										)
+									:model-value="String(row[col.fieldname] || '')"
+									@update:model-value="onCellChange(rowIndex, col.fieldname, $event)"
+									:items="
+										getSelectOptions(col, row, rowIndex).map((o) => ({
+											label: o.label,
+											value: String(o.value),
+										}))
 									"
-									class="h-7 w-full px-1 border border-border rounded text-xs bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-									@keydown="handleKeyDown($event, rowIndex, col.fieldname)"
-									:ref="(el: any) => registerInput(rowIndex, col.fieldname, el)"
-								>
-									<option
-										v-for="opt in getSelectOptions(col, row, rowIndex)"
-										:key="opt.value"
-										:value="opt.value"
-									>
-										{{ opt.label }}
-									</option>
-								</select>
+									class="h-7 text-xs"
+								/>
 
 								<span
 									v-else-if="col.type === 'readonly'"
@@ -504,10 +633,20 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 							</slot>
 						</td>
 
-						<td v-if="showDeleteButton || allowReorder || allowDuplicate" class="px-1 py-1">
+						<td v-if="hasActions" class="px-1 py-1">
 							<div
 								class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
 							>
+								<TooltipWrapper v-if="showEditRow" :content="__('Edit row')">
+									<Button
+										variant="ghost"
+										size="icon"
+										class="h-6 w-6"
+										@click.stop="openRowEditor(rowIndex)"
+									>
+										<Pencil class="w-3 h-3" />
+									</Button>
+								</TooltipWrapper>
 								<TooltipWrapper v-if="allowDuplicate" :content="__('Duplicate')">
 									<Button
 										variant="ghost"
@@ -566,6 +705,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 				{{ __("Arrow keys to navigate") }} &middot; {{ __("Enter for next row") }} &middot;
 				{{ __("Ctrl+D to duplicate") }} &middot;
 				{{ __("Del to delete selected") }}
+				<template v-if="tabToAddRow"> &middot; {{ __("Tab on last cell adds row") }} </template>
 			</span>
 			<button
 				v-if="showAddRow"
@@ -577,6 +717,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 			</button>
 		</div>
 
+		<!-- Column Settings Modal -->
 		<Teleport to="body">
 			<Transition name="ct-modal">
 				<div
@@ -609,12 +750,10 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 								class="flex items-center gap-2.5 px-2 py-1.5 rounded hover:bg-muted cursor-pointer text-sm"
 								:class="{ 'opacity-50 cursor-not-allowed': col.alwaysVisible }"
 							>
-								<input
-									type="checkbox"
+								<Checkbox
 									:checked="!hiddenColumns.has(col.fieldname)"
 									:disabled="col.alwaysVisible"
-									@change="toggleColumnVisibility(col.fieldname)"
-									class="w-3.5 h-3.5 rounded border-border text-primary focus:ring-ring"
+									@update:checked="toggleColumnVisibility(col.fieldname)"
 								/>
 								<span>{{ __(col.label) }}</span>
 								<span v-if="col.required" class="text-destructive text-xs">*</span>
@@ -628,6 +767,111 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 							<Button size="sm" @click="showColumnSettingsModal = false">
 								<Check class="w-3.5 h-3.5 me-1" />
 								{{ __("Done") }}
+							</Button>
+						</div>
+					</div>
+				</div>
+			</Transition>
+		</Teleport>
+
+		<!-- Row Editor Dialog -->
+		<Teleport to="body">
+			<Transition name="ct-modal">
+				<div
+					v-if="editorOpen"
+					class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+					@click.self="editorOpen = false"
+				>
+					<div class="absolute inset-0 bg-black/50" @click="editorOpen = false" />
+					<div
+						class="relative bg-background border border-border rounded-xl shadow-xl w-full max-w-lg max-h-[85vh] flex flex-col"
+					>
+						<div class="flex items-center justify-between px-5 py-3.5 border-b border-border">
+							<h3 class="text-sm font-semibold text-foreground">
+								{{ __("Edit Row") }} #{{ editorRowIndex + 1 }}
+							</h3>
+							<Button variant="ghost" size="icon" class="h-7 w-7" @click="editorOpen = false">
+								<X class="w-4 h-4" />
+							</Button>
+						</div>
+
+						<div class="flex-1 overflow-auto px-5 py-4 space-y-4">
+							<div v-for="col in editorColumns" :key="col.fieldname" class="space-y-1.5">
+								<label class="text-sm font-medium text-foreground">
+									{{ __(col.label) }}
+									<span v-if="col.required" class="text-destructive">*</span>
+								</label>
+
+								<!-- Link field in editor -->
+								<Autocomplete
+									v-if="col.type === 'link' && col.link"
+									:model-value="editorRowData[col.fieldname] || ''"
+									@update:model-value="onEditorFieldChange(col.fieldname, $event)"
+									@select="(opt: AutocompleteOption) => onEditorLinkSelect(col, opt)"
+									:doctype="col.link.doctype"
+									:label-field="col.link.labelField || 'name'"
+									:filters="getLinkFilters(col, editorRowData, editorRowIndex)"
+									:placeholder="`Search ${col.link.doctype}...`"
+								/>
+
+								<Input
+									v-else-if="col.type === 'text'"
+									:model-value="editorRowData[col.fieldname] || ''"
+									@update:model-value="onEditorFieldChange(col.fieldname, $event)"
+									:placeholder="col.placeholder ? __(col.placeholder) : ''"
+								/>
+
+								<NumberInput
+									v-else-if="col.type === 'number'"
+									:model-value="editorRowData[col.fieldname] ?? 0"
+									@update:model-value="onEditorFieldChange(col.fieldname, $event)"
+									:min="col.min ?? 0"
+									:max="col.max"
+									:precision="col.precision ?? 2"
+								/>
+
+								<Input
+									v-else-if="col.type === 'date'"
+									type="date"
+									:model-value="editorRowData[col.fieldname] || ''"
+									@update:model-value="onEditorFieldChange(col.fieldname, $event)"
+								/>
+
+								<Select
+									v-else-if="col.type === 'select'"
+									:model-value="String(editorRowData[col.fieldname] || '')"
+									@update:model-value="onEditorFieldChange(col.fieldname, $event)"
+									:items="
+										getSelectOptions(col, editorRowData, editorRowIndex).map((o) => ({
+											label: o.label,
+											value: String(o.value),
+										}))
+									"
+								/>
+
+								<span
+									v-else-if="col.type === 'readonly'"
+									class="block text-sm text-muted-foreground font-mono py-1"
+								>
+									{{
+										formatValue(
+											col,
+											editorRowData[col.fieldname],
+											editorRowData,
+											editorRowIndex,
+										)
+									}}
+								</span>
+							</div>
+						</div>
+
+						<div class="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-border">
+							<Button variant="outline" size="sm" @click="editorOpen = false">
+								{{ __("Cancel") }}
+							</Button>
+							<Button size="sm" @click="saveRowEditor">
+								<Check class="w-3.5 h-3.5 me-1" />
+								{{ __("Save") }}
 							</Button>
 						</div>
 					</div>

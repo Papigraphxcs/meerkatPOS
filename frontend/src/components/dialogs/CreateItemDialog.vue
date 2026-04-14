@@ -4,10 +4,11 @@ import { usePurchaseStore } from "@/stores/purchaseStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
-import { LinkField } from "@/components/ui/link";
+import { Autocomplete } from "@/components/ui/autocomplete";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import type { SearchItem } from "@/types/pos.types";
 import __ from "@/lib/translate";
+import { getBootProperty } from "@/utils";
 
 const props = defineProps<{
 	open: boolean;
@@ -90,7 +91,7 @@ async function handleCreate(): Promise<void> {
 						<label class="text-sm font-medium mb-1 block">{{ __("Item Name") }} *</label>
 						<Input v-model="newItem.item_name" required />
 					</div>
-					<div>
+					<div v-if="getBootProperty('stock_settings.item_naming_by') === 'Item Code'">
 						<label class="text-sm font-medium mb-1 block">{{ __("Item Code") }}</label>
 						<Input v-model="newItem.item_code" :placeholder="__('Auto-generated')" />
 					</div>
@@ -100,11 +101,16 @@ async function handleCreate(): Promise<void> {
 					</div>
 					<div>
 						<label class="text-sm font-medium mb-1 block">{{ __("UOM") }}</label>
-						<LinkField v-model="newItem.stock_uom" doctype="UOM" :open-on-focus="true" />
+						<Autocomplete v-model="newItem.stock_uom" doctype="UOM" :open-on-focus="true" />
 					</div>
 					<div>
 						<label class="text-sm font-medium mb-1 block">{{ __("Item Group") }}</label>
-						<Input v-model="newItem.item_group" />
+						<Autocomplete
+							v-model="newItem.item_group"
+							doctype="Item Group"
+							:open-on-focus="true"
+							:filters="{ is_group: 0 }"
+						/>
 					</div>
 					<div>
 						<label class="text-sm font-medium mb-1 block">{{ __("Buying Price") }}</label>

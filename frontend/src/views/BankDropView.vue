@@ -133,21 +133,7 @@
 						<label class="text-sm font-semibold text-foreground mb-1.5 block">
 							{{ __("Deposit To") }}
 						</label>
-						<Select v-model="form.target_account">
-							<SelectTriggerStyled class="h-8 w-full">
-								<SelectValue :placeholder="__('Select bank account')" />
-							</SelectTriggerStyled>
-							<SelectContentStyled>
-								<SelectItemStyled
-									class="cursor-pointer"
-									v-for="op in depositAccountOptions"
-									:key="op.value"
-									:value="op.value"
-								>
-									{{ op.label }}
-								</SelectItemStyled>
-							</SelectContentStyled>
-						</Select>
+						<Select v-model="form.target_account" :items="depositAccountOptions" />
 					</div>
 					<div>
 						<label class="text-sm font-semibold text-foreground mb-1.5 block">
@@ -214,15 +200,12 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import Select from "@/components/ui/select/Select.vue";
-import { SelectTriggerStyled, SelectValue } from "@/components/ui/select";
-import SelectContentStyled from "@/components/ui/select/SelectContentStyled.vue";
-import SelectItemStyled from "@/components/ui/select/SelectItemStyled.vue";
 import { Plus, RefreshCw, Trash2, Landmark, Loader2, ArrowUpCircle } from "lucide-vue-next";
 import DateTimePicker from "@/components/ui/datetime-picker/DateTimePicker.vue";
 import Pagination from "@/components/orders/Pagination.vue";
 import __ from "@/lib/translate";
 import { DOCSTATUS_MAP } from "@/types/pos.types";
+import { Select } from "@/components/ui/select";
 
 const posStore = usePosStore();
 const authStore = useAuthStore();

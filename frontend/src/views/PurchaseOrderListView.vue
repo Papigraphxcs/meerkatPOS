@@ -33,8 +33,9 @@ import {
 	Send,
 } from "lucide-vue-next";
 import __ from "@/lib/translate";
-import LinkField from "@/components/ui/link/LinkField.vue";
 import type { PurchaseOrder } from "@/types/pos.types";
+import { Autocomplete } from "@/components/ui/autocomplete";
+import { Select } from "@/components/ui/select";
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
@@ -219,21 +220,14 @@ onMounted(() => {
 						class="ps-8 h-8 text-sm"
 					/>
 				</div>
-				<LinkField
+				<Autocomplete
 					v-model="supplierFilter"
 					doctype="Supplier"
 					class="h-8 text-sm"
 					@update:model-value="fetchOrders"
+					:open-on-focus="true"
 				/>
-				<select
-					v-model="statusFilter"
-					@change="fetchOrders()"
-					class="w-full h-8 px-2 border border-border rounded-md text-sm bg-background text-foreground"
-				>
-					<option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
-						{{ opt.label }}
-					</option>
-				</select>
+				<Select v-model="statusFilter" @change="fetchOrders()" :items="statusOptions" />
 				<Input v-model="fromDate" type="date" class="h-8 text-sm" @change="fetchOrders" />
 				<Input v-model="toDate" type="date" class="h-8 text-sm" @change="fetchOrders" />
 			</div>

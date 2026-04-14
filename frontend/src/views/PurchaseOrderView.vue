@@ -1,26 +1,18 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore, type PurchaseCartItem } from "@/stores/purchaseStore";
-import {
-	Select,
-	SelectTriggerStyled,
-	SelectContentStyled,
-	SelectItemStyled,
-	SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@/components/ui/select";
 import { usePosStore } from "@/stores/posStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Table } from "@/components/ui/table";
 import type { TableColumn, TableRow } from "@/components/ui/table/types";
+import type { AutocompleteOption } from "@/components/ui/autocomplete";
 import {
-	Search,
 	Plus,
 	RefreshCw,
-	Package,
 	X,
 	ShoppingCart,
 	ScanBarcode,
@@ -30,22 +22,15 @@ import {
 	List,
 	Send,
 } from "lucide-vue-next";
-import type { SearchItem, Supplier } from "@/types/pos.types";
+import type { SearchItem } from "@/types/pos.types";
 import { showError } from "@/services/api";
 import __ from "@/lib/translate";
-import LinkField from "@/components/ui/link/LinkField.vue";
+import { Autocomplete } from "@/components/ui/autocomplete";
 import { CreateItemDialog, CreateSupplierDialog } from "@/components/purchase";
-import { TooltipWrapper } from "@/components/ui/tooltip";
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
-
-const itemSearchTerm = ref("");
-const supplierSearchTerm = ref("");
-const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
-const highlightedItemIndex = ref(-1);
-const itemSearchInputRef = ref<HTMLInputElement | null>(null);
 
 const barcodeValue = ref("");
 const isBarcodeScan = ref(false);
@@ -84,44 +69,6 @@ function getItemAmount(item: PurchaseCartItem): number {
 	return gross * (1 - disc / 100);
 }
 
-function onItemSearch(): void {
-	if (debounceTimer.value) clearTimeout(debounceTimer.value);
-	highlightedItemIndex.value = -1;
-	debounceTimer.value = setTimeout(() => {
-		purchaseStore.searchItems(itemSearchTerm.value);
-	}, 300);
-}
-
-function handleItemSearchKeyDown(event: KeyboardEvent): void {
-	const items = purchaseStore.purchaseItems;
-	if (items.length === 0) return;
-
-	if (event.key === "ArrowDown") {
-		event.preventDefault();
-		highlightedItemIndex.value = Math.min(highlightedItemIndex.value + 1, items.length - 1);
-		scrollHighlightedItemIntoView();
-	} else if (event.key === "ArrowUp") {
-		event.preventDefault();
-		highlightedItemIndex.value = Math.max(highlightedItemIndex.value - 1, -1);
-		if (highlightedItemIndex.value >= 0) {
-			scrollHighlightedItemIntoView();
-		}
-	} else if (event.key === "Enter") {
-		event.preventDefault();
-		if (highlightedItemIndex.value >= 0 && highlightedItemIndex.value < items.length) {
-			addItem(items[highlightedItemIndex.value]);
-			highlightedItemIndex.value = -1;
-		}
-	}
-}
-
-function scrollHighlightedItemIntoView(): void {
-	nextTick(() => {
-		const el = document.querySelector(`[data-purchase-item-index="${highlightedItemIndex.value}"]`);
-		el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-	});
-}
-
 async function onBarcodeScan(): Promise<void> {
 	const code = barcodeValue.value.trim();
 	if (!code) return;
@@ -154,21 +101,6 @@ function onBarcodePaste(): void {
 	}, 50);
 }
 
-function onSupplierSearch(): void {
-	if (debounceTimer.value) clearTimeout(debounceTimer.value);
-	debounceTimer.value = setTimeout(() => {
-		purchaseStore.searchSuppliers(supplierSearchTerm.value);
-	}, 300);
-}
-
-function selectSupplier(supplier: Supplier): void {
-	purchaseStore.selectSupplier(supplier);
-}
-
-function addItem(item: SearchItem): void {
-	purchaseStore.addToCart(item, 1);
-}
-
 function deleteRow(index: number): void {
 	purchaseStore.removeFromCart(index);
 }
@@ -193,6 +125,58 @@ function moveRow(index: number, direction: -1 | 1): void {
 	const temp = items[index];
 	items[index] = items[target];
 	items[target] = temp;
+}
+
+function addEmptyRow(): void {
+	purchaseStore.cartItems.push({
+		item_code: "",
+		item_name: "",
+		qty: 0,
+		rate: 0,
+		uom: "",
+		stock_uom: "",
+		conversion_factor: 1,
+		warehouse: posStore.warehouse,
+		stock_in_hand: 0,
+		transit_stock: 0,
+		required_packs: 0,
+		item_group: "",
+		class: "",
+		pack_units: 0,
+		discount_percent: 0,
+		item_packing: "",
+		item_uoms: [],
+	});
+}
+
+async function onItemLinkSelect(payload: {
+	rowIndex: number;
+	fieldname: string;
+	option: AutocompleteOption;
+}): Promise<void> {
+	const { rowIndex, option } = payload;
+	const itemCode = option.value as string;
+
+	const item = await purchaseStore.fetchItemByCode(itemCode);
+	if (!item) return;
+
+	const row = purchaseStore.cartItems[rowIndex];
+	if (!row) return;
+
+	row.item_code = item.item_code;
+	row.item_name = item.item_name;
+	row.rate = item.standard_rate || 0;
+	row.uom = item.stock_uom;
+	row.stock_uom = item.stock_uom;
+	row.conversion_factor = 1;
+	row.qty = row.qty || 1;
+	row.item_group = item.item_group || "";
+	row.class = item.custom_class || "";
+	row.pack_units = item.custom_pack_units || 0;
+	row.item_packing = item.custom_item_packing || "";
+	row.item_uoms = item.item_uoms || [{ uom: item.stock_uom, conversion_factor: 1 }];
+
+	purchaseStore.fetchStockForItems([item.item_code]);
 }
 
 function onPOCellChange(payload: { rowIndex: number; fieldname: string; value: any }): void {
@@ -232,14 +216,17 @@ function getUOMOptions(item: PurchaseCartItem): Array<{ uom: string; conversion_
 
 const poColumns = computed<TableColumn[]>(() => [
 	{
-		fieldname: "item_name",
-		label: "Item Name",
-		type: "readonly" as const,
-		width: "min-w-[140px]",
+		fieldname: "item_code",
+		label: "Item",
+		type: "link" as const,
+		width: "min-w-[180px]",
 		align: "left" as const,
-		editable: false,
 		alwaysVisible: true,
-		format: (val: any) => val || "-",
+		link: {
+			doctype: "Item",
+			labelField: "item_name",
+		},
+		placeholder: "Select item...",
 	},
 	{
 		fieldname: "stock_in_hand",
@@ -365,7 +352,6 @@ function goToList(): void {
 onMounted(() => {
 	purchaseStore.init();
 	purchaseStore.searchSuppliers();
-	purchaseStore.searchItems();
 });
 </script>
 
@@ -387,12 +373,6 @@ onMounted(() => {
 						<List class="w-4 h-4 me-1" />
 						{{ __("View Orders") }}
 					</Button>
-					<Badge variant="secondary" class="gap-1.5">
-						{{ posStore.warehouse }}
-					</Badge>
-					<Badge variant="outline">
-						{{ posStore.companyName }}
-					</Badge>
 				</div>
 			</div>
 		</header>
@@ -403,7 +383,7 @@ onMounted(() => {
 					<label class="text-xs text-muted-foreground mb-1 block">{{ __("Supplier") }} *</label>
 					<div class="flex gap-1">
 						<div class="flex-1">
-							<LinkField
+							<Autocomplete
 								v-model="purchaseStore.selectedSupplierName"
 								doctype="Supplier"
 								class="h-8 text-sm"
@@ -421,16 +401,12 @@ onMounted(() => {
 				</div>
 				<div>
 					<label class="text-xs text-muted-foreground mb-1 block">{{ __("P/O Category") }}</label>
-					<Select v-model="purchaseStore.poCategory">
-						<SelectTriggerStyled class="h-8 w-[140px]">
-							<SelectValue placeholder="P/O Category" />
-						</SelectTriggerStyled>
-						<SelectContentStyled>
-							<SelectItemStyled v-for="cat in poCategories" :key="cat" :value="cat">{{
-								cat
-							}}</SelectItemStyled>
-						</SelectContentStyled>
-					</Select>
+					<Select
+						v-model="purchaseStore.poCategory"
+						:items="poCategories.map((c) => ({ label: c, value: c }))"
+						placeholder="P/O Category"
+						class="h-8 w-[160px]"
+					/>
 				</div>
 				<div v-if="showCategoryButton">
 					<label class="text-xs text-muted-foreground mb-1 block">&nbsp;</label>
@@ -448,15 +424,15 @@ onMounted(() => {
 				</div>
 				<div v-else>
 					<label class="text-xs text-muted-foreground mb-1 block">{{ __("Zero Qty") }}</label>
-					<Select v-model="purchaseStore.poZeroQty">
-						<SelectTriggerStyled class="h-8 w-[140px]">
-							<SelectValue :placeholder="__('Zero Qty')" />
-						</SelectTriggerStyled>
-						<SelectContentStyled>
-							<SelectItemStyled value="No">{{ __("No") }}</SelectItemStyled>
-							<SelectItemStyled value="Yes">{{ __("Yes") }}</SelectItemStyled>
-						</SelectContentStyled>
-					</Select>
+					<Select
+						v-model="purchaseStore.poZeroQty"
+						:items="[
+							{ label: __('No'), value: 'No' },
+							{ label: __('Yes'), value: 'Yes' },
+						]"
+						:placeholder="__('Zero Qty')"
+						class="h-8 w-[140px]"
+					/>
 				</div>
 				<div class="col-span-3">
 					<label class="text-xs text-muted-foreground mb-1 block">{{ __("Remarks") }}</label>
@@ -465,106 +441,14 @@ onMounted(() => {
 			</div>
 		</div>
 
-		<div class="flex-1 flex min-h-0 overflow-hidden">
-			<div class="w-72 border-e border-border bg-card flex flex-col shrink-0 overflow-hidden">
-				<div class="px-3 pt-3 pb-2 border-b border-border">
-					<div class="relative">
-						<ScanBarcode
-							class="absolute start-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-						/>
-						<Input
-							v-model="barcodeValue"
-							class="ps-8 h-8 text-sm"
-							:class="{
-								'ring-2 ring-green-500/50 border-green-500': barcodeFlash === 'success',
-								'ring-2 ring-red-500/50 border-red-500': barcodeFlash === 'error',
-							}"
-							:placeholder="__('Scan barcode...')"
-							@keydown.enter.prevent="onBarcodeScan"
-							@paste="onBarcodePaste"
-						/>
-						<Loader2
-							v-if="isBarcodeScan"
-							class="absolute end-2.5 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin"
-						/>
-					</div>
-				</div>
-
-				<div class="p-3 border-b border-border">
-					<div class="flex gap-1">
-						<div class="relative flex-1">
-							<Search
-								class="absolute start-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-							/>
-							<Input
-								v-model="itemSearchTerm"
-								@input="onItemSearch"
-								@keydown="handleItemSearchKeyDown"
-								:placeholder="__('Search items...')"
-								class="ps-8 h-8 text-sm"
-								ref="itemSearchInputRef"
-							/>
-						</div>
-						<Button
-							@click="showNewItemDialog = true"
-							variant="outline"
-							size="icon"
-							class="h-8 w-8 shrink-0"
-						>
-							<Plus class="w-4 h-4" />
-						</Button>
-					</div>
-				</div>
-
-				<ScrollArea class="flex-1 min-h-0">
-					<div
-						v-if="purchaseStore.isLoadingItems"
-						class="p-4 text-center text-muted-foreground text-sm"
-					>
-						{{ __("Loading...") }}
-					</div>
-					<div
-						v-else-if="purchaseStore.purchaseItems.length === 0"
-						class="p-4 text-center text-muted-foreground"
-					>
-						<Package class="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
-						<p class="text-sm">{{ __("No items found") }}</p>
-					</div>
-					<div v-else class="divide-y divide-border">
-						<button
-							v-for="(item, index) in purchaseStore.purchaseItems"
-							:key="item.item_code"
-							@click="addItem(item)"
-							:data-purchase-item-index="index"
-							class="w-full p-3 text-start hover:bg-muted transition-colors"
-							:class="{
-								'bg-primary/10 ring-1 ring-primary/30': index === highlightedItemIndex,
-							}"
-						>
-							<p class="font-medium text-sm truncate text-foreground">
-								{{ item.item_name }}
-							</p>
-							<p class="text-xs text-muted-foreground truncate">
-								{{ item.item_code }}
-							</p>
-							<div class="flex gap-2 mt-1 text-xs text-muted-foreground/70">
-								<span>{{ item.stock_uom }}</span>
-								<span v-if="item.standard_rate">{{
-									formatCurrency(item.standard_rate)
-								}}</span>
-							</div>
-						</button>
-					</div>
-				</ScrollArea>
-			</div>
-
+		<div class="flex-1 flex flex-col min-h-0 overflow-hidden">
 			<div class="flex-1 flex flex-col min-h-0 overflow-hidden">
 				<Table
 					:rows="purchaseStore.cartItems"
 					:columns="poColumns"
 					label="Items"
 					min-width="1200px"
-					:show-add-row="false"
+					:show-add-row="true"
 					:show-checkboxes="true"
 					:show-row-numbers="true"
 					:show-delete-button="true"
@@ -573,36 +457,61 @@ onMounted(() => {
 					:allow-duplicate="true"
 					:show-column-settings="true"
 					:highlight-new-rows="true"
+					:tab-to-add-row="true"
+					:show-edit-row="true"
 					empty-message="No items added"
-					empty-description="Search and add items from the left panel"
+					empty-description="Add a row and search for items using the Item column"
+					@add-row="addEmptyRow"
 					@delete-row="deleteRow"
 					@delete-rows="deleteRows"
 					@duplicate-row="duplicateRow"
 					@move-row="moveRow"
 					@cell-change="onPOCellChange"
+					@link-select="onItemLinkSelect"
 					class="flex-1 min-h-0 flex flex-col"
 				>
 					<template #toolbar>
-						<Button
-							v-if="purchaseStore.cartItems.length > 0"
-							@click="purchaseStore.refreshAllStock()"
-							variant="outline"
-							size="sm"
-							class="h-7 text-xs"
-						>
-							<RefreshCw class="w-3.5 h-3.5 me-1" />
-							{{ __("Refresh Stock") }}
-						</Button>
-					</template>
-
-					<template #cell-item_name="{ row }">
-						<TooltipWrapper :content="row.item_name">
-							<div class="truncate font-medium text-xs">
-								{{ row.item_name }}
+						<div class="flex items-center gap-1.5">
+							<div class="relative">
+								<ScanBarcode
+									class="absolute start-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground"
+								/>
+								<Input
+									v-model="barcodeValue"
+									class="ps-7 h-7 w-[160px] text-xs"
+									:class="{
+										'ring-2 ring-green-500/50 border-green-500':
+											barcodeFlash === 'success',
+										'ring-2 ring-red-500/50 border-red-500': barcodeFlash === 'error',
+									}"
+									:placeholder="__('Scan barcode...')"
+									@keydown.enter.prevent="onBarcodeScan"
+									@paste="onBarcodePaste"
+								/>
+								<Loader2
+									v-if="isBarcodeScan"
+									class="absolute end-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 animate-spin"
+								/>
 							</div>
-						</TooltipWrapper>
-						<div class="text-[10px] text-muted-foreground truncate">
-							{{ row.item_code }}
+							<Button
+								@click="showNewItemDialog = true"
+								variant="outline"
+								size="sm"
+								class="h-7 text-xs"
+							>
+								<Plus class="w-3.5 h-3.5 me-1" />
+								{{ __("New Item") }}
+							</Button>
+							<Button
+								v-if="purchaseStore.cartItems.length > 0"
+								@click="purchaseStore.refreshAllStock()"
+								variant="outline"
+								size="sm"
+								class="h-7 text-xs"
+							>
+								<RefreshCw class="w-3.5 h-3.5 me-1" />
+								{{ __("Refresh Stock") }}
+							</Button>
 						</div>
 					</template>
 				</Table>
@@ -655,12 +564,8 @@ onMounted(() => {
 			</div>
 		</div>
 
-		<CreateItemDialog
-			v-model:open="showNewItemDialog"
-			:initial-name="itemSearchTerm"
-			@created="onItemCreated"
-		/>
+		<CreateItemDialog v-model:open="showNewItemDialog" initial-name="" @created="onItemCreated" />
 
-		<CreateSupplierDialog v-model:open="showNewSupplierDialog" :initial-name="supplierSearchTerm" />
+		<CreateSupplierDialog v-model:open="showNewSupplierDialog" initial-name="" />
 	</div>
 </template>

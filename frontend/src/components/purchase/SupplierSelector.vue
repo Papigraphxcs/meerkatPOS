@@ -4,7 +4,7 @@ import { usePurchaseStore } from "@/stores/purchaseStore";
 import { Plus, User, X } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LinkField, type LinkFieldOption } from "@/components/ui/link";
+import { Autocomplete, type AutocompleteOption } from "@/components/ui/autocomplete";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import __ from "@/lib/translate";
 
@@ -31,7 +31,7 @@ function handleSupplierSearch(text: string): void {
 	}, 300);
 }
 
-function handleSupplierSelect(option: LinkFieldOption): void {
+function handleSupplierSelect(option: AutocompleteOption): void {
 	purchaseStore.selectSupplier({
 		name: option.value,
 		supplier_name: option.description || option.value,
@@ -82,7 +82,7 @@ onUnmounted(() => {
 		<div class="p-4 border-b border-border bg-muted">
 			<div class="flex gap-2">
 				<div class="flex-1">
-					<LinkField
+					<Autocomplete
 						:model-value="supplierLinkValue"
 						@update:model-value="supplierLinkValue = $event"
 						@search="handleSupplierSearch"

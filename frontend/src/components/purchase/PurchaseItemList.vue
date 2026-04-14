@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { TooltipWrapper } from "@/components/ui/tooltip";
-import { LinkField, type LinkFieldOption } from "@/components/ui/link";
+import { Autocomplete, type AutocompleteOption } from "@/components/ui/autocomplete";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import type { SearchItem } from "@/types/pos.types";
 import { showError } from "@/services/api";
@@ -45,7 +45,7 @@ function handleItemLinkSearch(text: string): void {
 	}, 300);
 }
 
-async function handleItemLinkSelect(option: LinkFieldOption): Promise<void> {
+async function handleItemLinkSelect(option: AutocompleteOption): Promise<void> {
 	selectedItemCode.value = "";
 	let item = purchaseStore.purchaseItems.find((i) => i.item_code === option.value);
 	if (!item) {
@@ -183,7 +183,7 @@ onUnmounted(() => {
 		<div class="p-4 border-b border-border bg-muted">
 			<div class="flex gap-2">
 				<div class="flex-1">
-					<LinkField
+					<Autocomplete
 						:model-value="selectedItemCode"
 						@update:model-value="selectedItemCode = $event"
 						@search="handleItemLinkSearch"
@@ -288,7 +288,7 @@ onUnmounted(() => {
 							<label class="text-sm font-medium mb-1 block text-foreground"
 								>{{ __("Stock UOM") }} *</label
 							>
-							<LinkField v-model="newItem.stock_uom" doctype="UOM" :open-on-focus="true" />
+							<Autocomplete v-model="newItem.stock_uom" doctype="UOM" :open-on-focus="true" />
 						</div>
 
 						<div>

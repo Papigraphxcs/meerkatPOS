@@ -43,13 +43,16 @@ export const usePosStore = defineStore("pos", () => {
 	const currency = computed(() => posProfile.value?.currency);
 
 	const currencySymbol = computed(() => {
-		const _currency = (xpos as any).boot?.currencies?.find(
-			(c: any) => c.name === posProfile.value?.currency,
-		);
-		if (_currency) {
-			return _currency.symbol || _currency.name;
+		if (window.xpos) {
+			const _currency = (xpos as any).boot?.currencies?.find(
+				(c: any) => c.name === posProfile.value?.currency,
+			);
+			if (_currency) {
+				return _currency.symbol || _currency.name;
+			}
+			return currency.value || "$";
 		}
-		return currency.value || "$";
+		return "$";
 	});
 
 	const paymentMethods = computed(() => {
