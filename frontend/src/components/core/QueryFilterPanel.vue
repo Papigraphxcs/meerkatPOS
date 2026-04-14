@@ -54,6 +54,7 @@
 
 						<Select
 							v-model="filter.operator"
+							class="w-[130px] shrink-0"
 							@update:model-value="emitFilters"
 							:items="
 								getOperatorsForFilter(filter).map((op) => ({
@@ -86,6 +87,7 @@
 								!['is', 'is not'].includes(filter.operator)
 							"
 							v-model="filter.value"
+							class="flex-1"
 							@update:model-value="emitFilters"
 							:items="
 								getSelectOptionsForField(filter.field).map((opt) => ({
@@ -98,6 +100,7 @@
 						<Select
 							v-else-if="['is', 'is not'].includes(filter.operator)"
 							v-model="filter.value"
+							class="flex-1"
 							@update:model-value="emitFilters"
 							:items="[
 								{ label: __('Set (has value)'), value: 'set' },

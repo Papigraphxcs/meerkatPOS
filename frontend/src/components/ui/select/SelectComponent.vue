@@ -16,6 +16,7 @@ const props = withDefaults(
 		placeholder?: string;
 		disabled?: boolean;
 		class?: string;
+		side?: "top" | "bottom" | "left" | "right";
 	}>(),
 	{
 		placeholder: "Select...",
@@ -31,7 +32,7 @@ const modelValue = defineModel<string>({ default: "" });
 		<SelectTriggerStyled :placeholder="placeholder" :disabled="disabled" :class="class">
 			<SelectValue :placeholder="placeholder" />
 		</SelectTriggerStyled>
-		<SelectContentStyled :placeholder="placeholder" :disabled="disabled">
+		<SelectContentStyled :placeholder="placeholder" :disabled="disabled" :side="side">
 			<SelectItemStyled
 				v-for="opt in items.filter((i) => i.value !== '')"
 				:key="opt.value"

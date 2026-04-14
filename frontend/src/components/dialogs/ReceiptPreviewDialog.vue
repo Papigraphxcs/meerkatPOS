@@ -325,6 +325,7 @@ import { Invoice } from "@/types/pos.types";
 import { useRouter } from "vue-router";
 import { call, showError } from "@/services/api";
 import { get_full_url } from "@/utils";
+import { Badge } from "../ui/badge";
 
 const props = defineProps<{
 	invoice: Invoice | null;

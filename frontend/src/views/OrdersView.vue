@@ -37,7 +37,7 @@
 			</div>
 		</div>
 
-		<div class="flex-1 overflow-y-auto px-3 sm:px-4 xpos-scrollbar">
+		<div class="flex-1 overflow-y-auto px-3 sm:px-4 xpos-scrollbar py-1">
 			<div v-if="listView.isLoading.value && orders.length === 0" class="grid gap-3">
 				<div v-for="i in 5" :key="i" class="skeleton h-20 w-full rounded-xl"></div>
 			</div>
@@ -54,14 +54,15 @@
 				<Card
 					v-for="order in orders"
 					:key="order.name"
-					class="p-3 sm:p-4 cursor-pointer transition-all duration-200 border-transparent hover:border-primary/40 hover:shadow-md dark:hover:bg-accent/50 dark:hover:shadow-primary/5"
+					class="p-3 sm:p-4 cursor-pointer transition-all duration-200 border-border/60 dark:border-transparent hover:border-primary/40 hover:shadow-md dark:hover:bg-accent/50 dark:hover:shadow-primary/5"
 					@click="viewOrder(order)"
 				>
 					<div class="flex items-center gap-2 sm:gap-4">
 						<div class="min-w-0 flex-1">
 							<div class="flex items-center gap-2 mb-1 flex-wrap">
+								<User class="h-3 w-3 shrink-0" />
 								<span class="font-semibold text-foreground text-sm leading-tight">{{
-									order.name
+									order.customer_name || order.customer
 								}}</span>
 								<Badge :variant="statusVariant(order.status)" class="text-[10px]"
 									>{{ __(order.status) }}
@@ -73,8 +74,7 @@
 								<span
 									class="flex items-center gap-1 min-w-0 truncate max-w-[120px] sm:max-w-none"
 								>
-									<User class="h-3 w-3 shrink-0" />
-									{{ order.customer_name }}
+									{{ order.name }}
 								</span>
 								<span class="flex items-center gap-1 whitespace-nowrap">
 									<CalendarIcon class="h-3 w-3 shrink-0" />

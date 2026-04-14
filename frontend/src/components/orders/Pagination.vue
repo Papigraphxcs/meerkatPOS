@@ -52,15 +52,12 @@
 		</div>
 
 		<div class="flex items-center gap-2">
-			<span class="hidden sm:inline text-sm text-muted-foreground">Per page:</span>
-			<select
+			<span class="hidden sm:inline text-sm text-muted-foreground">{{ __("Per page:") }}</span>
+			<Select
 				v-model="pageSizeStr"
-				class="h-8 w-[70px] rounded-md border border-input bg-background px-2 text-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring"
-			>
-				<option v-for="size in pageSizes" :key="size" :value="String(size)">
-					{{ size }}
-				</option>
-			</select>
+				side="top"
+				:items="pageSizes.map((size) => ({ label: String(size), value: String(size) }))"
+			/>
 		</div>
 	</div>
 </template>
@@ -69,6 +66,8 @@
 import { computed, watch, ref } from "vue";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-vue-next";
+import __ from "@/lib/translate";
+import { Select } from "../ui/select";
 
 const props = withDefaults(
 	defineProps<{
