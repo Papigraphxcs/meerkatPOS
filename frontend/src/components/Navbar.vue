@@ -1,5 +1,8 @@
 <template>
 	<header class="h-14 bg-background border-b border-border flex items-center px-4 gap-3 shrink-0 z-30">
+		<Button variant="ghost" size="icon-sm" @click="toggleSidebar">
+			<Menu class="w-5 h-5" />
+		</Button>
 		<div class="flex items-center gap-2.5">
 			<img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-8 h-8" />
 			<span class="hidden md:inline">{{ __("X POS") }}</span>
@@ -258,6 +261,7 @@ import {
 	Search,
 	Info,
 	Keyboard,
+	Menu,
 } from "lucide-vue-next";
 import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
 import AboutDialog from "@/components/dialogs/AboutDialog.vue";
@@ -302,6 +306,10 @@ function handleOfflineAction() {
 	if (offlineStore.hasPending || !offlineStore.isOnline) {
 		showOfflinePanel.value = true;
 	}
+}
+
+function toggleSidebar() {
+	window.dispatchEvent(new CustomEvent("xpos:toggle-sidebar"));
 }
 
 function openSearch() {

@@ -1,13 +1,5 @@
 <template>
 	<div class="relative">
-		<button
-			@click="isOpen = !isOpen"
-			class="fixed start-0 top-1/2 -translate-y-1/2 z-50 bg-primary text-primary-foreground p-1.5 ltr:rounded-r-md rtl:rounded-l-md shadow-lg hover:bg-primary/90 transition-all"
-			:class="{ 'start-64': isOpen }"
-		>
-			<component :is="toggleIcon" class="w-4 h-4" />
-		</button>
-
 		<Transition name="fade">
 			<div v-if="isOpen" class="fixed inset-0 bg-black/50 z-40" @click="isOpen = false" />
 		</Transition>
@@ -149,8 +141,6 @@ import {
 	ClipboardList,
 	PackageCheck,
 	Printer,
-	ChevronLeft,
-	ChevronRight,
 	Building2,
 	Receipt,
 	Settings,
@@ -179,12 +169,6 @@ onMounted(() => {
 
 onUnmounted(() => {
 	window.removeEventListener("xpos:toggle-sidebar", handleToggleSidebar);
-});
-
-const isRtl = computed(() => document.documentElement.dir === "rtl");
-const toggleIcon = computed(() => {
-	if (isOpen.value) return isRtl.value ? ChevronRight : ChevronLeft;
-	return isRtl.value ? ChevronLeft : ChevronRight;
 });
 
 const mainNavItems = [
