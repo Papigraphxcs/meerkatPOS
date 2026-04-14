@@ -28,10 +28,10 @@ const modelValue = defineModel<string>({ default: "" });
 
 <template>
 	<Select :model-value="modelValue" @update:model-value="modelValue = $event as string">
-		<SelectTriggerStyled>
+		<SelectTriggerStyled :placeholder="placeholder" :disabled="disabled" :class="class">
 			<SelectValue :placeholder="placeholder" />
 		</SelectTriggerStyled>
-		<SelectContentStyled>
+		<SelectContentStyled :placeholder="placeholder" :disabled="disabled">
 			<SelectItemStyled
 				v-for="opt in items.filter((i) => i.value !== '')"
 				:key="opt.value"

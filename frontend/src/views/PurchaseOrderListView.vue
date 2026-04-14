@@ -1,53 +1,27 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { usePurchaseStore } from "@/stores/purchaseStore";
 import { usePosStore } from "@/stores/posStore";
+import { useListView, type QueryFilter } from "@/composables/useListView";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogDescription,
-	DialogFooter,
-} from "@/components/ui/dialog";
-import {
-	Search,
-	Plus,
-	FileText,
-	ChevronRight,
-	Calendar,
-	Package,
-	RefreshCw,
-	Edit,
-	Trash2,
-	Eye,
-	Clock,
-	CheckCircle,
-	AlertCircle,
-	Send,
-} from "lucide-vue-next";
+import { Plus, ChevronRight, Calendar, Package, RefreshCw, Edit, Trash2, X } from "lucide-vue-next";
 import __ from "@/lib/translate";
 import type { PurchaseOrder } from "@/types/pos.types";
-import { Autocomplete } from "@/components/ui/autocomplete";
-import { Select } from "@/components/ui/select";
+import ListFilterBar from "@/components/core/ListFilterBar.vue";
+import QueryFilterPanel from "@/components/core/QueryFilterPanel.vue";
+import SortBy from "@/components/core/SortBy.vue";
+import Pagination from "@/components/orders/Pagination.vue";
+import PurchaseOrderDetailDialog from "@/components/dialogs/PurchaseOrderDetailDialog.vue";
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
 
-const searchTerm = ref("");
-const supplierFilter = ref("");
-const statusFilter = ref("");
-const fromDate = ref("");
-const toDate = ref("");
 const selectedOrder = ref<PurchaseOrder | null>(null);
-const showDetailDialog = ref(false);
 const isLoadingDetail = ref(false);
 
 const draftOrders = ref<
@@ -62,86 +36,73 @@ const draftOrders = ref<
 	}>
 >([]);
 
-const statusOptions = [
-	{ value: "", label: __("All Status") },
-	{ value: "Draft", label: __("Draft") },
-	{ value: "To Receive and Bill", label: __("To Receive and Bill") },
-	{ value: "To Bill", label: __("To Bill") },
-	{ value: "To Receive", label: __("To Receive") },
-	{ value: "Completed", label: __("Completed") },
-	{ value: "Cancelled", label: __("Cancelled") },
-];
-
-const filteredOrders = computed(() => {
-	let orders = purchaseStore.purchaseOrders;
-
-	if (searchTerm.value) {
-		const search = searchTerm.value.toLowerCase();
-		orders = orders.filter(
-			(o) => o.name.toLowerCase().includes(search) || o.supplier_name?.toLowerCase().includes(search),
-		);
-	}
-
-	return orders;
+const listView = useListView({
+	doctype: "Purchase Order",
+	fields: [
+		"name",
+		"supplier",
+		"supplier_name",
+		"company",
+		"transaction_date",
+		"grand_total",
+		"status",
+		"docstatus",
+		"per_received",
+		"per_billed",
+	],
+	baseFilters: { docstatus: 1 },
+	defaultOrderBy: "transaction_date desc",
+	defaultPageSize: 20,
 });
 
-function formatCurrency(value: number): string {
-	return `${posStore.currencySymbol}${(value || 0).toFixed(2)}`;
-}
+const orders = computed(() => listView.data.value as unknown as PurchaseOrder[]);
 
-function formatDate(date: string): string {
-	if (!date) return "-";
-	return new Date(date).toLocaleDateString();
-}
+const standardFilterModel = computed(() => {
+	const model: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(listView.filters)) {
+		if (value !== undefined && value !== null && value !== "") model[key] = value;
+	}
+	return model;
+});
 
-function statusVariant(
-	status: string,
-): "default" | "secondary" | "destructive" | "outline" | "success" | "warning" {
-	switch (status) {
-		case "Completed":
-			return "success";
-		case "Draft":
-			return "secondary";
-		case "To Receive and Bill":
-		case "To Receive":
-		case "To Bill":
-			return "warning";
-		case "Cancelled":
-			return "destructive";
-		default:
-			return "outline";
+function onStandardFilterUpdate(updated: Record<string, unknown>) {
+	for (const key of Object.keys(listView.filters)) {
+		if (!(key in updated)) listView.removeFilter(key);
+	}
+	for (const [key, value] of Object.entries(updated)) {
+		listView.setFilter(key, value);
 	}
 }
 
-function statusIcon(status: string) {
-	switch (status) {
-		case "Completed":
-			return CheckCircle;
-		case "Draft":
-			return Edit;
-		case "To Receive and Bill":
-		case "To Receive":
-		case "To Bill":
-			return Clock;
-		case "Cancelled":
-			return AlertCircle;
-		default:
-			return FileText;
-	}
+const queryFilterModel = computed(() =>
+	listView.queryFilters.value.map((qf) => ({
+		field: qf.field,
+		operator: qf.operator,
+		value: qf.value,
+	})),
+);
+
+function onQueryFilterUpdate(filters: { field: string; operator: string; value: string }[]) {
+	listView.setQueryFilters(
+		filters.map((f) => ({
+			field: f.field,
+			operator: f.operator as QueryFilter["operator"],
+			value: f.value,
+		})),
+	);
 }
 
-async function fetchOrders(): Promise<void> {
-	await purchaseStore.fetchPurchaseOrders({
-		status: statusFilter.value || undefined,
-		supplier: supplierFilter.value || undefined,
-		from_date: fromDate.value || undefined,
-		to_date: toDate.value || undefined,
-	});
+const hasActiveFilters = computed(
+	() => Object.keys(listView.filters).length > 0 || listView.queryFilters.value.length > 0,
+);
+
+function clearAllFilters() {
+	listView.clearFilters();
 }
 
 async function viewOrder(order: PurchaseOrder): Promise<void> {
-	showDetailDialog.value = true;
 	isLoadingDetail.value = true;
+	selectedOrder.value = { ...order, items: [] };
 	try {
 		const detail = await purchaseStore.fetchReceiptDetail(order.name);
 		selectedOrder.value = { ...order, items: detail?.items || [] };
@@ -175,68 +136,92 @@ async function loadDrafts(): Promise<void> {
 
 function editSubmittedOrder(order: PurchaseOrder): void {
 	purchaseStore.loadFromOrder(order);
+	selectedOrder.value = null;
 	router.push("/purchase-order");
+}
+
+function formatCurrency(value: number): string {
+	return `${posStore.currencySymbol}${(value || 0).toFixed(2)}`;
+}
+
+function formatDate(date: string): string {
+	if (!date) return "-";
+	return new Date(date).toLocaleDateString();
+}
+
+function statusVariant(
+	status: string,
+): "default" | "secondary" | "destructive" | "outline" | "success" | "warning" {
+	switch (status) {
+		case "Completed":
+			return "success";
+		case "Draft":
+			return "secondary";
+		case "To Receive and Bill":
+		case "To Receive":
+		case "To Bill":
+			return "warning";
+		case "Cancelled":
+			return "destructive";
+		default:
+			return "outline";
+	}
 }
 
 onMounted(() => {
 	purchaseStore.init();
-	fetchOrders();
 	loadDrafts();
 });
 </script>
 
 <template>
-	<div class="h-full flex flex-col bg-background overflow-hidden">
-		<header class="bg-card border-b border-border px-4 py-3 shrink-0">
-			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-3">
-					<FileText class="w-6 h-6 text-primary" />
-					<h1 class="text-xl font-semibold text-foreground">
-						{{ __("Purchase Orders") }}
-					</h1>
-				</div>
-				<div class="flex items-center gap-2">
-					<Button @click="fetchOrders" variant="outline" size="sm">
-						<RefreshCw class="w-4 h-4 me-1" />
-						{{ __("Refresh") }}
-					</Button>
-					<Button @click="createNewOrder">
-						<Plus class="w-4 h-4 me-1" />
-						{{ __("New Order") }}
-					</Button>
-				</div>
+	<div class="flex flex-col h-full overflow-hidden bg-background">
+		<div class="shrink-0 p-3 sm:p-4 pb-2 sm:pb-3">
+			<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+				<h1 class="text-xl font-bold text-foreground">{{ __("Purchase Orders") }}</h1>
+				<Button size="sm" @click="createNewOrder">
+					<Plus class="w-4 h-4" />
+					{{ __("New Order") }}
+				</Button>
 			</div>
-		</header>
-
-		<div class="bg-card border-b border-border px-4 py-3 shrink-0">
-			<div class="grid grid-cols-5 gap-3">
-				<div class="relative">
-					<Search
-						class="absolute start-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-					/>
-					<Input
-						v-model="searchTerm"
-						:placeholder="__('Search orders...')"
-						class="ps-8 h-8 text-sm"
-					/>
-				</div>
-				<Autocomplete
-					v-model="supplierFilter"
-					doctype="Supplier"
-					class="h-8 text-sm"
-					@update:model-value="fetchOrders"
-					:open-on-focus="true"
+			<div class="flex flex-wrap items-center gap-2">
+				<ListFilterBar
+					:fields="listView.standardFilterFields.value"
+					:model-filters="standardFilterModel"
+					@update:model-filters="onStandardFilterUpdate"
 				/>
-				<Select v-model="statusFilter" @change="fetchOrders()" :items="statusOptions" />
-				<Input v-model="fromDate" type="date" class="h-8 text-sm" @change="fetchOrders" />
-				<Input v-model="toDate" type="date" class="h-8 text-sm" @change="fetchOrders" />
+				<SortBy
+					:model-value="listView.orderBy.value"
+					:fields="listView.allFilterableFields.value"
+					@update:model-value="listView.setOrderBy"
+				/>
+				<div class="flex-1"></div>
+				<QueryFilterPanel
+					:fields="listView.allFilterableFields.value"
+					:model-query-filters="queryFilterModel"
+					@update:model-query-filters="onQueryFilterUpdate"
+				/>
+				<Button variant="outline" size="sm" class="h-8" @click="listView.refresh()">
+					<RefreshCw class="h-3.5 w-3.5" />
+				</Button>
+				<Button
+					v-if="hasActiveFilters"
+					variant="ghost"
+					size="sm"
+					class="h-8 text-muted-foreground hover:text-foreground"
+					@click="clearAllFilters"
+				>
+					<X class="h-3.5 w-3.5" />
+					{{ __("Clear") }}
+				</Button>
 			</div>
 		</div>
 
-		<div class="flex-1 flex min-h-0 overflow-hidden">
+		<div class="flex flex-1 min-h-0 overflow-hidden">
+			<!-- Drafts sidebar -->
 			<div
 				v-if="draftOrders.length > 0"
-				class="w-72 border-e border-border bg-card flex flex-col shrink-0"
+				class="w-64 border-e border-border bg-card flex flex-col shrink-0"
 			>
 				<div class="px-3 py-2 border-b border-border bg-muted">
 					<span class="text-sm font-medium text-foreground">
@@ -267,7 +252,7 @@ onMounted(() => {
 									size="sm"
 									class="flex-1 h-7"
 								>
-									<Edit class="w-3 h-3 me-1" />
+									<Edit class="w-3 h-3" />
 									{{ __("Edit") }}
 								</Button>
 								<Button
@@ -284,200 +269,87 @@ onMounted(() => {
 				</ScrollArea>
 			</div>
 
+			<!-- Main list -->
 			<div class="flex-1 flex flex-col min-h-0 overflow-hidden">
-				<ScrollArea class="flex-1 min-h-0 p-4">
-					<div v-if="purchaseStore.isLoadingOrders" class="grid gap-3">
+				<div class="flex-1 overflow-y-auto px-3 sm:px-4 py-3 xpos-scrollbar">
+					<div v-if="listView.isLoading.value && orders.length === 0" class="grid gap-3">
 						<div v-for="i in 5" :key="i" class="skeleton h-20 w-full rounded-xl"></div>
 					</div>
 					<div
-						v-else-if="filteredOrders.length === 0"
+						v-else-if="orders.length === 0"
 						class="flex flex-col items-center justify-center h-64 text-muted-foreground"
 					>
 						<Package class="w-16 h-16 mb-4 text-muted-foreground/30" />
 						<p class="text-lg font-medium">{{ __("No purchase orders found") }}</p>
-						<p class="text-sm">
-							{{ __("Create a new order or adjust your filters") }}
-						</p>
+						<p class="text-sm">{{ __("Create a new order or adjust your filters") }}</p>
 					</div>
 
-					<div v-else class="space-y-2">
+					<div v-else class="space-y-2" :class="{ 'opacity-50': listView.isLoading.value }">
 						<Card
-							v-for="order in filteredOrders"
+							v-for="order in orders"
 							:key="order.name"
-							class="p-4 cursor-pointer transition-all duration-200 border-transparent hover:border-primary/40 hover:shadow-md"
+							class="p-3 sm:p-4 cursor-pointer transition-all duration-200 border-transparent hover:border-primary/40 hover:shadow-md dark:hover:bg-accent/50"
 							@click="viewOrder(order)"
 						>
-							<div class="flex items-center gap-4">
+							<div class="flex items-center gap-2 sm:gap-4">
 								<div class="min-w-0 flex-1">
-									<div class="flex items-center gap-2 mb-1">
-										<span class="font-semibold text-foreground">{{ order.name }}</span>
-										<Badge :variant="statusVariant(order.status)" class="text-[10px]">
-											{{ __(order.status) }}
-										</Badge>
+									<div class="flex items-center gap-2 mb-1 flex-wrap">
+										<span class="font-semibold text-foreground text-sm leading-tight">{{
+											order.name
+										}}</span>
+										<Badge :variant="statusVariant(order.status)" class="text-[10px]">{{
+											__(order.status)
+										}}</Badge>
 									</div>
-									<div class="flex items-center gap-3 text-xs text-muted-foreground">
+									<div
+										class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground"
+									>
 										<span class="flex items-center gap-1">
-											<Package class="h-3 w-3" />
+											<Package class="h-3 w-3 shrink-0" />
 											{{ order.supplier_name || order.supplier }}
 										</span>
-										<span class="flex items-center gap-1">
-											<Calendar class="h-3 w-3" />
+										<span class="flex items-center gap-1 whitespace-nowrap">
+											<Calendar class="h-3 w-3 shrink-0" />
 											{{ formatDate(order.transaction_date) }}
 										</span>
 									</div>
 								</div>
 
 								<div class="text-end shrink-0">
-									<div class="font-bold text-foreground text-lg">
+									<div class="font-bold text-foreground text-base sm:text-lg leading-tight">
 										{{ formatCurrency(order.grand_total) }}
 									</div>
 									<div
 										class="flex items-center gap-2 justify-end text-xs text-muted-foreground"
 									>
-										<span>{{ __("Received") }}: {{ order.per_received || 0 }}%</span>
+										<span>{{ __("Recv") }}: {{ order.per_received || 0 }}%</span>
 										<span>{{ __("Billed") }}: {{ order.per_billed || 0 }}%</span>
 									</div>
 								</div>
-								<ChevronRight class="w-5 h-5 text-muted-foreground/40 shrink-0" />
+								<ChevronRight
+									class="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground/40 shrink-0"
+								/>
 							</div>
 						</Card>
 					</div>
-				</ScrollArea>
+				</div>
+
+				<Pagination
+					v-if="listView.total.value > 0"
+					:total="listView.total.value"
+					:page-size="listView.pageSize.value"
+					:current-page="listView.currentPage.value"
+					@update:current-page="listView.setPage"
+					@update:page-size="listView.setPageSize"
+				/>
 			</div>
 		</div>
 
-		<Dialog v-model:open="showDetailDialog">
-			<DialogContent class="max-w-2xl p-0">
-				<DialogHeader class="p-6 pb-4 border-b border-border">
-					<div class="flex items-center justify-between">
-						<div>
-							<DialogTitle class="text-lg">
-								{{ selectedOrder?.name }}
-								<Badge
-									v-if="selectedOrder"
-									:variant="statusVariant(selectedOrder.status)"
-									class="text-xs ms-2"
-								>
-									{{ selectedOrder.status }}
-								</Badge>
-							</DialogTitle>
-							<DialogDescription>{{ __("Purchase Order Details") }}</DialogDescription>
-						</div>
-					</div>
-				</DialogHeader>
-
-				<div v-if="selectedOrder" class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-					<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-						<div class="space-y-1">
-							<span class="text-xs text-muted-foreground uppercase tracking-wide">{{
-								__("Supplier")
-							}}</span>
-							<p class="font-medium text-foreground">
-								{{ selectedOrder.supplier_name || selectedOrder.supplier }}
-							</p>
-						</div>
-						<div class="space-y-1">
-							<span class="text-xs text-muted-foreground uppercase tracking-wide">{{
-								__("Date")
-							}}</span>
-							<p class="font-medium text-foreground">
-								{{ formatDate(selectedOrder.transaction_date) }}
-							</p>
-						</div>
-						<div class="space-y-1">
-							<span class="text-xs text-muted-foreground uppercase tracking-wide">{{
-								__("Company")
-							}}</span>
-							<p class="font-medium text-foreground">{{ selectedOrder.company }}</p>
-						</div>
-					</div>
-
-					<div v-if="isLoadingDetail" class="py-8 text-center text-muted-foreground">
-						{{ __("Loading items...") }}
-					</div>
-					<div v-else-if="selectedOrder.items" class="space-y-2">
-						<h3 class="text-sm font-semibold text-foreground">
-							{{ __("Items") }} ({{ selectedOrder.items.length }})
-						</h3>
-						<div class="rounded-lg border border-border overflow-hidden">
-							<div class="overflow-x-auto">
-								<table class="w-full text-sm min-w-[360px]">
-									<thead class="bg-muted/50">
-										<tr>
-											<th
-												class="text-start px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase"
-											>
-												{{ __("Item") }}
-											</th>
-											<th
-												class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase"
-											>
-												{{ __("Qty") }}
-											</th>
-											<th
-												class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase"
-											>
-												{{ __("Rate") }}
-											</th>
-											<th
-												class="text-end px-4 py-2.5 text-muted-foreground font-medium text-xs uppercase"
-											>
-												{{ __("Amount") }}
-											</th>
-										</tr>
-									</thead>
-									<tbody class="divide-y divide-border">
-										<tr
-											v-for="item in selectedOrder.items"
-											:key="item.item_code"
-											class="hover:bg-muted/30 transition-colors"
-										>
-											<td class="px-4 py-3">
-												<div class="text-foreground font-medium">
-													{{ item.item_name }}
-												</div>
-												<div class="text-xs text-muted-foreground">
-													{{ item.item_code }}
-												</div>
-											</td>
-											<td class="px-4 py-3 text-end text-muted-foreground">
-												{{ item.qty }} {{ item.uom }}
-											</td>
-											<td class="px-4 py-3 text-end text-muted-foreground">
-												{{ formatCurrency(item.rate) }}
-											</td>
-											<td class="px-4 py-3 text-end font-medium text-foreground">
-												{{ formatCurrency((item.qty || 0) * (item.rate || 0)) }}
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-
-						<div class="space-y-2">
-							<div class="flex justify-between text-sm">
-								<span class="text-muted-foreground">{{ __("Grand Total") }}</span>
-								<span class="font-bold text-foreground text-lg">{{
-									formatCurrency(selectedOrder.grand_total)
-								}}</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<DialogFooter class="p-4 border-t border-border">
-					<Button
-						v-if="selectedOrder?.docstatus === 0"
-						@click="editSubmittedOrder(selectedOrder)"
-						variant="outline"
-					>
-						<Edit class="w-4 h-4 me-1" />
-						{{ __("Edit") }}
-					</Button>
-					<Button @click="showDetailDialog = false">{{ __("Close") }}</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+		<PurchaseOrderDetailDialog
+			:order="selectedOrder"
+			:is-loading="isLoadingDetail"
+			@close="selectedOrder = null"
+			@edit="editSubmittedOrder"
+		/>
 	</div>
 </template>

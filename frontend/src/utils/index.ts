@@ -14,6 +14,19 @@ export const getBootProperty = (key: string): any => {
 	return globalObj.boot ? globalObj.boot[key] : undefined;
 };
 
+export const provide = (ns: string) => {
+	const nsl = ns.split(".");
+	let parent: Record<string, any> = window as unknown as Record<string, any>;
+	for (var i = 0; i < nsl.length; i++) {
+		var n = nsl[i];
+		if (!parent[n]) {
+			parent[n] = {};
+		}
+		parent = parent[n];
+	}
+	return parent;
+};
+
 /**
  * Execute a function with offline fallback.
  * Attempts the online operation first, falls back to offline handler on failure.
@@ -152,4 +165,9 @@ export function extractErrorMessage(error: unknown): string {
 	} catch {
 		return String(error);
 	}
+}
+
+export function initializeNamespaces() {
+	const namespaces = ["xpos", "locals.DocType"];
+	namespaces.forEach(provide);
 }

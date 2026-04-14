@@ -8,6 +8,7 @@
 				:placeholder="field.label || field.fieldname"
 				:remote-search="true"
 				:show-search-icon="false"
+				:open-on-focus="true"
 				:clearable="true"
 				:max-visible="20"
 				:empty-text="__('No results')"
@@ -18,6 +19,7 @@
 
 			<Select
 				v-else-if="field.fieldtype === 'Select'"
+				class="w-[160px]"
 				:model-value="(modelFilters[field.fieldname] as string) || '__all__'"
 				@update:model-value="(val: string | undefined) => onFilterChange(field.fieldname, val || '')"
 				:items="[
@@ -28,6 +30,7 @@
 
 			<Select
 				v-else-if="field.fieldtype === 'Check'"
+				class="w-[160px]"
 				:model-value="(modelFilters[field.fieldname] as string) || '__all__'"
 				@update:model-value="(val: string | undefined) => onFilterChange(field.fieldname, val || '')"
 				:items="[

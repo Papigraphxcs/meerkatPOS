@@ -1,5 +1,5 @@
+import { provide } from "@/utils";
 import { call } from "./api";
-import { getMeta as idbGetMeta, setMeta as idbSetMeta } from "./idbService";
 
 export interface DocField {
 	fieldname: string;
@@ -44,60 +44,30 @@ const NON_VALUE_FIELDTYPES = new Set([
 	"Connection",
 ]);
 
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
-const IDB_KEY_PREFIX = "doctype_meta::";
-
-const memoryCache = new Map<string, { meta: DoctypeMeta; ts: number }>();
-
 async function fetchDoctypeMetaFromServer(doctype: string): Promise<DoctypeMeta> {
-	const response = await call<any>("frappe.desk.form.load.getdoctype", { doctype });
-
-	const raw = (response as any)?.docs?.[0] ?? (response as any);
-	if (!raw || !raw.fields) {
+	const response = await call<any>("frappe.desk.form.load.getdoctype", { doctype, with_parent: true });
+	provide("locals.DocType");
+	const docs: any[] = (response as any)?.docs ?? [];
+	if (docs.length === 0) {
 		throw new Error(`Failed to fetch meta for ${doctype}`);
 	}
 
-	return {
-		name: raw.name,
-		fields: raw.fields,
-		title_field: raw.title_field,
-		search_fields: raw.search_fields,
-		sort_field: raw.sort_field,
-		sort_order: raw.sort_order,
-		is_submittable: raw.is_submittable,
-	};
+	docs.forEach((doc) => {
+		if (doc.name) {
+			locals.DocType[doc.name] = doc;
+		}
+	});
+
+	return locals.DocType[doctype];
 }
 
 export async function getDoctypeMeta(doctype: string): Promise<DoctypeMeta> {
-	const mem = memoryCache.get(doctype);
-	if (mem && Date.now() - mem.ts < CACHE_TTL_MS) {
-		return mem.meta;
-	}
-
-	const idbKey = `${IDB_KEY_PREFIX}${doctype}`;
-	try {
-		const cached = (await idbGetMeta(idbKey)) as { meta: DoctypeMeta; ts: number } | null;
-		if (cached && cached.meta && Date.now() - cached.ts < CACHE_TTL_MS) {
-			memoryCache.set(doctype, cached);
-			return cached.meta;
-		}
-	} catch {
-		// IndexedDB unavailable — fall through to server
+	if (locals.DocType && locals.DocType[doctype]) {
+		return locals.DocType[doctype];
 	}
 
 	const meta = await fetchDoctypeMetaFromServer(doctype);
-	const entry = { meta, ts: Date.now() };
-	memoryCache.set(doctype, entry);
-	try {
-		await idbSetMeta(idbKey, entry);
-	} catch {
-		// Silent — caching is best-effort
-	}
 	return meta;
-}
-
-export function invalidateMetaCache(doctype: string): void {
-	memoryCache.delete(doctype);
 }
 
 export function isValueType(fieldtype: string): boolean {

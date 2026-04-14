@@ -6,63 +6,67 @@ import { router } from "./router";
 import { showError } from "@/services/api";
 import { isElectron, getApiBaseUrl, warmApiCredentials } from "@/services/electronBridge";
 import { usePosStore } from "./stores/posStore";
+import { initializeNamespaces } from "./utils";
 
 if (!isElectron() && import.meta.env.PROD) {
-  import("virtual:pwa-register").then(({ registerSW }) => {
-    const updateSW = registerSW({
-      onNeedRefresh() {
-        if (confirm("A new version of X POS is available. Reload to update?")) {
-          updateSW(true);
-        }
-      },
-      onOfflineReady() {
-        console.log("[XPOS PWA] App is ready for offline use");
-      },
-      onRegisteredSW(_swUrl, r) {
-        if (r) {
-          setInterval(() => {
-            r.update();
-          }, 60 * 60 * 1000);
-        }
-      },
-    });
-  });
+	import("virtual:pwa-register").then(({ registerSW }) => {
+		const updateSW = registerSW({
+			onNeedRefresh() {
+				if (confirm("A new version of X POS is available. Reload to update?")) {
+					updateSW(true);
+				}
+			},
+			onOfflineReady() {
+				console.log("[XPOS PWA] App is ready for offline use");
+			},
+			onRegisteredSW(_swUrl, r) {
+				if (r) {
+					setInterval(
+						() => {
+							r.update();
+						},
+						60 * 60 * 1000,
+					);
+				}
+			},
+		});
+	});
 } else {
-  getApiBaseUrl().then((url) => {
-    console.log("[XPOS Electron] Server URL:", url);
-  });
-  warmApiCredentials().then(() => {
-    console.log("[XPOS Electron] API credentials cache warmed");
-  });
+	getApiBaseUrl().then((url) => {
+		console.log("[XPOS Electron] Server URL:", url);
+	});
+	warmApiCredentials().then(() => {
+		console.log("[XPOS Electron] API credentials cache warmed");
+	});
 }
 
 async function initializeBrowserStorage(): Promise<void> {
-  if (isElectron()) return;
-  if (!usePosStore().useOfflineMode) return;
+	if (isElectron()) return;
+	if (!usePosStore().useOfflineMode) return;
 
-  try {
-    const { ensureDatabaseReady } = await import("@/services/idbService");
-    await ensureDatabaseReady();
-  } catch (error) {
-    console.warn("[XPOS] Browser storage initialization failed", error);
-  }
+	try {
+		const { ensureDatabaseReady } = await import("@/services/idbService");
+		await ensureDatabaseReady();
+	} catch (error) {
+		console.warn("[XPOS] Browser storage initialization failed", error);
+	}
 }
 
 async function bootstrap(): Promise<void> {
-  const app = createApp(App);
-  const pinia = createPinia();
+	const app = createApp(App);
+	const pinia = createPinia();
 
-  app.use(pinia);
-  app.use(router);
-  
-  await initializeBrowserStorage();
+	app.use(pinia);
+	app.use(router);
+	initializeNamespaces();
+	await initializeBrowserStorage();
 
-  app.config.errorHandler = (err: unknown, _instance: unknown, info: string) => {
-    console.error("X POS Error:", err, info);
-    showError(`Error: ${err instanceof Error ? err.message : String(err)}`);
-  };
+	app.config.errorHandler = (err: unknown, _instance: unknown, info: string) => {
+		console.error("X POS Error:", err, info);
+		showError(`Error: ${err instanceof Error ? err.message : String(err)}`);
+	};
 
-  app.mount("#app");
+	app.mount("#app");
 }
 
 void bootstrap();
