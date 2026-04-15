@@ -108,32 +108,6 @@ function onBarcodePaste(): void {
 	}, 50);
 }
 
-function deleteRow(index: number): void {
-	purchaseStore.removeFromCart(index);
-}
-
-function deleteRows(indices: number[]): void {
-	for (const i of indices) {
-		purchaseStore.removeFromCart(i);
-	}
-}
-
-function duplicateRow(index: number): void {
-	const src = purchaseStore.cartItems[index];
-	if (src) {
-		purchaseStore.cartItems.splice(index + 1, 0, { ...src });
-	}
-}
-
-function moveRow(index: number, direction: -1 | 1): void {
-	const target = index + direction;
-	const items = purchaseStore.cartItems;
-	if (target < 0 || target >= items.length) return;
-	const temp = items[index];
-	items[index] = items[target];
-	items[target] = temp;
-}
-
 function addEmptyRow(): void {
 	purchaseStore.cartItems.push({
 		item_code: "",
@@ -299,7 +273,7 @@ const poColumns = computed<TableColumn[]>(() => [
 		options: (row: TableRow) => {
 			const item = row as unknown as PurchaseCartItem;
 			return getUOMOptions(item).map((u) => ({
-				label: `${u.uom} (${u.conversion_factor})`,
+				label: u.uom,
 				value: u.uom,
 			}));
 		},
@@ -548,10 +522,6 @@ onMounted(() => {
 					empty-message="No items added"
 					empty-description="Add a row and search for items using the Item column"
 					@add-row="addEmptyRow"
-					@delete-row="deleteRow"
-					@delete-rows="deleteRows"
-					@duplicate-row="duplicateRow"
-					@move-row="moveRow"
 					@cell-change="onPOCellChange"
 					@link-select="onItemLinkSelect"
 					class="flex-1 min-h-0 flex flex-col"

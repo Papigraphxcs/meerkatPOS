@@ -190,29 +190,6 @@ function addItemToInvoice(item: SearchItem): void {
 	});
 }
 
-function removeItem(index: number): void {
-	invoiceItems.value.splice(index, 1);
-}
-
-function removeItems(indices: number[]): void {
-	for (const i of indices) {
-		invoiceItems.value.splice(i, 1);
-	}
-}
-
-function duplicateItem(index: number): void {
-	const src = invoiceItems.value[index];
-	invoiceItems.value.splice(index + 1, 0, { ...src });
-}
-
-function moveItem(index: number, direction: -1 | 1): void {
-	const target = index + direction;
-	if (target < 0 || target >= invoiceItems.value.length) return;
-	const temp = invoiceItems.value[index];
-	invoiceItems.value[index] = invoiceItems.value[target];
-	invoiceItems.value[target] = temp;
-}
-
 function onCellChange(payload: { rowIndex: number; fieldname: string; value: any }): void {
 	const item = invoiceItems.value[payload.rowIndex];
 	if (item) {
@@ -668,10 +645,6 @@ onMounted(() => {
 					:highlight-new-rows="true"
 					empty-message="No items added"
 					empty-description="Search and add items from the left panel"
-					@delete-row="removeItem"
-					@delete-rows="removeItems"
-					@duplicate-row="duplicateItem"
-					@move-row="moveItem"
 					@cell-change="onCellChange"
 					class="flex-1 min-h-0 flex flex-col"
 				>

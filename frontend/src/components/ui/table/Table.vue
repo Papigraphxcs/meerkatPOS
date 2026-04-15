@@ -13,6 +13,7 @@ import {
 	Package,
 	Settings,
 	Copy,
+	GripVertical,
 	ChevronUp,
 	ChevronDown,
 	X,
@@ -65,12 +66,7 @@ const props = withDefaults(
 const emit = defineEmits<{
 	(e: "update:rows", rows: ChildTableRow[]): void;
 	(e: "add-row"): void;
-	(e: "delete-row", index: number): void;
-	(e: "delete-rows", indices: number[]): void;
-	(e: "duplicate-row", index: number): void;
-	(e: "move-row", fromIndex: number, direction: -1 | 1): void;
 	(e: "cell-change", payload: { rowIndex: number; fieldname: string; value: any }): void;
-	(e: "row-click", index: number): void;
 	(e: "link-select", payload: { rowIndex: number; fieldname: string; option: AutocompleteOption }): void;
 }>();
 
@@ -86,10 +82,14 @@ const inputRefs = ref<Map<string, FocusTarget>>(new Map());
 const selectedIndices = ref<Set<number>>(new Set());
 const showColumnSettingsModal = ref(false);
 const hiddenColumns = ref<Set<string>>(new Set());
+const draggingRowIndex = ref<number | null>(null);
+const dragOverRowIndex = ref<number | null>(null);
+const dragInsertPosition = ref<"before" | "after" | null>(null);
 
 const editorOpen = ref(false);
 const editorRowIndex = ref(-1);
 const editorRowData = ref<ChildTableRow>({});
+const editorMoveToIndex = ref(1);
 
 const visibleColumns = computed(() => {
 	return props.columns.filter((col) => col.visible !== false && !hiddenColumns.value.has(col.fieldname));
@@ -159,12 +159,23 @@ const totalColSpan = computed(() => {
 	let count = visibleColumns.value.length;
 	if (props.showRowNumbers) count++;
 	if (props.showCheckboxes) count++;
-	if (props.showDeleteButton || props.allowReorder || props.allowDuplicate || props.showEditRow) count++;
+	if (hasActions.value) count++;
 	return count;
 });
 
+const showRowDragHandle = computed(() => props.allowReorder && props.showRowNumbers);
+
+const showInlineReorderActions = computed(() => props.allowReorder && !props.showRowNumbers);
+
 const hasActions = computed(() => {
-	return props.showDeleteButton || props.allowReorder || props.allowDuplicate || props.showEditRow;
+	return (
+		props.showDeleteButton || props.allowDuplicate || props.showEditRow || showInlineReorderActions.value
+	);
+});
+
+const actionColumnWidthClass = computed(() => {
+	if (!hasActions.value) return "";
+	return showInlineReorderActions.value ? "w-[112px]" : "w-[84px]";
 });
 
 function toFocusTarget(value: unknown): FocusTarget | null {
@@ -231,6 +242,127 @@ function focusCell(rowIndex: number, fieldname: string): void {
 			}
 		});
 	});
+}
+
+function clampRowIndex(index: number): number {
+	return Math.max(0, Math.min(props.rows.length - 1, index));
+}
+
+function shiftSelectionAfterDelete(index: number): void {
+	const next = new Set<number>();
+	for (const selectedIndex of selectedIndices.value) {
+		if (selectedIndex === index) continue;
+		next.add(selectedIndex > index ? selectedIndex - 1 : selectedIndex);
+	}
+	selectedIndices.value = next;
+}
+
+function shiftSelectionAfterMove(fromIndex: number, toIndex: number): void {
+	if (fromIndex === toIndex) return;
+
+	const next = new Set<number>();
+	for (const selectedIndex of selectedIndices.value) {
+		if (selectedIndex === fromIndex) {
+			next.add(toIndex);
+			continue;
+		}
+
+		if (fromIndex < toIndex && selectedIndex > fromIndex && selectedIndex <= toIndex) {
+			next.add(selectedIndex - 1);
+			continue;
+		}
+
+		if (toIndex < fromIndex && selectedIndex >= toIndex && selectedIndex < fromIndex) {
+			next.add(selectedIndex + 1);
+			continue;
+		}
+
+		next.add(selectedIndex);
+	}
+
+	selectedIndices.value = next;
+}
+
+function clearDragState(): void {
+	draggingRowIndex.value = null;
+	dragOverRowIndex.value = null;
+	dragInsertPosition.value = null;
+}
+
+function notifyRowsUpdated(): void {
+	emit("update:rows", props.rows.slice());
+}
+
+function reorderRows(fromIndex: number, toIndex: number): boolean {
+	if (props.rows.length < 2) return false;
+	if (fromIndex < 0 || fromIndex >= props.rows.length) return false;
+
+	const clampedIndex = clampRowIndex(toIndex);
+	if (fromIndex === clampedIndex) return false;
+
+	const [row] = props.rows.splice(fromIndex, 1);
+	if (!row) return false;
+	props.rows.splice(clampedIndex, 0, row);
+	shiftSelectionAfterMove(fromIndex, clampedIndex);
+	notifyRowsUpdated();
+	return true;
+}
+
+function onHandleDragStart(event: DragEvent, index: number): void {
+	if (!props.allowReorder || props.rows.length < 2) return;
+
+	draggingRowIndex.value = index;
+	dragOverRowIndex.value = index;
+	dragInsertPosition.value = "before";
+	selectedIndices.value = new Set([index]);
+
+	if (event.dataTransfer) {
+		event.dataTransfer.effectAllowed = "move";
+		event.dataTransfer.setData("text/plain", String(index));
+	}
+}
+
+function onHandleDragEnd(): void {
+	clearDragState();
+}
+
+function syncEditorRowData(): void {
+	if (!editorOpen.value || editorRowIndex.value < 0) return;
+	const sourceRow = props.rows[editorRowIndex.value];
+	if (!sourceRow) return;
+	editorRowData.value = { ...sourceRow };
+}
+
+function onRowDragOver(event: DragEvent, index: number): void {
+	if (!props.allowReorder || draggingRowIndex.value === null) return;
+
+	event.preventDefault();
+	const rowEl = event.currentTarget as HTMLElement | null;
+	if (!rowEl) return;
+
+	const rect = rowEl.getBoundingClientRect();
+	const offset = event.clientY - rect.top;
+	dragOverRowIndex.value = index;
+	dragInsertPosition.value = offset < rect.height / 2 ? "before" : "after";
+
+	if (event.dataTransfer) {
+		event.dataTransfer.dropEffect = "move";
+	}
+}
+
+function onRowDrop(event: DragEvent, index: number): void {
+	if (!props.allowReorder || draggingRowIndex.value === null) return;
+
+	event.preventDefault();
+	const fromIndex = draggingRowIndex.value;
+	const position = dragInsertPosition.value ?? "after";
+	let insertionIndex = index + (position === "after" ? 1 : 0);
+	if (insertionIndex > fromIndex) {
+		insertionIndex -= 1;
+	}
+
+	reorderRows(fromIndex, insertionIndex);
+	clearDragState();
 }
 
 function handleKeyDown(event: KeyboardEvent, rowIndex: number, fieldname: string): void {
@@ -341,6 +473,27 @@ watch(
 	},
 );
 
+watch(
+	() => props.rows.length,
+	(newLen) => {
+		if (!editorOpen.value) return;
+		if (newLen === 0 || editorRowIndex.value >= newLen) {
+			closeRowEditor();
+			return;
+		}
+
+		editorMoveToIndex.value = Math.min(editorMoveToIndex.value, newLen);
+	},
+);
+
+watch(
+	() => (editorOpen.value && editorRowIndex.value >= 0 ? props.rows[editorRowIndex.value] : undefined),
+	() => {
+		syncEditorRowData();
+	},
+	{ deep: true },
+);
+
 function toggleSelectAll(): void {
 	if (isAllRowsSelected.value === true) {
 		selectedIndices.value.clear();
@@ -362,22 +515,32 @@ function addRow(): void {
 }
 
 function deleteRow(index: number): void {
-	selectedIndices.value.delete(index);
-	emit("delete-row", index);
+	if (index < 0 || index >= props.rows.length) return;
+
+	shiftSelectionAfterDelete(index);
+	props.rows.splice(index, 1);
+	notifyRowsUpdated();
 }
 
 function deleteSelected(): void {
 	const indices = Array.from(selectedIndices.value).sort((a, b) => b - a);
-	emit("delete-rows", indices);
+	for (const index of indices) {
+		props.rows.splice(index, 1);
+	}
+	notifyRowsUpdated();
 	selectedIndices.value.clear();
 }
 
 function duplicateRow(index: number): void {
-	emit("duplicate-row", index);
+	const row = props.rows[index];
+	if (!row) return;
+
+	props.rows.splice(index + 1, 0, { ...row });
+	notifyRowsUpdated();
 }
 
 function moveRow(index: number, direction: -1 | 1): void {
-	emit("move-row", index, direction);
+	reorderRows(index, index + direction);
 }
 
 function onCellChange(rowIndex: number, fieldname: string, value: any): void {
@@ -410,26 +573,42 @@ function getLinkFilters(col: ChildTableColumn, row: ChildTableRow, index: number
 	return col.link.filters;
 }
 
-function onRowClick(index: number): void {
-	if (isTouchDevice.value && props.showEditRow) {
-		openRowEditor(index);
-	} else {
-		emit("row-click", index);
-	}
+function openRowEditor(index: number): void {
+	if (!props.rows[index]) return;
+
+	editorRowIndex.value = index;
+	editorMoveToIndex.value = index + 1;
+	editorOpen.value = true;
+	syncEditorRowData();
 }
 
-function openRowEditor(index: number): void {
-	editorRowIndex.value = index;
-	editorRowData.value = { ...props.rows[index] };
-	editorOpen.value = true;
+function closeRowEditor(): void {
+	editorOpen.value = false;
+	editorRowIndex.value = -1;
+	editorMoveToIndex.value = 1;
+	editorRowData.value = {};
 }
 
 function onEditorFieldChange(fieldname: string, value: any): void {
 	editorRowData.value[fieldname] = value;
+	if (editorRowIndex.value < 0) return;
+	emit("cell-change", { rowIndex: editorRowIndex.value, fieldname, value });
 }
 
 function onEditorLinkSelect(col: ChildTableColumn, option: AutocompleteOption): void {
+	if (editorRowIndex.value < 0) return;
+
 	editorRowData.value[col.fieldname] = option.value;
+	emit("cell-change", {
+		rowIndex: editorRowIndex.value,
+		fieldname: col.fieldname,
+		value: option.value,
+	});
+	emit("link-select", {
+		rowIndex: editorRowIndex.value,
+		fieldname: col.fieldname,
+		option,
+	});
 
 	if (col.link?.onSelect) {
 		const partial = col.link.onSelect(
@@ -441,23 +620,51 @@ function onEditorLinkSelect(col: ChildTableColumn, option: AutocompleteOption): 
 		if (partial && typeof partial === "object") {
 			for (const [key, val] of Object.entries(partial)) {
 				editorRowData.value[key] = val;
+				emit("cell-change", { rowIndex: editorRowIndex.value, fieldname: key, value: val });
 			}
 		}
 	}
 }
 
 function saveRowEditor(): void {
+	if (editorRowIndex.value < 0) return;
+	closeRowEditor();
+}
+
+function moveEditorRow(direction: -1 | 1): void {
 	const idx = editorRowIndex.value;
 	if (idx < 0) return;
 
-	for (const col of editorColumns.value) {
-		const newVal = editorRowData.value[col.fieldname];
-		const oldVal = props.rows[idx]?.[col.fieldname];
-		if (newVal !== oldVal) {
-			emit("cell-change", { rowIndex: idx, fieldname: col.fieldname, value: newVal });
-		}
+	const targetIndex = idx + direction;
+	if (targetIndex < 0 || targetIndex >= props.rows.length) return;
+
+	if (reorderRows(idx, targetIndex)) {
+		editorRowIndex.value = targetIndex;
+		editorMoveToIndex.value = targetIndex + 1;
+		syncEditorRowData();
 	}
-	editorOpen.value = false;
+}
+
+function moveEditorRowToIndex(): void {
+	const idx = editorRowIndex.value;
+	if (idx < 0) return;
+
+	const targetIndex = clampRowIndex(Math.round(editorMoveToIndex.value || idx + 1) - 1);
+	if (reorderRows(idx, targetIndex)) {
+		editorRowIndex.value = targetIndex;
+		editorMoveToIndex.value = targetIndex + 1;
+		syncEditorRowData();
+	} else {
+		editorMoveToIndex.value = idx + 1;
+	}
+}
+
+function deleteEditorRow(): void {
+	const idx = editorRowIndex.value;
+	if (idx < 0) return;
+
+	deleteRow(idx);
+	closeRowEditor();
 }
 
 function toggleColumnVisibility(fieldname: string): void {
@@ -632,7 +839,11 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 							{{ __(col.label) }}
 							<span v-if="col.required" class="text-destructive">*</span>
 						</th>
-						<th v-if="hasActions" class="px-2 py-2 w-[100px] text-center">""</th>
+						<th
+							v-if="hasActions"
+							class="px-2 py-2 text-center"
+							:class="actionColumnWidthClass"
+						></th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-border">
@@ -642,8 +853,14 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 						class="hover:bg-muted/50 transition-colors ct-row group"
 						:class="{
 							'bg-blue-50/40 dark:bg-blue-900/10': selectedIndices.has(rowIndex),
+							'ct-row-dragging': draggingRowIndex === rowIndex,
+							'ct-row-drop-before':
+								dragOverRowIndex === rowIndex && dragInsertPosition === 'before',
+							'ct-row-drop-after':
+								dragOverRowIndex === rowIndex && dragInsertPosition === 'after',
 						}"
-						@click="emit('row-click', rowIndex)"
+						@dragover="onRowDragOver($event, rowIndex)"
+						@drop="onRowDrop($event, rowIndex)"
 					>
 						<td
 							v-if="showCheckboxes"
@@ -663,7 +880,21 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 							:style="frozenStyles.get('__rownumber')"
 							:class="{ 'ct-frozen-last': lastFrozenFieldname === '__rownumber' }"
 						>
-							{{ rowIndex + 1 }}
+							<button
+								v-if="showRowDragHandle"
+								type="button"
+								class="ct-row-handle mx-auto flex h-7 min-w-7 items-center justify-center rounded-md px-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+								:class="{ 'ct-row-handle-dragging': draggingRowIndex === rowIndex }"
+								:draggable="rows.length > 1"
+								:title="__('Drag to reorder')"
+								@click.stop
+								@dragstart="onHandleDragStart($event, rowIndex)"
+								@dragend="onHandleDragEnd"
+							>
+								<GripVertical class="h-3.5 w-3.5 me-0.5 opacity-60" />
+								<span>{{ rowIndex + 1 }}</span>
+							</button>
+							<span v-else>{{ rowIndex + 1 }}</span>
 						</td>
 
 						<td
@@ -785,7 +1016,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 							</slot>
 						</td>
 
-						<td v-if="hasActions" class="px-1 py-1">
+						<td v-if="hasActions" class="px-1 py-1" :class="actionColumnWidthClass">
 							<div
 								class="flex items-center justify-center gap-0.5 transition-opacity"
 								:class="isTouchDevice ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
@@ -810,7 +1041,10 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 										<Copy class="w-3 h-3" />
 									</Button>
 								</TooltipWrapper>
-								<TooltipWrapper v-if="allowReorder && rowIndex > 0" :content="__('Move up')">
+								<TooltipWrapper
+									v-if="showInlineReorderActions && rowIndex > 0"
+									:content="__('Move up')"
+								>
 									<Button
 										variant="ghost"
 										size="icon"
@@ -821,7 +1055,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 									</Button>
 								</TooltipWrapper>
 								<TooltipWrapper
-									v-if="allowReorder && rowIndex < rows.length - 1"
+									v-if="showInlineReorderActions && rowIndex < rows.length - 1"
 									:content="__('Move down')"
 								>
 									<Button
@@ -838,7 +1072,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 										variant="ghost"
 										size="icon"
 										class="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
-										@click.stop="$emit('delete-row', rowIndex)"
+										@click.stop="deleteRow(rowIndex)"
 									>
 										<Trash2 class="w-3 h-3" />
 									</Button>
@@ -856,6 +1090,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 		>
 			<span class="text-[10px] text-muted-foreground">
 				{{ __("Arrow keys to navigate") }} &middot; {{ __("Enter for next row") }} &middot;
+				<template v-if="showRowDragHandle">{{ __("Drag row number to reorder") }} &middot; </template>
 				{{ __("Ctrl+D to duplicate") }} &middot;
 				{{ __("Del to delete selected") }}
 				<template v-if="tabToAddRow"> &middot; {{ __("Tab on last cell adds row") }} </template>
@@ -931,9 +1166,9 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 				<div
 					v-if="editorOpen"
 					class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-					@click.self="editorOpen = false"
+					@click.self="closeRowEditor"
 				>
-					<div class="absolute inset-0 bg-black/50" @click="editorOpen = false" />
+					<div class="absolute inset-0 bg-black/50" @click="closeRowEditor" />
 					<div
 						class="relative bg-background border border-border rounded-xl shadow-xl w-full max-w-lg max-h-[85vh] flex flex-col"
 					>
@@ -941,9 +1176,73 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 							<h3 class="text-sm font-semibold text-foreground">
 								{{ __("Edit Row") }} #{{ editorRowIndex + 1 }}
 							</h3>
-							<Button variant="ghost" size="icon" class="h-7 w-7" @click="editorOpen = false">
+							<Button variant="ghost" size="icon" class="h-7 w-7" @click="closeRowEditor">
 								<X class="w-4 h-4" />
 							</Button>
+						</div>
+
+						<div class="border-b border-border bg-muted/30 px-5 py-3">
+							<div class="flex flex-wrap items-center justify-between gap-3">
+								<div class="flex items-center gap-2">
+									<TooltipWrapper :content="__('Move up')">
+										<Button
+											variant="outline"
+											size="icon-sm"
+											class="h-8 w-8"
+											:disabled="editorRowIndex <= 0"
+											@click="moveEditorRow(-1)"
+										>
+											<ChevronUp class="w-3.5 h-3.5" />
+										</Button>
+									</TooltipWrapper>
+									<TooltipWrapper :content="__('Move down')">
+										<Button
+											variant="outline"
+											size="icon-sm"
+											class="h-8 w-8"
+											:disabled="editorRowIndex >= rows.length - 1"
+											@click="moveEditorRow(1)"
+										>
+											<ChevronDown class="w-3.5 h-3.5" />
+										</Button>
+									</TooltipWrapper>
+									<TooltipWrapper :content="__('Delete row')">
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											class="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+											@click="deleteEditorRow"
+										>
+											<Trash2 class="w-3.5 h-3.5" />
+										</Button>
+									</TooltipWrapper>
+								</div>
+
+								<div class="flex items-center gap-2 ms-auto">
+									<span class="text-xs font-medium text-muted-foreground">{{
+										__("Row")
+									}}</span>
+									<NumberInput
+										v-model="editorMoveToIndex"
+										:min="1"
+										:max="rows.length"
+										:step="1"
+										:precision="0"
+										:allow-decimal="false"
+										:disable-spinner="true"
+										class="h-8 w-16 text-center text-xs"
+										@keydown.enter.prevent="moveEditorRowToIndex"
+									/>
+									<Button
+										variant="outline"
+										size="sm"
+										class="h-8 shrink-0"
+										@click="moveEditorRowToIndex"
+									>
+										{{ __("Move") }}
+									</Button>
+								</div>
+							</div>
 						</div>
 
 						<div class="flex-1 overflow-auto px-5 py-4 space-y-4">
@@ -1016,7 +1315,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 						</div>
 
 						<div class="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-border">
-							<Button variant="outline" size="sm" @click="editorOpen = false">
+							<Button variant="outline" size="sm" @click="closeRowEditor">
 								{{ __("Cancel") }}
 							</Button>
 							<Button size="sm" @click="saveRowEditor">
@@ -1045,6 +1344,27 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 	transition:
 		background-color 0.15s ease,
 		box-shadow 0.3s ease;
+}
+
+.ct-row-dragging {
+	opacity: 0.6;
+}
+
+.ct-row-drop-before > td {
+	box-shadow: inset 0 2px 0 hsl(var(--primary));
+}
+
+.ct-row-drop-after > td {
+	box-shadow: inset 0 -2px 0 hsl(var(--primary));
+}
+
+.ct-row-handle {
+	cursor: grab;
+}
+
+.ct-row-handle:active,
+.ct-row-handle-dragging {
+	cursor: grabbing;
 }
 
 .ct-frozen-last {
