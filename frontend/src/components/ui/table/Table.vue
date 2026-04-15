@@ -75,7 +75,14 @@ const emit = defineEmits<{
 }>();
 
 const tableContainerRef = ref<HTMLElement | null>(null);
-const inputRefs = ref<Map<string, HTMLInputElement>>(new Map());
+const isTouchDevice = ref("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
+type FocusTarget = {
+	focus: () => void;
+	select?: () => void;
+};
+
+const inputRefs = ref<Map<string, FocusTarget>>(new Map());
 const selectedIndices = ref<Set<number>>(new Set());
 const showColumnSettingsModal = ref(false);
 const hiddenColumns = ref<Set<string>>(new Set());
@@ -92,6 +99,43 @@ const editableColumnNames = computed(() => {
 	return visibleColumns.value
 		.filter((col) => col.editable !== false && col.type !== "readonly" && col.type !== "component")
 		.map((col) => col.fieldname);
+});
+
+function parseTwWidth(tw?: string): number {
+	if (!tw) return 0;
+	const m = tw.match(/\[(\d+)px\]/);
+	return m ? parseInt(m[1], 10) : 0;
+}
+
+const frozenStyles = computed(() => {
+	const map = new Map<string, Record<string, string>>();
+	let left = 0;
+
+	if (props.showCheckboxes) {
+		map.set("__checkbox", { position: "sticky", left: `${left}px`, zIndex: "11" });
+		left += 32; // w-8
+	}
+	if (props.showRowNumbers) {
+		map.set("__rownumber", { position: "sticky", left: `${left}px`, zIndex: "11" });
+		left += 40; // w-10
+	}
+	for (const col of visibleColumns.value) {
+		if (col.frozen === "left") {
+			map.set(col.fieldname, { position: "sticky", left: `${left}px`, zIndex: "11" });
+			left += col.frozenWidth || parseTwWidth(col.width) || 150;
+		}
+	}
+	return map;
+});
+
+const lastFrozenFieldname = computed(() => {
+	let last = "";
+	if (props.showCheckboxes) last = "__checkbox";
+	if (props.showRowNumbers) last = "__rownumber";
+	for (const col of visibleColumns.value) {
+		if (col.frozen === "left") last = col.fieldname;
+	}
+	return last;
 });
 
 const editorColumns = computed(() => {
@@ -123,7 +167,51 @@ const hasActions = computed(() => {
 	return props.showDeleteButton || props.allowReorder || props.allowDuplicate || props.showEditRow;
 });
 
-function registerInput(rowIndex: number, fieldname: string, el: HTMLInputElement | null): void {
+function toFocusTarget(value: unknown): FocusTarget | null {
+	if (!value) return null;
+
+	if (value instanceof HTMLElement) {
+		return {
+			focus: () => value.focus(),
+			select:
+				"select" in value && typeof (value as HTMLInputElement).select === "function"
+					? () => (value as HTMLInputElement).select()
+					: undefined,
+		};
+	}
+
+	const component = value as {
+		focus?: () => void;
+		select?: () => void;
+		getInputEl?: () => HTMLInputElement | null;
+		getTriggerEl?: () => HTMLElement | null;
+	};
+
+	if (typeof component.focus === "function") {
+		return {
+			focus: () => component.focus!(),
+			select: typeof component.select === "function" ? () => component.select!() : undefined,
+		};
+	}
+
+	const el =
+		(typeof component.getInputEl === "function" ? component.getInputEl() : null) ??
+		(typeof component.getTriggerEl === "function" ? component.getTriggerEl() : null);
+
+	if (el instanceof HTMLElement) {
+		return {
+			focus: () => el.focus(),
+			select:
+				"select" in el && typeof (el as HTMLInputElement).select === "function"
+					? () => (el as HTMLInputElement).select()
+					: undefined,
+		};
+	}
+
+	return null;
+}
+
+function registerInput(rowIndex: number, fieldname: string, el: FocusTarget | null): void {
 	const key = `${rowIndex}-${fieldname}`;
 	if (el) {
 		inputRefs.value.set(key, el);
@@ -135,19 +223,22 @@ function registerInput(rowIndex: number, fieldname: string, el: HTMLInputElement
 function focusCell(rowIndex: number, fieldname: string): void {
 	const key = `${rowIndex}-${fieldname}`;
 	nextTick(() => {
-		const input = inputRefs.value.get(key);
-		if (input) {
-			input.focus();
-			input.select();
-		}
+		requestAnimationFrame(() => {
+			const input = inputRefs.value.get(key);
+			if (input) {
+				input.focus();
+				input.select?.();
+			}
+		});
 	});
 }
 
 function handleKeyDown(event: KeyboardEvent, rowIndex: number, fieldname: string): void {
-	if (!props.keyboardNavigation) return;
+	if (event.defaultPrevented || !props.keyboardNavigation) return;
 
 	const cols = editableColumnNames.value;
 	const colIndex = cols.indexOf(fieldname);
+	if (colIndex === -1) return;
 	const totalRows = props.rows.length;
 
 	let newRowIndex = rowIndex;
@@ -187,24 +278,35 @@ function handleKeyDown(event: KeyboardEvent, rowIndex: number, fieldname: string
 			}
 			break;
 		case "Tab":
-			if (props.tabToAddRow && !event.shiftKey) {
-				const isLastCol = colIndex === cols.length - 1;
-				const isLastRow = rowIndex === totalRows - 1;
-				if (isLastCol && isLastRow) {
+			if (event.shiftKey) {
+				const isFirstCol = colIndex === 0;
+				const isFirstRow = rowIndex === 0;
+				if (isFirstCol && isFirstRow) return;
+
+				event.preventDefault();
+				if (isFirstCol) {
+					focusCell(rowIndex - 1, cols[cols.length - 1]);
+				} else {
+					focusCell(rowIndex, cols[colIndex - 1]);
+				}
+				return;
+			}
+
+			const isLastCol = colIndex === cols.length - 1;
+			const isLastRow = rowIndex === totalRows - 1;
+			if (isLastCol && isLastRow) {
+				if (props.tabToAddRow) {
 					event.preventDefault();
 					emit("add-row");
-					return;
 				}
-				if (isLastCol && rowIndex < totalRows - 1) {
-					event.preventDefault();
-					focusCell(rowIndex + 1, cols[0]);
-					return;
-				}
-				if (!isLastCol) {
-					event.preventDefault();
-					focusCell(rowIndex, cols[colIndex + 1]);
-					return;
-				}
+				return;
+			}
+
+			event.preventDefault();
+			if (isLastCol) {
+				focusCell(rowIndex + 1, cols[0]);
+			} else {
+				focusCell(rowIndex, cols[colIndex + 1]);
 			}
 			return;
 		default:
@@ -308,7 +410,14 @@ function getLinkFilters(col: ChildTableColumn, row: ChildTableRow, index: number
 	return col.link.filters;
 }
 
-// ── Row editor dialog ──
+function onRowClick(index: number): void {
+	if (isTouchDevice.value && props.showEditRow) {
+		openRowEditor(index);
+	} else {
+		emit("row-click", index);
+	}
+}
+
 function openRowEditor(index: number): void {
 	editorRowIndex.value = index;
 	editorRowData.value = { ...props.rows[index] };
@@ -412,10 +521,12 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 
 <template>
 	<div
-		class="child-table border border-border rounded-lg overflow-hidden bg-background"
+		class="child-table flex min-h-0 flex-col border border-border rounded-lg overflow-hidden bg-background"
 		@keydown="handleTableKeyDown"
 	>
-		<div class="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border">
+		<div
+			class="shrink-0 flex flex-col gap-2 px-3 py-2 bg-muted/50 border-b border-border sm:flex-row sm:items-center sm:justify-between"
+		>
 			<div class="flex items-center gap-2">
 				<span class="text-sm font-semibold text-foreground">
 					{{ __(label) }}
@@ -424,7 +535,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 					{{ rows.length }}
 				</span>
 			</div>
-			<div class="flex items-center gap-1.5">
+			<div class="flex w-full flex-wrap items-center gap-1.5 sm:w-auto sm:justify-end">
 				<template v-if="selectedIndices.size > 0">
 					<span class="text-[11px] font-medium text-blue-600 dark:text-blue-400 me-1">
 						{{ selectedIndices.size }} {{ __("selected") }}
@@ -449,6 +560,11 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 
 				<slot name="toolbar" />
 
+				<Button v-if="showAddRow" variant="outline" size="sm" class="h-7 text-xs" @click="addRow">
+					<Plus class="w-3.5 h-3.5 me-1" />
+					{{ __("Add Row") }}
+				</Button>
+
 				<TooltipWrapper v-if="showColumnSettings" :content="__('Column settings')">
 					<Button
 						variant="ghost"
@@ -459,16 +575,14 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 						<Settings class="w-3.5 h-3.5" />
 					</Button>
 				</TooltipWrapper>
-
-				<Button v-if="showAddRow" variant="outline" size="sm" class="h-7 text-xs" @click="addRow">
-					<Plus class="w-3.5 h-3.5 me-1" />
-					{{ __("Add Row") }}
-				</Button>
 			</div>
 		</div>
 
-		<div ref="tableContainerRef" class="overflow-auto ct-table-container">
-			<div v-if="rows.length === 0" class="flex items-center justify-center py-12 px-8">
+		<div ref="tableContainerRef" class="ct-table-container flex-1 min-h-0 overflow-auto">
+			<div
+				v-if="rows.length === 0"
+				class="flex h-full min-h-[180px] items-center justify-center px-8 py-12"
+			>
 				<div class="text-center text-muted-foreground">
 					<Package class="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
 					<p class="font-medium text-sm">{{ __(emptyMessage) }}</p>
@@ -480,29 +594,45 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 				</div>
 			</div>
 
-			<table v-else class="w-full text-sm border-collapse ct-table" :style="{ minWidth: minWidth }">
+			<table v-else class="w-full text-sm ct-table" :style="{ minWidth: minWidth }">
 				<thead class="sticky top-0 z-20 bg-muted border-b border-border">
 					<tr class="text-xs text-muted-foreground uppercase tracking-wider">
-						<th v-if="showCheckboxes" class="w-8 px-2 py-2">
+						<th
+							v-if="showCheckboxes"
+							class="w-8 px-2 py-2 bg-muted"
+							:style="frozenStyles.get('__checkbox')"
+							:class="{ 'ct-frozen-last': lastFrozenFieldname === '__checkbox' }"
+						>
 							<Checkbox
 								:checked="isAllRowsSelected"
 								:indeterminate="isPartialSelect"
 								@update:checked="toggleSelectAll"
 							/>
 						</th>
-						<th v-if="showRowNumbers" class="px-2 py-2 text-center w-10">#</th>
+						<th
+							v-if="showRowNumbers"
+							class="px-2 py-2 text-center w-10 bg-muted"
+							:style="frozenStyles.get('__rownumber')"
+							:class="{ 'ct-frozen-last': lastFrozenFieldname === '__rownumber' }"
+						>
+							#
+						</th>
 						<th
 							v-for="col in visibleColumns"
 							:key="col.fieldname"
 							class="px-2 py-2 whitespace-nowrap"
-							:class="[getAlignClass(col.align), col.width]"
+							:class="[
+								getAlignClass(col.align),
+								col.width,
+								col.frozen === 'left' ? 'bg-muted' : '',
+								lastFrozenFieldname === col.fieldname ? 'ct-frozen-last' : '',
+							]"
+							:style="frozenStyles.get(col.fieldname)"
 						>
 							{{ __(col.label) }}
 							<span v-if="col.required" class="text-destructive">*</span>
 						</th>
-						<th v-if="hasActions" class="px-2 py-2 w-[100px] text-center">
-							{{ __("") }}
-						</th>
+						<th v-if="hasActions" class="px-2 py-2 w-[100px] text-center">""</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-border">
@@ -515,7 +645,12 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 						}"
 						@click="emit('row-click', rowIndex)"
 					>
-						<td v-if="showCheckboxes" class="px-2 py-1">
+						<td
+							v-if="showCheckboxes"
+							class="px-2 py-1 bg-background group-hover:bg-muted/50"
+							:style="frozenStyles.get('__checkbox')"
+							:class="{ 'ct-frozen-last': lastFrozenFieldname === '__checkbox' }"
+						>
 							<Checkbox
 								:checked="selectedIndices.has(rowIndex)"
 								@update:checked="toggleRowSelect(rowIndex)"
@@ -524,7 +659,9 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 
 						<td
 							v-if="showRowNumbers"
-							class="px-2 py-1 text-center text-xs text-muted-foreground tabular-nums"
+							class="px-2 py-1 text-center text-xs text-muted-foreground tabular-nums bg-background group-hover:bg-muted/50"
+							:style="frozenStyles.get('__rownumber')"
+							:class="{ 'ct-frozen-last': lastFrozenFieldname === '__rownumber' }"
 						>
 							{{ rowIndex + 1 }}
 						</td>
@@ -533,7 +670,13 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 							v-for="col in visibleColumns"
 							:key="`${rowIndex}-${col.fieldname}`"
 							class="px-2 py-1"
-							:class="[getAlignClass(col.align)]"
+							:class="[
+								getAlignClass(col.align),
+								col.frozen === 'left' ? 'bg-background group-hover:bg-muted/50' : '',
+								lastFrozenFieldname === col.fieldname ? 'ct-frozen-last' : '',
+							]"
+							:style="frozenStyles.get(col.fieldname)"
+							@keydown="handleKeyDown($event, rowIndex, col.fieldname)"
 						>
 							<slot
 								:name="`cell-${col.fieldname}`"
@@ -543,12 +686,10 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 								:value="row[col.fieldname]"
 								:onChange="(val: any) => onCellChange(rowIndex, col.fieldname, val)"
 								:registerInput="
-									(el: HTMLInputElement | null) =>
-										registerInput(rowIndex, col.fieldname, el)
+									(el: unknown) => registerInput(rowIndex, col.fieldname, toFocusTarget(el))
 								"
 								:onKeyDown="(e: KeyboardEvent) => handleKeyDown(e, rowIndex, col.fieldname)"
 							>
-								<!-- Link field -->
 								<Autocomplete
 									v-if="col.type === 'link' && col.link"
 									:model-value="row[col.fieldname] || ''"
@@ -563,8 +704,13 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 											: `Search ${col.link.doctype}...`
 									"
 									:compact="true"
+									:table-navigation="keyboardNavigation"
 									:show-search-icon="false"
-									:clearable="false"
+									:clearable="true"
+									:ref="
+										(el: unknown) =>
+											registerInput(rowIndex, col.fieldname, toFocusTarget(el))
+									"
 								/>
 
 								<Input
@@ -574,7 +720,10 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 									class="h-7 text-xs"
 									:placeholder="col.placeholder ? __(col.placeholder) : ''"
 									@keydown="handleKeyDown($event, rowIndex, col.fieldname)"
-									:ref="(el: any) => registerInput(rowIndex, col.fieldname, el?.$el || el)"
+									:ref="
+										(el: unknown) =>
+											registerInput(rowIndex, col.fieldname, toFocusTarget(el))
+									"
 								/>
 
 								<NumberInput
@@ -589,12 +738,8 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 									:placeholder="col.placeholder"
 									@keydown="handleKeyDown($event, rowIndex, col.fieldname)"
 									:ref="
-										(el: any) =>
-											registerInput(
-												rowIndex,
-												col.fieldname,
-												el?.$el?.querySelector('input') || el?.inputRef,
-											)
+										(el: unknown) =>
+											registerInput(rowIndex, col.fieldname, toFocusTarget(el))
 									"
 								/>
 
@@ -605,7 +750,10 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 									@update:model-value="onCellChange(rowIndex, col.fieldname, $event)"
 									class="h-7 text-xs"
 									@keydown="handleKeyDown($event, rowIndex, col.fieldname)"
-									:ref="(el: any) => registerInput(rowIndex, col.fieldname, el?.$el || el)"
+									:ref="
+										(el: unknown) =>
+											registerInput(rowIndex, col.fieldname, toFocusTarget(el))
+									"
 								/>
 
 								<Select
@@ -619,6 +767,10 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 										}))
 									"
 									class="h-7 text-xs"
+									:ref="
+										(el: unknown) =>
+											registerInput(rowIndex, col.fieldname, toFocusTarget(el))
+									"
 								/>
 
 								<span
@@ -635,7 +787,8 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 
 						<td v-if="hasActions" class="px-1 py-1">
 							<div
-								class="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+								class="flex items-center justify-center gap-0.5 transition-opacity"
+								:class="isTouchDevice ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
 							>
 								<TooltipWrapper v-if="showEditRow" :content="__('Edit row')">
 									<Button
@@ -699,7 +852,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 
 		<div
 			v-if="rows.length > 0 && keyboardNavigation"
-			class="flex items-center justify-between px-3 py-1.5 border-t border-border bg-muted/30"
+			class="shrink-0 flex flex-col gap-2 px-3 py-1.5 border-t border-border bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
 		>
 			<span class="text-[10px] text-muted-foreground">
 				{{ __("Arrow keys to navigate") }} &middot; {{ __("Enter for next row") }} &middot;
@@ -710,14 +863,13 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 			<button
 				v-if="showAddRow"
 				type="button"
-				class="text-[11px] text-primary hover:underline"
+				class="self-start text-[11px] text-primary hover:underline"
 				@click="addRow"
 			>
 				+ {{ __("Add Row") }}
 			</button>
 		</div>
 
-		<!-- Column Settings Modal -->
 		<Teleport to="body">
 			<Transition name="ct-modal">
 				<div
@@ -774,7 +926,6 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 			</Transition>
 		</Teleport>
 
-		<!-- Row Editor Dialog -->
 		<Teleport to="body">
 			<Transition name="ct-modal">
 				<div
@@ -802,7 +953,6 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 									<span v-if="col.required" class="text-destructive">*</span>
 								</label>
 
-								<!-- Link field in editor -->
 								<Autocomplete
 									v-if="col.type === 'link' && col.link"
 									:model-value="editorRowData[col.fieldname] || ''"
@@ -895,6 +1045,16 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 	transition:
 		background-color 0.15s ease,
 		box-shadow 0.3s ease;
+}
+
+.ct-frozen-last {
+	box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12);
+	clip-path: inset(0 -8px 0 0);
+}
+
+thead .ct-frozen-last,
+thead [style*="sticky"] {
+	z-index: 22 !important;
 }
 
 .ct-modal-enter-active,

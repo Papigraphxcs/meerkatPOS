@@ -37,6 +37,7 @@ const props = withDefaults(
 		labelField?: string;
 		openOnFocus?: boolean;
 		compact?: boolean;
+		tableNavigation?: boolean;
 	}>(),
 	{
 		placeholder: "Search or select...",
@@ -55,6 +56,7 @@ const props = withDefaults(
 		labelField: "name",
 		openOnFocus: false,
 		compact: false,
+		tableNavigation: false,
 	},
 );
 
@@ -124,7 +126,7 @@ const groupedOptions = computed(() => {
 const flatVisibleOptions = computed(() => filteredOptions.value.slice(0, props.maxVisible));
 
 const effectiveShowSearchIcon = computed(() => (props.compact ? false : props.showSearchIcon));
-const effectiveClearable = computed(() => (props.compact ? false : props.clearable));
+const effectiveClearable = computed(() => props.clearable);
 
 watch(
 	() => props.modelValue,
@@ -302,23 +304,29 @@ function onKeydown(e: KeyboardEvent) {
 
 	switch (e.key) {
 		case "ArrowDown":
+			if (props.tableNavigation && !open.value) return;
 			e.preventDefault();
 			if (!open.value) open.value = true;
 			highlightedIndex.value = Math.min(highlightedIndex.value + 1, opts.length - 1);
 			scrollToHighlighted();
 			break;
 		case "ArrowUp":
+			if (props.tableNavigation && !open.value) return;
 			e.preventDefault();
+			if (!open.value) open.value = true;
 			highlightedIndex.value = Math.max(highlightedIndex.value - 1, 0);
 			scrollToHighlighted();
 			break;
 		case "Enter":
+			if (props.tableNavigation && !open.value) return;
+			if (highlightedIndex.value < 0 || highlightedIndex.value >= opts.length) return;
 			e.preventDefault();
 			if (highlightedIndex.value >= 0 && highlightedIndex.value < opts.length) {
 				selectOption(opts[highlightedIndex.value]);
 			}
 			break;
 		case "Escape":
+			if (!open.value) return;
 			e.preventDefault();
 			open.value = false;
 			break;
@@ -379,7 +387,7 @@ defineExpose({ focus, select, getInputEl, inputRef });
 								'flex w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
 								compact ? 'h-7 text-xs' : 'h-8',
 								effectiveShowSearchIcon && 'ps-9',
-								effectiveClearable && modelValue ? 'pe-16' : 'pe-8',
+								effectiveClearable && modelValue ? (compact ? 'pe-12' : 'pe-16') : 'pe-8',
 							)
 						"
 						@input="onInput"

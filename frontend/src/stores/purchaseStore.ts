@@ -1055,7 +1055,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 		}
 	}
 
-	async function fetchCategoryItems(): Promise<void> {
+	async function fetchCategoryItems(fromDate?: string, toDate?: string): Promise<void> {
 		if (!poCategory.value || !selectedSupplier.value) {
 			showError(__("Please select a supplier and PO Category first"));
 			return;
@@ -1065,13 +1065,17 @@ export const usePurchaseStore = defineStore("purchase", () => {
 
 		try {
 			const posStore = usePosStore();
+			const params: Record<string, unknown> = {
+				supplier: selectedSupplier.value?.name ?? "",
+				po_category: poCategory.value,
+				warehouse: posStore.warehouse,
+			};
+			if (fromDate) params.from_date = fromDate;
+			if (toDate) params.to_date = toDate;
+
 			const result = await call<Array<SearchItem & { qty?: number }>>(
 				"xpos.x_pos.api.purchase_orders.get_category_items",
-				{
-					supplier: selectedSupplier.value?.name ?? "",
-					po_category: poCategory.value,
-					warehouse: posStore.warehouse,
-				},
+				params,
 			);
 
 			if (!result || result.length === 0) {

@@ -1074,20 +1074,28 @@ def get_stock_and_transit(item_codes: str | list[str], warehouse: str | None = N
 
 
 @frappe.whitelist()
-def get_category_items(supplier: str, po_category: str, warehouse: str | None = None) -> list[dict]:
+def get_category_items(
+	supplier: str,
+	po_category: str,
+	warehouse: str | None = None,
+	from_date: str | None = None,
+	to_date: str | None = None,
+) -> list[dict]:
 	"""
 	Get items based on PO category and supplier.
 
 	Categories:
 	- Against Purchase Quotation: Items from supplier's purchase quotations
 	- Against Sale Order: Items from pending sales orders
-	- Projection Period: Items based on sales projection
+	- Projection Period: Items based on sales projection for a given date range
 	- Reorder Level: Items below reorder level
 
 	Args:
 	    supplier: Supplier name
 	    po_category: PO Category string
 	    warehouse: Optional warehouse filter
+	    from_date: Start date for projection period
+	    to_date: End date for projection period
 
 	Returns:
 	    List of items with qty suggestions
@@ -1097,14 +1105,8 @@ def get_category_items(supplier: str, po_category: str, warehouse: str | None = 
 
 	items = []
 
-	if po_category == "Against Purchase Quotation":
-		items = _get_items_from_purchase_quotations(supplier)
-
-	elif po_category == "Against Sale Order":
-		items = _get_items_from_sales_orders(supplier, warehouse)
-
-	elif po_category == "Projection Period":
-		items = _get_items_from_projection(supplier, warehouse)
+	if po_category == "Projection Period":
+		items = _get_items_from_projection(supplier, warehouse, from_date, to_date)
 
 	elif po_category == "Reorder Level":
 		items = _get_items_below_reorder(supplier, warehouse)
@@ -1118,114 +1120,30 @@ def get_category_items(supplier: str, po_category: str, warehouse: str | None = 
 	return items
 
 
-def _get_items_from_purchase_quotations(supplier: str) -> list[dict]:
-	"""Get items from supplier's pending purchase quotations."""
-	quotations = frappe.get_all(
-		"Supplier Quotation",
-		filters={
-			"supplier": supplier,
-			"docstatus": 1,
-			"status": ["not in", ["Cancelled", "Expired", "Ordered"]],
-		},
-		fields=["name"],
-		limit=10,
-	)
+def _get_items_from_projection(
+	supplier: str,
+	warehouse: str | None = None,
+	from_date: str | None = None,
+	to_date: str | None = None,
+) -> list[dict]:
+	"""Get items based on sales projection for a date range.
 
-	items_map = {}
-	for sq in quotations:
-		sq_items = frappe.get_all(
-			"Supplier Quotation Item",
-			filters={"parent": sq.name},
-			fields=["item_code", "item_name", "qty", "rate", "stock_uom", "uom"],
-		)
-		for item in sq_items:
-			if item.item_code not in items_map:
-				items_map[item.item_code] = {
-					"item_code": item.item_code,
-					"item_name": item.item_name,
-					"stock_uom": item.stock_uom or item.uom,
-					"standard_rate": flt(item.rate),
-					"qty": flt(item.qty),
-					"item_group": frappe.get_value("Item", item.item_code, "item_group"),
-				}
-			else:
-				items_map[item.item_code]["qty"] += flt(item.qty)
-
-	return list(items_map.values())
-
-
-def _get_items_from_sales_orders(supplier: str, warehouse: str | None = None) -> list[dict]:
-	"""Get items from pending sales orders that this supplier can supply."""
-	supplier_items = set()
-
-	supplier_item_rows = frappe.get_all(
-		"Item Supplier",
-		filters={"supplier": supplier},
-		fields=["parent"],
-	)
-	for row in supplier_item_rows:
-		supplier_items.add(row.parent)
-
-	default_supplier_rows = frappe.get_all(
-		"Item Default",
-		filters={"default_supplier": supplier},
-		fields=["parent"],
-	)
-	for row in default_supplier_rows:
-		supplier_items.add(row.parent)
-
-	if not supplier_items:
-		return []
-
-	filters = {
-		"docstatus": 1,
-		"status": ["not in", ["Completed", "Cancelled", "Closed"]],
-	}
-
-	so_items = frappe.db.sql(
-		"""
-        SELECT
-            soi.item_code,
-            soi.item_name,
-            soi.stock_uom,
-            SUM(soi.qty - soi.delivered_qty) as pending_qty,
-            MAX(soi.rate) as rate
-        FROM `tabSales Order Item` soi
-        INNER JOIN `tabSales Order` so ON so.name = soi.parent
-        WHERE soi.item_code IN %(items)s
-          AND so.docstatus = 1
-          AND so.status NOT IN ('Completed', 'Cancelled', 'Closed')
-          AND soi.qty > soi.delivered_qty
-        GROUP BY soi.item_code
-        """,
-		{"items": list(supplier_items)},
-		as_dict=True,
-	)
-
-	items = []
-	for row in so_items:
-		item = frappe.get_cached_doc("Item", row.item_code)
-		items.append(
-			{
-				"item_code": row.item_code,
-				"item_name": row.item_name,
-				"stock_uom": row.stock_uom,
-				"standard_rate": _get_buying_rate(row.item_code),
-				"qty": flt(row.pending_qty),
-				"item_group": item.item_group,
-			}
-		)
-
-	return items
-
-
-def _get_items_from_projection(supplier: str, warehouse: str | None = None) -> list[dict]:
-	"""Get items based on sales projection (last 30 days average)."""
+	Looks at Sales Invoice Items in the specified period (defaults to last 30
+	days when no dates are given), calculates the average daily sales, then
+	suggests a reorder quantity that covers the same period length.
+	"""
 	supplier_items = _get_supplier_item_codes(supplier)
 	if not supplier_items:
 		return []
 
-	from_date = frappe.utils.add_days(nowdate(), -30)
+	if from_date and to_date:
+		start = getdate(from_date)
+		end = getdate(to_date)
+	else:
+		end = getdate(nowdate())
+		start = frappe.utils.add_days(end, -30)
+
+	period_days = max((end - start).days, 1)
 
 	sales_data = frappe.db.sql(
 		"""
@@ -1239,16 +1157,28 @@ def _get_items_from_projection(supplier: str, warehouse: str | None = None) -> l
         WHERE sii.item_code IN %(items)s
           AND si.docstatus = 1
           AND si.posting_date >= %(from_date)s
+          AND si.posting_date <= %(to_date)s
         GROUP BY sii.item_code
         """,
-		{"items": supplier_items, "from_date": from_date},
+		{"items": supplier_items, "from_date": start, "to_date": end},
 		as_dict=True,
 	)
 
+	if not sales_data:
+		return []
+
+	item_codes = [r.item_code for r in sales_data]
+	stock_data = get_stock_and_transit(item_codes, warehouse)
+
 	items = []
 	for row in sales_data:
-		avg_daily = flt(row.total_qty) / 30
-		suggested_qty = max(1, int(avg_daily * 7))
+		avg_daily = flt(row.total_qty) / period_days
+		suggested_qty = max(1, int(avg_daily * period_days))
+
+		stock = stock_data.get(row.item_code, {})
+		current_stock = flt(stock.get("stock_in_hand", 0))
+		transit_stock = flt(stock.get("transit_stock", 0))
+		net_required = max(0, suggested_qty - current_stock - transit_stock)
 
 		item = frappe.get_cached_doc("Item", row.item_code)
 		items.append(
@@ -1257,8 +1187,10 @@ def _get_items_from_projection(supplier: str, warehouse: str | None = None) -> l
 				"item_name": row.item_name,
 				"stock_uom": row.stock_uom,
 				"standard_rate": _get_buying_rate(row.item_code),
-				"qty": suggested_qty,
+				"qty": max(1, int(net_required)) if net_required > 0 else suggested_qty,
 				"item_group": item.item_group,
+				"custom_stock_in_hand": current_stock,
+				"custom_transit_stock": transit_stock,
 			}
 		)
 
@@ -1271,22 +1203,14 @@ def _get_items_below_reorder(supplier: str, warehouse: str | None = None) -> lis
 	if not supplier_items:
 		return []
 
-	reorder_data = frappe.db.sql(
-		"""
-        SELECT
-            ir.parent as item_code,
-            ir.warehouse_reorder_level,
-            ir.warehouse_reorder_qty
-        FROM `tabItem Reorder` ir
-        WHERE ir.parent IN %(items)s
-          AND ir.warehouse_reorder_level > 0
-          %(warehouse_filter)s
-        """,
-		{
-			"items": supplier_items,
-			"warehouse_filter": (f"AND ir.warehouse = '{warehouse}'" if warehouse else ""),
-		},
-		as_dict=True,
+	filters = {"parent": ["in", supplier_items], "warehouse_reorder_level": [">", 0]}
+	if warehouse:
+		filters["warehouse"] = warehouse
+
+	reorder_data = frappe.get_all(
+		"Item Reorder",
+		filters=filters,
+		fields=["parent as item_code", "warehouse_reorder_level", "warehouse_reorder_qty"],
 	)
 
 	if not reorder_data:

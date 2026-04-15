@@ -37,6 +37,7 @@ export interface TableColumn {
 	visible?: boolean;
 	required?: boolean;
 	frozen?: "left" | "right";
+	frozenWidth?: number;
 	placeholder?: string;
 	alwaysVisible?: boolean;
 	link?: LinkColumnConfig;

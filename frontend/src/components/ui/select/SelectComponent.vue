@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { SelectValue } from "radix-vue";
 import Select from "./Select.vue";
 import SelectTriggerStyled from "./SelectTriggerStyled.vue";
@@ -25,11 +26,22 @@ const props = withDefaults(
 );
 
 const modelValue = defineModel<string>({ default: "" });
+const triggerRef = ref<{ $el?: HTMLElement | null } | null>(null);
+
+function getTriggerEl(): HTMLElement | null {
+	return triggerRef.value?.$el ?? null;
+}
+
+function focus(): void {
+	getTriggerEl()?.focus();
+}
+
+defineExpose({ focus, getTriggerEl });
 </script>
 
 <template>
 	<Select :model-value="modelValue" @update:model-value="modelValue = $event as string">
-		<SelectTriggerStyled :placeholder="placeholder" :disabled="disabled" :class="class">
+		<SelectTriggerStyled ref="triggerRef" :placeholder="placeholder" :disabled="disabled" :class="class">
 			<SelectValue :placeholder="placeholder" />
 		</SelectTriggerStyled>
 		<SelectContentStyled :placeholder="placeholder" :disabled="disabled" :side="side">

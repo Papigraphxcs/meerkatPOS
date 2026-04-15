@@ -177,7 +177,7 @@ onMounted(() => {
 <template>
 	<div class="flex flex-col h-full overflow-hidden bg-background">
 		<div class="shrink-0 p-3 sm:p-4 pb-2 sm:pb-3">
-			<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+			<div class="flex items-center justify-between gap-3 mb-4">
 				<h1 class="text-xl font-bold text-foreground">{{ __("Purchase Orders") }}</h1>
 				<Button size="sm" @click="createNewOrder">
 					<Plus class="w-4 h-4" />
@@ -185,11 +185,13 @@ onMounted(() => {
 				</Button>
 			</div>
 			<div class="flex flex-wrap items-center gap-2">
-				<ListFilterBar
-					:fields="listView.standardFilterFields.value"
-					:model-filters="standardFilterModel"
-					@update:model-filters="onStandardFilterUpdate"
-				/>
+				<div class="hidden sm:contents">
+					<ListFilterBar
+						:fields="listView.standardFilterFields.value"
+						:model-filters="standardFilterModel"
+						@update:model-filters="onStandardFilterUpdate"
+					/>
+				</div>
 				<SortBy
 					:model-value="listView.orderBy.value"
 					:fields="listView.allFilterableFields.value"
@@ -218,7 +220,6 @@ onMounted(() => {
 		</div>
 
 		<div class="flex flex-1 min-h-0 overflow-hidden">
-			<!-- Drafts sidebar -->
 			<div
 				v-if="draftOrders.length > 0"
 				class="w-64 border-e border-border bg-card flex flex-col shrink-0"
@@ -269,7 +270,6 @@ onMounted(() => {
 				</ScrollArea>
 			</div>
 
-			<!-- Main list -->
 			<div class="flex-1 flex flex-col min-h-0 overflow-hidden">
 				<div class="flex-1 overflow-y-auto px-3 sm:px-4 py-3 xpos-scrollbar">
 					<div v-if="listView.isLoading.value && orders.length === 0" class="grid gap-3">

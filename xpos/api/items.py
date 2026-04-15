@@ -15,6 +15,7 @@ def get_pos_items(
 	start: int = 0,
 	page_length: int = 40,
 	include_templates: bool = False,
+	include_uoms: bool = False,
 ):
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
 	warehouse = pos.warehouse
@@ -140,6 +141,22 @@ def get_pos_items(
 		item.actual_qty = (
 			get_stock_qty(item.item_code, warehouse, pos_profile=pos_profile) if warehouse else 0
 		)
+
+	if include_uoms and items:
+		item_codes = [item.item_code for item in items]
+		uom_rows = frappe.get_all(
+			"UOM Conversion Detail",
+			filters={"parent": ["in", item_codes]},
+			fields=["parent as item_code", "uom", "conversion_factor"],
+			order_by="parent asc",
+		)
+		uom_map: dict[str, list] = {}
+		for row in uom_rows:
+			uom_map.setdefault(row.item_code, []).append(
+				{"uom": row.uom, "conversion_factor": flt(row.conversion_factor)}
+			)
+		for item in items:
+			item.uoms = uom_map.get(item.item_code, [])
 
 	return items
 
