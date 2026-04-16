@@ -7,10 +7,9 @@ Provides functions to generate barcode and QR code images as base64-encoded
 data URIs for use in print formats, Jinja templates, and the frontend.
 """
 
-from __future__ import annotations
-
 import base64
 import io
+import json
 from typing import Literal
 
 import frappe
@@ -185,6 +184,7 @@ def generate_item_barcode_label(
 	include_qr: bool = False,
 	width: float = 0.4,
 	height: float = 20.0,
+	pos_profile: str | None = None,
 ) -> dict:
 	"""Generate barcode (and optionally QR code) data for an item.
 
@@ -203,7 +203,6 @@ def generate_item_barcode_label(
 
 	item = frappe.get_cached_doc("Item", item_code)
 
-	# Determine barcode value
 	if not barcode_value:
 		barcodes = item.get("barcodes") or []
 		if barcodes:
@@ -214,10 +213,15 @@ def generate_item_barcode_label(
 		else:
 			barcode_value = item_code
 
-	# Get price
 	price = 0
 	currency = frappe.defaults.get_global_default("currency") or "USD"
-	default_price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list") or ""
+	pp = frappe.get_cached_doc("POS Profile", pos_profile) if pos_profile else None
+	default_price_list = None
+	if pp and pp.selling_price_list:
+		default_price_list = pp.selling_price_list
+	if not default_price_list:
+		default_price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list") or ""
+
 	if default_price_list:
 		price_doc = frappe.db.get_value(
 			"Item Price",
@@ -298,6 +302,7 @@ def get_item_barcode_labels(
 	include_qr: bool = False,
 	width: float = 0.4,
 	height: float = 15.0,
+	pos_profile: str | None = None,
 ) -> list[dict]:
 	"""API: Generate barcode labels for a list of items.
 
@@ -312,8 +317,6 @@ def get_item_barcode_labels(
 	Returns:
 	    List of label dicts, one per label copy.
 	"""
-	import json
-
 	if isinstance(items, str):
 		items = json.loads(items)
 
@@ -341,10 +344,11 @@ def get_item_barcode_labels(
 			include_qr=include_qr,
 			width=float(width),
 			height=float(height),
+			pos_profile=pos_profile,
 		)
 
 		if label:
-			for _ in range(qty):
+			for x in range(qty):
 				labels.append(label)
 
 	return labels

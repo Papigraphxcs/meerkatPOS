@@ -248,6 +248,7 @@ import { __ } from "@/lib/translate";
 import { Search, Plus, Minus, X, Printer, Trash2, Barcode } from "lucide-vue-next";
 import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
 import { NumberInput } from "@/components/ui/number-input";
+import { usePosStore } from "@/stores/posStore";
 
 interface BarcodeItem {
 	item_code: string;
@@ -380,6 +381,7 @@ async function printLabels() {
 			items: JSON.stringify(payload),
 			barcode_type: barcodeType.value,
 			include_qr: includeQR.value ? 1 : 0,
+			pos_profile: usePosStore().profileName,
 		});
 
 		if (!labels || labels.length === 0) return;
