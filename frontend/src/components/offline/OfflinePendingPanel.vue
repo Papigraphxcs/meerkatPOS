@@ -49,11 +49,23 @@
 						<CloudUpload v-else class="w-4 h-4" />
 						{{ __("Sync All") }} ({{ offlineStore.pendingCount }})
 					</Button>
-					<Button variant="destructive" size="sm" class="gap-1.5" @click="confirmClearAll">
+					<Button
+						v-if="posStore.allowDeleteOfflineInvoice"
+						variant="destructive"
+						size="sm"
+						class="gap-1.5"
+						@click="confirmClearAll"
+					>
 						<Trash2 class="w-4 h-4" />
 						{{ __("Clear All") }}
 					</Button>
 				</div>
+				<p
+					v-if="offlineStore.pendingCount > 0 && !posStore.allowDeleteOfflineInvoice"
+					class="text-xs text-muted-foreground"
+				>
+					{{ __("Deleting offline invoices is disabled for this POS Profile.") }}
+				</p>
 				<div
 					v-if="offlineStore.pendingCount === 0"
 					class="flex flex-col items-center justify-center py-10 text-muted-foreground"
@@ -125,6 +137,7 @@
 							{{ __("Retry") }}
 						</Button>
 						<Button
+							v-if="posStore.allowDeleteOfflineInvoice"
 							variant="ghost"
 							size="sm"
 							class="text-destructive gap-1 text-xs"
@@ -147,6 +160,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useOfflineStore } from "@/stores/offlineStore";
+import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
 import { showSuccess, showError } from "@/services/api";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -169,6 +183,7 @@ defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const offlineStore = useOfflineStore();
+const posStore = usePosStore();
 const cartStore = useCartStore();
 
 onMounted(() => {
@@ -204,7 +219,7 @@ async function loadToCart(inv: (typeof offlineStore.pendingInvoices)[number]) {
 			customer_name: data.customer_name || data.customer,
 			items: data.items || [],
 		});
-		if (inv.id) await offlineStore.deletePending(inv.id);
+		if (inv.id) await offlineStore.consumePending(inv.id);
 		showSuccess(__("Draft loaded into cart"));
 		emit("close");
 	} catch (e) {

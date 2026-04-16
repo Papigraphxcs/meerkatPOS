@@ -68,7 +68,7 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 | Enable Return Validity | Enforce a return time window |
 | Return Validity Days | Days allowed for returns after purchase |
 | Allow Delete | Allow invoice deletion |
-| Allow Delete Offline Invoice | Allow deleting offline invoices |
+| Allow Delete Offline Invoice | Allow manual delete and clear actions in the offline invoices panel |
 | Auto Delete Draft Invoice | Auto-cleanup draft invoices |
 | Allow Print Draft Invoices | Allow printing before submission |
 | Allow Print Last Invoice | Quick-print last invoice |

@@ -115,6 +115,8 @@ export const usePosStore = defineStore("pos", () => {
 
 	const allowDelete = computed(() => !!posProfile.value?.allow_delete);
 
+	const allowDeleteOfflineInvoice = computed(() => !!posProfile.value?.allow_delete_offline_invoice);
+
 	const allowPrintLastInvoice = computed(() => !!posProfile.value?.allow_print_last_invoice);
 
 	const displayAdditionalNotes = computed(() => !!posProfile.value?.display_additional_notes);
@@ -500,6 +502,7 @@ export const usePosStore = defineStore("pos", () => {
 		allowReturnWithoutInvoice,
 		allowSalesOrder,
 		allowDelete,
+		allowDeleteOfflineInvoice,
 		allowPrintLastInvoice,
 		displayAdditionalNotes,
 		allowWriteOffChange,

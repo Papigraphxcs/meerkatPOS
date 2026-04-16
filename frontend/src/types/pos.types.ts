@@ -19,6 +19,7 @@ export interface POSProfile {
 	allow_return_without_invoice?: boolean;
 	allow_sales_order?: boolean;
 	allow_delete?: boolean;
+	allow_delete_offline_invoice?: boolean;
 	allow_print_last_invoice?: boolean;
 	display_additional_notes?: boolean;
 	allow_write_off_change?: boolean;
@@ -747,6 +748,8 @@ export interface PurchaseInvoice {
 	supplier_name?: string;
 	company: string;
 	posting_date: string;
+	bill_no?: string;
+	remarks?: string;
 	grand_total: number;
 	outstanding_amount: number;
 	status: string;

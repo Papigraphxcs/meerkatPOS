@@ -11,7 +11,6 @@ import {
 } from "@/services/dbBridge";
 import type { PendingInvoice } from "@/services/idbService";
 import type { InvoiceData } from "@/types/pos.types";
-import { isOnline } from "@/utils";
 import __ from "@/lib/translate";
 
 export type OfflineInvoice = PendingInvoice;
@@ -23,6 +22,7 @@ export const useOfflineStore = defineStore("offline", () => {
 	const lastSyncTime = ref("");
 	const syncErrors = ref<string[]>([]);
 	const isOnline = ref(typeof navigator !== "undefined" ? navigator.onLine : true);
+	const posStore = usePosStore();
 
 	const MAX_RETRIES = 3;
 	const SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -31,8 +31,11 @@ export const useOfflineStore = defineStore("offline", () => {
 	const hasPending = computed(() => pendingCount.value > 0);
 
 	const offlineModeEnabled = computed(() => {
-		const posStore = usePosStore();
 		return !!posStore.useOfflineMode;
+	});
+
+	const allowDeleteOfflineInvoice = computed(() => {
+		return !!posStore.allowDeleteOfflineInvoice;
 	});
 
 	const statusLabel = computed(() => {
@@ -75,6 +78,15 @@ export const useOfflineStore = defineStore("offline", () => {
 	function handleOffline() {
 		isOnline.value = false;
 		showError(__("You are offline. Check your internet connection."));
+	}
+
+	function ensureDeleteAllowed(): boolean {
+		if (allowDeleteOfflineInvoice.value) {
+			return true;
+		}
+
+		showInfo(__("Deleting offline invoices is disabled for this POS Profile."));
+		return false;
 	}
 
 	async function refreshPendingCount() {
@@ -231,13 +243,21 @@ export const useOfflineStore = defineStore("offline", () => {
 		}
 	}
 
-	async function deletePending(id: number): Promise<void> {
+	async function consumePending(id: number): Promise<void> {
 		await deletePendingInvoice(id);
 		await refreshPendingCount();
 		await loadPendingInvoices();
 	}
 
+	async function deletePending(id: number): Promise<void> {
+		if (!ensureDeleteAllowed()) return;
+
+		await consumePending(id);
+	}
+
 	async function clearAll(): Promise<void> {
+		if (!ensureDeleteAllowed()) return;
+
 		const invoices = await getAllPendingInvoices();
 		for (const inv of invoices) {
 			if ((inv as any).id) await deletePendingInvoice((inv as any).id);
@@ -296,6 +316,7 @@ export const useOfflineStore = defineStore("offline", () => {
 		syncErrors,
 		hasPending,
 		offlineModeEnabled,
+		allowDeleteOfflineInvoice,
 		statusLabel,
 		statusColor,
 		isOnline,
@@ -306,6 +327,7 @@ export const useOfflineStore = defineStore("offline", () => {
 		loadPendingInvoices,
 		syncPendingInvoices,
 		retrySingle,
+		consumePending,
 		deletePending,
 		clearAll,
 		startPeriodicSync,

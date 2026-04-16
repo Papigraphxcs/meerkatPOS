@@ -151,10 +151,11 @@ A dedicated dialog for managing queued offline data.
   - Item count
   - Payment methods used
 - **Sync All** button — Attempts to sync all pending invoices immediately
-- **Clear All** button — Removes all pending items (with confirmation prompt)
+- **Clear All** button — Removes all pending items when `Allow Delete Offline Invoice` is enabled
 - Per-invoice actions:
   - **Retry** — Manually retry a failed invoice
-  - **Delete** — Remove a specific pending invoice
+  - **Delete** — Remove a specific pending invoice when `Allow Delete Offline Invoice` is enabled
+  - **Load to Cart** — Reopens an offline draft in the cart for editing/resubmission
 
 ### Status Indicators
 - **"Online"** — Connected and synced
@@ -198,7 +199,7 @@ When connectivity returns:
 - You can manually force a sync when online
 | `server_cache_duration` | Server cache TTL in minutes |
 | `force_reload_items` | Force reload the item list (clear cache) |
-| `allow_delete_offline_invoice` | Allow deleting offline-created invoices |
+| `Allow Delete Offline Invoice` | Show manual delete and clear actions for pending offline invoices |
 
 ---
 
