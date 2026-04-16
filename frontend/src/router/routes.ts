@@ -7,6 +7,7 @@ const PurchaseView = () => import("@/views/PurchaseView.vue");
 const PurchaseOrderView = () => import("@/views/PurchaseOrderView.vue");
 const PurchaseOrderListView = () => import("@/views/PurchaseOrderListView.vue");
 const PurchaseInvoiceView = () => import("@/views/PurchaseInvoiceView.vue");
+const PurchaseInvoiceListView = () => import("@/views/PurchaseInvoiceListView.vue");
 const StockReceivingView = () => import("@/views/StockReceivingView.vue");
 const ExpenseView = () => import("@/views/ExpenseView.vue");
 const BankDropView = () => import("@/views/BankDropView.vue");
@@ -92,6 +93,12 @@ const routes: RouteRecordRaw[] = [
 		name: "purchase-invoice",
 		component: PurchaseInvoiceView,
 		meta: { title: "Purchase Invoice", requiresAuth: true },
+	},
+	{
+		path: "/purchase-invoices",
+		name: "purchase-invoices",
+		component: PurchaseInvoiceListView,
+		meta: { title: "Purchase Invoices", requiresAuth: true },
 	},
 	{
 		path: "/stock-receiving",

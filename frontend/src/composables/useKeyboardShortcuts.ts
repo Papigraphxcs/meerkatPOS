@@ -130,7 +130,7 @@ export function useKeyboardShortcuts() {
 			category: "Navigation",
 			global: true,
 			action: () => {
-				router.push("/purchase-invoice");
+				router.push("/purchase-invoices");
 			},
 		},
 		{

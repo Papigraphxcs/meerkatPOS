@@ -486,7 +486,7 @@ const menus = computed<Menu[]>(() => [
 				label: "Purchase Invoice",
 				icon: Receipt,
 				shortcut: "Alt+4",
-				action: () => router.push("/purchase-invoice"),
+				action: () => router.push("/purchase-invoices"),
 			},
 			{
 				id: "goto-stock-receiving",

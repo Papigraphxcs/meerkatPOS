@@ -336,7 +336,7 @@ const pages: CommandResult[] = [
 		description: __("View purchase invoices"),
 		shortcut: "Alt+4",
 		icon: Receipt,
-		action: () => router.push("/purchase-invoice"),
+		action: () => router.push("/purchase-invoices"),
 	},
 	{
 		id: "page-stock-receiving",

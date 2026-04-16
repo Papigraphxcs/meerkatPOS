@@ -437,6 +437,8 @@ export const usePurchaseStore = defineStore("purchase", () => {
 				supplier: selectedSupplier.value?.name ?? "",
 				company: posStore.companyName,
 				warehouse: selectedWarehouse.value || posStore.warehouse,
+				receive: receiveImmediately.value,
+				create_invoice: createInvoice.value,
 				items: cartItems.value.map((item) => ({
 					item_code: item.item_code,
 					item_name: item.item_name,

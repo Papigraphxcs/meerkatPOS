@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import logging
 import time
@@ -211,3 +209,12 @@ def get_item_groups(pos_profile: str) -> list[str]:
 	)
 
 	return expand_item_groups(groups)
+
+
+def get(flag: str, pos_profile: str | None = None):
+	"""Helper to fetch and cache commonly used POS profile related data."""
+	pp = frappe.get_cached_doc("POS Profile", pos_profile) if pos_profile else None
+	if pp and flag:
+		return pp.get(flag)
+
+	return None

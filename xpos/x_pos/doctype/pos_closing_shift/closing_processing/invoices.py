@@ -86,16 +86,16 @@ def delete_draft_invoices(pos_opening_shift, pos_profile):
 			)
 			else "Sales Invoice"
 		)
-		data = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection — doctype set from validated db lookup
-			f"""
+		data = frappe.db.sql(
+			"""
         select
             name
         from
-            `tab{doctype}`
+            `tab%(doctype)s`
         where
             docstatus = 0 and is_printed = 0 and pos_opening_shift = %(pos_opening_shift)s
         """,
-			{"pos_opening_shift": pos_opening_shift},
+			{"pos_opening_shift": pos_opening_shift, "doctype": doctype},
 			as_dict=1,
 		)
 

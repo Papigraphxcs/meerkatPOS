@@ -179,7 +179,7 @@ const mainNavItems = [
 
 const purchaseNavItems = [
 	{ route: "/purchase-order", label: __("Purchase Order"), icon: ClipboardList },
-	{ route: "/purchase-invoice", label: __("Purchase Invoice"), icon: Receipt },
+	{ route: "/purchase-invoices", label: __("Purchase Invoice"), icon: Receipt },
 	{ route: "/stock-receiving", label: __("Stock Receiving"), icon: PackageCheck },
 ];
 
@@ -206,6 +206,9 @@ const financeNavItems = computed(() => [
 function isActive(path: string): boolean {
 	if (path === "/reports") {
 		return route.path === path || route.path.startsWith("/reports/");
+	}
+	if (path === "/purchase-invoices") {
+		return route.path === "/purchase-invoices" || route.path === "/purchase-invoice";
 	}
 	return route.path === path;
 }
