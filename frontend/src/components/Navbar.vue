@@ -85,7 +85,7 @@
 			</Button>
 		</TooltipWrapper>
 
-		<TooltipWrapper :content="__('Process Return')">
+		<TooltipWrapper v-if="posStore.allowReturn" :content="__('Process Return')">
 			<Button
 				variant="ghost"
 				size="sm"
@@ -322,6 +322,7 @@ function handleShowRepeatDialog() {
 }
 
 function handleShowReturnDialog() {
+	if (!posStore.allowReturn) return;
 	showReturnDialog.value = true;
 }
 
@@ -332,7 +333,7 @@ function handleKeyboard(e: KeyboardEvent) {
 	}
 	if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "r") {
 		e.preventDefault();
-		showReturnDialog.value = true;
+		if (posStore.allowReturn) showReturnDialog.value = true;
 	}
 }
 
