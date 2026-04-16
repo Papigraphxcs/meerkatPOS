@@ -101,6 +101,8 @@ export const usePosStore = defineStore("pos", () => {
 		() => !!posProfile.value?.allow_user_to_edit_additional_discount,
 	);
 
+	const allowChangePostingDate = computed(() => !!posProfile.value?.allow_change_posting_date);
+
 	const displayItemsInStock = computed(() => !!posProfile.value?.display_items_in_stock);
 
 	const allowPartialPayment = computed(() => !!posProfile.value?.allow_partial_payment);
@@ -495,6 +497,7 @@ export const usePosStore = defineStore("pos", () => {
 		allowEditRate,
 		allowEditItemDiscount,
 		allowEditAdditionalDiscount,
+		allowChangePostingDate,
 		displayItemsInStock,
 		allowPartialPayment,
 		allowCreditSale,

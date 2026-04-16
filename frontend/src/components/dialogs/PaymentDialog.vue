@@ -407,6 +407,30 @@
 						/>
 					</div>
 
+					<div class="space-y-1">
+						<div class="flex items-center justify-between">
+							<label
+								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+							>
+								{{ __("Posting Date") }}
+							</label>
+							<span
+								v-if="!posStore.allowChangePostingDate"
+								class="text-xs text-muted-foreground"
+							>
+								{{ __("Locked by POS Profile") }}
+							</span>
+						</div>
+						<DateTimePicker
+							v-model="cartStore.postingDate"
+							mode="date"
+							:disabled="!posStore.allowChangePostingDate"
+							:clearable="false"
+							placeholder="Posting date"
+							class="text-sm"
+						/>
+					</div>
+
 					<div class="flex gap-2 mt-auto">
 						<div
 							v-if="changeAmount > 0"
@@ -531,6 +555,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { NumberInput } from "@/components/ui/number-input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -554,6 +579,7 @@ import {
 
 import type { InvoicePayment } from "@/types/pos.types";
 import { isOnline, extractErrorMessage } from "@/utils";
+import { nowDate } from "@/utils/datetime";
 import {
 	isPaymentDialogSaveAndPrintShortcut,
 	isPaymentDialogSaveOnlyShortcut,
@@ -653,6 +679,10 @@ const canSubmit = computed(() => {
 });
 
 onMounted(async () => {
+	if (!posStore.allowChangePostingDate || !cartStore.postingDate) {
+		cartStore.postingDate = nowDate();
+	}
+
 	tenderedAmount.value = roundCurrency(Math.abs(cartStore.grandTotal));
 	if (availableMethods.value.length > 0) {
 		selectedMethod.value = availableMethods.value[0].mode_of_payment;

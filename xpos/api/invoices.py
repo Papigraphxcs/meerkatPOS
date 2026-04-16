@@ -37,6 +37,21 @@ def _resolve_invoice_doctype(pos_profile: str):
 	return "Sales Invoice"
 
 
+def _resolve_invoice_posting_date(pos, requested_posting_date=None, current_posting_date=None):
+	"""Respect the POS Profile posting-date setting while validating client input."""
+	if not cint(pos.get("allow_change_posting_date")):
+		return nowdate()
+
+	candidate = requested_posting_date or current_posting_date
+	if not candidate:
+		return nowdate()
+
+	try:
+		return str(getdate(candidate))
+	except Exception:
+		frappe.throw(_("Posting Date must be a valid date"))
+
+
 def _detect_invoice_doctype(invoice_name: str):
 	"""Detect whether an invoice name belongs to Sales Invoice or POS Invoice."""
 	if frappe.db.exists("Sales Invoice", invoice_name):
@@ -87,7 +102,9 @@ def _resolve_loyalty_paid_amount(invoice_doc) -> float:
 		invoice_doc.loyalty_amount = 0
 		return 0
 
-	from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+	from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+		validate_loyalty_points,
+	)
 
 	invoice_doc.loyalty_amount = 0
 	validate_loyalty_points(invoice_doc, cint(invoice_doc.loyalty_points))
@@ -154,8 +171,19 @@ def create_invoice(data: str | dict):
 	invoice_doc.customer = customer
 	invoice_doc.company = pos.company
 	invoice_doc.debit_to = debit_to
-	invoice_doc.posting_date = nowdate()
-	invoice_doc.posting_time = now_datetime().strftime("%H:%M:%S")
+	if pos.allow_change_posting_date:
+		invoice_doc.set_posting_time = 1
+		invoice_doc.posting_date = _resolve_invoice_posting_date(
+			pos,
+			data.get("posting_date"),
+			getattr(invoice_doc, "posting_date", None) if is_existing_draft else None,
+		)
+		invoice_doc.posting_time = now_datetime().strftime("%H:%M:%S")
+	else:
+		invoice_doc.set_posting_time = 0
+		invoice_doc.posting_date = nowdate()
+		invoice_doc.posting_time = now_datetime().strftime("%H:%M:%S")
+
 	invoice_doc.set_warehouse = pos.warehouse
 	invoice_doc.update_stock = cint(pos.get("update_stock")) or 1
 	invoice_doc.currency = (
@@ -353,7 +381,8 @@ def create_invoice(data: str | dict):
 			_original_set_paid_amount()
 			invoice_doc.paid_amount = flt(invoice_doc.paid_amount + loyalty_paid, 2)
 			invoice_doc.base_paid_amount = flt(
-				invoice_doc.base_paid_amount + (loyalty_paid * flt(invoice_doc.conversion_rate or 1)), 2
+				invoice_doc.base_paid_amount + (loyalty_paid * flt(invoice_doc.conversion_rate or 1)),
+				2,
 			)
 
 		invoice_doc.set_paid_amount = _set_paid_amount_with_loyalty
@@ -501,7 +530,18 @@ def save_draft_invoice(data: str | dict):
 	invoice_doc.customer = customer
 	invoice_doc.company = pos.company
 	invoice_doc.debit_to = debit_to
-	invoice_doc.posting_date = nowdate()
+	if pos.allow_change_posting_date:
+		invoice_doc.set_posting_time = 1
+		invoice_doc.posting_date = _resolve_invoice_posting_date(
+			pos,
+			data.get("posting_date"),
+			getattr(invoice_doc, "posting_date", None) if is_update else None,
+		)
+		invoice_doc.posting_time = now_datetime().strftime("%H:%M:%S")
+	else:
+		invoice_doc.set_posting_time = 0
+		invoice_doc.posting_date = nowdate()
+		invoice_doc.posting_time = now_datetime().strftime("%H:%M:%S")
 	invoice_doc.set_warehouse = pos.warehouse
 	invoice_doc.update_stock = cint(pos.get("update_stock")) or 1
 	invoice_doc.currency = (
@@ -593,7 +633,9 @@ def get_draft_invoices(pos_opening_shift: str):
 	doctype = (
 		"POS Invoice"
 		if get_profile_setting(
-			pos_opening_shift, "create_pos_invoice_instead_of_sales_invoice", "POS Invoice"
+			pos_opening_shift,
+			"create_pos_invoice_instead_of_sales_invoice",
+			"POS Invoice",
 		)
 		else "Sales Invoice"
 	)

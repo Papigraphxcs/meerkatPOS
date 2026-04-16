@@ -52,7 +52,7 @@ const selectedDate = ref("");
 const selectedTime = ref("00:00:00");
 const calendarView = ref<"day" | "month" | "year">("day");
 
-const DATE_DISPLAY_FORMAT = "DD/MM/YYYY";
+const DATE_DISPLAY_FORMAT = "DD-MM-YYYY";
 
 function parseUserDate(input: string): string | null {
 	const trimmed = input.trim();

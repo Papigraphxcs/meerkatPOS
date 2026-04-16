@@ -10,6 +10,7 @@ export interface POSProfile {
 	selling_price_list?: string;
 	default_customer?: string;
 	allow_rate_change?: boolean;
+	allow_change_posting_date?: boolean;
 	allow_user_to_edit_additional_discount?: boolean;
 	allow_discount_change?: boolean;
 	display_items_in_stock?: boolean;
@@ -343,6 +344,7 @@ export interface InvoiceData {
 	pos_profile: string;
 	customer: string;
 	items: InvoiceItem[];
+	posting_date?: string;
 	additional_discount_percentage?: number;
 	discount_amount?: number;
 	payments?: InvoicePayment[];

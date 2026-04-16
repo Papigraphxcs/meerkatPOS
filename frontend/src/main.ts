@@ -7,6 +7,7 @@ import { showError } from "@/services/api";
 import { isElectron, getApiBaseUrl, warmApiCredentials } from "@/services/electronBridge";
 import { usePosStore } from "./stores/posStore";
 import { initializeNamespaces } from "./utils";
+import { dayjs } from "@/utils/datetime";
 
 if (!isElectron() && import.meta.env.PROD) {
 	import("virtual:pwa-register").then(({ registerSW }) => {
@@ -60,7 +61,7 @@ async function bootstrap(): Promise<void> {
 	app.use(router);
 	initializeNamespaces();
 	await initializeBrowserStorage();
-
+	app.config.globalProperties.$dayjs = dayjs;
 	app.config.errorHandler = (err: unknown, _instance: unknown, info: string) => {
 		console.error("X POS Error:", err, info);
 		showError(`Error: ${err instanceof Error ? err.message : String(err)}`);

@@ -21,6 +21,7 @@ import {
 	computeGrandTotalDiscountPct,
 	type OfferEvaluationResult,
 } from "@/services/offerEngine";
+import { nowDate, toDateOrNow } from "@/utils/datetime";
 
 export const useCartStore = defineStore("cart", () => {
 	const items = ref<CartItem[]>([]);
@@ -41,6 +42,7 @@ export const useCartStore = defineStore("cart", () => {
 	const returnItemCodes = ref<string[]>([]);
 	const orderNotes = ref("");
 	const deliveryDate = ref("");
+	const postingDate = ref(nowDate());
 	const writeOffAmount = ref(0);
 	const salesPerson = ref("");
 	const redeemLoyaltyPoints = ref(false);
@@ -582,7 +584,6 @@ export const useCartStore = defineStore("cart", () => {
 	function applyCoupon(coupon: POSCoupon): void {
 		appliedCoupon.value = coupon;
 		couponCode.value = coupon.coupon_code || "";
-		// If the coupon has a linked POS Offer object, apply it
 		const linkedOffer = (coupon as Record<string, unknown>)._offer as POSOffer | undefined;
 		if (linkedOffer && !appliedOffers.value.find((o) => o.name === linkedOffer.name)) {
 			appliedOffers.value.push(linkedOffer);
@@ -591,7 +592,6 @@ export const useCartStore = defineStore("cart", () => {
 	}
 
 	function removeCoupon(): void {
-		// Remove the coupon's linked offer if present
 		if (appliedCoupon.value) {
 			const linkedOfferName = (appliedCoupon.value as Record<string, unknown>).pos_offer as string;
 			if (linkedOfferName) {
@@ -683,6 +683,7 @@ export const useCartStore = defineStore("cart", () => {
 		writeOffAmount.value = 0;
 		orderNotes.value = "";
 		deliveryDate.value = "";
+		postingDate.value = nowDate();
 		salesPerson.value = "";
 		payments.value = [];
 		currentDraftName.value = "";
@@ -742,6 +743,10 @@ export const useCartStore = defineStore("cart", () => {
 			}
 
 			clearCart();
+
+			postingDate.value = posStore.allowChangePostingDate
+				? toDateOrNow(result.posting_date)
+				: nowDate();
 
 			if (result.customer) {
 				customer.value = {
@@ -906,6 +911,7 @@ export const useCartStore = defineStore("cart", () => {
 				}),
 			),
 			pos_opening_shift: posOpeningShift,
+			posting_date: posStore.allowChangePostingDate ? postingDate.value || nowDate() : nowDate(),
 			additional_discount_percentage: discountPercentage.value,
 			discount_amount: discountAmount.value,
 		};
@@ -1012,6 +1018,7 @@ export const useCartStore = defineStore("cart", () => {
 		returnItemCodes,
 		orderNotes,
 		deliveryDate,
+		postingDate,
 		writeOffAmount,
 		salesPerson,
 		redeemLoyaltyPoints,
