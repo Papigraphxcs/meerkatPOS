@@ -56,7 +56,14 @@ export interface POSProfile {
 	default_pos_expense_account?: string;
 	back_office_cash_account?: string;
 	block_sale_beyond_available_qty?: boolean;
+	purchase_taxes?: PurchaseTaxEntry[];
 	[key: string]: any;
+}
+
+export interface PurchaseTaxEntry {
+	name?: string;
+	tax_type: string;
+	erp_tax_account: string;
 }
 
 export interface POSPaymentMethod {
@@ -695,6 +702,7 @@ export interface PurchaseItem {
 	amount?: number;
 	uom?: string;
 	stock_uom?: string;
+	taxes?: Record<string, number>;
 	conversion_factor?: number;
 	warehouse?: string;
 	serial_no?: string;

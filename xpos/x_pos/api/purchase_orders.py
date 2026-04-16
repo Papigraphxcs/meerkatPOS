@@ -74,25 +74,6 @@ def _resolve_supplier(supplier_value: str | dict | None) -> str | None:
 	return None
 
 
-def _resolve_buying_price_list() -> str:
-	buying_price_list = frappe.db.get_single_value("Buying Settings", "buying_price_list")
-	if not buying_price_list:
-		buying_price_list = frappe.db.get_value("Price List", {"buying": 1}, "name")
-
-	if not buying_price_list:
-		if frappe.db.exists("Price List", "Standard Buying"):
-			buying_price_list = "Standard Buying"
-
-	if not buying_price_list:
-		frappe.throw(
-			_(
-				"No buying price list found. Please configure one in Buying Settings or create a Price List with 'Buying' enabled."
-			)
-		)
-
-	return buying_price_list
-
-
 def _upsert_item_price(
 	item_code: str,
 	price_list: str,
@@ -148,6 +129,58 @@ def _resolve_input_row(items_by_code: dict[str, list[dict]], item_code: str) -> 
 	if not rows:
 		return {}
 	return rows.pop(0)
+
+
+def _build_purchase_taxes(profile: dict, items: list[dict]) -> list[dict]:
+	"""Build Actual taxes_and_charges rows from POS Profile purchase_taxes and per-item tax percentages.
+
+	Each item in *items* must have ``qty``, ``rate``, and optionally ``taxes``
+	(a dict mapping tax_type -> percentage, e.g. ``{"Sales Tax": 17}``).
+
+	Returns a list of dicts ready to be appended to a document's ``taxes`` child table:
+	``[{charge_type, account_head, description, tax_amount}]``
+	"""
+	purchase_taxes_config = profile.get("purchase_taxes") or []
+	if not purchase_taxes_config:
+		return []
+
+	tax_account_map: dict[str, str] = {}
+	for row in purchase_taxes_config:
+		tax_type = row.get("tax_type")
+		account = row.get("erp_tax_account")
+		if tax_type and account and tax_type not in tax_account_map:
+			tax_account_map[tax_type] = account
+
+	if not tax_account_map:
+		return []
+
+	tax_totals: dict[str, float] = {t: 0.0 for t in tax_account_map}
+
+	for item in items or []:
+		qty = flt(item.get("qty") or 0)
+		rate = flt(item.get("rate") or 0)
+		if qty <= 0 or rate <= 0:
+			continue
+		net = qty * rate
+		item_taxes = item.get("taxes") or {}
+		for tax_type in tax_account_map:
+			percent = flt(item_taxes.get(tax_type) or 0)
+			if percent:
+				tax_totals[tax_type] += net * percent / 100
+
+	rows = []
+	for tax_type, account_head in tax_account_map.items():
+		amount = tax_totals[tax_type]
+		if amount:
+			rows.append(
+				{
+					"charge_type": "Actual",
+					"account_head": account_head,
+					"description": tax_type,
+					"tax_amount": flt(amount, 2),
+				}
+			)
+	return rows
 
 
 def _create_purchase_receipt(
@@ -277,11 +310,6 @@ def search_suppliers(search_text: str | None = None, limit: int = 20) -> list[di
 
 
 @frappe.whitelist()
-def get_buying_price_list():
-	return _resolve_buying_price_list()
-
-
-@frappe.whitelist()
 def create_purchase_item(data: str | dict) -> dict:
 	payload = json.loads(data) if isinstance(data, str) else data
 	profile = _resolve_pos_profile(payload.get("pos_profile"))
@@ -329,7 +357,7 @@ def create_purchase_item(data: str | dict) -> dict:
 	item_doc.insert()
 
 	selling_price_list = payload.get("selling_price_list") or profile.get("selling_price_list")
-	buying_price_list = payload.get("buying_price_list") or _resolve_buying_price_list()
+	buying_price_list = payload.get("buying_price_list")
 
 	selling_price = payload.get("selling_price")
 	buying_price = payload.get("buying_price")
@@ -472,7 +500,9 @@ def create_purchase_order(data: str | dict) -> dict:
 	if not supplier_currency:
 		supplier_currency = frappe.get_value("Company", company, "default_currency")
 
-	buying_price_list = _resolve_buying_price_list()
+	buying_price_list = get("buying_price_list", profile) or frappe.db.get_value(
+		"Price List", {"buying": 1, "company": company}, "name"
+	)
 	price_list_currency = frappe.get_value("Price List", buying_price_list, "currency")
 
 	if price_list_currency and price_list_currency != supplier_currency:
@@ -567,6 +597,9 @@ def create_purchase_order(data: str | dict) -> dict:
 	if not po_doc.items:
 		frappe.throw(_("Purchase order requires at least one item with quantity."))
 
+	for tax_row in _build_purchase_taxes(profile, items):
+		po_doc.append("taxes", tax_row)
+
 	po_doc.flags.ignore_permissions = True
 	frappe.flags.ignore_account_permission = True
 	po_doc.save()
@@ -584,7 +617,12 @@ def create_purchase_order(data: str | dict) -> dict:
 		invoice_name = None
 		if cint(payload.get("create_invoice", 0)):
 			invoice_name = _create_purchase_invoice(
-				po_doc, payload, warehouse, transaction_date, receipt_doc=receipt_doc
+				po_doc,
+				payload,
+				warehouse,
+				transaction_date,
+				receipt_doc=receipt_doc,
+				profile=profile,
 			)
 
 		payments = payload.get("payments")
@@ -639,6 +677,7 @@ def create_purchase_invoice_direct(data: str | dict) -> dict:
 		)
 		item_map = {row.name: row for row in item_meta}
 
+	update_item_prices(items, profile)
 	invoice = frappe.get_doc(
 		{
 			"doctype": "Purchase Invoice",
@@ -652,36 +691,6 @@ def create_purchase_invoice_direct(data: str | dict) -> dict:
 			"update_stock": update_stock,
 		}
 	)
-
-	taxes_template = payload.get("taxes_and_charges")
-	if taxes_template and frappe.db.exists("Purchase Taxes and Charges Template", taxes_template):
-		invoice.taxes_and_charges = taxes_template
-		template_taxes = frappe.get_all(
-			"Purchase Taxes and Charges",
-			filters={"parent": taxes_template, "parenttype": "Purchase Taxes and Charges Template"},
-			fields=[
-				"charge_type",
-				"description",
-				"rate",
-				"account_head",
-				"included_in_print_rate",
-				"cost_center",
-				"tax_amount",
-			],
-			order_by="idx asc",
-		)
-		for tax_row in template_taxes:
-			invoice.append(
-				"taxes",
-				{
-					"charge_type": tax_row.get("charge_type") or "On Net Total",
-					"account_head": tax_row.get("account_head"),
-					"description": tax_row.get("description"),
-					"rate": flt(tax_row.get("rate")),
-					"included_in_print_rate": cint(tax_row.get("included_in_print_rate")),
-					"cost_center": tax_row.get("cost_center") or None,
-				},
-			)
 
 	is_paid = cint(payload.get("is_paid"))
 	mode_of_payment = payload.get("mode_of_payment")
@@ -743,6 +752,44 @@ def create_purchase_invoice_direct(data: str | dict) -> dict:
 
 	if not invoice.items:
 		frappe.throw(_("Purchase invoice requires at least one item with quantity."))
+
+	profile_tax_rows = _build_purchase_taxes(profile, items)
+	if profile_tax_rows:
+		for tax_row in profile_tax_rows:
+			invoice.append("taxes", tax_row)
+	else:
+		taxes_template = payload.get("taxes_and_charges")
+		if taxes_template and frappe.db.exists("Purchase Taxes and Charges Template", taxes_template):
+			invoice.taxes_and_charges = taxes_template
+			template_taxes = frappe.get_all(
+				"Purchase Taxes and Charges",
+				filters={
+					"parent": taxes_template,
+					"parenttype": "Purchase Taxes and Charges Template",
+				},
+				fields=[
+					"charge_type",
+					"description",
+					"rate",
+					"account_head",
+					"included_in_print_rate",
+					"cost_center",
+					"tax_amount",
+				],
+				order_by="idx asc",
+			)
+			for tax_row in template_taxes:
+				invoice.append(
+					"taxes",
+					{
+						"charge_type": tax_row.get("charge_type") or "On Net Total",
+						"account_head": tax_row.get("account_head"),
+						"description": tax_row.get("description"),
+						"rate": flt(tax_row.get("rate")),
+						"included_in_print_rate": cint(tax_row.get("included_in_print_rate")),
+						"cost_center": tax_row.get("cost_center") or None,
+					},
+				)
 
 	invoice.flags.ignore_permissions = True
 	frappe.flags.ignore_account_permission = True
@@ -848,20 +895,6 @@ def search_item_by_barcode(barcode: str, pos_profile: str | None = None) -> dict
 	if not barcode:
 		return None
 
-	price_list = _resolve_buying_price_list()
-
-	def _get_buying_rate(item_code: str) -> float:
-		rate = 0
-		if price_list:
-			rate = frappe.db.get_value(
-				"Item Price",
-				{"item_code": item_code, "price_list": price_list, "buying": 1},
-				"price_list_rate",
-			)
-		if not rate:
-			rate = frappe.db.get_value("Item", item_code, "standard_rate")
-		return flt(rate)
-
 	barcode_data = frappe.db.get_value(
 		"Item Barcode",
 		{"barcode": barcode},
@@ -900,6 +933,7 @@ def _create_purchase_invoice(
 	default_warehouse: str | None,
 	transaction_date: str,
 	receipt_doc: dict | None = None,
+	profile: dict | None = None,
 ) -> str:
 	invoice_date = payload.get("invoice_date") or payload.get("invoice_posting_date") or transaction_date
 	invoice = frappe.get_doc(
@@ -945,6 +979,27 @@ def _create_purchase_invoice(
 
 	if not invoice.items:
 		frappe.throw(_("No items to invoice. Please ensure there are items on the Purchase Order."))
+
+	if profile:
+		payload_items_by_code: dict[str, list[dict]] = {}
+		for p_item in payload.get("items") or []:
+			code = p_item.get("item_code")
+			if code:
+				payload_items_by_code.setdefault(code, []).append(p_item)
+
+		combined_items = []
+		for inv_item in invoice.items:
+			p_rows = payload_items_by_code.get(inv_item.item_code) or [{}]
+			combined_items.append(
+				{
+					"qty": inv_item.qty,
+					"rate": inv_item.rate,
+					"taxes": (p_rows[0].get("taxes") or {}),
+				}
+			)
+
+		for tax_row in _build_purchase_taxes(profile, combined_items):
+			invoice.append("taxes", tax_row)
 
 	invoice.flags.ignore_permissions = True
 	frappe.flags.ignore_account_permission = True
@@ -1369,7 +1424,11 @@ def _get_items_below_reorder(supplier: str, warehouse: str | None = None) -> lis
 	reorder_data = frappe.get_all(
 		"Item Reorder",
 		filters=filters,
-		fields=["parent as item_code", "warehouse_reorder_level", "warehouse_reorder_qty"],
+		fields=[
+			"parent as item_code",
+			"warehouse_reorder_level",
+			"warehouse_reorder_qty",
+		],
 	)
 
 	if not reorder_data:
@@ -1428,9 +1487,8 @@ def _get_supplier_item_codes(supplier: str) -> list[str]:
 	return list(supplier_items)
 
 
-def _get_buying_rate(item_code: str) -> float:
+def _get_buying_rate(item_code: str, price_list: str | None = None) -> float:
 	"""Get buying rate for an item."""
-	price_list = _resolve_buying_price_list()
 	rate = 0
 	if price_list:
 		rate = frappe.db.get_value(
@@ -1474,7 +1532,7 @@ def _get_item_uoms(item_codes: list[str]) -> dict[str, list[dict[str, float]]]:
 
 
 @frappe.whitelist()
-def save_po_draft(data: str | dict) -> dict:
+def save_po_draft(data: str | dict, pos_profile: str) -> dict:
 	"""
 	Save or update a Purchase Order in Draft state (docstatus=0).
 
@@ -1520,7 +1578,9 @@ def save_po_draft(data: str | dict) -> dict:
 		supplier_currency = supplier_doc.default_currency or frappe.get_value(
 			"Company", company, "default_currency"
 		)
-		buying_price_list = _resolve_buying_price_list()
+		buying_price_list = get("buying_price_list", pos_profile) or frappe.db.get_value(
+			"Price List", {"buying": 1, "company": company}, "name"
+		)
 		po_doc = frappe.get_doc(
 			{
 				"doctype": "Purchase Order",
@@ -1569,13 +1629,6 @@ def save_po_draft(data: str | dict) -> dict:
 				"rate": flt(row.get("rate") or 0),
 				"warehouse": row.get("warehouse") or warehouse,
 				"schedule_date": schedule_date,
-				"custom_alias": row.get("item_name") or item_code,
-				"custom_stock_in_hand": flt(row.get("stock_in_hand") or 0),
-				"custom_transit_stock": flt(row.get("transit_stock") or 0),
-				"custom_required_packs": flt(row.get("required_packs") or 0),
-				"custom_pack_units": flt(row.get("pack_units") or 0),
-				"custom_class": row.get("class") or "",
-				"custom_item_packing": row.get("item_packing") or "",
 			},
 		)
 
@@ -1721,14 +1774,14 @@ def save_pi_draft(data: str | dict) -> dict:
 	"""Save or update a Purchase Invoice draft (docstatus=0).
 
 	Args:
-		data: JSON string or dict with keys:
-			- draft_name (optional): existing draft to update
-			- supplier, company, warehouse, posting_date, bill_no, remarks
-			- items: list of item dicts
-			- additional_discount_percentage, discount_amount, taxes_and_charges
+	        data: JSON string or dict with keys:
+	                - draft_name (optional): existing draft to update
+	                - supplier, company, warehouse, posting_date, bill_no, remarks
+	                - items: list of item dicts
+	                - additional_discount_percentage, discount_amount, taxes_and_charges
 
 	Returns:
-		dict with draft_name, supplier, items_count, modified
+	        dict with draft_name, supplier, items_count, modified
 	"""
 	payload = json.loads(data) if isinstance(data, str) else data
 
@@ -1843,10 +1896,10 @@ def load_pi_draft(name: str, pos_profile: str) -> dict:
 	"""Load a Purchase Invoice draft (docstatus=0) into the frontend cart format.
 
 	Args:
-		name: Purchase Invoice docname
-		pos_profile: POS profile name
+	        name: Purchase Invoice docname
+	        pos_profile: POS profile name
 	Returns:
-		dict with draft_name, supplier, posting_date, bill_no, remarks, items, etc.
+	        dict with draft_name, supplier, posting_date, bill_no, remarks, items, etc.
 	"""
 	if not frappe.db.exists("Purchase Invoice", name):
 		frappe.throw(_("Draft {0} not found.").format(name))
@@ -1944,8 +1997,8 @@ def list_pi_drafts(limit: int = 20) -> list[dict]:
 	"""List draft Purchase Invoices owned by the current user (docstatus=0).
 
 	Returns:
-		List of dicts: name, supplier, supplier_name, posting_date,
-		               grand_total, creation, modified, items_count.
+	        List of dicts: name, supplier, supplier_name, posting_date,
+	                       grand_total, creation, modified, items_count.
 	"""
 	drafts = frappe.get_all(
 		"Purchase Invoice",
@@ -1978,10 +2031,10 @@ def submit_pi_draft(name: str) -> dict:
 	"""Submit a Purchase Invoice draft.
 
 	Args:
-		name: Purchase Invoice docname (docstatus=0)
+	        name: Purchase Invoice docname (docstatus=0)
 
 	Returns:
-		dict with purchase_invoice name
+	        dict with purchase_invoice name
 	"""
 	if not frappe.db.exists("Purchase Invoice", name):
 		frappe.throw(_("Draft {0} not found.").format(name))
@@ -2002,17 +2055,20 @@ def submit_pi_draft(name: str) -> dict:
 
 @frappe.whitelist()
 def get_purchase_orders_for_invoice(
-	supplier: str, warehouse: str | None = None, pos_profile: str | None = None, company: str | None = None
+	supplier: str,
+	warehouse: str | None = None,
+	pos_profile: str | None = None,
+	company: str | None = None,
 ) -> list[dict]:
 	"""Get submitted Purchase Orders with pending billing for a supplier.
 
 	Args:
-		supplier: Supplier name/docname
-		warehouse: Optional warehouse filter
-		pos_profile: Optional POS profile name
+	        supplier: Supplier name/docname
+	        warehouse: Optional warehouse filter
+	        pos_profile: Optional POS profile name
 
 	Returns:
-		List of PO dicts with items that can be invoiced.
+	        List of PO dicts with items that can be invoiced.
 	"""
 	supplier = _resolve_supplier(supplier)
 	if not supplier:
@@ -2096,47 +2152,48 @@ def get_purchase_orders_for_invoice(
 	return pos
 
 
-@frappe.whitelist()
-def update_item_selling_price(
-	data: str | dict, pos_profile: str | None = None, company: str | None = None
-) -> dict:
-	"""Update standard selling price for items.
+def update_item_prices(items: list, pos_profile: dict):
+	"""Update item prices for items."""
+	selling_price_list = None
+	buying_price_list = None
 
-	Args:
-		data: JSON string or dict with key 'items' - list of dicts:
-			- item_code, sale_price, uom (optional)
+	if pos_profile.get("update_selling_price"):
+		selling_price_list = pos_profile.get("selling_price_list", pos_profile) or frappe.db.get_value(
+			"Price List", {"selling": 1, "company": pos_profile.get("company")}, "name"
+		)
 
-	Returns:
-		dict with updated_count
-	"""
-	payload = json.loads(data) if isinstance(data, str) else data
-	items = payload.get("items") or []
+	if pos_profile.get("update_buying_price"):
+		buying_price_list = pos_profile.get("buying_price_list", pos_profile) or frappe.db.get_value(
+			"Price List", {"buying": 1, "company": pos_profile.get("company")}, "name"
+		)
 
-	selling_price_list = get("selling_price_list", pos_profile) or frappe.db.get_value(
-		"Price List", {"selling": 1, "company": company}, "name"
-	)
-	if not selling_price_list:
-		frappe.throw(_("No selling price list found."))
-
-	updated = 0
 	for row in items:
 		item_code = row.get("item_code")
 		sale_price = flt(row.get("sale_price"))
-		uom = row.get("uom")
-		if not item_code or sale_price <= 0:
+		rate = flt(row.get("rate"))
+
+		if not item_code or (not sale_price and not rate):
 			continue
 
-		_upsert_item_price(
-			item_code,
-			selling_price_list,
-			sale_price,
-			uom=uom,
-			selling=True,
-		)
-		updated += 1
+		if selling_price_list and pos_profile.get("update_selling_price"):
+			_upsert_item_price(
+				item_code,
+				selling_price_list,
+				sale_price / flt(row.get("conversion_factor") or 1),
+				uom=frappe.db.get_value("Item", item_code, "stock_uom"),
+				selling=True,
+			)
+
+		if buying_price_list and pos_profile.get("update_buying_price"):
+			_upsert_item_price(
+				item_code,
+				buying_price_list,
+				rate / flt(row.get("conversion_factor") or 1),
+				uom=frappe.db.get_value("Item", item_code, "stock_uom"),
+				buying=True,
+			)
 
 	frappe.db.commit()
-	return {"updated_count": updated}
 
 
 @frappe.whitelist()
@@ -2144,12 +2201,12 @@ def get_item_purchase_details(item_code: str, pos_profile: str | None = None) ->
 	"""Fetch full item details for purchase invoice including prices, UOMs, and tax info.
 
 	Args:
-		item_code: Item code / name
-		pos_profile: Optional POS Profile name (to resolve buying/selling price lists)
+	        item_code: Item code / name
+	        pos_profile: Optional POS Profile name (to resolve buying/selling price lists)
 
 	Returns:
-		Dict with item_code, item_name, stock_uom, purchase_uom, buying_rate,
-		selling_rate, conversion_factor, item_uoms, item_tax_template, tax_rate
+	        Dict with item_code, item_name, stock_uom, purchase_uom, buying_rate,
+	        selling_rate, conversion_factor, item_uoms, item_tax_template, tax_rate
 	"""
 	if not item_code or not frappe.db.exists("Item", item_code):
 		return None
@@ -2163,19 +2220,25 @@ def get_item_purchase_details(item_code: str, pos_profile: str | None = None) ->
 	if item.stock_uom and not any(u["uom"] == item.stock_uom for u in uoms):
 		uoms.append({"uom": item.stock_uom, "conversion_factor": 1})
 
-	purchase_uom = item.purchase_uom or item.stock_uom
+	purchase_uom = item.purchase_uom or get("purchase_uom", pos_profile) or item.stock_uom
 	purchase_cf = 1
 	for u in uoms:
 		if u["uom"] == purchase_uom:
 			purchase_cf = flt(u["conversion_factor"]) or 1
 			break
 
-	buying_price_list = _resolve_buying_price_list()
+	buying_price_list = get("buying_price_list", pos_profile) or frappe.db.get_value(
+		"Price List", {"buying": 1, "company": item.company}, "name"
+	)
 	buying_rate = 0
 	if buying_price_list:
 		bp = frappe.db.get_value(
 			"Item Price",
-			{"item_code": item_code, "price_list": buying_price_list, "buying": 1, "uom": purchase_uom},
+			{
+				"item_code": item_code,
+				"price_list": buying_price_list,
+				"buying": 1,
+			},
 			"price_list_rate",
 		)
 		if not bp:
@@ -2188,13 +2251,9 @@ def get_item_purchase_details(item_code: str, pos_profile: str | None = None) ->
 	if not buying_rate:
 		buying_rate = flt(item.last_purchase_rate) or flt(item.standard_rate) or flt(item.valuation_rate)
 
-	selling_price_list = None
-	try:
-		selling_price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list")
-	except Exception:
-		pass
-	if not selling_price_list:
-		selling_price_list = frappe.db.get_value("Price List", {"selling": 1}, "name")
+	selling_price_list = get("selling_price_list", pos_profile) or frappe.db.get_value(
+		"Price List", {"selling": 1, "company": item.company}, "name"
+	)
 
 	selling_rate = 0
 	if selling_price_list:
@@ -2207,35 +2266,6 @@ def get_item_purchase_details(item_code: str, pos_profile: str | None = None) ->
 	if not selling_rate:
 		selling_rate = flt(item.standard_selling_rate)
 
-	item_tax_template = None
-	tax_rate = 0
-
-	company = frappe.defaults.get_user_default("Company")
-	for d in item.taxes or []:
-		if d.company == company and d.item_tax_template:
-			item_tax_template = d.item_tax_template
-			break
-	if not item_tax_template:
-		for d in item.item_defaults or []:
-			if d.item_tax_template:
-				item_tax_template = d.item_tax_template
-				break
-	if not item_tax_template and item.taxes:
-		for t in item.taxes:
-			if t.item_tax_template:
-				item_tax_template = t.item_tax_template
-				break
-
-	if item_tax_template:
-		tax_details = frappe.get_all(
-			"Item Tax Template Detail",
-			filters={"parent": item_tax_template},
-			fields=["tax_type", "tax_rate"],
-			limit=1,
-		)
-		if tax_details:
-			tax_rate = flt(tax_details[0].get("tax_rate"))
-
 	barcodes = [b.barcode for b in (item.barcodes or []) if b.barcode]
 
 	return {
@@ -2247,8 +2277,6 @@ def get_item_purchase_details(item_code: str, pos_profile: str | None = None) ->
 		"item_uoms": uoms,
 		"buying_rate": buying_rate,
 		"selling_rate": selling_rate,
-		"item_tax_template": item_tax_template,
-		"tax_rate": tax_rate,
 		"item_group": item.item_group,
 		"barcode": barcodes[0] if barcodes else None,
 		"barcodes": barcodes,
@@ -2262,11 +2290,11 @@ def get_purchase_tax_template(template_name: str | None = None, company: str | N
 	If template_name is not given, tries to find the default template for the company.
 
 	Args:
-		template_name: Purchase Taxes and Charges Template name
-		company: Company name (used to find default template if template_name not given)
+	        template_name: Purchase Taxes and Charges Template name
+	        company: Company name (used to find default template if template_name not given)
 
 	Returns:
-		Dict with template_name and taxes list
+	        Dict with template_name and taxes list
 	"""
 	if not template_name:
 		company = company or frappe.defaults.get_user_default("Company")
@@ -2288,8 +2316,18 @@ def get_purchase_tax_template(template_name: str | None = None, company: str | N
 
 	taxes = frappe.get_all(
 		"Purchase Taxes and Charges",
-		filters={"parent": template_name, "parenttype": "Purchase Taxes and Charges Template"},
-		fields=["charge_type", "description", "rate", "account_head", "included_in_print_rate", "tax_amount"],
+		filters={
+			"parent": template_name,
+			"parenttype": "Purchase Taxes and Charges Template",
+		},
+		fields=[
+			"charge_type",
+			"description",
+			"rate",
+			"account_head",
+			"included_in_print_rate",
+			"tax_amount",
+		],
 		order_by="idx asc",
 	)
 

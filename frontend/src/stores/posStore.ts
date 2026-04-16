@@ -165,6 +165,8 @@ export const usePosStore = defineStore("pos", () => {
 
 	const cashModeOfPayment = computed(() => posProfile.value?.cash_mode_of_payment || "Cash");
 
+	const purchaseTaxes = computed(() => posProfile.value?.purchase_taxes || []);
+
 	function clearShiftState(): void {
 		posOpeningShift.value = null;
 		posProfile.value = null;
@@ -529,6 +531,7 @@ export const usePosStore = defineStore("pos", () => {
 		applyCustomerDiscount,
 		allowPrintDraftInvoices,
 		cashModeOfPayment,
+		purchaseTaxes,
 		hideImages,
 		hideUnavailableItems,
 		blockSaleBeyondAvailableQty,

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { usePurchaseStore, type PurchaseCartItem } from "@/stores/purchaseStore";
 import { usePosStore } from "@/stores/posStore";
 import { Trash2, ShoppingCart, Package, RefreshCw } from "lucide-vue-next";
@@ -13,15 +14,44 @@ import __ from "@/lib/translate";
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
 
+const purchaseTaxes = computed(() => posStore.purchaseTaxes);
+
 function formatCurrency(value: number): string {
 	return `${posStore.currencySymbol}${value.toFixed(2)}`;
 }
 
-function getItemAmount(item: PurchaseCartItem): number {
+function getItemNetAmount(item: PurchaseCartItem): number {
 	const gross = item.qty * item.rate;
 	const disc = item.discount_percent || 0;
 	return gross * (1 - disc / 100);
 }
+
+function getItemAmount(item: PurchaseCartItem): number {
+	return getItemNetAmount(item);
+}
+
+function getItemTaxAmountByType(item: PurchaseCartItem, taxType: string): number {
+	const percent = (item.taxes || {})[taxType] || 0;
+	return (getItemNetAmount(item) * percent) / 100;
+}
+
+function getItemTotalTax(item: PurchaseCartItem): number {
+	if (!purchaseTaxes.value.length) return 0;
+	return purchaseTaxes.value.reduce((sum, t) => sum + getItemTaxAmountByType(item, t.tax_type), 0);
+}
+
+function getItemGrandTotal(item: PurchaseCartItem): number {
+	return getItemNetAmount(item) + getItemTotalTax(item);
+}
+
+const cartNetTotal = computed(() => purchaseStore.cartItems.reduce((s, i) => s + getItemNetAmount(i), 0));
+
+const cartTaxByType = (taxType: string) =>
+	purchaseStore.cartItems.reduce((s, i) => s + getItemTaxAmountByType(i, taxType), 0);
+
+const cartTotalTax = computed(() => purchaseStore.cartItems.reduce((s, i) => s + getItemTotalTax(i), 0));
+
+const cartGrandTotal = computed(() => cartNetTotal.value + cartTotalTax.value);
 </script>
 
 <template>
@@ -67,6 +97,19 @@ function getItemAmount(item: PurchaseCartItem): number {
 							<th class="px-2 py-2 text-end w-[80px]">{{ __("Rate") }}</th>
 							<th class="px-2 py-2 text-end w-[60px]">{{ __("Disc%") }}</th>
 							<th class="px-2 py-2 text-end w-[80px]">{{ __("Amount") }}</th>
+							<th
+								v-for="tax in purchaseTaxes"
+								:key="'th-' + tax.tax_type"
+								class="px-2 py-2 text-end w-[70px]"
+							>
+								{{ tax.tax_type }}%
+							</th>
+							<th v-if="purchaseTaxes.length" class="px-2 py-2 text-end w-[80px]">
+								{{ __("Tax Amt") }}
+							</th>
+							<th v-if="purchaseTaxes.length" class="px-2 py-2 text-end w-[90px]">
+								{{ __("Total") }}
+							</th>
 							<th class="px-2 py-2 text-start min-w-[90px]">{{ __("Generic") }}</th>
 							<th class="px-2 py-2 text-start w-[80px]">{{ __("Category") }}</th>
 							<th class="px-2 py-2 text-start w-[70px]">{{ __("Class") }}</th>
@@ -152,6 +195,36 @@ function getItemAmount(item: PurchaseCartItem): number {
 							<td class="px-2 py-1.5 text-end text-xs font-medium text-green-600 font-mono">
 								{{ formatCurrency(getItemAmount(item)) }}
 							</td>
+							<td
+								v-for="tax in purchaseTaxes"
+								:key="'tax-' + tax.tax_type + '-' + index"
+								class="px-2 py-1.5"
+							>
+								<NumberInput
+									:model-value="(item.taxes || {})[tax.tax_type] || 0"
+									@update:model-value="
+										purchaseStore.updateCartItemTax(index, tax.tax_type, $event)
+									"
+									:min="0"
+									:max="100"
+									:precision="1"
+									class="h-7 text-xs w-full"
+								/>
+							</td>
+
+							<td
+								v-if="purchaseTaxes.length"
+								class="px-2 py-1.5 text-end text-xs text-amber-600 font-mono"
+							>
+								{{ formatCurrency(getItemTotalTax(item)) }}
+							</td>
+
+							<td
+								v-if="purchaseTaxes.length"
+								class="px-2 py-1.5 text-end text-xs font-semibold text-primary font-mono"
+							>
+								{{ formatCurrency(getItemGrandTotal(item)) }}
+							</td>
 
 							<td class="px-2 py-1.5">
 								<Input v-model="item.custom_generic_item" class="h-7 text-xs" />
@@ -195,9 +268,25 @@ function getItemAmount(item: PurchaseCartItem): number {
 					<span class="text-muted-foreground">{{ __("Total Qty") }}</span>
 					<span class="font-mono">{{ purchaseStore.cartItemCount }}</span>
 				</div>
+				<template v-if="purchaseTaxes.length">
+					<div
+						v-for="tax in purchaseTaxes"
+						:key="'footer-' + tax.tax_type"
+						class="flex justify-between text-sm"
+					>
+						<span class="text-muted-foreground">{{ tax.tax_type }}</span>
+						<span class="font-mono text-amber-600">{{
+							formatCurrency(cartTaxByType(tax.tax_type))
+						}}</span>
+					</div>
+					<div class="flex justify-between text-sm">
+						<span class="text-muted-foreground">{{ __("Total Tax") }}</span>
+						<span class="font-mono text-amber-600">{{ formatCurrency(cartTotalTax) }}</span>
+					</div>
+				</template>
 				<div class="flex justify-between font-semibold text-lg pt-2 border-t">
 					<span>{{ __("Total") }}</span>
-					<span class="text-green-600">{{ formatCurrency(purchaseStore.cartTotal) }}</span>
+					<span class="text-green-600">{{ formatCurrency(cartGrandTotal) }}</span>
 				</div>
 			</div>
 

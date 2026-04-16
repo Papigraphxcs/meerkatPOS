@@ -48,12 +48,14 @@ interface InvoiceItem {
 	discount_percent: number;
 	discount_amount: number;
 	gst_percent: number;
+	taxes?: Record<string, number>;
 	sale_price: number;
 	warehouse: string;
 	batch_no: string;
 	item_uoms: Array<{ uom: string; conversion_factor: number }>;
 	purchase_order?: string;
 	po_detail?: string;
+	[key: string]: any;
 }
 
 const invoiceHeader = reactive({
@@ -98,9 +100,10 @@ const isBarcodeScan = ref(false);
 const barcodeFlash = ref<"" | "success" | "error">("");
 let barcodeFlashTimer: ReturnType<typeof setTimeout> | null = null;
 
-// ─── Purchase Tax Template ─────────────────────────────────────────────────
 const purchaseTaxTemplate = ref("");
 const defaultTaxRate = ref(0);
+
+const purchaseTaxes = computed(() => posStore.purchaseTaxes);
 
 const showNewItemDialog = ref(false);
 const showNewSupplierDialog = ref(false);
@@ -121,7 +124,14 @@ function getNetAmount(item: InvoiceItem): number {
 }
 
 function getTaxAmount(item: InvoiceItem): number {
-	return (getNetAmount(item) * (item.gst_percent || 0)) / 100;
+	const net = getNetAmount(item);
+	if (purchaseTaxes.value.length > 0) {
+		return purchaseTaxes.value.reduce((sum: any, t: any) => {
+			const percent = (item.taxes || {})[t.tax_type] || 0;
+			return sum + (net * percent) / 100;
+		}, 0);
+	}
+	return (net * (item.gst_percent || 0)) / 100;
 }
 
 function getTotalAmount(item: InvoiceItem): number {
@@ -356,151 +366,180 @@ function onCellChange(payload: { rowIndex: number; fieldname: string; value: any
 			break;
 		}
 		default: {
-			(item as any)[fieldname] = value;
+			if (fieldname.startsWith("tax__")) {
+				const taxType = fieldname.slice(5);
+				if (!item.taxes) item.taxes = {};
+				item.taxes[taxType] = value;
+			} else {
+				(item as any)[fieldname] = value;
+			}
 		}
 	}
 }
 
-const invoiceColumns = computed<TableColumn[]>(() => [
-	{
-		fieldname: "item_code",
-		label: __("Item"),
-		type: "link" as const,
-		width: "min-w-[260px]",
-		align: "left" as const,
-		alwaysVisible: true,
-		frozen: "left" as const,
-		frozenWidth: 260,
-		link: {
-			doctype: "Item",
-			labelField: "item_name",
+const invoiceColumns = computed<TableColumn[]>(() => {
+	// Fixed columns before tax
+	const cols: TableColumn[] = [
+		{
+			fieldname: "item_code",
+			label: __("Item"),
+			type: "link" as const,
+			width: "min-w-[260px]",
+			align: "left" as const,
+			alwaysVisible: true,
+			frozen: "left" as const,
+			frozenWidth: 260,
+			link: {
+				doctype: "Item",
+				labelField: "item_name",
+			},
+			placeholder: __("Select item..."),
 		},
-		placeholder: __("Select item..."),
-	},
-	{
-		fieldname: "qty",
-		label: __("Qty"),
-		type: "number" as const,
-		width: "w-[70px]",
-		align: "center" as const,
-		min: 0,
-		precision: 0,
-	},
-	{
-		fieldname: "uom",
-		label: __("UOM"),
-		type: "select" as const,
-		width: "w-[90px]",
-		align: "center" as const,
-		options: (row: any) => {
-			const uoms = row.item_uoms || [];
-			return uoms.map((u: any) => ({ label: u.uom, value: u.uom }));
+		{
+			fieldname: "qty",
+			label: __("Qty"),
+			type: "number" as const,
+			width: "min-w-[70px]",
+			align: "center" as const,
+			min: 0,
+			precision: 0,
 		},
-	},
-	{
-		fieldname: "conversion_factor",
-		label: __("CF"),
-		type: "readonly" as const,
-		width: "w-[50px]",
-		align: "center" as const,
-		editable: false,
-		format: (val: any) => `${Number(val || 1).toFixed(0)}`,
-	},
-	{
-		fieldname: "rate",
-		label: __("Rate"),
-		type: "number" as const,
-		width: "w-[85px]",
-		align: "right" as const,
-		min: 0,
-		precision: 2,
-	},
-	{
-		fieldname: "gross_amount",
-		label: __("Gross"),
-		type: "readonly" as const,
-		width: "w-[85px]",
-		align: "right" as const,
-		editable: false,
-		format: (_: any, row: any) => formatCurrency(getGrossAmount(row)),
-	},
-	{
-		fieldname: "discount_percent",
-		label: __("Disc%"),
-		type: "number" as const,
-		width: "w-[60px]",
-		align: "right" as const,
-		min: 0,
-		max: 100,
-		precision: 1,
-	},
-	{
-		fieldname: "discount_amount",
-		label: __("Disc Amt"),
-		type: "number" as const,
-		width: "w-[75px]",
-		align: "right" as const,
-		min: 0,
-		precision: 2,
-	},
-	{
-		fieldname: "net_amount",
-		label: __("Net"),
-		type: "readonly" as const,
-		width: "w-[85px]",
-		align: "right" as const,
-		editable: false,
-		format: (_: any, row: any) => formatCurrency(getNetAmount(row)),
-	},
-	{
-		fieldname: "gst_percent",
-		label: __("Tax%"),
-		type: "number" as const,
-		width: "w-[60px]",
-		align: "right" as const,
-		min: 0,
-		max: 100,
-		precision: 1,
-	},
-	{
-		fieldname: "tax_amount",
-		label: __("Tax Amt"),
-		type: "readonly" as const,
-		width: "w-[75px]",
-		align: "right" as const,
-		editable: false,
-		format: (_: any, row: any) => formatCurrency(getTaxAmount(row)),
-	},
-	{
-		fieldname: "total_amount",
-		label: __("Total"),
-		type: "readonly" as const,
-		width: "w-[90px]",
-		align: "right" as const,
-		editable: false,
-		cellClass: "text-green-600 font-medium",
-		format: (_: any, row: any) => formatCurrency(getTotalAmount(row)),
-	},
-	{
-		fieldname: "sale_price",
-		label: __("Sale Price"),
-		type: "number" as const,
-		width: "w-[85px]",
-		align: "right" as const,
-		min: 0,
-		precision: 2,
-	},
-	{
-		fieldname: "margin_percent",
-		label: __("Margin%"),
-		type: "readonly" as const,
-		width: "w-[65px]",
-		align: "right" as const,
-		editable: false,
-		format: (_: any, row: any) => `${getMarginPercent(row).toFixed(1)}%`,
-		cellClass: (_: any, row: any) => (getMarginPercent(row) >= 0 ? "text-green-600" : "text-red-500"),
-	},
-]);
+		{
+			fieldname: "uom",
+			label: __("UOM"),
+			type: "select" as const,
+			width: "w-[90px]",
+			align: "center" as const,
+			options: (row: any) => {
+				const uoms = row.item_uoms || [];
+				return uoms.map((u: any) => ({ label: u.uom, value: u.uom }));
+			},
+		},
+		{
+			fieldname: "conversion_factor",
+			label: __("CF"),
+			type: "readonly" as const,
+			width: "w-[50px]",
+			align: "center" as const,
+			editable: false,
+			format: (val: any) => `${Number(val || 1).toFixed(0)}`,
+		},
+		{
+			fieldname: "rate",
+			label: __("Rate"),
+			type: "number" as const,
+			width: "min-w-[85px]",
+			align: "right" as const,
+			min: 0,
+			precision: 2,
+		},
+		{
+			fieldname: "gross_amount",
+			label: __("Gross"),
+			type: "readonly" as const,
+			width: "w-[85px]",
+			align: "right" as const,
+			editable: false,
+			format: (_: any, row: any) => formatCurrency(getGrossAmount(row)),
+		},
+		{
+			fieldname: "discount_percent",
+			label: __("Disc%"),
+			type: "number" as const,
+			width: "w-[60px]",
+			align: "right" as const,
+			min: 0,
+			max: 100,
+			precision: 1,
+		},
+		{
+			fieldname: "discount_amount",
+			label: __("Disc Amt"),
+			type: "number" as const,
+			width: "w-[75px]",
+			align: "right" as const,
+			min: 0,
+			precision: 2,
+		},
+		{
+			fieldname: "net_amount",
+			label: __("Net"),
+			type: "readonly" as const,
+			width: "w-[85px]",
+			align: "right" as const,
+			editable: false,
+			format: (_: any, row: any) => formatCurrency(getNetAmount(row)),
+		},
+	];
+	if (purchaseTaxes.value.length > 0) {
+		for (const tax of purchaseTaxes.value) {
+			cols.push({
+				fieldname: `tax__${tax.tax_type}`,
+				label: `${tax.tax_type}%`,
+				type: "number" as const,
+				width: "w-[70px]",
+				align: "right" as const,
+				min: 0,
+				max: 100,
+				precision: 1,
+				format: (_: any, row: any) => `${((row.taxes || {})[tax.tax_type] || 0).toFixed(1)}`,
+			});
+		}
+	} else {
+		cols.push({
+			fieldname: "gst_percent",
+			label: __("Tax%"),
+			type: "number" as const,
+			width: "w-[60px]",
+			align: "right" as const,
+			min: 0,
+			max: 100,
+			precision: 1,
+		});
+	}
+	cols.push(
+		{
+			fieldname: "tax_amount",
+			label: __("Tax Amt"),
+			type: "readonly" as const,
+			width: "w-[75px]",
+			align: "right" as const,
+			editable: false,
+			format: (_: any, row: any) => formatCurrency(getTaxAmount(row)),
+		},
+		{
+			fieldname: "total_amount",
+			label: __("Total"),
+			type: "readonly" as const,
+			width: "w-[90px]",
+			align: "right" as const,
+			editable: false,
+			cellClass: "text-green-600 font-medium",
+			format: (_: any, row: any) => formatCurrency(getTotalAmount(row)),
+		},
+		{
+			fieldname: "sale_price",
+			label: __("Sale Price"),
+			type: "number" as const,
+			width: "w-[85px]",
+			align: "right" as const,
+			min: 0,
+			precision: 2,
+		},
+		{
+			fieldname: "margin_percent",
+			label: __("Margin%"),
+			type: "readonly" as const,
+			width: "w-[65px]",
+			align: "right" as const,
+			editable: false,
+			format: (_: any, row: any) => `${getMarginPercent(row).toFixed(1)}%`,
+			cellClass: (_: any, row: any) => (getMarginPercent(row) >= 0 ? "text-green-600" : "text-red-500"),
+		},
+	);
+
+	return cols;
+});
 
 async function createInvoice(): Promise<void> {
 	if (!purchaseStore.selectedSupplier) {
@@ -514,21 +553,6 @@ async function createInvoice(): Promise<void> {
 
 	isProcessing.value = true;
 	try {
-		const itemsWithSalePrice = invoiceItems.value.filter((i) => i.sale_price > 0 && i.item_code);
-		if (itemsWithSalePrice.length > 0) {
-			await call("xpos.x_pos.api.purchase_orders.update_item_selling_price", {
-				data: JSON.stringify({
-					items: itemsWithSalePrice.map((i) => ({
-						item_code: i.item_code,
-						sale_price: i.sale_price,
-						uom: i.uom,
-					})),
-				}),
-				pos_profile: posStore.profileName,
-				company: posStore.companyName,
-			});
-		}
-
 		const payload: Record<string, any> = {
 			pos_profile: posStore.profileName,
 			supplier: purchaseStore.selectedSupplier?.name || purchaseStore.selectedSupplierName || undefined,
@@ -551,11 +575,13 @@ async function createInvoice(): Promise<void> {
 					warehouse: item.warehouse,
 					purchase_order: item.purchase_order || undefined,
 					po_detail: item.po_detail || undefined,
+					taxes: item.taxes || {},
+					sale_price: item.sale_price,
 				})),
 			receive: true,
 		};
 
-		if (purchaseTaxTemplate.value) {
+		if (purchaseTaxes.value.length === 0 && purchaseTaxTemplate.value) {
 			payload.taxes_and_charges = purchaseTaxTemplate.value;
 		}
 

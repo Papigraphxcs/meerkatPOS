@@ -61,6 +61,7 @@ export interface PurchaseCartItem {
 	custom_class?: string;
 	custom_item_packing?: string;
 	custom_pack_units?: number;
+	taxes?: Record<string, number>;
 }
 
 export const usePurchaseStore = defineStore("purchase", () => {
@@ -335,6 +336,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 				discount_percent: 0,
 				item_packing: item.custom_item_packing || "",
 				item_uoms: item.item_uoms || [{ uom: item.stock_uom, conversion_factor: 1 }],
+				taxes: {} as Record<string, number>,
 			});
 			lastAddedIndex.value = cartItems.value.length - 1;
 			// Fetch stock data for newly added item
@@ -409,6 +411,18 @@ export const usePurchaseStore = defineStore("purchase", () => {
 		cartItems.value[index].discount_percent = discount;
 	}
 
+	function updateCartItemTax(index: number, taxType: string, percent: number): void {
+		const item = cartItems.value[index];
+		if (!item) return;
+		if (!item.taxes) {
+			// First tax assignment: create a new object so Vue tracks it as a property
+			item.taxes = { [taxType]: percent };
+		} else {
+			// Direct mutation on the existing reactive proxy — Vue tracks this key specifically
+			item.taxes[taxType] = percent;
+		}
+	}
+
 	function updateCartItemField(index: number, field: keyof PurchaseCartItem, value: unknown): void {
 		(cartItems.value[index] as Record<string, unknown>)[field] = value;
 	}
@@ -453,6 +467,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 					required_packs: item.required_packs,
 					class: item.class,
 					pack_units: item.pack_units,
+					taxes: item.taxes || {},
 				})),
 				submit: true,
 				custom_po_category: poCategory.value || undefined,
@@ -956,6 +971,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 					pack_units: item.pack_units,
 					class: item.class,
 					item_packing: item.item_packing,
+					taxes: item.taxes || {},
 				})),
 				custom_po_category: poCategory.value || undefined,
 				custom_po_type: poType.value || undefined,
@@ -964,7 +980,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 			};
 			const result = await call<{ draft_name: string }>(
 				"xpos.x_pos.api.purchase_orders.save_po_draft",
-				{ data: JSON.stringify(payload) },
+				{ data: JSON.stringify(payload), pos_profile: posStore.profileName },
 			);
 			currentDraftName.value = result.draft_name;
 			showSuccess(__("Draft saved successfully"));
@@ -994,7 +1010,13 @@ export const usePurchaseStore = defineStore("purchase", () => {
 			selectedSupplier.value = result.supplier
 				? ({ name: result.supplier, supplier_name: result.supplier } as Supplier)
 				: null;
-			cartItems.value = result.items || [];
+			cartItems.value = (result.items || []).map((item) => ({
+				...item,
+				taxes: (item.taxes && typeof item.taxes === "object" ? item.taxes : {}) as Record<
+					string,
+					number
+				>,
+			}));
 			poCategory.value = result.po_category || "";
 			poType.value = result.po_type || "";
 			poRemarks.value = result.po_remarks || "";
@@ -1048,6 +1070,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 				pack_units: item.custom_pack_units || 0,
 				discount_percent: 0,
 				item_packing: item.custom_item_packing || "",
+				taxes: {} as Record<string, number>,
 			});
 		}
 
@@ -1163,6 +1186,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 		updateCartItemPacks,
 		updateCartItemLoose,
 		updateCartItemDiscount,
+		updateCartItemTax,
 		updateCartItemField,
 		fetchStockForItems,
 		refreshAllStock,
