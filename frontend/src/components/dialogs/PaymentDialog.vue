@@ -450,10 +450,16 @@
 							class="flex-1 bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-center"
 						>
 							<p class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mb-0.5">
-								{{ __("Remaining") }}
+								{{ remainingLabel }}
 							</p>
 							<p class="text-lg font-extrabold text-amber-700 dark:text-amber-300 tabular-nums">
 								{{ posStore.currencySymbol }}{{ formatPrice(remainingAmount) }}
+							</p>
+							<p
+								v-if="outstandingSubmissionHint"
+								class="mt-1 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+							>
+								{{ outstandingSubmissionHint }}
 							</p>
 						</div>
 					</div>
@@ -577,7 +583,7 @@ import {
 	DollarSign,
 } from "lucide-vue-next";
 
-import type { InvoicePayment } from "@/types/pos.types";
+import type { InvoiceData, InvoicePayment } from "@/types/pos.types";
 import { isOnline, extractErrorMessage } from "@/utils";
 import { nowDate } from "@/utils/datetime";
 import {
@@ -669,13 +675,40 @@ const remainingAmount = computed(() => {
 	return diff > 0 ? diff : 0;
 });
 
+const hasRecordedPayment = computed(() => {
+	const amount = isSplitPayment.value ? splitTotal.value : tenderedAmount.value;
+	return roundCurrency(amount) > 0;
+});
+
+const canSubmitOutstanding = computed(() => {
+	if (cartStore.isReturnMode || remainingAmount.value <= 0) return false;
+	if (posStore.allowCreditSale) return true;
+	return hasRecordedPayment.value && posStore.allowPartialPayment;
+});
+
+const remainingLabel = computed(() => {
+	return canSubmitOutstanding.value ? __("Outstanding After Save") : __("Remaining");
+});
+
+const outstandingSubmissionHint = computed(() => {
+	if (!canSubmitOutstanding.value) return "";
+	if (posStore.allowCreditSale) {
+		return __("Invoice will be submitted with an outstanding credit balance.");
+	}
+	return __("Invoice will be submitted with a partial payment.");
+});
+
 const canSubmit = computed(() => {
 	if (cartStore.isEmpty) return false;
-	const total = Math.abs(cartStore.grandTotal);
-	if (isSplitPayment.value) {
-		return roundCurrency(splitTotal.value) >= roundCurrency(total);
+	const total = roundCurrency(Math.abs(cartStore.grandTotal));
+	if (total <= 0) return true;
+	if (remainingAmount.value > 0) {
+		return canSubmitOutstanding.value;
 	}
-	return selectedMethod.value !== "" && roundCurrency(tenderedAmount.value) >= roundCurrency(total);
+	if (isSplitPayment.value) {
+		return roundCurrency(splitTotal.value) >= total;
+	}
+	return selectedMethod.value !== "" && roundCurrency(tenderedAmount.value) >= total;
 });
 
 onMounted(async () => {
@@ -939,6 +972,47 @@ function validateForSubmission(): { valid: boolean; message?: string } {
 	return { valid: true };
 }
 
+function buildSubmissionPayments(): InvoicePayment[] {
+	if (isSplitPayment.value) {
+		return splitPayments.value
+			.filter((payment) => roundCurrency(payment.amount || 0) > 0)
+			.map((payment) => ({
+				...payment,
+				amount: roundCurrency(payment.amount || 0),
+			}));
+	}
+
+	if (!selectedMethod.value || roundCurrency(tenderedAmount.value) <= 0) {
+		return [];
+	}
+
+	return [
+		{
+			mode_of_payment: selectedMethod.value,
+			amount: roundCurrency(tenderedAmount.value),
+		},
+	];
+}
+
+function applySubmissionPayments(invoiceData: InvoiceData): void {
+	let payments = buildSubmissionPayments();
+
+	if (cartStore.isReturnMode) {
+		payments = payments.map((payment) => ({
+			...payment,
+			amount: -Math.abs(payment.amount),
+		}));
+	}
+
+	if (payments.length > 0) {
+		invoiceData.payments = payments;
+	}
+
+	if (!cartStore.isReturnMode && remainingAmount.value > 0 && posStore.allowCreditSale) {
+		invoiceData.is_credit_sale = true;
+	}
+}
+
 async function submitPayment(withPrint: boolean = true) {
 	if (isSubmitting.value) return;
 
@@ -961,23 +1035,7 @@ async function submitPayment(withPrint: boolean = true) {
 		const shiftName = posStore.posOpeningShift?.name || "";
 		const invoiceData = cartStore.getInvoiceData(posStore.profileName, shiftName);
 
-		if (isSplitPayment.value) {
-			invoiceData.payments = splitPayments.value.map((p) => ({ ...p }));
-		} else {
-			invoiceData.payments = [
-				{
-					mode_of_payment: selectedMethod.value,
-					amount: roundCurrency(tenderedAmount.value),
-				},
-			];
-		}
-
-		if (cartStore.isReturnMode && invoiceData.payments) {
-			invoiceData.payments = invoiceData.payments.map((p) => ({
-				...p,
-				amount: -Math.abs(p.amount),
-			}));
-		}
+		applySubmissionPayments(invoiceData);
 
 		if (changeAmount.value > 0) {
 			invoiceData.change_amount = changeAmount.value;
@@ -1055,16 +1113,7 @@ async function submitPayment(withPrint: boolean = true) {
 				posStore.profileName,
 				posStore.posOpeningShift?.name || "",
 			);
-			if (isSplitPayment.value) {
-				invoiceData.payments = splitPayments.value.map((p) => ({ ...p }));
-			} else {
-				invoiceData.payments = [
-					{
-						mode_of_payment: selectedMethod.value,
-						amount: roundCurrency(cartStore.grandTotal),
-					},
-				];
-			}
+			applySubmissionPayments(invoiceData);
 			if (changeAmount.value > 0) {
 				invoiceData.change_amount = changeAmount.value;
 			}

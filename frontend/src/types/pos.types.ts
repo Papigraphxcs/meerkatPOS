@@ -366,6 +366,7 @@ export interface InvoiceData {
 	change_amount?: number;
 	currency?: string;
 	conversion_rate?: number;
+	is_credit_sale?: boolean;
 	pos_delivery_charges?: string;
 	pos_delivery_charges_rate?: number;
 }

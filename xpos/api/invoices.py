@@ -111,6 +111,91 @@ def _resolve_loyalty_paid_amount(invoice_doc) -> float:
 	return round(flt(invoice_doc.loyalty_amount or 0), 2)
 
 
+def _coerce_amount(value) -> float:
+	"""Coerce invoice amounts without depending on request-local Frappe state."""
+	try:
+		return round(float(value or 0), 2)
+	except (TypeError, ValueError):
+		return 0.0
+
+
+def _get_unpaid_balance(invoice_doc) -> float:
+	"""Return the unpaid balance remaining on an invoice after applied settlements."""
+	outstanding_amount = _coerce_amount(getattr(invoice_doc, "outstanding_amount", 0))
+	if outstanding_amount > 0:
+		return outstanding_amount
+
+	grand_total = abs(
+		_coerce_amount(getattr(invoice_doc, "rounded_total", 0) or getattr(invoice_doc, "grand_total", 0))
+	)
+	settled_amount = abs(_coerce_amount(getattr(invoice_doc, "paid_amount", 0))) + abs(
+		_coerce_amount(getattr(invoice_doc, "write_off_amount", 0))
+	)
+	return max(0.0, round(grand_total - settled_amount, 2))
+
+
+def _validate_unpaid_balance_permissions(invoice_doc, pos_profile_doc, data: dict):
+	"""Enforce POS Profile permissions before submitting an invoice with a balance due."""
+	if cint(getattr(invoice_doc, "is_return", 0)):
+		return
+
+	outstanding_amount = _get_unpaid_balance(invoice_doc)
+	if outstanding_amount <= 0.009:
+		return
+
+	allow_credit_sale = cint(pos_profile_doc.get("allow_credit_sale"))
+	allow_partial_payment = cint(pos_profile_doc.get("allow_partial_payment"))
+	requested_credit_sale = cint(data.get("is_credit_sale"))
+	settled_amount = abs(_coerce_amount(getattr(invoice_doc, "paid_amount", 0))) + abs(
+		_coerce_amount(getattr(invoice_doc, "write_off_amount", 0))
+	)
+
+	if requested_credit_sale or settled_amount <= 0.009:
+		if not allow_credit_sale:
+			frappe.throw(_("Credit sale is not allowed for POS Profile {0}.").format(pos_profile_doc.name))
+		return
+
+	if not (allow_partial_payment or allow_credit_sale):
+		frappe.throw(_("Partial payment is not allowed for POS Profile {0}.").format(pos_profile_doc.name))
+
+
+def _get_default_pos_payment_mode(pos_profile_doc) -> str:
+	"""Return the default mode of payment configured on the POS Profile."""
+	payments = getattr(pos_profile_doc, "payments", None) or []
+	if payments:
+		mode_of_payment = getattr(payments[0], "mode_of_payment", None)
+		if mode_of_payment:
+			return mode_of_payment
+	return "Cash"
+
+
+def _ensure_pos_invoice_payment_row(invoice_doc, pos_profile_doc, require_payment_row: bool):
+	"""Seed a zero-amount payment row so ERPNext accepts POS sale submissions."""
+	if not require_payment_row:
+		return
+
+	existing_payments = None
+	if hasattr(invoice_doc, "get"):
+		try:
+			existing_payments = invoice_doc.get("payments")
+		except Exception:
+			existing_payments = None
+
+	if existing_payments is None:
+		existing_payments = getattr(invoice_doc, "payments", None)
+
+	if existing_payments:
+		return
+
+	invoice_doc.append(
+		"payments",
+		{
+			"mode_of_payment": _get_default_pos_payment_mode(pos_profile_doc),
+			"amount": 0,
+		},
+	)
+
+
 @frappe.whitelist()
 def create_invoice(data: str | dict):
 	"""Create a POS Sales Invoice from cart data."""
@@ -374,6 +459,8 @@ def create_invoice(data: str | dict):
 			)
 			total_payment += pay_amount
 
+	_ensure_pos_invoice_payment_row(invoice_doc, pos, bool(invoice_doc.is_pos and not invoice_doc.is_return))
+
 	if loyalty_paid and hasattr(invoice_doc, "set_paid_amount"):
 		_original_set_paid_amount = invoice_doc.set_paid_amount
 
@@ -452,6 +539,8 @@ def create_invoice(data: str | dict):
 		invoice_doc.save(ignore_permissions=True)
 	else:
 		invoice_doc.insert(ignore_permissions=True)
+
+	_validate_unpaid_balance_permissions(invoice_doc, pos, data)
 
 	if submit_in_background:
 		enqueue(
@@ -597,9 +686,8 @@ def save_draft_invoice(data: str | dict):
 					"type": payment.get("type"),
 				},
 			)
-	elif use_pos_invoice and not is_update:
-		default_mop = pos.payments[0].mode_of_payment if pos.payments else "Cash"
-		invoice_doc.append("payments", {"mode_of_payment": default_mop, "amount": 0})
+
+		_ensure_pos_invoice_payment_row(invoice_doc, pos, use_pos_invoice)
 
 	if pos_opening_shift:
 		try:

@@ -162,6 +162,98 @@ class TestCreateInvoice(unittest.TestCase):
 		self.assertEqual(mock_item.rate, 12.346)
 
 
+class TestInvoiceOutstandingPermissions(unittest.TestCase):
+	"""Tests for outstanding-balance permission enforcement."""
+
+	@patch("xpos.api.invoices.frappe.throw")
+	def test_validate_unpaid_balance_blocks_credit_sale_when_disallowed(self, mock_throw):
+		"""Credit-sale submissions should be blocked when the profile disallows them."""
+		invoice_doc = SimpleNamespace(
+			outstanding_amount=100,
+			paid_amount=0,
+			write_off_amount=0,
+			is_return=0,
+		)
+		pos_profile = MagicMock()
+		pos_profile.name = "POS-PROFILE-1"
+		pos_profile.get.side_effect = lambda key: {
+			"allow_credit_sale": 0,
+			"allow_partial_payment": 0,
+		}.get(key)
+
+		with patch("xpos.api.invoices._", lambda message: message):
+			invoices._validate_unpaid_balance_permissions(invoice_doc, pos_profile, {"is_credit_sale": 1})
+
+		mock_throw.assert_called_once_with("Credit sale is not allowed for POS Profile POS-PROFILE-1.")
+
+	@patch("xpos.api.invoices.frappe.throw")
+	def test_validate_unpaid_balance_allows_credit_sale_when_enabled(self, mock_throw):
+		"""Credit-sale submissions should pass when the profile explicitly allows them."""
+		invoice_doc = SimpleNamespace(
+			outstanding_amount=100,
+			paid_amount=0,
+			write_off_amount=0,
+			is_return=0,
+		)
+		pos_profile = MagicMock()
+		pos_profile.name = "POS-PROFILE-1"
+		pos_profile.get.side_effect = lambda key: {
+			"allow_credit_sale": 1,
+			"allow_partial_payment": 0,
+		}.get(key)
+
+		invoices._validate_unpaid_balance_permissions(invoice_doc, pos_profile, {"is_credit_sale": 1})
+
+		mock_throw.assert_not_called()
+
+	@patch("xpos.api.invoices.frappe.throw")
+	def test_validate_unpaid_balance_allows_partial_payment_when_enabled(self, mock_throw):
+		"""Non-credit outstanding balances should respect the partial-payment flag."""
+		invoice_doc = SimpleNamespace(
+			outstanding_amount=25,
+			paid_amount=75,
+			write_off_amount=0,
+			is_return=0,
+		)
+		pos_profile = MagicMock()
+		pos_profile.name = "POS-PROFILE-1"
+		pos_profile.get.side_effect = lambda key: {
+			"allow_credit_sale": 0,
+			"allow_partial_payment": 1,
+		}.get(key)
+
+		invoices._validate_unpaid_balance_permissions(invoice_doc, pos_profile, {"is_credit_sale": 0})
+
+		mock_throw.assert_not_called()
+
+
+class TestInvoicePaymentRowDefaults(unittest.TestCase):
+	"""Tests for default POS Invoice payment row seeding."""
+
+	def test_ensure_pos_invoice_payment_row_appends_zero_amount_payment(self):
+		"""POS Invoices should always carry at least one payment row for ERPNext validation."""
+		invoice_doc = MagicMock()
+		invoice_doc.get.return_value = []
+		pos_profile = SimpleNamespace(payments=[SimpleNamespace(mode_of_payment="Cash")])
+
+		invoices._ensure_pos_invoice_payment_row(invoice_doc, pos_profile, True)
+
+		invoice_doc.append.assert_called_once_with(
+			"payments",
+			{"mode_of_payment": "Cash", "amount": 0},
+		)
+
+	def test_ensure_pos_invoice_payment_row_skips_when_payment_exists(self):
+		"""Existing payment rows must be preserved as-is."""
+		invoice_doc = MagicMock()
+		invoice_doc.get.return_value = [SimpleNamespace(mode_of_payment="Card", amount=50)]
+		pos_profile = SimpleNamespace(payments=[SimpleNamespace(mode_of_payment="Cash")])
+
+		invoices._ensure_pos_invoice_payment_row(invoice_doc, pos_profile, True)
+
+		invoice_doc.append.assert_not_called()
+
+
 class TestInvoiceDeliveryChargeFields(unittest.TestCase):
 	"""Tests for xpos-managed delivery charge handling."""
 
