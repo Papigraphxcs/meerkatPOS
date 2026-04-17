@@ -33,6 +33,7 @@ export interface ReportDefinition {
 	category: ReportCategory;
 	tone: ReportTone;
 	permissionKey?: keyof PosPermissions;
+	thermalPrint?: boolean;
 	filters: ReportFilterDefinition[];
 }
 
@@ -496,6 +497,51 @@ const reportDefinitions: ReportDefinition[] = [
 				label: "Supplier",
 				type: "multi-link",
 				doctype: "Supplier",
+			},
+		],
+	},
+	{
+		slug: "stock-audit-report",
+		title: "Stock Audit Report",
+		reportName: "Stock Audit Report",
+		description:
+			"Thermal-printable stock audit by item with available qty. Filter by warehouse, brand, supplier, or item.",
+		category: "Inventory",
+		tone: "emerald",
+		thermalPrint: true,
+		filters: [
+			{
+				fieldname: "company",
+				label: "Company",
+				type: "link",
+				doctype: "Company",
+				required: true,
+			},
+			{
+				fieldname: "warehouse",
+				label: "Warehouse",
+				type: "multi-link",
+				doctype: "Warehouse",
+				linkFilters: (values) => ({ company: values.company, is_group: 0 }),
+				dependsOn: ["company"],
+			},
+			{
+				fieldname: "brand",
+				label: "Brand",
+				type: "multi-link",
+				doctype: "Brand",
+			},
+			{
+				fieldname: "supplier",
+				label: "Supplier",
+				type: "multi-link",
+				doctype: "Supplier",
+			},
+			{
+				fieldname: "item_group",
+				label: "Item Group",
+				type: "multi-link",
+				doctype: "Item Group",
 			},
 		],
 	},

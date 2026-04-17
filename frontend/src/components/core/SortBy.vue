@@ -101,8 +101,10 @@ const NON_SORTABLE = new Set([
 ]);
 
 const SYSTEM_FIELDS: DocField[] = [
+	{ fieldname: "owner", fieldtype: "Data", label: "Created By" },
+	{ fieldname: "modified_by", fieldtype: "Data", label: "Modified By" },
+	{ fieldname: "modified", fieldtype: "Datetime", label: "Modified On" },
 	{ fieldname: "creation", fieldtype: "Datetime", label: "Created On" },
-	{ fieldname: "modified", fieldtype: "Datetime", label: "Last Modified" },
 	{ fieldname: "name", fieldtype: "Data", label: "ID" },
 ];
 
@@ -135,6 +137,7 @@ const sortableFields = computed<DocField[]>(() => {
 			!systemNames.has(f.fieldname) &&
 			!NON_SORTABLE.has(f.fieldtype) &&
 			!f.hidden &&
+			!f.fieldname.includes(".") &&
 			(f.bold || f.in_list_view || f.reqd || f.in_standard_filter || f.in_global_search),
 	);
 

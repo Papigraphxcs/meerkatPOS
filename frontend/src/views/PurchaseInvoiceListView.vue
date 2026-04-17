@@ -37,7 +37,7 @@ const listView = useListView({
 		"docstatus",
 	],
 	baseFilters: { docstatus: 1 },
-	defaultOrderBy: "posting_date desc",
+	defaultOrderBy: "modified desc",
 	defaultPageSize: 20,
 });
 

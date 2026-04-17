@@ -51,7 +51,7 @@ const listView = useListView({
 		"per_billed",
 	],
 	baseFilters: { docstatus: 1 },
-	defaultOrderBy: "transaction_date desc",
+	defaultOrderBy: "modified desc",
 	defaultPageSize: 20,
 });
 

@@ -14,6 +14,7 @@ import {
 	Layers3,
 	Link2,
 	Lock,
+	Printer,
 	RefreshCw,
 	Search,
 	Sparkles,
@@ -523,6 +524,152 @@ function getSortLabel(): string {
 	const direction = sortState.value.direction === "asc" ? __("Ascending") : __("Descending");
 	return `${column?.label || sortState.value.fieldname} • ${direction}`;
 }
+function buildThermalHtml(rows: Record<string, unknown>[]): string {
+	const report = activeReport.value;
+	if (!report) return "";
+
+	const now = new Date().toLocaleString();
+	const totalItems = rows.length;
+
+	const filterLines = report.filters
+		.map((f) => {
+			const val = filterState[f.fieldname];
+			if (!val || (Array.isArray(val) && val.length === 0)) return null;
+			const display = Array.isArray(val) ? val.join(", ") : String(val);
+			return `<div><span class="fl">${f.label}:</span> <span class="fv">${display}</span></div>`;
+		})
+		.filter(Boolean)
+		.join("");
+
+	const warehouseMap = new Map<string, Record<string, unknown>[]>();
+	for (const row of rows) {
+		const wh = String(row.warehouse || "—");
+		if (!warehouseMap.has(wh)) warehouseMap.set(wh, []);
+		warehouseMap.get(wh)!.push(row);
+	}
+
+	let bodyHtml = "";
+	for (const [warehouse, warehouseRows] of warehouseMap) {
+		bodyHtml += `<div class="wh-header">${warehouse}</div>`;
+		for (const row of warehouseRows) {
+			const itemName = String(row.item_name || row.item_code || "—");
+			const qty = Number(row.qty_in_hand ?? 0);
+			const qtyStr = qty % 1 === 0 ? String(qty) : qty.toFixed(2);
+			bodyHtml += `<div class="item-row"><span class="item-name">${itemName}</span><span class="item-qty">${qtyStr}</span></div>`;
+		}
+		bodyHtml += `<div class="wh-subtotal">Subtotal: ${warehouseRows.length} item(s)</div>`;
+	}
+
+	return `<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>${report.title}</title>
+	<style>
+		@page { size: 80mm auto; margin: 4mm 3mm; }
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: Arial, sans-serif;
+			font-size: 9pt;
+			width: 74mm;
+			color: #000;
+		}
+		.center { text-align: center; }
+		.title { font-size: 11pt; font-weight: bold; margin-bottom: 2mm; }
+		.divider { border-top: 1px dashed #000; margin: 2mm 0; }
+		.filters { font-size: 7.5pt; color: #333; margin-bottom: 1mm; }
+		.fl { font-weight: bold; }
+		.fv { font-style: italic; }
+		.wh-header {
+			font-weight: bold;
+			font-size: 8.5pt;
+			margin-top: 2mm;
+			padding-bottom: 0.5mm;
+			border-bottom: 1px solid #000;
+			text-transform: uppercase;
+		}
+		.item-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: baseline;
+			padding: 0.6mm 0;
+			border-bottom: 1px dotted #ccc;
+			gap: 2mm;
+		}
+		.item-name {
+			flex: 1;
+			word-break: break-word;
+			line-height: 1.3;
+		}
+		.item-qty {
+			white-space: nowrap;
+			font-weight: bold;
+			text-align: right;
+			min-width: 10mm;
+		}
+		.wh-subtotal {
+			text-align: right;
+			font-size: 7.5pt;
+			color: #555;
+			margin-top: 0.5mm;
+			margin-bottom: 1mm;
+		}
+		.footer {
+			margin-top: 2mm;
+			text-align: center;
+			font-size: 7.5pt;
+			color: #555;
+		}
+		.total-row {
+			font-weight: bold;
+			margin-top: 1.5mm;
+			padding-top: 1mm;
+			border-top: 2px solid #000;
+			display: flex;
+			justify-content: space-between;
+		}
+	</style>
+</head>
+<body>
+	<div class="center title">${report.title}</div>
+	<div class="center" style="font-size:7.5pt; color:#555;">${now}</div>
+	${filterLines ? `<div class="divider"></div><div class="filters">${filterLines}</div>` : ""}
+	<div class="divider"></div>
+	<div style="display:flex; justify-content:space-between; font-weight:bold; font-size:8pt; padding-bottom:1mm; border-bottom:1px solid #000;">
+		<span>Item Name</span><span>Qty</span>
+	</div>
+	${bodyHtml}
+	<div class="divider"></div>
+	<div class="total-row"><span>Total Items</span><span>${totalItems}</span></div>
+	<div class="footer">*** End of Report ***</div>
+</body>
+</html>`;
+}
+
+function printThermal() {
+	if (filteredRows.value.length === 0) {
+		showError(__("No data to print."));
+		return;
+	}
+	const html = buildThermalHtml(filteredRows.value);
+	const printWindow = window.open("", "_blank", "width=320,height=600");
+	if (!printWindow) {
+		showError(__("Print window blocked. Please allow popups and try again."));
+		return;
+	}
+	printWindow.document.open();
+	printWindow.document.write(html);
+	printWindow.document.close();
+	printWindow.focus();
+	printWindow.onload = () => {
+		printWindow.print();
+	};
+	setTimeout(() => {
+		if (printWindow && !printWindow.closed) {
+			printWindow.print();
+		}
+	}, 800);
+}
 </script>
 
 <template>
@@ -629,6 +776,17 @@ function getSortLabel(): string {
 								<Button variant="outline" size="sm" class="h-10" @click="exportCsv">
 									<Download class="h-4 w-4" />
 									{{ __("Export CSV") }}
+								</Button>
+								<Button
+									v-if="activeReport.thermalPrint"
+									variant="outline"
+									size="sm"
+									class="h-10"
+									:disabled="reportRows.length === 0"
+									@click="printThermal"
+								>
+									<Printer class="h-4 w-4" />
+									{{ __("Print Thermal") }}
 								</Button>
 								<Button variant="ghost" size="sm" class="h-10" @click="copyReportLink">
 									<Link2 class="h-4 w-4" />
