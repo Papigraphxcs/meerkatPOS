@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-04-19 13:51+0428\n"
+"POT-Creation-Date: 2026-04-19 22:32+0428\n"
 "PO-Revision-Date: 2026-03-18 18:39+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
@@ -15,10 +15,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.13.1\n"
-
-#: frontend/src/views/PurchaseView.vue:143
-msgid "-- Select --"
-msgstr ""
 
 #. Description of the 'Item code starting position' (Int) field in DocType
 #. 'Scale Barcode Settings'
@@ -75,20 +71,12 @@ msgstr "ಬಳಕೆದಾರ ಖಾತೆಗಳು"
 msgid "Actual Qty"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseItemList.vue:243
-msgid "Add"
-msgstr ""
-
 #: frontend/src/components/core/QueryFilterPanel.vue:36
 msgid "Add Filter"
 msgstr "ಫಿಲ್ಟರ್ ಸೇರಿಸಿ"
 
 #: frontend/src/components/ui/table/Table.vue:799
 msgid "Add First Row"
-msgstr ""
-
-#: frontend/src/components/purchase/SupplierSelector.vue:112
-msgid "Add New Supplier"
 msgstr ""
 
 #: frontend/src/components/ui/table/Table.vue:772
@@ -108,20 +96,8 @@ msgstr ""
 msgid "Add a new item to inventory"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseItemList.vue:254
-msgid "Add a new item to the inventory"
-msgstr ""
-
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:68
 msgid "Add a new supplier"
-msgstr ""
-
-#: frontend/src/components/purchase/SupplierSelector.vue:165
-msgid "Add a new supplier to the system"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:79
-msgid "Add items from the list to start"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:433
@@ -163,15 +139,6 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Administrator"
 msgstr "ನಿರ್ವಾಹಕ"
-
-#: frontend/src/components/purchase/PurchaseCart.vue:89
-#: frontend/src/views/PurchaseView.vue:133
-msgid "Alias"
-msgstr ""
-
-#: frontend/src/views/PurchaseView.vue:129
-msgid "Alias Name"
-msgstr ""
 
 #: frontend/src/components/core/ListFilterBar.vue:26
 #: frontend/src/components/core/ListFilterBar.vue:37
@@ -218,7 +185,6 @@ msgstr "ಗೆ ತಿದ್ದುಪಡಿ"
 #: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:79
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:109
 #: frontend/src/components/dialogs/ReturnDialog.vue:111
-#: frontend/src/components/purchase/PurchaseCart.vue:99
 #: frontend/src/views/BankDropView.vue:140
 #: frontend/src/views/ExpenseView.vue:143
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -345,14 +311,6 @@ msgstr ""
 msgid "Auto-generated"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseItemList.vue:275
-msgid "Auto-generated if empty"
-msgstr ""
-
-#: frontend/src/views/PurchaseView.vue:266
-msgid "Auto-receive"
-msgstr ""
-
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:98
 msgid "Available Programs"
 msgstr ""
@@ -389,14 +347,9 @@ msgid "Bank Drops"
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:99
-#: frontend/src/components/purchase/PurchaseItemList.vue:280
 #: frontend/src/views/BarcodePrintView.vue:173
 msgid "Barcode"
 msgstr "ಬಾರ್‌ಕೋಡ್"
-
-#: frontend/src/components/purchase/PurchaseItemList.vue:282
-msgid "Barcode (optional)"
-msgstr ""
 
 #: frontend/src/components/Sidebar.vue:187
 #: frontend/src/components/items/CommandSearch.vue:371
@@ -476,7 +429,6 @@ msgid "Built with ❤️, using VueJS"
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:116
-#: frontend/src/components/purchase/PurchaseItemList.vue:305
 msgid "Buying Price"
 msgstr ""
 
@@ -521,7 +473,6 @@ msgstr "ದಂಡಯಾತ್ರೆ"
 #: frontend/src/components/dialogs/RepeatInvoiceDialog.vue:83
 #: frontend/src/components/dialogs/ReturnDialog.vue:152
 #: frontend/src/components/purchase/StockReceiving.vue:307
-#: frontend/src/components/purchase/SupplierSelector.vue:226
 #: frontend/src/components/ui/table/Table.vue:1319
 #: frontend/src/views/BankDropView.vue:164
 #: frontend/src/views/ExpenseView.vue:167
@@ -572,7 +523,6 @@ msgstr ""
 
 #: frontend/src/components/cart/Cart.vue:128
 #: frontend/src/components/dialogs/PaymentDialog.vue:945
-#: frontend/src/components/purchase/PurchaseCart.vue:78
 msgid "Cart is empty"
 msgstr ""
 
@@ -613,10 +563,6 @@ msgstr ""
 msgid "Cashier"
 msgstr "ಕ್ಯಾಷಿಯರ್"
 
-#: frontend/src/components/purchase/PurchaseCart.vue:114
-msgid "Category"
-msgstr ""
-
 #: frontend/src/components/dialogs/PaymentDialog.vue:440
 msgid "Change"
 msgstr "ಬದಲಾವಣೆ"
@@ -634,11 +580,6 @@ msgstr ""
 msgid "City"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:115
-msgid "Class"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:316
 #: frontend/src/components/ui/datetime-picker/DateTimePicker.vue:851
 #: frontend/src/views/OrdersView.vue:35
 #: frontend/src/views/PurchaseInvoiceListView.vue:175
@@ -768,8 +709,6 @@ msgstr ""
 #: frontend/src/components/dialogs/OpeningDialog.vue:72
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:47
 #: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:43
-#: frontend/src/components/purchase/SupplierSelector.vue:190
-#: frontend/src/views/PurchaseView.vue:276
 #: xpos/x_pos/api/payment_processing/data.py:79
 #: xpos/x_pos/api/payment_processing/data.py:179
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
@@ -946,34 +885,20 @@ msgstr ""
 msgid "Create & Submit"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseItemList.vue:337
-msgid "Create Item"
-msgstr ""
-
 #: frontend/src/components/customer/CustomerSelect.vue:103
 msgid "Create New Customer"
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:85
-#: frontend/src/components/purchase/PurchaseItemList.vue:252
 msgid "Create New Item"
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:67
-#: frontend/src/components/purchase/SupplierSelector.vue:163
 msgid "Create New Supplier"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:323
-msgid "Create Order"
 msgstr ""
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:44
 msgid "Create Purchase Order"
-msgstr ""
-
-#: frontend/src/components/purchase/SupplierSelector.vue:229
-msgid "Create Supplier"
 msgstr ""
 
 #: frontend/src/views/PurchaseInvoiceListView.vue:190
@@ -986,15 +911,6 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:316
 msgid "Create items"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseItemList.vue:195
-#: frontend/src/components/purchase/PurchaseItemList.vue:215
-msgid "Create new item"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:309
-msgid "Create purchase invoice"
 msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:327
@@ -1016,8 +932,6 @@ msgstr ""
 #: frontend/src/components/customer/CustomerSelect.vue:271
 #: frontend/src/components/dialogs/CreateItemDialog.vue:129
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:104
-#: frontend/src/components/purchase/PurchaseItemList.vue:337
-#: frontend/src/components/purchase/SupplierSelector.vue:229
 #: frontend/src/views/PurchaseInvoiceView.vue:938
 #: frontend/src/views/PurchaseOrderView.vue:624
 msgid "Creating..."
@@ -1290,10 +1204,6 @@ msgstr ""
 msgid "Delivery charge"
 msgstr ""
 
-#: frontend/src/views/PurchaseView.vue:156
-msgid "Department"
-msgstr ""
-
 #. Option for the 'Movement Type' (Select) field in DocType 'POS Cash Movement'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Deposit"
@@ -1306,10 +1216,6 @@ msgstr ""
 
 #: frontend/src/views/BankDropView.vue:388
 msgid "Deposit cancelled"
-msgstr ""
-
-#: frontend/src/views/PurchaseView.vue:152
-msgid "Dept"
 msgstr ""
 
 #: frontend/src/views/ReportViewerView.vue:524
@@ -1371,7 +1277,6 @@ msgid "Disc Amt"
 msgstr ""
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:129
-#: frontend/src/components/purchase/PurchaseCart.vue:98
 #: frontend/src/views/PurchaseInvoiceView.vue:447
 msgid "Disc%"
 msgstr ""
@@ -1515,7 +1420,6 @@ msgstr ""
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:96
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:57
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:59
-#: frontend/src/components/purchase/SupplierSelector.vue:211
 msgid "Email"
 msgstr "ಇಮೇಲ್"
 
@@ -1525,10 +1429,6 @@ msgstr "ಇಮೇಲ್"
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 msgid "Email ID"
 msgstr "ಇಮೇಲ್ ID"
-
-#: frontend/src/components/purchase/SupplierSelector.vue:216
-msgid "Email address"
-msgstr "ಇಮೇಲ್ ವಿಳಾಸ"
 
 #. Description of the 'Price' (Section Break) field in DocType 'Scale Barcode
 #. Settings'
@@ -1567,18 +1467,10 @@ msgstr ""
 msgid "Enter for next row"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseItemList.vue:266
-msgid "Enter item name"
-msgstr ""
-
 #: frontend/src/components/dialogs/CashMovementDialog.vue:83
 #: frontend/src/views/BankDropView.vue:158
 #: frontend/src/views/ExpenseView.vue:161
 msgid "Enter reason for this transaction..."
-msgstr ""
-
-#: frontend/src/components/purchase/SupplierSelector.vue:176
-msgid "Enter supplier name"
 msgstr ""
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:75
@@ -1886,10 +1778,6 @@ msgstr ""
 msgid "Generating..."
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:113
-msgid "Generic"
-msgstr ""
-
 #: frontend/src/views/PurchaseOrderView.vue:463
 #: frontend/src/views/PurchaseOrderView.vue:482
 msgid "Get Items"
@@ -2018,7 +1906,6 @@ msgid "Increase/Decrease Quantity (in cart)"
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:83
-#: frontend/src/components/purchase/SupplierSelector.vue:191
 msgid "Individual"
 msgstr "ಇಂಡಿವಿಜುವಲ್"
 
@@ -2077,10 +1964,6 @@ msgstr ""
 #: xpos/x_pos/api/payment_processing/data.py:19
 msgid "Invalid {0} filter"
 msgstr ""
-
-#: frontend/src/views/PurchaseView.vue:267
-msgid "Invoice"
-msgstr "ಸರಕುಪಟ್ಟಿ"
 
 #. Label of a Currency field in DocType 'Sales Invoice Reference'
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
@@ -2164,7 +2047,6 @@ msgstr "ವಸ್ತು"
 #. Option for the 'Apply Type' (Select) field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'POS Offer'
 #: frontend/src/components/dialogs/CreateItemDialog.vue:95
-#: frontend/src/components/purchase/PurchaseItemList.vue:273
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.py:40
 #: xpos/x_pos/report/current_stock_report/current_stock_report.py:57
@@ -2199,7 +2081,6 @@ msgstr ""
 #. Option for the 'Apply Type' (Select) field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'POS Offer'
 #: frontend/src/components/dialogs/CreateItemDialog.vue:107
-#: frontend/src/components/purchase/PurchaseItemList.vue:296
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/report/current_stock_report/current_stock_report.js:46
 #: xpos/x_pos/report/current_stock_report/current_stock_report.py:70
@@ -2209,8 +2090,6 @@ msgid "Item Group"
 msgstr "ಐಟಂ ಗುಂಪು"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:91
-#: frontend/src/components/purchase/PurchaseCart.vue:91
-#: frontend/src/components/purchase/PurchaseItemList.vue:262
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.py:47
 #: xpos/x_pos/report/current_stock_report/current_stock_report.py:64
 #: xpos/x_pos/report/current_stock_with_levels/current_stock_with_levels.py:50
@@ -2255,15 +2134,10 @@ msgstr ""
 msgid "Item code starting position"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseItemList.vue:298
-msgid "Item group"
-msgstr ""
-
 #: frontend/src/stores/cartStore.ts:467
 msgid "Item not found"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseItemList.vue:74
 #: frontend/src/views/PurchaseInvoiceView.vue:186
 #: frontend/src/views/PurchaseOrderView.vue:90
 msgid "Item not found for barcode"
@@ -2293,8 +2167,6 @@ msgstr ""
 #: frontend/src/views/PosView.vue:16
 #: frontend/src/views/PurchaseInvoiceView.vue:1172
 #: frontend/src/views/PurchaseOrderView.vue:579
-#: frontend/src/views/PurchaseView.vue:208
-#: frontend/src/views/PurchaseView.vue:245
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Items"
 msgstr "ಐಟಂಗಳನ್ನು"
@@ -2364,12 +2236,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:85
 #: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:50
-#: frontend/src/components/purchase/PurchaseItemList.vue:205
 msgid "Loading items..."
-msgstr ""
-
-#: frontend/src/components/purchase/SupplierSelector.vue:103
-msgid "Loading suppliers..."
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:249
@@ -2382,10 +2249,6 @@ msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:421
 msgid "Locked by POS Profile"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:95
-msgid "Loose"
 msgstr ""
 
 #. Name of a report
@@ -2518,7 +2381,6 @@ msgid "Missing Dependency"
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:92
-#: frontend/src/components/purchase/SupplierSelector.vue:204
 msgid "Mobile"
 msgstr "ಮೊಬೈಲ್"
 
@@ -2657,7 +2519,6 @@ msgstr ""
 #: frontend/src/components/core/ListFilterBar.vue:39
 #: frontend/src/services/reports.ts:829
 #: frontend/src/views/PurchaseOrderView.vue:494
-#: frontend/src/views/PurchaseView.vue:165
 msgid "No"
 msgstr ""
 
@@ -2755,8 +2616,6 @@ msgid "No invoices found"
 msgstr ""
 
 #: frontend/src/components/items/ItemGrid.vue:19
-#: frontend/src/components/purchase/PurchaseItemList.vue:192
-#: frontend/src/components/purchase/PurchaseItemList.vue:212
 #: frontend/src/views/BarcodePrintView.vue:104
 msgid "No items found"
 msgstr ""
@@ -2894,11 +2753,6 @@ msgstr ""
 msgid "No rows to copy."
 msgstr ""
 
-#: frontend/src/components/purchase/SupplierSelector.vue:92
-#: frontend/src/components/purchase/SupplierSelector.vue:109
-msgid "No suppliers found"
-msgstr ""
-
 #: xpos/x_pos/api/payment_processing/reconciliation.py:57
 msgid "No unallocated payments were available for reconciliation."
 msgstr ""
@@ -2979,7 +2833,6 @@ msgid "Offers & Coupons"
 msgstr ""
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:29
-#: frontend/src/views/PurchaseView.vue:81
 msgid "Offline"
 msgstr "ಆಫ್ಲೈನ್"
 
@@ -3086,10 +2939,6 @@ msgstr ""
 msgid "Order History"
 msgstr ""
 
-#: frontend/src/views/PurchaseView.vue:266
-msgid "Order only"
-msgstr ""
-
 #: frontend/src/components/cart/CartSummary.vue:653
 msgid "Order saved as draft"
 msgstr ""
@@ -3134,12 +2983,7 @@ msgstr ""
 msgid "Outstanding After Save"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:117
-msgid "P.Units"
-msgstr ""
-
 #: frontend/src/views/PurchaseOrderView.vue:416
-#: frontend/src/views/PurchaseView.vue:137
 msgid "P/O Category"
 msgstr ""
 
@@ -3394,15 +3238,6 @@ msgstr ""
 msgid "POS profile data is missing or invalid."
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:116
-#: frontend/src/components/purchase/PurchaseItemList.vue:237
-msgid "Packing"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:96
-msgid "Packs"
-msgstr ""
-
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:73
 msgid "Paid"
 msgstr ""
@@ -3471,10 +3306,6 @@ msgstr ""
 msgid "Payments"
 msgstr "ಪಾವತಿಗಳು"
 
-#: frontend/src/views/PurchaseView.vue:89
-msgid "Pending"
-msgstr "ಬಾಕಿ"
-
 #: frontend/src/components/orders/Pagination.vue:55
 msgid "Per page:"
 msgstr ""
@@ -3492,10 +3323,6 @@ msgstr "ಅವಧಿ ಅಂತ್ಯ ದಿನಾಂಕ"
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Period Start Date"
 msgstr "ಅವಧಿಯ ಪ್ರಾರಂಭ ದಿನಾಂಕ"
-
-#: frontend/src/components/purchase/SupplierSelector.vue:206
-msgid "Phone number"
-msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:54
 msgid "Platform"
@@ -3764,7 +3591,6 @@ msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:81
 #: frontend/src/components/dialogs/PaymentDialog.vue:533
-#: frontend/src/components/purchase/PurchaseCart.vue:323
 #: frontend/src/components/purchase/StockReceiving.vue:315
 msgid "Processing..."
 msgstr "ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ ..."
@@ -3796,10 +3622,6 @@ msgstr "ಪ್ರಚಾರ"
 #. Label of a Link in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Promotional Scheme"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:62
-msgid "Purchase Cart"
 msgstr ""
 
 #: frontend/src/components/Sidebar.vue:182
@@ -3844,7 +3666,6 @@ msgid "Purchase Order <a href=\"/app/purchase-order/{0}\">{0}</a> created succes
 msgstr ""
 
 #: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:20
-#: frontend/src/views/PurchaseView.vue:123
 msgid "Purchase Order Details"
 msgstr ""
 
@@ -3915,7 +3736,6 @@ msgid "Purchase orders"
 msgstr ""
 
 #: frontend/src/components/Sidebar.vue:48
-#: frontend/src/views/PurchaseView.vue:74
 msgid "Purchasing"
 msgstr ""
 
@@ -3992,8 +3812,6 @@ msgstr ""
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:119
 #: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:74
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:104
-#: frontend/src/components/purchase/PurchaseCart.vue:97
-#: frontend/src/components/purchase/PurchaseItemList.vue:233
 #: frontend/src/views/PurchaseInvoiceView.vue:429
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:96
@@ -4010,11 +3828,6 @@ msgstr "ದರ"
 msgid "Reason / Notes"
 msgstr ""
 
-#: frontend/src/views/PurchaseView.vue:215
-#: frontend/src/views/PurchaseView.vue:251
-msgid "Receive"
-msgstr "ಸ್ವೀಕರಿಸಿ"
-
 #: frontend/src/components/purchase/StockReceiving.vue:315
 msgid "Receive & Return"
 msgstr ""
@@ -4026,10 +3839,6 @@ msgstr ""
 #: frontend/src/components/items/CommandSearch.vue:345
 #: xpos/x_pos/api/purchase_orders.py:476 xpos/x_pos/api/purchase_orders.py:651
 msgid "Receive stock"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:300
-msgid "Receive stock immediately"
 msgstr ""
 
 #: frontend/src/views/PurchaseInvoiceView.vue:1093
@@ -4146,10 +3955,6 @@ msgstr ""
 msgid "Refresh profiles"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:67
-msgid "Refresh stock data"
-msgstr ""
-
 #: frontend/src/views/ReportViewerView.vue:766
 msgid "Refreshing"
 msgstr ""
@@ -4170,8 +3975,6 @@ msgstr ""
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:79
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:267
 #: frontend/src/views/PurchaseInvoiceView.vue:996
-#: frontend/src/views/PurchaseView.vue:170
-#: frontend/src/views/PurchaseView.vue:174
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Remarks"
 msgstr "ರಿಮಾರ್ಕ್ಸ್"
@@ -4485,10 +4288,6 @@ msgstr ""
 msgid "Scale Barcode Settings are incomplete. Please configure item and weight segments."
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseItemList.vue:171
-msgid "Scan barcode to add..."
-msgstr ""
-
 #: frontend/src/components/items/BarcodeScanner.vue:12
 #: frontend/src/views/PurchaseInvoiceView.vue:1147
 #: frontend/src/views/PurchaseOrderView.vue:543
@@ -4639,7 +4438,6 @@ msgid "Selected source account is not allowed for this POS Profile."
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:120
-#: frontend/src/components/purchase/PurchaseItemList.vue:317
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:81
 msgid "Selling Price"
 msgstr ""
@@ -4820,8 +4618,6 @@ msgstr "ಅಂತಸ್ತು"
 msgid "Status must be one of {0}"
 msgstr "ಸ್ಥಿತಿ ಒಂದು ಇರಬೇಕು {0}"
 
-#: frontend/src/components/purchase/PurchaseCart.vue:70
-#: frontend/src/components/purchase/PurchaseCart.vue:93
 #: xpos/x_pos/report/current_stock_report/current_stock_report.py:82
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.py:79
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.py:86
@@ -4862,10 +4658,6 @@ msgstr ""
 #: frontend/src/components/items/CommandSearch.vue:344
 #: frontend/src/views/StockReceivingView.vue:23
 msgid "Stock Receiving"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseItemList.vue:289
-msgid "Stock UOM"
 msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:325
@@ -4958,7 +4750,6 @@ msgid "Supplier Bill"
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:72
-#: frontend/src/components/purchase/SupplierSelector.vue:172
 msgid "Supplier Name"
 msgstr "ಸರಬರಾಜುದಾರ ಹೆಸರು"
 
@@ -4982,11 +4773,6 @@ msgstr ""
 msgid "Supplier {0} was not found."
 msgstr ""
 
-#: frontend/src/views/PurchaseView.vue:196
-#: frontend/src/views/PurchaseView.vue:238
-msgid "Suppliers"
-msgstr "ಪೂರೈಕೆದಾರರು"
-
 #: frontend/src/components/dialogs/CameraBarcodeDialog.vue:96
 msgid "Supported: QR, EAN, UPC, Code 128, Code 39 and more"
 msgstr ""
@@ -4994,10 +4780,6 @@ msgstr ""
 #: frontend/src/components/items/CommandSearch.vue:510
 msgid "Switch between light/dark/system"
 msgstr ""
-
-#: frontend/src/views/PurchaseView.vue:102
-msgid "Sync"
-msgstr "ಸಿಂಕ್"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:50
 msgid "Sync All"
@@ -5053,7 +4835,6 @@ msgstr ""
 msgid "Tax"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:108
 #: frontend/src/views/PurchaseInvoiceView.vue:503
 msgid "Tax Amt"
 msgstr ""
@@ -5067,8 +4848,6 @@ msgstr ""
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:87
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:42
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:44
-#: frontend/src/components/purchase/SupplierSelector.vue:196
-#: frontend/src/components/purchase/SupplierSelector.vue:198
 msgid "Tax ID"
 msgstr "ತೆರಿಗೆಯ ID"
 
@@ -5186,8 +4965,6 @@ msgid "Tools"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:124
-#: frontend/src/components/purchase/PurchaseCart.vue:111
-#: frontend/src/components/purchase/PurchaseCart.vue:288
 #: frontend/src/views/PurchaseInvoiceView.vue:512
 msgid "Total"
 msgstr "ಒಟ್ಟು"
@@ -5205,7 +4982,6 @@ msgid "Total Paid"
 msgstr ""
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:228
-#: frontend/src/components/purchase/PurchaseCart.vue:268
 #: frontend/src/views/PurchaseInvoiceView.vue:1176
 #: frontend/src/views/PurchaseOrderView.vue:583
 msgid "Total Qty"
@@ -5216,10 +4992,6 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Total Quantity"
 msgstr "ಒಟ್ಟು ಪರಿಮಾಣ"
-
-#: frontend/src/components/purchase/PurchaseCart.vue:283
-msgid "Total Tax"
-msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:75
 msgid "Total Taxes"
@@ -5240,10 +5012,6 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Transaction"
 msgstr "ಟ್ರಾನ್ಸಾಕ್ಷನ್"
-
-#: frontend/src/components/purchase/PurchaseCart.vue:94
-msgid "Transit"
-msgstr ""
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:166
 msgid "Trigger Manual Sync"
@@ -5271,9 +5039,6 @@ msgstr ""
 
 #. Label of a Data field in DocType 'POS Coupon Detail'
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:77
-#: frontend/src/components/purchase/SupplierSelector.vue:184
-#: frontend/src/views/PurchaseView.vue:148
-#: frontend/src/views/PurchaseView.vue:149
 #: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:35
 msgid "Type"
@@ -5281,7 +5046,6 @@ msgstr "ದರ್ಜೆ"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:103
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:109
-#: frontend/src/components/purchase/PurchaseItemList.vue:231
 #: frontend/src/views/PurchaseInvoiceView.vue:409
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:161
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.py:70
@@ -5428,7 +5192,6 @@ msgid "Walk-in Customer"
 msgstr ""
 
 #. Label of a Link field in DocType 'POS Offer'
-#: frontend/src/views/PurchaseView.vue:273
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/report/branch_item_summary/branch_item_summary.js:19
 #: xpos/x_pos/report/branch_set_summary/branch_set_summary.js:19
@@ -5544,7 +5307,6 @@ msgstr ""
 #: frontend/src/components/core/ListFilterBar.vue:38
 #: frontend/src/services/reports.ts:829
 #: frontend/src/views/PurchaseOrderView.vue:495
-#: frontend/src/views/PurchaseView.vue:166
 msgid "Yes"
 msgstr ""
 
@@ -5583,7 +5345,6 @@ msgstr ""
 
 #: frontend/src/views/PurchaseOrderView.vue:490
 #: frontend/src/views/PurchaseOrderView.vue:497
-#: frontend/src/views/PurchaseView.vue:160
 msgid "Zero Qty"
 msgstr ""
 
@@ -5635,7 +5396,6 @@ msgid "item(s)"
 msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:76
-#: frontend/src/components/purchase/PurchaseCart.vue:64
 #: frontend/src/components/purchase/StockReceiving.vue:381
 #: frontend/src/views/PurchaseInvoiceView.vue:1029
 #: frontend/src/views/PurchaseInvoiceView.vue:1090
