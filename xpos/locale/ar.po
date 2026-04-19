@@ -1,14 +1,14 @@
 # Translations template for X POS.
 # Copyright (C) 2026 Ali Raza
 # This file is distributed under the same license as the X POS project.
-# FIRST AUTHOR <ar.frappe.dev@gmail.com>, 2026.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
 "POT-Creation-Date: 2026-04-19 22:32+0428\n"
-"PO-Revision-Date: 2026-03-18 18:39+0428\n"
+"PO-Revision-Date: 2026-04-19 22:32+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -20,13 +20,13 @@ msgstr ""
 #. 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "1-indexed start position of item code in the full barcode. Example: for item code 3310100 in 3310100010009, start is 1."
-msgstr ""
+msgstr "موضع البداية (مُرقَّم من 1) لرمز العنصر في الباركود الكامل. مثال: لرمز العنصر 3310100 في 3310100010009، البداية هي 1."
 
 #. Description of the 'Weight starting position' (Int) field in DocType 'Scale
 #. Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "1-indexed start position of weight segment. Example: in 3310100010009, weight starts at position 8."
-msgstr ""
+msgstr "موضع البداية (مُرقَّم من 1) لمقطع الوزن. مثال: في 3310100010009، يبدأ الوزن في الموضع 8."
 
 #. Header text in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
@@ -73,7 +73,7 @@ msgstr ""
 
 #: frontend/src/components/core/QueryFilterPanel.vue:36
 msgid "Add Filter"
-msgstr ""
+msgstr "إضافة فلتر"
 
 #: frontend/src/components/ui/table/Table.vue:799
 msgid "Add First Row"
@@ -102,7 +102,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:433
 msgid "Add items to pay"
-msgstr ""
+msgstr "إضافة عناصر للدفع"
 
 #: frontend/src/components/dialogs/ItemDetailDialog.vue:183
 msgid "Add to Cart"
@@ -149,7 +149,7 @@ msgstr "الكل"
 
 #: frontend/src/views/PosView.vue:114 frontend/src/views/PosView.vue:236
 msgid "All Groups"
-msgstr ""
+msgstr "كل المجموعات"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:74
 msgid "All caught up"
@@ -161,11 +161,11 @@ msgstr ""
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:438
 msgid "Allocated {0} across {1} payment(s)."
-msgstr ""
+msgstr "تم تخصيص {0} عبر {1} دفعة (دفعات)."
 
 #: xpos/x_pos/api/payment_processing/processor.py:242
 msgid "Allocation amount for payment {0} exceeds outstanding invoices"
-msgstr ""
+msgstr "مبلغ التخصيص للدفع {0} يتجاوز الفواتير المستحقة"
 
 #. Label of a Link field in DocType 'POS Cash Movement'
 #. Label of a Link field in DocType 'POS Closing Shift'
@@ -199,21 +199,21 @@ msgstr "مبلغ"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:75
 msgid "Amount Due"
-msgstr ""
+msgstr "المبلغ المستحق"
 
 #: xpos/x_pos/api/cash_movement/validation.py:50
 msgid "Amount exceeds POS Profile cash movement max amount."
-msgstr ""
+msgstr "المبلغ يتجاوز الحد الأقصى لحركة النقد في ملف نقاط البيع."
 
 #: xpos/api/cash_movements.py:80 xpos/api/cash_movements.py:165
 msgid "Amount must be greater than zero"
-msgstr ""
+msgstr "يجب أن يكون المبلغ أكبر من صفر"
 
 #: xpos/x_pos/api/cash_movement/posting.py:18
 #: xpos/x_pos/api/cash_movement/validation.py:46
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:53
 msgid "Amount must be greater than zero."
-msgstr ""
+msgstr "يجب أن يكون المبلغ أكبر من صفر."
 
 #: frontend/src/views/ReportsIndexView.vue:118
 msgid "Analytics Reports"
@@ -233,7 +233,7 @@ msgstr "طلب"
 #: frontend/src/components/core/QueryFilterPanel.vue:143
 #: frontend/src/components/dialogs/PaymentDialog.vue:362
 msgid "Apply"
-msgstr ""
+msgstr "تطبيق"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:96
 msgid "Apply Discount"
@@ -246,12 +246,12 @@ msgstr ""
 #. Label of a Section Break field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Apply For"
-msgstr ""
+msgstr "تطبيق على"
 
 #. Label of a Section Break field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "Apply For POS Profiles"
-msgstr ""
+msgstr "تطبيق على ملفات نقاط البيع"
 
 #. Label of a Data field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
@@ -276,11 +276,11 @@ msgstr "تطبيق القاعدة على مجموعة العناصر"
 #. Label of a Select field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Apply Type"
-msgstr ""
+msgstr "نوع التطبيق"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:194
 msgid "Are you sure you want to delete this draft?"
-msgstr ""
+msgstr "هل أنت متأكد أنك تريد حذف هذه المسودة؟"
 
 #: frontend/src/components/ui/table/Table.vue:1092
 msgid "Arrow keys to navigate"
@@ -296,7 +296,7 @@ msgstr ""
 
 #: xpos/api/invoices.py:220
 msgid "At least one item is required"
-msgstr ""
+msgstr "مطلوب عنصر واحد على الأقل"
 
 #: xpos/x_pos/api/purchase_orders.py:1876
 msgid "At least one item is required."
@@ -305,7 +305,7 @@ msgstr ""
 #. Label of a Check field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Auto Apply"
-msgstr ""
+msgstr "تطبيق تلقائي"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:96
 msgid "Auto-generated"
@@ -313,7 +313,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:98
 msgid "Available Programs"
-msgstr ""
+msgstr "البرامج المتاحة"
 
 #: frontend/src/components/dialogs/ReturnDialog.vue:92
 msgid "Back"
@@ -321,15 +321,15 @@ msgstr ""
 
 #: xpos/x_pos/api/cash_movement/validation.py:155
 msgid "Back Office Cash Account is fixed by POS Profile and cannot be overridden."
-msgstr ""
+msgstr "حساب النقد للمكتب الخلفي محدد بواسطة ملف نقاط البيع ولا يمكن تجاوزه."
 
 #: xpos/x_pos/api/cash_movement/validation.py:161
 msgid "Back Office Cash Account is required for cash deposit."
-msgstr ""
+msgstr "حساب النقد للمكتب الخلفي مطلوب للإيداع النقدي."
 
 #: xpos/x_pos/api/cash_movement/validation.py:164
 msgid "Back Office Cash Account must be a Cash account."
-msgstr ""
+msgstr "يجب أن يكون حساب النقد للمكتب الخلفي حساباً نقدياً."
 
 #: frontend/src/components/dialogs/OpeningDialog.vue:129
 msgid "Back to Desk"
@@ -355,12 +355,12 @@ msgstr "الرمز الشريطي"
 #: frontend/src/components/items/CommandSearch.vue:371
 #: frontend/src/views/BarcodePrintView.vue:6
 msgid "Barcode Printer"
-msgstr ""
+msgstr "طابعة الباركود"
 
 #. Label of a Section Break field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Barcode Structure"
-msgstr ""
+msgstr "هيكل الباركود"
 
 #: frontend/src/views/BarcodePrintView.vue:45
 msgid "Barcode Type"
@@ -368,11 +368,11 @@ msgstr "نوع الباركود"
 
 #: frontend/src/views/PosView.vue:366
 msgid "Barcode lookup failed"
-msgstr ""
+msgstr "فشل البحث عن الباركود"
 
 #: xpos/x_pos/api/purchase_orders.py:336
 msgid "Barcode {0} already exists."
-msgstr ""
+msgstr "الباركود {0} موجود بالفعل."
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:176
 msgid "Batch"
@@ -486,11 +486,11 @@ msgstr "ألغيت"
 
 #: xpos/x_pos/api/cash_movement/permissions.py:24
 msgid "Cancelling submitted cash movements is disabled for this POS Profile."
-msgstr ""
+msgstr "إلغاء حركات النقد المقدمة معطل لهذا الملف التعريفي لنقاط البيع."
 
 #: frontend/src/views/PosView.vue:474
 msgid "Cannot add item to cart"
-msgstr ""
+msgstr "لا يمكن إضافة العنصر إلى السلة"
 
 #: xpos/x_pos/api/purchase_orders.py:1732
 msgid "Cannot delete a submitted Purchase Order."
@@ -524,18 +524,18 @@ msgstr ""
 #: frontend/src/components/cart/Cart.vue:128
 #: frontend/src/components/dialogs/PaymentDialog.vue:945
 msgid "Cart is empty"
-msgstr ""
+msgstr "السلة فارغة"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:29
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:153
 #: frontend/src/components/items/CommandSearch.vue:483
 #: frontend/src/views/BankDropView.vue:124
 msgid "Cash Deposit"
-msgstr ""
+msgstr "إيداع نقدي"
 
 #: xpos/x_pos/api/cash_movement/permissions.py:19
 msgid "Cash Deposit is disabled for this POS Profile."
-msgstr ""
+msgstr "الإيداع النقدي معطل لهذا الملف التعريفي لنقاط البيع."
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:150
 #: frontend/src/components/items/CommandSearch.vue:474
@@ -545,16 +545,16 @@ msgstr ""
 #. Label of a Card Break in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Cash Movement"
-msgstr ""
+msgstr "حركة نقدية"
 
 #: xpos/x_pos/api/cash_movement/permissions.py:11
 msgid "Cash Movement is disabled for this POS Profile."
-msgstr ""
+msgstr "حركة النقد معطلة لهذا الملف التعريفي لنقاط البيع."
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:291
 #: frontend/src/views/BankDropView.vue:368
 msgid "Cash deposit recorded"
-msgstr ""
+msgstr "تم تسجيل الإيداع النقدي"
 
 #. Label of a Link field in DocType 'POS Closing Shift'
 #. Label of a Link field in DocType 'POS Opening Shift'
@@ -569,7 +569,7 @@ msgstr "تغيير"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:237
 msgid "Change Given"
-msgstr ""
+msgstr "المبلغ المُسلَّم كباقٍ"
 
 #: frontend/src/components/items/CommandSearch.vue:410
 msgid "Choose or create customer"
@@ -594,7 +594,7 @@ msgstr ""
 #: frontend/src/components/offline/OfflinePendingPanel.vue:60
 #: frontend/src/views/BarcodePrintView.vue:14
 msgid "Clear All"
-msgstr ""
+msgstr "مسح الكل"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:131
 msgid "Clear All Items from Cart"
@@ -610,7 +610,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:193
 msgid "Clear cart"
-msgstr ""
+msgstr "إفراغ السلة"
 
 #: frontend/src/components/items/CommandSearch.vue:392
 msgid "Clear cart and start new sale"
@@ -618,20 +618,20 @@ msgstr ""
 
 #: frontend/src/components/cart/Cart.vue:130
 msgid "Click on items to add them here"
-msgstr ""
+msgstr "انقر على العناصر لإضافتها هنا"
 
 #: frontend/src/components/cart/Cart.vue:98
 msgid "Click to change customer"
-msgstr ""
+msgstr "انقر لتغيير العميل"
 
 #: frontend/src/components/cart/Cart.vue:103
 msgid "Click to select customer"
-msgstr ""
+msgstr "انقر لاختيار العميل"
 
 #. Label of a Data field in DocType 'POS Cash Movement'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Client Request ID"
-msgstr ""
+msgstr "معرّف طلب العميل"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:83
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:175
@@ -653,7 +653,7 @@ msgstr ""
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:148
 #: frontend/src/components/items/CommandSearch.vue:465
 msgid "Close Shift"
-msgstr ""
+msgstr "إغلاق النوبة"
 
 #: frontend/src/components/items/CommandSearch.vue:466
 msgid "Close the current POS shift"
@@ -666,7 +666,7 @@ msgstr "مغلق"
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:132
 msgid "Closing"
-msgstr ""
+msgstr "الإغلاق"
 
 #. Label of a Currency field in DocType 'POS Closing Shift Detail'
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
@@ -675,7 +675,7 @@ msgstr "مبلغ الإغلاق"
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:208
 msgid "Closing..."
-msgstr ""
+msgstr "جارٍ الإغلاق..."
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:149
 msgid "Collection factor"
@@ -739,29 +739,29 @@ msgstr "شركة"
 #: xpos/x_pos/api/payment_processing/reconciliation.py:26
 #: xpos/x_pos/api/pricing_rules.py:181
 msgid "Company is required"
-msgstr ""
+msgstr "الشركة مطلوبة"
 
 #: xpos/x_pos/api/purchase_orders.py:488 xpos/x_pos/api/purchase_orders.py:659
 #: xpos/x_pos/api/purchase_orders.py:1560
 #: xpos/x_pos/api/purchase_orders.py:1794
 msgid "Company is required."
-msgstr ""
+msgstr "الشركة مطلوبة."
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:70
 msgid "Company must match the selected POS Opening Shift company."
-msgstr ""
+msgstr "يجب أن تتطابق الشركة مع شركة نوبة فتح نقاط البيع المحددة."
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:58
 msgid "Company must match the selected POS Profile company."
-msgstr ""
+msgstr "يجب أن تتطابق الشركة مع شركة ملف نقاط البيع المحددة."
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:168
 msgid "Contact administrator to set up loyalty programs"
-msgstr ""
+msgstr "تواصل مع المسؤول لإعداد برامج الولاء"
 
 #: xpos/x_pos/api/pricing_rules.py:395
 msgid "Context is required"
-msgstr ""
+msgstr "السياق مطلوب"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:168
 msgid "Conversion Factor"
@@ -799,7 +799,7 @@ msgstr "مركز التكلفة"
 
 #: xpos/x_pos/api/payments.py:230
 msgid "Cost Center is not set in pos profile {0}"
-msgstr ""
+msgstr "مركز التكلفة غير محدد في ملف نقاط البيع {0}"
 
 #: xpos/x_pos/api/payment_processing/journal_entry.py:87
 msgid "Could not determine bank/cash account for payment. Please set default cash account for company."
@@ -822,12 +822,12 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Coupon"
-msgstr ""
+msgstr "قسيمة"
 
 #. Label of a Check field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Coupon Based"
-msgstr ""
+msgstr "قائم على القسيمة"
 
 #. Label of a Data field in DocType 'POS Coupon'
 #. Label of a Data field in DocType 'POS Coupon Detail'
@@ -862,15 +862,15 @@ msgstr ""
 
 #: xpos/api/offers.py:102
 msgid "Coupon has expired"
-msgstr ""
+msgstr "انتهت صلاحية القسيمة"
 
 #: xpos/api/offers.py:104
 msgid "Coupon is not valid for this customer"
-msgstr ""
+msgstr "القسيمة غير صالحة لهذا العميل"
 
 #: xpos/api/offers.py:100
 msgid "Coupon is not yet valid"
-msgstr ""
+msgstr "القسيمة غير صالحة بعد"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:129
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:104
@@ -895,7 +895,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:67
 msgid "Create New Supplier"
-msgstr ""
+msgstr "إنشاء مورد جديد"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:44
 msgid "Create Purchase Order"
@@ -911,7 +911,7 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:316
 msgid "Create items"
-msgstr ""
+msgstr "إنشاء عناصر"
 
 #: frontend/src/components/items/CommandSearch.vue:327
 msgid "Create purchase orders"
@@ -919,11 +919,11 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:253
 msgid "Create suppliers"
-msgstr ""
+msgstr "إنشاء موردين"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:58
 msgid "Created By"
-msgstr ""
+msgstr "تم الإنشاء بواسطة"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:82
 msgid "Creating Purchase Order..."
@@ -935,7 +935,7 @@ msgstr ""
 #: frontend/src/views/PurchaseInvoiceView.vue:938
 #: frontend/src/views/PurchaseOrderView.vue:624
 msgid "Creating..."
-msgstr ""
+msgstr "جارٍ الإنشاء..."
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:43
 msgid "Credit Limit"
@@ -948,15 +948,15 @@ msgstr "إشعار دائن"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:114
 msgid "Credit Note {0} has no remaining balance to allocate."
-msgstr ""
+msgstr "إشعار الدائن {0} لا يوجد به رصيد متبقٍ للتخصيص."
 
 #: xpos/x_pos/api/payment_processing/processor.py:124
 msgid "Credit note {0} is already fully allocated"
-msgstr ""
+msgstr "إشعار الدائن {0} مخصص بالكامل بالفعل"
 
 #: xpos/x_pos/api/payment_processing/processor.py:207
 msgid "Credit note {0} still has an unapplied balance of {1}"
-msgstr ""
+msgstr "إشعار الدائن {0} لا يزال يحمل رصيداً غير مطبق بقيمة {1}"
 
 #: xpos/api/invoices.py:155
 msgid "Credit sale is not allowed for POS Profile {0}."
@@ -973,11 +973,11 @@ msgstr "العملة"
 
 #: xpos/x_pos/api/payment_processing/creation.py:40
 msgid "Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}"
-msgstr ""
+msgstr "العملة غير صحيحة، عملة حساب الطرف هي {party_account_currency} وعملة المعاملة هي {currency}"
 
 #: xpos/x_pos/api/payment_processing/processor.py:34
 msgid "Currency is required"
-msgstr ""
+msgstr "العملة مطلوبة"
 
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:93
 msgid "Current Stock"
@@ -1041,7 +1041,7 @@ msgstr "اسم العميل"
 
 #: xpos/x_pos/api/customers.py:322
 msgid "Customer already exists"
-msgstr ""
+msgstr "العميل موجود بالفعل"
 
 #: frontend/src/components/cart/Cart.vue:287
 msgid "Customer cannot be changed in return mode"
@@ -1057,15 +1057,15 @@ msgstr ""
 
 #: xpos/api/customers.py:598
 msgid "Customer is already enrolled in {0}"
-msgstr ""
+msgstr "العميل مسجل بالفعل في {0}"
 
 #: xpos/api/customers.py:601
 msgid "Customer is already enrolled in {0}. Please unenroll from the current program first."
-msgstr ""
+msgstr "العميل مسجل بالفعل في {0}. يرجى إلغاء التسجيل من البرنامج الحالي أولاً."
 
 #: xpos/api/customers.py:644
 msgid "Customer is not enrolled in any loyalty program"
-msgstr ""
+msgstr "العميل غير مسجل في أي برنامج ولاء"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:949
 #: xpos/api/customers.py:584 xpos/api/customers.py:636 xpos/api/invoices.py:218
@@ -1077,19 +1077,19 @@ msgstr "العميل مطلوب"
 
 #: xpos/api/customers.py:397
 msgid "Customer is required to create an address"
-msgstr ""
+msgstr "العميل مطلوب لإنشاء عنوان"
 
 #: frontend/src/components/cart/Cart.vue:97
 msgid "Customer locked for return"
-msgstr ""
+msgstr "العميل مقفل للإرجاع"
 
 #: xpos/api/invoices.py:1380
 msgid "Customer mismatch: Return must be for the same customer ({0}) as the original invoice"
-msgstr ""
+msgstr "عدم تطابق العميل: يجب أن يكون الإرجاع لنفس العميل ({0}) كما في الفاتورة الأصلية"
 
 #: xpos/api/customers.py:221
 msgid "Customer name is required"
-msgstr ""
+msgstr "اسم العميل مطلوب"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:270
 msgid "Customer unenrolled successfully"
@@ -1101,11 +1101,11 @@ msgstr ""
 
 #: xpos/api/customers.py:589 xpos/api/customers.py:639
 msgid "Customer {0} not found"
-msgstr ""
+msgstr "العميل {0} غير موجود"
 
 #: xpos/api/payments.py:188
 msgid "Customer, Company, Amount, and Mode of Payment are required"
-msgstr ""
+msgstr "العميل والشركة والمبلغ وطريقة الدفع مطلوبة"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:161
 msgid "Data Sync"
@@ -1124,7 +1124,7 @@ msgstr "التاريخ"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:37
 msgid "Date & Time"
-msgstr ""
+msgstr "التاريخ والوقت"
 
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.js:33
 msgid "Days"
@@ -1138,16 +1138,16 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Default Loyalty Program"
-msgstr ""
+msgstr "برنامج الولاء الافتراضي"
 
 #. Label of a Currency field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "Default Rate"
-msgstr ""
+msgstr "السعر الافتراضي"
 
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.py:36
 msgid "Default Rate is required"
-msgstr ""
+msgstr "السعر الافتراضي مطلوب"
 
 #: frontend/src/views/ReportViewerView.vue:522
 msgid "Default order"
@@ -1168,7 +1168,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:85
 msgid "Delete draft"
-msgstr ""
+msgstr "حذف المسودة"
 
 #: frontend/src/components/ui/table/Table.vue:1209
 msgid "Delete row"
@@ -1180,7 +1180,7 @@ msgstr ""
 
 #: xpos/x_pos/api/cash_movement/permissions.py:29
 msgid "Deleting cancelled cash movements is disabled for this POS Profile."
-msgstr ""
+msgstr "حذف حركات النقد الملغاة معطل لهذا الملف التعريفي لنقاط البيع."
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:67
 #: frontend/src/stores/offlineStore.ts:88
@@ -1193,12 +1193,12 @@ msgstr ""
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Delivery Charges"
-msgstr ""
+msgstr "رسوم التوصيل"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 msgid "Delivery Charges POS Profile"
-msgstr ""
+msgstr "ملف نقاط البيع لرسوم التوصيل"
 
 #: frontend/src/components/cart/CartSummary.vue:204
 msgid "Delivery charge"
@@ -1207,12 +1207,12 @@ msgstr ""
 #. Option for the 'Movement Type' (Select) field in DocType 'POS Cash Movement'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Deposit"
-msgstr ""
+msgstr "إيداع"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:57
 #: frontend/src/views/BankDropView.vue:134
 msgid "Deposit To"
-msgstr ""
+msgstr "إيداع إلى"
 
 #: frontend/src/views/BankDropView.vue:388
 msgid "Deposit cancelled"
@@ -1254,13 +1254,13 @@ msgstr "فرق"
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Digits after decimal. Example: 1.000 => decimals 3."
-msgstr ""
+msgstr "أرقام بعد الفاصلة العشرية. مثال: 1.000 => عشريات 3."
 
 #. Description of the 'Weight digits' (Int) field in DocType 'Scale Barcode
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Digits before decimal. Example: for 1.000, use 1 (or 2 if your scale encodes 01.000)."
-msgstr ""
+msgstr "أرقام قبل الفاصلة العشرية. مثال: لـ 1.000، استخدم 1 (أو 2 إذا كان ميزانك يُشفّر 01.000)."
 
 #. Label of a Check field in DocType 'Delivery Charges'
 #. Label of a Check field in DocType 'POS Offer'
@@ -1311,7 +1311,7 @@ msgstr "نوع الخصم"
 
 #: frontend/src/components/cart/CartSummary.vue:297
 msgid "Discount amount"
-msgstr ""
+msgstr "مبلغ الخصم"
 
 #: xpos/api/sync.py:56
 msgid "Doctype {0} is not permitted via this endpoint"
@@ -1341,11 +1341,11 @@ msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:202
 msgid "Draft invoice deleted"
-msgstr ""
+msgstr "تم حذف فاتورة المسودة"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:182
 msgid "Draft invoice restored to cart"
-msgstr ""
+msgstr "تم استعادة فاتورة المسودة إلى السلة"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:725
 msgid "Draft loaded"
@@ -1428,23 +1428,23 @@ msgstr "البريد الإلكتروني"
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 msgid "Email ID"
-msgstr ""
+msgstr "معرّف البريد الإلكتروني"
 
 #. Description of the 'Price' (Section Break) field in DocType 'Scale Barcode
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Enable only if barcode also contains price segment."
-msgstr ""
+msgstr "فعّل فقط إذا كان الباركود يحتوي أيضاً على مقطع السعر."
 
 #. Description of the 'Prefix included in barcode' (Check) field in DocType
 #. 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Enable when your barcode starts with a fixed prefix value (for example, 331)."
-msgstr ""
+msgstr "فعّل عندما يبدأ الباركود بقيمة بادئة ثابتة (مثال: 331)."
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:186
 msgid "Enroll Customer"
-msgstr ""
+msgstr "تسجيل العميل"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:34
 msgid "Enrolled"
@@ -1461,7 +1461,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:311
 msgid "Enter coupon code..."
-msgstr ""
+msgstr "أدخل رمز القسيمة..."
 
 #: frontend/src/components/ui/table/Table.vue:1092
 msgid "Enter for next row"
@@ -1471,7 +1471,7 @@ msgstr ""
 #: frontend/src/views/BankDropView.vue:158
 #: frontend/src/views/ExpenseView.vue:161
 msgid "Enter reason for this transaction..."
-msgstr ""
+msgstr "أدخل سبب هذه المعاملة..."
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:75
 msgid "Error"
@@ -1479,7 +1479,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:127
 msgid "Expected"
-msgstr ""
+msgstr "المتوقع"
 
 #. Label of a Currency field in DocType 'POS Closing Shift Detail'
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
@@ -1500,15 +1500,15 @@ msgstr "حساب النفقات"
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:98
 msgid "Expense Account is required for expense entries."
-msgstr ""
+msgstr "حساب النفقات مطلوب لقيود النفقات."
 
 #: xpos/api/cash_movements.py:82
 msgid "Expense account is required"
-msgstr ""
+msgstr "حساب النفقات مطلوب"
 
 #: xpos/x_pos/api/cash_movement/validation.py:146
 msgid "Expense account is required for POS Expense."
-msgstr ""
+msgstr "حساب النفقات مطلوب لنفقات نقاط البيع."
 
 #: frontend/src/views/ExpenseView.vue:400
 msgid "Expense cancelled"
@@ -1516,7 +1516,7 @@ msgstr ""
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:101
 msgid "Expense target account must match Expense Account."
-msgstr ""
+msgstr "يجب أن يتطابق حساب هدف النفقة مع حساب النفقات."
 
 #: frontend/src/components/Sidebar.vue:194
 #: frontend/src/components/items/CommandSearch.vue:353
@@ -1526,7 +1526,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:130
 msgid "Expires"
-msgstr ""
+msgstr "تنتهي"
 
 #: frontend/src/views/ReportViewerView.vue:778
 msgid "Export CSV"
@@ -1582,7 +1582,7 @@ msgstr ""
 
 #: xpos/api/payments.py:287
 msgid "Failed to create payment request: {0}"
-msgstr ""
+msgstr "فشل إنشاء طلب الدفع: {0}"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:740
 msgid "Failed to delete draft"
@@ -1590,7 +1590,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:206
 msgid "Failed to delete draft invoice"
-msgstr ""
+msgstr "فشل حذف فاتورة المسودة"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:256
 msgid "Failed to enroll customer"
@@ -1598,7 +1598,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:167
 msgid "Failed to fetch draft invoices"
-msgstr ""
+msgstr "فشل جلب فواتير المسودة"
 
 #: frontend/src/views/OrdersView.vue:243
 msgid "Failed to fetch order details"
@@ -1615,7 +1615,7 @@ msgstr ""
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:185
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:189
 msgid "Failed to load draft invoice"
-msgstr ""
+msgstr "فشل تحميل فاتورة المسودة"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:678
 msgid "Failed to load drafts"
@@ -1635,19 +1635,19 @@ msgstr ""
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:193
 msgid "Failed to reconcile Credit Note {0}: {1}"
-msgstr ""
+msgstr "فشل تسوية إشعار الدائن {0}: {1}"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:293
 msgid "Failed to reconcile Journal Entry {0}: {1}"
-msgstr ""
+msgstr "فشل تسوية القيد اليومي {0}: {1}"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:399
 msgid "Failed to reconcile Payment Entry {0}: {1}"
-msgstr ""
+msgstr "فشل تسوية قيد الدفع {0}: {1}"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:305
 msgid "Failed to record cash movement"
-msgstr ""
+msgstr "فشل تسجيل حركة النقد"
 
 #: frontend/src/views/BankDropView.vue:373
 msgid "Failed to record deposit"
@@ -1667,7 +1667,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:665
 msgid "Failed to save draft: {0}"
-msgstr ""
+msgstr "فشل حفظ المسودة: {0}"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:1089
 msgid "Failed to save invoice offline"
@@ -1687,7 +1687,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:564
 msgid "Failed to validate coupon"
-msgstr ""
+msgstr "فشل التحقق من القسيمة"
 
 #: frontend/src/components/customer/CustomerSelect.vue:330
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:177
@@ -1710,7 +1710,7 @@ msgstr ""
 #. Label of a Link field in DocType 'Referral Code'
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 msgid "Final Customer Offer"
-msgstr ""
+msgstr "العرض النهائي للعميل"
 
 #: frontend/src/components/Sidebar.vue:72
 msgid "Finance"
@@ -1719,7 +1719,7 @@ msgstr ""
 #. Description of the 'Prefix' (Data) field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored."
-msgstr ""
+msgstr "القيمة الثابتة لبداية جميع باركودات الميزان (مثال: 331). إذا تم تعيينها، يتم تجاهل الباركودات التي لا تبدأ بهذه القيمة."
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:78
 msgid "Focus Barcode Input"
@@ -1772,11 +1772,11 @@ msgstr ""
 
 #: frontend/src/views/BarcodePrintView.vue:8
 msgid "Generate and print barcode labels for items"
-msgstr ""
+msgstr "إنشاء وطباعة ملصقات الباركود للعناصر"
 
 #: frontend/src/views/BarcodePrintView.vue:18
 msgid "Generating..."
-msgstr ""
+msgstr "جارٍ الإنشاء..."
 
 #: frontend/src/views/PurchaseOrderView.vue:463
 #: frontend/src/views/PurchaseOrderView.vue:482
@@ -1791,22 +1791,22 @@ msgstr "كرت هدية"
 #. Label of a Link field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Give Item"
-msgstr ""
+msgstr "منح عنصر"
 
 #. Label of a Data field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Give Item Row ID"
-msgstr ""
+msgstr "معرّف صف منح العنصر"
 
 #. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Give Product"
-msgstr ""
+msgstr "منح منتج"
 
 #. Label of a Float field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Given Quantity"
-msgstr ""
+msgstr "الكمية الممنوحة"
 
 #: xpos/x_pos/doctype/pos_offer/pos_offer.js:21
 msgid "Given Quantity must be more than zero"
@@ -1895,11 +1895,11 @@ msgstr "في مرحلة انتقالية"
 
 #: frontend/src/components/purchase/StockReceiving.vue:325
 msgid "In-Transit Stock"
-msgstr ""
+msgstr "مخزون في العبور"
 
 #: frontend/src/views/BarcodePrintView.vue:89
 msgid "Include QR Code"
-msgstr ""
+msgstr "تضمين رمز QR"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:135
 msgid "Increase/Decrease Quantity (in cart)"
@@ -1919,7 +1919,7 @@ msgstr "إدخال فتح غير صالح"
 
 #: xpos/x_pos/doctype/pos_closing_shift/closing_processing/overview.py:43
 msgid "Invalid POS Opening Shift data provided."
-msgstr ""
+msgstr "بيانات نوبة فتح نقاط البيع المقدمة غير صالحة."
 
 #: xpos/api/invoices.py:1112
 msgid "Invalid doctype for return search"
@@ -1927,35 +1927,35 @@ msgstr ""
 
 #: xpos/x_pos/api/utilities.py:783
 msgid "Invalid language code"
-msgstr ""
+msgstr "رمز اللغة غير صالح"
 
 #: xpos/x_pos/api/utilities.py:786
 msgid "Invalid language code format: {0}"
-msgstr ""
+msgstr "تنسيق رمز اللغة غير صالح: {0}"
 
 #: xpos/x_pos/api/cash_movement/posting.py:22
 msgid "Invalid movement type for journal entry."
-msgstr ""
+msgstr "نوع الحركة غير صالح للقيد اليومي."
 
 #: xpos/x_pos/api/cash_movement/validation.py:167
 msgid "Invalid movement type."
-msgstr ""
+msgstr "نوع الحركة غير صالح."
 
 #: xpos/api/offers.py:89
 msgid "Invalid or already used coupon code"
-msgstr ""
+msgstr "رمز القسيمة غير صالح أو مستخدم بالفعل"
 
 #: frontend/src/components/cart/CartSummary.vue:561
 msgid "Invalid or expired coupon code"
-msgstr ""
+msgstr "رمز القسيمة غير صالح أو منتهي الصلاحية"
 
 #: xpos/x_pos/api/cash_movement/validation.py:15
 msgid "Invalid payload for cash movement."
-msgstr ""
+msgstr "بيانات حركة النقد غير صالحة."
 
 #: xpos/x_pos/api/cash_movement/service.py:222
 msgid "Invalid posting date."
-msgstr ""
+msgstr "تاريخ الترحيل غير صالح."
 
 #: xpos/x_pos/api/m_pesa.py:41
 msgid "Invalid webhook token"
@@ -1963,21 +1963,21 @@ msgstr ""
 
 #: xpos/x_pos/api/payment_processing/data.py:19
 msgid "Invalid {0} filter"
-msgstr ""
+msgstr "فلتر {0} غير صالح"
 
 #. Label of a Currency field in DocType 'Sales Invoice Reference'
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
 msgid "Invoice Amount"
-msgstr ""
+msgstr "مبلغ الفاتورة"
 
 #. Label of a Link field in DocType 'Sales Invoice Reference'
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
 msgid "Invoice Currency"
-msgstr ""
+msgstr "عملة الفاتورة"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:20
 msgid "Invoice details"
-msgstr ""
+msgstr "تفاصيل الفاتورة"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:1182
 msgid "Invoice not found for printing"
@@ -2001,11 +2001,11 @@ msgstr ""
 
 #: xpos/x_pos/api/invoices.py:79
 msgid "Invoice {0} Deleted"
-msgstr ""
+msgstr "تم حذف الفاتورة {0}"
 
 #: xpos/x_pos/api/invoices.py:71
 msgid "Invoice {0} does not exist"
-msgstr ""
+msgstr "الفاتورة {0} غير موجودة"
 
 #: xpos/x_pos/api/invoice_processing/creation.py:444
 msgid "Invoice {0} has been cancelled and cannot be submitted."
@@ -2023,7 +2023,7 @@ msgstr ""
 
 #: xpos/api/invoices.py:61 xpos/api/invoices.py:1543
 msgid "Invoice {0} not found"
-msgstr ""
+msgstr "الفاتورة {0} غير موجودة"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:1102
 msgid "Invoice {0} saved successfully!"
@@ -2062,11 +2062,11 @@ msgstr "رمز السلعة"
 
 #: xpos/x_pos/api/item_processing/price.py:10
 msgid "Item Code and Price List are required"
-msgstr ""
+msgstr "رمز العنصر وقائمة الأسعار مطلوبان"
 
 #: xpos/api/taxes.py:27
 msgid "Item Code is required"
-msgstr ""
+msgstr "رمز العنصر مطلوب"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:1184
 msgid "Item Discount"
@@ -2074,7 +2074,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:13
 msgid "Item Discounts"
-msgstr ""
+msgstr "خصومات العناصر"
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
 #. 'POS Offer'
@@ -2109,12 +2109,12 @@ msgstr "سعر الصنف"
 
 #: xpos/x_pos/api/item_processing/price.py:37
 msgid "Item Price has been added or updated"
-msgstr ""
+msgstr "تم إضافة سعر العنصر أو تحديثه"
 
 #. Label of a Float field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Item Rate Should Less Then"
-msgstr ""
+msgstr "يجب أن يكون سعر العنصر أقل من"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:107
 msgid "Item Selection"
@@ -2123,16 +2123,16 @@ msgstr ""
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Item code digits"
-msgstr ""
+msgstr "أرقام رمز العنصر"
 
 #: xpos/x_pos/api/purchase_orders.py:323
 msgid "Item code is required."
-msgstr ""
+msgstr "رمز العنصر مطلوب."
 
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Item code starting position"
-msgstr ""
+msgstr "موضع بداية رمز العنصر"
 
 #: frontend/src/stores/cartStore.ts:467
 msgid "Item not found"
@@ -2149,11 +2149,11 @@ msgstr ""
 
 #: xpos/api/invoices.py:1416
 msgid "Item {0} was not in the original invoice {1}"
-msgstr ""
+msgstr "العنصر {0} لم يكن في الفاتورة الأصلية {1}"
 
 #: xpos/api/invoices.py:1456
 msgid "Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})"
-msgstr ""
+msgstr "العنصر {0}: لا يمكن إرجاع {1} وحدة. {2} وحدة فقط متبقية للإرجاع (الأصلي: {3}، تم الإرجاع بالفعل: {4})"
 
 #: xpos/api/invoices.py:381
 #, python-format
@@ -2184,13 +2184,13 @@ msgstr "القيود اليومية"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:224
 msgid "Journal Entry {0} has no unallocated amount remaining."
-msgstr ""
+msgstr "القيد اليومي {0} لا يوجد به مبلغ غير مخصص متبقٍ."
 
 #: frontend/src/components/Navbar.vue:181
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:14
 #: frontend/src/components/items/CommandSearch.vue:492
 msgid "Keyboard Shortcuts"
-msgstr ""
+msgstr "اختصارات لوحة المفاتيح"
 
 #. Label of a Data field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
@@ -2199,11 +2199,11 @@ msgstr "ملصق"
 
 #: frontend/src/views/BarcodePrintView.vue:61
 msgid "Label Size"
-msgstr ""
+msgstr "حجم الملصق"
 
 #: frontend/src/views/BarcodePrintView.vue:69
 msgid "Large (60×40mm)"
-msgstr ""
+msgstr "كبير (60×40 ملم)"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:153
 msgid "Last sync"
@@ -2232,7 +2232,7 @@ msgstr ""
 
 #: frontend/src/components/purchase/StockReceiving.vue:348
 msgid "Loading in-transit stock..."
-msgstr ""
+msgstr "جارٍ تحميل المخزون في العبور..."
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:85
 #: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:50
@@ -2258,21 +2258,21 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:98
 msgid "Loyalty"
-msgstr ""
+msgstr "الولاء"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:248
 msgid "Loyalty Information"
-msgstr ""
+msgstr "معلومات الولاء"
 
 #. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Loyalty Point"
-msgstr ""
+msgstr "نقطة ولاء"
 
 #. Label of a Section Break field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Loyalty Point Scheme"
-msgstr ""
+msgstr "نظام نقاط الولاء"
 
 #. Label of a Int field in DocType 'POS Offer'
 #: frontend/src/components/dialogs/PaymentDialog.vue:307
@@ -2282,7 +2282,7 @@ msgstr "نقاط الولاء"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:184
 msgid "Loyalty Points Redeemed"
-msgstr ""
+msgstr "نقاط الولاء المستردة"
 
 #: xpos/x_pos/doctype/pos_offer/pos_offer.js:24
 msgid "Loyalty Points must be more than zero"
@@ -2295,11 +2295,11 @@ msgstr "برنامج الولاء"
 
 #: xpos/api/customers.py:586
 msgid "Loyalty Program is required"
-msgstr ""
+msgstr "برنامج الولاء مطلوب"
 
 #: xpos/api/customers.py:592
 msgid "Loyalty Program {0} not found"
-msgstr ""
+msgstr "برنامج الولاء {0} غير موجود"
 
 #: frontend/src/components/Sidebar.vue:25
 msgid "Main"
@@ -2316,7 +2316,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:17
 msgid "Manage loyalty for"
-msgstr ""
+msgstr "إدارة الولاء لـ"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:531
 msgid "Margin%"
@@ -2324,7 +2324,7 @@ msgstr ""
 
 #: frontend/src/components/purchase/StockReceiving.vue:341
 msgid "Material transfers awaiting receipt at your warehouse"
-msgstr ""
+msgstr "تحويلات المواد بانتظار الاستلام في مستودعك"
 
 #. Label of a Float field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -2334,7 +2334,7 @@ msgstr "أقصى مبلغ"
 #. Label of a Float field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Max Quantity"
-msgstr ""
+msgstr "الكمية القصوى"
 
 #. Label of a Int field in DocType 'POS Coupon'
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -2343,7 +2343,7 @@ msgstr "الاستخدام الأقصى"
 
 #: frontend/src/views/BarcodePrintView.vue:68
 msgid "Medium (50×30mm)"
-msgstr ""
+msgstr "متوسط (50×30 ملم)"
 
 #: frontend/src/layouts/DefaultLayout.vue:58
 msgid "Menu"
@@ -2370,7 +2370,7 @@ msgstr ""
 #. Label of a Float field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Min Quantity"
-msgstr ""
+msgstr "الكمية الدنيا"
 
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.js:40
 msgid "Minimum Value"
@@ -2378,7 +2378,7 @@ msgstr ""
 
 #: xpos/x_pos/api/qz.py:50
 msgid "Missing Dependency"
-msgstr ""
+msgstr "تبعية مفقودة"
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:92
 msgid "Mobile"
@@ -2389,7 +2389,7 @@ msgstr "التليفون المحمول"
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 msgid "Mobile NO"
-msgstr ""
+msgstr "رقم الجوال"
 
 #: frontend/src/components/customer/CustomerSelect.vue:148
 #: frontend/src/components/customer/CustomerSelect.vue:153
@@ -2446,11 +2446,11 @@ msgstr ""
 #. Label of a Select field in DocType 'POS Cash Movement'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Movement Type"
-msgstr ""
+msgstr "نوع الحركة"
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:94
 msgid "Movement Type must be Expense or Deposit."
-msgstr ""
+msgstr "يجب أن يكون نوع الحركة نفقة أو إيداع."
 
 #: frontend/src/components/items/CommandSearch.vue:46
 msgid "Navigate"
@@ -2532,27 +2532,27 @@ msgstr ""
 
 #: xpos/x_pos/api/payment_processing/processor.py:192
 msgid "No allocation made for credit note {0}"
-msgstr ""
+msgstr "لم يتم إجراء أي تخصيص لإشعار الدائن {0}"
 
 #: xpos/x_pos/api/payment_processing/processor.py:288
 msgid "No allocation made for payment {0}"
-msgstr ""
+msgstr "لم يتم إجراء أي تخصيص للدفع {0}"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:205
 msgid "No allocation was recorded for Credit Note {0}."
-msgstr ""
+msgstr "لم يتم تسجيل أي تخصيص لإشعار الدائن {0}."
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:305
 msgid "No allocation was recorded for Journal Entry {0}."
-msgstr ""
+msgstr "لم يتم تسجيل أي تخصيص للقيد اليومي {0}."
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:412
 msgid "No allocation was recorded for Payment Entry {0}."
-msgstr ""
+msgstr "لم يتم تسجيل أي تخصيص لقيد الدفع {0}."
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:443
 msgid "No allocations were made."
-msgstr ""
+msgstr "لم يتم إجراء أي تخصيصات."
 
 #: frontend/src/views/BankDropView.vue:45
 msgid "No bank drops found"
@@ -2560,7 +2560,7 @@ msgstr ""
 
 #: xpos/x_pos/api/invoice_processing/stock.py:186
 msgid "No batches available in {0} for {1}."
-msgstr ""
+msgstr "لا توجد دفعات متاحة في {0} لـ {1}."
 
 #: frontend/src/components/dialogs/CameraBarcodeDialog.vue:190
 msgid "No camera found on this device."
@@ -2584,7 +2584,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:39
 msgid "No draft invoices found"
-msgstr ""
+msgstr "لم يتم العثور على فواتير مسودة"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:1019
 msgid "No drafts found"
@@ -2604,11 +2604,11 @@ msgstr ""
 
 #: frontend/src/views/PosView.vue:104
 msgid "No groups found"
-msgstr ""
+msgstr "لم يتم العثور على مجموعات"
 
 #: frontend/src/components/purchase/StockReceiving.vue:356
 msgid "No in-transit stock"
-msgstr ""
+msgstr "لا يوجد مخزون في العبور"
 
 #: frontend/src/components/dialogs/RepeatInvoiceDialog.vue:76
 #: frontend/src/components/dialogs/ReturnDialog.vue:66
@@ -2618,7 +2618,7 @@ msgstr ""
 #: frontend/src/components/items/ItemGrid.vue:19
 #: frontend/src/views/BarcodePrintView.vue:104
 msgid "No items found"
-msgstr ""
+msgstr "لم يتم العثور على عناصر"
 
 #: frontend/src/stores/purchaseStore.ts:1107
 msgid "No items found for this category and supplier"
@@ -2634,67 +2634,67 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:631
 msgid "No items in cart to save."
-msgstr ""
+msgstr "لا توجد عناصر في السلة للحفظ."
 
 #: frontend/src/views/BarcodePrintView.vue:149
 msgid "No items selected"
-msgstr ""
+msgstr "لم يتم تحديد أي عناصر"
 
 #: xpos/x_pos/api/purchase_orders.py:981
 msgid "No items to invoice. Please ensure there are items on the Purchase Order."
-msgstr ""
+msgstr "لا توجد عناصر للفوترة. يرجى التأكد من وجود عناصر في طلب الشراء."
 
 #: xpos/x_pos/api/purchase_orders.py:1149 xpos/x_pos/api/stock_transfer.py:267
 msgid "No items to receive."
-msgstr ""
+msgstr "لا توجد عناصر للاستلام."
 
 #: xpos/x_pos/api/purchase_orders.py:240
 msgid "No items to receive. Please enter received quantities."
-msgstr ""
+msgstr "لا توجد عناصر للاستلام. يرجى إدخال الكميات المستلمة."
 
 #: xpos/x_pos/api/stock_transfer.py:388
 msgid "No items to return."
-msgstr ""
+msgstr "لا توجد عناصر للإرجاع."
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:166
 msgid "No loyalty programs available"
-msgstr ""
+msgstr "لا توجد برامج ولاء متاحة"
 
 #: frontend/src/components/purchase/StockReceiving.vue:357
 msgid "No material transfers pending receipt"
-msgstr ""
+msgstr "لا توجد تحويلات مواد معلقة الاستلام"
 
 #: frontend/src/components/cart/CartSummary.vue:612
 msgid "No open shift found. Please open a shift first."
-msgstr ""
+msgstr "لم يتم العثور على نوبة مفتوحة. يرجى فتح نوبة أولاً."
 
 #: frontend/src/views/OrdersView.vue:49
 msgid "No orders found"
-msgstr ""
+msgstr "لم يتم العثور على طلبات"
 
 #: xpos/x_pos/api/payment_processing/processor.py:130
 msgid "No outstanding invoices available for allocation of credit note {0}"
-msgstr ""
+msgstr "لا توجد فواتير مستحقة متاحة لتخصيص إشعار الدائن {0}"
 
 #: xpos/x_pos/api/payment_processing/processor.py:234
 msgid "No outstanding invoices available for allocation of payment {0}"
-msgstr ""
+msgstr "لا توجد فواتير مستحقة متاحة لتخصيص الدفع {0}"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:182
 msgid "No outstanding invoices were available to reconcile Credit Note {0}."
-msgstr ""
+msgstr "لم تكن هناك فواتير مستحقة متاحة لتسوية إشعار الدائن {0}."
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:282
 msgid "No outstanding invoices were available to reconcile Journal Entry {0}."
-msgstr ""
+msgstr "لم تكن هناك فواتير مستحقة متاحة لتسوية القيد اليومي {0}."
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:388
 msgid "No outstanding invoices were available to reconcile Payment Entry {0}."
-msgstr ""
+msgstr "لم تكن هناك فواتير مستحقة متاحة لتسوية قيد الدفع {0}."
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:43
 msgid "No outstanding invoices were found for {0}."
-msgstr ""
+msgstr "لم يتم العثور على فواتير مستحقة لـ {0}."
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:75
 msgid "No pending offline invoices."
@@ -2755,19 +2755,19 @@ msgstr ""
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:57
 msgid "No unallocated payments were available for reconciliation."
-msgstr ""
+msgstr "لم تكن هناك مدفوعات غير مخصصة متاحة للتسوية."
 
 #: xpos/x_pos/api/invoice_processing/stock.py:210
 msgid "No valid batches available in {0} for {1}."
-msgstr ""
+msgstr "لا توجد دفعات صالحة متاحة في {0} لـ {1}."
 
 #: xpos/x_pos/api/purchase_orders.py:1207 xpos/x_pos/api/stock_transfer.py:333
 msgid "No valid items to receive."
-msgstr ""
+msgstr "لا توجد عناصر صالحة للاستلام."
 
 #: xpos/x_pos/api/stock_transfer.py:448
 msgid "No valid items to return."
-msgstr ""
+msgstr "لا توجد عناصر صالحة للإرجاع."
 
 #: frontend/src/components/dialogs/AboutDialog.vue:64
 msgid "Node Role"
@@ -2775,7 +2775,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:89
 msgid "Not Enrolled"
-msgstr ""
+msgstr "غير مسجل"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:71
 msgid "Not Set"
@@ -2793,29 +2793,29 @@ msgstr ""
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Number of decimal places encoded for the price."
-msgstr ""
+msgstr "عدد المنازل العشرية المُشفَّرة للسعر."
 
 #. Description of the 'Price digits' (Int) field in DocType 'Scale Barcode
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Number of digits representing the price before decimal places."
-msgstr ""
+msgstr "عدد الأرقام التي تمثل السعر قبل المنازل العشرية."
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:470
 msgid "Numpad"
-msgstr ""
+msgstr "لوحة الأرقام"
 
 #. Label of a Data field in DocType 'POS Offer Detail'
 #: frontend/src/components/cart/CartSummary.vue:66
 #: frontend/src/components/dialogs/PaymentDialog.vue:132
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Offer"
-msgstr ""
+msgstr "عرض"
 
 #. Label of a Check field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Offer Applied"
-msgstr ""
+msgstr "تم تطبيق العرض"
 
 #: frontend/src/components/cart/CartSummary.vue:54
 #: frontend/src/components/dialogs/PaymentDialog.vue:122
@@ -2825,7 +2825,7 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Offer Name"
-msgstr ""
+msgstr "اسم العرض"
 
 #. Label of a Card Break in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
@@ -2834,7 +2834,7 @@ msgstr ""
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:29
 msgid "Offline"
-msgstr ""
+msgstr "غير متصل"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:27
 msgid "Offline Invoices"
@@ -2847,39 +2847,39 @@ msgstr ""
 #. Label of a Check field in DocType 'POS Coupon'
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 msgid "Only One Use Per Customer"
-msgstr ""
+msgstr "استخدام واحد فقط لكل عميل"
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:49
 msgid "Only cancelled POS Cash Movement records can be deleted."
-msgstr ""
+msgstr "يمكن حذف سجلات حركات النقد الملغاة في نقاط البيع فقط."
 
 #: xpos/x_pos/api/cash_movement/service.py:187
 msgid "Only cancelled cash movements can be deleted."
-msgstr ""
+msgstr "يمكن حذف حركات النقد الملغاة فقط."
 
 #: xpos/api/sales_orders.py:178
 msgid "Only draft Quotations can be updated"
-msgstr ""
+msgstr "يمكن تحديث عروض الأسعار المسودة فقط"
 
 #: xpos/api/sales_orders.py:77
 msgid "Only draft Sales Orders can be updated"
-msgstr ""
+msgstr "يمكن تحديث طلبات المبيعات المسودة فقط"
 
 #: xpos/api/invoices.py:1083
 msgid "Only draft invoices can be deleted"
-msgstr ""
+msgstr "يمكن حذف الفواتير المسودة فقط"
 
 #: xpos/api/invoices.py:239
 msgid "Only draft invoices can be updated and submitted"
-msgstr ""
+msgstr "يمكن تحديث وتقديم الفواتير المسودة فقط"
 
 #: xpos/x_pos/api/cash_movement/service.py:202
 msgid "Only submitted or cancelled cash movements can be duplicated."
-msgstr ""
+msgstr "يمكن تكرار حركات النقد المقدمة أو الملغاة فقط."
 
 #: xpos/x_pos/api/cash_movement/validation.py:26
 msgid "Only the shift owner can create cash movement entries."
-msgstr ""
+msgstr "يمكن لمالك النوبة فقط إنشاء قيود حركات النقد."
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
 #: frontend/src/views/ReportsIndexView.vue:258
@@ -2937,11 +2937,11 @@ msgstr ""
 
 #: frontend/src/views/OrdersView.vue:5
 msgid "Order History"
-msgstr ""
+msgstr "سجل الطلبات"
 
 #: frontend/src/components/cart/CartSummary.vue:653
 msgid "Order saved as draft"
-msgstr ""
+msgstr "تم حفظ الطلب كمسودة"
 
 #: frontend/src/components/cart/CartSummary.vue:642
 msgid "Order saved as draft locally"
@@ -2956,7 +2956,7 @@ msgstr "أوامر"
 
 #: xpos/api/invoices.py:1374
 msgid "Original invoice {0} not found"
-msgstr ""
+msgstr "الفاتورة الأصلية {0} غير موجودة"
 
 #: frontend/src/components/customer/CustomerSelect.vue:331
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:178
@@ -2971,7 +2971,7 @@ msgstr "إنتهى من المخزن"
 
 #: xpos/x_pos/api/stock_transfer.py:244 xpos/x_pos/api/stock_transfer.py:377
 msgid "Outgoing Stock Entry is required."
-msgstr ""
+msgstr "قيد المخزون الصادر مطلوب."
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:36
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:268
@@ -3000,12 +3000,12 @@ msgstr ""
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_allowed_expense_account/pos_allowed_expense_account.json
 msgid "POS Allowed Expense Account"
-msgstr ""
+msgstr "حساب النفقات المسموح به في نقاط البيع"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_allowed_source_account/pos_allowed_source_account.json
 msgid "POS Allowed Source Account"
-msgstr ""
+msgstr "حساب المصدر المسموح به في نقاط البيع"
 
 #. Name of a DocType
 #. Label of a Link in the X POS Workspace
@@ -3013,7 +3013,7 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "POS Cash Movement"
-msgstr ""
+msgstr "حركة نقد نقاط البيع"
 
 #. Name of a DocType
 #. Label of a Data field in DocType 'POS Opening Shift'
@@ -3022,17 +3022,17 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "POS Closing Shift"
-msgstr ""
+msgstr "نوبة إغلاق نقاط البيع"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
 msgid "POS Closing Shift Detail"
-msgstr ""
+msgstr "تفاصيل نوبة إغلاق نقاط البيع"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
 msgid "POS Closing Shift Taxes"
-msgstr ""
+msgstr "ضرائب نوبة إغلاق نقاط البيع"
 
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:67
 msgid "POS Closing Shift {0} against {1} between selected period"
@@ -3043,21 +3043,21 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "POS Coupon"
-msgstr ""
+msgstr "قسيمة نقاط البيع"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
 msgid "POS Coupon Detail"
-msgstr ""
+msgstr "تفاصيل قسيمة نقاط البيع"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:28
 #: frontend/src/views/ExpenseView.vue:123
 msgid "POS Expense"
-msgstr ""
+msgstr "نفقة نقاط البيع"
 
 #: xpos/x_pos/api/cash_movement/permissions.py:17
 msgid "POS Expense is disabled for this POS Profile."
-msgstr ""
+msgstr "نفقة نقاط البيع معطلة لهذا الملف التعريفي لنقاط البيع."
 
 #. Label of a Link field in DocType 'Sales Invoice Reference'
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
@@ -3073,16 +3073,16 @@ msgstr "فاتورة نقاط البيع"
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "POS Offer"
-msgstr ""
+msgstr "عرض نقاط البيع"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "POS Offer Detail"
-msgstr ""
+msgstr "تفاصيل عرض نقاط البيع"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:59
 msgid "POS Offer is disabled."
-msgstr ""
+msgstr "عرض نقاط البيع معطل."
 
 #. Label of a Link field in DocType 'POS Cash Movement'
 #. Label of a Link field in DocType 'POS Closing Shift'
@@ -3093,42 +3093,42 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "POS Opening Shift"
-msgstr ""
+msgstr "نوبة فتح نقاط البيع"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_opening_shift_detail/pos_opening_shift_detail.json
 msgid "POS Opening Shift Detail"
-msgstr ""
+msgstr "تفاصيل نوبة فتح نقاط البيع"
 
 #: xpos/api/cash_movements.py:78 xpos/api/cash_movements.py:163
 #: xpos/x_pos/api/payment_processing/processor.py:38
 msgid "POS Opening Shift is required"
-msgstr ""
+msgstr "نوبة فتح نقاط البيع مطلوبة"
 
 #: xpos/x_pos/doctype/pos_closing_shift/closing_processing/overview.py:19
 msgid "POS Opening Shift is required to compute the overview."
-msgstr ""
+msgstr "نوبة فتح نقاط البيع مطلوبة لحساب النظرة العامة."
 
 #: xpos/x_pos/api/cash_movement/validation.py:20
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:67
 msgid "POS Opening Shift is required."
-msgstr ""
+msgstr "نوبة فتح نقاط البيع مطلوبة."
 
 #: xpos/x_pos/api/cash_movement/validation.py:24
 msgid "POS Opening Shift must be submitted and open."
-msgstr ""
+msgstr "يجب تقديم نوبة فتح نقاط البيع وفتحها."
 
 #: xpos/x_pos/api/cash_movement/service.py:33
 msgid "POS Opening Shift not found."
-msgstr ""
+msgstr "نوبة فتح نقاط البيع غير موجودة."
 
 #: xpos/x_pos/api/invoice.py:331
 msgid "POS Opening Shift {0} is not for the same POS Profile"
-msgstr ""
+msgstr "نوبة فتح نقاط البيع {0} ليست لنفس ملف نقاط البيع"
 
 #: xpos/x_pos/api/invoice.py:334
 msgid "POS Opening Shift {0} is not for the same company"
-msgstr ""
+msgstr "نوبة فتح نقاط البيع {0} ليست لنفس الشركة"
 
 #: xpos/api/shifts.py:539
 msgid "POS Opening Shift {0} not found"
@@ -3137,17 +3137,17 @@ msgstr ""
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
 msgid "POS Payment Entry Reference"
-msgstr ""
+msgstr "مرجع قيد دفع نقاط البيع"
 
 #. Label of a Table field in DocType 'POS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "POS Payments"
-msgstr ""
+msgstr "مدفوعات نقاط البيع"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_print_format_rule/pos_print_format_rule.json
 msgid "POS Print Format Rule"
-msgstr ""
+msgstr "قاعدة تنسيق طباعة نقاط البيع"
 
 #. Label of a Link field in DocType 'Delivery Charges POS Profile'
 #. Label of a Link field in DocType 'POS Cash Movement'
@@ -3169,42 +3169,42 @@ msgstr "الملف الشخصي لنقطة البيع"
 
 #: xpos/x_pos/api/cash_movement/validation.py:40
 msgid "POS Profile company must match active POS Opening Shift company."
-msgstr ""
+msgstr "يجب أن تتطابق شركة ملف نقاط البيع مع شركة نوبة فتح نقاط البيع النشطة."
 
 #: frontend/src/components/cart/CartSummary.vue:607
 msgid "POS Profile is not set. Please close and reopen the shift."
-msgstr ""
+msgstr "ملف نقاط البيع غير محدد. يرجى إغلاق النوبة وإعادة فتحها."
 
 #: xpos/api/invoices.py:216 xpos/x_pos/api/payment_processing/processor.py:36
 msgid "POS Profile is required"
-msgstr ""
+msgstr "ملف نقاط البيع مطلوب"
 
 #: xpos/x_pos/api/purchase_orders.py:33
 msgid "POS Profile is required to create purchase documents."
-msgstr ""
+msgstr "ملف نقاط البيع مطلوب لإنشاء مستندات الشراء."
 
 #: xpos/x_pos/api/cash_movement/service.py:109
 #: xpos/x_pos/api/cash_movement/validation.py:32
 msgid "POS Profile is required."
-msgstr ""
+msgstr "ملف نقاط البيع مطلوب."
 
 #: xpos/x_pos/api/cash_movement/validation.py:38
 msgid "POS Profile must match the active POS Opening Shift profile."
-msgstr ""
+msgstr "يجب أن يتطابق ملف نقاط البيع مع ملف نوبة فتح نقاط البيع النشطة."
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:73
 msgid "POS Profile must match the selected POS Opening Shift profile."
-msgstr ""
+msgstr "يجب أن يتطابق ملف نقاط البيع مع ملف نوبة فتح نقاط البيع المحددة."
 
 #: xpos/api/invoices.py:593 xpos/api/sales_orders.py:69
 #: xpos/api/sales_orders.py:170
 msgid "POS Profile, Customer, and Items are required"
-msgstr ""
+msgstr "ملف نقاط البيع والعميل والعناصر مطلوبة"
 
 #. Label of a Table field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "POS Profiles"
-msgstr ""
+msgstr "ملفات نقاط البيع"
 
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_purchase_taxes/pos_purchase_taxes.json
@@ -3214,11 +3214,11 @@ msgstr ""
 #. Name of a DocType
 #: xpos/x_pos/doctype/pos_sales_person_filter/pos_sales_person_filter.json
 msgid "POS Sales Person Filter"
-msgstr ""
+msgstr "فلتر مندوب المبيعات في نقاط البيع"
 
 #: xpos/x_pos/api/invoice.py:328
 msgid "POS Shift {0} is not open"
-msgstr ""
+msgstr "نوبة نقاط البيع {0} غير مفتوحة"
 
 #. Label of a Table field in DocType 'POS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
@@ -3227,16 +3227,16 @@ msgstr "معاملات نقاط البيع"
 
 #: xpos/x_pos/api/payments.py:20
 msgid "POS credit redemption for Sales Invoice {0}"
-msgstr ""
+msgstr "استرداد رصيد نقاط البيع لفاتورة المبيعات {0}"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:281
 #: frontend/src/views/ExpenseView.vue:380
 msgid "POS expense recorded"
-msgstr ""
+msgstr "تم تسجيل نفقة نقاط البيع"
 
 #: xpos/x_pos/api/utils.py:103
 msgid "POS profile data is missing or invalid."
-msgstr ""
+msgstr "بيانات ملف نقاط البيع مفقودة أو غير صالحة."
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:73
 msgid "Paid"
@@ -3252,7 +3252,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:436
 msgid "Pay {0}"
-msgstr ""
+msgstr "ادفع {0}"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:22
 #: frontend/src/views/PurchaseInvoiceView.vue:1226
@@ -3266,15 +3266,15 @@ msgstr "تدوينات المدفوعات"
 
 #: xpos/x_pos/api/payments.py:218
 msgid "Payment Entry is already created or payment account is not matched"
-msgstr ""
+msgstr "قيد الدفع موجود بالفعل أو حساب الدفع غير متطابق"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:331
 msgid "Payment Entry {0} has no unallocated amount remaining."
-msgstr ""
+msgstr "قيد الدفع {0} لا يوجد به مبلغ غير مخصص متبقٍ."
 
 #: xpos/x_pos/api/payments.py:110
 msgid "Payment Gateway Account not found"
-msgstr ""
+msgstr "حساب بوابة الدفع غير موجود"
 
 #. Label of a Table field in DocType 'POS Closing Shift'
 #: frontend/src/components/dialogs/ClosingDialog.vue:107
@@ -3300,7 +3300,7 @@ msgstr ""
 
 #: xpos/x_pos/api/payment_processing/processor.py:228
 msgid "Payment {0} is already fully allocated"
-msgstr ""
+msgstr "الدفع {0} مخصص بالكامل بالفعل"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:221
 msgid "Payments"
@@ -3346,15 +3346,15 @@ msgstr ""
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:57
 msgid "Please select Coupon Code Based POS Offer."
-msgstr ""
+msgstr "يرجى اختيار عرض نقاط البيع القائم على رمز القسيمة."
 
 #: frontend/src/views/PosView.vue:458
 msgid "Please select a customer before adding items to the cart"
-msgstr ""
+msgstr "يرجى اختيار عميل قبل إضافة عناصر إلى السلة"
 
 #: frontend/src/components/cart/CartSummary.vue:626
 msgid "Please select a customer before holding the order."
-msgstr ""
+msgstr "يرجى اختيار عميل قبل تعليق الطلب."
 
 #: frontend/src/views/PurchaseInvoiceView.vue:546
 msgid "Please select a supplier"
@@ -3388,7 +3388,7 @@ msgstr ""
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:55
 msgid "Please select the correct POS Offer with the same company."
-msgstr ""
+msgstr "يرجى اختيار عرض نقاط البيع الصحيح بنفس الشركة."
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:52
 msgid "Please select the customer."
@@ -3396,11 +3396,11 @@ msgstr "يرجى اختيار العميل."
 
 #: xpos/x_pos/api/purchase_orders.py:441
 msgid "Please set Default Payable Account in Company {0}"
-msgstr ""
+msgstr "يرجى تعيين حساب الدائنين الافتراضي في الشركة {0}"
 
 #: xpos/x_pos/api/purchase_orders.py:398
 msgid "Please set default account for Mode of Payment {0} in company {1}"
-msgstr ""
+msgstr "يرجى تعيين الحساب الافتراضي لطريقة الدفع {0} في الشركة {1}"
 
 #: frontend/src/components/dialogs/CameraBarcodeDialog.vue:78
 msgid "Point at a barcode to scan"
@@ -3420,15 +3420,15 @@ msgstr ""
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:256
 msgid "Points Earned"
-msgstr ""
+msgstr "النقاط المكتسبة"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:260
 msgid "Points Redeemed"
-msgstr ""
+msgstr "النقاط المستردة"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:62
 msgid "Points Value"
-msgstr ""
+msgstr "قيمة النقاط"
 
 #. Label of a shortcut in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
@@ -3439,7 +3439,7 @@ msgstr ""
 #. 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Positions are 1-indexed and counted on the full barcode. Example: 3310100010009 => prefix 331, item code 3310100, weight 1.000, check digit 9."
-msgstr ""
+msgstr "المواضع مُرقَّمة بدايةً من 1 وتُحسب على الباركود الكامل. مثال: 3310100010009 => بادئة 331، رمز العنصر 3310100، وزن 1.000، رقم التحقق 9."
 
 #. Label of a Date field in DocType 'POS Cash Movement'
 #. Label of a Date field in DocType 'POS Closing Shift'
@@ -3463,23 +3463,23 @@ msgstr ""
 #. Label of a Data field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Prefix"
-msgstr ""
+msgstr "بادئة"
 
 #. Label of a Check field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Prefix included in barcode"
-msgstr ""
+msgstr "البادئة مضمنة في الباركود"
 
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Prefix length"
-msgstr ""
+msgstr "طول البادئة"
 
 #. Description of the 'Prefix length' (Int) field in DocType 'Scale Barcode
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Prefix length (for example, prefix 331 => length 3). Item/weight start positions still use full barcode positions."
-msgstr ""
+msgstr "طول البادئة (مثال: بادئة 331 => طول 3). لا تزال مواضع بداية العنصر/الوزن تستخدم مواضع الباركود الكامل."
 
 #: frontend/src/components/items/CommandSearch.vue:710
 msgid "Press Enter to copy result"
@@ -3494,36 +3494,36 @@ msgstr "السعر"
 #. Label of a Section Break field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Price Discount Scheme "
-msgstr ""
+msgstr "نظام خصم السعر"
 
 #: xpos/x_pos/api/pricing_rules.py:183
 msgid "Price List is required"
-msgstr ""
+msgstr "قائمة الأسعار مطلوبة"
 
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Price decimals"
-msgstr ""
+msgstr "عشريات السعر"
 
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Price digits"
-msgstr ""
+msgstr "أرقام السعر"
 
 #. Label of a Check field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Price included in barcode"
-msgstr ""
+msgstr "السعر مضمن في الباركود"
 
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Price starting position"
-msgstr ""
+msgstr "موضع بداية السعر"
 
 #. Label of a Link field in DocType 'Referral Code'
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 msgid "Primary Customer Offer"
-msgstr ""
+msgstr "العرض الأساسي للعميل"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:277
 msgid "Print"
@@ -3536,11 +3536,11 @@ msgstr "تنسيق الطباعة"
 
 #: frontend/src/views/BarcodePrintView.vue:18
 msgid "Print Labels"
-msgstr ""
+msgstr "طباعة الملصقات"
 
 #: frontend/src/components/Navbar.vue:102
 msgid "Print Last Invoice"
-msgstr ""
+msgstr "طباعة آخر فاتورة"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:95
 #: frontend/src/components/items/CommandSearch.vue:438
@@ -3579,11 +3579,11 @@ msgstr ""
 #: frontend/src/components/Navbar.vue:88
 #: frontend/src/components/dialogs/ReturnDialog.vue:160
 msgid "Process Return"
-msgstr ""
+msgstr "معالجة الإرجاع"
 
 #: frontend/src/components/cart/CartSummary.vue:436
 msgid "Process Return {0}"
-msgstr ""
+msgstr "معالجة الإرجاع {0}"
 
 #: frontend/src/components/items/CommandSearch.vue:430
 msgid "Process a return"
@@ -3593,7 +3593,7 @@ msgstr ""
 #: frontend/src/components/dialogs/PaymentDialog.vue:533
 #: frontend/src/components/purchase/StockReceiving.vue:315
 msgid "Processing..."
-msgstr ""
+msgstr "جارٍ المعالجة..."
 
 #. Label of a Section Break field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -3603,7 +3603,7 @@ msgstr "مخطط خصم المنتج"
 #. Label of a Code field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "Profiles List"
-msgstr ""
+msgstr "قائمة الملفات الشخصية"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:252
 msgid "Program"
@@ -3612,7 +3612,7 @@ msgstr "برنامج"
 #. Label of a Select field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Promo Type"
-msgstr ""
+msgstr "نوع العرض الترويجي"
 
 #. Option for the 'Coupon Type' (Select) field in DocType 'POS Coupon'
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -3676,7 +3676,7 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:1138
 msgid "Purchase Order is required."
-msgstr ""
+msgstr "طلب الشراء مطلوب."
 
 #: frontend/src/stores/purchaseStore.ts:491
 msgid "Purchase Order {0} created"
@@ -3684,15 +3684,15 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:1078
 msgid "Purchase Order {0} does not exist."
-msgstr ""
+msgstr "طلب الشراء {0} غير موجود."
 
 #: xpos/x_pos/api/purchase_orders.py:1142
 msgid "Purchase Order {0} is not submitted."
-msgstr ""
+msgstr "لم يتم تقديم طلب الشراء {0}."
 
 #: xpos/x_pos/api/purchase_orders.py:640
 msgid "Purchase Order {0} processing failed: {1}"
-msgstr ""
+msgstr "فشلت معالجة طلب الشراء {0}: {1}"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:1063
 #: frontend/src/views/PurchaseOrderListView.vue:181
@@ -3717,11 +3717,11 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:598
 msgid "Purchase order requires at least one item with quantity."
-msgstr ""
+msgstr "يتطلب طلب الشراء عنصراً واحداً على الأقل مع الكمية."
 
 #: xpos/x_pos/api/purchase_orders.py:496
 msgid "Purchase order requires at least one item."
-msgstr ""
+msgstr "يتطلب طلب الشراء عنصراً واحداً على الأقل."
 
 #: frontend/src/stores/purchaseStore.ts:481
 msgid "Purchase order saved offline. Will sync when online."
@@ -3733,7 +3733,7 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:472
 msgid "Purchase orders"
-msgstr ""
+msgstr "طلبات الشراء"
 
 #: frontend/src/components/Sidebar.vue:48
 msgid "Purchasing"
@@ -3741,15 +3741,15 @@ msgstr ""
 
 #: xpos/x_pos/api/qz.py:46
 msgid "Python package 'cryptography' is required for QZ Tray signing. Please install it on the server and retry."
-msgstr ""
+msgstr "حزمة Python 'cryptography' مطلوبة لتوقيع QZ Tray. يرجى تثبيتها على الخادم والمحاولة مرة أخرى."
 
 #: xpos/x_pos/api/qz.py:76
 msgid "QZ Certificate Missing"
-msgstr ""
+msgstr "شهادة QZ مفقودة"
 
 #: xpos/x_pos/api/qz.py:168
 msgid "QZ Certificate Ready"
-msgstr ""
+msgstr "شهادة QZ جاهزة"
 
 #: xpos/x_pos/api/qz.py:163
 msgid "QZ Tray certificate generated successfully.<br><br>Download the certificate from XPOS and import it into QZ Tray on each POS machine, then restart QZ Tray."
@@ -3757,15 +3757,15 @@ msgstr ""
 
 #: xpos/x_pos/api/qz.py:75
 msgid "QZ Tray certificate not found. Ask an administrator to run Setup QZ Certificate."
-msgstr ""
+msgstr "شهادة QZ Tray غير موجودة. اطلب من المسؤول تشغيل إعداد شهادة QZ."
 
 #: xpos/x_pos/api/qz.py:116
 msgid "QZ certificate already exists."
-msgstr ""
+msgstr "شهادة QZ موجودة بالفعل."
 
 #: xpos/x_pos/api/qz.py:174
 msgid "QZ certificate generated successfully."
-msgstr ""
+msgstr "تم إنشاء شهادة QZ بنجاح."
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:104
 #: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:69
@@ -3782,7 +3782,7 @@ msgstr ""
 #. Label of a Select field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Qualifying Transaction / Item"
-msgstr ""
+msgstr "المعاملة / العنصر المؤهل"
 
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.py:93
 msgid "Quantity"
@@ -3791,7 +3791,7 @@ msgstr ""
 #. Label of a Section Break field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Quantity and Amount Conditions"
-msgstr ""
+msgstr "شروط الكمية والمبلغ"
 
 #: frontend/src/components/core/QueryFilterPanel.vue:33
 msgid "Query Filters"
@@ -3803,7 +3803,7 @@ msgstr ""
 
 #: xpos/api/sales_orders.py:221
 msgid "Quotation name is required"
-msgstr ""
+msgstr "اسم عرض السعر مطلوب"
 
 #. Label of a Currency field in DocType 'Delivery Charges POS Profile'
 #. Label of a Percent field in DocType 'POS Closing Shift Taxes'
@@ -3826,20 +3826,20 @@ msgstr "سعر السلعة المفردة"
 #: frontend/src/views/BankDropView.vue:152
 #: frontend/src/views/ExpenseView.vue:155
 msgid "Reason / Notes"
-msgstr ""
+msgstr "السبب / الملاحظات"
 
 #: frontend/src/components/purchase/StockReceiving.vue:315
 msgid "Receive & Return"
-msgstr ""
+msgstr "استلام وإرجاع"
 
 #: frontend/src/components/purchase/StockReceiving.vue:229
 msgid "Receive Qty"
-msgstr ""
+msgstr "كمية الاستلام"
 
 #: frontend/src/components/items/CommandSearch.vue:345
 #: xpos/x_pos/api/purchase_orders.py:476 xpos/x_pos/api/purchase_orders.py:651
 msgid "Receive stock"
-msgstr ""
+msgstr "استلام المخزون"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:1093
 msgid "Received"
@@ -3847,25 +3847,25 @@ msgstr ""
 
 #: xpos/x_pos/api/stock_transfer.py:281
 msgid "Received at {0}"
-msgstr ""
+msgstr "تم الاستلام في {0}"
 
 #: frontend/src/components/purchase/StockReceiving.vue:194
 msgid "Receiving at"
-msgstr ""
+msgstr "الاستلام في"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:89
 msgid "Recent Movements"
-msgstr ""
+msgstr "الحركات الأخيرة"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:137
 #: frontend/src/views/BankDropView.vue:174
 msgid "Record Deposit"
-msgstr ""
+msgstr "تسجيل إيداع"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:136
 #: frontend/src/views/ExpenseView.vue:177
 msgid "Record Expense"
-msgstr ""
+msgstr "تسجيل نفقة"
 
 #: frontend/src/components/items/CommandSearch.vue:475
 msgid "Record a POS expense"
@@ -3875,7 +3875,7 @@ msgstr ""
 #: frontend/src/components/items/CommandSearch.vue:484
 #: frontend/src/views/BankDropView.vue:126
 msgid "Record a cash deposit"
-msgstr ""
+msgstr "تسجيل إيداع نقدي"
 
 #: frontend/src/views/BankDropView.vue:46
 msgid "Record a cash drop to the bank"
@@ -3884,7 +3884,7 @@ msgstr ""
 #: frontend/src/components/dialogs/CashMovementDialog.vue:35
 #: frontend/src/views/ExpenseView.vue:125
 msgid "Record a cash withdrawal"
-msgstr ""
+msgstr "تسجيل سحب نقدي"
 
 #: frontend/src/components/items/CommandSearch.vue:363
 msgid "Record bank drops"
@@ -3896,7 +3896,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:384
 msgid "Redeem Points"
-msgstr ""
+msgstr "استرداد النقاط"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:319
 msgid "Redeeming"
@@ -3916,20 +3916,20 @@ msgstr "كود الإحالة"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:69
 msgid "Referral Code is required"
-msgstr ""
+msgstr "رمز الإحالة مطلوب"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:77
 msgid "Referral Code {0} does not exist"
-msgstr ""
+msgstr "رمز الإحالة {0} غير موجود"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:79
 msgid "Referral Code {0} is disabled"
-msgstr ""
+msgstr "رمز الإحالة {0} معطل"
 
 #. Label of a Data field in DocType 'Referral Code'
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 msgid "Referral Name"
-msgstr ""
+msgstr "اسم المُحيل"
 
 #: frontend/src/components/customer/CustomerSelect.vue:246
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:107
@@ -3961,7 +3961,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:75
 msgid "Refund Amount"
-msgstr ""
+msgstr "مبلغ الاسترداد"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:690
 msgid "Remaining"
@@ -3969,7 +3969,7 @@ msgstr "المتبقية"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:446
 msgid "Remaining outstanding: {0} across {1} invoice(s)."
-msgstr ""
+msgstr "المتبقي المستحق: {0} عبر {1} فاتورة (فواتير)."
 
 #. Label of a Small Text field in DocType 'POS Cash Movement'
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:79
@@ -3981,11 +3981,11 @@ msgstr "ملاحظات"
 
 #: frontend/src/components/purchase/StockReceiving.vue:302
 msgid "Remarks (optional, e.g. missing or damaged items)"
-msgstr ""
+msgstr "ملاحظات (اختياري، مثل: عناصر مفقودة أو تالفة)"
 
 #: xpos/x_pos/api/cash_movement/validation.py:56
 msgid "Remarks are required for cash movement in this POS Profile."
-msgstr ""
+msgstr "الملاحظات مطلوبة لحركة النقد في هذا الملف التعريفي لنقاط البيع."
 
 #: frontend/src/components/cart/CartSummary.vue:245
 #: frontend/src/components/dialogs/PaymentDialog.vue:331
@@ -4009,7 +4009,7 @@ msgstr ""
 #: frontend/src/components/Navbar.vue:84
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:289
 msgid "Repeat"
-msgstr ""
+msgstr "تكرار"
 
 #: frontend/src/components/dialogs/RepeatInvoiceDialog.vue:14
 #: frontend/src/components/items/CommandSearch.vue:420
@@ -4018,7 +4018,7 @@ msgstr ""
 
 #: frontend/src/components/Navbar.vue:76
 msgid "Repeat Invoice (Ctrl+G)"
-msgstr ""
+msgstr "تكرار الفاتورة (Ctrl+G)"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:92
 msgid "Repeat Last Invoice"
@@ -4031,12 +4031,12 @@ msgstr ""
 #. Label of a Check field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Replace Cheapest Item"
-msgstr ""
+msgstr "استبدال أرخص عنصر"
 
 #. Label of a Check field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Replace Same Item"
-msgstr ""
+msgstr "استبدال نفس العنصر"
 
 #: frontend/src/views/ReportViewerView.vue:498
 msgid "Report exported as CSV."
@@ -4078,11 +4078,11 @@ msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:20
 msgid "Restore Draft Invoice"
-msgstr ""
+msgstr "استعادة فاتورة المسودة"
 
 #: frontend/src/components/cart/CartSummary.vue:183
 msgid "Restore draft"
-msgstr ""
+msgstr "استعادة المسودة"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:137
 msgid "Retry"
@@ -4096,11 +4096,11 @@ msgstr "عودة"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:537
 msgid "Return & Print"
-msgstr ""
+msgstr "إرجاع وطباعة"
 
 #: xpos/api/invoices.py:295
 msgid "Return Against invoice is required for returns"
-msgstr ""
+msgstr "الفاتورة المرجعية للإرجاع مطلوبة للمرتجعات"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:94
 #: frontend/src/components/dialogs/ReturnDialog.vue:14
@@ -4114,12 +4114,12 @@ msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:22
 msgid "Return Payment"
-msgstr ""
+msgstr "دفع المرتجعات"
 
 #: frontend/src/components/dialogs/ReturnDialog.vue:108
 #: frontend/src/components/purchase/StockReceiving.vue:252
 msgid "Return Qty"
-msgstr ""
+msgstr "كمية الإرجاع"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:954
 msgid "Return against invoice is required for returns"
@@ -4147,11 +4147,11 @@ msgstr "النتائج"
 
 #: xpos/x_pos/api/invoice_processing/utils.py:68
 msgid "Returns are only allowed until {0}"
-msgstr ""
+msgstr "المرتجعات مسموحة فقط حتى {0}"
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:13
 msgid "Review and reconcile your shift"
-msgstr ""
+msgstr "مراجعة وتسوية نوبتك"
 
 #: frontend/src/components/ui/table/Table.vue:1223
 msgid "Row"
@@ -4164,7 +4164,7 @@ msgstr "الصف # {0}: الدفعة {1} فقط {2} الكمية. يرجى تح�
 #. Label of a Data field in DocType 'POS Offer Detail'
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Row ID"
-msgstr ""
+msgstr "معرّف الصف"
 
 #: frontend/src/views/ReportViewerView.vue:473
 msgid "Row copied to clipboard."
@@ -4184,7 +4184,7 @@ msgstr "فاتورة مبيعات"
 #. Name of a DocType
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
 msgid "Sales Invoice Reference"
-msgstr ""
+msgstr "مرجع فاتورة المبيعات"
 
 #. Name of a role
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -4203,15 +4203,15 @@ msgstr "المدير الرئيسي للمبيعات"
 
 #: xpos/x_pos/api/invoice.py:121
 msgid "Sales Order Created"
-msgstr ""
+msgstr "تم إنشاء طلب المبيعات"
 
 #: xpos/x_pos/api/invoice.py:120
 msgid "Sales Order Created at <a href='{0}'>{1}</a>"
-msgstr ""
+msgstr "تم إنشاء طلب المبيعات في <a href='{0}'>{1}</a>"
 
 #: xpos/api/sales_orders.py:131
 msgid "Sales Order name is required"
-msgstr ""
+msgstr "اسم طلب المبيعات مطلوب"
 
 #: xpos/x_pos/api/invoices.py:112
 msgid "Sales Order {0} does not exist"
@@ -4243,7 +4243,7 @@ msgstr ""
 #: frontend/src/components/dialogs/PaymentDialog.vue:498
 #: frontend/src/components/dialogs/PaymentDialog.vue:537
 msgid "Save & Print"
-msgstr ""
+msgstr "حفظ وطباعة"
 
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:128
 msgid "Save Changes"
@@ -4257,15 +4257,15 @@ msgstr ""
 #: frontend/src/components/dialogs/PaymentDialog.vue:503
 #: frontend/src/components/dialogs/PaymentDialog.vue:522
 msgid "Save Only"
-msgstr ""
+msgstr "حفظ فقط"
 
 #: frontend/src/components/cart/CartSummary.vue:172
 msgid "Save as draft"
-msgstr ""
+msgstr "حفظ كمسودة"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:41
 msgid "Save your current order to create a draft"
-msgstr ""
+msgstr "احفظ طلبك الحالي لإنشاء مسودة"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:1012
 msgid "Saved Drafts"
@@ -4282,7 +4282,7 @@ msgstr ""
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Scale Barcode Settings"
-msgstr ""
+msgstr "إعدادات باركود الميزان"
 
 #: xpos/x_pos/api/item_processing/barcode.py:282
 msgid "Scale Barcode Settings are incomplete. Please configure item and weight segments."
@@ -4292,7 +4292,7 @@ msgstr ""
 #: frontend/src/views/PurchaseInvoiceView.vue:1147
 #: frontend/src/views/PurchaseOrderView.vue:543
 msgid "Scan barcode..."
-msgstr ""
+msgstr "مسح الباركود..."
 
 #: frontend/src/components/Navbar.vue:72
 msgid "Search"
@@ -4304,7 +4304,7 @@ msgstr ""
 
 #: frontend/src/views/BarcodePrintView.vue:151
 msgid "Search and add items from the left panel"
-msgstr ""
+msgstr "ابحث وأضف عناصر من اللوحة اليسرى"
 
 #: frontend/src/components/dialogs/RepeatInvoiceDialog.vue:18
 msgid "Search and select a past invoice to load into the cart"
@@ -4324,7 +4324,7 @@ msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:30
 msgid "Search by name, phone, email..."
-msgstr ""
+msgstr "ابحث بالاسم أو الهاتف أو البريد الإلكتروني..."
 
 #: frontend/src/components/core/SortBy.vue:37
 msgid "Search fields..."
@@ -4336,11 +4336,11 @@ msgstr ""
 
 #: frontend/src/views/BarcodePrintView.vue:110
 msgid "Search for items to add barcode labels"
-msgstr ""
+msgstr "ابحث عن عناصر لإضافة ملصقات الباركود"
 
 #: frontend/src/views/PosView.vue:101
 msgid "Search item groups..."
-msgstr ""
+msgstr "بحث في مجموعات العناصر..."
 
 #: frontend/src/components/items/CommandSearch.vue:73
 msgid "Search items"
@@ -4352,7 +4352,7 @@ msgstr ""
 
 #: frontend/src/views/BarcodePrintView.vue:35
 msgid "Search items by name, code, or barcode..."
-msgstr ""
+msgstr "ابحث عن العناصر بالاسم أو الرمز أو الباركود..."
 
 #: frontend/src/components/items/CommandSearch.vue:19
 msgid "Search items, pages, actions..."
@@ -4360,7 +4360,7 @@ msgstr ""
 
 #: frontend/src/components/items/SearchBar.vue:8
 msgid "Search items, scan barcode..."
-msgstr ""
+msgstr "ابحث عن العناصر، مسح الباركود..."
 
 #: frontend/src/views/ReportsIndexView.vue:136
 msgid "Search reports, filters, or categories..."
@@ -4378,11 +4378,11 @@ msgstr "حدد العميل"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:23
 msgid "Select a draft invoice to restore to cart"
-msgstr ""
+msgstr "اختر فاتورة مسودة لاستعادتها إلى السلة"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:92
 msgid "Select a loyalty program to enroll this customer"
-msgstr ""
+msgstr "اختر برنامج ولاء لتسجيل هذا العميل"
 
 #: frontend/src/components/customer/CustomerSelect.vue:255
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:115
@@ -4395,7 +4395,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:434
 msgid "Select customer first"
-msgstr ""
+msgstr "اختر العميل أولاً"
 
 #: frontend/src/views/ExpenseView.vue:138
 msgid "Select expense account"
@@ -4422,20 +4422,20 @@ msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:121
 msgid "Selected"
-msgstr ""
+msgstr "محدد"
 
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:74
 msgid "Selected POS Opening Shift should be open."
-msgstr ""
+msgstr "يجب أن تكون نوبة فتح نقاط البيع المحددة مفتوحة."
 
 #: xpos/x_pos/api/cash_movement/validation.py:142
 msgid "Selected expense account is not allowed for this POS Profile."
-msgstr ""
+msgstr "حساب النفقات المحدد غير مسموح به لهذا الملف التعريفي لنقاط البيع."
 
 #: xpos/x_pos/api/cash_movement/validation.py:113
 #: xpos/x_pos/api/cash_movement/validation.py:120
 msgid "Selected source account is not allowed for this POS Profile."
-msgstr ""
+msgstr "حساب المصدر المحدد غير مسموح به لهذا الملف التعريفي لنقاط البيع."
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:120
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:81
@@ -4467,7 +4467,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:328
 msgid "Shift closed successfully!"
-msgstr ""
+msgstr "تم إغلاق النوبة بنجاح!"
 
 #. Label of a Link field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
@@ -4476,7 +4476,7 @@ msgstr "حساب الشحن"
 
 #: xpos/x_pos/api/stock_transfer.py:401
 msgid "Shortage return from transit to source"
-msgstr ""
+msgstr "إرجاع النقص من العبور إلى المصدر"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:39
 msgid "Show Keyboard Shortcuts"
@@ -4492,7 +4492,7 @@ msgstr ""
 
 #: frontend/src/components/Navbar.vue:199
 msgid "Sign Out"
-msgstr ""
+msgstr "تسجيل الخروج"
 
 #. Name of a report
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.json
@@ -4501,11 +4501,11 @@ msgstr ""
 
 #: frontend/src/views/BarcodePrintView.vue:67
 msgid "Small (38×25mm)"
-msgstr ""
+msgstr "صغير (38×25 ملم)"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:397
 msgid "Small remaining amounts"
-msgstr ""
+msgstr "مبالغ متبقية صغيرة"
 
 #: frontend/src/components/dialogs/ReturnDialog.vue:105
 msgid "Sold"
@@ -4524,11 +4524,11 @@ msgstr ""
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:140
 msgid "Sorry, this coupon code cannot be used by this company"
-msgstr ""
+msgstr "عذراً، لا يمكن استخدام رمز القسيمة هذا من قبل هذه الشركة"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:136
 msgid "Sorry, this coupon code cannot be used by this customer"
-msgstr ""
+msgstr "عذراً، لا يمكن استخدام رمز القسيمة هذا من قبل هذا العميل"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:119
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:123
@@ -4537,7 +4537,7 @@ msgstr "عذرا ، رمز القسيمة هذا لم يعد صالحًا"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:104
 msgid "Sorry, this coupon code not exists"
-msgstr ""
+msgstr "عذراً، رمز القسيمة هذا غير موجود"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:116
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:131
@@ -4551,7 +4551,7 @@ msgstr "عذرًا ، لم تبدأ صلاحية رمز القسيمة"
 
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:154
 msgid "Sorry, {0} have used this coupon before"
-msgstr ""
+msgstr "عذراً، {0} استخدم هذه القسيمة من قبل"
 
 #: frontend/src/views/ReportViewerView.vue:947
 msgid "Sort by"
@@ -4560,36 +4560,36 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Cash Movement'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Source Account"
-msgstr ""
+msgstr "حساب المصدر"
 
 #: xpos/x_pos/api/cash_movement/service.py:61
 msgid "Source account"
-msgstr ""
+msgstr "حساب المصدر"
 
 #: xpos/x_pos/api/cash_movement/validation.py:124
 msgid "Source account must be a Cash account."
-msgstr ""
+msgstr "يجب أن يكون حساب المصدر حساباً نقدياً."
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:86
 msgid "Source account must belong to the selected company."
-msgstr ""
+msgstr "يجب أن ينتمي حساب المصدر إلى الشركة المحددة."
 
 #: xpos/x_pos/api/cash_movement/validation.py:110
 msgid "Source account override is disabled for this POS Profile."
-msgstr ""
+msgstr "تجاوز حساب المصدر معطل لهذا الملف التعريفي لنقاط البيع."
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:80
 msgid "Source and target accounts are required."
-msgstr ""
+msgstr "حسابا المصدر والهدف مطلوبان."
 
 #: xpos/x_pos/api/cash_movement/service.py:65
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:104
 msgid "Source and target accounts cannot be the same for cash deposit."
-msgstr ""
+msgstr "لا يمكن أن يكون حسابا المصدر والهدف متماثلين للإيداع النقدي."
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:216
 msgid "Split Payment"
-msgstr ""
+msgstr "تقسيم الدفع"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:115
 msgid "Start Search"
@@ -4607,7 +4607,7 @@ msgstr ""
 #. Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Starting position (1-indexed) of the price segment."
-msgstr ""
+msgstr "موضع البداية (مُرقَّم من 1) لمقطع السعر."
 
 #. Label of a Select field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
@@ -4631,23 +4631,23 @@ msgstr ""
 
 #: xpos/x_pos/api/stock_transfer.py:170
 msgid "Stock Entry {0} does not exist."
-msgstr ""
+msgstr "قيد المخزون {0} غير موجود."
 
 #: xpos/x_pos/api/stock_transfer.py:255
 msgid "Stock Entry {0} has already been fully received."
-msgstr ""
+msgstr "قيد المخزون {0} تم استلامه بالكامل بالفعل."
 
 #: xpos/x_pos/api/stock_transfer.py:175
 msgid "Stock Entry {0} is not a Material Transfer with in-transit."
-msgstr ""
+msgstr "قيد المخزون {0} ليس تحويل مواد مع عبور."
 
 #: xpos/x_pos/api/stock_transfer.py:252
 msgid "Stock Entry {0} is not a valid in-transit transfer."
-msgstr ""
+msgstr "قيد المخزون {0} ليس تحويل عبور صالح."
 
 #: xpos/x_pos/api/stock_transfer.py:249 xpos/x_pos/api/stock_transfer.py:382
 msgid "Stock Entry {0} is not submitted."
-msgstr ""
+msgstr "لم يتم تقديم قيد المخزون {0}."
 
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.py:74
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:174
@@ -4658,11 +4658,11 @@ msgstr ""
 #: frontend/src/components/items/CommandSearch.vue:344
 #: frontend/src/views/StockReceivingView.vue:23
 msgid "Stock Receiving"
-msgstr ""
+msgstr "استلام المخزون"
 
 #: xpos/x_pos/api/purchase_orders.py:325
 msgid "Stock UOM is required."
-msgstr ""
+msgstr "وحدة قياس المخزون مطلوبة."
 
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.py:86
 #: xpos/x_pos/report/current_stock_report/current_stock_report.py:90
@@ -4701,15 +4701,15 @@ msgstr "حاصل الجمع"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:60
 msgid "Success"
-msgstr ""
+msgstr "نجاح"
 
 #: xpos/api/customers.py:619
 msgid "Successfully enrolled {0} in {1}"
-msgstr ""
+msgstr "تم تسجيل {0} في {1} بنجاح"
 
 #: xpos/api/customers.py:655
 msgid "Successfully unenrolled {0} from {1}"
-msgstr ""
+msgstr "تم إلغاء تسجيل {0} من {1} بنجاح"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:153
 #: frontend/src/views/ReportViewerView.vue:809
@@ -4763,15 +4763,15 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:480 xpos/x_pos/api/purchase_orders.py:655
 msgid "Supplier is required."
-msgstr ""
+msgstr "المورد مطلوب."
 
 #: xpos/x_pos/api/purchase_orders.py:257
 msgid "Supplier name is required."
-msgstr ""
+msgstr "اسم المورد مطلوب."
 
 #: xpos/x_pos/api/purchase_orders.py:484
 msgid "Supplier {0} was not found."
-msgstr ""
+msgstr "المورد {0} غير موجود."
 
 #: frontend/src/components/dialogs/CameraBarcodeDialog.vue:96
 msgid "Supported: QR, EAN, UPC, Code 128, Code 39 and more"
@@ -4813,23 +4813,23 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Cash Movement'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "Target Account"
-msgstr ""
+msgstr "حساب الهدف"
 
 #: xpos/x_pos/api/cash_movement/service.py:62
 msgid "Target account"
-msgstr ""
+msgstr "حساب الهدف"
 
 #: xpos/api/cash_movements.py:167
 msgid "Target account is required"
-msgstr ""
+msgstr "حساب الهدف مطلوب"
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:89
 msgid "Target account must belong to the selected company."
-msgstr ""
+msgstr "يجب أن ينتمي حساب الهدف إلى الشركة المحددة."
 
 #: xpos/x_pos/api/stock_transfer.py:261
 msgid "Target warehouse is required."
-msgstr ""
+msgstr "المستودع الهدف مطلوب."
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:144
 msgid "Tax"
@@ -4841,7 +4841,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:87
 msgid "Tax Breakdown"
-msgstr ""
+msgstr "تفصيل الضريبة"
 
 #: frontend/src/components/customer/CustomerSelect.vue:142
 #: frontend/src/components/customer/CustomerSelect.vue:144
@@ -4873,15 +4873,15 @@ msgstr "الضرائب"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:162
 msgid "Taxes & Charges"
-msgstr ""
+msgstr "الضرائب والرسوم"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:204
 msgid "Taxes Breakdown"
-msgstr ""
+msgstr "تفصيل الضرائب"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:207
 msgid "Tendered"
-msgstr ""
+msgstr "المبلغ المُسلَّم"
 
 #: frontend/src/components/customer/CustomerSelect.vue:226
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:90
@@ -4894,23 +4894,23 @@ msgstr ""
 
 #: frontend/src/components/Navbar.vue:294
 msgid "Theme: Dark (click to switch to System)"
-msgstr ""
+msgstr "السمة: داكن (انقر للتبديل إلى النظام)"
 
 #: frontend/src/components/Navbar.vue:293
 msgid "Theme: Light (click to switch to Dark)"
-msgstr ""
+msgstr "السمة: فاتح (انقر للتبديل إلى الداكن)"
 
 #: frontend/src/components/Navbar.vue:295
 msgid "Theme: System ({0}) (click to switch to Light)"
-msgstr ""
+msgstr "السمة: النظام ({0}) (انقر للتبديل إلى الفاتح)"
 
 #: xpos/x_pos/api/customer.py:59
 msgid "This Referral Code {0} not exists"
-msgstr ""
+msgstr "رمز الإحالة {0} غير موجود"
 
 #: xpos/x_pos/api/invoices.py:76
 msgid "This invoice {0} cannot be deleted"
-msgstr ""
+msgstr "لا يمكن حذف الفاتورة {0}"
 
 #: frontend/src/stores/cartStore.ts:308 frontend/src/stores/cartStore.ts:395
 msgid "This item is not in the original invoice"
@@ -4975,11 +4975,11 @@ msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:26
 msgid "Total Invoices"
-msgstr ""
+msgstr "إجمالي الفواتير"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:268
 msgid "Total Paid"
-msgstr ""
+msgstr "إجمالي المدفوع"
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:228
 #: frontend/src/views/PurchaseInvoiceView.vue:1176
@@ -4995,7 +4995,7 @@ msgstr "الكمية الإجمالية"
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:75
 msgid "Total Taxes"
-msgstr ""
+msgstr "إجمالي الضرائب"
 
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.py:115
 msgid "Total Value"
@@ -5005,7 +5005,7 @@ msgstr ""
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Total item code digits to extract. Example: item code 3310100 => digits 7."
-msgstr ""
+msgstr "إجمالي أرقام رمز العنصر للاستخراج. مثال: رمز العنصر 3310100 => أرقام 7."
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
 #. 'POS Offer'
@@ -5027,7 +5027,7 @@ msgstr ""
 
 #: frontend/src/components/items/ItemGrid.vue:20
 msgid "Try a different search or category"
-msgstr ""
+msgstr "جرّب بحثاً أو فئة مختلفة"
 
 #: frontend/src/views/ReportViewerView.vue:1011
 msgid "Try adjusting the filters, search term, or sort order."
@@ -5035,7 +5035,7 @@ msgstr ""
 
 #: frontend/src/views/OrdersView.vue:50
 msgid "Try adjusting your filters"
-msgstr ""
+msgstr "جرّب تعديل الفلاتر"
 
 #. Label of a Data field in DocType 'POS Coupon Detail'
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:77
@@ -5054,44 +5054,44 @@ msgstr ""
 
 #: xpos/x_pos/api/invoice.py:71
 msgid "Unable to cancel Journal Entry {0} linked to this invoice. Please cancel it manually and try again."
-msgstr ""
+msgstr "لا يمكن إلغاء القيد اليومي {0} المرتبط بهذه الفاتورة. يرجى إلغاؤه يدوياً والمحاولة مرة أخرى."
 
 #: xpos/x_pos/api/payments.py:282
 msgid "Unable to create Journal Entry for customer credit."
-msgstr ""
+msgstr "لا يمكن إنشاء القيد اليومي لرصيد العميل."
 
 #: xpos/x_pos/api/invoice_processing/payment.py:70
 msgid "Unable to determine cash account for change payment entry."
-msgstr ""
+msgstr "لا يمكن تحديد حساب النقد لقيد دفع الباقي."
 
 #: xpos/x_pos/api/invoice_processing/payment.py:76
 msgid "Unable to determine customer receivable account for change payment entry."
-msgstr ""
+msgstr "لا يمكن تحديد حساب مستحقات العميل لقيد دفع الباقي."
 
 #: xpos/x_pos/api/invoice_processing/creation.py:316
 #: xpos/x_pos/api/invoice_processing/creation.py:330
 msgid "Unable to find exchange rate for {0} to {1}. Please create a Currency Exchange record manually"
-msgstr ""
+msgstr "لا يمكن العثور على سعر الصرف من {0} إلى {1}. يرجى إنشاء سجل تبادل العملات يدوياً"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:107
 msgid "Unable to load Credit Note {0}: {1}"
-msgstr ""
+msgstr "لا يمكن تحميل إشعار الدائن {0}: {1}"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:324
 msgid "Unable to load Payment Entry {0}: {1}"
-msgstr ""
+msgstr "لا يمكن تحميل قيد الدفع {0}: {1}"
 
 #: xpos/x_pos/doctype/pos_closing_shift/closing_processing/overview.py:47
 msgid "Unable to resolve POS Opening Shift."
-msgstr ""
+msgstr "لا يمكن حل نوبة فتح نقاط البيع."
 
 #: xpos/x_pos/api/cash_movement/validation.py:100
 msgid "Unable to resolve POS cash account from POS Profile cash mode of payment."
-msgstr ""
+msgstr "لا يمكن حل حساب النقد في نقاط البيع من طريقة الدفع النقدي في ملف نقاط البيع."
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:81
 msgid "Unenroll from Program"
-msgstr ""
+msgstr "إلغاء التسجيل من البرنامج"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:87
 msgid "Unknown Customer"
@@ -5103,7 +5103,7 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:571
 msgid "Unknown error"
-msgstr ""
+msgstr "خطأ غير معروف"
 
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:16
 msgid "Update customer information"
@@ -5126,7 +5126,7 @@ msgstr "المستعمل"
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:76
 msgid "User must match the selected POS Opening Shift user."
-msgstr ""
+msgstr "يجب أن يتطابق المستخدم مع مستخدم نوبة فتح نقاط البيع المحددة."
 
 #. Label of a Date field in DocType 'POS Coupon'
 #. Label of a Date field in DocType 'POS Offer'
@@ -5189,7 +5189,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:66
 msgid "Walk-in Customer"
-msgstr ""
+msgstr "عميل بدون موعد"
 
 #. Label of a Link field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -5239,29 +5239,29 @@ msgstr "وزن"
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Weight decimals"
-msgstr ""
+msgstr "عشريات الوزن"
 
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Weight digits"
-msgstr ""
+msgstr "أرقام الوزن"
 
 #. Label of a Int field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Weight starting position"
-msgstr ""
+msgstr "موضع بداية الوزن"
 
 #. Description of the 'Weight' (Section Break) field in DocType 'Scale Barcode
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Weight value is parsed as: [weight digits].[weight decimals]."
-msgstr ""
+msgstr "تتم قراءة قيمة الوزن على النحو: [أرقام الوزن].[عشريات الوزن]."
 
 #. Description of the 'Price included in barcode' (Check) field in DocType
 #. 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "When enabled, price is extracted using the price start/digits/decimals fields below."
-msgstr ""
+msgstr "عند التفعيل، يتم استخراج السعر باستخدام حقول بداية السعر/الأرقام/العشريات أدناه."
 
 #: frontend/src/components/cart/CartSummary.vue:106
 #: frontend/src/components/dialogs/PaymentDialog.vue:394
@@ -5270,7 +5270,7 @@ msgstr "لا تصلح"
 
 #: xpos/x_pos/api/invoice_processing/creation.py:134
 msgid "Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount."
-msgstr ""
+msgstr "مبلغ الشطب يتجاوز الحد المسموح به ({0}). يرجى إضافة دفعة للمبلغ المتبقي."
 
 #. Name of a Workspace
 #: frontend/src/components/Navbar.vue:8
@@ -5278,12 +5278,12 @@ msgstr ""
 #: frontend/src/components/dialogs/AboutDialog.vue:21
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "X POS"
-msgstr ""
+msgstr "إكس بي أو إس"
 
 #. Label of a shortcut in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "X POS App"
-msgstr ""
+msgstr "تطبيق إكس بي أو إس"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:21
 msgid "X POS Desktop"
@@ -5291,11 +5291,11 @@ msgstr ""
 
 #: xpos/x_pos/api/payment_processing/processor.py:22
 msgid "X POS Payments is not enabled for this POS Profile"
-msgstr ""
+msgstr "مدفوعات إكس بي أو إس غير مفعلة لهذا الملف التعريفي لنقاط البيع"
 
 #: xpos/x_pos/api/purchase_orders.py:639
 msgid "X POS Purchase Order Flow Failed"
-msgstr ""
+msgstr "فشل سير طلب الشراء في إكس بي أو إس"
 
 #. Label of a Data field in DocType 'POS Closing Shift'
 #. Label of a Data field in DocType 'POS Opening Shift'
@@ -5312,11 +5312,11 @@ msgstr ""
 
 #: xpos/x_pos/api/cash_movement/service.py:35
 msgid "You are not allowed to access this shift."
-msgstr ""
+msgstr "غير مسموح لك بالوصول إلى هذه النوبة."
 
 #: xpos/x_pos/api/cash_movement/permissions.py:35
 msgid "You are not allowed to manage this cash movement record."
-msgstr ""
+msgstr "غير مسموح لك بإدارة سجل حركة النقد هذا."
 
 #: frontend/src/stores/offlineStore.ts:80
 msgid "You are offline. Check your internet connection."
@@ -5332,7 +5332,7 @@ msgstr ""
 
 #: xpos/x_pos/api/invoice_processing/returns.py:360
 msgid "You are trying to return more quantity for item {0} than was sold."
-msgstr ""
+msgstr "تحاول إرجاع كمية أكبر من المُباعة للعنصر {0}."
 
 #: frontend/src/views/ReportViewerView.vue:214
 #: frontend/src/views/ReportViewerView.vue:293
@@ -5367,7 +5367,7 @@ msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:131
 msgid "days"
-msgstr ""
+msgstr "أيام"
 
 #. Description of the 'Coupon Name' (Data) field in DocType 'POS Coupon'
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -5385,15 +5385,15 @@ msgstr ""
 #: frontend/src/components/cart/CartSummary.vue:32
 #: frontend/src/components/dialogs/PaymentDialog.vue:110
 msgid "incl."
-msgstr ""
+msgstr "شامل"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:76
 msgid "item"
-msgstr ""
+msgstr "عنصر"
 
 #: frontend/src/views/BarcodePrintView.vue:158
 msgid "item(s)"
-msgstr ""
+msgstr "عنصر (عناصر)"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:76
 #: frontend/src/components/purchase/StockReceiving.vue:381
@@ -5401,23 +5401,23 @@ msgstr ""
 #: frontend/src/views/PurchaseInvoiceView.vue:1090
 #: frontend/src/views/PurchaseOrderListView.vue:247
 msgid "items"
-msgstr ""
+msgstr "عناصر"
 
 #: xpos/x_pos/api/barcode_generator.py:324
 msgid "items must be a list"
-msgstr ""
+msgstr "يجب أن تكون العناصر قائمة"
 
 #: frontend/src/views/BarcodePrintView.vue:159
 msgid "label(s)"
-msgstr ""
+msgstr "ملصق (ملصقات)"
 
 #: xpos/x_pos/api/customers.py:124 xpos/x_pos/api/item_processing/search.py:111
 msgid "modified_after must be a valid ISO datetime"
-msgstr ""
+msgstr "يجب أن يكون modified_after تاريخاً ووقتاً صالحاً بتنسيق ISO"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:158
 msgid "more"
-msgstr ""
+msgstr "المزيد"
 
 #: frontend/src/components/items/CommandSearch.vue:191
 msgid "navigate"
@@ -5431,11 +5431,11 @@ msgstr ""
 #: frontend/src/components/dialogs/PaymentDialog.vue:319
 #: frontend/src/components/dialogs/PaymentDialog.vue:347
 msgid "pts"
-msgstr ""
+msgstr "نقاط"
 
 #: frontend/src/components/purchase/StockReceiving.vue:391
 msgid "received"
-msgstr ""
+msgstr "تم الاستلام"
 
 #: frontend/src/views/ReportsIndexView.vue:110
 #: frontend/src/views/ReportsIndexView.vue:177

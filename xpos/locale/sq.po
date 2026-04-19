@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
 "POT-Creation-Date: 2026-04-19 22:32+0428\n"
-"PO-Revision-Date: 2026-03-18 18:39+0428\n"
+"PO-Revision-Date: 2026-04-19 22:32+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -4701,7 +4701,7 @@ msgstr "Nëntotali"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:60
 msgid "Success"
-msgstr ""
+msgstr "Sukses"
 
 #: xpos/api/customers.py:619
 msgid "Successfully enrolled {0} in {1}"

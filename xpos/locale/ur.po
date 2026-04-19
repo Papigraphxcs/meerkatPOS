@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-04-19 23:23+0428\n"
-"PO-Revision-Date: 2026-03-18 18:39+0428\n"
+"POT-Creation-Date: 2026-04-19 22:32+0428\n"
+"PO-Revision-Date: 2026-04-19 22:32+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -1279,7 +1279,7 @@ msgstr "رعایت کی رقم"
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:129
 #: frontend/src/views/PurchaseInvoiceView.vue:447
 msgid "Disc%"
-msgstr "رعایت٪"
+msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:351
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:127
@@ -1290,7 +1290,7 @@ msgstr "رعایت"
 
 #: frontend/src/components/cart/CartSummary.vue:297
 msgid "Discount %"
-msgstr "رعایت٪"
+msgstr ""
 
 #. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
 #. Label of a Float field in DocType 'POS Offer'
@@ -4863,7 +4863,7 @@ msgstr "ٹیکس کی قسم"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:491
 msgid "Tax%"
-msgstr "ٹیکس٪"
+msgstr ""
 
 #. Label of a Table field in DocType 'POS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:90
@@ -5266,7 +5266,7 @@ msgstr "فعال ہونے پر، قیمت شروع/ہندسے/اعشاریہ ن�
 #: frontend/src/components/cart/CartSummary.vue:106
 #: frontend/src/components/dialogs/PaymentDialog.vue:394
 msgid "Write Off"
-msgstr "رائٹ آف"
+msgstr "لکھ دینا"
 
 #: xpos/x_pos/api/invoice_processing/creation.py:134
 msgid "Write off amount exceeds the allowed limit ({0}). Please add payment for the remaining amount."
