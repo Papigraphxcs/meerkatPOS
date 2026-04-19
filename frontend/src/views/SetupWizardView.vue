@@ -7,7 +7,7 @@
 				<Store class="w-8 h-8 text-primary-foreground" />
 			</div>
 			<h1 class="text-2xl font-bold text-foreground">X POS</h1>
-			<p class="text-muted-foreground text-sm mt-1">{{ __("Initial Setup") }}</p>
+			<p class="text-muted-foreground text-sm mt-1">Initial Setup</p>
 		</div>
 
 		<div class="flex items-center gap-2 mb-6">
@@ -32,8 +32,8 @@
 		<Card class="w-full max-w-lg">
 			<template v-if="step === 1">
 				<CardHeader class="text-center">
-					<CardTitle>{{ __("Select Installation Type") }}</CardTitle>
-					<CardDescription>{{ __("Choose how this machine will be used") }}</CardDescription>
+					<CardTitle>Select Installation Type</CardTitle>
+					<CardDescription>Choose how this machine will be used</CardDescription>
 				</CardHeader>
 				<CardContent class="space-y-3">
 					<button
@@ -52,15 +52,10 @@
 								<Server class="w-5 h-5 text-primary" />
 							</div>
 							<div>
-								<p class="font-semibold text-foreground">
-									{{ __("Hub (Server)") }}
-								</p>
+								<p class="font-semibold text-foreground">Hub (Server)</p>
 								<p class="text-sm text-muted-foreground mt-0.5">
-									{{
-										__(
-											"Main server that syncs with ERPNext and serves data to all tills on the network. Install on one machine per location.",
-										)
-									}}
+									Main server that syncs with ERPNext and serves data to all tills on the
+									network. Install on one machine per location.
 								</p>
 							</div>
 						</div>
@@ -81,15 +76,10 @@
 								<MonitorSmartphone class="w-5 h-5 text-primary" />
 							</div>
 							<div>
-								<p class="font-semibold text-foreground">
-									{{ __("Till (Client)") }}
-								</p>
+								<p class="font-semibold text-foreground">Till (Client)</p>
 								<p class="text-sm text-muted-foreground mt-0.5">
-									{{
-										__(
-											"Point of sale terminal that connects to the hub server on the local network. Install on each checkout counter.",
-										)
-									}}
+									Point of sale terminal that connects to the hub server on the local
+									network. Install on each checkout counter.
 								</p>
 							</div>
 						</div>
@@ -97,7 +87,7 @@
 				</CardContent>
 				<CardFooter class="justify-end">
 					<Button @click="step = 2" :disabled="!config.role">
-						{{ __("Next") }}
+						Next
 						<ChevronRight class="w-4 h-4 ms-1" />
 					</Button>
 				</CardFooter>
@@ -105,8 +95,8 @@
 
 			<template v-if="step === 2">
 				<CardHeader>
-					<CardTitle>{{ __("Database Configuration") }}</CardTitle>
-					<CardDescription>{{ __("Configure connection to local MariaDB") }}</CardDescription>
+					<CardTitle>Database Configuration</CardTitle>
+					<CardDescription>Configure connection to local MariaDB</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div
@@ -132,22 +122,22 @@
 									v-if="mariaDbStatus.installed"
 									class="font-medium text-green-800 dark:text-green-300"
 								>
-									{{ __("MariaDB detected") }}: {{ mariaDbStatus.version }}
+									MariaDB detected: {{ mariaDbStatus.version }}
 								</p>
 								<template v-else>
 									<p class="font-medium text-amber-800 dark:text-amber-300">
-										{{ __("MariaDB not detected") }}
+										MariaDB not detected
 									</p>
 									<p class="text-amber-700 dark:text-amber-400 mt-1">
-										{{ __("Install MariaDB before proceeding:") }}
+										Install MariaDB before proceeding:
 									</p>
 									<div
 										class="mt-2 p-2 rounded bg-background/80 font-mono text-xs leading-relaxed select-all"
 									>
 										<template v-if="platformInfo === 'win32'">
-											{{ __("Download installer from:") }}<br />
+											Download installer from:<br />
 											https://mariadb.org/download/<br /><br />
-											{{ __("Or via winget:") }}<br />
+											Or via winget:<br />
 											winget install MariaDB.Server
 										</template>
 										<template v-else-if="platformInfo === 'darwin'">
@@ -167,7 +157,7 @@
 										@click="detectMariaDb"
 									>
 										<RefreshCw class="w-3.5 h-3.5 me-1" />
-										{{ __("Re-check") }}
+										Re-check
 									</Button>
 								</template>
 							</div>
@@ -176,11 +166,11 @@
 
 					<div class="grid grid-cols-2 gap-3">
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Host") }}</label>
+							<label class="text-sm font-medium text-foreground">Host</label>
 							<Input v-model="config.dbHost" placeholder="127.0.0.1" class="mt-1" />
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Port") }}</label>
+							<label class="text-sm font-medium text-foreground">Port</label>
 							<Input
 								v-model.number="config.dbPort"
 								type="number"
@@ -189,11 +179,11 @@
 							/>
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Username") }}</label>
+							<label class="text-sm font-medium text-foreground">Username</label>
 							<Input v-model="config.dbUser" placeholder="xpos" class="mt-1" />
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Password") }}</label>
+							<label class="text-sm font-medium text-foreground">Password</label>
 							<Input
 								v-model="config.dbPassword"
 								type="password"
@@ -202,9 +192,7 @@
 							/>
 						</div>
 						<div class="col-span-2">
-							<label class="text-sm font-medium text-foreground">{{
-								__("Database Name")
-							}}</label>
+							<label class="text-sm font-medium text-foreground">Database Name</label>
 							<Input v-model="config.dbName" placeholder="xpos_local" class="mt-1" />
 						</div>
 					</div>
@@ -212,23 +200,23 @@
 						<Button size="sm" variant="outline" @click="testDb" :disabled="testingDb">
 							<Loader2 v-if="testingDb" class="w-4 h-4 me-1 animate-spin" />
 							<DatabaseZap v-else class="w-4 h-4 me-1" />
-							{{ __("Test Connection") }}
+							Test Connection
 						</Button>
 						<span
 							v-if="dbTestResult !== null"
 							:class="['text-sm ms-2', dbTestResult ? 'text-green-600' : 'text-destructive']"
 						>
-							{{ dbTestResult ? __("Connected!") : dbTestError }}
+							{{ dbTestResult ? "Connected!" : dbTestError }}
 						</span>
 					</div>
 				</CardContent>
 				<CardFooter class="justify-between">
 					<Button variant="outline" @click="step = 1">
 						<ChevronLeft class="w-4 h-4 me-1" />
-						{{ __("Back") }}
+						Back
 					</Button>
 					<Button @click="step = 3" :disabled="!dbTestResult">
-						{{ __("Next") }}
+						Next
 						<ChevronRight class="w-4 h-4 ms-1" />
 					</Button>
 				</CardFooter>
@@ -236,21 +224,19 @@
 
 			<template v-if="step === 3">
 				<CardHeader>
-					<CardTitle>{{
-						config.role === "hub" ? __("ERPNext Server") : __("Hub Server")
-					}}</CardTitle>
+					<CardTitle>{{ config.role === "hub" ? "ERPNext Server" : "Hub Server" }}</CardTitle>
 					<CardDescription>
 						{{
 							config.role === "hub"
-								? __("Connect to your live ERPNext instance for data synchronization")
-								: __("Connect to the hub server on your local network")
+								? "Connect to your live ERPNext instance for data synchronization"
+								: "Connect to the hub server on your local network"
 						}}
 					</CardDescription>
 				</CardHeader>
 				<CardContent class="space-y-3">
 					<template v-if="config.role === 'hub'">
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("ERPNext URL") }}</label>
+							<label class="text-sm font-medium text-foreground">ERPNext URL</label>
 							<Input
 								v-model="config.erpUrl"
 								placeholder="https://erp.example.com"
@@ -258,11 +244,11 @@
 							/>
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("API Key") }}</label>
+							<label class="text-sm font-medium text-foreground">API Key</label>
 							<Input v-model="config.apiKey" placeholder="API Key" class="mt-1" />
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("API Secret") }}</label>
+							<label class="text-sm font-medium text-foreground">API Secret</label>
 							<Input
 								v-model="config.apiSecret"
 								type="password"
@@ -271,9 +257,7 @@
 							/>
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{
-								__("Hub API Port")
-							}}</label>
+							<label class="text-sm font-medium text-foreground">Hub API Port</label>
 							<Input
 								v-model.number="config.hubApiPort"
 								type="number"
@@ -281,14 +265,14 @@
 								class="mt-1 w-32"
 							/>
 							<p class="text-xs text-muted-foreground mt-1">
-								{{ __("Port for till clients to connect to this hub") }}
+								Port for till clients to connect to this hub
 							</p>
 						</div>
 						<div>
 							<Button size="sm" variant="outline" @click="testErpNext" :disabled="testingErp">
 								<Loader2 v-if="testingErp" class="w-4 h-4 me-1 animate-spin" />
 								<Globe v-else class="w-4 h-4 me-1" />
-								{{ __("Test ERPNext Connection") }}
+								Test ERPNext Connection
 							</Button>
 							<span
 								v-if="erpTestResult !== null"
@@ -297,36 +281,32 @@
 									erpTestResult ? 'text-green-600' : 'text-destructive',
 								]"
 							>
-								{{ erpTestResult ? __("Connected!") : erpTestError }}
+								{{ erpTestResult ? "Connected!" : erpTestError }}
 							</span>
 						</div>
 					</template>
 					<template v-else>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{
-								__("Hub Server URL")
-							}}</label>
+							<label class="text-sm font-medium text-foreground">Hub Server URL</label>
 							<Input
 								v-model="config.hubUrl"
 								placeholder="http://192.168.1.100:6789"
 								class="mt-1"
 							/>
 							<p class="text-xs text-muted-foreground mt-1">
-								{{ __("IP address and port of the hub server on your local network") }}
+								IP address and port of the hub server on your local network
 							</p>
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Till ID") }}</label>
+							<label class="text-sm font-medium text-foreground">Till ID</label>
 							<Input v-model="config.tillId" placeholder="TILL-01" class="mt-1 w-48" />
-							<p class="text-xs text-muted-foreground mt-1">
-								{{ __("Unique identifier for this till") }}
-							</p>
+							<p class="text-xs text-muted-foreground mt-1">Unique identifier for this till</p>
 						</div>
 						<div>
 							<Button size="sm" variant="outline" @click="pingHub" :disabled="testingHub">
 								<Loader2 v-if="testingHub" class="w-4 h-4 me-1 animate-spin" />
 								<Wifi v-else class="w-4 h-4 me-1" />
-								{{ __("Ping Hub") }}
+								Ping Hub
 							</Button>
 							<span
 								v-if="hubTestResult !== null"
@@ -335,7 +315,7 @@
 									hubTestResult ? 'text-green-600' : 'text-destructive',
 								]"
 							>
-								{{ hubTestResult ? __("Hub reachable!") : __("Hub unreachable") }}
+								{{ hubTestResult ? "Hub reachable!" : "Hub unreachable" }}
 							</span>
 						</div>
 					</template>
@@ -343,10 +323,10 @@
 				<CardFooter class="justify-between">
 					<Button variant="outline" @click="step = 2">
 						<ChevronLeft class="w-4 h-4 me-1" />
-						{{ __("Back") }}
+						Back
 					</Button>
 					<Button @click="step = 4" :disabled="!canProceedStep3">
-						{{ __("Next") }}
+						Next
 						<ChevronRight class="w-4 h-4 ms-1" />
 					</Button>
 				</CardFooter>
@@ -354,34 +334,26 @@
 
 			<template v-if="step === 4">
 				<CardHeader>
-					<CardTitle>{{ __("Admin User") }}</CardTitle>
-					<CardDescription>{{
-						__("Create the local administrator account for this installation")
-					}}</CardDescription>
+					<CardTitle>Admin User</CardTitle>
+					<CardDescription>
+						Create the local administrator account for this installation
+					</CardDescription>
 				</CardHeader>
 				<CardContent class="space-y-4">
 					<div
 						class="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm text-muted-foreground"
 					>
-						{{
-							__(
-								"This account is stored locally and used to log in to X POS. It is independent of your ERPNext users.",
-							)
-						}}<br />
-						{{
-							__(
-								"Make sure to remember these credentials as they cannot be recovered. You can create additional users later from the settings.",
-							)
-						}}<br />
-						{{
-							__(
-								"This account is stored locally and used to log in to X POS. It is independent of your ERPNext users.",
-							)
-						}}
+						"This account is stored locally and used to log in to X POS. It is independent of your
+						ERPNext users.",<br />
+						"Make sure to remember these credentials as they cannot be recovered. You can create
+						additional users later from the settings.",
+						<br />
+						"This account is stored locally and used to log in to X POS. It is independent of your
+						ERPNext users.",
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Username") }}</label>
+							<label class="text-sm font-medium text-foreground">Username</label>
 							<Input
 								v-model="adminUser.username"
 								placeholder="admin"
@@ -390,7 +362,7 @@
 							/>
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Full Name") }}</label>
+							<label class="text-sm font-medium text-foreground">Full Name</label>
 							<Input
 								v-model="adminUser.fullName"
 								placeholder="Administrator"
@@ -399,7 +371,7 @@
 							/>
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Password") }}</label>
+							<label class="text-sm font-medium text-foreground">Password</label>
 							<div class="relative mt-1">
 								<Input
 									v-model="adminUser.password"
@@ -420,13 +392,11 @@
 								v-if="adminUser.password && adminUser.password.length < 6"
 								class="text-xs text-destructive mt-1"
 							>
-								{{ __("Minimum 6 characters") }}
+								Minimum 6 characters
 							</p>
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{
-								__("Confirm Password")
-							}}</label>
+							<label class="text-sm font-medium text-foreground">Confirm Password</label>
 							<Input
 								v-model="adminUser.confirmPassword"
 								:type="showAdminConfirm ? 'text' : 'password'"
@@ -441,7 +411,7 @@
 								"
 								class="text-xs text-destructive mt-1"
 							>
-								{{ __("Passwords do not match") }}
+								Passwords do not match
 							</p>
 						</div>
 					</div>
@@ -449,10 +419,10 @@
 				<CardFooter class="justify-between">
 					<Button variant="outline" @click="step = 3">
 						<ChevronLeft class="w-4 h-4 me-1" />
-						{{ __("Back") }}
+						Back
 					</Button>
 					<Button @click="step = 5" :disabled="!adminUser.username || !adminPasswordMatch">
-						{{ __("Next") }}
+						Next
 						<ChevronRight class="w-4 h-4 ms-1" />
 					</Button>
 				</CardFooter>
@@ -460,21 +430,19 @@
 
 			<template v-if="step === 5">
 				<CardHeader>
-					<CardTitle>{{ __("Setup Summary") }}</CardTitle>
-					<CardDescription>{{
-						__("Review your configuration before completing setup")
-					}}</CardDescription>
+					<CardTitle>Setup Summary</CardTitle>
+					<CardDescription> Review your configuration before completing setup </CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div class="space-y-3 text-sm">
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted">
-							<span class="text-muted-foreground">{{ __("Installation Type") }}</span>
+							<span class="text-muted-foreground">Installation Type</span>
 							<Badge variant="default">{{
-								config.role === "hub" ? __("Hub (Server)") : __("Till (Client)")
+								config.role === "hub" ? "Hub (Server)" : "Till (Client)"
 							}}</Badge>
 						</div>
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted">
-							<span class="text-muted-foreground">{{ __("Database") }}</span>
+							<span class="text-muted-foreground">Database</span>
 							<span class="text-foreground font-medium"
 								>{{ config.dbUser }}@{{ config.dbHost }}:{{ config.dbPort }}/{{
 									config.dbName
@@ -485,32 +453,32 @@
 							v-if="config.role === 'hub'"
 							class="flex items-center justify-between p-3 rounded-lg bg-muted"
 						>
-							<span class="text-muted-foreground">{{ __("ERPNext Server") }}</span>
+							<span class="text-muted-foreground">ERPNext Server</span>
 							<span class="text-foreground font-medium">{{ config.erpUrl }}</span>
 						</div>
 						<div
 							v-if="config.role === 'hub'"
 							class="flex items-center justify-between p-3 rounded-lg bg-muted"
 						>
-							<span class="text-muted-foreground">{{ __("Hub API Port") }}</span>
+							<span class="text-muted-foreground">Hub API Port</span>
 							<span class="text-foreground font-medium">{{ config.hubApiPort }}</span>
 						</div>
 						<div
 							v-if="config.role === 'till'"
 							class="flex items-center justify-between p-3 rounded-lg bg-muted"
 						>
-							<span class="text-muted-foreground">{{ __("Hub Server") }}</span>
+							<span class="text-muted-foreground">Hub Server</span>
 							<span class="text-foreground font-medium">{{ config.hubUrl }}</span>
 						</div>
 						<div
 							v-if="config.role === 'till'"
 							class="flex items-center justify-between p-3 rounded-lg bg-muted"
 						>
-							<span class="text-muted-foreground">{{ __("Till ID") }}</span>
+							<span class="text-muted-foreground">Till ID</span>
 							<span class="text-foreground font-medium">{{ config.tillId }}</span>
 						</div>
 						<div class="flex items-center justify-between p-3 rounded-lg bg-muted">
-							<span class="text-muted-foreground">{{ __("Admin User") }}</span>
+							<span class="text-muted-foreground">Admin User</span>
 							<span class="text-foreground font-medium">{{ adminUser.username }}</span>
 						</div>
 					</div>
@@ -518,12 +486,12 @@
 				<CardFooter class="justify-between">
 					<Button variant="outline" @click="step = 4">
 						<ChevronLeft class="w-4 h-4 me-1" />
-						{{ __("Back") }}
+						Back
 					</Button>
 					<Button @click="completeSetup" :disabled="completing">
 						<Loader2 v-if="completing" class="w-4 h-4 me-1 animate-spin" />
 						<Check v-else class="w-4 h-4 me-1" />
-						{{ __("Complete Setup") }}
+						Complete Setup
 					</Button>
 				</CardFooter>
 			</template>
@@ -541,7 +509,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
-import { __ } from "@/lib/translate";
 import { toast } from "vue-sonner";
 import { markSetupComplete } from "@/router/index";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -742,7 +709,7 @@ async function completeSetup() {
 			return;
 		}
 
-		toast.success(__("Setup completed successfully!"));
+		toast.success("Setup completed successfully!");
 
 		markSetupComplete();
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-04-13 19:09+0428\n"
+"POT-Creation-Date: 2026-04-19 12:28+0428\n"
 "PO-Revision-Date: 2026-03-18 18:39+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
@@ -37,24 +37,12 @@ msgstr ""
 msgid "<span class=\"h4\">X POS</span>"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:261
-msgid "API Key"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:265
-msgid "API Secret"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:211
-msgid "About"
-msgstr ""
-
-#: frontend/src/components/Navbar.vue:187
+#: frontend/src/components/Navbar.vue:190
 #: frontend/src/components/items/CommandSearch.vue:501
 msgid "About X POS"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:564
+#: frontend/src/views/ReportViewerView.vue:705
 msgid "Access restricted"
 msgstr ""
 
@@ -92,11 +80,10 @@ msgid "Add"
 msgstr ""
 
 #: frontend/src/components/core/QueryFilterPanel.vue:36
-#: frontend/src/components/orders/ListFilters.vue:111
 msgid "Add Filter"
 msgstr "Pridať filter"
 
-#: frontend/src/components/ui/table/Table.vue:355
+#: frontend/src/components/ui/table/Table.vue:799
 msgid "Add First Row"
 msgstr ""
 
@@ -104,8 +91,8 @@ msgstr ""
 msgid "Add New Supplier"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:342
-#: frontend/src/components/ui/table/Table.vue:576
+#: frontend/src/components/ui/table/Table.vue:772
+#: frontend/src/components/ui/table/Table.vue:1104
 msgid "Add Row"
 msgstr ""
 
@@ -117,7 +104,7 @@ msgstr ""
 msgid "Add a new expense to get started"
 msgstr ""
 
-#: frontend/src/components/dialogs/CreateItemDialog.vue:85
+#: frontend/src/components/dialogs/CreateItemDialog.vue:86
 msgid "Add a new item to inventory"
 msgstr ""
 
@@ -133,7 +120,7 @@ msgstr ""
 msgid "Add a new supplier to the system"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:49
+#: frontend/src/components/purchase/PurchaseCart.vue:79
 msgid "Add items from the list to start"
 msgstr ""
 
@@ -154,6 +141,11 @@ msgstr "Pridať / upraviť podmienky kupónu"
 msgid "Additional Discount"
 msgstr "Ďalšie zľavy"
 
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:262
+#: frontend/src/views/PurchaseInvoiceView.vue:1198
+msgid "Addl. Discount"
+msgstr ""
+
 #: frontend/src/components/customer/CustomerSelect.vue:181
 msgid "Address"
 msgstr ""
@@ -162,13 +154,8 @@ msgstr ""
 msgid "Address line 1"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:678
+#: frontend/src/views/ReportViewerView.vue:830
 msgid "Adjust filters and refresh the report to load live data."
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:357
-#: frontend/src/views/SetupWizardView.vue:513
-msgid "Admin User"
 msgstr ""
 
 #. Name of a role
@@ -177,18 +164,17 @@ msgstr ""
 msgid "Administrator"
 msgstr "Správce"
 
-#: frontend/src/components/purchase/PurchaseCart.vue:59
+#: frontend/src/components/purchase/PurchaseCart.vue:89
 #: frontend/src/views/PurchaseView.vue:133
 msgid "Alias"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:487
 #: frontend/src/views/PurchaseView.vue:129
 msgid "Alias Name"
 msgstr ""
 
-#: frontend/src/components/core/ListFilterBar.vue:28
-#: frontend/src/components/core/ListFilterBar.vue:44
+#: frontend/src/components/core/ListFilterBar.vue:26
+#: frontend/src/components/core/ListFilterBar.vue:37
 #: frontend/src/components/purchase/StockReceiving.vue:245
 #: frontend/src/components/purchase/StockReceiving.vue:268
 msgid "All"
@@ -198,25 +184,12 @@ msgstr "ALL"
 msgid "All Groups"
 msgstr ""
 
-#: frontend/src/components/orders/ListFilters.vue:29
-#: frontend/src/views/PurchaseOrderListView.vue:65
-msgid "All Status"
-msgstr ""
-
-#: frontend/src/components/orders/ListFilters.vue:44
-msgid "All Types"
-msgstr ""
-
-#: frontend/src/components/offline/OfflinePendingPanel.vue:62
+#: frontend/src/components/offline/OfflinePendingPanel.vue:74
 msgid "All caught up"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:905
+#: frontend/src/components/dialogs/PaymentDialog.vue:968
 msgid "All items must have positive quantities"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:457
-msgid "All local data cleared"
 msgstr ""
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:438
@@ -240,12 +213,14 @@ msgstr "Platném znění"
 #. Label of a Currency field in DocType 'POS Closing Shift Taxes'
 #. Label of a Currency field in DocType 'POS Payment Entry Reference'
 #. Label of a Currency field in DocType 'Sales Invoice Reference'
-#: frontend/src/components/dialogs/CashMovementDialog.vue:89
+#: frontend/src/components/dialogs/CashMovementDialog.vue:64
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:149
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:79
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:109
 #: frontend/src/components/dialogs/ReturnDialog.vue:111
-#: frontend/src/components/purchase/PurchaseCart.vue:69
-#: frontend/src/views/BankDropView.vue:154
-#: frontend/src/views/ExpenseView.vue:153 frontend/src/views/OrdersView.vue:236
-#: frontend/src/views/PurchaseOrderListView.vue:431
+#: frontend/src/components/purchase/PurchaseCart.vue:99
+#: frontend/src/views/BankDropView.vue:140
+#: frontend/src/views/ExpenseView.vue:143
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:59
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:97
@@ -255,14 +230,6 @@ msgstr "Platném znění"
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:186
 msgid "Amount"
 msgstr "Částka"
-
-#: frontend/src/components/orders/ListFilters.vue:61
-msgid "Amount (High)"
-msgstr ""
-
-#: frontend/src/components/orders/ListFilters.vue:62
-msgid "Amount (Low)"
-msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:75
 msgid "Amount Due"
@@ -297,9 +264,8 @@ msgid "Applied"
 msgstr "aplikovaný"
 
 #: frontend/src/components/cart/CartSummary.vue:319
-#: frontend/src/components/core/QueryFilterPanel.vue:157
+#: frontend/src/components/core/QueryFilterPanel.vue:143
 #: frontend/src/components/dialogs/PaymentDialog.vue:362
-#: frontend/src/components/orders/ListFilters.vue:197
 msgid "Apply"
 msgstr "platiť"
 
@@ -307,7 +273,7 @@ msgstr "platiť"
 msgid "Apply Discount"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:691
+#: frontend/src/views/ReportViewerView.vue:843
 msgid "Apply Filters"
 msgstr ""
 
@@ -350,11 +316,11 @@ msgstr ""
 msgid "Are you sure you want to delete this draft?"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:566
+#: frontend/src/components/ui/table/Table.vue:1092
 msgid "Arrow keys to navigate"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:529
+#: frontend/src/views/ReportViewerView.vue:524
 msgid "Ascending"
 msgstr ""
 
@@ -362,12 +328,12 @@ msgstr ""
 msgid "Ascending — click to sort descending"
 msgstr ""
 
-#: xpos/api/invoices.py:118
+#: xpos/api/invoices.py:220
 msgid "At least one item is required"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:470
-msgid "Auto"
+#: xpos/x_pos/api/purchase_orders.py:1876
+msgid "At least one item is required."
 msgstr ""
 
 #. Label of a Check field in DocType 'POS Offer'
@@ -375,11 +341,7 @@ msgstr ""
 msgid "Auto Apply"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:118
-msgid "Auto Sync"
-msgstr ""
-
-#: frontend/src/components/dialogs/CreateItemDialog.vue:95
+#: frontend/src/components/dialogs/CreateItemDialog.vue:96
 msgid "Auto-generated"
 msgstr ""
 
@@ -391,23 +353,11 @@ msgstr ""
 msgid "Auto-receive"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:121
-msgid "Automatically sync data in background"
-msgstr ""
-
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:98
 msgid "Available Programs"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:740
-msgid "Avg. Price"
-msgstr ""
-
 #: frontend/src/components/dialogs/ReturnDialog.vue:92
-#: frontend/src/views/SetupWizardView.vue:228
-#: frontend/src/views/SetupWizardView.vue:346
-#: frontend/src/views/SetupWizardView.vue:452
-#: frontend/src/views/SetupWizardView.vue:521
 msgid "Back"
 msgstr ""
 
@@ -423,12 +373,12 @@ msgstr ""
 msgid "Back Office Cash Account must be a Cash account."
 msgstr ""
 
-#: frontend/src/components/dialogs/OpeningDialog.vue:135
+#: frontend/src/components/dialogs/OpeningDialog.vue:129
 msgid "Back to Desk"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:551
-#: frontend/src/views/ReportViewerView.vue:571
+#: frontend/src/views/ReportViewerView.vue:692
+#: frontend/src/views/ReportViewerView.vue:712
 msgid "Back to Reports"
 msgstr ""
 
@@ -437,13 +387,13 @@ msgstr ""
 msgid "Back to Sign In"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:216
+#: frontend/src/components/Sidebar.vue:200
 #: frontend/src/components/items/CommandSearch.vue:362
 #: frontend/src/views/BankDropView.vue:5
 msgid "Bank Drops"
 msgstr ""
 
-#: frontend/src/components/dialogs/CreateItemDialog.vue:98
+#: frontend/src/components/dialogs/CreateItemDialog.vue:99
 #: frontend/src/components/purchase/PurchaseItemList.vue:280
 #: frontend/src/views/BarcodePrintView.vue:173
 msgid "Barcode"
@@ -453,7 +403,7 @@ msgstr "čiarový kód"
 msgid "Barcode (optional)"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:203
+#: frontend/src/components/Sidebar.vue:187
 #: frontend/src/components/items/CommandSearch.vue:371
 #: frontend/src/views/BarcodePrintView.vue:6
 msgid "Barcode Printer"
@@ -472,11 +422,16 @@ msgstr "Typ čiarového kódu"
 msgid "Barcode lookup failed"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:308
+#: xpos/x_pos/api/purchase_orders.py:336
 msgid "Barcode {0} already exists."
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:344
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:176
+msgid "Batch"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:1093
+#: frontend/src/views/PurchaseOrderListView.vue:326
 msgid "Billed"
 msgstr ""
 
@@ -511,6 +466,8 @@ msgstr ""
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:67
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:123
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.py:81
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.js:38
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.py:100
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.py:80
 msgid "Brand"
 msgstr "značka"
@@ -523,9 +480,14 @@ msgstr ""
 msgid "Built with ❤️, using VueJS"
 msgstr ""
 
-#: frontend/src/components/dialogs/CreateItemDialog.vue:110
+#: frontend/src/components/dialogs/CreateItemDialog.vue:116
 #: frontend/src/components/purchase/PurchaseItemList.vue:305
 msgid "Buying Price"
+msgstr ""
+
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:114
+#: frontend/src/views/PurchaseInvoiceView.vue:420
+msgid "CF"
 msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:55
@@ -552,27 +514,26 @@ msgid "Campaign"
 msgstr "kampaň"
 
 #: frontend/src/components/customer/CustomerSelect.vue:263
-#: frontend/src/components/dialogs/CashMovementDialog.vue:144
+#: frontend/src/components/dialogs/CashMovementDialog.vue:119
 #: frontend/src/components/dialogs/ClosingDialog.vue:199
-#: frontend/src/components/dialogs/CreateItemDialog.vue:120
+#: frontend/src/components/dialogs/CreateItemDialog.vue:126
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:101
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:124
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:111
 #: frontend/src/components/dialogs/PaymentDialog.vue:370
-#: frontend/src/components/dialogs/PaymentDialog.vue:476
-#: frontend/src/components/dialogs/PaymentDialog.vue:479
+#: frontend/src/components/dialogs/PaymentDialog.vue:506
+#: frontend/src/components/dialogs/PaymentDialog.vue:509
 #: frontend/src/components/dialogs/RepeatInvoiceDialog.vue:83
 #: frontend/src/components/dialogs/ReturnDialog.vue:152
 #: frontend/src/components/purchase/StockReceiving.vue:307
 #: frontend/src/components/purchase/SupplierSelector.vue:226
-#: frontend/src/views/BankDropView.vue:178
-#: frontend/src/views/ExpenseView.vue:177
+#: frontend/src/components/ui/table/Table.vue:1319
+#: frontend/src/views/BankDropView.vue:164
+#: frontend/src/views/ExpenseView.vue:167
 msgid "Cancel"
 msgstr "Zrušit"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
-#: frontend/src/components/orders/ListFilters.vue:35
-#: frontend/src/views/PurchaseOrderListView.vue:71
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Cancelled"
 msgstr "zrušený"
@@ -585,24 +546,24 @@ msgstr ""
 msgid "Cannot add item to cart"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:1596
+#: xpos/x_pos/api/purchase_orders.py:1732
 msgid "Cannot delete a submitted Purchase Order."
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:354
-msgid "Cannot reach server"
+#: xpos/x_pos/api/purchase_orders.py:1989
+msgid "Cannot delete submitted invoice {0}."
 msgstr ""
 
-#: frontend/src/stores/offlineStore.ts:202
+#: frontend/src/stores/offlineStore.ts:214
 msgid "Cannot sync a draft invoice. Load it to cart first."
 msgstr ""
 
-#: frontend/src/stores/offlineStore.ts:193
-#: frontend/src/stores/purchaseStore.ts:664
+#: frontend/src/stores/offlineStore.ts:205
+#: frontend/src/stores/purchaseStore.ts:660
 msgid "Cannot sync while offline"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:1429
+#: xpos/x_pos/api/purchase_orders.py:1570
 msgid "Cannot update a submitted Purchase Order as draft."
 msgstr ""
 
@@ -615,8 +576,8 @@ msgid "Cart Actions"
 msgstr ""
 
 #: frontend/src/components/cart/Cart.vue:128
-#: frontend/src/components/dialogs/PaymentDialog.vue:882
-#: frontend/src/components/purchase/PurchaseCart.vue:48
+#: frontend/src/components/dialogs/PaymentDialog.vue:945
+#: frontend/src/components/purchase/PurchaseCart.vue:78
 msgid "Cart is empty"
 msgstr ""
 
@@ -645,8 +606,8 @@ msgstr ""
 msgid "Cash Movement is disabled for this POS Profile."
 msgstr ""
 
-#: frontend/src/components/dialogs/CashMovementDialog.vue:319
-#: frontend/src/views/BankDropView.vue:385
+#: frontend/src/components/dialogs/CashMovementDialog.vue:291
+#: frontend/src/views/BankDropView.vue:368
 msgid "Cash deposit recorded"
 msgstr ""
 
@@ -657,24 +618,20 @@ msgstr ""
 msgid "Cashier"
 msgstr "Pokladník"
 
-#: frontend/src/components/purchase/PurchaseCart.vue:71
+#: frontend/src/components/purchase/PurchaseCart.vue:114
 msgid "Category"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:416
+#: frontend/src/components/dialogs/PaymentDialog.vue:440
 msgid "Change"
 msgstr "Zmena"
 
-#: frontend/src/views/OrdersView.vue:380
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:237
 msgid "Change Given"
 msgstr ""
 
 #: frontend/src/views/ResetPasswordView.vue:19
 msgid "Check your email for reset instructions"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:36
-msgid "Choose how this machine will be used"
 msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:410
@@ -686,23 +643,23 @@ msgstr ""
 msgid "City"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:72
+#: frontend/src/components/purchase/PurchaseCart.vue:115
 msgid "Class"
 msgstr ""
 
-#: frontend/src/components/orders/ListFilters.vue:216
-#: frontend/src/components/purchase/PurchaseCart.vue:227
+#: frontend/src/components/purchase/PurchaseCart.vue:316
 #: frontend/src/components/ui/datetime-picker/DateTimePicker.vue:851
 #: frontend/src/views/OrdersView.vue:35
-#: frontend/src/views/PurchaseInvoiceView.vue:767
-#: frontend/src/views/PurchaseOrderView.vue:632
+#: frontend/src/views/PurchaseInvoiceListView.vue:175
+#: frontend/src/views/PurchaseInvoiceView.vue:904
+#: frontend/src/views/PurchaseOrderListView.vue:217
+#: frontend/src/views/PurchaseOrderView.vue:605
 #: frontend/src/views/ReportsIndexView.vue:147
 msgid "Clear"
 msgstr ""
 
-#: frontend/src/components/core/QueryFilterPanel.vue:154
-#: frontend/src/components/offline/OfflinePendingPanel.vue:54
-#: frontend/src/components/orders/ListFilters.vue:194
+#: frontend/src/components/core/QueryFilterPanel.vue:140
+#: frontend/src/components/offline/OfflinePendingPanel.vue:60
 #: frontend/src/views/BarcodePrintView.vue:14
 msgid "Clear All"
 msgstr ""
@@ -711,16 +668,8 @@ msgstr ""
 msgid "Clear All Items from Cart"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:195
-msgid "Clear All Local Data"
-msgstr ""
-
-#: frontend/src/views/ReportViewerView.vue:843
+#: frontend/src/views/ReportViewerView.vue:973
 msgid "Clear Sort"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:192
-msgid "Clear Synced Data"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:218
@@ -755,8 +704,9 @@ msgstr ""
 #: frontend/src/components/dialogs/AboutDialog.vue:83
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:175
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:177
-#: frontend/src/views/OrdersView.vue:455
-#: frontend/src/views/PurchaseOrderListView.vue:484
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:284
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:127
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:302
 msgid "Close"
 msgstr "Zavrieť"
 
@@ -764,8 +714,8 @@ msgstr "Zavrieť"
 msgid "Close Dialog / Cancel"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:201
-#: frontend/src/components/Navbar.vue:212
+#: frontend/src/components/Navbar.vue:204
+#: frontend/src/components/Navbar.vue:215
 #: frontend/src/components/dialogs/ClosingDialog.vue:12
 #: frontend/src/components/dialogs/ClosingDialog.vue:210
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:148
@@ -799,11 +749,11 @@ msgstr ""
 msgid "Collection factor"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:593
+#: frontend/src/components/ui/table/Table.vue:1121
 msgid "Column Settings"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:329
+#: frontend/src/components/ui/table/Table.vue:775
 msgid "Column settings"
 msgstr ""
 
@@ -824,9 +774,10 @@ msgstr ""
 #. Label of a Link field in DocType 'Referral Code'
 #: frontend/src/components/dialogs/AboutDialog.vue:70
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:82
-#: frontend/src/components/dialogs/OpeningDialog.vue:78
+#: frontend/src/components/dialogs/OpeningDialog.vue:72
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:47
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:43
 #: frontend/src/components/purchase/SupplierSelector.vue:190
-#: frontend/src/views/PurchaseOrderListView.vue:395
 #: frontend/src/views/PurchaseView.vue:276
 #: xpos/x_pos/api/payment_processing/data.py:79
 #: xpos/x_pos/api/payment_processing/data.py:179
@@ -846,6 +797,7 @@ msgstr ""
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.js:8
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:8
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.js:8
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.js:8
 #: xpos/x_pos/report/stock_value_by_warehouse/stock_value_by_warehouse.js:8
 #: xpos/x_pos/report/stock_value_summary_by_date/stock_value_summary_by_date.js:8
 #: xpos/x_pos/report/warehouse_stock_movement/warehouse_stock_movement.js:8
@@ -859,7 +811,9 @@ msgstr "Spoločnosť"
 msgid "Company is required"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:460 xpos/x_pos/api/purchase_orders.py:1419
+#: xpos/x_pos/api/purchase_orders.py:488 xpos/x_pos/api/purchase_orders.py:659
+#: xpos/x_pos/api/purchase_orders.py:1560
+#: xpos/x_pos/api/purchase_orders.py:1794
 msgid "Company is required."
 msgstr ""
 
@@ -869,51 +823,6 @@ msgstr ""
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:58
 msgid "Company must match the selected POS Profile company."
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:167
-msgid "Company:"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:526
-msgid "Complete Setup"
-msgstr ""
-
-#: frontend/src/views/PurchaseOrderListView.vue:70
-msgid "Completed"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:109
-msgid "Configure connection to local MariaDB"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:6
-msgid "Configure your POS application"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:428
-msgid "Confirm Password"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:246
-msgid "Connect to the hub server on your local network"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:245
-msgid "Connect to your live ERPNext instance for data synchronization"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:221
-#: frontend/src/views/SetupWizardView.vue:300
-msgid "Connected!"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:382
-msgid "Connection failed"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:385
-msgid "Connection test failed"
 msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:168
@@ -928,11 +837,11 @@ msgstr ""
 msgid "Conversion Factor"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:467
+#: frontend/src/views/ReportViewerView.vue:462
 msgid "Copied current page to clipboard."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:457
+#: frontend/src/views/ReportViewerView.vue:452
 msgid "Copied {0} rows to clipboard."
 msgstr ""
 
@@ -940,16 +849,16 @@ msgstr ""
 msgid "Copy"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:633
+#: frontend/src/views/ReportViewerView.vue:774
 msgid "Copy Data"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:641
-#: frontend/src/views/ReportViewerView.vue:863
+#: frontend/src/views/ReportViewerView.vue:793
+#: frontend/src/views/ReportViewerView.vue:993
 msgid "Copy Link"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:629
+#: frontend/src/views/ReportViewerView.vue:770
 msgid "Copy Page"
 msgstr ""
 
@@ -979,7 +888,7 @@ msgstr ""
 #: frontend/src/components/cart/Cart.vue:191
 #: frontend/src/components/cart/CartSummary.vue:156
 #: frontend/src/components/dialogs/PaymentDialog.vue:143
-#: frontend/src/views/OrdersView.vue:201
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:74
 #: xpos/x_pos/doctype/pos_coupon_detail/pos_coupon_detail.json
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Coupon"
@@ -1033,7 +942,7 @@ msgstr ""
 msgid "Coupon is not yet valid"
 msgstr ""
 
-#: frontend/src/components/dialogs/CreateItemDialog.vue:123
+#: frontend/src/components/dialogs/CreateItemDialog.vue:129
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:104
 msgid "Create"
 msgstr ""
@@ -1042,8 +951,8 @@ msgstr ""
 msgid "Create & Select"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:778
-msgid "Create Invoice"
+#: frontend/src/views/PurchaseInvoiceView.vue:938
+msgid "Create & Submit"
 msgstr ""
 
 #: frontend/src/components/purchase/PurchaseItemList.vue:337
@@ -1054,7 +963,7 @@ msgstr ""
 msgid "Create New Customer"
 msgstr ""
 
-#: frontend/src/components/dialogs/CreateItemDialog.vue:84
+#: frontend/src/components/dialogs/CreateItemDialog.vue:85
 #: frontend/src/components/purchase/PurchaseItemList.vue:252
 msgid "Create New Item"
 msgstr ""
@@ -1064,7 +973,7 @@ msgstr ""
 msgid "Create New Supplier"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:234
+#: frontend/src/components/purchase/PurchaseCart.vue:323
 msgid "Create Order"
 msgstr ""
 
@@ -1076,11 +985,15 @@ msgstr ""
 msgid "Create Supplier"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:305
+#: frontend/src/views/PurchaseInvoiceListView.vue:190
+msgid "Create a new invoice or adjust your filters"
+msgstr ""
+
+#: frontend/src/views/PurchaseOrderListView.vue:284
 msgid "Create a new order or adjust your filters"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:288
+#: xpos/x_pos/api/purchase_orders.py:316
 msgid "Create items"
 msgstr ""
 
@@ -1089,7 +1002,7 @@ msgstr ""
 msgid "Create new item"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:220
+#: frontend/src/components/purchase/PurchaseCart.vue:309
 msgid "Create purchase invoice"
 msgstr ""
 
@@ -1097,15 +1010,11 @@ msgstr ""
 msgid "Create purchase orders"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:220
+#: xpos/x_pos/api/purchase_orders.py:253
 msgid "Create suppliers"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:359
-msgid "Create the local administrator account for this installation"
-msgstr ""
-
-#: frontend/src/views/OrdersView.vue:185
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:58
 msgid "Created By"
 msgstr "Vytvorené (kým)"
 
@@ -1114,12 +1023,12 @@ msgid "Creating Purchase Order..."
 msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:271
-#: frontend/src/components/dialogs/CreateItemDialog.vue:123
+#: frontend/src/components/dialogs/CreateItemDialog.vue:129
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:104
 #: frontend/src/components/purchase/PurchaseItemList.vue:337
 #: frontend/src/components/purchase/SupplierSelector.vue:229
-#: frontend/src/views/PurchaseInvoiceView.vue:778
-#: frontend/src/views/PurchaseOrderView.vue:649
+#: frontend/src/views/PurchaseInvoiceView.vue:938
+#: frontend/src/views/PurchaseOrderView.vue:624
 msgid "Creating..."
 msgstr ""
 
@@ -1131,10 +1040,6 @@ msgstr ""
 #: xpos/x_pos/api/payment_processing/data.py:405
 msgid "Credit Note"
 msgstr "Dobropis"
-
-#: frontend/src/components/orders/ListFilters.vue:34
-msgid "Credit Note Issued"
-msgstr ""
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:114
 msgid "Credit Note {0} has no remaining balance to allocate."
@@ -1148,7 +1053,11 @@ msgstr ""
 msgid "Credit note {0} still has an unapplied balance of {1}"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:567
+#: xpos/api/invoices.py:155
+msgid "Credit sale is not allowed for POS Profile {0}."
+msgstr ""
+
+#: frontend/src/components/ui/table/Table.vue:1094
 msgid "Ctrl+D to duplicate"
 msgstr ""
 
@@ -1198,8 +1107,7 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Payment Entry Reference'
 #. Label of a Link field in DocType 'Referral Code'
 #. Label of a Link field in DocType 'Sales Invoice Reference'
-#: frontend/src/components/orders/ListFilters.vue:310
-#: frontend/src/views/OrdersView.vue:156
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:29
 #: xpos/x_pos/api/payment_processing/data.py:78
 #: xpos/x_pos/api/payment_processing/data.py:178
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -1221,7 +1129,6 @@ msgstr "Zákaznícka skupina"
 #. Label of a Data field in DocType 'Referral Code'
 #: frontend/src/components/customer/CustomerSelect.vue:129
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:29
-#: frontend/src/components/orders/ListFilters.vue:311
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
 #: xpos/x_pos/doctype/referral_code/referral_code.json
 msgid "Customer Name"
@@ -1255,8 +1162,8 @@ msgstr ""
 msgid "Customer is not enrolled in any loyalty program"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:886
-#: xpos/api/customers.py:584 xpos/api/customers.py:636 xpos/api/invoices.py:116
+#: frontend/src/components/dialogs/PaymentDialog.vue:949
+#: xpos/api/customers.py:584 xpos/api/customers.py:636 xpos/api/invoices.py:218
 #: xpos/x_pos/api/payment_processing/processor.py:30
 #: xpos/x_pos/api/payment_processing/reconciliation.py:24
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.py:67
@@ -1271,7 +1178,7 @@ msgstr ""
 msgid "Customer locked for return"
 msgstr ""
 
-#: xpos/api/invoices.py:1250
+#: xpos/api/invoices.py:1380
 msgid "Customer mismatch: Return must be for the same customer ({0}) as the original invoice"
 msgstr ""
 
@@ -1295,55 +1202,23 @@ msgstr ""
 msgid "Customer, Company, Amount, and Mode of Payment are required"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:181
-msgid "Data Management"
-msgstr ""
-
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:161
 msgid "Data Sync"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:477
-msgid "Database"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:108
-msgid "Database Configuration"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:79
-#: frontend/src/views/SetupWizardView.vue:206
-msgid "Database Name"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:380
-msgid "Database connection successful"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:402
-msgid "Database reconnected successfully"
-msgstr ""
-
 #. Label of a Date field in DocType 'POS Payment Entry Reference'
 #. Label of a Date field in DocType 'Sales Invoice Reference'
-#: frontend/src/views/PurchaseInvoiceView.vue:474
-#: frontend/src/views/PurchaseOrderListView.vue:387
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:41
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:37
+#: frontend/src/views/PurchaseInvoiceView.vue:960
 #: xpos/x_pos/doctype/pos_payment_entry_reference/pos_payment_entry_reference.json
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
 #: xpos/x_pos/report/branch_set_summary/branch_set_summary.js:34
 msgid "Date"
 msgstr "Dátum"
 
-#: frontend/src/views/OrdersView.vue:164
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:37
 msgid "Date & Time"
-msgstr ""
-
-#: frontend/src/components/orders/ListFilters.vue:56
-msgid "Date (Newest)"
-msgstr ""
-
-#: frontend/src/components/orders/ListFilters.vue:59
-msgid "Date (Oldest)"
 msgstr ""
 
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.js:33
@@ -1369,20 +1244,20 @@ msgstr ""
 msgid "Default Rate is required"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:527
+#: frontend/src/views/ReportViewerView.vue:522
 msgid "Default order"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:568
+#: frontend/src/components/ui/table/Table.vue:1095
 msgid "Del to delete selected"
 msgstr ""
 
-#: frontend/src/components/offline/OfflinePendingPanel.vue:134
-#: frontend/src/components/ui/table/Table.vue:544
+#: frontend/src/components/offline/OfflinePendingPanel.vue:147
+#: frontend/src/components/ui/table/Table.vue:1070
 msgid "Delete"
 msgstr ""
 
-#: frontend/src/components/offline/OfflinePendingPanel.vue:265
+#: frontend/src/components/offline/OfflinePendingPanel.vue:280
 msgid "Delete all pending offline invoices? This cannot be undone."
 msgstr ""
 
@@ -1390,12 +1265,21 @@ msgstr ""
 msgid "Delete draft"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:309
+#: frontend/src/components/ui/table/Table.vue:1209
+msgid "Delete row"
+msgstr ""
+
+#: frontend/src/components/ui/table/Table.vue:750
 msgid "Delete selected"
 msgstr ""
 
 #: xpos/x_pos/api/cash_movement/permissions.py:29
 msgid "Deleting cancelled cash movements is disabled for this POS Profile."
+msgstr ""
+
+#: frontend/src/components/offline/OfflinePendingPanel.vue:67
+#: frontend/src/stores/offlineStore.ts:88
+msgid "Deleting offline invoices is disabled for this POS Profile."
 msgstr ""
 
 #. Name of a DocType
@@ -1424,12 +1308,12 @@ msgstr ""
 msgid "Deposit"
 msgstr ""
 
-#: frontend/src/components/dialogs/CashMovementDialog.vue:70
+#: frontend/src/components/dialogs/CashMovementDialog.vue:57
 #: frontend/src/views/BankDropView.vue:134
 msgid "Deposit To"
 msgstr ""
 
-#: frontend/src/views/BankDropView.vue:405
+#: frontend/src/views/BankDropView.vue:388
 msgid "Deposit cancelled"
 msgstr ""
 
@@ -1437,7 +1321,7 @@ msgstr ""
 msgid "Dept"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:529
+#: frontend/src/views/ReportViewerView.vue:524
 msgid "Descending"
 msgstr ""
 
@@ -1450,7 +1334,7 @@ msgstr ""
 msgid "Description"
 msgstr "Popis"
 
-#: frontend/src/components/ui/table/Table.vue:319
+#: frontend/src/components/ui/table/Table.vue:760
 msgid "Deselect all"
 msgstr ""
 
@@ -1494,16 +1378,21 @@ msgstr ""
 msgid "Disabled"
 msgstr "Vypnuté"
 
-#: frontend/src/components/purchase/PurchaseCart.vue:68
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:134
+#: frontend/src/views/PurchaseInvoiceView.vue:457
+msgid "Disc Amt"
+msgstr ""
+
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:129
+#: frontend/src/components/purchase/PurchaseCart.vue:98
+#: frontend/src/views/PurchaseInvoiceView.vue:447
 msgid "Disc%"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:702
-msgid "Disc(%)"
-msgstr ""
-
 #: frontend/src/components/dialogs/PaymentDialog.vue:351
-#: frontend/src/views/OrdersView.vue:254 frontend/src/views/OrdersView.vue:309
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:127
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:173
+#: frontend/src/views/PurchaseOrderView.vue:587
 msgid "Discount"
 msgstr "zľava"
 
@@ -1537,27 +1426,26 @@ msgid "Doctype {0} is not permitted via this endpoint"
 msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:196
-#: frontend/src/components/ui/table/Table.vue:630
+#: frontend/src/components/ui/table/Table.vue:1156
 msgid "Done"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:148
-msgid "Download installer from:"
-msgstr ""
-
-#: frontend/src/components/dialogs/OpeningDialog.vue:70
+#: frontend/src/components/dialogs/OpeningDialog.vue:64
 msgid "Downloading profiles from server…"
 msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:59
-#: frontend/src/components/offline/OfflinePendingPanel.vue:93
-#: frontend/src/views/PurchaseOrderListView.vue:66
-#: frontend/src/views/PurchaseOrderListView.vue:263
-#: frontend/src/views/PurchaseOrderView.vue:382
+#: frontend/src/components/offline/OfflinePendingPanel.vue:105
+#: frontend/src/views/PurchaseOrderListView.vue:243
+#: frontend/src/views/PurchaseOrderView.vue:383
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Draft"
 msgstr "Návrh"
+
+#: frontend/src/views/PurchaseInvoiceView.vue:738
+msgid "Draft deleted"
+msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:202
 msgid "Draft invoice deleted"
@@ -1567,19 +1455,41 @@ msgstr ""
 msgid "Draft invoice restored to cart"
 msgstr ""
 
-#: frontend/src/components/offline/OfflinePendingPanel.vue:208
+#: frontend/src/views/PurchaseInvoiceView.vue:725
+msgid "Draft loaded"
+msgstr ""
+
+#: frontend/src/components/offline/OfflinePendingPanel.vue:223
 msgid "Draft loaded into cart"
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:973
+#: frontend/src/stores/purchaseStore.ts:986
 msgid "Draft saved successfully"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:249
+#: xpos/x_pos/api/purchase_orders.py:1905
+#: xpos/x_pos/api/purchase_orders.py:2040
+msgid "Draft {0} not found."
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:662
+msgid "Draft {0} saved"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:943
+#: frontend/src/views/PurchaseOrderListView.vue:229
 msgid "Drafts"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:511
+#: frontend/src/components/ui/table/Table.vue:1093
+msgid "Drag row number to reorder"
+msgstr ""
+
+#: frontend/src/components/ui/table/Table.vue:889
+msgid "Drag to reorder"
+msgstr ""
+
+#: frontend/src/components/ui/table/Table.vue:1034
 msgid "Duplicate"
 msgstr ""
 
@@ -1587,26 +1497,30 @@ msgstr ""
 msgid "Duplicate POS Profile in Delivery Charges"
 msgstr ""
 
+#. Label of a Link field in DocType 'POS Purchase Taxes'
+#: xpos/x_pos/doctype/pos_purchase_taxes/pos_purchase_taxes.json
+msgid "ERP Tax Account"
+msgstr ""
+
 #: frontend/src/components/dialogs/AboutDialog.vue:50
 msgid "ERPNext"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:240
-#: frontend/src/views/SetupWizardView.vue:488
-msgid "ERPNext Server"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:253
-msgid "ERPNext URL"
-msgstr ""
-
-#: frontend/src/views/PurchaseOrderListView.vue:277
-#: frontend/src/views/PurchaseOrderListView.vue:482
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:124
+#: frontend/src/views/PurchaseOrderListView.vue:257
 msgid "Edit"
 msgstr ""
 
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:14
 msgid "Edit Customer"
+msgstr ""
+
+#: frontend/src/components/ui/table/Table.vue:1177
+msgid "Edit Row"
+msgstr ""
+
+#: frontend/src/components/ui/table/Table.vue:1024
+msgid "Edit row"
 msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:161
@@ -1674,7 +1588,7 @@ msgstr ""
 msgid "Enter coupon code..."
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:566
+#: frontend/src/components/ui/table/Table.vue:1092
 msgid "Enter for next row"
 msgstr ""
 
@@ -1682,9 +1596,9 @@ msgstr ""
 msgid "Enter item name"
 msgstr ""
 
-#: frontend/src/components/dialogs/CashMovementDialog.vue:108
-#: frontend/src/views/BankDropView.vue:172
-#: frontend/src/views/ExpenseView.vue:171
+#: frontend/src/components/dialogs/CashMovementDialog.vue:83
+#: frontend/src/views/BankDropView.vue:158
+#: frontend/src/views/ExpenseView.vue:161
 msgid "Enter reason for this transaction..."
 msgstr ""
 
@@ -1749,7 +1663,7 @@ msgstr ""
 msgid "Expense account is required for POS Expense."
 msgstr ""
 
-#: frontend/src/views/ExpenseView.vue:413
+#: frontend/src/views/ExpenseView.vue:400
 msgid "Expense cancelled"
 msgstr ""
 
@@ -1757,7 +1671,7 @@ msgstr ""
 msgid "Expense target account must match Expense Account."
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:210
+#: frontend/src/components/Sidebar.vue:194
 #: frontend/src/components/items/CommandSearch.vue:353
 #: frontend/src/views/ExpenseView.vue:5
 msgid "Expenses"
@@ -1767,7 +1681,7 @@ msgstr ""
 msgid "Expires"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:637
+#: frontend/src/views/ReportViewerView.vue:778
 msgid "Export CSV"
 msgstr ""
 
@@ -1799,17 +1713,12 @@ msgstr ""
 msgid "FBR rejected the request. Check the bearer token and IP whitelist configured on the FBR portal."
 msgstr ""
 
-#: frontend/src/views/BankDropView.vue:408
+#: frontend/src/views/BankDropView.vue:391
 msgid "Failed to cancel deposit"
 msgstr ""
 
-#: frontend/src/views/ExpenseView.vue:416
+#: frontend/src/views/ExpenseView.vue:403
 msgid "Failed to cancel expense"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:441
-#: frontend/src/views/SettingsView.vue:459
-msgid "Failed to clear data"
 msgstr ""
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:77
@@ -1820,12 +1729,16 @@ msgstr ""
 msgid "Failed to create customer: "
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:416
+#: frontend/src/views/PurchaseInvoiceView.vue:612
 msgid "Failed to create invoice"
 msgstr ""
 
 #: xpos/api/payments.py:287
 msgid "Failed to create payment request: {0}"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:740
+msgid "Failed to delete draft"
 msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:206
@@ -1840,7 +1753,15 @@ msgstr ""
 msgid "Failed to fetch draft invoices"
 msgstr ""
 
-#: frontend/src/components/offline/OfflinePendingPanel.vue:211
+#: frontend/src/views/OrdersView.vue:243
+msgid "Failed to fetch order details"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:727
+msgid "Failed to load draft"
+msgstr ""
+
+#: frontend/src/components/offline/OfflinePendingPanel.vue:226
 msgid "Failed to load draft into cart"
 msgstr ""
 
@@ -1849,11 +1770,19 @@ msgstr ""
 msgid "Failed to load draft invoice"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1090
+#: frontend/src/views/PurchaseInvoiceView.vue:678
+msgid "Failed to load drafts"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:796
+msgid "Failed to load purchase orders"
+msgstr ""
+
+#: frontend/src/components/dialogs/PaymentDialog.vue:1169
 msgid "Failed to print invoice"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1119
+#: frontend/src/components/dialogs/PaymentDialog.vue:1198
 msgid "Failed to print invoice locally"
 msgstr ""
 
@@ -1869,32 +1798,36 @@ msgstr ""
 msgid "Failed to reconcile Payment Entry {0}: {1}"
 msgstr ""
 
-#: frontend/src/components/dialogs/CashMovementDialog.vue:333
+#: frontend/src/components/dialogs/CashMovementDialog.vue:305
 msgid "Failed to record cash movement"
 msgstr ""
 
-#: frontend/src/views/BankDropView.vue:390
+#: frontend/src/views/BankDropView.vue:373
 msgid "Failed to record deposit"
 msgstr ""
 
-#: frontend/src/views/ExpenseView.vue:398
+#: frontend/src/views/ExpenseView.vue:385
 msgid "Failed to record expense"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:670
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:407
 msgid "Failed to repeat invoice"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:407
-msgid "Failed to save database config"
+#: frontend/src/views/PurchaseInvoiceView.vue:664
+msgid "Failed to save draft"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:665
 msgid "Failed to save draft: {0}"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1001
+#: frontend/src/components/dialogs/PaymentDialog.vue:1089
 msgid "Failed to save invoice offline"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:773
+msgid "Failed to submit invoice"
 msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:272
@@ -1923,7 +1856,7 @@ msgid "Fill in customer details"
 msgstr ""
 
 #: frontend/src/components/core/QueryFilterPanel.vue:14
-#: frontend/src/views/ReportViewerView.vue:675
+#: frontend/src/views/ReportViewerView.vue:827
 msgid "Filters"
 msgstr ""
 
@@ -1932,17 +1865,13 @@ msgstr ""
 msgid "Final Customer Offer"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:80
+#: frontend/src/components/Sidebar.vue:72
 msgid "Finance"
 msgstr ""
 
 #. Description of the 'Prefix' (Data) field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Fixed starting value of all scale barcodes (for example, 331). If set, barcodes not starting with this value are ignored."
-msgstr ""
-
-#: frontend/src/views/PurchaseInvoiceView.vue:712
-msgid "Flat Disc(-)"
 msgstr ""
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:78
@@ -1961,7 +1890,12 @@ msgstr ""
 msgid "Frappe"
 msgstr ""
 
+#: frontend/src/views/PurchaseOrderView.vue:432
+msgid "From"
+msgstr ""
+
 #: frontend/src/views/ExpenseView.vue:16
+#: frontend/src/views/PurchaseOrderView.vue:428
 #: xpos/x_pos/report/branch_item_summary/branch_item_summary.js:34
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.js:16
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:23
@@ -1971,25 +1905,17 @@ msgstr ""
 msgid "From Date"
 msgstr ""
 
+#: frontend/src/views/PurchaseInvoiceView.vue:947
+msgid "From PO"
+msgstr ""
+
 #: xpos/x_pos/report/stock_value_summary_by_date/stock_value_summary_by_date.js:19
 msgid "From Posting Date"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:556
-msgid "Full"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:393
-msgid "Full Name"
-msgstr "Celé meno/názov"
-
 #: frontend/src/components/customer/CustomerSelect.vue:135
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:35
 msgid "Full name"
-msgstr ""
-
-#: frontend/src/views/PurchaseInvoiceView.vue:754
-msgid "GST"
 msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:167
@@ -2009,11 +1935,12 @@ msgstr ""
 msgid "Generating..."
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:70
+#: frontend/src/components/purchase/PurchaseCart.vue:113
 msgid "Generic"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderView.vue:446
+#: frontend/src/views/PurchaseOrderView.vue:463
+#: frontend/src/views/PurchaseOrderView.vue:482
 msgid "Get Items"
 msgstr ""
 
@@ -2078,26 +2005,28 @@ msgstr ""
 msgid "Go to Stock Receiving"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:483
-msgid "Godown"
-msgstr ""
-
 #. Label of a Currency field in DocType 'POS Closing Shift'
 #. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
 #: frontend/src/components/dialogs/ClosingDialog.vue:36
-#: frontend/src/components/orders/ListFilters.vue:312
-#: frontend/src/views/OrdersView.vue:327
-#: frontend/src/views/PurchaseInvoiceView.vue:759
-#: frontend/src/views/PurchaseOrderListView.vue:466
-#: frontend/src/views/PurchaseOrderView.vue:624
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:273
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:113
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:191
+#: frontend/src/views/PurchaseInvoiceView.vue:1243
+#: frontend/src/views/PurchaseOrderView.vue:597
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:15
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 msgid "Grand Total"
 msgstr "Celkem"
 
-#: frontend/src/views/PurchaseInvoiceView.vue:557
-msgid "Half"
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:124
+#: frontend/src/views/PurchaseInvoiceView.vue:438
+msgid "Gross"
+msgstr ""
+
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:232
+#: frontend/src/views/PurchaseInvoiceView.vue:1180
+msgid "Gross Total"
 msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:456
@@ -2116,44 +2045,8 @@ msgstr ""
 msgid "Hold Invoice"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:57
-#: frontend/src/views/SetupWizardView.vue:179
-msgid "Host"
-msgstr ""
-
 #: frontend/src/components/dialogs/AboutDialog.vue:66
 msgid "Hub"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:56
-#: frontend/src/views/SetupWizardView.vue:473
-msgid "Hub (Server)"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:275
-#: frontend/src/views/SetupWizardView.vue:495
-msgid "Hub API Port"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:240
-#: frontend/src/views/SetupWizardView.vue:502
-msgid "Hub Server"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:307
-msgid "Hub Server URL"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:338
-msgid "Hub reachable!"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:338
-msgid "Hub unreachable"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:315
-msgid "IP address and port of the hub server on your local network"
 msgstr ""
 
 #: frontend/src/components/purchase/StockReceiving.vue:219
@@ -2178,28 +2071,8 @@ msgstr ""
 msgid "Individual"
 msgstr "Individuální"
 
-#: frontend/src/views/SetupWizardView.vue:10
-msgid "Initial Setup"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:142
-msgid "Install MariaDB before proceeding:"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:471
-msgid "Installation Type"
-msgstr ""
-
-#: frontend/src/stores/offlineStore.ts:68
+#: frontend/src/stores/offlineStore.ts:71
 msgid "Internet connection restored"
-msgstr ""
-
-#: frontend/src/views/PurchaseInvoiceView.vue:730
-msgid "Inv GST(%)"
-msgstr ""
-
-#: frontend/src/views/PurchaseInvoiceView.vue:551
-msgid "Inv. Size"
 msgstr ""
 
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:75
@@ -2210,7 +2083,7 @@ msgstr "Neplatný úvodný záznam"
 msgid "Invalid POS Opening Shift data provided."
 msgstr ""
 
-#: xpos/api/invoices.py:982
+#: xpos/api/invoices.py:1112
 msgid "Invalid doctype for return search"
 msgstr ""
 
@@ -2258,14 +2131,6 @@ msgstr ""
 msgid "Invoice"
 msgstr "faktúra"
 
-#: frontend/src/components/orders/ListFilters.vue:63
-msgid "Invoice # (Newest)"
-msgstr ""
-
-#: frontend/src/components/orders/ListFilters.vue:64
-msgid "Invoice # (Oldest)"
-msgstr ""
-
 #. Label of a Currency field in DocType 'Sales Invoice Reference'
 #: xpos/x_pos/doctype/sales_invoice_reference/sales_invoice_reference.json
 msgid "Invoice Amount"
@@ -2276,28 +2141,28 @@ msgstr ""
 msgid "Invoice Currency"
 msgstr ""
 
-#: frontend/src/components/orders/ListFilters.vue:309
-msgid "Invoice ID"
-msgstr ""
-
-#: frontend/src/views/PurchaseInvoiceView.vue:465
-msgid "Invoice No"
-msgstr ""
-
-#: frontend/src/views/OrdersView.vue:147
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:20
 msgid "Invoice details"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1103
+#: frontend/src/components/dialogs/PaymentDialog.vue:1182
 msgid "Invoice not found for printing"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:977
+#: frontend/src/components/dialogs/PaymentDialog.vue:1065
 msgid "Invoice saved locally (#{0}). It will sync to server automatically."
 msgstr ""
 
-#: frontend/src/stores/offlineStore.ts:217
+#: frontend/src/stores/offlineStore.ts:229
 msgid "Invoice synced successfully"
+msgstr ""
+
+#: frontend/src/components/dialogs/PaymentDialog.vue:698
+msgid "Invoice will be submitted with a partial payment."
+msgstr ""
+
+#: frontend/src/components/dialogs/PaymentDialog.vue:696
+msgid "Invoice will be submitted with an outstanding credit balance."
 msgstr ""
 
 #: xpos/x_pos/api/invoices.py:79
@@ -2312,22 +2177,34 @@ msgstr ""
 msgid "Invoice {0} has been cancelled and cannot be submitted."
 msgstr ""
 
-#: xpos/api/invoices.py:492
+#: xpos/api/invoices.py:610
 msgid "Invoice {0} is not a draft and cannot be updated"
 msgstr ""
 
-#: xpos/api/invoices.py:46 xpos/api/invoices.py:1413
+#: xpos/x_pos/api/purchase_orders.py:1806
+#: xpos/x_pos/api/purchase_orders.py:1909
+#: xpos/x_pos/api/purchase_orders.py:2044
+msgid "Invoice {0} is not a draft."
+msgstr ""
+
+#: xpos/api/invoices.py:61 xpos/api/invoices.py:1543
 msgid "Invoice {0} not found"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1014
+#: frontend/src/components/dialogs/PaymentDialog.vue:1102
 msgid "Invoice {0} saved successfully!"
 msgstr ""
 
+#: frontend/src/views/PurchaseInvoiceView.vue:951
+msgid "Invoices"
+msgstr ""
+
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:99
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:64
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:94
 #: frontend/src/components/dialogs/ReturnDialog.vue:102
 #: frontend/src/views/BarcodePrintView.vue:168
-#: frontend/src/views/OrdersView.vue:221
-#: frontend/src/views/PurchaseOrderListView.vue:416
+#: frontend/src/views/PurchaseInvoiceView.vue:385
 msgid "Item"
 msgstr "položka"
 
@@ -2335,7 +2212,7 @@ msgstr "položka"
 #. 'POS Offer'
 #. Option for the 'Apply Type' (Select) field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'POS Offer'
-#: frontend/src/components/dialogs/CreateItemDialog.vue:94
+#: frontend/src/components/dialogs/CreateItemDialog.vue:95
 #: frontend/src/components/purchase/PurchaseItemList.vue:273
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.py:40
@@ -2345,6 +2222,7 @@ msgstr "položka"
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:47
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:110
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.py:61
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.py:87
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.py:52
 msgid "Item Code"
 msgstr "Kód položky"
@@ -2357,6 +2235,10 @@ msgstr ""
 msgid "Item Code is required"
 msgstr ""
 
+#: frontend/src/views/PurchaseInvoiceView.vue:1184
+msgid "Item Discount"
+msgstr ""
+
 #: frontend/src/components/cart/CartSummary.vue:13
 msgid "Item Discounts"
 msgstr ""
@@ -2365,17 +2247,18 @@ msgstr ""
 #. 'POS Offer'
 #. Option for the 'Apply Type' (Select) field in DocType 'POS Offer'
 #. Label of a Link field in DocType 'POS Offer'
-#: frontend/src/components/dialogs/CreateItemDialog.vue:106
+#: frontend/src/components/dialogs/CreateItemDialog.vue:107
 #: frontend/src/components/purchase/PurchaseItemList.vue:296
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
 #: xpos/x_pos/report/current_stock_report/current_stock_report.js:46
 #: xpos/x_pos/report/current_stock_report/current_stock_report.py:70
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:130
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.js:29
 msgid "Item Group"
 msgstr "Položková skupina"
 
-#: frontend/src/components/dialogs/CreateItemDialog.vue:90
-#: frontend/src/components/purchase/PurchaseCart.vue:61
+#: frontend/src/components/dialogs/CreateItemDialog.vue:91
+#: frontend/src/components/purchase/PurchaseCart.vue:91
 #: frontend/src/components/purchase/PurchaseItemList.vue:262
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.py:47
 #: xpos/x_pos/report/current_stock_report/current_stock_report.py:64
@@ -2384,6 +2267,7 @@ msgstr "Položková skupina"
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:54
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:117
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.py:68
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.py:94
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.py:59
 msgid "Item Name"
 msgstr ""
@@ -2411,7 +2295,7 @@ msgstr ""
 msgid "Item code digits"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:295
+#: xpos/x_pos/api/purchase_orders.py:323
 msgid "Item code is required."
 msgstr ""
 
@@ -2424,13 +2308,13 @@ msgstr ""
 msgid "Item group"
 msgstr ""
 
-#: frontend/src/stores/cartStore.ts:465
+#: frontend/src/stores/cartStore.ts:467
 msgid "Item not found"
 msgstr ""
 
 #: frontend/src/components/purchase/PurchaseItemList.vue:74
-#: frontend/src/views/PurchaseInvoiceView.vue:144
-#: frontend/src/views/PurchaseOrderView.vue:136
+#: frontend/src/views/PurchaseInvoiceView.vue:186
+#: frontend/src/views/PurchaseOrderView.vue:90
 msgid "Item not found for barcode"
 msgstr ""
 
@@ -2438,29 +2322,35 @@ msgstr ""
 msgid "Item {0} is missing Customs Tariff Number, which FBR requires as the PCT Code."
 msgstr ""
 
-#: xpos/api/invoices.py:1286
+#: xpos/api/invoices.py:1416
 msgid "Item {0} was not in the original invoice {1}"
 msgstr ""
 
-#: xpos/api/invoices.py:1326
+#: xpos/api/invoices.py:1456
 msgid "Item {0}: Cannot return {1} units. Only {2} units remaining for return (Original: {3}, Already returned: {4})"
 msgstr ""
 
-#: xpos/api/invoices.py:268
+#: xpos/api/invoices.py:381
 #, python-format
 msgid "Item {0}: Discount {1}% exceeds maximum allowed {2}%"
 msgstr ""
 
 #. Label of a Small Text field in DocType 'POS Offer Detail'
-#: frontend/src/views/OrdersView.vue:211 frontend/src/views/PosView.vue:16
-#: frontend/src/views/PurchaseInvoiceView.vue:748
-#: frontend/src/views/PurchaseOrderListView.vue:406
-#: frontend/src/views/PurchaseOrderView.vue:614
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:89
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:54
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:84
+#: frontend/src/views/PosView.vue:16
+#: frontend/src/views/PurchaseInvoiceView.vue:1172
+#: frontend/src/views/PurchaseOrderView.vue:579
 #: frontend/src/views/PurchaseView.vue:208
 #: frontend/src/views/PurchaseView.vue:245
 #: xpos/x_pos/doctype/pos_offer_detail/pos_offer_detail.json
 msgid "Items"
 msgstr "Položky"
+
+#: frontend/src/views/PurchaseInvoiceView.vue:837
+msgid "Items loaded from PO {0}"
+msgstr ""
 
 #. Label of a Link field in DocType 'POS Cash Movement'
 #: xpos/x_pos/api/payment_processing/data.py:274
@@ -2473,7 +2363,7 @@ msgstr "Zápis do deníku"
 msgid "Journal Entry {0} has no unallocated amount remaining."
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:178
+#: frontend/src/components/Navbar.vue:181
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:14
 #: frontend/src/components/items/CommandSearch.vue:492
 msgid "Keyboard Shortcuts"
@@ -2492,12 +2382,8 @@ msgstr ""
 msgid "Large (60×40mm)"
 msgstr ""
 
-#: frontend/src/components/offline/OfflinePendingPanel.vue:140
+#: frontend/src/components/offline/OfflinePendingPanel.vue:153
 msgid "Last sync"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:128
-msgid "Last sync:"
 msgstr ""
 
 #. Label of a Section Break field in DocType 'POS Closing Shift'
@@ -2505,11 +2391,19 @@ msgstr ""
 msgid "Linked Invoices"
 msgstr "Prepojené faktúry"
 
+#: frontend/src/views/PurchaseInvoiceView.vue:1043
+msgid "Load"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:1103
+msgid "Load Items"
+msgstr ""
+
 #: frontend/src/components/dialogs/RepeatInvoiceDialog.vue:70
 msgid "Load More"
 msgstr ""
 
-#: frontend/src/components/offline/OfflinePendingPanel.vue:114
+#: frontend/src/components/offline/OfflinePendingPanel.vue:126
 msgid "Load to Cart"
 msgstr ""
 
@@ -2517,8 +2411,9 @@ msgstr ""
 msgid "Loading in-transit stock..."
 msgstr ""
 
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:85
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:50
 #: frontend/src/components/purchase/PurchaseItemList.vue:205
-#: frontend/src/views/PurchaseOrderListView.vue:402
 msgid "Loading items..."
 msgstr ""
 
@@ -2527,24 +2422,18 @@ msgid "Loading suppliers..."
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:249
-#: frontend/src/views/PurchaseInvoiceView.vue:621
-#: frontend/src/views/PurchaseOrderView.vue:524
 msgid "Loading..."
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:52
-msgid "Local Database"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:186
-msgid "Local items:"
 msgstr ""
 
 #: frontend/src/views/ReportsIndexView.vue:249
 msgid "Locked"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:65
+#: frontend/src/components/dialogs/PaymentDialog.vue:421
+msgid "Locked by POS Profile"
+msgstr ""
+
+#: frontend/src/components/purchase/PurchaseCart.vue:95
 msgid "Loose"
 msgstr ""
 
@@ -2557,7 +2446,7 @@ msgstr ""
 msgid "Loyalty"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:394
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:248
 msgid "Loyalty Information"
 msgstr ""
 
@@ -2577,7 +2466,7 @@ msgstr ""
 msgid "Loyalty Points"
 msgstr "Vernostné body"
 
-#: frontend/src/views/OrdersView.vue:320
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:184
 msgid "Loyalty Points Redeemed"
 msgstr ""
 
@@ -2598,7 +2487,7 @@ msgstr ""
 msgid "Loyalty Program {0} not found"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:33
+#: frontend/src/components/Sidebar.vue:25
 msgid "Main"
 msgstr ""
 
@@ -2615,12 +2504,8 @@ msgstr ""
 msgid "Manage loyalty for"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:135
-msgid "MariaDB detected"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:139
-msgid "MariaDB not detected"
+#: frontend/src/views/PurchaseInvoiceView.vue:531
+msgid "Margin%"
 msgstr ""
 
 #: frontend/src/components/purchase/StockReceiving.vue:341
@@ -2673,16 +2558,8 @@ msgstr ""
 msgid "Min Quantity"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:423
-msgid "Minimum 6 characters"
-msgstr ""
-
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.js:40
 msgid "Minimum Value"
-msgstr ""
-
-#: frontend/src/views/PurchaseInvoiceView.vue:721
-msgid "Misc(+)"
 msgstr ""
 
 #: xpos/x_pos/api/qz.py:50
@@ -2709,7 +2586,6 @@ msgid "Mobile No"
 msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:58
-#: frontend/src/views/SettingsView.vue:223
 msgid "Mode"
 msgstr ""
 
@@ -2740,11 +2616,17 @@ msgstr "Spôsob platieb"
 msgid "Modes of Payment"
 msgstr "Spôsoby platby"
 
-#: frontend/src/components/ui/table/Table.vue:533
+#: frontend/src/components/ui/table/Table.vue:1242
+msgid "Move"
+msgstr ""
+
+#: frontend/src/components/ui/table/Table.vue:1059
+#: frontend/src/components/ui/table/Table.vue:1198
 msgid "Move down"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:521
+#: frontend/src/components/ui/table/Table.vue:1046
+#: frontend/src/components/ui/table/Table.vue:1187
 msgid "Move up"
 msgstr ""
 
@@ -2773,18 +2655,20 @@ msgstr ""
 msgid "Navigation"
 msgstr ""
 
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:139
+#: frontend/src/views/PurchaseInvoiceView.vue:466
+msgid "Net"
+msgstr ""
+
 #. Label of a Currency field in DocType 'POS Closing Shift'
 #: frontend/src/components/dialogs/ClosingDialog.vue:46
-#: frontend/src/components/orders/ListFilters.vue:313
-#: frontend/src/views/OrdersView.vue:283
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:244
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:156
+#: frontend/src/views/PurchaseInvoiceView.vue:1190
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:28
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Net Total"
 msgstr "Netto Spolu"
-
-#: frontend/src/views/SettingsView.vue:129
-msgid "Never"
-msgstr ""
 
 #: frontend/src/views/BankDropView.vue:8
 msgid "New Bank Drop"
@@ -2798,7 +2682,16 @@ msgstr ""
 msgid "New Expense"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:204
+#: frontend/src/views/PurchaseInvoiceListView.vue:142
+msgid "New Invoice"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:1163
+#: frontend/src/views/PurchaseOrderView.vue:559
+msgid "New Item"
+msgstr ""
+
+#: frontend/src/views/PurchaseOrderListView.vue:184
 msgid "New Order"
 msgstr ""
 
@@ -2810,22 +2703,18 @@ msgstr ""
 msgid "New Sale / Clear Cart"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:100
-#: frontend/src/views/SetupWizardView.vue:231
-#: frontend/src/views/SetupWizardView.vue:349
-#: frontend/src/views/SetupWizardView.vue:455
-msgid "Next"
-msgstr ""
-
-#: frontend/src/components/core/ListFilterBar.vue:46
-#: frontend/src/services/reports.ts:783
-#: frontend/src/views/PurchaseInvoiceView.vue:547
-#: frontend/src/views/PurchaseOrderView.vue:456
+#: frontend/src/components/core/ListFilterBar.vue:39
+#: frontend/src/services/reports.ts:829
+#: frontend/src/views/PurchaseOrderView.vue:494
 #: frontend/src/views/PurchaseView.vue:165
 msgid "No"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:261
+#: frontend/src/views/PurchaseInvoiceView.vue:1232
+msgid "No Payment"
+msgstr ""
+
+#: frontend/src/views/PurchaseOrderListView.vue:241
 msgid "No Supplier"
 msgstr ""
 
@@ -2861,10 +2750,6 @@ msgstr ""
 msgid "No batches available in {0} for {1}."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:88
-msgid "No buying price list found. Please configure one in Buying Settings or create a Price List with 'Buying' enabled."
-msgstr ""
-
 #: frontend/src/components/dialogs/CameraBarcodeDialog.vue:190
 msgid "No camera found on this device."
 msgstr ""
@@ -2877,12 +2762,20 @@ msgstr ""
 msgid "No customers found"
 msgstr ""
 
+#: frontend/src/views/ReportViewerView.vue:651
+msgid "No data to print."
+msgstr ""
+
 #: frontend/src/components/cart/CartSummary.vue:252
 msgid "No delivery charges available for this profile"
 msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:39
 msgid "No draft invoices found"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:1019
+msgid "No drafts found"
 msgstr ""
 
 #: frontend/src/views/ExpenseView.vue:45
@@ -2894,7 +2787,6 @@ msgid "No fields"
 msgstr ""
 
 #: frontend/src/components/core/SortBy.vue:64
-#: frontend/src/components/orders/ListFilters.vue:129
 msgid "No fields found"
 msgstr ""
 
@@ -2915,16 +2807,14 @@ msgstr ""
 #: frontend/src/components/purchase/PurchaseItemList.vue:192
 #: frontend/src/components/purchase/PurchaseItemList.vue:212
 #: frontend/src/views/BarcodePrintView.vue:104
-#: frontend/src/views/PurchaseInvoiceView.vue:628
-#: frontend/src/views/PurchaseOrderView.vue:531
 msgid "No items found"
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:1085
+#: frontend/src/stores/purchaseStore.ts:1107
 msgid "No items found for this category and supplier"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:656
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:393
 msgid "No items found in this invoice"
 msgstr ""
 
@@ -2940,15 +2830,15 @@ msgstr ""
 msgid "No items selected"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:788
+#: xpos/x_pos/api/purchase_orders.py:981
 msgid "No items to invoice. Please ensure there are items on the Purchase Order."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:935 xpos/x_pos/api/stock_transfer.py:267
+#: xpos/x_pos/api/purchase_orders.py:1149 xpos/x_pos/api/stock_transfer.py:267
 msgid "No items to receive."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:207
+#: xpos/x_pos/api/purchase_orders.py:240
 msgid "No items to receive. Please enter received quantities."
 msgstr ""
 
@@ -2958,10 +2848,6 @@ msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:166
 msgid "No loyalty programs available"
-msgstr ""
-
-#: frontend/src/components/ui/link/LinkField.vue:35
-msgid "No matches found"
 msgstr ""
 
 #: frontend/src/components/purchase/StockReceiving.vue:357
@@ -3000,24 +2886,31 @@ msgstr ""
 msgid "No outstanding invoices were found for {0}."
 msgstr ""
 
-#: frontend/src/components/offline/OfflinePendingPanel.vue:63
+#: frontend/src/components/offline/OfflinePendingPanel.vue:75
 msgid "No pending offline invoices."
 msgstr ""
 
-#: frontend/src/components/dialogs/OpeningDialog.vue:71
+#: frontend/src/views/PurchaseInvoiceView.vue:1076
+msgid "No pending purchase orders"
+msgstr ""
+
+#: frontend/src/components/dialogs/OpeningDialog.vue:65
 msgid "No profiles found. Check server connection or click Refresh."
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:303
+#: frontend/src/views/PurchaseInvoiceListView.vue:189
+msgid "No purchase invoices found"
+msgstr ""
+
+#: frontend/src/views/PurchaseOrderListView.vue:283
 msgid "No purchase orders found"
 msgstr ""
 
-#: frontend/src/components/core/QueryFilterPanel.vue:148
-#: frontend/src/components/orders/ListFilters.vue:185
+#: frontend/src/components/core/QueryFilterPanel.vue:134
 msgid "No query filters. Click \"Add Filter\" to add one."
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:829
+#: frontend/src/components/dialogs/PaymentDialog.vue:892
 msgid "No redeemable loyalty points for this invoice total"
 msgstr ""
 
@@ -3025,7 +2918,7 @@ msgstr ""
 msgid "No reports match your search"
 msgstr ""
 
-#: frontend/src/components/core/ListFilterBar.vue:13
+#: frontend/src/components/core/ListFilterBar.vue:14
 msgid "No results"
 msgstr ""
 
@@ -3033,20 +2926,20 @@ msgstr ""
 msgid "No results found"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:899
+#: frontend/src/views/ReportViewerView.vue:1029
 msgid "No rows available after filtering."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:488
+#: frontend/src/views/ReportViewerView.vue:483
 msgid "No rows available to export."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:880
+#: frontend/src/views/ReportViewerView.vue:1010
 msgid "No rows found"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:452
-#: frontend/src/views/ReportViewerView.vue:462
+#: frontend/src/views/ReportViewerView.vue:447
+#: frontend/src/views/ReportViewerView.vue:457
 msgid "No rows to copy."
 msgstr ""
 
@@ -3063,7 +2956,7 @@ msgstr ""
 msgid "No valid batches available in {0} for {1}."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:993 xpos/x_pos/api/stock_transfer.py:333
+#: xpos/x_pos/api/purchase_orders.py:1207 xpos/x_pos/api/stock_transfer.py:333
 msgid "No valid items to receive."
 msgstr ""
 
@@ -3083,13 +2976,8 @@ msgstr ""
 msgid "Not Set"
 msgstr ""
 
-#: frontend/src/components/core/QueryFilterPanel.vue:120
-#: frontend/src/components/orders/ListFilters.vue:166
+#: frontend/src/components/core/QueryFilterPanel.vue:107
 msgid "Not Set (empty)"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:163
-msgid "Not set"
 msgstr ""
 
 #: frontend/src/components/ui/datetime-picker/DateTimePicker.vue:873
@@ -3108,7 +2996,7 @@ msgstr ""
 msgid "Number of digits representing the price before decimal places."
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:440
+#: frontend/src/components/dialogs/PaymentDialog.vue:470
 msgid "Numpad"
 msgstr ""
 
@@ -3173,11 +3061,11 @@ msgstr ""
 msgid "Only draft Sales Orders can be updated"
 msgstr ""
 
-#: xpos/api/invoices.py:953
+#: xpos/api/invoices.py:1083
 msgid "Only draft invoices can be deleted"
 msgstr ""
 
-#: xpos/api/invoices.py:137
+#: xpos/api/invoices.py:239
 msgid "Only draft invoices can be updated and submitted"
 msgstr ""
 
@@ -3187,11 +3075,6 @@ msgstr ""
 
 #: xpos/x_pos/api/cash_movement/validation.py:26
 msgid "Only the shift owner can create cash movement entries."
-msgstr ""
-
-#: frontend/src/components/core/QueryFilterPanel.vue:57
-#: frontend/src/components/orders/ListFilters.vue:136
-msgid "Op"
 msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
@@ -3208,7 +3091,7 @@ msgstr ""
 msgid "Open Settings"
 msgstr ""
 
-#: frontend/src/components/dialogs/OpeningDialog.vue:123
+#: frontend/src/components/dialogs/OpeningDialog.vue:117
 msgid "Open Shift"
 msgstr ""
 
@@ -3232,7 +3115,7 @@ msgstr "Počiatočná suma"
 msgid "Opening Balance Details"
 msgstr "Počiatočný zostatok"
 
-#: frontend/src/components/dialogs/OpeningDialog.vue:89
+#: frontend/src/components/dialogs/OpeningDialog.vue:83
 msgid "Opening Cash Balance"
 msgstr ""
 
@@ -3240,12 +3123,12 @@ msgstr ""
 msgid "Opening Shift is required"
 msgstr ""
 
-#: frontend/src/components/dialogs/OpeningDialog.vue:119
+#: frontend/src/components/dialogs/OpeningDialog.vue:113
 msgid "Opening Shift..."
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:150
-msgid "Or via winget:"
+#: frontend/src/views/PurchaseInvoiceView.vue:1000
+msgid "Optional notes..."
 msgstr ""
 
 #: frontend/src/views/OrdersView.vue:5
@@ -3264,14 +3147,14 @@ msgstr ""
 msgid "Order saved as draft locally"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:38
-#: frontend/src/components/Sidebar.vue:192
+#: frontend/src/components/Navbar.vue:41
+#: frontend/src/components/Sidebar.vue:176
 #: frontend/src/components/items/CommandSearch.vue:308
 #: frontend/src/layouts/DefaultLayout.vue:39
 msgid "Orders"
 msgstr "objednávky"
 
-#: xpos/api/invoices.py:1244
+#: xpos/api/invoices.py:1374
 msgid "Original invoice {0} not found"
 msgstr ""
 
@@ -3291,29 +3174,26 @@ msgid "Outgoing Stock Entry is required."
 msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:36
-#: frontend/src/components/orders/ListFilters.vue:315
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:268
+#: frontend/src/views/PurchaseInvoiceListView.vue:233
 msgid "Outstanding"
 msgstr ""
 
-#: frontend/src/components/orders/ListFilters.vue:32
-msgid "Overdue"
+#: frontend/src/components/dialogs/PaymentDialog.vue:690
+msgid "Outstanding After Save"
 msgstr ""
 
-#: frontend/src/components/orders/ListFilters.vue:317
-msgid "Owner"
-msgstr ""
-
-#: frontend/src/components/purchase/PurchaseCart.vue:74
+#: frontend/src/components/purchase/PurchaseCart.vue:117
 msgid "P.Units"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderView.vue:423
+#: frontend/src/views/PurchaseOrderView.vue:416
 #: frontend/src/views/PurchaseView.vue:137
 msgid "P/O Category"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:22
-#: frontend/src/components/Sidebar.vue:191
+#: frontend/src/components/Navbar.vue:25
+#: frontend/src/components/Sidebar.vue:175
 #: frontend/src/layouts/DefaultLayout.vue:27
 msgid "POS"
 msgstr "POS"
@@ -3481,9 +3361,7 @@ msgstr ""
 #. Label of a Link field in DocType 'POS Opening Shift'
 #. Label of a Link in the X POS Workspace
 #: frontend/src/components/dialogs/OpeningDialog.vue:25
-#: frontend/src/components/dialogs/OpeningDialog.vue:56
-#: frontend/src/views/OrdersView.vue:177
-#: frontend/src/views/SettingsView.vue:156
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:50
 #: xpos/x_pos/api/payment_processing/data.py:81
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -3502,7 +3380,7 @@ msgstr ""
 msgid "POS Profile is not set. Please close and reopen the shift."
 msgstr ""
 
-#: xpos/api/invoices.py:114 xpos/x_pos/api/payment_processing/processor.py:36
+#: xpos/api/invoices.py:216 xpos/x_pos/api/payment_processing/processor.py:36
 msgid "POS Profile is required"
 msgstr ""
 
@@ -3523,7 +3401,7 @@ msgstr ""
 msgid "POS Profile must match the selected POS Opening Shift profile."
 msgstr ""
 
-#: xpos/api/invoices.py:475 xpos/api/sales_orders.py:69
+#: xpos/api/invoices.py:593 xpos/api/sales_orders.py:69
 #: xpos/api/sales_orders.py:170
 msgid "POS Profile, Customer, and Items are required"
 msgstr ""
@@ -3531,6 +3409,11 @@ msgstr ""
 #. Label of a Table field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "POS Profiles"
+msgstr ""
+
+#. Name of a DocType
+#: xpos/x_pos/doctype/pos_purchase_taxes/pos_purchase_taxes.json
+msgid "POS Purchase Taxes"
 msgstr ""
 
 #. Name of a DocType
@@ -3551,51 +3434,46 @@ msgstr "POS transakcie"
 msgid "POS credit redemption for Sales Invoice {0}"
 msgstr ""
 
-#: frontend/src/components/dialogs/CashMovementDialog.vue:309
-#: frontend/src/views/ExpenseView.vue:393
+#: frontend/src/components/dialogs/CashMovementDialog.vue:281
+#: frontend/src/views/ExpenseView.vue:380
 msgid "POS expense recorded"
 msgstr ""
 
-#: xpos/x_pos/api/utils.py:105
+#: xpos/x_pos/api/utils.py:103
 msgid "POS profile data is missing or invalid."
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:73
+#: frontend/src/components/purchase/PurchaseCart.vue:116
 #: frontend/src/components/purchase/PurchaseItemList.vue:237
 msgid "Packing"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:66
+#: frontend/src/components/purchase/PurchaseCart.vue:96
 msgid "Packs"
 msgstr ""
 
-#: frontend/src/components/orders/ListFilters.vue:30
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:73
 msgid "Paid"
-msgstr ""
-
-#: frontend/src/components/orders/ListFilters.vue:314
-msgid "Paid Amount"
 msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:448
 msgid "Park current invoice as draft"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:52 frontend/src/views/SettingsView.vue:69
-#: frontend/src/views/SetupWizardView.vue:196
-#: frontend/src/views/SetupWizardView.vue:402
+#: xpos/api/invoices.py:159
+msgid "Partial payment is not allowed for POS Profile {0}."
+msgstr ""
+
+#: frontend/src/views/LoginView.vue:52
 msgid "Password"
 msgstr "Heslo"
-
-#: frontend/src/views/SetupWizardView.vue:444
-msgid "Passwords do not match"
-msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:436
 msgid "Pay {0}"
 msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:22
+#: frontend/src/views/PurchaseInvoiceView.vue:1226
 msgid "Payment"
 msgstr "Splátka"
 
@@ -3626,11 +3504,15 @@ msgstr "Platba Odsouhlasení"
 msgid "Payment Request for {0}"
 msgstr "Žiadosť o platbu za {0}"
 
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:71
+msgid "Payment Status"
+msgstr ""
+
 #: xpos/api/payments.py:240 xpos/x_pos/api/payments.py:30
 msgid "Payment amount cannot be less than or equal to 0"
 msgstr "Výška platby nemôže byť menšia alebo rovná 0"
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1055
+#: frontend/src/components/dialogs/PaymentDialog.vue:1134
 msgid "Payment failed: {0}"
 msgstr ""
 
@@ -3638,7 +3520,7 @@ msgstr ""
 msgid "Payment {0} is already fully allocated"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:364
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:221
 msgid "Payments"
 msgstr "Platby"
 
@@ -3646,8 +3528,8 @@ msgstr "Platby"
 msgid "Pending"
 msgstr "Čakajúce"
 
-#: frontend/src/views/SettingsView.vue:132
-msgid "Pending records:"
+#: frontend/src/components/orders/Pagination.vue:55
+msgid "Per page:"
 msgstr ""
 
 #. Label of a Datetime field in DocType 'POS Closing Shift'
@@ -3668,24 +3550,23 @@ msgstr "Dátum začiatku obdobia"
 msgid "Phone number"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:329
-msgid "Ping Hub"
-msgstr ""
-
 #: frontend/src/components/dialogs/AboutDialog.vue:54
-#: frontend/src/views/SettingsView.vue:219
 msgid "Platform"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:382
+#: frontend/src/views/PurchaseInvoiceView.vue:550
 msgid "Please add at least one item"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:624
+msgid "Please add at least one item."
 msgstr ""
 
 #: xpos/api/payments.py:243 xpos/x_pos/api/payments.py:33
 msgid "Please enter the phone number first"
 msgstr "Najskôr zadajte telefónne číslo"
 
-#: frontend/src/views/ReportViewerView.vue:315
+#: frontend/src/views/ReportViewerView.vue:310
 msgid "Please fill the required filters: {0}"
 msgstr ""
 
@@ -3701,21 +3582,26 @@ msgstr ""
 msgid "Please select a customer before holding the order."
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:378
+#: frontend/src/views/PurchaseInvoiceView.vue:546
 msgid "Please select a supplier"
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:1067
+#: frontend/src/stores/purchaseStore.ts:1085
 msgid "Please select a supplier and PO Category first"
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:441
+#: frontend/src/stores/purchaseStore.ts:440
 msgid "Please select a supplier and add items"
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:936
-#: xpos/x_pos/api/purchase_orders.py:1411
+#: frontend/src/stores/purchaseStore.ts:948
+#: frontend/src/views/PurchaseInvoiceView.vue:620
+#: xpos/x_pos/api/purchase_orders.py:1552
 msgid "Please select a supplier before saving a draft."
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:781
+msgid "Please select a supplier first"
 msgstr ""
 
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.py:15
@@ -3734,11 +3620,11 @@ msgstr ""
 msgid "Please select the customer."
 msgstr "Vyberte zákazníka."
 
-#: xpos/x_pos/api/purchase_orders.py:413
+#: xpos/x_pos/api/purchase_orders.py:441
 msgid "Please set Default Payable Account in Company {0}"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:370
+#: xpos/x_pos/api/purchase_orders.py:398
 msgid "Please set default account for Mode of Payment {0} in company {1}"
 msgstr ""
 
@@ -3763,25 +3649,16 @@ msgstr ""
 msgid "Points Balance"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:402
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:256
 msgid "Points Earned"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:411
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:260
 msgid "Points Redeemed"
 msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:62
 msgid "Points Value"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:61
-#: frontend/src/views/SetupWizardView.vue:183
-msgid "Port"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:284
-msgid "Port for till clients to connect to this hub"
 msgstr ""
 
 #. Label of a shortcut in the X POS Workspace
@@ -3798,11 +3675,16 @@ msgstr ""
 #. Label of a Date field in DocType 'POS Cash Movement'
 #. Label of a Date field in DocType 'POS Closing Shift'
 #. Label of a Date field in DocType 'POS Opening Shift'
+#: frontend/src/components/dialogs/PaymentDialog.vue:415
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Posting Date"
 msgstr "Dátum pridania"
+
+#: xpos/api/invoices.py:52
+msgid "Posting Date must be a valid date"
+msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:332
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:179
@@ -3874,13 +3756,9 @@ msgstr ""
 msgid "Primary Customer Offer"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:428
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:277
 msgid "Print"
 msgstr "vytlačiť"
-
-#: frontend/src/views/PurchaseInvoiceView.vue:541
-msgid "Print Bal"
-msgstr ""
 
 #. Label of a Link field in DocType 'POS Print Format Rule'
 #: xpos/x_pos/doctype/pos_print_format_rule/pos_print_format_rule.json
@@ -3891,7 +3769,7 @@ msgstr "Formát tlače"
 msgid "Print Labels"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:99
+#: frontend/src/components/Navbar.vue:102
 msgid "Print Last Invoice"
 msgstr ""
 
@@ -3904,6 +3782,10 @@ msgstr ""
 msgid "Print Summary"
 msgstr ""
 
+#: frontend/src/views/ReportViewerView.vue:789
+msgid "Print Thermal"
+msgstr ""
+
 #: frontend/src/components/items/CommandSearch.vue:372
 msgid "Print barcode labels"
 msgstr ""
@@ -3912,8 +3794,12 @@ msgstr ""
 msgid "Print last invoice"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1097
+#: frontend/src/components/dialogs/PaymentDialog.vue:1176
 msgid "Print not available"
+msgstr ""
+
+#: frontend/src/views/ReportViewerView.vue:657
+msgid "Print window blocked. Please allow popups and try again."
 msgstr ""
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:80
@@ -3921,7 +3807,7 @@ msgstr ""
 msgid "Process Payment"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:85
+#: frontend/src/components/Navbar.vue:88
 #: frontend/src/components/dialogs/ReturnDialog.vue:160
 msgid "Process Return"
 msgstr ""
@@ -3935,8 +3821,8 @@ msgid "Process a return"
 msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:81
-#: frontend/src/components/dialogs/PaymentDialog.vue:503
-#: frontend/src/components/purchase/PurchaseCart.vue:234
+#: frontend/src/components/dialogs/PaymentDialog.vue:533
+#: frontend/src/components/purchase/PurchaseCart.vue:323
 #: frontend/src/components/purchase/StockReceiving.vue:315
 msgid "Processing..."
 msgstr "Spracovanie ..."
@@ -3946,16 +3832,12 @@ msgstr "Spracovanie ..."
 msgid "Product Discount Scheme"
 msgstr "Schéma zľavy na výrobok"
 
-#: frontend/src/views/SettingsView.vue:161
-msgid "Profile:"
-msgstr ""
-
 #. Label of a Code field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
 msgid "Profiles List"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:398
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:252
 msgid "Program"
 msgstr "Program"
 
@@ -3974,31 +3856,44 @@ msgstr "propagačné"
 msgid "Promotional Scheme"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:32
+#: frontend/src/components/purchase/PurchaseCart.vue:62
 msgid "Purchase Cart"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:198
+#: frontend/src/components/Sidebar.vue:182
 #: frontend/src/components/items/CommandSearch.vue:335
-#: frontend/src/views/PurchaseInvoiceView.vue:452
+#: frontend/src/views/PurchaseInvoiceView.vue:892
 msgid "Purchase Invoice"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:412
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:24
+msgid "Purchase Invoice Details"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:608
 msgid "Purchase Invoice {0} created"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:197
+#: frontend/src/views/PurchaseInvoiceView.vue:770
+msgid "Purchase Invoice {0} submitted"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceListView.vue:139
+msgid "Purchase Invoices"
+msgstr ""
+
+#: frontend/src/components/Sidebar.vue:181
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:59
 #: frontend/src/components/items/CommandSearch.vue:326
-#: frontend/src/views/PurchaseOrderView.vue:379
+#: frontend/src/views/PurchaseOrderView.vue:380
 msgid "Purchase Order"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:1533
+#: xpos/x_pos/api/purchase_orders.py:1669
 msgid "Purchase Order '{0}' is not a draft."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:1529
+#: xpos/x_pos/api/purchase_orders.py:1665
 msgid "Purchase Order '{0}' not found."
 msgstr ""
 
@@ -4006,7 +3901,7 @@ msgstr ""
 msgid "Purchase Order <a href=\"/app/purchase-order/{0}\">{0}</a> created successfully"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:370
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:20
 #: frontend/src/views/PurchaseView.vue:123
 msgid "Purchase Order Details"
 msgstr ""
@@ -4016,51 +3911,68 @@ msgstr ""
 msgid "Purchase Order Report"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:924
+#: xpos/x_pos/api/purchase_orders.py:1138
 msgid "Purchase Order is required."
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:489
+#: frontend/src/stores/purchaseStore.ts:491
 msgid "Purchase Order {0} created"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:864
+#: xpos/x_pos/api/purchase_orders.py:1078
 msgid "Purchase Order {0} does not exist."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:928
+#: xpos/x_pos/api/purchase_orders.py:1142
 msgid "Purchase Order {0} is not submitted."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:602
+#: xpos/x_pos/api/purchase_orders.py:640
 msgid "Purchase Order {0} processing failed: {1}"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:194
+#: frontend/src/views/PurchaseInvoiceView.vue:1063
+#: frontend/src/views/PurchaseOrderListView.vue:181
 msgid "Purchase Orders"
 msgstr "Objednávky"
 
-#: xpos/x_pos/api/purchase_orders.py:568
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:65
+msgid "Purchase Receipt"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:754
+msgid "Purchase invoice requires at least one item with quantity."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:668
+msgid "Purchase invoice requires at least one item."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:647
+msgid "Purchase invoices"
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:598
 msgid "Purchase order requires at least one item with quantity."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:468
+#: xpos/x_pos/api/purchase_orders.py:496
 msgid "Purchase order requires at least one item."
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:479
+#: frontend/src/stores/purchaseStore.ts:481
 msgid "Purchase order saved offline. Will sync when online."
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:684
+#: frontend/src/stores/purchaseStore.ts:679
 msgid "Purchase order synced successfully"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:444
+#: xpos/x_pos/api/purchase_orders.py:472
 msgid "Purchase orders"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:56
+#: frontend/src/components/Sidebar.vue:48
 #: frontend/src/views/PurchaseView.vue:74
 msgid "Purchasing"
 msgstr ""
@@ -4093,11 +4005,17 @@ msgstr ""
 msgid "QZ certificate generated successfully."
 msgstr ""
 
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:104
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:69
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:99
 #: frontend/src/views/BarcodePrintView.vue:178
-#: frontend/src/views/OrdersView.vue:226
-#: frontend/src/views/PurchaseOrderListView.vue:421
+#: frontend/src/views/PurchaseInvoiceView.vue:400
 msgid "Qty"
 msgstr "množstvo"
+
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.py:113
+msgid "Qty in Hand"
+msgstr ""
 
 #. Label of a Select field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -4114,7 +4032,6 @@ msgid "Quantity and Amount Conditions"
 msgstr ""
 
 #: frontend/src/components/core/QueryFilterPanel.vue:33
-#: frontend/src/components/orders/ListFilters.vue:107
 msgid "Query Filters"
 msgstr ""
 
@@ -4130,10 +4047,12 @@ msgstr ""
 #. Label of a Percent field in DocType 'POS Closing Shift Taxes'
 #. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
 #. Label of a Float field in DocType 'POS Offer'
-#: frontend/src/components/purchase/PurchaseCart.vue:67
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:119
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:74
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:104
+#: frontend/src/components/purchase/PurchaseCart.vue:97
 #: frontend/src/components/purchase/PurchaseItemList.vue:233
-#: frontend/src/views/OrdersView.vue:231
-#: frontend/src/views/PurchaseOrderListView.vue:426
+#: frontend/src/views/PurchaseInvoiceView.vue:429
 #: xpos/x_pos/doctype/delivery_charges_pos_profile/delivery_charges_pos_profile.json
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:96
 #: xpos/x_pos/doctype/pos_closing_shift_taxes/pos_closing_shift_taxes.json
@@ -4143,17 +4062,9 @@ msgstr ""
 msgid "Rate"
 msgstr "Sadzba"
 
-#: frontend/src/views/PurchaseInvoiceView.vue:681
-msgid "Re-Calculate"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:170
-msgid "Re-check"
-msgstr ""
-
-#: frontend/src/components/dialogs/CashMovementDialog.vue:102
-#: frontend/src/views/BankDropView.vue:166
-#: frontend/src/views/ExpenseView.vue:165
+#: frontend/src/components/dialogs/CashMovementDialog.vue:77
+#: frontend/src/views/BankDropView.vue:152
+#: frontend/src/views/ExpenseView.vue:155
 msgid "Reason / Notes"
 msgstr ""
 
@@ -4171,15 +4082,15 @@ msgid "Receive Qty"
 msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:345
-#: xpos/x_pos/api/purchase_orders.py:448
+#: xpos/x_pos/api/purchase_orders.py:476 xpos/x_pos/api/purchase_orders.py:651
 msgid "Receive stock"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:211
+#: frontend/src/components/purchase/PurchaseCart.vue:300
 msgid "Receive stock immediately"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderListView.vue:343
+#: frontend/src/views/PurchaseInvoiceView.vue:1093
 msgid "Received"
 msgstr ""
 
@@ -4191,21 +4102,17 @@ msgstr ""
 msgid "Receiving at"
 msgstr ""
 
-#: frontend/src/components/dialogs/CashMovementDialog.vue:114
+#: frontend/src/components/dialogs/CashMovementDialog.vue:89
 msgid "Recent Movements"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:404
-msgid "Reconnection failed"
-msgstr ""
-
-#: frontend/src/components/dialogs/CashMovementDialog.vue:162
-#: frontend/src/views/BankDropView.vue:188
+#: frontend/src/components/dialogs/CashMovementDialog.vue:137
+#: frontend/src/views/BankDropView.vue:174
 msgid "Record Deposit"
 msgstr ""
 
-#: frontend/src/components/dialogs/CashMovementDialog.vue:161
-#: frontend/src/views/ExpenseView.vue:187
+#: frontend/src/components/dialogs/CashMovementDialog.vue:136
+#: frontend/src/views/ExpenseView.vue:177
 msgid "Record Expense"
 msgstr ""
 
@@ -4230,6 +4137,10 @@ msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:363
 msgid "Record bank drops"
+msgstr ""
+
+#: frontend/src/views/PurchaseOrderListView.vue:325
+msgid "Recv"
 msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:384
@@ -4277,12 +4188,11 @@ msgstr ""
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:115
 #: frontend/src/components/dialogs/OpeningDialog.vue:43
 #: frontend/src/components/purchase/StockReceiving.vue:337
-#: frontend/src/views/PurchaseOrderListView.vue:200
-#: frontend/src/views/ReportViewerView.vue:625
+#: frontend/src/views/ReportViewerView.vue:766
 msgid "Refresh"
 msgstr "Obnoviť"
 
-#: frontend/src/views/PurchaseOrderView.vue:594
+#: frontend/src/views/PurchaseOrderView.vue:569
 msgid "Refresh Stock"
 msgstr ""
 
@@ -4294,11 +4204,11 @@ msgstr ""
 msgid "Refresh profiles"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:37
+#: frontend/src/components/purchase/PurchaseCart.vue:67
 msgid "Refresh stock data"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:625
+#: frontend/src/views/ReportViewerView.vue:766
 msgid "Refreshing"
 msgstr ""
 
@@ -4306,7 +4216,7 @@ msgstr ""
 msgid "Refund Amount"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:429
+#: frontend/src/components/dialogs/PaymentDialog.vue:690
 msgid "Remaining"
 msgstr "zostávajúce"
 
@@ -4315,9 +4225,9 @@ msgid "Remaining outstanding: {0} across {1} invoice(s)."
 msgstr ""
 
 #. Label of a Small Text field in DocType 'POS Cash Movement'
-#: frontend/src/views/OrdersView.vue:418
-#: frontend/src/views/PurchaseInvoiceView.vue:537
-#: frontend/src/views/PurchaseOrderView.vue:462
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:79
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:267
+#: frontend/src/views/PurchaseInvoiceView.vue:996
 #: frontend/src/views/PurchaseView.vue:170
 #: frontend/src/views/PurchaseView.vue:174
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -4351,7 +4261,8 @@ msgstr ""
 msgid "Reorder Qty"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:81 frontend/src/views/OrdersView.vue:440
+#: frontend/src/components/Navbar.vue:84
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:289
 msgid "Repeat"
 msgstr "repeat"
 
@@ -4360,7 +4271,7 @@ msgstr "repeat"
 msgid "Repeat Invoice"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:73
+#: frontend/src/components/Navbar.vue:76
 msgid "Repeat Invoice (Ctrl+G)"
 msgstr ""
 
@@ -4382,32 +4293,32 @@ msgstr ""
 msgid "Replace Same Item"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:503
+#: frontend/src/views/ReportViewerView.vue:498
 msgid "Report exported as CSV."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:483
+#: frontend/src/views/ReportViewerView.vue:478
 msgid "Report link copied to clipboard."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:544
+#: frontend/src/views/ReportViewerView.vue:685
 msgid "Report not found"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:213
+#: frontend/src/views/ReportViewerView.vue:208
 msgid "Report not found."
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:55
-#: frontend/src/components/Sidebar.vue:193
+#: frontend/src/components/Navbar.vue:58
+#: frontend/src/components/Sidebar.vue:177
 #: frontend/src/components/items/CommandSearch.vue:317
 #: frontend/src/layouts/DefaultLayout.vue:51
-#: frontend/src/views/ReportViewerView.vue:214
+#: frontend/src/views/ReportViewerView.vue:209
 #: frontend/src/views/ReportsIndexView.vue:106
 msgid "Reports"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:712
+#: frontend/src/views/ReportViewerView.vue:864
 msgid "Required"
 msgstr ""
 
@@ -4415,8 +4326,8 @@ msgstr ""
 msgid "Required Qty"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:626
-#: frontend/src/views/ReportViewerView.vue:687
+#: frontend/src/components/ui/table/Table.vue:1152
+#: frontend/src/views/ReportViewerView.vue:839
 msgid "Reset"
 msgstr ""
 
@@ -4432,26 +4343,21 @@ msgstr ""
 msgid "Restore draft"
 msgstr ""
 
-#: frontend/src/components/offline/OfflinePendingPanel.vue:125
+#: frontend/src/components/offline/OfflinePendingPanel.vue:137
 msgid "Retry"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:93
+#: frontend/src/components/Navbar.vue:96
 #: frontend/src/components/dialogs/PaymentDialog.vue:48
-#: frontend/src/components/orders/ListFilters.vue:33
-#: frontend/src/views/OrdersView.vue:452
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:299
 msgid "Return"
 msgstr "Spiatočná"
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:507
+#: frontend/src/components/dialogs/PaymentDialog.vue:537
 msgid "Return & Print"
 msgstr ""
 
-#: frontend/src/components/orders/ListFilters.vue:316
-msgid "Return Against"
-msgstr ""
-
-#: xpos/api/invoices.py:182
+#: xpos/api/invoices.py:295
 msgid "Return Against invoice is required for returns"
 msgstr ""
 
@@ -4474,28 +4380,27 @@ msgstr ""
 msgid "Return Qty"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:891
+#: frontend/src/components/dialogs/PaymentDialog.vue:954
 msgid "Return against invoice is required for returns"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:896
+#: frontend/src/components/dialogs/PaymentDialog.vue:959
 msgid "Return items must have negative quantities"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:973
+#: frontend/src/components/dialogs/PaymentDialog.vue:1061
 msgid "Return saved locally (#{0}). It will sync to server automatically."
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:900
+#: frontend/src/components/dialogs/PaymentDialog.vue:963
 msgid "Return total must be negative (refund amount)"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1012
+#: frontend/src/components/dialogs/PaymentDialog.vue:1100
 msgid "Return {0} saved successfully!"
 msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:62
-#: frontend/src/components/orders/ListFilters.vue:46
 msgid "Returns"
 msgstr "výnos"
 
@@ -4507,8 +4412,8 @@ msgstr ""
 msgid "Review and reconcile your shift"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:465
-msgid "Review your configuration before completing setup"
+#: frontend/src/components/ui/table/Table.vue:1223
+msgid "Row"
 msgstr ""
 
 #: xpos/x_pos/api/utilities.py:133
@@ -4520,16 +4425,12 @@ msgstr "Riadok # {0}: Dávka {1} má iba {2} qty. Vyberte inú dávku, ktorá m�
 msgid "Row ID"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:478
+#: frontend/src/views/ReportViewerView.vue:473
 msgid "Row copied to clipboard."
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:561
-msgid "S/Ord. #"
-msgstr ""
-
-#: frontend/src/components/orders/ListFilters.vue:45
-msgid "Sales"
+#: frontend/src/views/PurchaseInvoiceView.vue:522
+msgid "Sale Price"
 msgstr ""
 
 #. Label of a Link field in DocType 'Sales Invoice Reference'
@@ -4575,7 +4476,7 @@ msgstr ""
 msgid "Sales Order {0} does not exist"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:193
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:66
 msgid "Sales Partner"
 msgstr "Partner predaja"
 
@@ -4594,30 +4495,26 @@ msgstr "Súhrn predajov"
 msgid "Sales User"
 msgstr "Používateľ predaja"
 
-#: frontend/src/views/SettingsView.vue:42
-#: frontend/src/views/SettingsView.vue:147
+#: frontend/src/components/ui/table/Table.vue:1323
 msgid "Save"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:468
-#: frontend/src/components/dialogs/PaymentDialog.vue:507
+#: frontend/src/components/dialogs/PaymentDialog.vue:498
+#: frontend/src/components/dialogs/PaymentDialog.vue:537
 msgid "Save & Print"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:90
-msgid "Save & Reconnect"
 msgstr ""
 
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:128
 msgid "Save Changes"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderView.vue:642
+#: frontend/src/views/PurchaseInvoiceView.vue:916
+#: frontend/src/views/PurchaseOrderView.vue:616
 msgid "Save Draft"
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:473
-#: frontend/src/components/dialogs/PaymentDialog.vue:492
+#: frontend/src/components/dialogs/PaymentDialog.vue:503
+#: frontend/src/components/dialogs/PaymentDialog.vue:522
 msgid "Save Only"
 msgstr ""
 
@@ -4629,8 +4526,13 @@ msgstr ""
 msgid "Save your current order to create a draft"
 msgstr ""
 
+#: frontend/src/views/PurchaseInvoiceView.vue:1012
+msgid "Saved Drafts"
+msgstr ""
+
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:128
-#: frontend/src/views/PurchaseOrderView.vue:642
+#: frontend/src/views/PurchaseInvoiceView.vue:916
+#: frontend/src/views/PurchaseOrderView.vue:616
 msgid "Saving..."
 msgstr ""
 
@@ -4650,16 +4552,16 @@ msgid "Scan barcode to add..."
 msgstr ""
 
 #: frontend/src/components/items/BarcodeScanner.vue:12
-#: frontend/src/views/PurchaseInvoiceView.vue:581
-#: frontend/src/views/PurchaseOrderView.vue:482
+#: frontend/src/views/PurchaseInvoiceView.vue:1147
+#: frontend/src/views/PurchaseOrderView.vue:543
 msgid "Scan barcode..."
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:69
+#: frontend/src/components/Navbar.vue:72
 msgid "Search"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:61
+#: frontend/src/components/Navbar.vue:64
 msgid "Search Items (Ctrl+K)"
 msgstr ""
 
@@ -4688,7 +4590,6 @@ msgid "Search by name, phone, email..."
 msgstr ""
 
 #: frontend/src/components/core/SortBy.vue:37
-#: frontend/src/components/orders/ListFilters.vue:125
 msgid "Search fields..."
 msgstr ""
 
@@ -4724,29 +4625,12 @@ msgstr ""
 msgid "Search items, scan barcode..."
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:601
-#: frontend/src/views/PurchaseOrderView.vue:503
-msgid "Search items..."
-msgstr ""
-
-#: frontend/src/views/PurchaseOrderListView.vue:218
-msgid "Search orders..."
-msgstr ""
-
 #: frontend/src/views/ReportsIndexView.vue:136
 msgid "Search reports, filters, or categories..."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:800
+#: frontend/src/views/ReportViewerView.vue:941
 msgid "Search rows..."
-msgstr ""
-
-#: frontend/src/views/PurchaseInvoiceView.vue:500
-msgid "Search supplier..."
-msgstr ""
-
-#: frontend/src/components/ui/link/LinkField.vue:287
-msgid "Searching..."
 msgstr ""
 
 #: frontend/src/views/LoginView.vue:100
@@ -4759,20 +4643,12 @@ msgstr ""
 msgid "Select Customer"
 msgstr "Vyberte zákazníka"
 
-#: frontend/src/views/SetupWizardView.vue:35
-msgid "Select Installation Type"
-msgstr ""
-
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:23
 msgid "Select a draft invoice to restore to cart"
 msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:92
 msgid "Select a loyalty program to enroll this customer"
-msgstr ""
-
-#: frontend/src/views/BankDropView.vue:138
-msgid "Select bank account"
 msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:255
@@ -4788,7 +4664,7 @@ msgstr ""
 msgid "Select customer first"
 msgstr ""
 
-#: frontend/src/views/ExpenseView.vue:137
+#: frontend/src/views/ExpenseView.vue:138
 msgid "Select expense account"
 msgstr ""
 
@@ -4800,6 +4676,10 @@ msgstr ""
 #: frontend/src/components/customer/CustomerSelect.vue:219
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:83
 msgid "Select group"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:396
+msgid "Select item..."
 msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:231
@@ -4824,7 +4704,7 @@ msgstr ""
 msgid "Selected source account is not allowed for this POS Profile."
 msgstr ""
 
-#: frontend/src/components/dialogs/CreateItemDialog.vue:114
+#: frontend/src/components/dialogs/CreateItemDialog.vue:120
 #: frontend/src/components/purchase/PurchaseItemList.vue:317
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:81
 msgid "Selling Price"
@@ -4838,28 +4718,7 @@ msgstr ""
 msgid "Sending..."
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:16
-msgid "Server Connection"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:21
-msgid "Server URL"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:365
-msgid "Server URL saved"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:349
-msgid "Server is reachable"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:351
-msgid "Server returned status"
-msgstr ""
-
-#: frontend/src/components/core/QueryFilterPanel.vue:118
-#: frontend/src/components/orders/ListFilters.vue:163
+#: frontend/src/components/core/QueryFilterPanel.vue:106
 msgid "Set (has value)"
 msgstr ""
 
@@ -4868,23 +4727,14 @@ msgstr ""
 msgid "Set Posting Date"
 msgstr "Nastavte dátum zverejnenia"
 
-#: frontend/src/components/Sidebar.vue:204
+#: frontend/src/components/Sidebar.vue:188
 #: frontend/src/components/items/CommandSearch.vue:379
-#: frontend/src/views/SettingsView.vue:4
 msgid "Settings"
 msgstr ""
 
 #. Label of a Card Break in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Setup"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:463
-msgid "Setup Summary"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:745
-msgid "Setup completed successfully!"
 msgstr ""
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:143
@@ -4920,7 +4770,7 @@ msgstr ""
 msgid "Sign In"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:196
+#: frontend/src/components/Navbar.vue:199
 msgid "Sign Out"
 msgstr ""
 
@@ -4991,7 +4841,7 @@ msgstr "Je nám ľúto, platnosť tohto kódu kupónu sa nezačala"
 msgid "Sorry, {0} have used this coupon before"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:809
+#: frontend/src/views/ReportViewerView.vue:947
 msgid "Sort by"
 msgstr ""
 
@@ -5056,13 +4906,17 @@ msgstr "Stav"
 msgid "Status must be one of {0}"
 msgstr "Stav musí být jedním z {0}"
 
-#: frontend/src/components/purchase/PurchaseCart.vue:40
-#: frontend/src/components/purchase/PurchaseCart.vue:63
-#: frontend/src/views/PurchaseInvoiceView.vue:698
+#: frontend/src/components/purchase/PurchaseCart.vue:70
+#: frontend/src/components/purchase/PurchaseCart.vue:93
 #: xpos/x_pos/report/current_stock_report/current_stock_report.py:82
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.py:79
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.py:86
 msgid "Stock"
+msgstr ""
+
+#. Name of a report
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.json
+msgid "Stock Audit Report"
 msgstr ""
 
 #: xpos/x_pos/api/stock_transfer.py:170
@@ -5090,7 +4944,7 @@ msgstr ""
 msgid "Stock Qty"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:199
+#: frontend/src/components/Sidebar.vue:183
 #: frontend/src/components/items/CommandSearch.vue:344
 #: frontend/src/views/StockReceivingView.vue:23
 msgid "Stock Receiving"
@@ -5100,7 +4954,7 @@ msgstr ""
 msgid "Stock UOM"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:297
+#: xpos/x_pos/api/purchase_orders.py:325
 msgid "Stock UOM is required."
 msgstr ""
 
@@ -5121,7 +4975,8 @@ msgstr ""
 msgid "Stock Value by Warehouse"
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderView.vue:649
+#: frontend/src/views/PurchaseInvoiceView.vue:926
+#: frontend/src/views/PurchaseOrderView.vue:624
 msgid "Submit"
 msgstr ""
 
@@ -5129,9 +4984,12 @@ msgstr ""
 msgid "Submit current cart"
 msgstr ""
 
+#: frontend/src/views/PurchaseInvoiceView.vue:926
+msgid "Submitting..."
+msgstr ""
+
 #: frontend/src/components/cart/CartSummary.vue:5
 #: frontend/src/components/dialogs/PaymentDialog.vue:94
-#: frontend/src/views/PurchaseInvoiceView.vue:751
 msgid "Subtotal"
 msgstr "medzisúčet"
 
@@ -5147,18 +5005,23 @@ msgstr ""
 msgid "Successfully unenrolled {0} from {1}"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:280
-#: frontend/src/views/ReportViewerView.vue:657
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:153
+#: frontend/src/views/ReportViewerView.vue:809
 msgid "Summary"
 msgstr "zhrnutie"
 
-#: frontend/src/views/PurchaseInvoiceView.vue:533
+#: frontend/src/views/PurchaseInvoiceView.vue:983
 msgid "Supp. Inv #"
 msgstr ""
 
-#: frontend/src/views/PurchaseInvoiceView.vue:491
-#: frontend/src/views/PurchaseOrderListView.vue:379
-#: frontend/src/views/PurchaseOrderView.vue:403
+#: frontend/src/views/PurchaseInvoiceView.vue:987
+msgid "Supp. Inv Date"
+msgstr ""
+
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:33
+#: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:29
+#: frontend/src/views/PurchaseInvoiceView.vue:964
+#: frontend/src/views/PurchaseOrderView.vue:396
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.py:53
 #: xpos/x_pos/report/current_stock_report/current_stock_report.js:34
 #: xpos/x_pos/report/current_stock_with_levels/current_stock_with_levels.py:56
@@ -5167,12 +5030,17 @@ msgstr ""
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:74
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:16
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.js:33
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.js:47
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.py:73
 msgid "Supplier"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:1415
+#: xpos/x_pos/api/purchase_orders.py:1556
 msgid "Supplier '{0}' not found."
+msgstr ""
+
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:53
+msgid "Supplier Bill"
 msgstr ""
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:72
@@ -5180,19 +5048,23 @@ msgstr ""
 msgid "Supplier Name"
 msgstr "Názov dodávateľa"
 
-#: xpos/x_pos/api/purchase_orders.py:1096
+#: xpos/x_pos/api/purchase_orders.py:1318
 msgid "Supplier and PO Category are required."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:452
+#: xpos/x_pos/api/purchase_orders.py:1790
+msgid "Supplier is required to save a draft."
+msgstr ""
+
+#: xpos/x_pos/api/purchase_orders.py:480 xpos/x_pos/api/purchase_orders.py:655
 msgid "Supplier is required."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:224
+#: xpos/x_pos/api/purchase_orders.py:257
 msgid "Supplier name is required."
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:456
+#: xpos/x_pos/api/purchase_orders.py:484
 msgid "Supplier {0} was not found."
 msgstr ""
 
@@ -5217,37 +5089,12 @@ msgstr "sync"
 msgid "Sync All"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:105
-msgid "Sync Interval (minutes)"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:145
-msgid "Sync Now"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:424
-msgid "Sync failed"
-msgstr ""
-
-#: frontend/src/stores/offlineStore.ts:229
+#: frontend/src/stores/offlineStore.ts:241
 msgid "Sync failed:"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:414
-msgid "Sync settings saved"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:439
-msgid "Synced data cleared"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:99
-msgid "Synchronization"
 msgstr ""
 
 #: frontend/src/components/dialogs/OpeningDialog.vue:29
 #: frontend/src/components/dialogs/OpeningDialog.vue:43
-#: frontend/src/views/SettingsView.vue:145
 msgid "Syncing..."
 msgstr ""
 
@@ -5262,6 +5109,10 @@ msgstr ""
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "System Manager"
 msgstr "Správca systému"
+
+#: frontend/src/components/ui/table/Table.vue:1096
+msgid "Tab on last cell adds row"
+msgstr ""
 
 #. Label of a Link field in DocType 'POS Cash Movement'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -5284,6 +5135,15 @@ msgstr ""
 msgid "Target warehouse is required."
 msgstr ""
 
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:144
+msgid "Tax"
+msgstr ""
+
+#: frontend/src/components/purchase/PurchaseCart.vue:108
+#: frontend/src/views/PurchaseInvoiceView.vue:503
+msgid "Tax Amt"
+msgstr ""
+
 #: frontend/src/components/dialogs/ClosingDialog.vue:87
 msgid "Tax Breakdown"
 msgstr ""
@@ -5298,17 +5158,31 @@ msgstr ""
 msgid "Tax ID"
 msgstr "DIČ"
 
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:253
+#: frontend/src/views/PurchaseInvoiceView.vue:1194
+msgid "Tax Total"
+msgstr ""
+
+#. Label of a Data field in DocType 'POS Purchase Taxes'
+#: xpos/x_pos/doctype/pos_purchase_taxes/pos_purchase_taxes.json
+msgid "Tax Type"
+msgstr ""
+
+#: frontend/src/views/PurchaseInvoiceView.vue:491
+msgid "Tax%"
+msgstr ""
+
 #. Label of a Table field in DocType 'POS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:90
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Taxes"
 msgstr "dane"
 
-#: frontend/src/views/OrdersView.vue:293
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:162
 msgid "Taxes & Charges"
 msgstr ""
 
-#: frontend/src/views/OrdersView.vue:345
+#: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:204
 msgid "Taxes Breakdown"
 msgstr ""
 
@@ -5321,33 +5195,19 @@ msgstr ""
 msgid "Territory"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:39
-#: frontend/src/views/SettingsView.vue:87
-#: frontend/src/views/SetupWizardView.vue:215
-msgid "Test Connection"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:291
-msgid "Test ERPNext Connection"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:28
-msgid "The ERPNext server this POS connects to"
-msgstr ""
-
-#: frontend/src/views/ReportViewerView.vue:546
+#: frontend/src/views/ReportViewerView.vue:687
 msgid "The report route does not match any configured report."
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:290
+#: frontend/src/components/Navbar.vue:294
 msgid "Theme: Dark (click to switch to System)"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:289
+#: frontend/src/components/Navbar.vue:293
 msgid "Theme: Light (click to switch to Dark)"
 msgstr ""
 
-#: frontend/src/components/Navbar.vue:291
+#: frontend/src/components/Navbar.vue:295
 msgid "Theme: System ({0}) (click to switch to Light)"
 msgstr ""
 
@@ -5359,30 +5219,12 @@ msgstr ""
 msgid "This invoice {0} cannot be deleted"
 msgstr ""
 
-#: frontend/src/stores/cartStore.ts:306 frontend/src/stores/cartStore.ts:393
+#: frontend/src/stores/cartStore.ts:308 frontend/src/stores/cartStore.ts:395
 msgid "This item is not in the original invoice"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:449
-msgid "This will clear ALL local data including pending records. This cannot be undone. Continue?"
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:432
-msgid "This will clear all synced master data. Pending records will not be affected. Continue?"
 msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:66
 msgid "Till"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:85
-#: frontend/src/views/SetupWizardView.vue:473
-msgid "Till (Client)"
-msgstr ""
-
-#: frontend/src/views/SetupWizardView.vue:319
-#: frontend/src/views/SetupWizardView.vue:509
-msgid "Till ID"
 msgstr ""
 
 #. Label of a Data field in DocType 'POS Offer'
@@ -5390,11 +5232,12 @@ msgstr ""
 msgid "Title"
 msgstr "Názov"
 
-#: frontend/src/views/PurchaseOrderListView.vue:68
-msgid "To Bill"
+#: frontend/src/views/PurchaseOrderView.vue:441
+msgid "To"
 msgstr ""
 
 #: frontend/src/views/ExpenseView.vue:25
+#: frontend/src/views/PurchaseOrderView.vue:437
 #: xpos/x_pos/report/branch_item_summary/branch_item_summary.js:41
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.js:23
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:29
@@ -5402,14 +5245,6 @@ msgstr ""
 #: xpos/x_pos/report/warehouse_stock_movement/warehouse_stock_movement.js:26
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.js:23
 msgid "To Date"
-msgstr ""
-
-#: frontend/src/views/PurchaseOrderListView.vue:69
-msgid "To Receive"
-msgstr ""
-
-#: frontend/src/views/PurchaseOrderListView.vue:67
-msgid "To Receive and Bill"
 msgstr ""
 
 #: frontend/src/components/ui/datetime-picker/DateTimePicker.vue:863
@@ -5432,14 +5267,20 @@ msgstr ""
 msgid "Toggle Theme"
 msgstr ""
 
-#: frontend/src/components/Sidebar.vue:104 xpos/x_pos/api/purchase_order.js:43
+#: frontend/src/components/Sidebar.vue:96 xpos/x_pos/api/purchase_order.js:43
 msgid "Tools"
 msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:124
-#: frontend/src/components/purchase/PurchaseCart.vue:199
+#: frontend/src/components/purchase/PurchaseCart.vue:111
+#: frontend/src/components/purchase/PurchaseCart.vue:288
+#: frontend/src/views/PurchaseInvoiceView.vue:512
 msgid "Total"
 msgstr "Celkem"
+
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:237
+msgid "Total Discount"
+msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:26
 msgid "Total Invoices"
@@ -5449,8 +5290,10 @@ msgstr ""
 msgid "Total Paid"
 msgstr ""
 
-#: frontend/src/components/purchase/PurchaseCart.vue:195
-#: frontend/src/views/PurchaseOrderView.vue:618
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:228
+#: frontend/src/components/purchase/PurchaseCart.vue:268
+#: frontend/src/views/PurchaseInvoiceView.vue:1176
+#: frontend/src/views/PurchaseOrderView.vue:583
 msgid "Total Qty"
 msgstr ""
 
@@ -5459,6 +5302,10 @@ msgstr ""
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 msgid "Total Quantity"
 msgstr "Celkové množstvo"
+
+#: frontend/src/components/purchase/PurchaseCart.vue:283
+msgid "Total Tax"
+msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:75
 msgid "Total Taxes"
@@ -5480,7 +5327,7 @@ msgstr ""
 msgid "Transaction"
 msgstr "Transakce"
 
-#: frontend/src/components/purchase/PurchaseCart.vue:64
+#: frontend/src/components/purchase/PurchaseCart.vue:94
 msgid "Transit"
 msgstr ""
 
@@ -5488,7 +5335,7 @@ msgstr ""
 msgid "Trigger Manual Sync"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:859
+#: frontend/src/views/ReportViewerView.vue:989
 msgid "Try Again"
 msgstr ""
 
@@ -5500,7 +5347,7 @@ msgstr ""
 msgid "Try a different search or category"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:881
+#: frontend/src/views/ReportViewerView.vue:1011
 msgid "Try adjusting the filters, search term, or sort order."
 msgstr ""
 
@@ -5522,8 +5369,10 @@ msgstr ""
 msgid "Type"
 msgstr "Typ"
 
-#: frontend/src/components/dialogs/CreateItemDialog.vue:102
+#: frontend/src/components/dialogs/CreateItemDialog.vue:103
+#: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:109
 #: frontend/src/components/purchase/PurchaseItemList.vue:231
+#: frontend/src/views/PurchaseInvoiceView.vue:409
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:161
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.py:70
 msgid "UOM"
@@ -5570,11 +5419,7 @@ msgstr ""
 msgid "Unenroll from Program"
 msgstr ""
 
-#: frontend/src/views/SetupWizardView.vue:322
-msgid "Unique identifier for this till"
-msgstr ""
-
-#: frontend/src/components/offline/OfflinePendingPanel.vue:75
+#: frontend/src/components/offline/OfflinePendingPanel.vue:87
 msgid "Unknown Customer"
 msgstr ""
 
@@ -5584,10 +5429,6 @@ msgstr ""
 
 #: frontend/src/components/cart/CartSummary.vue:571
 msgid "Unknown error"
-msgstr ""
-
-#: frontend/src/components/orders/ListFilters.vue:31
-msgid "Unpaid"
 msgstr ""
 
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:16
@@ -5604,19 +5445,13 @@ msgid "Used"
 msgstr "použité"
 
 #. Label of a Link field in DocType 'POS Cash Movement'
-#: frontend/src/components/Navbar.vue:157
+#: frontend/src/components/Navbar.vue:160
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
 msgid "User"
 msgstr "užívateľ"
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:76
 msgid "User must match the selected POS Opening Shift user."
-msgstr ""
-
-#: frontend/src/views/SettingsView.vue:65
-#: frontend/src/views/SetupWizardView.vue:192
-#: frontend/src/views/SetupWizardView.vue:384
-msgid "Username"
 msgstr ""
 
 #. Label of a Date field in DocType 'POS Coupon'
@@ -5645,17 +5480,12 @@ msgstr "Platnosť a použitie"
 msgid "Valuation Rate"
 msgstr ""
 
-#: frontend/src/components/core/QueryFilterPanel.vue:77
-#: frontend/src/components/core/QueryFilterPanel.vue:96
+#: frontend/src/components/core/QueryFilterPanel.vue:74
 #: frontend/src/components/core/QueryFilterPanel.vue:115
-#: frontend/src/components/core/QueryFilterPanel.vue:129
-#: frontend/src/components/orders/ListFilters.vue:153
-#: frontend/src/components/orders/ListFilters.vue:159
 msgid "Value"
 msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:34
-#: frontend/src/views/SettingsView.vue:215
 msgid "Version"
 msgstr ""
 
@@ -5700,6 +5530,7 @@ msgstr ""
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.js:19
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.py:87
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:60
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.py:106
 #: xpos/x_pos/report/stock_value_by_warehouse/stock_value_by_warehouse.py:34
 msgid "Warehouse"
 msgstr "sklad"
@@ -5709,8 +5540,12 @@ msgstr "sklad"
 msgid "Warehouse Stock Movement"
 msgstr ""
 
-#: frontend/src/views/SettingsView.vue:171
-msgid "Warehouse:"
+#: xpos/x_pos/api/purchase_orders.py:664
+msgid "Warehouse is required when receiving stock with a Purchase Invoice."
+msgstr ""
+
+#: xpos/x_pos/report/stock_audit_report/stock_audit_report.js:16
+msgid "Warehouses"
 msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:60
@@ -5769,7 +5604,7 @@ msgid "Write off amount exceeds the allowed limit ({0}). Please add payment for 
 msgstr ""
 
 #. Name of a Workspace
-#: frontend/src/components/Navbar.vue:5
+#: frontend/src/components/Navbar.vue:8
 #: frontend/src/components/dialogs/AboutDialog.vue:14
 #: frontend/src/components/dialogs/AboutDialog.vue:21
 #: xpos/x_pos/workspace/x_pos/x_pos.json
@@ -5789,7 +5624,7 @@ msgstr ""
 msgid "X POS Payments is not enabled for this POS Profile"
 msgstr ""
 
-#: xpos/x_pos/api/purchase_orders.py:601
+#: xpos/x_pos/api/purchase_orders.py:639
 msgid "X POS Purchase Order Flow Failed"
 msgstr ""
 
@@ -5800,10 +5635,9 @@ msgstr ""
 msgid "XPOS Local ID"
 msgstr ""
 
-#: frontend/src/components/core/ListFilterBar.vue:45
-#: frontend/src/services/reports.ts:783
-#: frontend/src/views/PurchaseInvoiceView.vue:546
-#: frontend/src/views/PurchaseOrderView.vue:457
+#: frontend/src/components/core/ListFilterBar.vue:38
+#: frontend/src/services/reports.ts:829
+#: frontend/src/views/PurchaseOrderView.vue:495
 #: frontend/src/views/PurchaseView.vue:166
 msgid "Yes"
 msgstr ""
@@ -5816,15 +5650,15 @@ msgstr ""
 msgid "You are not allowed to manage this cash movement record."
 msgstr ""
 
-#: frontend/src/stores/offlineStore.ts:77
+#: frontend/src/stores/offlineStore.ts:80
 msgid "You are offline. Check your internet connection."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:304
+#: frontend/src/views/ReportViewerView.vue:299
 msgid "You are offline. Connect to the server and try again."
 msgstr ""
 
-#: frontend/src/components/dialogs/PaymentDialog.vue:1053
+#: frontend/src/components/dialogs/PaymentDialog.vue:1132
 msgid "You are offline. Invoice could not be saved locally."
 msgstr ""
 
@@ -5832,17 +5666,17 @@ msgstr ""
 msgid "You are trying to return more quantity for item {0} than was sold."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:219
-#: frontend/src/views/ReportViewerView.vue:298
+#: frontend/src/views/ReportViewerView.vue:214
+#: frontend/src/views/ReportViewerView.vue:293
 msgid "You do not have access to this report."
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:566
+#: frontend/src/views/ReportViewerView.vue:707
 msgid "You do not have permission to open this report from the app."
 msgstr ""
 
-#: frontend/src/views/PurchaseOrderView.vue:450
-#: frontend/src/views/PurchaseOrderView.vue:453
+#: frontend/src/views/PurchaseOrderView.vue:490
+#: frontend/src/views/PurchaseOrderView.vue:497
 #: frontend/src/views/PurchaseView.vue:160
 msgid "Zero Qty"
 msgstr ""
@@ -5860,7 +5694,7 @@ msgstr ""
 msgid "close"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:600
+#: frontend/src/views/ReportViewerView.vue:741
 msgid "columns"
 msgstr ""
 
@@ -5895,13 +5729,15 @@ msgid "item(s)"
 msgstr ""
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:76
-#: frontend/src/components/purchase/PurchaseCart.vue:34
+#: frontend/src/components/purchase/PurchaseCart.vue:64
 #: frontend/src/components/purchase/StockReceiving.vue:381
-#: frontend/src/views/PurchaseOrderListView.vue:267
+#: frontend/src/views/PurchaseInvoiceView.vue:1029
+#: frontend/src/views/PurchaseInvoiceView.vue:1090
+#: frontend/src/views/PurchaseOrderListView.vue:247
 msgid "items"
 msgstr ""
 
-#: xpos/x_pos/api/barcode_generator.py:321
+#: xpos/x_pos/api/barcode_generator.py:324
 msgid "items must be a list"
 msgstr ""
 
@@ -5921,6 +5757,10 @@ msgstr ""
 msgid "navigate"
 msgstr ""
 
+#: frontend/src/views/PurchaseInvoiceView.vue:1209
+msgid "or"
+msgstr ""
+
 #: frontend/src/components/dialogs/PaymentDialog.vue:311
 #: frontend/src/components/dialogs/PaymentDialog.vue:319
 #: frontend/src/components/dialogs/PaymentDialog.vue:347
@@ -5936,11 +5776,11 @@ msgstr ""
 msgid "reports"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:684
+#: frontend/src/views/ReportViewerView.vue:836
 msgid "required"
 msgstr ""
 
-#: frontend/src/views/ReportViewerView.vue:596
+#: frontend/src/views/ReportViewerView.vue:737
 msgid "rows"
 msgstr ""
 
@@ -5956,7 +5796,7 @@ msgstr ""
 msgid "select"
 msgstr ""
 
-#: frontend/src/components/ui/table/Table.vue:307
+#: frontend/src/components/ui/table/Table.vue:748
 msgid "selected"
 msgstr ""
 
@@ -5997,7 +5837,7 @@ msgstr ""
 msgid "{0} is invalid."
 msgstr ""
 
-#: frontend/src/stores/purchaseStore.ts:1094
+#: frontend/src/stores/purchaseStore.ts:1116
 msgid "{0} items added"
 msgstr ""
 

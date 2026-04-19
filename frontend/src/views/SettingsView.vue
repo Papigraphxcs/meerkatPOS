@@ -1,10 +1,8 @@
 <template>
 	<div class="flex flex-col h-full overflow-hidden bg-background">
 		<div class="shrink-0 p-4 pb-3 border-b border-border">
-			<h1 class="text-xl font-bold text-foreground">{{ __("Settings") }}</h1>
-			<p class="text-sm text-muted-foreground mt-1">
-				{{ __("Configure your POS application") }}
-			</p>
+			<h1 class="text-xl font-bold text-foreground">Settings</h1>
+			<p class="text-sm text-muted-foreground mt-1">Configure your POS application</p>
 		</div>
 
 		<ScrollArea class="flex-1 p-4">
@@ -12,20 +10,18 @@
 				<Card class="p-5">
 					<div class="flex items-center gap-2 mb-4">
 						<Globe class="w-5 h-5 text-primary" />
-						<h2 class="text-base font-semibold text-foreground">
-							{{ __("Server Connection") }}
-						</h2>
+						<h2 class="text-base font-semibold text-foreground">Server Connection</h2>
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Server URL") }}</label>
+							<label class="text-sm font-medium text-foreground">Server URL</label>
 							<Input
 								v-model="settings.serverUrl"
 								placeholder="https://erp.example.com"
 								class="mt-1"
 							/>
 							<p class="text-xs text-muted-foreground mt-1">
-								{{ __("The ERPNext server this POS connects to") }}
+								The ERPNext server this POS connects to
 							</p>
 						</div>
 						<div class="flex gap-2">
@@ -36,10 +32,10 @@
 								:disabled="testingServer"
 							>
 								<Loader2 v-if="testingServer" class="w-4 h-4 me-1 animate-spin" />
-								{{ __("Test Connection") }}
+								Test Connection
 							</Button>
 							<Button size="sm" @click="saveServerUrl" :disabled="!settings.serverUrl">
-								{{ __("Save") }}
+								Save
 							</Button>
 						</div>
 					</div>
@@ -48,25 +44,23 @@
 				<Card v-if="isElectronMode" class="p-5">
 					<div class="flex items-center gap-2 mb-4">
 						<Database class="w-5 h-5 text-primary" />
-						<h2 class="text-base font-semibold text-foreground">
-							{{ __("Local Database") }}
-						</h2>
+						<h2 class="text-base font-semibold text-foreground">Local Database</h2>
 					</div>
 					<div class="grid grid-cols-2 gap-3">
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Host") }}</label>
+							<label class="text-sm font-medium text-foreground">Host</label>
 							<Input v-model="settings.dbHost" placeholder="127.0.0.1" class="mt-1" />
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Port") }}</label>
+							<label class="text-sm font-medium text-foreground">Port</label>
 							<Input v-model="settings.dbPort" type="number" placeholder="3306" class="mt-1" />
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Username") }}</label>
+							<label class="text-sm font-medium text-foreground">Username</label>
 							<Input v-model="settings.dbUser" placeholder="xpos" class="mt-1" />
 						</div>
 						<div>
-							<label class="text-sm font-medium text-foreground">{{ __("Password") }}</label>
+							<label class="text-sm font-medium text-foreground">Password</label>
 							<Input
 								v-model="settings.dbPassword"
 								type="password"
@@ -75,35 +69,29 @@
 							/>
 						</div>
 						<div class="col-span-2">
-							<label class="text-sm font-medium text-foreground">{{
-								__("Database Name")
-							}}</label>
+							<label class="text-sm font-medium text-foreground">Database Name</label>
 							<Input v-model="settings.dbName" placeholder="xpos_local" class="mt-1" />
 						</div>
 					</div>
 					<div class="flex gap-2 mt-3">
 						<Button size="sm" variant="outline" @click="testDbConnection" :disabled="testingDb">
 							<Loader2 v-if="testingDb" class="w-4 h-4 me-1 animate-spin" />
-							{{ __("Test Connection") }}
+							Test Connection
 						</Button>
-						<Button size="sm" @click="saveDbConfig">
-							{{ __("Save & Reconnect") }}
-						</Button>
+						<Button size="sm" @click="saveDbConfig"> Save & Reconnect </Button>
 					</div>
 				</Card>
 
 				<Card v-if="isElectronMode" class="p-5">
 					<div class="flex items-center gap-2 mb-4">
 						<RefreshCw class="w-5 h-5 text-primary" />
-						<h2 class="text-base font-semibold text-foreground">
-							{{ __("Synchronization") }}
-						</h2>
+						<h2 class="text-base font-semibold text-foreground">Synchronization</h2>
 					</div>
 					<div class="space-y-3">
 						<div>
-							<label class="text-sm font-medium text-foreground">{{
-								__("Sync Interval (minutes)")
-							}}</label>
+							<label class="text-sm font-medium text-foreground">
+								Sync Interval (minutes)
+							</label>
 							<Input
 								v-model.number="settings.syncInterval"
 								type="number"
@@ -114,22 +102,20 @@
 						</div>
 						<div class="flex items-center justify-between">
 							<div>
-								<p class="text-sm font-medium text-foreground">
-									{{ __("Auto Sync") }}
-								</p>
+								<p class="text-sm font-medium text-foreground">Auto Sync</p>
 								<p class="text-xs text-muted-foreground">
-									{{ __("Automatically sync data in background") }}
+									Automatically sync data in background
 								</p>
 							</div>
 							<Checkbox v-model:checked="settings.autoSync" />
 						</div>
 						<Separator />
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">{{ __("Last sync:") }}</span>
-							<span class="text-foreground">{{ syncState.lastSyncTime || __("Never") }}</span>
+							<span class="text-muted-foreground">Last sync:</span>
+							<span class="text-foreground">{{ syncState.lastSyncTime || "Never" }}</span>
 						</div>
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">{{ __("Pending records:") }}</span>
+							<span class="text-muted-foreground">Pending records:</span>
 							<Badge :variant="syncState.pendingPushCount > 0 ? 'destructive' : 'secondary'">
 								{{ syncState.pendingPushCount }}
 							</Badge>
@@ -142,9 +128,9 @@
 								:disabled="syncState.isSyncing"
 							>
 								<Loader2 v-if="syncState.isSyncing" class="w-4 h-4 me-1 animate-spin" />
-								{{ syncState.isSyncing ? __("Syncing...") : __("Sync Now") }}
+								{{ syncState.isSyncing ? "Syncing..." : "Sync Now" }}
 							</Button>
-							<Button size="sm" @click="saveSyncSettings">{{ __("Save") }}</Button>
+							<Button size="sm" @click="saveSyncSettings">Save</Button>
 						</div>
 					</div>
 				</Card>
@@ -152,23 +138,21 @@
 				<Card class="p-5">
 					<div class="flex items-center gap-2 mb-4">
 						<Monitor class="w-5 h-5 text-primary" />
-						<h2 class="text-base font-semibold text-foreground">
-							{{ __("POS Profile") }}
-						</h2>
+						<h2 class="text-base font-semibold text-foreground">POS Profile</h2>
 					</div>
 					<div class="space-y-3">
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">{{ __("Profile:") }}</span>
+							<span class="text-muted-foreground">Profile:</span>
 							<span class="text-foreground font-medium">{{
-								posStore.posProfile || __("Not set")
+								posStore.posProfile || "Not set"
 							}}</span>
 						</div>
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">{{ __("Company:") }}</span>
+							<span class="text-muted-foreground">Company:</span>
 							<span class="text-foreground">{{ posStore.companyName || "—" }}</span>
 						</div>
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">{{ __("Warehouse:") }}</span>
+							<span class="text-muted-foreground">Warehouse:</span>
 							<span class="text-foreground">{{ posStore.warehouse || "—" }}</span>
 						</div>
 					</div>
@@ -177,30 +161,25 @@
 				<Card v-if="isElectronMode" class="p-5">
 					<div class="flex items-center gap-2 mb-4">
 						<HardDrive class="w-5 h-5 text-primary" />
-						<h2 class="text-base font-semibold text-foreground">
-							{{ __("Data Management") }}
-						</h2>
+						<h2 class="text-base font-semibold text-foreground">Data Management</h2>
 					</div>
 					<div class="space-y-3">
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">{{ __("Local items:") }}</span>
+							<span class="text-muted-foreground">Local items:</span>
 							<span class="text-foreground">{{ itemCount }}</span>
 						</div>
 						<Separator />
 						<div class="flex gap-2 flex-wrap">
 							<Button size="sm" variant="outline" @click="clearSyncData">
-								{{ __("Clear Synced Data") }}
+								Clear Synced Data
 							</Button>
 							<Button size="sm" variant="destructive" @click="clearAllLocalData">
-								{{ __("Clear All Local Data") }}
+								Clear All Local Data
 							</Button>
 						</div>
 						<p class="text-xs text-muted-foreground">
-							{{
-								__(
-									"Clearing synced data will re-download on next sync. Pending records are not affected.",
-								)
-							}}
+							Clearing synced data will re-download on next sync. Pending records are not
+							affected.
 						</p>
 					</div>
 				</Card>
@@ -208,19 +187,19 @@
 				<Card class="p-5">
 					<div class="flex items-center gap-2 mb-4">
 						<Info class="w-5 h-5 text-primary" />
-						<h2 class="text-base font-semibold text-foreground">{{ __("About") }}</h2>
+						<h2 class="text-base font-semibold text-foreground">About</h2>
 					</div>
 					<div class="space-y-2 text-sm">
 						<div class="flex items-center justify-between">
-							<span class="text-muted-foreground">{{ __("Version") }}</span>
+							<span class="text-muted-foreground">Version</span>
 							<span class="text-foreground">{{ platformInfo.version || "—" }}</span>
 						</div>
 						<div class="flex items-center justify-between">
-							<span class="text-muted-foreground">{{ __("Platform") }}</span>
+							<span class="text-muted-foreground">Platform</span>
 							<span class="text-foreground">{{ platformInfo.platform || "Web" }}</span>
 						</div>
 						<div class="flex items-center justify-between">
-							<span class="text-muted-foreground">{{ __("Mode") }}</span>
+							<span class="text-muted-foreground">Mode</span>
 							<Badge variant="secondary">{{ isElectronMode ? "Desktop" : "Browser" }}</Badge>
 						</div>
 					</div>
@@ -232,7 +211,6 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
-import { __ } from "@/lib/translate";
 import { isElectron } from "@/services/electronBridge";
 import { getSetting, setSetting, countItems, clearAllData } from "@/services/dbBridge";
 import { usePosStore } from "@/stores/posStore";
@@ -346,12 +324,12 @@ async function testServerConnection() {
 			headers: { Accept: "application/json" },
 		});
 		if (resp.ok) {
-			toast.success(__("Server is reachable"));
+			toast.success("Server is reachable");
 		} else {
-			toast.error(__("Server returned status") + ` ${resp.status}`);
+			toast.error("Server returned status" + ` ${resp.status}`);
 		}
 	} catch {
-		toast.error(__("Cannot reach server"));
+		toast.error("Cannot reach server");
 	} finally {
 		testingServer.value = false;
 	}
@@ -362,7 +340,7 @@ async function saveServerUrl() {
 		await window.electronAPI!.setServerUrl(settings.serverUrl);
 	}
 	await setSetting("server_url", settings.serverUrl, "connection");
-	toast.success(__("Server URL saved"));
+	toast.success("Server URL saved");
 }
 
 async function testDbConnection() {
@@ -377,12 +355,12 @@ async function testDbConnection() {
 			database: settings.dbName,
 		});
 		if (result.success) {
-			toast.success(__("Database connection successful"));
+			toast.success("Database connection successful");
 		} else {
-			toast.error(result.error || __("Connection failed"));
+			toast.error(result.error || "Connection failed");
 		}
 	} catch (err) {
-		toast.error(__("Connection test failed"));
+		toast.error("Connection test failed");
 	} finally {
 		testingDb.value = false;
 	}
@@ -399,19 +377,19 @@ async function saveDbConfig() {
 			database: settings.dbName,
 		});
 		if (result.success) {
-			toast.success(__("Database reconnected successfully"));
+			toast.success("Database reconnected successfully");
 		} else {
-			toast.error(result.error || __("Reconnection failed"));
+			toast.error(result.error || "Reconnection failed");
 		}
 	} catch {
-		toast.error(__("Failed to save database config"));
+		toast.error("Failed to save database config");
 	}
 }
 
 async function saveSyncSettings() {
 	await setSetting("sync_interval", String(settings.syncInterval), "sync");
 	await setSetting("auto_sync", String(settings.autoSync), "sync");
-	toast.success(__("Sync settings saved"));
+	toast.success("Sync settings saved");
 }
 
 async function triggerSync() {
@@ -421,42 +399,36 @@ async function triggerSync() {
 		await window.electronAPI!.triggerSync();
 		await loadSyncState();
 	} catch {
-		toast.error(__("Sync failed"));
+		toast.error("Sync failed");
 	}
 }
 
 async function clearSyncData() {
 	if (!isElectronMode) return;
-	if (
-		!confirm(
-			__("This will clear all synced master data. Pending records will not be affected. Continue?"),
-		)
-	)
+	if (!confirm("This will clear all synced master data. Pending records will not be affected. Continue?"))
 		return;
 	try {
 		await window.electronAPI!.db.clearAllData();
 		itemCount.value = 0;
-		toast.success(__("Synced data cleared"));
+		toast.success("Synced data cleared");
 	} catch {
-		toast.error(__("Failed to clear data"));
+		toast.error("Failed to clear data");
 	}
 }
 
 async function clearAllLocalData() {
 	if (!isElectronMode) return;
 	if (
-		!confirm(
-			__("This will clear ALL local data including pending records. This cannot be undone. Continue?"),
-		)
+		!confirm("This will clear ALL local data including pending records. This cannot be undone. Continue?")
 	)
 		return;
 	try {
 		await window.electronAPI!.db.clearAllData();
 		await window.electronAPI!.db.clearPendingData();
 		itemCount.value = 0;
-		toast.success(__("All local data cleared"));
+		toast.success("All local data cleared");
 	} catch {
-		toast.error(__("Failed to clear data"));
+		toast.error("Failed to clear data");
 	}
 }
 </script>
