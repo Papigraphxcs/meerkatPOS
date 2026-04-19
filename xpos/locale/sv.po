@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-04-19 12:28+0428\n"
+"POT-Creation-Date: 2026-04-19 13:51+0428\n"
 "PO-Revision-Date: 2026-03-18 18:39+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
@@ -382,11 +382,6 @@ msgstr ""
 msgid "Back to Reports"
 msgstr ""
 
-#: frontend/src/views/ResetPasswordView.vue:53
-#: frontend/src/views/ResetPasswordView.vue:107
-msgid "Back to Sign In"
-msgstr ""
-
 #: frontend/src/components/Sidebar.vue:200
 #: frontend/src/components/items/CommandSearch.vue:362
 #: frontend/src/views/BankDropView.vue:5
@@ -628,10 +623,6 @@ msgstr "Byta"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:237
 msgid "Change Given"
-msgstr ""
-
-#: frontend/src/views/ResetPasswordView.vue:19
-msgid "Check your email for reset instructions"
 msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:410
@@ -1347,10 +1338,6 @@ msgstr ""
 msgid "Details"
 msgstr "Detaljer"
 
-#: frontend/src/views/ResetPasswordView.vue:45
-msgid "Didn't receive the email?"
-msgstr ""
-
 #. Label of a Currency field in DocType 'POS Closing Shift Detail'
 #: frontend/src/components/dialogs/ClosingDialog.vue:137
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
@@ -1532,10 +1519,6 @@ msgstr ""
 msgid "Email"
 msgstr "E-post"
 
-#: frontend/src/views/ResetPasswordView.vue:68
-msgid "Email Address"
-msgstr "E-postadress"
-
 #. Label of a Data field in DocType 'POS Coupon'
 #. Label of a Data field in DocType 'Referral Code'
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -1543,17 +1526,9 @@ msgstr "E-postadress"
 msgid "Email ID"
 msgstr "E-post ID"
 
-#: frontend/src/views/ResetPasswordView.vue:32
-msgid "Email Sent Successfully"
-msgstr ""
-
 #: frontend/src/components/purchase/SupplierSelector.vue:216
 msgid "Email address"
 msgstr "E-Postadress"
-
-#: frontend/src/views/LoginView.vue:31
-msgid "Email or Username"
-msgstr ""
 
 #. Description of the 'Price' (Section Break) field in DocType 'Scale Barcode
 #. Settings'
@@ -1605,26 +1580,6 @@ msgstr ""
 #: frontend/src/components/purchase/SupplierSelector.vue:176
 msgid "Enter supplier name"
 msgstr ""
-
-#: frontend/src/views/ResetPasswordView.vue:86
-msgid "Enter the email address associated with your account"
-msgstr ""
-
-#: frontend/src/views/ResetPasswordView.vue:78
-msgid "Enter your email address"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:41
-msgid "Enter your email or username"
-msgstr ""
-
-#: frontend/src/views/ResetPasswordView.vue:20
-msgid "Enter your email to receive a password reset link"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:62
-msgid "Enter your password"
-msgstr "Ange ditt lösenord"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:75
 msgid "Error"
@@ -1880,10 +1835,6 @@ msgstr ""
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:79
 msgid "Focus Search Input"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:81
-msgid "Forgot password?"
 msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:46
@@ -3464,10 +3415,6 @@ msgstr ""
 msgid "Partial payment is not allowed for POS Profile {0}."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:52
-msgid "Password"
-msgstr "Lösenord"
-
 #: frontend/src/components/cart/CartSummary.vue:436
 msgid "Pay {0}"
 msgstr ""
@@ -3638,11 +3585,6 @@ msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:24
 msgid "Point of Sale Application for ERPNext"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:12
-#: frontend/src/views/ResetPasswordView.vue:10
-msgid "Point of Sale System"
 msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:53
@@ -4331,10 +4273,6 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
-#: frontend/src/views/ResetPasswordView.vue:15
-msgid "Reset Password"
-msgstr "Återställ Lösenord"
-
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:20
 msgid "Restore Draft Invoice"
 msgstr ""
@@ -4633,10 +4571,6 @@ msgstr ""
 msgid "Search rows..."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:100
-msgid "Secure login powered by Frappe Framework"
-msgstr ""
-
 #: frontend/src/components/customer/CustomerSelect.vue:16
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:85
 #: frontend/src/components/items/CommandSearch.vue:409
@@ -4710,14 +4644,6 @@ msgstr ""
 msgid "Selling Price"
 msgstr ""
 
-#: frontend/src/views/ResetPasswordView.vue:98
-msgid "Send Reset Link"
-msgstr ""
-
-#: frontend/src/views/ResetPasswordView.vue:98
-msgid "Sending..."
-msgstr "Skickar..."
-
 #: frontend/src/components/core/QueryFilterPanel.vue:106
 msgid "Set (has value)"
 msgstr ""
@@ -4766,20 +4692,8 @@ msgstr "Visa pris"
 msgid "Show this help"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:93
-msgid "Sign In"
-msgstr ""
-
 #: frontend/src/components/Navbar.vue:199
 msgid "Sign Out"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:18
-msgid "Sign in to your account to continue"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:93
-msgid "Signing in..."
 msgstr ""
 
 #. Name of a report
@@ -5355,10 +5269,6 @@ msgstr ""
 msgid "Try adjusting your filters"
 msgstr ""
 
-#: frontend/src/views/ResetPasswordView.vue:47
-msgid "Try again"
-msgstr ""
-
 #. Label of a Data field in DocType 'POS Coupon Detail'
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:77
 #: frontend/src/components/purchase/SupplierSelector.vue:184
@@ -5582,10 +5492,6 @@ msgstr ""
 #. Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Weight value is parsed as: [weight digits].[weight decimals]."
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:17
-msgid "Welcome back"
 msgstr ""
 
 #. Description of the 'Price included in barcode' (Check) field in DocType

@@ -9,13 +9,13 @@
 				class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center"
 			/>
 			<h1 class="text-2xl font-bold text-foreground">X POS</h1>
-			<p class="text-muted-foreground text-sm mt-1">{{ __("Point of Sale System") }}</p>
+			<p class="text-muted-foreground text-sm mt-1">Point of Sale System</p>
 		</div>
 
 		<Card class="w-full max-w-md">
 			<CardHeader class="text-center">
-				<CardTitle class="text-xl">{{ __("Welcome back") }}</CardTitle>
-				<CardDescription>{{ __("Sign in to your account to continue") }}</CardDescription>
+				<CardTitle class="text-xl">Welcome back</CardTitle>
+				<CardDescription>Sign in to your account to continue</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<form @submit.prevent="handleLogin" class="space-y-4">
@@ -28,7 +28,7 @@
 					</div>
 					<div class="space-y-2">
 						<label for="username" class="text-sm font-medium text-foreground">
-							{{ __("Email or Username") }}
+							Email or Username
 						</label>
 						<div class="relative">
 							<User
@@ -38,7 +38,7 @@
 								id="username"
 								v-model="username"
 								type="text"
-								:placeholder="__('Enter your email or username')"
+								placeholder="Enter your email or username"
 								class="ps-10"
 								:disabled="authStore.isLoading"
 								required
@@ -48,9 +48,7 @@
 					</div>
 
 					<div class="space-y-2">
-						<label for="password" class="text-sm font-medium text-foreground">
-							{{ __("Password") }}
-						</label>
+						<label for="password" class="text-sm font-medium text-foreground"> Password </label>
 						<div class="relative">
 							<Lock
 								class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
@@ -59,7 +57,7 @@
 								id="password"
 								v-model="password"
 								:type="showPassword ? 'text' : 'password'"
-								:placeholder="__('Enter your password')"
+								placeholder="Enter your password"
 								class="ps-10 pe-10"
 								:disabled="authStore.isLoading"
 								required
@@ -78,7 +76,7 @@
 
 					<div class="flex justify-end">
 						<RouterLink to="/reset-password" class="text-sm text-primary hover:underline">
-							{{ __("Forgot password?") }}
+							Forgot password?
 						</RouterLink>
 					</div>
 
@@ -90,15 +88,11 @@
 					>
 						<Loader2 v-if="authStore.isLoading" class="w-4 h-4 animate-spin" />
 						<LogIn v-else class="w-4 h-4" />
-						{{ authStore.isLoading ? __("Signing in...") : __("Sign In") }}
+						{{ authStore.isLoading ? "Signing in..." : "Sign In" }}
 					</Button>
 				</form>
 			</CardContent>
 		</Card>
-
-		<p class="mt-8 text-center text-sm text-muted-foreground">
-			{{ __("Secure login powered by Frappe Framework") }}
-		</p>
 	</div>
 </template>
 
@@ -109,8 +103,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { __ } from "@/lib/translate";
-import { Store, User, Lock, Eye, EyeOff, LogIn, Loader2, AlertCircle } from "lucide-vue-next";
+import { User, Lock, Eye, EyeOff, LogIn, Loader2, AlertCircle } from "lucide-vue-next";
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
 import LogoLight from "@/assets/images/xpos-logo-light.svg";
 const isDark = inject("isDark")! as boolean;
@@ -129,12 +122,6 @@ async function handleLogin() {
 	if (success) {
 		const redirectTo = (router.currentRoute.value.query.redirect as string) || "/pos";
 		router.push(redirectTo);
-	}
-}
-
-function clearError() {
-	if (authStore.error) {
-		authStore.clearError();
 	}
 }
 

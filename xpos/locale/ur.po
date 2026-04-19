@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-04-19 12:28+0428\n"
+"POT-Creation-Date: 2026-04-19 13:51+0428\n"
 "PO-Revision-Date: 2026-03-18 18:39+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
@@ -40,11 +40,11 @@ msgstr ""
 #: frontend/src/components/Navbar.vue:190
 #: frontend/src/components/items/CommandSearch.vue:501
 msgid "About X POS"
-msgstr ""
+msgstr "X POS کے بارے میں"
 
 #: frontend/src/views/ReportViewerView.vue:705
 msgid "Access restricted"
-msgstr ""
+msgstr "رسائی محدود"
 
 #. Label of a Link field in DocType 'POS Allowed Expense Account'
 #. Label of a Link field in DocType 'POS Allowed Source Account'
@@ -73,11 +73,11 @@ msgstr "اکاؤنٹس یوزر"
 
 #: xpos/x_pos/report/current_stock_with_levels/current_stock_with_levels.py:77
 msgid "Actual Qty"
-msgstr ""
+msgstr "اصل مقدار"
 
 #: frontend/src/components/purchase/PurchaseItemList.vue:243
 msgid "Add"
-msgstr ""
+msgstr "شامل کریں"
 
 #: frontend/src/components/core/QueryFilterPanel.vue:36
 msgid "Add Filter"
@@ -85,7 +85,7 @@ msgstr "فلٹر لگائں"
 
 #: frontend/src/components/ui/table/Table.vue:799
 msgid "Add First Row"
-msgstr ""
+msgstr "پہلی قطار شامل کریں"
 
 #: frontend/src/components/purchase/SupplierSelector.vue:112
 msgid "Add New Supplier"
@@ -94,27 +94,27 @@ msgstr "نیا سپلائر بنائں"
 #: frontend/src/components/ui/table/Table.vue:772
 #: frontend/src/components/ui/table/Table.vue:1104
 msgid "Add Row"
-msgstr ""
+msgstr "قطار شامل کریں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:113
 msgid "Add Selected Item to Cart"
-msgstr ""
+msgstr "منتخب آئٹم کو ٹوکری میں شامل کریں"
 
 #: frontend/src/views/ExpenseView.vue:46
 msgid "Add a new expense to get started"
-msgstr ""
+msgstr "شروع کرنے کے لیے ایک نیا خرچ شامل کریں"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:86
 msgid "Add a new item to inventory"
-msgstr ""
+msgstr "انوینٹری میں ایک نیا آئٹم شامل کریں"
 
 #: frontend/src/components/purchase/PurchaseItemList.vue:254
 msgid "Add a new item to the inventory"
-msgstr ""
+msgstr "انوینٹری میں ایک نیا آئٹم شامل کریں"
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:68
 msgid "Add a new supplier"
-msgstr ""
+msgstr "ایک نیا سپلائر شامل کریں"
 
 #: frontend/src/components/purchase/SupplierSelector.vue:165
 msgid "Add a new supplier to the system"
@@ -122,7 +122,7 @@ msgstr "سسٹم میں نیاسپلائر داخل کریں"
 
 #: frontend/src/components/purchase/PurchaseCart.vue:79
 msgid "Add items from the list to start"
-msgstr ""
+msgstr "شروع کرنے کے لیے فہرست سے آئٹمز شامل کریں"
 
 #: frontend/src/components/cart/CartSummary.vue:433
 msgid "Add items to pay"
@@ -144,19 +144,19 @@ msgstr "اضافی رعایت"
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:262
 #: frontend/src/views/PurchaseInvoiceView.vue:1198
 msgid "Addl. Discount"
-msgstr ""
+msgstr "اضافی رعایت"
 
 #: frontend/src/components/customer/CustomerSelect.vue:181
 msgid "Address"
-msgstr ""
+msgstr "پتہ"
 
 #: frontend/src/components/customer/CustomerSelect.vue:186
 msgid "Address line 1"
-msgstr ""
+msgstr "ایڈریس لائن 1"
 
 #: frontend/src/views/ReportViewerView.vue:830
 msgid "Adjust filters and refresh the report to load live data."
-msgstr ""
+msgstr "لائیو ڈیٹا لوڈ کرنے کے لیے فلٹرز کو ایڈجسٹ کریں اور رپورٹ کو ریفریش کریں"
 
 #. Name of a role
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
@@ -381,11 +381,6 @@ msgstr ""
 #: frontend/src/views/ReportViewerView.vue:712
 msgid "Back to Reports"
 msgstr ""
-
-#: frontend/src/views/ResetPasswordView.vue:53
-#: frontend/src/views/ResetPasswordView.vue:107
-msgid "Back to Sign In"
-msgstr "واپس سائن ان کریں"
 
 #: frontend/src/components/Sidebar.vue:200
 #: frontend/src/components/items/CommandSearch.vue:362
@@ -629,10 +624,6 @@ msgstr "بھان"
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:237
 msgid "Change Given"
 msgstr "بھان دی"
-
-#: frontend/src/views/ResetPasswordView.vue:19
-msgid "Check your email for reset instructions"
-msgstr "دوبارہ ترتیب دینے کی ہدایات کے لیے اپنا ای میل چیک کریں"
 
 #: frontend/src/components/items/CommandSearch.vue:410
 msgid "Choose or create customer"
@@ -1347,10 +1338,6 @@ msgstr ""
 msgid "Details"
 msgstr "تفصیلات"
 
-#: frontend/src/views/ResetPasswordView.vue:45
-msgid "Didn't receive the email?"
-msgstr ""
-
 #. Label of a Currency field in DocType 'POS Closing Shift Detail'
 #: frontend/src/components/dialogs/ClosingDialog.vue:137
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
@@ -1532,10 +1519,6 @@ msgstr ""
 msgid "Email"
 msgstr "ای میل"
 
-#: frontend/src/views/ResetPasswordView.vue:68
-msgid "Email Address"
-msgstr "ای میل ایڈریس"
-
 #. Label of a Data field in DocType 'POS Coupon'
 #. Label of a Data field in DocType 'Referral Code'
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -1543,17 +1526,9 @@ msgstr "ای میل ایڈریس"
 msgid "Email ID"
 msgstr "ای میل شناخت"
 
-#: frontend/src/views/ResetPasswordView.vue:32
-msgid "Email Sent Successfully"
-msgstr "ای میل کامیابی کے ساتھ بھیجی گئی"
-
 #: frontend/src/components/purchase/SupplierSelector.vue:216
 msgid "Email address"
 msgstr "ای میل ایڈریس"
-
-#: frontend/src/views/LoginView.vue:31
-msgid "Email or Username"
-msgstr "ای میل یا صارف نام"
 
 #. Description of the 'Price' (Section Break) field in DocType 'Scale Barcode
 #. Settings'
@@ -1605,26 +1580,6 @@ msgstr "اس لین دین کی وجہ درج کریں..."
 #: frontend/src/components/purchase/SupplierSelector.vue:176
 msgid "Enter supplier name"
 msgstr "سپلائر کا نام لکھیں"
-
-#: frontend/src/views/ResetPasswordView.vue:86
-msgid "Enter the email address associated with your account"
-msgstr "اپنے اکاؤنٹ سے وابستہ ای میل ایڈریس درج کریں"
-
-#: frontend/src/views/ResetPasswordView.vue:78
-msgid "Enter your email address"
-msgstr "اپنا ای میل ایڈریس درج کریں"
-
-#: frontend/src/views/LoginView.vue:41
-msgid "Enter your email or username"
-msgstr "اپنا ای میل یا صارف کا نام درج کریں"
-
-#: frontend/src/views/ResetPasswordView.vue:20
-msgid "Enter your email to receive a password reset link"
-msgstr "پاس ورڈ دوبارہ ترتیب دینے کا لنک حاصل کرنے کے لیے اپنا ای میل درج کریں"
-
-#: frontend/src/views/LoginView.vue:62
-msgid "Enter your password"
-msgstr "اپنا پاس ورڈ درج کریں"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:75
 msgid "Error"
@@ -1881,10 +1836,6 @@ msgstr ""
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:79
 msgid "Focus Search Input"
 msgstr ""
-
-#: frontend/src/views/LoginView.vue:81
-msgid "Forgot password?"
-msgstr "پاس ورڈ بھول گئے؟"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:46
 msgid "Frappe"
@@ -3464,10 +3415,6 @@ msgstr ""
 msgid "Partial payment is not allowed for POS Profile {0}."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:52
-msgid "Password"
-msgstr "پاس ورڈ"
-
 #: frontend/src/components/cart/CartSummary.vue:436
 msgid "Pay {0}"
 msgstr ""
@@ -3638,11 +3585,6 @@ msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:24
 msgid "Point of Sale Application for ERPNext"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:12
-#: frontend/src/views/ResetPasswordView.vue:10
-msgid "Point of Sale System"
 msgstr ""
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:53
@@ -4331,10 +4273,6 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
-#: frontend/src/views/ResetPasswordView.vue:15
-msgid "Reset Password"
-msgstr "پاس ورڈ ری سیٹ"
-
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:20
 msgid "Restore Draft Invoice"
 msgstr ""
@@ -4633,10 +4571,6 @@ msgstr ""
 msgid "Search rows..."
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:100
-msgid "Secure login powered by Frappe Framework"
-msgstr ""
-
 #: frontend/src/components/customer/CustomerSelect.vue:16
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:85
 #: frontend/src/components/items/CommandSearch.vue:409
@@ -4710,14 +4644,6 @@ msgstr ""
 msgid "Selling Price"
 msgstr ""
 
-#: frontend/src/views/ResetPasswordView.vue:98
-msgid "Send Reset Link"
-msgstr ""
-
-#: frontend/src/views/ResetPasswordView.vue:98
-msgid "Sending..."
-msgstr ""
-
 #: frontend/src/components/core/QueryFilterPanel.vue:106
 msgid "Set (has value)"
 msgstr ""
@@ -4766,20 +4692,8 @@ msgstr "قیمت دکھائیں"
 msgid "Show this help"
 msgstr ""
 
-#: frontend/src/views/LoginView.vue:93
-msgid "Sign In"
-msgstr ""
-
 #: frontend/src/components/Navbar.vue:199
 msgid "Sign Out"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:18
-msgid "Sign in to your account to continue"
-msgstr ""
-
-#: frontend/src/views/LoginView.vue:93
-msgid "Signing in..."
 msgstr ""
 
 #. Name of a report
@@ -5355,10 +5269,6 @@ msgstr "فلٹرز، تلاش کی اصطلاح، یا ترتیب ترتیب د�
 msgid "Try adjusting your filters"
 msgstr "اپنے فلٹرز کو ایڈجسٹ کرنے کی کوشش کریں"
 
-#: frontend/src/views/ResetPasswordView.vue:47
-msgid "Try again"
-msgstr "دوبارہ کوشش کریں"
-
 #. Label of a Data field in DocType 'POS Coupon Detail'
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:77
 #: frontend/src/components/purchase/SupplierSelector.vue:184
@@ -5583,10 +5493,6 @@ msgstr "وزن شروع کرنے کی پوزیشن"
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
 msgid "Weight value is parsed as: [weight digits].[weight decimals]."
 msgstr "وزن کی قدر کو اس طرح پارس کیا جاتا ہے: [وزن کے ہندسے] [وزن کے اعشاریہ]۔"
-
-#: frontend/src/views/LoginView.vue:17
-msgid "Welcome back"
-msgstr "دوبارہ خوش آمدید"
 
 #. Description of the 'Price included in barcode' (Check) field in DocType
 #. 'Scale Barcode Settings'
