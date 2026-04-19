@@ -3,7 +3,6 @@ const OrdersView = () => import("@/views/OrdersView.vue");
 const ReportsIndexView = () => import("@/views/ReportsIndexView.vue");
 const ReportViewerView = () => import("@/views/ReportViewerView.vue");
 const SettingsView = () => import("@/views/SettingsView.vue");
-const PurchaseView = () => import("@/views/PurchaseView.vue");
 const PurchaseOrderView = () => import("@/views/PurchaseOrderView.vue");
 const PurchaseOrderListView = () => import("@/views/PurchaseOrderListView.vue");
 const PurchaseInvoiceView = () => import("@/views/PurchaseInvoiceView.vue");
@@ -63,12 +62,6 @@ const routes: RouteRecordRaw[] = [
 		name: "report-viewer",
 		component: ReportViewerView,
 		meta: { title: "Report Viewer", requiresAuth: true },
-	},
-	{
-		path: "/purchase",
-		name: "purchase",
-		component: PurchaseView,
-		meta: { title: "Purchasing", requiresAuth: true },
 	},
 	{
 		path: "/barcode-print",
