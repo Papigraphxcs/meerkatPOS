@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-04-19 22:32+0428\n"
+"POT-Creation-Date: 2026-04-19 23:23+0428\n"
 "PO-Revision-Date: 2026-03-18 18:39+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
@@ -221,7 +221,7 @@ msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:380
 msgid "Application settings"
-msgstr ""
+msgstr "سوفٹوئیر کی ترتیبات"
 
 #. Label of a Check field in DocType 'POS Coupon Detail'
 #: frontend/src/components/dialogs/PaymentDialog.vue:148
@@ -237,11 +237,11 @@ msgstr "لاگوکریں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:96
 msgid "Apply Discount"
-msgstr ""
+msgstr "رعایت کا اطلاق کریں"
 
 #: frontend/src/views/ReportViewerView.vue:843
 msgid "Apply Filters"
-msgstr ""
+msgstr "فلٹرز لگائیں"
 
 #. Label of a Section Break field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -284,7 +284,7 @@ msgstr "کیا آپ واقعی اس مسودے کو ختم کرنا چاہتے �
 
 #: frontend/src/components/ui/table/Table.vue:1092
 msgid "Arrow keys to navigate"
-msgstr ""
+msgstr "نیویگیٹ کرنے کے لیے تیر والے بٹن"
 
 #: frontend/src/views/ReportViewerView.vue:524
 msgid "Ascending"
@@ -292,7 +292,7 @@ msgstr ""
 
 #: frontend/src/components/core/SortBy.vue:8
 msgid "Ascending — click to sort descending"
-msgstr ""
+msgstr "صعودی"
 
 #: xpos/api/invoices.py:220
 msgid "At least one item is required"
@@ -300,7 +300,7 @@ msgstr "کم از کم ایک آئٹم درکار ہے"
 
 #: xpos/x_pos/api/purchase_orders.py:1876
 msgid "At least one item is required."
-msgstr ""
+msgstr "کم از کم ایک آئٹم درکار ہے۔"
 
 #. Label of a Check field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -309,7 +309,7 @@ msgstr "خودکار لاگو"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:96
 msgid "Auto-generated"
-msgstr ""
+msgstr "خود بخود تیار کردہ"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:98
 msgid "Available Programs"
@@ -317,7 +317,7 @@ msgstr "دستیاب پروگرام"
 
 #: frontend/src/components/dialogs/ReturnDialog.vue:92
 msgid "Back"
-msgstr ""
+msgstr "پیچھے"
 
 #: xpos/x_pos/api/cash_movement/validation.py:155
 msgid "Back Office Cash Account is fixed by POS Profile and cannot be overridden."
@@ -333,18 +333,18 @@ msgstr "بیک آفس نقدی اکاؤنٹ ایک نقدی اکاؤنٹ ہون�
 
 #: frontend/src/components/dialogs/OpeningDialog.vue:129
 msgid "Back to Desk"
-msgstr ""
+msgstr "واپس ڈیسک پر"
 
 #: frontend/src/views/ReportViewerView.vue:692
 #: frontend/src/views/ReportViewerView.vue:712
 msgid "Back to Reports"
-msgstr ""
+msgstr "رپورٹس پر واپس جائیں"
 
 #: frontend/src/components/Sidebar.vue:200
 #: frontend/src/components/items/CommandSearch.vue:362
 #: frontend/src/views/BankDropView.vue:5
 msgid "Bank Drops"
-msgstr ""
+msgstr "بینک ڈراپ"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:99
 #: frontend/src/views/BarcodePrintView.vue:173
@@ -376,31 +376,31 @@ msgstr "بارکوڈ {0} پہلے ہی موجود ہے"
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:176
 msgid "Batch"
-msgstr ""
+msgstr "بیچ"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:1093
 #: frontend/src/views/PurchaseOrderListView.vue:326
 msgid "Billed"
-msgstr ""
+msgstr "بل کیا گیا"
 
 #: frontend/src/components/customer/CustomerSelect.vue:251
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:111
 msgid "Birthday"
-msgstr ""
+msgstr "سالگرہ"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:38
 msgid "Branch"
-msgstr ""
+msgstr "شاخ"
 
 #. Name of a report
 #: xpos/x_pos/report/branch_item_summary/branch_item_summary.json
 msgid "Branch Item Summary"
-msgstr ""
+msgstr "برانچ آئٹم کا خلاصہ"
 
 #. Name of a report
 #: xpos/x_pos/report/branch_set_summary/branch_set_summary.json
 msgid "Branch Set Summary"
-msgstr ""
+msgstr "برانچ سیٹ کا خلاصہ"
 
 #. Option for the 'Qualifying Transaction / Item' (Select) field in DocType
 #. 'POS Offer'
@@ -422,15 +422,15 @@ msgstr "برانڈ"
 
 #: frontend/src/components/items/CommandSearch.vue:318
 msgid "Browse analytics reports"
-msgstr ""
+msgstr "تجزیاتی رپورٹس کو براؤز کریں"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:77
 msgid "Built with ❤️, using VueJS"
-msgstr ""
+msgstr "VueJS کا استعمال کرتے ہوئے ❤️ کے ساتھ بنایا گیا ہے"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:116
 msgid "Buying Price"
-msgstr ""
+msgstr "قیمت خرید"
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:114
 #: frontend/src/views/PurchaseInvoiceView.vue:420
@@ -439,19 +439,19 @@ msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:55
 msgid "Calculate"
-msgstr ""
+msgstr "حساب لگانا"
 
 #: frontend/src/components/items/CommandSearch.vue:164
 msgid "Calculator - evaluate math expressions"
-msgstr ""
+msgstr "کیلکولیٹر - ریاضی کے تاثرات کا اندازہ کریں"
 
 #: frontend/src/components/dialogs/CameraBarcodeDialog.vue:7
 msgid "Camera Scanner"
-msgstr ""
+msgstr "کیمرہ سکینر"
 
 #: frontend/src/components/dialogs/CameraBarcodeDialog.vue:169
 msgid "Camera permission denied. Please allow camera access."
-msgstr ""
+msgstr "کیمرے کی اجازت مسترد کر دی گئی۔ براہ کرم کیمرے تک رسائی کی اجازت دیں۔"
 
 #. Label of a Link field in DocType 'POS Coupon'
 #. Label of a Link field in DocType 'Referral Code'
@@ -494,24 +494,24 @@ msgstr "آئٹم کو ٹوکری میں شامل نہیں کیا جا سکتا"
 
 #: xpos/x_pos/api/purchase_orders.py:1732
 msgid "Cannot delete a submitted Purchase Order."
-msgstr ""
+msgstr "جمع کرائے گئے پرچیز آرڈر کو حذف نہیں کیا جا سکتا۔"
 
 #: xpos/x_pos/api/purchase_orders.py:1989
 msgid "Cannot delete submitted invoice {0}."
-msgstr ""
+msgstr "جمع شدہ انوائس {0} کو حذف نہیں کیا جا سکتا۔"
 
 #: frontend/src/stores/offlineStore.ts:214
 msgid "Cannot sync a draft invoice. Load it to cart first."
-msgstr ""
+msgstr "ڈرافٹ انوائس کی مطابقت پذیری نہیں ہو سکتی۔ پہلے اسے کارٹ میں لوڈ کریں۔"
 
 #: frontend/src/stores/offlineStore.ts:205
 #: frontend/src/stores/purchaseStore.ts:660
 msgid "Cannot sync while offline"
-msgstr ""
+msgstr "آف لائن رہتے ہوئے مطابقت پذیری نہیں ہو سکتی"
 
 #: xpos/x_pos/api/purchase_orders.py:1570
 msgid "Cannot update a submitted Purchase Order as draft."
-msgstr ""
+msgstr "جمع کرائے گئے پرچیز آرڈر کو بطور مسودہ اپ ڈیٹ نہیں کیا جا سکتا۔"
 
 #: frontend/src/components/cart/Cart.vue:33 frontend/src/views/PosView.vue:26
 msgid "Cart"
@@ -519,7 +519,7 @@ msgstr "ٹوکری"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:122
 msgid "Cart Actions"
-msgstr ""
+msgstr "ٹوکری کے ایکشن"
 
 #: frontend/src/components/cart/Cart.vue:128
 #: frontend/src/components/dialogs/PaymentDialog.vue:945
@@ -540,7 +540,7 @@ msgstr "اس POS پروفائل کے لیے نقدی جمع کرانا غیر ف
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:150
 #: frontend/src/components/items/CommandSearch.vue:474
 msgid "Cash Expense"
-msgstr ""
+msgstr "نقد خرچ"
 
 #. Label of a Card Break in the X POS Workspace
 #: xpos/x_pos/workspace/x_pos/x_pos.json
@@ -573,12 +573,12 @@ msgstr "بھان دی"
 
 #: frontend/src/components/items/CommandSearch.vue:410
 msgid "Choose or create customer"
-msgstr ""
+msgstr "منتخب کریں یا گاہک بنائیں"
 
 #: frontend/src/components/customer/CustomerSelect.vue:193
 #: frontend/src/components/customer/CustomerSelect.vue:195
 msgid "City"
-msgstr ""
+msgstr "شہر"
 
 #: frontend/src/components/ui/datetime-picker/DateTimePicker.vue:851
 #: frontend/src/views/OrdersView.vue:35
@@ -588,7 +588,7 @@ msgstr ""
 #: frontend/src/views/PurchaseOrderView.vue:605
 #: frontend/src/views/ReportsIndexView.vue:147
 msgid "Clear"
-msgstr ""
+msgstr "صاف"
 
 #: frontend/src/components/core/QueryFilterPanel.vue:140
 #: frontend/src/components/offline/OfflinePendingPanel.vue:60
@@ -598,15 +598,15 @@ msgstr "تمام صاف کریں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:131
 msgid "Clear All Items from Cart"
-msgstr ""
+msgstr "ٹوکری سے تمام آئٹمز صاف کریں۔"
 
 #: frontend/src/views/ReportViewerView.vue:973
 msgid "Clear Sort"
-msgstr ""
+msgstr "صاف ترتیب دیں"
 
 #: frontend/src/components/cart/CartSummary.vue:218
 msgid "Clear all discounts"
-msgstr ""
+msgstr "تمام چھوٹ صاف کریں"
 
 #: frontend/src/components/cart/CartSummary.vue:193
 msgid "Clear cart"
@@ -614,7 +614,7 @@ msgstr "ٹوکری صاف کریں"
 
 #: frontend/src/components/items/CommandSearch.vue:392
 msgid "Clear cart and start new sale"
-msgstr ""
+msgstr "ٹوکری صاف کریں اور نئی فروخت شروع کریں"
 
 #: frontend/src/components/cart/Cart.vue:130
 msgid "Click on items to add them here"
@@ -644,7 +644,7 @@ msgstr "بند"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:43
 msgid "Close Dialog / Cancel"
-msgstr ""
+msgstr "ڈائیلاگ بند کریں / منسوخ کریں"
 
 #: frontend/src/components/Navbar.vue:204
 #: frontend/src/components/Navbar.vue:215
@@ -657,7 +657,7 @@ msgstr "شفٹ بند کریں"
 
 #: frontend/src/components/items/CommandSearch.vue:466
 msgid "Close the current POS shift"
-msgstr ""
+msgstr "موجودہ POS شفٹ کو بند کریں۔"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
@@ -679,23 +679,23 @@ msgstr "بند ہو رہا ہے..."
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:149
 msgid "Collection factor"
-msgstr ""
+msgstr "جمع کرنے کا عنصر"
 
 #: frontend/src/components/ui/table/Table.vue:1121
 msgid "Column Settings"
-msgstr ""
+msgstr "کالم کی ترتیبات"
 
 #: frontend/src/components/ui/table/Table.vue:775
 msgid "Column settings"
-msgstr ""
+msgstr "کالم کی ترتیبات"
 
 #: frontend/src/components/items/CommandSearch.vue:141
 msgid "Command Search Help"
-msgstr ""
+msgstr "کمانڈ سرچ مدد"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:42
 msgid "Commit"
-msgstr ""
+msgstr "کمٹ"
 
 #. Label of a Link field in DocType 'Delivery Charges'
 #. Label of a Link field in DocType 'POS Cash Movement'
@@ -765,32 +765,32 @@ msgstr "سیاق و سباق درکار ہے"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.py:168
 msgid "Conversion Factor"
-msgstr ""
+msgstr "تبادلوں کا عنصر"
 
 #: frontend/src/views/ReportViewerView.vue:462
 msgid "Copied current page to clipboard."
-msgstr ""
+msgstr "موجودہ صفحہ کو کلپ بورڈ پر کاپی کیا گیا۔"
 
 #: frontend/src/views/ReportViewerView.vue:452
 msgid "Copied {0} rows to clipboard."
-msgstr ""
+msgstr "{0} قطاروں کو کلپ بورڈ میں کاپی کیا گیا۔"
 
 #: frontend/src/components/reports/ReportDataTable.vue:169
 msgid "Copy"
-msgstr ""
+msgstr "کاپی"
 
 #: frontend/src/views/ReportViewerView.vue:774
 msgid "Copy Data"
-msgstr ""
+msgstr "ڈیٹا کاپی کریں"
 
 #: frontend/src/views/ReportViewerView.vue:793
 #: frontend/src/views/ReportViewerView.vue:993
 msgid "Copy Link"
-msgstr ""
+msgstr "لنک کاپی کریں"
 
 #: frontend/src/views/ReportViewerView.vue:770
 msgid "Copy Page"
-msgstr ""
+msgstr "صفحہ کاپی کریں"
 
 #. Label of a Link field in DocType 'Delivery Charges'
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.json
@@ -803,15 +803,15 @@ msgstr "پوز پروفائل میں لاگت کا مرکز سیٹ نہیں ہے
 
 #: xpos/x_pos/api/payment_processing/journal_entry.py:87
 msgid "Could not determine bank/cash account for payment. Please set default cash account for company."
-msgstr ""
+msgstr "ادائیگی کے لیے بینک/کیش اکاؤنٹ کا تعین نہیں کیا جا سکا۔ براہ کرم کمپنی کے لیے ڈیفالٹ کیش اکاؤنٹ سیٹ کریں۔"
 
 #: frontend/src/components/dialogs/CameraBarcodeDialog.vue:193
 msgid "Could not start camera."
-msgstr ""
+msgstr "کیمرہ شروع نہیں ہو سکا۔"
 
 #: frontend/src/components/customer/CustomerSelect.vue:199
 msgid "Country"
-msgstr ""
+msgstr "ملک"
 
 #. Label of a Link field in DocType 'POS Coupon Detail'
 #. Label of a Link field in DocType 'POS Offer Detail'
@@ -858,7 +858,7 @@ msgstr "کوپن کی قسم"
 
 #: xpos/api/offers.py:92
 msgid "Coupon has already been used the maximum number of times"
-msgstr ""
+msgstr "کوپن پہلے ہی زیادہ سے زیادہ بار استعمال ہو چکا ہے"
 
 #: xpos/api/offers.py:102
 msgid "Coupon has expired"
@@ -875,23 +875,23 @@ msgstr "کوپن ابھی تک درست نہیں ہے"
 #: frontend/src/components/dialogs/CreateItemDialog.vue:129
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:104
 msgid "Create"
-msgstr ""
+msgstr "بنائیں"
 
 #: frontend/src/components/customer/CustomerSelect.vue:271
 msgid "Create & Select"
-msgstr ""
+msgstr "بنائیں اور منتخب کریں"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:938
 msgid "Create & Submit"
-msgstr ""
+msgstr "بنائیں اور جمع کروائیں"
 
 #: frontend/src/components/customer/CustomerSelect.vue:103
 msgid "Create New Customer"
-msgstr ""
+msgstr "نیا گاہک بنائیں"
 
 #: frontend/src/components/dialogs/CreateItemDialog.vue:85
 msgid "Create New Item"
-msgstr ""
+msgstr "نئی شے بنائیں"
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:67
 msgid "Create New Supplier"
@@ -899,15 +899,15 @@ msgstr "نیا سپلائر بنائیں"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:44
 msgid "Create Purchase Order"
-msgstr ""
+msgstr "پرچیز آرڈر بنائیں"
 
 #: frontend/src/views/PurchaseInvoiceListView.vue:190
 msgid "Create a new invoice or adjust your filters"
-msgstr ""
+msgstr "ایک نیا انوائس بنائیں یا اپنے فلٹرز کو ایڈجسٹ کریں"
 
 #: frontend/src/views/PurchaseOrderListView.vue:284
 msgid "Create a new order or adjust your filters"
-msgstr ""
+msgstr "ایک نیا آرڈر بنائیں یا اپنے فلٹرز کو ایڈجسٹ کریں"
 
 #: xpos/x_pos/api/purchase_orders.py:316
 msgid "Create items"
@@ -915,7 +915,7 @@ msgstr "آئٹمز بنائیں"
 
 #: frontend/src/components/items/CommandSearch.vue:327
 msgid "Create purchase orders"
-msgstr ""
+msgstr "خریداری کے آرڈر بنائیں"
 
 #: xpos/x_pos/api/purchase_orders.py:253
 msgid "Create suppliers"
@@ -927,7 +927,7 @@ msgstr "بنانے والا"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:82
 msgid "Creating Purchase Order..."
-msgstr ""
+msgstr "پرچیز آرڈر بنایا جا رہا ہے..."
 
 #: frontend/src/components/customer/CustomerSelect.vue:271
 #: frontend/src/components/dialogs/CreateItemDialog.vue:129
@@ -939,7 +939,7 @@ msgstr "بن رہا۔۔۔"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:43
 msgid "Credit Limit"
-msgstr ""
+msgstr "کریڈٹ کی حد"
 
 #: xpos/x_pos/api/payment_processing/data.py:272
 #: xpos/x_pos/api/payment_processing/data.py:405
@@ -960,11 +960,11 @@ msgstr "کریڈٹ نوٹ {0} کے پاس اب بھی {1} کا غیر لاگو �
 
 #: xpos/api/invoices.py:155
 msgid "Credit sale is not allowed for POS Profile {0}."
-msgstr ""
+msgstr "POS پروفائل {0} کے لیے کریڈٹ سیل کی اجازت نہیں ہے۔"
 
 #: frontend/src/components/ui/table/Table.vue:1094
 msgid "Ctrl+D to duplicate"
-msgstr ""
+msgstr "نقل کرنے کے لیے Ctrl+D"
 
 #: xpos/x_pos/api/payment_processing/data.py:80
 #: xpos/x_pos/api/payment_processing/data.py:180
@@ -981,31 +981,31 @@ msgstr "کرنسی درکار ہے"
 
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.py:93
 msgid "Current Stock"
-msgstr ""
+msgstr "موجودہ اسٹاک"
 
 #. Name of a report
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.json
 msgid "Current Stock By Brand"
-msgstr ""
+msgstr "برانڈ کے لحاظ سے موجودہ اسٹاک"
 
 #. Name of a report
 #: xpos/x_pos/report/current_stock_report/current_stock_report.json
 msgid "Current Stock Report"
-msgstr ""
+msgstr "موجودہ اسٹاک رپورٹ"
 
 #. Name of a report
 #: xpos/x_pos/report/current_stock_summary/current_stock_summary.json
 msgid "Current Stock Summary"
-msgstr ""
+msgstr "موجودہ اسٹاک کا خلاصہ"
 
 #. Name of a report
 #: xpos/x_pos/report/current_stock_with_levels/current_stock_with_levels.json
 msgid "Current Stock with Levels"
-msgstr ""
+msgstr "سطحوں کے ساتھ موجودہ اسٹاک"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:68
 msgid "Current Tier"
-msgstr ""
+msgstr "موجودہ درجے"
 
 #. Label of a Link field in DocType 'POS Coupon'
 #. Label of a Link field in DocType 'POS Coupon Detail'
@@ -1045,15 +1045,15 @@ msgstr "گاہک پہلے ہی موجود ہے"
 
 #: frontend/src/components/cart/Cart.vue:287
 msgid "Customer cannot be changed in return mode"
-msgstr ""
+msgstr "گاہک کو واپسی کے موڈ میں تبدیل نہیں کیا جا سکتا"
 
 #: frontend/src/components/customer/CustomerSelect.vue:527
 msgid "Customer created successfully!"
-msgstr ""
+msgstr "گاہک کامیابی کے ساتھ بنایا گیا!"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:253
 msgid "Customer enrolled successfully"
-msgstr ""
+msgstr "گاہک نے کامیابی سے اندراج کیا"
 
 #: xpos/api/customers.py:598
 msgid "Customer is already enrolled in {0}"
@@ -1093,11 +1093,11 @@ msgstr "گاہک کا نام درکار ہے"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:270
 msgid "Customer unenrolled successfully"
-msgstr ""
+msgstr "گاہک کا اندراج کامیابی سے ختم ہو گیا"
 
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:326
 msgid "Customer updated successfully!"
-msgstr ""
+msgstr "کسٹمر کامیابی سے اپ ڈیٹ ہو گیا!"
 
 #: xpos/api/customers.py:589 xpos/api/customers.py:639
 msgid "Customer {0} not found"
@@ -1109,7 +1109,7 @@ msgstr "گاہک، کمپنی، رقم، اور ادائیگی کا طریقہ �
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:161
 msgid "Data Sync"
-msgstr ""
+msgstr "ڈیٹا سنک"
 
 #. Label of a Date field in DocType 'POS Payment Entry Reference'
 #. Label of a Date field in DocType 'Sales Invoice Reference'
@@ -1128,12 +1128,12 @@ msgstr "تاریخ اور وقت"
 
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.js:33
 msgid "Days"
-msgstr ""
+msgstr "دن"
 
 #. Name of a report
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.json
 msgid "Dead Stock Report"
-msgstr ""
+msgstr "ڈیڈ اسٹاک رپورٹ"
 
 #. Label of a Link field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -1151,20 +1151,20 @@ msgstr "طے شدہ شرح درکار ہے"
 
 #: frontend/src/views/ReportViewerView.vue:522
 msgid "Default order"
-msgstr ""
+msgstr "پہلے سے طے شدہ آرڈر"
 
 #: frontend/src/components/ui/table/Table.vue:1095
 msgid "Del to delete selected"
-msgstr ""
+msgstr "منتخب کو حزف کرنے ک لئے Del دبائیں"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:147
 #: frontend/src/components/ui/table/Table.vue:1070
 msgid "Delete"
-msgstr ""
+msgstr "حذف کریں"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:280
 msgid "Delete all pending offline invoices? This cannot be undone."
-msgstr ""
+msgstr "تمام زیر التواء آف لائن رسیدیں حذف کریں؟ اسے کالعدم نہیں کیا جا سکتا۔"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:85
 msgid "Delete draft"
@@ -1172,11 +1172,11 @@ msgstr "مسودہ حذف کریں"
 
 #: frontend/src/components/ui/table/Table.vue:1209
 msgid "Delete row"
-msgstr ""
+msgstr "قطار کو حذف کریں"
 
 #: frontend/src/components/ui/table/Table.vue:750
 msgid "Delete selected"
-msgstr ""
+msgstr "منتخب کردہ کو حذف کریں"
 
 #: xpos/x_pos/api/cash_movement/permissions.py:29
 msgid "Deleting cancelled cash movements is disabled for this POS Profile."
@@ -1185,7 +1185,7 @@ msgstr "منسوخ شدہ کیش موومنٹ کو حذف کرنا اس POS پر
 #: frontend/src/components/offline/OfflinePendingPanel.vue:67
 #: frontend/src/stores/offlineStore.ts:88
 msgid "Deleting offline invoices is disabled for this POS Profile."
-msgstr ""
+msgstr "اس POS پروفائل کے لیے آف لائن رسیدیں حذف کرنا غیر فعال ہے۔"
 
 #. Name of a DocType
 #. Label of a Link in the X POS Workspace
@@ -1202,7 +1202,7 @@ msgstr "ڈیلیوری چارجز POS پروفائل"
 
 #: frontend/src/components/cart/CartSummary.vue:204
 msgid "Delivery charge"
-msgstr ""
+msgstr "ڈلیوری چارج"
 
 #. Option for the 'Movement Type' (Select) field in DocType 'POS Cash Movement'
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.json
@@ -1216,15 +1216,15 @@ msgstr "جمع کروائیں"
 
 #: frontend/src/views/BankDropView.vue:388
 msgid "Deposit cancelled"
-msgstr ""
+msgstr "ڈپازٹ منسوخ ہو گیا"
 
 #: frontend/src/views/ReportViewerView.vue:524
 msgid "Descending"
-msgstr ""
+msgstr "نزول"
 
 #: frontend/src/components/core/SortBy.vue:7
 msgid "Descending — click to sort ascending"
-msgstr ""
+msgstr "نزول - صعودی ترتیب دینے کے لیے کلک کریں"
 
 #. Label of a Small Text field in DocType 'POS Offer'
 #: xpos/x_pos/doctype/pos_offer/pos_offer.json
@@ -1233,11 +1233,11 @@ msgstr "تفصیل"
 
 #: frontend/src/components/ui/table/Table.vue:760
 msgid "Deselect all"
-msgstr ""
+msgstr "سبھی کو غیر منتخب کریں"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:60
 msgid "Desktop App"
-msgstr ""
+msgstr "ڈیسک ٹاپ ایپ"
 
 #. Label of a Section Break field in DocType 'POS Closing Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
@@ -1274,12 +1274,12 @@ msgstr "غیر فعال"
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:134
 #: frontend/src/views/PurchaseInvoiceView.vue:457
 msgid "Disc Amt"
-msgstr ""
+msgstr "رعایت کی رقم"
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:129
 #: frontend/src/views/PurchaseInvoiceView.vue:447
 msgid "Disc%"
-msgstr ""
+msgstr "رعایت٪"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:351
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:127
@@ -1290,7 +1290,7 @@ msgstr "رعایت"
 
 #: frontend/src/components/cart/CartSummary.vue:297
 msgid "Discount %"
-msgstr ""
+msgstr "رعایت٪"
 
 #. Option for the 'Discount Type' (Select) field in DocType 'POS Offer'
 #. Label of a Float field in DocType 'POS Offer'
@@ -1315,16 +1315,16 @@ msgstr "رعایت کی رقم"
 
 #: xpos/api/sync.py:56
 msgid "Doctype {0} is not permitted via this endpoint"
-msgstr ""
+msgstr "اس اختتامی نقطہ کے ذریعے دستاویز کی قسم {0} کی اجازت نہیں ہے"
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:196
 #: frontend/src/components/ui/table/Table.vue:1156
 msgid "Done"
-msgstr ""
+msgstr "ہو گیا"
 
 #: frontend/src/components/dialogs/OpeningDialog.vue:64
 msgid "Downloading profiles from server…"
-msgstr ""
+msgstr "سرور سے پروفائلز ڈاؤن لوڈ ہو رہے ہیں…"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:59
@@ -1337,7 +1337,7 @@ msgstr "مسودہ"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:738
 msgid "Draft deleted"
-msgstr ""
+msgstr "مسودہ حذف کر دیا گیا"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:202
 msgid "Draft invoice deleted"
@@ -1349,50 +1349,50 @@ msgstr "ڈرافٹ انوائس کو کارٹ میں بحال کر دیا گیا
 
 #: frontend/src/views/PurchaseInvoiceView.vue:725
 msgid "Draft loaded"
-msgstr ""
+msgstr "ڈرافٹ لوڈ ہو گیا"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:223
 msgid "Draft loaded into cart"
-msgstr ""
+msgstr "ڈرافٹ کارٹ میں بھرا ہوا ہے"
 
 #: frontend/src/stores/purchaseStore.ts:986
 msgid "Draft saved successfully"
-msgstr ""
+msgstr "ڈرافٹ کامیابی کے ساتھ محفوظ ہو گیا"
 
 #: xpos/x_pos/api/purchase_orders.py:1905
 #: xpos/x_pos/api/purchase_orders.py:2040
 msgid "Draft {0} not found."
-msgstr ""
+msgstr "مسودہ {0} نہیں ملا۔"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:662
 msgid "Draft {0} saved"
-msgstr ""
+msgstr "مسودہ {0} محفوظ ہو گیا"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:943
 #: frontend/src/views/PurchaseOrderListView.vue:229
 msgid "Drafts"
-msgstr ""
+msgstr "ڈرافٹ"
 
 #: frontend/src/components/ui/table/Table.vue:1093
 msgid "Drag row number to reorder"
-msgstr ""
+msgstr "دوبارہ ترتیب دینے کے لیے قطار نمبر کو گھسیٹیں"
 
 #: frontend/src/components/ui/table/Table.vue:889
 msgid "Drag to reorder"
-msgstr ""
+msgstr "دوبارہ ترتیب دینے کے لیے گھسیٹیں"
 
 #: frontend/src/components/ui/table/Table.vue:1034
 msgid "Duplicate"
-msgstr ""
+msgstr "نقل"
 
 #: xpos/x_pos/doctype/delivery_charges/delivery_charges.py:45
 msgid "Duplicate POS Profile in Delivery Charges"
-msgstr ""
+msgstr "ڈپلیکیٹ POS پروفائل ڈیلیوری چارجز میں"
 
 #. Label of a Link field in DocType 'POS Purchase Taxes'
 #: xpos/x_pos/doctype/pos_purchase_taxes/pos_purchase_taxes.json
 msgid "ERP Tax Account"
-msgstr ""
+msgstr "ERP ٹیکس اکاؤنٹ"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:50
 msgid "ERPNext"
@@ -1401,19 +1401,19 @@ msgstr ""
 #: frontend/src/components/dialogs/PurchaseOrderDetailDialog.vue:124
 #: frontend/src/views/PurchaseOrderListView.vue:257
 msgid "Edit"
-msgstr ""
+msgstr "ترمیم کریں"
 
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:14
 msgid "Edit Customer"
-msgstr ""
+msgstr "کسٹمر میں ترمیم کریں"
 
 #: frontend/src/components/ui/table/Table.vue:1177
 msgid "Edit Row"
-msgstr ""
+msgstr "قطار میں ترمیم کریں"
 
 #: frontend/src/components/ui/table/Table.vue:1024
 msgid "Edit row"
-msgstr ""
+msgstr "قطار میں ترمیم کریں"
 
 #: frontend/src/components/customer/CustomerSelect.vue:161
 #: frontend/src/components/customer/CustomerSelect.vue:163
@@ -1457,7 +1457,7 @@ msgstr "اندراج ہو رہا ہے..."
 #: frontend/src/components/dialogs/RepeatInvoiceDialog.vue:79
 #: frontend/src/components/dialogs/ReturnDialog.vue:69
 msgid "Enter an invoice number or customer name to search"
-msgstr ""
+msgstr "تلاش کرنے کے لیے انوائس نمبر یا گاہک کا نام درج کریں"
 
 #: frontend/src/components/cart/CartSummary.vue:311
 msgid "Enter coupon code..."
@@ -1465,7 +1465,7 @@ msgstr "کوپن کوڈ درج کریں..."
 
 #: frontend/src/components/ui/table/Table.vue:1092
 msgid "Enter for next row"
-msgstr ""
+msgstr "اگلی قطار کے لیے درج کریں"
 
 #: frontend/src/components/dialogs/CashMovementDialog.vue:83
 #: frontend/src/views/BankDropView.vue:158
@@ -1475,7 +1475,7 @@ msgstr "اس لین دین کی وجہ درج کریں..."
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:75
 msgid "Error"
-msgstr ""
+msgstr "خرابی"
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:127
 msgid "Expected"
@@ -1512,7 +1512,7 @@ msgstr "POS اخراجات کے لیے اخراجات کا اکاؤنٹ درکا
 
 #: frontend/src/views/ExpenseView.vue:400
 msgid "Expense cancelled"
-msgstr ""
+msgstr "خرچہ منسوخ کر دیا گیا"
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:101
 msgid "Expense target account must match Expense Account."
@@ -1522,7 +1522,7 @@ msgstr "اخراجات کے ہدف کا اکاؤنٹ اخراجات اکاؤنٹ
 #: frontend/src/components/items/CommandSearch.vue:353
 #: frontend/src/views/ExpenseView.vue:5
 msgid "Expenses"
-msgstr ""
+msgstr "اخراجات"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:130
 msgid "Expires"
@@ -1530,11 +1530,11 @@ msgstr "میعاد ختم"
 
 #: frontend/src/views/ReportViewerView.vue:778
 msgid "Export CSV"
-msgstr ""
+msgstr "CSV برآمد کریں"
 
 #: xpos/x_pos/integrations/fbr.py:220
 msgid "FBR API call failed: {0}"
-msgstr ""
+msgstr "FBR API کال ناکام ہوئی: {0}"
 
 #: xpos/x_pos/integrations/fbr.py:91
 msgid "FBR Bearer Token"
@@ -1562,23 +1562,23 @@ msgstr ""
 
 #: frontend/src/views/BankDropView.vue:391
 msgid "Failed to cancel deposit"
-msgstr ""
+msgstr "ڈپازٹ منسوخ کرنے میں ناکام"
 
 #: frontend/src/views/ExpenseView.vue:403
 msgid "Failed to cancel expense"
-msgstr ""
+msgstr "اخراجات کو منسوخ کرنے میں ناکام"
 
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.js:77
 msgid "Failed to create Purchase Order: {0}"
-msgstr ""
+msgstr "پرچیز آرڈر بنانے میں ناکام: {0}"
 
 #: frontend/src/components/customer/CustomerSelect.vue:530
 msgid "Failed to create customer: "
-msgstr ""
+msgstr "کسٹمر بنانے میں ناکام:"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:612
 msgid "Failed to create invoice"
-msgstr ""
+msgstr "انوائس بنانے میں ناکام"
 
 #: xpos/api/payments.py:287
 msgid "Failed to create payment request: {0}"
@@ -1586,7 +1586,7 @@ msgstr "ادائیگی کی درخواست بنانے میں ناکام: {0}"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:740
 msgid "Failed to delete draft"
-msgstr ""
+msgstr "مسودہ حذف کرنے میں ناکام"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:206
 msgid "Failed to delete draft invoice"
@@ -1594,7 +1594,7 @@ msgstr "ڈرافٹ انوائس کو حذف کرنے میں ناکام"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:256
 msgid "Failed to enroll customer"
-msgstr ""
+msgstr "کسٹمر کا اندراج کرنے میں ناکام"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:167
 msgid "Failed to fetch draft invoices"
@@ -1602,15 +1602,15 @@ msgstr "ڈرافٹ رسیدیں حاصل کرنے میں ناکام"
 
 #: frontend/src/views/OrdersView.vue:243
 msgid "Failed to fetch order details"
-msgstr ""
+msgstr "آرڈر کی تفصیلات حاصل کرنے میں ناکام"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:727
 msgid "Failed to load draft"
-msgstr ""
+msgstr "ڈرافٹ لوڈ کرنے میں ناکام"
 
 #: frontend/src/components/offline/OfflinePendingPanel.vue:226
 msgid "Failed to load draft into cart"
-msgstr ""
+msgstr "ڈرافٹ کو کارٹ میں لوڈ کرنے میں ناکام"
 
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:185
 #: frontend/src/components/dialogs/DraftInvoiceDialog.vue:189
@@ -1619,19 +1619,19 @@ msgstr "ڈرافٹ انوائس لوڈ کرنے میں ناکام"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:678
 msgid "Failed to load drafts"
-msgstr ""
+msgstr "ڈرافٹ لوڈ کرنے میں ناکام"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:796
 msgid "Failed to load purchase orders"
-msgstr ""
+msgstr "خریداری کے آرڈرز لوڈ کرنے میں ناکام"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:1169
 msgid "Failed to print invoice"
-msgstr ""
+msgstr "انوائس پرنٹ کرنے میں ناکام"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:1198
 msgid "Failed to print invoice locally"
-msgstr ""
+msgstr "مقامی طور پر انوائس پرنٹ کرنے میں ناکام"
 
 #: xpos/x_pos/api/payment_processing/reconciliation.py:193
 msgid "Failed to reconcile Credit Note {0}: {1}"
@@ -1651,19 +1651,19 @@ msgstr "کیش موومنٹ ریکارڈ کرنے میں ناکام"
 
 #: frontend/src/views/BankDropView.vue:373
 msgid "Failed to record deposit"
-msgstr ""
+msgstr "ڈپازٹ ریکارڈ کرنے میں ناکام"
 
 #: frontend/src/views/ExpenseView.vue:385
 msgid "Failed to record expense"
-msgstr ""
+msgstr "اخراجات ریکارڈ کرنے میں ناکام"
 
 #: frontend/src/components/dialogs/ReceiptPreviewDialog.vue:407
 msgid "Failed to repeat invoice"
-msgstr ""
+msgstr "انوائس کو دہرانے میں ناکام"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:664
 msgid "Failed to save draft"
-msgstr ""
+msgstr "مسودہ محفوظ کرنے میں ناکام"
 
 #: frontend/src/components/cart/CartSummary.vue:665
 msgid "Failed to save draft: {0}"
@@ -1671,19 +1671,19 @@ msgstr "مسودہ محفوظ کرنے میں ناکام: {0}"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:1089
 msgid "Failed to save invoice offline"
-msgstr ""
+msgstr "انوائس آف لائن محفوظ کرنے میں ناکام"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:773
 msgid "Failed to submit invoice"
-msgstr ""
+msgstr "انوائس جمع کرانے میں ناکام"
 
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:272
 msgid "Failed to unenroll customer"
-msgstr ""
+msgstr "کسٹمر کا اندراج ختم کرنے میں ناکام"
 
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:329
 msgid "Failed to update customer: "
-msgstr ""
+msgstr "کسٹمر کو اپ ڈیٹ کرنے میں ناکام:"
 
 #: frontend/src/components/cart/CartSummary.vue:564
 msgid "Failed to validate coupon"
@@ -1692,7 +1692,7 @@ msgstr "کوپن کی توثیق کرنے میں ناکام"
 #: frontend/src/components/customer/CustomerSelect.vue:330
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:177
 msgid "Female"
-msgstr ""
+msgstr "خاتون"
 
 #: frontend/src/components/core/QueryFilterPanel.vue:46
 msgid "Field..."
@@ -1700,12 +1700,12 @@ msgstr ""
 
 #: frontend/src/components/customer/CustomerSelect.vue:120
 msgid "Fill in customer details"
-msgstr ""
+msgstr "کسٹمر کی تفصیلات پُر کریں"
 
 #: frontend/src/components/core/QueryFilterPanel.vue:14
 #: frontend/src/views/ReportViewerView.vue:827
 msgid "Filters"
-msgstr ""
+msgstr "فلٹرز"
 
 #. Label of a Link field in DocType 'Referral Code'
 #: xpos/x_pos/doctype/referral_code/referral_code.json
@@ -1714,7 +1714,7 @@ msgstr "حتمی گاہک آفر"
 
 #: frontend/src/components/Sidebar.vue:72
 msgid "Finance"
-msgstr ""
+msgstr "فنانس"
 
 #. Description of the 'Prefix' (Data) field in DocType 'Scale Barcode Settings'
 #: xpos/x_pos/doctype/scale_barcode_settings/scale_barcode_settings.json
@@ -1723,11 +1723,11 @@ msgstr "تمام پیمانے کے بارکوڈز کی مقررہ ابتدائی
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:78
 msgid "Focus Barcode Input"
-msgstr ""
+msgstr "بار کوڈ ان پٹ پر فوکس کریں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:79
 msgid "Focus Search Input"
-msgstr ""
+msgstr "فوکس سرچ ان پٹ"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:46
 msgid "Frappe"
@@ -1735,7 +1735,7 @@ msgstr ""
 
 #: frontend/src/views/PurchaseOrderView.vue:432
 msgid "From"
-msgstr ""
+msgstr "سے"
 
 #: frontend/src/views/ExpenseView.vue:16
 #: frontend/src/views/PurchaseOrderView.vue:428
@@ -1746,29 +1746,29 @@ msgstr ""
 #: xpos/x_pos/report/warehouse_stock_movement/warehouse_stock_movement.js:19
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.js:16
 msgid "From Date"
-msgstr ""
+msgstr "تاریخ سے"
 
 #: frontend/src/views/PurchaseInvoiceView.vue:947
 msgid "From PO"
-msgstr ""
+msgstr "سے PO"
 
 #: xpos/x_pos/report/stock_value_summary_by_date/stock_value_summary_by_date.js:19
 msgid "From Posting Date"
-msgstr ""
+msgstr "پوسٹنگ کی تاریخ سے"
 
 #: frontend/src/components/customer/CustomerSelect.vue:135
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:35
 msgid "Full name"
-msgstr ""
+msgstr "پورا نام"
 
 #: frontend/src/components/customer/CustomerSelect.vue:167
 #: frontend/src/components/dialogs/CustomerEditDialog.vue:63
 msgid "Gender"
-msgstr ""
+msgstr "جنس"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:26
 msgid "General"
-msgstr ""
+msgstr "جنرل"
 
 #: frontend/src/views/BarcodePrintView.vue:8
 msgid "Generate and print barcode labels for items"
@@ -1781,7 +1781,7 @@ msgstr "بن رہا ہے..."
 #: frontend/src/views/PurchaseOrderView.vue:463
 #: frontend/src/views/PurchaseOrderView.vue:482
 msgid "Get Items"
-msgstr ""
+msgstr "اشیاء حاصل کریں۔"
 
 #. Option for the 'Coupon Type' (Select) field in DocType 'POS Coupon'
 #: xpos/x_pos/doctype/pos_coupon/pos_coupon.json
@@ -1810,39 +1810,39 @@ msgstr "دی گئی مقدار"
 
 #: xpos/x_pos/doctype/pos_offer/pos_offer.js:21
 msgid "Given Quantity must be more than zero"
-msgstr ""
+msgstr "دی گئی مقدار صفر سے زیادہ ہونی چاہیے"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:68
 msgid "Go to Bank Drops"
-msgstr ""
+msgstr "بینک ڈراپس پر جائیں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:67
 msgid "Go to Expenses"
-msgstr ""
+msgstr "اخراجات پر جائیں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:54
 msgid "Go to Orders"
-msgstr ""
+msgstr "آرڈرز پر جائیں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:53
 msgid "Go to POS"
-msgstr ""
+msgstr "POS پر جائیں"
 
 #: frontend/src/components/items/CommandSearch.vue:300
 msgid "Go to POS screen"
-msgstr ""
+msgstr "POS اسکرین پر جائیں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:61
 msgid "Go to Purchase Invoice"
-msgstr ""
+msgstr "پرچیز انوائس پر جائیں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:57
 msgid "Go to Purchase Order"
-msgstr ""
+msgstr "پرچیز آرڈر پر جائیں"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:65
 msgid "Go to Stock Receiving"
-msgstr ""
+msgstr "اسٹاک وصول کرنے پر جائیں"
 
 #. Label of a Currency field in DocType 'POS Closing Shift'
 #. Option for the 'Promo Type' (Select) field in DocType 'POS Offer'
@@ -1861,32 +1861,32 @@ msgstr "عظیم کل"
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:124
 #: frontend/src/views/PurchaseInvoiceView.vue:438
 msgid "Gross"
-msgstr ""
+msgstr "مجموعی"
 
 #: frontend/src/components/dialogs/PurchaseInvoiceDetailDialog.vue:232
 #: frontend/src/views/PurchaseInvoiceView.vue:1180
 msgid "Gross Total"
-msgstr ""
+msgstr "مجموعی کل"
 
 #: frontend/src/components/items/CommandSearch.vue:456
 msgid "Held Invoices"
-msgstr ""
+msgstr "منعقد رسیدیں"
 
 #: frontend/src/components/items/CommandSearch.vue:64
 msgid "Help"
-msgstr ""
+msgstr "مدد"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:99
 msgid "Hold / Park Invoice"
-msgstr ""
+msgstr "ہولڈ/پارک انوائس"
 
 #: frontend/src/components/items/CommandSearch.vue:447
 msgid "Hold Invoice"
-msgstr ""
+msgstr "انوائس پکڑو"
 
 #: frontend/src/components/dialogs/AboutDialog.vue:66
 msgid "Hub"
-msgstr ""
+msgstr "مرکز"
 
 #: frontend/src/components/purchase/StockReceiving.vue:219
 #: frontend/src/components/purchase/StockReceiving.vue:386
@@ -1903,7 +1903,7 @@ msgstr "QR کوڈ شامل کریں۔"
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:135
 msgid "Increase/Decrease Quantity (in cart)"
-msgstr ""
+msgstr "مقدار میں اضافہ/کم کریں (کارٹ میں)"
 
 #: frontend/src/components/dialogs/CreateSupplierDialog.vue:83
 msgid "Individual"
@@ -1911,7 +1911,7 @@ msgstr "انفرادی"
 
 #: frontend/src/stores/offlineStore.ts:71
 msgid "Internet connection restored"
-msgstr ""
+msgstr "انٹرنیٹ کنکشن بحال ہو گیا"
 
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.py:75
 msgid "Invalid Opening Entry"
@@ -1923,7 +1923,7 @@ msgstr "غلط POS اوپننگ شفٹ ڈیٹا فراہم کیا گیا"
 
 #: xpos/api/invoices.py:1112
 msgid "Invalid doctype for return search"
-msgstr ""
+msgstr "واپسی کی تلاش کے لیے غلط doctype"
 
 #: xpos/x_pos/api/utilities.py:783
 msgid "Invalid language code"
@@ -1981,23 +1981,23 @@ msgstr "رسیدکی تفصیلات"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:1182
 msgid "Invoice not found for printing"
-msgstr ""
+msgstr "پرنٹنگ کے لیے رسید نہیں ملی"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:1065
 msgid "Invoice saved locally (#{0}). It will sync to server automatically."
-msgstr ""
+msgstr "انوائس مقامی طور پر محفوظ کی گئی (#{0})۔ یہ خود بخود سرور سے مطابقت پذیر ہوجائے گا۔"
 
 #: frontend/src/stores/offlineStore.ts:229
 msgid "Invoice synced successfully"
-msgstr ""
+msgstr "انوائس کامیابی کے ساتھ مطابقت پذیر ہو گئی"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:698
 msgid "Invoice will be submitted with a partial payment."
-msgstr ""
+msgstr "انوائس جزوی ادائیگی کے ساتھ جمع کرائی جائے گی۔"
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:696
 msgid "Invoice will be submitted with an outstanding credit balance."
-msgstr ""
+msgstr "انوائس بقایا کریڈٹ بیلنس کے ساتھ جمع کرائی جائے گی۔"
 
 #: xpos/x_pos/api/invoices.py:79
 msgid "Invoice {0} Deleted"
@@ -2009,7 +2009,7 @@ msgstr "رسید {0} موجود نہیں ہے"
 
 #: xpos/x_pos/api/invoice_processing/creation.py:444
 msgid "Invoice {0} has been cancelled and cannot be submitted."
-msgstr ""
+msgstr "انوائس {0} کو منسوخ کر دیا گیا ہے اور جمع نہیں کیا جا سکتا۔"
 
 #: xpos/api/invoices.py:610
 msgid "Invoice {0} is not a draft and cannot be updated"
