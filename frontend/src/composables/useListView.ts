@@ -1,4 +1,4 @@
-import { ref, reactive, computed, watch, type Ref } from "vue";
+import { ref, reactive, computed, watch, isRef, type Ref } from "vue";
 import { getList, getCount, searchLink } from "@/services/api";
 import {
 	getDoctypeMeta,
@@ -29,10 +29,12 @@ export interface QueryFilter {
 	value: string;
 }
 
+type MaybeRef<T> = T | Ref<T>;
+
 export interface ListViewOptions {
 	doctype: Ref<string> | string;
 	fields?: string[];
-	baseFilters?: Record<string, unknown>;
+	baseFilters?: MaybeRef<Record<string, unknown> | undefined>;
 	defaultOrderBy?: string;
 	defaultPageSize?: number;
 	autoFetch?: boolean;
@@ -42,6 +44,7 @@ const TEXT_FILTER_TYPES = new Set(["Data", "Small Text", "Text", "Long Text"]);
 
 export function useListView(options: ListViewOptions) {
 	const doctypeRef = typeof options.doctype === "string" ? ref(options.doctype) : options.doctype;
+	const baseFiltersRef = isRef(options.baseFilters) ? options.baseFilters : ref(options.baseFilters);
 
 	const data = ref<Record<string, unknown>[]>([]);
 	const total = ref(0);
@@ -61,8 +64,8 @@ export function useListView(options: ListViewOptions) {
 	const frappeFilters = computed(() => {
 		const result: [string, string, FilterOperator | string, unknown][] = [];
 
-		if (options.baseFilters) {
-			for (const [field, value] of Object.entries(options.baseFilters)) {
+		if (baseFiltersRef.value) {
+			for (const [field, value] of Object.entries(baseFiltersRef.value)) {
 				result.push([doctypeRef.value, field, "=", value]);
 			}
 		}
@@ -246,6 +249,14 @@ export function useListView(options: ListViewOptions) {
 
 	watch(
 		() => JSON.stringify(queryFilters.value),
+		() => {
+			currentPage.value = 1;
+			fetch();
+		},
+	);
+
+	watch(
+		() => JSON.stringify(baseFiltersRef.value ?? {}),
 		() => {
 			currentPage.value = 1;
 			fetch();
