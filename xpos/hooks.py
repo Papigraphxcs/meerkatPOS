@@ -14,7 +14,7 @@ required_apps = ["frappe", "erpnext"]
 add_to_apps_screen = [
 	{
 		"name": "xpos",
-		"logo": "/assets/xpos/images/xpos-logo.svg",
+		"logo": "/assets/xpos/images/xpos-logo-light.svg",
 		"title": "X POS",
 		"route": "/xpos",
 	}

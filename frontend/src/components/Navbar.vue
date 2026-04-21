@@ -7,6 +7,16 @@
 			<img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-8 h-8" />
 			<span class="hidden md:inline">{{ __("X POS") }}</span>
 		</div>
+		<TooltipWrapper :content="__('Go to Desk')">
+			<Button
+				variant="outline"
+				size="icon-sm"
+				class="text-muted-foreground hover:text-foreground"
+				@click="goToDesk"
+			>
+				<LayoutDashboard class="w-4 h-4" />
+			</Button>
+		</TooltipWrapper>
 		<nav class="hidden md:flex items-center gap-1 ms-4">
 			<router-link
 				to="/pos"
@@ -262,6 +272,7 @@ import {
 	Info,
 	Keyboard,
 	Menu,
+	LayoutDashboard,
 } from "lucide-vue-next";
 import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
 import AboutDialog from "@/components/dialogs/AboutDialog.vue";
@@ -362,5 +373,9 @@ function printLastInvoice() {
 
 function handleSignOut() {
 	authStore.logout();
+}
+
+function goToDesk() {
+	window.location.href = "/app";
 }
 </script>
