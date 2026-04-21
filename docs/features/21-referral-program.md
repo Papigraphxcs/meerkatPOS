@@ -50,15 +50,6 @@ Each referral code is defined with:
 
 ---
 
-## Automatic Referral Code Generation
-
-When enabled in your POS Profile:
-- Every new customer created at the POS automatically gets a referral code
-- The code is stored on the customer record
-- The customer can immediately start referring others
-
----
-
 ## Customer Fields for Referrals
 
 | Field | Description |
@@ -79,9 +70,8 @@ When enabled in your POS Profile:
 6. The referral is registered, and the appropriate coupon is generated
 
 ### Redemption
-- The referred customer's coupon appears in their applicable offers
-- When `auto_fetch_coupons_gifts` is enabled, the coupon is auto-applied
-- The referring customer's reward coupon is created and available for their next purchase
+- The referred customer's coupon can be redeemed through the normal coupon flow at checkout
+- The referring customer's reward coupon is created when the referral's primary offer is configured
 
 ---
 

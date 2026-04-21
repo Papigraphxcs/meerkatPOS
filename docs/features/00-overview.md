@@ -25,7 +25,6 @@
 | 15 | [Printing & Receipts](15-printing-receipts.md) | Thermal receipts, barcodes, QR codes |
 | 16 | [Offline Mode](16-offline-mode.md) | Full offline operation with auto-sync |
 | 17 | [Purchasing Module](17-purchasing.md) | Purchase orders, stock receiving, in-transit |
-| 18 | [Sales Orders & Quotations](18-sales-orders.md) | Create SOs and quotations from POS |
 | 19 | [Multi-Currency](19-multi-currency.md) | Foreign currency transactions |
 | 20 | [Delivery Charges](20-delivery-charges.md) | Configurable delivery/shipping charges |
 | 21 | [Referral Program](21-referral-program.md) | Customer referral codes and rewards |

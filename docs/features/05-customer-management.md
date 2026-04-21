@@ -57,7 +57,7 @@ Directly from the Customer Selection Dialog, you can create a new customer witho
 ### Create & Select
 - Click **Create & Select** to save the customer and immediately select them for the current transaction
 - The customer is saved and available for all future searches
-- If enabled, a referral code is automatically generated for the new customer
+- If company-level auto-referral is configured, a referral code is generated for the new customer
 
 ---
 
@@ -82,7 +82,7 @@ Once a customer is selected, X POS can display:
 - Tax ID
 
 ### Financial Info
-- **Outstanding balance** — Total unpaid amount from GL entries (if `show_customer_balance` is enabled)
+- **Outstanding balance** — Total unpaid amount from GL entries when available at checkout
 - **Customer credit** — Unallocated payment entries and credit notes available for use
 
 ### Customer-Specific Pricing

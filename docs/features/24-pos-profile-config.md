@@ -15,7 +15,6 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 | Enable Quantity Input | Enable manual quantity input mode |
 | Hide Variant Items | Hide individual variant items in the grid |
 | Show Template Items | Show template (parent) items in the grid |
-| Show Customer Balance | Display customer outstanding balance |
 | Hide Expected Amount | Hide expected amounts in the closing dialog |
 | Hide Closing Shift | Hide the close shift button |
 | Hide Images | Hide item images (text-only display) |
@@ -42,8 +41,7 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 
 | Setting | Description |
 |---|---|
-| Auto Fetch Coupons | Auto-fetch and apply applicable coupons/offers |
-| Auto Create Referral Codes | Auto-generate referral codes for new customers |
+| Auto Fetch Coupons & Gifts | Enable coupon entry and automatic cart-offer refresh |
 
 ---
 
@@ -73,7 +71,6 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 | Allow Print Draft Invoices | Allow printing before submission |
 | Allow Print Last Invoice | Quick-print last invoice |
 | Use POS Invoice | Use POS Invoice instead of Sales Invoice |
-| Allow Sales Order | Create Sales Orders from POS |
 | Allow Multi Currency | Enable multi-currency transactions |
 | Block Sale Beyond Available Qty | Prevent selling beyond available stock |
 
@@ -90,7 +87,7 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 | Allow M-Pesa Reconciliation | Enable M-Pesa payment reconciliation |
 | Use Cashback | Enable cashback feature |
 | Use Customer Credit | Allow payment via customer credit |
-| Allow Write Off | Allow small write-off amounts |
+| Allow Write Off Change | Allow small write-off amounts |
 | Cash Mode of Payment | Default cash payment mode |
 
 ---

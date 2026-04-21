@@ -80,12 +80,6 @@ X POS is a feature-rich, offline-first Point of Sale application built on [Frapp
 - **Cash expenses** – Record till expenses with GL account allocation
 - **Cash deposits** – Move cash from till to bank/safe accounts mid-shift
 
-### Quotations & Sales Orders
-
-- **Quotation creation** – Convert cart to customer-facing quote
-- **Sales order conversion** – Create SOs from quotes or directly from POS
-- **SO fulfillment** – Invoice against open or partial sales orders
-
 ### Receipts & Printing
 
 - **Dynamic print format** – Select from available ERPNext print formats

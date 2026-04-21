@@ -1,6 +1,6 @@
 # Payment Processing
 
-X POS supports flexible payment processing with multiple payment methods, split payments, loyalty redemption, write-offs, and phone payments.
+X POS supports flexible payment processing with multiple payment methods, split payments, loyalty redemption, and write-offs.
 
 ---
 
@@ -117,17 +117,6 @@ If the selected customer is enrolled in a loyalty program and has available poin
 - Use it to write off minor rounding differences
 - Example: Order total is $10.02, customer pays $10.00 — write off $0.02
 - Written-off amounts appear as an amber badge in the cart summary
-
----
-
-## Phone Payments (M-Pesa)
-
-For payment modes configured as phone-type payments:
-
-1. The system creates or retrieves a **Payment Request** 
-2. The payment request is sent to the customer's registered mobile number
-3. The customer completes the payment on their phone
-4. X POS tracks the Payment Request status
 
 ---
 

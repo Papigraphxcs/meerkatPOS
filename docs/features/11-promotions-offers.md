@@ -87,7 +87,6 @@ Offers can be triggered based on:
 
 ### Gift Cards
 - Gift card coupons are tied to a specific customer
-- When `auto_fetch_coupons_gifts` is enabled, the system auto-fetches active gift card coupons for the selected customer
 - Gift card balance is tracked via the coupon's `maximum_use` and `used` fields
 
 ---

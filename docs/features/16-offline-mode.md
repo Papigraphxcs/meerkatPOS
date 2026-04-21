@@ -185,21 +185,9 @@ When connectivity returns:
 | Stock updates | Uses cached stock levels (may not reflect latest) |
 | Pricing changes | Uses cached prices (server price changes won't appear until sync) |
 | Offers/promotions | Uses cached offers (new offers won't appear until sync) |
-| Payment verification | Phone payments (M-Pesa) not available offline |
+| External payment verification | Requires connectivity |
 | Order history | Only online orders visible in history |
 | Shift closing | Requires connectivity to close the shift |
-
----
-
-## Tips
-
-- Enable offline mode for locations with unreliable internet connectivity
-- Pending invoices sync automatically when the connection is restored
-- Monitor the pending count indicator in the toolbar
-- You can manually force a sync when online
-| `server_cache_duration` | Server cache TTL in minutes |
-| `force_reload_items` | Force reload the item list (clear cache) |
-| `Allow Delete Offline Invoice` | Show manual delete and clear actions for pending offline invoices |
 
 ---
 
