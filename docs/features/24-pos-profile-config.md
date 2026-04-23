@@ -84,7 +84,6 @@ The POS Profile is the central configuration hub for X POS. It controls every as
 | Use POS Payments | Use X POS payment handling |
 | Allow New Payments | Create new payment entries |
 | Allow Reconcile Payments | Enable payment reconciliation |
-| Allow M-Pesa Reconciliation | Enable M-Pesa payment reconciliation |
 | Use Cashback | Enable cashback feature |
 | Use Customer Credit | Allow payment via customer credit |
 | Allow Write Off Change | Allow small write-off amounts |

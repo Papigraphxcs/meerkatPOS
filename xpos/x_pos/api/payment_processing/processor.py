@@ -9,7 +9,6 @@ from erpnext.accounts.utils import reconcile_against_document
 from frappe import _
 from frappe.utils import cint, flt, fmt_money, nowdate
 
-from xpos.x_pos.api.m_pesa import submit_mpesa_payment
 from xpos.x_pos.api.payment_processing.creation import create_payment_entry
 from xpos.x_pos.api.payment_processing.data import get_outstanding_invoices
 
@@ -43,7 +42,6 @@ def process_pos_payment(payload: str):
 	pos_opening_shift_name = data.pos_opening_shift_name
 	allow_make_new_payments = data.pos_profile.get("allow_make_new_payments")
 	allow_reconcile_payments = data.pos_profile.get("allow_reconcile_payments")
-	allow_mpesa_reconcile_payments = data.pos_profile.get("allow_mpesa_reconcile_payments")
 	today = nowdate()
 
 	remaining_invoices = []
@@ -79,7 +77,6 @@ def process_pos_payment(payload: str):
 		and (
 			(len(data.payment_methods) > 0 and flt(data.total_payment_methods) > 0)
 			or (len(data.selected_payments) > 0 and flt(data.total_selected_payments) > 0)
-			or (len(data.selected_mpesa_payments) > 0 and flt(data.total_selected_mpesa_payments) > 0)
 		)
 	)
 
@@ -97,19 +94,6 @@ def process_pos_payment(payload: str):
 	all_payments_entry = []
 	reconciled_payments = []
 	errors = []
-
-	if (
-		allow_mpesa_reconcile_payments
-		and len(data.selected_mpesa_payments) > 0
-		and data.total_selected_mpesa_payments > 0
-	):
-		for mpesa_payment in data.selected_mpesa_payments:
-			try:
-				new_mpesa_payment = submit_mpesa_payment(mpesa_payment.get("name"), customer)
-				new_payments_entry.append(new_mpesa_payment)
-				all_payments_entry.append(new_mpesa_payment)
-			except Exception as e:
-				errors.append(str(e))
 
 	if allow_reconcile_payments and len(data.selected_payments) > 0 and data.total_selected_payments > 0:
 		for pay in data.selected_payments:

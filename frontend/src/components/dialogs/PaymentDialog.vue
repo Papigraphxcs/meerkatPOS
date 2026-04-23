@@ -924,7 +924,7 @@ function getMethodIcon(method: string) {
 	if (lower.includes("cash")) return Banknote;
 	if (lower.includes("card") || lower.includes("credit") || lower.includes("debit")) return CreditCard;
 	if (lower.includes("bank") || lower.includes("transfer")) return Landmark;
-	if (lower.includes("mobile") || lower.includes("mpesa") || lower.includes("wallet")) return Smartphone;
+	if (lower.includes("mobile") || lower.includes("wallet")) return Smartphone;
 	if (lower.includes("check") || lower.includes("cheque")) return FileText;
 	return DollarSign;
 }

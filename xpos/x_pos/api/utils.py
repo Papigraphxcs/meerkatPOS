@@ -31,24 +31,20 @@ def expand_item_groups(item_groups: list[str] | None):
 		if not group:
 			continue
 
-		# Check if this is a parent group
 		is_group = frappe.db.get_value("Item Group", group, "is_group")
 
 		if is_group:
-			# If it's a parent group, get all its children
 			if get_child_groups:
 				try:
 					descendants = get_child_groups(group) or []
 					expanded_groups.update(descendants)
 				except Exception:
-					# Fallback to database method
 					descendants = frappe.db.get_descendants("Item Group", group) or []
 					expanded_groups.update(descendants)
 			else:
 				descendants = frappe.db.get_descendants("Item Group", group) or []
 				expanded_groups.update(descendants)
 		else:
-			# If it's a leaf group, add it directly
 			expanded_groups.add(group)
 
 	return list(expanded_groups)

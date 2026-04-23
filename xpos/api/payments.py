@@ -4,7 +4,7 @@
 """
 POS Payments API.
 
-- Phone payment requests (M-Pesa, etc.)
+- Phone payment requests
 - Customer credit retrieval & redemption
 - Outstanding invoice lookup
 - Unallocated payment lookup
@@ -230,7 +230,7 @@ def create_payment_entry(data: str | dict) -> dict:
 
 @frappe.whitelist()
 def create_payment_request(doc: str | dict) -> dict | None:
-	"""Creates a phone payment request (M-Pesa, etc.)."""
+	"""Creates a phone payment request."""
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 

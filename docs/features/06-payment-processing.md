@@ -27,7 +27,7 @@ Payment modes are configured in the POS Profile and typically include:
 | Cash | Banknotes | Physical cash payment |
 | Card | Credit card | Debit/credit card payments |
 | Bank Transfer | Building | Direct bank transfers |
-| Mobile / M-Pesa | Phone | Mobile money payments |
+| Mobile Money | Phone | Mobile money payments |
 | Check | Document | Payment by check |
 | Custom modes | — | Any other mode defined in ERPNext |
 

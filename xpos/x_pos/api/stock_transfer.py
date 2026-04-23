@@ -46,11 +46,6 @@ def get_in_transit_transfers(warehouse: str | None = None, limit: int = 50):
 		"per_transferred": ["<", 100],
 	}
 
-	# If warehouse is specified, filter entries where items are destined for this warehouse
-	# In ERPNext in-transit flow, items go source_warehouse -> transit_warehouse
-	# The eventual target is often determined by the Material Request or manual assignment
-	# We'll look at entries that have items in transit warehouses
-
 	entries = frappe.get_all(
 		"Stock Entry",
 		filters=filters,
@@ -73,8 +68,6 @@ def get_in_transit_transfers(warehouse: str | None = None, limit: int = 50):
 		return []
 
 	entry_names = [e.name for e in entries]
-
-	# Fetch items for these entries
 	items = frappe.get_all(
 		"Stock Entry Detail",
 		filters={"parent": ["in", entry_names], "docstatus": 1},
@@ -96,38 +89,26 @@ def get_in_transit_transfers(warehouse: str | None = None, limit: int = 50):
 		],
 	)
 
-	# Group items by parent
 	items_by_entry = {}
 	for item in items:
 		items_by_entry.setdefault(item["parent"], []).append(item)
 
-	# If warehouse filter, only keep entries that have transit warehouse items
-	# where items could be received at the target warehouse
 	result = []
 	for entry in entries:
 		entry_items = items_by_entry.get(entry["name"], [])
 		if not entry_items:
 			continue
 
-		# Calculate how much has been transferred (received) for each item
 		for item in entry_items:
 			received = _get_received_qty(entry["name"], item["ste_detail"])
 			item["received_qty"] = received
 			item["pending_qty"] = flt(item["qty"]) - received
 
-		# Filter out entries with no pending items
 		pending_items = [i for i in entry_items if i["pending_qty"] > 0]
 		if not pending_items:
 			continue
 
-		# If a warehouse filter is given, check if we should show this entry
-		# We show entries where the target warehouse (eventual destination)
-		# could be the user's warehouse. The transit warehouse's parent or
-		# linked warehouse often determines this. For simplicity, we show
-		# all in-transit entries for the company and let the user receive.
 		if warehouse:
-			# Check if any items are in a transit warehouse and could be directed
-			# to the user's warehouse (we show all in-transit for now)
 			company = entry.get("company")
 			user_company = frappe.db.get_value("Warehouse", warehouse, "company")
 			if company and user_company and company != user_company:
@@ -266,10 +247,8 @@ def receive_transit_stock(data: str | dict):
 	if not items_data:
 		frappe.throw(_("No items to receive."))
 
-	# Build outgoing items map
 	outgoing_items_map = {item.name: item for item in outgoing_se.items}
 
-	# Create the receiving Stock Entry
 	receive_se = frappe.get_doc(
 		{
 			"doctype": "Stock Entry",
@@ -295,7 +274,6 @@ def receive_transit_stock(data: str | dict):
 		if receive_qty <= 0:
 			continue
 
-		# Check pending qty
 		already_received = _get_received_qty(outgoing_entry_name, ste_detail)
 		max_receivable = flt(outgoing_item.qty) - already_received
 		if receive_qty > max_receivable:
@@ -304,8 +282,6 @@ def receive_transit_stock(data: str | dict):
 		if receive_qty <= 0:
 			continue
 
-		# Source = transit warehouse (where stock currently sits)
-		# Target = the actual target warehouse
 		receive_se.append(
 			"items",
 			{
@@ -315,8 +291,8 @@ def receive_transit_stock(data: str | dict):
 				"uom": outgoing_item.uom,
 				"stock_uom": outgoing_item.stock_uom,
 				"conversion_factor": outgoing_item.conversion_factor or 1,
-				"s_warehouse": outgoing_item.t_warehouse,  # from transit warehouse
-				"t_warehouse": target_warehouse,  # to target warehouse
+				"s_warehouse": outgoing_item.t_warehouse,
+				"t_warehouse": target_warehouse,
 				"basic_rate": outgoing_item.basic_rate,
 				"valuation_rate": outgoing_item.valuation_rate,
 				"against_stock_entry": outgoing_entry_name,
@@ -389,7 +365,6 @@ def return_shortage_to_source(data: str | dict):
 
 	outgoing_items_map = {item.name: item for item in outgoing_se.items}
 
-	# Create a return Stock Entry: transit warehouse → source warehouse
 	return_se = frappe.get_doc(
 		{
 			"doctype": "Stock Entry",
@@ -414,7 +389,6 @@ def return_shortage_to_source(data: str | dict):
 		if return_qty <= 0:
 			continue
 
-		# Check how much is still in transit (not yet received)
 		already_received = _get_received_qty(outgoing_entry_name, ste_detail)
 		max_in_transit = flt(outgoing_item.qty) - already_received
 		if return_qty > max_in_transit:
@@ -423,7 +397,6 @@ def return_shortage_to_source(data: str | dict):
 		if return_qty <= 0:
 			continue
 
-		# Move from transit warehouse back to source warehouse
 		return_se.append(
 			"items",
 			{
@@ -433,8 +406,8 @@ def return_shortage_to_source(data: str | dict):
 				"uom": outgoing_item.uom,
 				"stock_uom": outgoing_item.stock_uom,
 				"conversion_factor": outgoing_item.conversion_factor or 1,
-				"s_warehouse": outgoing_item.t_warehouse,  # from transit warehouse
-				"t_warehouse": outgoing_item.s_warehouse,  # back to source warehouse
+				"s_warehouse": outgoing_item.t_warehouse,
+				"t_warehouse": outgoing_item.s_warehouse,
 				"basic_rate": outgoing_item.basic_rate,
 				"valuation_rate": outgoing_item.valuation_rate,
 				"against_stock_entry": outgoing_entry_name,

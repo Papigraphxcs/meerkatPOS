@@ -2,7 +2,7 @@
 
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import frappe
 from erpnext.setup.utils import get_exchange_rate
@@ -249,7 +249,6 @@ def _fetch_batches(warehouse: str, item_codes: tuple[str, ...]):
 
 	qty_map: dict[tuple[str, str], float] = {}
 
-	# Primary source of batch quantities: Serial and Batch Entry records linked to SLEs.
 	bundle_rows = frappe.db.sql(
 		"""
         SELECT
@@ -278,7 +277,6 @@ def _fetch_batches(warehouse: str, item_codes: tuple[str, ...]):
 		key = (row.item_code, row.batch_no)
 		qty_map[key] = qty_map.get(key, 0) + flt(row.qty)
 
-	# Backward compatibility for ledgers created before Serial and Batch Bundle existed.
 	legacy_rows = frappe.db.sql(
 		"""
         SELECT
@@ -383,7 +381,6 @@ def _select_price(
 	if "None" in price_rows:
 		return price_rows["None"]
 
-	# fall back to first available rate
 	return next(iter(price_rows.values()), frappe._dict())
 
 
@@ -535,8 +532,6 @@ class ItemDetailAggregator:
 					self.today,
 				)
 
-		# Stock, metadata, UOM and barcode data are reused both for batches and the
-		# final merged item rows, so collect them up front.
 		if use_cache:
 			stock_rows = get_bin_qty(self.warehouse, item_codes_tuple, ttl=self.cache_ttl)
 			meta_rows = get_item_meta(item_codes_tuple, ttl=self.cache_ttl)
