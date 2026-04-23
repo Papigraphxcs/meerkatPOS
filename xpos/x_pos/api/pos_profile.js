@@ -1,4 +1,4 @@
-// Copyright (c) 20201 Youssef Restom and contributors
+// Copyright (c) 2026 Ali Raza and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on("POS Profile", {
@@ -45,6 +45,16 @@ frappe.ui.form.on("POS Profile", {
 					company: doc.company,
 					is_group: 0,
 					root_type: "Expense",
+				},
+			};
+		});
+
+		frm.set_query("erp_tax_account", "purchase_taxes", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					account_type: "Tax",
 				},
 			};
 		});

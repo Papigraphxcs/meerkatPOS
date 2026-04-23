@@ -30,7 +30,7 @@ def get_cash_movement_context(pos_profile: str):
 
 	deposit_accounts = frappe.get_all(
 		"Account",
-		filters={"disabled": 0, "is_group": 0, "account_type": "Bank"},
+		filters={"disabled": 0, "is_group": 0, "account_type": "Bank", "company": pos.company},
 		fields=["name"],
 		order_by="idx",
 	)
