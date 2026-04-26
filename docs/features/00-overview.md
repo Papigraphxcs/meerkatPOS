@@ -39,10 +39,10 @@
 
 | Requirement | Version |
 |---|---|
-| Python | ≥ 3.10 |
-| Frappe Framework | v15 |
-| ERPNext | v15 |
-| Node.js | ≥ 18 |
+| Python | ≥ 3.14 |
+| Frappe Framework | v16 |
+| ERPNext | v16 |
+| Node.js | ≥ 24 |
 
 ---
 

@@ -4,7 +4,7 @@
 
 **A modern, offline-capable Point of Sale for Frappe & ERPNext**
 
-License: MIT · Frappe v15 · ERPNext v15
+License: MIT · Frappe v16 · ERPNext v16
 
 </div>
 
@@ -117,10 +117,10 @@ X POS is a feature-rich, offline-first Point of Sale application built on Frappe
 
 | Dependency | Version |
 |---|---|
-| Python | >= 3.10 |
-| Frappe Framework | v15 |
-| ERPNext | v15 |
-| Node.js | >= 18 (for builds) |
+| Python | >= 3.14 |
+| Frappe Framework | v16 |
+| ERPNext | v18 |
+| Node.js | >= 24 (for builds) |
 
 ---
 
