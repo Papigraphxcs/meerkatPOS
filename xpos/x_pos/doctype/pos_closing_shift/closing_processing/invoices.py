@@ -76,7 +76,7 @@ def _is_consolidated_sales_invoice(sales_invoice):
 
 
 def delete_draft_invoices(pos_opening_shift, pos_profile):
-	if frappe.get_value("POS Profile", pos_profile, "allow_delete"):
+	if frappe.get_value("POS Profile", pos_profile, "allow_delete_draft_invoices"):
 		doctype = (
 			"POS Invoice"
 			if frappe.db.get_value(

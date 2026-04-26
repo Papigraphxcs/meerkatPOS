@@ -56,3 +56,4 @@ logs/
 htmlcov/
 .pytest_cache/
 coverage/
+xpos/public/node_modules

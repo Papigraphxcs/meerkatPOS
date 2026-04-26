@@ -4,11 +4,11 @@
 	>
 		<div class="w-full max-w-md animate-in fade-in zoom-in-95 duration-300 my-auto">
 			<div class="text-center mb-8">
-				<div
-					class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 shadow-lg"
-				>
-					<Zap class="w-8 h-8 text-primary-foreground" />
-				</div>
+				<img
+					:src="LogoLight"
+					alt="X POS Logo"
+					class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center"
+				/>
 				<h1 class="text-2xl font-bold text-primary-foreground mb-1">X POS</h1>
 				<p class="text-primary-foreground/70 text-sm">{{ __("Open your shift to get started") }}</p>
 			</div>
@@ -141,11 +141,12 @@ import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { Card, CardContent } from "@/components/ui/card";
 import { TooltipWrapper } from "@/components/ui/tooltip";
-import { Zap, Loader2, Lock, RefreshCw } from "lucide-vue-next";
+import { Loader2, Lock, RefreshCw } from "lucide-vue-next";
 import { useSyncStatus } from "@/composables/useSyncStatus";
 import { isElectron } from "@/services/electronBridge";
 import __ from "@/lib/translate";
 import { Select } from "../ui/select";
+import LogoLight from "@/assets/images/xpos-logo-light.svg";
 
 const isElectronMode = isElectron();
 

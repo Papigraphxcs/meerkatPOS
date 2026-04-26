@@ -19,7 +19,6 @@ export interface POSProfile {
 	allow_return?: boolean;
 	allow_return_without_invoice?: boolean;
 	allow_sales_order?: boolean;
-	allow_delete?: boolean;
 	allow_delete_offline_invoice?: boolean;
 	allow_print_last_invoice?: boolean;
 	display_additional_notes?: boolean;
