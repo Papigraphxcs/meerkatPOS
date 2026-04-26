@@ -11,15 +11,11 @@ from pathlib import Path
 from typing import Any
 
 import frappe
+import psutil
 from frappe import _
 from frappe.utils import add_to_date, cstr, flt, get_datetime
 
 from .utils import fetch_sales_person_names, get_item_groups
-
-try:
-	import psutil
-except ImportError:  # pragma: no cover - optional dependency
-	psutil = None
 
 _PSUTIL_MISSING_LOGGED = False
 
