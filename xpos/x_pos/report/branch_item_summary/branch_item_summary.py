@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 
 
 def execute(filters=None):
@@ -40,17 +41,17 @@ def get_data(filters):
 def get_columns():
 	return [
 		{
-			"label": "Item Code",
+			"label": _("Item Code"),
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 150,
 		},
 		{
-			"label": "Item Name",
+			"label": _("Item Name"),
 			"fieldname": "item_name",
 			"fieldtype": "Data",
 			"width": 200,
 		},
-		{"label": "Quantity", "fieldname": "qty", "fieldtype": "Float", "width": 100},
+		{"label": _("Quantity"), "fieldname": "qty", "fieldtype": "Float", "width": 100},
 	]

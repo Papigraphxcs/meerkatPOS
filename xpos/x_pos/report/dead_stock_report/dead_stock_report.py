@@ -21,7 +21,10 @@ def get_data(filters):
 	else:
 		filters["suppliers"] = tuple()
 
-	query = f"""
+	# `conditions` and `supplier_filter` contain only server-controlled SQL
+	# fragments; user-supplied values are bound through the parameter dict below.
+	query = (
+		"""
         SELECT
             ti.item_code,
             ti.item_name,
@@ -35,7 +38,9 @@ def get_data(filters):
         LEFT JOIN `tabBin` bin ON ti.item_code = bin.item_code
         LEFT JOIN `tabItem Supplier` sup ON ti.item_code = sup.parent
         WHERE
-            { " AND ".join(conditions) }
+            """
+		+ " AND ".join(conditions)
+		+ """
             AND ti.item_code NOT IN (
                 SELECT tsi.item_code
                 FROM `tabSales Invoice Item` tsi
@@ -49,10 +54,13 @@ def get_data(filters):
                 AND sl.voucher_type = 'Sales Invoice'
                 AND sl.creation >= DATE_SUB(NOW(), INTERVAL %(days)s DAY)
             )
-            {supplier_filter}
+            """
+		+ supplier_filter
+		+ """
         GROUP BY ti.item_code
         ORDER BY ti.item_name ASC
     """
+	)
 
 	data = frappe.db.sql(
 		query,

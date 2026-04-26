@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 
 
 def execute(filters=None):
@@ -31,14 +32,14 @@ def get_stock_balance(filters):
 def get_columns():
 	return [
 		{
-			"label": "Warehouse",
+			"label": _("Warehouse"),
 			"fieldname": "warehouse",
 			"fieldtype": "Link",
 			"options": "Warehouse",
 			"width": 200,
 		},
 		{
-			"label": "Balance",
+			"label": _("Balance"),
 			"fieldname": "balance",
 			"fieldtype": "Currency",
 			"width": 150,

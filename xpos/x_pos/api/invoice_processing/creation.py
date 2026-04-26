@@ -30,7 +30,7 @@ from xpos.x_pos.api.invoice_processing.utils import (
 	get_latest_rate,
 )
 from xpos.x_pos.api.payments import redeeming_customer_credit
-from xpos.x_pos.api.utilities import ensure_child_doctype, set_batch_nos_for_bundels
+from xpos.x_pos.api.utilities import ensure_child_doctype, set_batch_nos_for_bundles
 
 _coupon_row_fields = ("coupon", "coupon_code", "type", "pos_offer", "applied", "customer")
 _offer_row_fields = ("offer_name", "offer", "apply_on", "offer_applied", "coupon_based")
@@ -516,7 +516,7 @@ def submit_invoice(invoice: str, data: str | dict, submit_in_background: bool = 
 
 	_auto_set_return_batches(invoice_doc)
 
-	set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
+	set_batch_nos_for_bundles(invoice_doc, "warehouse", throw=True)
 
 	_validate_stock_on_invoice(invoice_doc)
 

@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 
 
 def execute(filters=None):
@@ -44,27 +45,27 @@ def get_data(filters):
 def get_columns():
 	return [
 		{
-			"label": "Stock Entry ID",
+			"label": _("Stock Entry ID"),
 			"fieldname": "name",
 			"fieldtype": "Link",
 			"options": "Stock Entry",
 			"width": 150,
 		},
 		{
-			"label": "Posting Date",
+			"label": _("Posting Date"),
 			"fieldname": "posting_date",
 			"fieldtype": "Date",
 			"width": 120,
 		},
 		{
-			"label": "Target Warehouse",
+			"label": _("Target Warehouse"),
 			"fieldname": "t_warehouse",
 			"fieldtype": "Link",
 			"options": "Warehouse",
 			"width": 200,
 		},
 		{
-			"label": "Source Warehouse",
+			"label": _("Source Warehouse"),
 			"fieldname": "s_warehouse",
 			"fieldtype": "Link",
 			"options": "Warehouse",

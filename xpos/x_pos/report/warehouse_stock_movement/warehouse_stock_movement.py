@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 
 
 def execute(filters=None):
@@ -36,20 +37,20 @@ def get_data(filters):
 def get_columns():
 	return [
 		{
-			"label": "Warehouse",
+			"label": _("Warehouse"),
 			"fieldname": "warehouse",
 			"fieldtype": "Link",
 			"options": "Warehouse",
 			"width": 200,
 		},
 		{
-			"label": "Voucher Type",
+			"label": _("Voucher Type"),
 			"fieldname": "voucher_type",
 			"fieldtype": "Data",
 			"width": 200,
 		},
 		{
-			"label": "Stock Value Difference",
+			"label": _("Stock Value Difference"),
 			"fieldname": "stock_value_difference",
 			"fieldtype": "Currency",
 			"width": 200,

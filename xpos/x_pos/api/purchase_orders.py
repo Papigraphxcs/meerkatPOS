@@ -1881,8 +1881,6 @@ def save_pi_draft(data: str | dict) -> dict:
 	else:
 		pi_doc.insert()
 
-	frappe.db.commit()
-
 	return {
 		"draft_name": pi_doc.name,
 		"supplier": pi_doc.supplier,
@@ -2192,8 +2190,6 @@ def update_item_prices(items: list, pos_profile: dict):
 				uom=frappe.db.get_value("Item", item_code, "stock_uom"),
 				buying=True,
 			)
-
-	frappe.db.commit()
 
 
 @frappe.whitelist()

@@ -1,16 +1,20 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
+import functools
 import json
 import os
 import re
 import subprocess
 import time
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any
 
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, cstr, flt, get_datetime
+
+from .utils import fetch_sales_person_names, get_item_groups
 
 try:
 	import psutil
@@ -18,9 +22,6 @@ except ImportError:  # pragma: no cover - optional dependency
 	psutil = None
 
 _PSUTIL_MISSING_LOGGED = False
-import functools
-
-from .utils import fetch_sales_person_names, get_item_groups
 
 
 def get_version():
@@ -134,10 +135,6 @@ def set_batch_nos_for_bundles(doc, warehouse_field, throw=False):
 							"Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches"
 						).format(d.idx, d.batch_no, batch_qty, qty)
 					)
-
-
-# Keep backward compatibility alias
-set_batch_nos_for_bundels = set_batch_nos_for_bundles
 
 
 def get_company_domain(company):
@@ -747,7 +744,6 @@ def set_current_user_language(lang_code: str):
 				"message": "Guest users cannot set language preferences",
 			}
 
-		# Validate language code
 		available_languages = get_available_languages()
 		valid_codes = [lang["code"] for lang in available_languages]
 
@@ -757,11 +753,9 @@ def set_current_user_language(lang_code: str):
 				"message": f"Language '{lang_code}' is not supported",
 			}
 
-		# Batch database operations
 		frappe.db.set_value("User", user, "language", lang_code, update_modified=False)
 		frappe.db.commit()
 
-		# Clear specific caches
 		frappe.clear_cache(user=user)
 		_get_user_language_cached.cache_clear()
 		_set_active_session_language(lang_code)
@@ -798,17 +792,14 @@ def get_language_info(lang_code: str):
 		available_languages = get_available_languages()
 		language = next((lang for lang in available_languages if lang["code"] == lang_code), None)
 
-		# Check translation file
 		translations_path = frappe.get_app_path("xpos", "translations", f"{lang_code}.csv")
 		has_translations = os.path.exists(translations_path)
 
 		translation_count = 0
 		if has_translations:
 			try:
-				with (
-					open(translations_path, encoding="utf-8") as f
-				):  # nosemgrep: frappe-security-file-traversal \u2014 path built via frappe.get_app_path, not user input
-					translation_count = sum(1 for _ in f) - 1  # Exclude header
+				translation_lines = Path(translations_path).read_text(encoding="utf-8").splitlines()
+				translation_count = max(len(translation_lines) - 1, 0)  # Exclude header
 			except Exception:
 				pass
 

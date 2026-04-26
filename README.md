@@ -4,15 +4,13 @@
 
 **A modern, offline-capable Point of Sale for Frappe & ERPNext**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](license.txt)
-[![Frappe](https://img.shields.io/badge/Frappe-v15-blue)](https://frappeframework.com)
-[![ERPNext](https://img.shields.io/badge/ERPNext-v15-blue)](https://erpnext.com)
+License: MIT · Frappe v15 · ERPNext v15
 
 </div>
 
 ---
 
-X POS is a feature-rich, offline-first Point of Sale application built on [Frappe](https://frappeframework.com) and [ERPNext](https://erpnext.com). It delivers a fast, keyboard-driven, and fully offline-capable POS experience for retail, hospitality, and service businesses — deployable as a web app, PWA, or Electron desktop application.
+X POS is a feature-rich, offline-first Point of Sale application built on Frappe and ERPNext. It delivers a fast, keyboard-driven, and fully offline-capable POS experience for retail, hospitality, and service businesses — deployable as a web app, PWA, or Electron desktop application.
 
 ## Highlights
 
@@ -130,13 +128,13 @@ X POS is a feature-rich, offline-first Point of Sale application built on [Frapp
 
 ### Frappe Cloud
 
-X POS is available on [Frappe Cloud](https://frappecloud.com). Add it as a marketplace app to your site.
+X POS is available on Frappe Cloud. Add it as a marketplace app to your site.
 
 ### Self-Hosted
 
 ```bash
 cd $PATH_TO_YOUR_BENCH
-bench get-app https://github.com/aliraxa29/xpos --branch develop
+bench get-app xpos
 bench --site your-site.com install-app xpos
 ```
 
@@ -177,7 +175,7 @@ Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a pull r
 
 ```bash
 cd $PATH_TO_YOUR_BENCH
-bench get-app https://github.com/aliraxa29/xpos --branch develop
+bench get-app xpos
 bench --site your-site.com install-app xpos
 cd apps/xpos
 pre-commit install
@@ -191,7 +189,7 @@ This project uses `pre-commit` for code formatting and linting:
 - **eslint** – JavaScript / TypeScript linting
 - **prettier** – Code formatting for JS, Vue, and SCSS
 
-All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) format:
+All commits must follow Conventional Commits format:
 
 ```
 feat: add barcode printing support
@@ -201,8 +199,8 @@ docs: update installation instructions
 
 ### Community
 
-- [Report a Bug](https://github.com/aliraxa29/xpos/issues/new?template=bug_report.md)
-- [Request a Feature](https://github.com/aliraxa29/xpos/issues/new?template=feature_request.md)
+- Report a Bug — see the issue tracker in the source repository
+- Request a Feature — see the issue tracker in the source repository
 - [Security Policy](SECURITY.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 

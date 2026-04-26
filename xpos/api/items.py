@@ -209,13 +209,8 @@ def get_items_count(pos_profile: str, search_term: str = "", item_group: str = "
 		)"""
 		values["search"] = f"%{search_term}%"
 
-	sql = "SELECT COUNT(DISTINCT i.name) FROM `tabItem` i {bin_join} WHERE {conditions}".format(
-		bin_join=bin_join, conditions=conditions
-	)
-	count = frappe.db.sql(
-		sql,
-		values,
-	)
+	sql = "SELECT COUNT(DISTINCT i.name) FROM `tabItem` i " + bin_join + " WHERE " + conditions
+	count = frappe.db.sql(sql, values)
 	return count[0][0] if count else 0
 
 
@@ -226,7 +221,6 @@ def get_item_groups(pos_profile: str | None = None):
 		pos = frappe.get_cached_doc("POS Profile", pos_profile)
 		allowed_names = [ig.item_group for ig in (pos.item_groups or [])]
 		if allowed_names:
-			# Use the configured groups as the display tabs (parent_groups)
 			parent_groups = frappe.get_all(
 				"Item Group",
 				filters={"name": ["in", allowed_names]},
@@ -234,7 +228,6 @@ def get_item_groups(pos_profile: str | None = None):
 				order_by="lft asc",
 				limit_page_length=0,
 			)
-			# Collect all leaf groups that are descendants of the configured groups
 			all_leaf_names: set[str] = set()
 			for group_name in allowed_names:
 				lft_rgt = frappe.db.get_value("Item Group", group_name, ["lft", "rgt"])

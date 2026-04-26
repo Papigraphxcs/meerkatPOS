@@ -65,7 +65,10 @@ def get_data(filters):
 
 	where = " AND ".join(conditions)
 
-	query = f"""
+	# `where` is composed of server-controlled SQL fragments only; user-supplied
+	# values are bound via the `params` dict.
+	query = (
+		"""
 		SELECT
 			ti.item_code,
 			ti.item_name,
@@ -74,9 +77,12 @@ def get_data(filters):
 			bin.actual_qty AS qty_in_hand
 		FROM `tabItem` ti
 		INNER JOIN `tabBin` bin ON ti.item_code = bin.item_code
-		WHERE {where}
+		WHERE """
+		+ where
+		+ """
 		ORDER BY bin.warehouse, ti.item_name
 	"""
+	)
 
 	return frappe.db.sql(query, params, as_dict=True)
 
