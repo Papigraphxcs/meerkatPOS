@@ -42,6 +42,25 @@ export interface ListViewOptions {
 
 const TEXT_FILTER_TYPES = new Set(["Data", "Small Text", "Text", "Long Text"]);
 
+function normalizeOrderByClause(orderByValue: string, doctype: string): string {
+	const tableName = `\`tab${doctype}\``;
+
+	return orderByValue
+		.split(",")
+		.map((part) => {
+			const trimmed = part.trim();
+			if (!trimmed) return "";
+
+			const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)(?:\s+(asc|desc))?$/i);
+			if (!match) return trimmed;
+
+			const [, fieldname, direction] = match;
+			return `${tableName}.\`${fieldname}\`${direction ? ` ${direction.toLowerCase()}` : ""}`;
+		})
+		.filter(Boolean)
+		.join(", ");
+}
+
 export function useListView(options: ListViewOptions) {
 	const doctypeRef = typeof options.doctype === "string" ? ref(options.doctype) : options.doctype;
 	const baseFiltersRef = isRef(options.baseFilters) ? options.baseFilters : ref(options.baseFilters);
@@ -114,7 +133,7 @@ export function useListView(options: ListViewOptions) {
 		try {
 			const listArgs: Record<string, unknown> = {
 				filters: frappeFilters.value,
-				order_by: orderBy.value,
+				order_by: normalizeOrderByClause(orderBy.value, doctypeRef.value),
 				limit_start: (currentPage.value - 1) * pageSize.value,
 				limit_page_length: pageSize.value,
 			};
