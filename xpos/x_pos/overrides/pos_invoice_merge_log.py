@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import frappe
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	POSInvoiceMergeLog as ERPNextPOSInvoiceMergeLog,
 )
@@ -36,8 +37,6 @@ class CustomPOSInvoiceMergeLog(ERPNextPOSInvoiceMergeLog):
 
 		sales_invoice.save()
 
-		# Monkey-patch the instance so update_stock_ledger passes
-		# allow_negative_stock=True during the submit cycle.
 		_orig = sales_invoice.update_stock_ledger
 
 		def _allow_negative(**kwargs):
@@ -50,6 +49,66 @@ class CustomPOSInvoiceMergeLog(ERPNextPOSInvoiceMergeLog):
 		self.consolidated_invoice = sales_invoice.name
 
 		return sales_invoice
+
+	def process_merging_into_credit_notes(self, data):
+		"""Duplicate ERPNext's loop so we can normalise item rates before save.
+		The credit note's return_against is the consolidated SI, but rates come
+		from POS return invoices whose net_rate may be slightly higher due to
+		rounding in different calculation paths.  Capping them to the SI rate
+		lets validate_returned_items pass without bypassing the check.
+  		"""
+		credit_notes = {}
+		for key, value in data.items():
+			if not value:
+				continue
+
+			credit_note = self.get_new_sales_invoice()
+			credit_note.is_return = 1
+			credit_note = self.merge_pos_invoice_into(credit_note, value)
+			credit_note.return_against = key
+			credit_note.is_consolidated = 1
+			credit_note.set_posting_time = 1
+			credit_note.update_stock = 1
+			credit_note.posting_date = getdate(self.posting_date)
+			credit_note.posting_time = get_time(self.posting_time)
+
+			self._cap_item_rates_to_return_against(credit_note)
+
+			credit_note.save()
+			credit_note.submit()
+
+			self.consolidated_credit_note = credit_note.name
+			credit_notes[credit_note.name] = [d.name for d in value]
+
+		return credit_notes
+
+	def _cap_item_rates_to_return_against(self, credit_note) -> None:
+		"""Cap credit note item rates that exceed the consolidated SI rate.
+
+		A POS return item's net_rate can be marginally higher than the
+		corresponding row in the consolidated SI due to rounding.
+		validate_returned_items throws when rate > ref.rate, so we clamp here
+		and recalculate totals so _normalize_return_payments stays consistent.
+		"""
+		si_rates = {
+			row.name: flt(row.rate)
+			for row in frappe.db.get_all(
+				"Sales Invoice Item",
+				filters={"parent": credit_note.return_against},
+				fields=["name", "rate"],
+			)
+		}
+
+		changed = False
+		for item in credit_note.get("items"):
+			ref_rate = si_rates.get(item.get("sales_invoice_item"))
+			if ref_rate is not None and flt(item.rate) > ref_rate:
+				item.rate = ref_rate
+				changed = True
+
+		if changed:
+			credit_note.calculate_taxes_and_totals()
+			self._normalize_return_payments(credit_note)
 
 	def merge_pos_invoice_into(self, invoice, data):
 		invoice = super().merge_pos_invoice_into(invoice, data)
