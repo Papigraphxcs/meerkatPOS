@@ -76,31 +76,33 @@ def _is_consolidated_sales_invoice(sales_invoice):
 
 
 def delete_draft_invoices(pos_opening_shift, pos_profile):
-	if frappe.get_value("POS Profile", pos_profile, "allow_delete_draft_invoices"):
-		doctype = (
-			"POS Invoice"
-			if frappe.db.get_value(
-				"POS Profile",
-				pos_profile,
-				"create_pos_invoice_instead_of_sales_invoice",
-			)
-			else "Sales Invoice"
-		)
-		data = frappe.db.sql(
-			"""
-        select
-            name
-        from
-            `tab%(doctype)s`
-        where
-            docstatus = 0 and is_printed = 0 and pos_opening_shift = %(pos_opening_shift)s
-        """,
-			{"pos_opening_shift": pos_opening_shift, "doctype": doctype},
-			as_dict=1,
-		)
+	if not frappe.db.get_value("POS Profile", pos_profile, "allow_delete_draft_invoices"):
+		return
 
-		for invoice in data:
-			frappe.delete_doc(doctype, invoice.name, force=1)
+	create_pos_invoice = frappe.db.get_value(
+		"POS Profile",
+		pos_profile,
+		"create_pos_invoice_instead_of_sales_invoice",
+	)
+
+	doctype = "POS Invoice" if create_pos_invoice else "Sales Invoice"
+
+	invoice_names = frappe.get_all(
+		doctype,
+		filters={
+			"docstatus": 0,
+			"is_printed": 0,
+			"pos_opening_shift": pos_opening_shift,
+		},
+		pluck="name",
+	)
+
+	for invoice_name in invoice_names:
+		frappe.delete_doc(
+			doctype,
+			invoice_name,
+			force=True,
+			)
 
 
 def submit_printed_invoices(pos_opening_shift, doctype):

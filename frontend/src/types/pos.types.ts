@@ -320,6 +320,7 @@ export interface InvoiceItem {
 	local_item_name?: string;
 	qty: number;
 	rate: number;
+	price_list_rate?: number;
 	amount?: number;
 	uom?: string;
 	discount_percentage?: number;

@@ -452,7 +452,7 @@ def _get_shift_tax_summary(invoices: list, doctype: str = "Sales Invoice") -> li
 	taxes = frappe.get_all(
 		"Sales Taxes and Charges",
 		filters={"parent": ["in", inv_names], "parenttype": doctype},
-		fields=["account_head", "rate", "SUM(tax_amount) AS amount"],
+		fields=["account_head", "rate", {"SUM": "tax_amount", "as": "amount"}],
 		group_by="account_head, rate",
 		order_by="account_head",
 	)

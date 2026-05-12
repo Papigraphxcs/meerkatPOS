@@ -338,6 +338,7 @@ def create_invoice(data: str | dict):
 						"item_code": item_data.get("item_code"),
 						"price_list": price_list,
 						"selling": 1,
+						"uom": item_data.get("uom") or item_data.get("stock_uom"),
 					},
 					"price_list_rate",
 				)

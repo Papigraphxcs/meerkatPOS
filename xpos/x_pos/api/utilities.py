@@ -35,8 +35,11 @@ def get_app_branch(app):
 	"""Returns branch of an app."""
 	import subprocess
 
+	if not app or app not in frappe.get_installed_apps():
+		return ""
+
 	try:
-		branch = subprocess.check_output(
+		branch = subprocess.check_output(  # nosemgrep: frappe-subprocess-exec — app validated against installed apps list
 			["git", "-C", f"../apps/{app}", "rev-parse", "--abbrev-ref", "HEAD"],
 			stderr=subprocess.DEVNULL,
 		)
@@ -159,7 +162,7 @@ def _get_git_commit_info(app_name: str = "xpos") -> dict[str, Any]:
 		return {}
 
 	def _run(cmd: list[str]) -> str:
-		return subprocess.check_output(cmd, cwd=app_path, stderr=subprocess.DEVNULL).decode("utf-8").strip()
+		return subprocess.check_output(cmd, cwd=app_path, stderr=subprocess.DEVNULL).decode("utf-8").strip()  # nosemgrep: frappe-subprocess-exec — static argument list, no user input
 
 	try:
 		commit_hash = _run(["git", "rev-parse", "HEAD"])
@@ -176,7 +179,7 @@ def _get_git_commit_info(app_name: str = "xpos") -> dict[str, Any]:
 
 def _fetch_remote(app_path: str) -> None:
 	try:
-		subprocess.check_output(
+		subprocess.check_output(  # nosemgrep: frappe-subprocess-exec — static argument list, no user input
 			["git", "fetch", "origin", "--prune", "--quiet"],
 			cwd=app_path,
 			stderr=subprocess.DEVNULL,
@@ -188,7 +191,7 @@ def _fetch_remote(app_path: str) -> None:
 def _get_remote_heads(app_path: str) -> dict[str, str]:
 	try:
 		output = (
-			subprocess.check_output(
+			subprocess.check_output(  # nosemgrep: frappe-subprocess-exec — static argument list, no user input
 				["git", "for-each-ref", "refs/remotes/origin", "--format=%(refname:short) %(objectname)"],
 				cwd=app_path,
 				stderr=subprocess.DEVNULL,
@@ -211,10 +214,20 @@ def _get_remote_heads(app_path: str) -> dict[str, str]:
 		return {}
 
 
+_SAFE_GIT_REF_RE = re.compile(r"^[a-zA-Z0-9._/^~@{}\[\]-]+$")
+
+
+def _validate_git_ref(ref: str) -> bool:
+	"""Return True only if *ref* matches a safe git ref pattern."""
+	return bool(ref and _SAFE_GIT_REF_RE.match(ref))
+
+
 def _get_commit_details(app_path: str, ref: str) -> dict[str, str]:
+	if not _validate_git_ref(ref):
+		return {}
 	try:
 		commit_message = (
-			subprocess.check_output(
+			subprocess.check_output(  # nosemgrep: frappe-subprocess-exec — ref validated against safe pattern above
 				["git", "log", "-1", "--pretty=%B", ref],
 				cwd=app_path,
 				stderr=subprocess.DEVNULL,
@@ -223,7 +236,7 @@ def _get_commit_details(app_path: str, ref: str) -> dict[str, str]:
 			.strip()
 		)
 		commit_date = (
-			subprocess.check_output(
+			subprocess.check_output(  # nosemgrep: frappe-subprocess-exec — ref validated against safe pattern above
 				["git", "log", "-1", "--pretty=%cI", ref],
 				cwd=app_path,
 				stderr=subprocess.DEVNULL,
@@ -232,7 +245,7 @@ def _get_commit_details(app_path: str, ref: str) -> dict[str, str]:
 			.strip()
 		)
 		commit_hash = (
-			subprocess.check_output(
+			subprocess.check_output(  # nosemgrep: frappe-subprocess-exec — ref validated against safe pattern above
 				["git", "rev-parse", ref],
 				cwd=app_path,
 				stderr=subprocess.DEVNULL,
@@ -250,9 +263,11 @@ def _get_commit_details(app_path: str, ref: str) -> dict[str, str]:
 
 
 def _get_commit_list(app_path: str, range_ref: str, limit: int = 20) -> list[dict[str, str]]:
+	if not _validate_git_ref(range_ref):
+		return []
 	try:
 		output = (
-			subprocess.check_output(
+			subprocess.check_output(  # nosemgrep: frappe-subprocess-exec — range_ref validated against safe pattern above
 				[
 					"git",
 					"log",
@@ -288,7 +303,7 @@ def _get_commit_list(app_path: str, range_ref: str, limit: int = 20) -> list[dic
 def _get_current_branch(app_path: str) -> str:
 	try:
 		branch = (
-			subprocess.check_output(
+			subprocess.check_output(  # nosemgrep: frappe-subprocess-exec — static argument list, no user input
 				["git", "rev-parse", "--abbrev-ref", "HEAD"],
 				cwd=app_path,
 				stderr=subprocess.DEVNULL,

@@ -1,16 +1,13 @@
-"""Override POS Invoice Merge Log to stabilise consolidated return payments."""
+"""Mixin that augments POS Invoice Merge Log to stabilise consolidated return payments."""
 
 from __future__ import annotations
 
 import frappe
-from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
-	POSInvoiceMergeLog as ERPNextPOSInvoiceMergeLog,
-)
 from frappe.utils import flt, get_time, getdate
 
 
-class CustomPOSInvoiceMergeLog(ERPNextPOSInvoiceMergeLog):
-	"""Ensure consolidated credit notes keep payment totals within tolerance."""
+class CustomPOSInvoiceMergeLog:
+	"""Mixin that ensures consolidated credit notes keep payment totals within tolerance."""
 
 	def process_merging_into_sales_invoice(self, data):
 		"""Allow negative stock during POS consolidation.

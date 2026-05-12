@@ -136,9 +136,9 @@ after_uninstall = "xpos.uninstall.after_uninstall"
 
 # DocType Class
 # ---------------
-# Override standard doctype classes
+# Extend standard doctype classes (mixin — does not miss upstream fixes)
 
-override_doctype_class = {
+extend_doctype_class = {
 	"POS Invoice": "xpos.x_pos.overrides.pos_invoice.CustomPOSInvoice",
 	"POS Invoice Merge Log": "xpos.x_pos.overrides.pos_invoice_merge_log.CustomPOSInvoiceMergeLog",
 }
