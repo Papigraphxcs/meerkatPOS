@@ -17,10 +17,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/aliraxa29/xpos"
-Repository = "https://github.com/aliraxa29/xpos"
-Issues = "https://github.com/aliraxa29/xpos/issues"
-Changelog = "https://github.com/aliraxa29/xpos/releases"
+Homepage = "https://github.com/kodlyft/xpos"
+Repository = "https://github.com/kodlyft/xpos"
+Issues = "https://github.com/kodlyft/xpos/issues"
+Changelog = "https://github.com/kodlyft/xpos/releases"
 
 [build-system]
 requires = ["flit_core >=3.4,<4"]
