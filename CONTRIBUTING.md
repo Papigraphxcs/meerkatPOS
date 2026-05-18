@@ -32,7 +32,7 @@ This project follows a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, 
 
    ```bash
    cd apps/xpos
-   git remote add upstream https://github.com/aliraxa29/xpos.git
+   git remote add upstream https://github.com/kodlyft/xpos.git
    ```
 
 4. **Create a new branch** from `develop`:
@@ -157,7 +157,7 @@ test: add unit tests for pricing engine
 
 ## Reporting Bugs
 
-Use the [Bug Report](https://github.com/aliraxa29/xpos/issues/new?template=bug_report.md) issue template. Please include:
+Use the [Bug Report](https://github.com/kodlyft/xpos/issues/new?template=bug_report.md) issue template. Please include:
 
 - Steps to reproduce
 - Expected vs. actual behavior
@@ -166,7 +166,7 @@ Use the [Bug Report](https://github.com/aliraxa29/xpos/issues/new?template=bug_r
 
 ## Requesting Features
 
-Use the [Feature Request](https://github.com/aliraxa29/xpos/issues/new?template=feature_request.md) issue template. Describe:
+Use the [Feature Request](https://github.com/kodlyft/xpos/issues/new?template=feature_request.md) issue template. Describe:
 
 - The problem you're trying to solve
 - Your proposed solution

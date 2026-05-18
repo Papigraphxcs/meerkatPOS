@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aliraxa29/xpos.git"
+    "url": "https://github.com/kodlyft/xpos.git"
   },
   "bugs": {
-    "url": "https://github.com/aliraxa29/xpos/issues"
+    "url": "https://github.com/kodlyft/xpos/issues"
   },
-  "homepage": "https://github.com/aliraxa29/xpos#readme",
+  "homepage": "https://github.com/kodlyft/xpos#readme",
   "keywords": [
     "xpos",
     "frappe",
