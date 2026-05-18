@@ -1,14 +1,10 @@
 <template>
 	<div
-		class="fixed inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/95 z-50 flex flex-col items-center overflow-y-auto p-4"
-	>
+		class="fixed inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/95 z-50 flex flex-col items-center overflow-y-auto p-4">
 		<div class="w-full max-w-md animate-in fade-in zoom-in-95 duration-300 my-auto">
 			<div class="text-center mb-8">
-				<img
-					:src="LogoLight"
-					alt="X POS Logo"
-					class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center"
-				/>
+				<img :src="LogoLight" alt="X POS Logo"
+					class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center" />
 				<h1 class="text-2xl font-bold text-primary-foreground mb-1">X POS</h1>
 				<p class="text-primary-foreground/70 text-sm">{{ __("Open your shift to get started") }}</p>
 			</div>
@@ -24,20 +20,13 @@
 							<label class="text-sm font-semibold text-foreground">{{
 								__("POS Profile")
 							}}</label>
-							<TooltipWrapper
-								:content="
-									syncStatus.isSyncing.value ? __('Syncing...') : __('Refresh profiles')
-								"
-							>
-								<button
-									type="button"
+							<TooltipWrapper :content="syncStatus.isSyncing.value ? __('Syncing...') : __('Refresh profiles')
+								">
+								<button type="button"
 									class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
 									:class="{
 										'animate-spin pointer-events-none': syncStatus.isSyncing.value,
-									}"
-									:disabled="isLoadingData"
-									@click="loadProfiles"
-								>
+									}" :disabled="isLoadingData" @click="loadProfiles">
 									<RefreshCw class="w-3.5 h-3.5" />
 									<span>{{
 										syncStatus.isSyncing.value ? __("Syncing...") : __("Refresh")
@@ -47,17 +36,11 @@
 						</div>
 
 						<div>
-							<Select
-								:items="
-									profiles.map((p) => ({
-										label: `${p.name} (${p.company})`,
-										value: p.name,
-									}))
-								"
-								v-model="selectedProfile"
-								@update:model-value="onProfileChange"
-								class="h-10 w-full px-10"
-							/>
+							<Select :items="profiles.map((p) => ({
+								label: `${p.name} (${p.company})`,
+								value: p.name,
+							}))
+								" v-model="selectedProfile" @update:model-value="onProfileChange" class="h-10 w-full px-10" />
 							<p v-if="profiles.length === 0" class="mt-1 text-xs text-muted-foreground">
 								{{
 									syncStatus.isSyncing.value
@@ -72,8 +55,7 @@
 								__("Company")
 							}}</label>
 							<div
-								class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground"
-							>
+								class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground">
 								{{ selectedCompany }}
 							</div>
 						</div>
@@ -83,31 +65,19 @@
 								{{ __("Opening Cash Balance") }}
 							</label>
 							<div class="space-y-2">
-								<div
-									v-for="method in paymentMethodsList"
-									:key="method.mode_of_payment"
-									class="flex items-center gap-3"
-								>
+								<div v-for="method in paymentMethodsList" :key="method.mode_of_payment"
+									class="flex items-center gap-3">
 									<span class="text-sm text-muted-foreground w-28 truncate">
 										{{ method.mode_of_payment }}
 									</span>
-									<NumberInput
-										v-model="method.opening_amount"
-										:min="0"
-										:precision="2"
-										class="flex-1"
-										placeholder="0.00"
-									/>
+									<NumberInput v-model="method.opening_amount" :min="0" :precision="2" class="flex-1"
+										placeholder="0.00" />
 								</div>
 							</div>
 						</div>
 
-						<Button
-							size="xl"
-							class="w-full font-bold bg-gradient-to-r from-primary to-primary/90"
-							:disabled="!selectedProfile || isOpening"
-							@click="handleOpenShift"
-						>
+						<Button size="xl" class="w-full font-bold bg-gradient-to-r from-primary to-primary/90"
+							:disabled="!selectedProfile || isOpening" @click="handleOpenShift">
 							<template v-if="isOpening">
 								<Loader2 class="w-5 h-5 animate-spin" />
 								{{ __("Opening Shift...") }}
@@ -122,10 +92,8 @@
 			</Card>
 
 			<div v-if="!isElectronMode" class="text-center mt-4">
-				<a
-					href="/app"
-					class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline"
-				>
+				<a href="/desk"
+					class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline">
 					← {{ __("Back to Desk") }}
 				</a>
 			</div>
