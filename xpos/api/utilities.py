@@ -164,3 +164,8 @@ def get_default_warehouse(company: str | None = None):
 	if warehouse:
 		return warehouse
 	return frappe.db.get_value("Company", company, "default_warehouse_for_sales")
+
+
+def get_invoice_type():
+	"""Returns the invoice type based on POS settings."""
+	return frappe.get_single_value("POS Settings", "invoice_type") or "Sales Invoice"

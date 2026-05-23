@@ -1145,7 +1145,7 @@ async function printInvoice(invoiceName: string) {
 		const printFormat = posStore?.defaultPrintFormat || "XPOS Thermal Receipt";
 		const letterHead = posStore.printSettings?.letter_head || "";
 
-		const usePosInvoice = posStore.posProfile?.create_pos_invoice_instead_of_sales_invoice;
+		const usePosInvoice = xpos.boot?.pos_settings?.invoice_type === "POS Invoice";
 		const doctype = usePosInvoice ? "POS Invoice" : "Sales Invoice";
 
 		const baseUrl = window.location.origin;

@@ -37,6 +37,7 @@ declare global {
 			stock_settings?: Record<string, any>;
 			selling_settings?: Record<string, any>;
 			territories?: Array<{ name?: string; territory_name?: string }>;
+			pos_settings?: Record<string, any>;
 		};
 		_messages?: Record<string, string>;
 		csrf_token?: string;

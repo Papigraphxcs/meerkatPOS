@@ -1,3 +1,23 @@
+export interface POSSearchField {
+	field: string;
+	[key: string]: unknown;
+}
+
+export interface POSAdditionalField {
+	fieldname: string;
+	default_value: any;
+	reqd: boolean;
+	read_only: boolean;
+	[key: string]: unknown;
+}
+
+export interface POSSettings {
+	invoice_type: string;
+	post_change_gl_entries: boolean;
+	invoice_fields: POSAdditionalField[];
+	pos_search_fields: POSSearchField[];
+}
+
 export interface POSProfile {
 	name: string;
 	warehouse: string;
@@ -42,14 +62,12 @@ export interface POSProfile {
 	auto_fetch_coupons_gifts?: boolean;
 	hide_closing_shift?: boolean;
 	use_offline_mode?: boolean;
-	fetch_items_directly_from_server?: boolean;
 	cash_mode_of_payment?: string;
 	use_customer_credit?: boolean;
 	use_cashback?: boolean;
 	apply_customer_discount?: boolean;
 	show_template_items?: boolean;
 	hide_variants_items?: boolean;
-	create_pos_invoice_instead_of_sales_invoice?: boolean;
 	hide_unavailable_items?: boolean;
 	hide_images?: boolean;
 	default_pos_expense_account?: string;

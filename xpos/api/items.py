@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe.utils import cint, flt, getdate, nowdate
+from xpos.api.utilities import get_invoice_type
 
 
 @frappe.whitelist()
@@ -56,7 +57,7 @@ def get_pos_items(
 		]
 
 	hide_unavailable = pos.get("hide_unavailable_items") and warehouse
-	use_pos_deduction = bool(pos.get("create_pos_invoice_instead_of_sales_invoice"))
+	use_pos_deduction = bool(get_invoice_type() == "POS Invoice")
 
 	if hide_unavailable:
 		wh_list = [warehouse]
@@ -552,7 +553,7 @@ def get_stock_availability(items: str | list, warehouse: str | None = None, pos_
 	if not items:
 		return []
 
-	use_pos_deduction = bool(pos_profile and _is_pos_invoice_mode(pos_profile))
+	use_pos_deduction = bool(pos_profile and get_invoice_type() == "POS Invoice")
 	pending_map: dict[str, float] = {}
 	if use_pos_deduction and warehouse:
 		wh_list = [warehouse]
@@ -677,18 +678,11 @@ def get_stock_qty(item_code: str, warehouse: str, pos_profile: str | None = None
 	)
 	bin_qty = flt(rows[0].actual_qty) if rows else 0
 
-	if pos_profile and _is_pos_invoice_mode(pos_profile):
+	if pos_profile and get_invoice_type() == "POS Invoice":
 		pending_map = _get_pending_pos_qty_map(warehouses, item_codes=[item_code])
 		bin_qty -= pending_map.get(item_code, 0.0)
 
 	return bin_qty
-
-
-def _is_pos_invoice_mode(pos_profile: str) -> bool:
-	"""Return True when the POS Profile creates POS Invoices instead of Sales Invoices."""
-	return bool(
-		frappe.db.get_value("POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice")
-	)
 
 
 def _get_pending_pos_qty_map(

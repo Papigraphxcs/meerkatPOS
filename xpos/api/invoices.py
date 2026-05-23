@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import cint, flt, getdate, now_datetime, nowdate
 from frappe.utils.background_jobs import enqueue
 
-from xpos.api.utilities import get_profile_setting
+from xpos.api.utilities import get_invoice_type, get_profile_setting
 
 
 def _get_item_rate_precision():
@@ -20,21 +20,6 @@ def _get_item_rate_precision():
 		return p if p >= 0 else 3
 	except Exception:
 		return 3
-
-
-def _resolve_invoice_doctype(pos_profile: str):
-	"""Return 'POS Invoice' or 'Sales Invoice' based on POS Profile setting."""
-	if pos_profile:
-		use_pos = cint(
-			frappe.db.get_value(
-				"POS Profile",
-				pos_profile,
-				"create_pos_invoice_instead_of_sales_invoice",
-			)
-		)
-		if use_pos:
-			return "POS Invoice"
-	return "Sales Invoice"
 
 
 def _resolve_invoice_posting_date(pos, requested_posting_date=None, current_posting_date=None):
@@ -220,9 +205,8 @@ def create_invoice(data: str | dict):
 		frappe.throw(_("At least one item is required"))
 
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
-
-	use_pos_invoice = cint(pos.get("create_pos_invoice_instead_of_sales_invoice"))
-	doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
+	
+	doctype = get_invoice_type()
 
 	debit_to = None
 	if hasattr(pos, "debit_to") and pos.get("debit_to"):
@@ -594,9 +578,8 @@ def save_draft_invoice(data: str | dict):
 		frappe.throw(_("POS Profile, Customer, and Items are required"))
 
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
-
-	use_pos_invoice = cint(pos.get("create_pos_invoice_instead_of_sales_invoice"))
-	doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
+	
+	doctype = get_invoice_type()
 
 	debit_to = None
 	if hasattr(pos, "debit_to") and pos.get("debit_to"):
@@ -688,7 +671,7 @@ def save_draft_invoice(data: str | dict):
 				},
 			)
 
-		_ensure_pos_invoice_payment_row(invoice_doc, pos, use_pos_invoice)
+		_ensure_pos_invoice_payment_row(invoice_doc, pos, get_invoice_type() == "POS Invoice")
 
 	if pos_opening_shift:
 		try:
@@ -719,15 +702,7 @@ def get_draft_invoices(pos_opening_shift: str):
 	if pos_opening_shift:
 		filters["pos_opening_shift"] = pos_opening_shift
 
-	doctype = (
-		"POS Invoice"
-		if get_profile_setting(
-			pos_opening_shift,
-			"create_pos_invoice_instead_of_sales_invoice",
-			"POS Invoice",
-		)
-		else "Sales Invoice"
-	)
+	doctype = get_invoice_type()
 
 	invoices = frappe.get_list(
 		doctype,
@@ -916,7 +891,7 @@ def get_past_orders(
 
 	order_clause = ", ".join(order_parts) if order_parts else "si.posting_date DESC, si.posting_time DESC"
 
-	doctype = _resolve_invoice_doctype(pos_profile)
+	doctype = get_invoice_type()
 	table = f"`tab{doctype}`"
 
 	total = frappe.db.sql(
@@ -966,7 +941,7 @@ def get_invoices(
 	pos_profile: str = "",
 ):
 	"""Return POS invoices filtered by opening shift and optional return flag."""
-	doctype = _resolve_invoice_doctype(pos_profile)
+	doctype = get_invoice_type()
 	filters = {"docstatus": 1, "is_pos": 1}
 	if pos_opening_shift:
 		filters["pos_opening_shift"] = pos_opening_shift
