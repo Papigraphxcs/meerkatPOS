@@ -2,6 +2,7 @@ from warnings import filters
 
 import frappe
 
+from xpos.api.utilities import get_invoice_type
 from xpos.x_pos.doctype.pos_closing_shift.closing_processing.invoices import (
 	submit_printed_invoices,
 )
@@ -31,13 +32,7 @@ def get_pos_invoices(pos_opening_shift: str, doctype: str | None = None):
 		return []
 
 	if not doctype:
-		pos_profile = frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile")
-		use_pos_invoice = frappe.db.get_value(
-			"POS Profile",
-			pos_profile,
-			"create_pos_invoice_instead_of_sales_invoice",
-		)
-		doctype = "POS Invoice" if use_pos_invoice else "Sales Invoice"
+		doctype = get_invoice_type()
 
 	submit_printed_invoices(pos_opening_shift, doctype)
 

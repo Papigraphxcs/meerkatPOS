@@ -24,3 +24,4 @@ def extend_bootinfo(bootinfo):
 		bootinfo.accounts_setting = frappe.get_single("Accounts Settings")
 		bootinfo.buying_settings = frappe.get_single("Buying Settings")
 		bootinfo.stock_settings = frappe.get_single("Stock Settings")
+		bootinfo.pos_settings = frappe.get_single("POS Settings")

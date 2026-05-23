@@ -6,15 +6,7 @@ import json
 import frappe
 from frappe import Any, _
 from frappe.utils import cint, flt, now_datetime, nowdate
-
-
-def _resolve_invoice_doctype(pos_profile: str) -> str:
-	"""Return 'POS Invoice' or 'Sales Invoice' based on POS Profile setting."""
-	if pos_profile and cint(
-		frappe.db.get_value("POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice")
-	):
-		return "POS Invoice"
-	return "Sales Invoice"
+from xpos.api.utilities import get_invoice_type
 
 
 def _row_value(row: dict | object, key: str, default: Any | None = None):
@@ -153,7 +145,7 @@ def close_shift(opening_shift: str, closing_details: str | list[dict] | None):
 	closing_details = json.loads(closing_details) if isinstance(closing_details, str) else closing_details
 
 	opening = frappe.get_doc("POS Opening Shift", opening_shift)
-	doctype = _resolve_invoice_doctype(opening.pos_profile)
+	doctype = get_invoice_type()
 
 	filters = {
 		"pos_opening_shift": opening.name,
@@ -282,7 +274,7 @@ def get_shift_summary(opening_shift: str):
 	Enhanced version with tax breakdown and return info.
 	"""
 	opening = frappe.get_doc("POS Opening Shift", opening_shift)
-	doctype = _resolve_invoice_doctype(opening.pos_profile)
+	doctype = get_invoice_type()
 
 	filters = {
 		"pos_opening_shift": opening.name,

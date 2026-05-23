@@ -11,6 +11,7 @@ from frappe.utils import (
 )
 from frappe.utils.background_jobs import enqueue
 
+from xpos.api.utilities import get_invoice_type
 from xpos.x_pos.api.invoice_processing.stock import (
 	_apply_item_name_overrides,
 	_auto_set_return_batches,
@@ -195,11 +196,7 @@ def update_invoice(data: str) -> dict:
 	data.pop("offers", None)
 
 	pos_profile = data.get("pos_profile")
-	doctype = "Sales Invoice"
-	if pos_profile and frappe.db.get_value(
-		"POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
-	):
-		doctype = "POS Invoice"
+	doctype = get_invoice_type()
 
 	data.setdefault("doctype", doctype)
 
@@ -417,12 +414,7 @@ def submit_invoice(invoice: str, data: str | dict, submit_in_background: bool = 
 	invoice.pop("offers", None)
 
 	pos_profile = invoice.get("pos_profile")
-	doctype = "Sales Invoice"
-	if pos_profile and frappe.db.get_value(
-		"POS Profile", pos_profile, "create_pos_invoice_instead_of_sales_invoice"
-	):
-		doctype = "POS Invoice"
-
+	doctype = get_invoice_type()
 	invoice_name = invoice.get("name")
 	if not invoice_name or not frappe.db.exists(doctype, invoice_name):
 		# Re-inject detail rows so update_invoice can process them.

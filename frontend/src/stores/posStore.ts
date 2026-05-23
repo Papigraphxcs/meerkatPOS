@@ -12,7 +12,6 @@ import {
 	type OpeningData,
 	type ShiftSummary,
 	type PrintFormat,
-	type CurrencySymbolMap,
 	type TaxDetail,
 	type PrintSettings,
 } from "@/types/pos.types";
@@ -67,9 +66,7 @@ export const usePosStore = defineStore("pos", () => {
 
 	const sellingPriceList = computed(() => posProfile.value?.selling_price_list || "");
 
-	const invoiceType = computed(() =>
-		posProfile.value?.create_pos_invoice_instead_of_sales_invoice ? "POS Invoice" : "Sales Invoice",
-	);
+	const invoiceType = computed(() => xpos.boot?.pos_settings?.invoice_type);
 
 	const defaultPrintFormat = computed(
 		() => posProfile.value?.default_print_format || "XPOS Thermal Receipt",
