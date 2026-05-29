@@ -47,6 +47,8 @@ export interface POSProfile {
 	display_item_code?: boolean;
 	allow_zero_rated_items?: boolean;
 	allow_print_draft_invoices?: boolean;
+	enable_cashier_settlement?: boolean;
+	print_backup_receipt?: boolean;
 	auto_set_batch?: boolean;
 	search_serial_no?: boolean;
 	tax_inclusive?: boolean;
@@ -392,6 +394,7 @@ export interface InvoiceData {
 	currency?: string;
 	conversion_rate?: number;
 	is_credit_sale?: boolean;
+	pos_awaiting_settlement?: boolean;
 	pos_delivery_charges?: string;
 	pos_delivery_charges_rate?: number;
 }
@@ -633,6 +636,7 @@ export interface ShiftCheckResult {
 	tax_inclusive?: number;
 	print_settings?: PrintSettings;
 	disable_rounded_total?: number;
+	is_cashier?: boolean;
 }
 
 export interface OpeningData {

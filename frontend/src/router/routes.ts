@@ -1,5 +1,6 @@
 const PosView = () => import("@/views/PosView.vue");
 const OrdersView = () => import("@/views/OrdersView.vue");
+const CashierView = () => import("@/views/CashierView.vue");
 const ReportsIndexView = () => import("@/views/ReportsIndexView.vue");
 const ReportViewerView = () => import("@/views/ReportViewerView.vue");
 const SettingsView = () => import("@/views/SettingsView.vue");
@@ -50,6 +51,12 @@ const routes: RouteRecordRaw[] = [
 		name: "orders",
 		component: OrdersView,
 		meta: { title: "Orders", requiresAuth: true },
+	},
+	{
+		path: "/cashier",
+		name: "cashier",
+		component: CashierView,
+		meta: { title: "Cashier", requiresAuth: true },
 	},
 	{
 		path: "/reports",

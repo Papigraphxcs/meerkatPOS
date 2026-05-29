@@ -551,6 +551,7 @@ import { usePaymentStore } from "@/stores/paymentStore";
 import { call, showSuccess, showError, showInfo, isNetworkError } from "@/services/api";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { __ } from "@/lib/translate";
+import { usePrintInvoice } from "@/composables/usePrintInvoice";
 import { isElectron } from "@/services/electronBridge";
 import {
 	Dialog,
@@ -592,6 +593,7 @@ import {
 } from "@/components/dialogs/paymentDialogShortcuts";
 
 const posStore = usePosStore();
+const { printInvoice, printInvoiceLocal } = usePrintInvoice();
 const cartStore = useCartStore();
 const paymentStore = usePaymentStore();
 const offlineStore = useOfflineStore();
@@ -1137,65 +1139,6 @@ async function submitPayment(withPrint: boolean = true) {
 	} finally {
 		isSubmitting.value = false;
 		printAfterSave.value = false;
-	}
-}
-
-async function printInvoice(invoiceName: string) {
-	try {
-		const printFormat = posStore?.defaultPrintFormat || "XPOS Thermal Receipt";
-		const letterHead = posStore.printSettings?.letter_head || "";
-
-		const usePosInvoice = xpos.boot?.pos_settings?.invoice_type === "POS Invoice";
-		const doctype = usePosInvoice ? "POS Invoice" : "Sales Invoice";
-
-		const baseUrl = window.location.origin;
-		const printUrl = `${baseUrl}/printview?doctype=${doctype}&name=${invoiceName}&format=${printFormat}&no_letterhead=${letterHead ? "0" : "1"}`;
-		const printWindow = window.open(printUrl, "_blank");
-
-		if (printWindow) {
-			printWindow.onload = () => {
-				printWindow.onafterprint = () => {
-					printWindow.close();
-				};
-				setTimeout(() => {
-					printWindow.print();
-				}, 500);
-			};
-		} else {
-			window.open(printUrl, "_blank");
-		}
-	} catch (error) {
-		console.error("Print error:", error);
-		showError(__("Failed to print invoice"));
-	}
-}
-
-async function printInvoiceLocal(localId: number) {
-	try {
-		if (!window.electronAPI?.db || !window.electronAPI?.print) {
-			showError(__("Print not available"));
-			return;
-		}
-
-		const invoice = await window.electronAPI.db.getPendingInvoice(localId);
-		if (!invoice) {
-			showError(__("Invoice not found for printing"));
-			return;
-		}
-
-		await window.electronAPI.print.printInvoice({
-			localId,
-			data: invoice.data,
-			customerName: invoice.customer_name || "",
-			grandTotal: invoice.grand_total,
-			isReturn: invoice.is_return,
-			printFormat: posStore.printSettings?.print_format || "POS Invoice",
-			letterHead: posStore.printSettings?.letter_head || "",
-			companyName: posStore.posProfile?.company || "",
-		});
-	} catch (error) {
-		console.error("Local print error:", error);
-		showError(__("Failed to print invoice locally"));
 	}
 }
 
