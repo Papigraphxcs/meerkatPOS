@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import cint, flt, getdate, now_datetime, nowdate
 from frappe.utils.background_jobs import enqueue
 
-from xpos.api.utilities import get_invoice_type, get_profile_setting
+from xpos.api.utilities import get_invoice_type, get_profile_setting, is_pos_cashier
 
 
 def _get_item_rate_precision():
@@ -221,6 +221,11 @@ def create_invoice(data: str | dict):
 		invoice_doc = frappe.get_doc(doctype, invoice_name)
 		if invoice_doc.docstatus != 0:
 			frappe.throw(_("Only draft invoices can be updated and submitted"))
+
+		if invoice_doc.get("pos_awaiting_settlement") and not is_pos_cashier(
+			frappe.session.user, pos_profile
+		):
+			frappe.throw(_("Only a cashier can settle this invoice."), frappe.PermissionError)
 
 		is_existing_draft = True
 		invoice_doc.set("items", [])
@@ -671,13 +676,16 @@ def save_draft_invoice(data: str | dict):
 				},
 			)
 
-		_ensure_pos_invoice_payment_row(invoice_doc, pos, get_invoice_type() == "POS Invoice")
+	_ensure_pos_invoice_payment_row(invoice_doc, pos, doctype == "POS Invoice")
 
 	if pos_opening_shift:
 		try:
 			invoice_doc.pos_opening_shift = pos_opening_shift
 		except Exception:
 			pass
+
+	if data.get("pos_awaiting_settlement") and frappe.db.has_column(doctype, "pos_awaiting_settlement"):
+		invoice_doc.pos_awaiting_settlement = 1
 
 	_apply_invoice_delivery_charge_fields(invoice_doc, data)
 
@@ -723,6 +731,47 @@ def get_draft_invoices(pos_opening_shift: str):
 	)
 
 	return invoices
+
+
+@frappe.whitelist()
+def get_unsettled_invoices(pos_profile: str | None = None):
+	"""Get draft invoices awaiting cashier settlement for a POS profile.
+
+	These are unsubmitted invoices created by a terminal in cashier-settlement
+	mode (``pos_awaiting_settlement = 1``). They are listed on the Cashier screen
+	regardless of which terminal, operator or shift created them. Once settled
+	(submitted), they drop out of this list via the ``docstatus = 0`` filter.
+	"""
+	doctype = get_invoice_type()
+
+	if not frappe.db.has_column(doctype, "pos_awaiting_settlement"):
+		return []
+
+	if not is_pos_cashier(frappe.session.user, pos_profile):
+		frappe.throw(_("You are not permitted to settle invoices."), frappe.PermissionError)
+
+	filters = {"docstatus": 0, "is_pos": 1, "pos_awaiting_settlement": 1}
+	if pos_profile:
+		filters["pos_profile"] = pos_profile
+
+	return frappe.get_list(
+		doctype,
+		filters=filters,
+		fields=[
+			"name",
+			"customer",
+			"customer_name",
+			"posting_date",
+			"posting_time",
+			"grand_total",
+			"total_qty",
+			"currency",
+			"creation",
+			"modified",
+		],
+		limit_page_length=0,
+		order_by="modified desc",
+	)
 
 
 @frappe.whitelist()

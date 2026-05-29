@@ -184,6 +184,16 @@ export function useKeyboardShortcuts() {
 			},
 		},
 		{
+			id: "goto-cashier",
+			keys: ["alt", "0"],
+			description: "Go to Cashier",
+			category: "Navigation",
+			global: true,
+			action: () => {
+				router.push("/cashier");
+			},
+		},
+		{
 			id: "focus-cart",
 			keys: ["f3"],
 			description: "Focus Cart (First Item Qty)",

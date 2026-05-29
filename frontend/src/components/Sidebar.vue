@@ -25,7 +25,7 @@
 							{{ __("Main") }}
 						</p>
 						<router-link
-							v-for="item in mainNavItems"
+							v-for="item in mainNavItems.filter((it) => it.show)"
 							:key="item.route"
 							:to="item.route"
 							@click="isOpen = false"
@@ -147,6 +147,7 @@ import {
 	Wallet,
 	Landmark,
 	BarChart3,
+	Banknote,
 } from "lucide-vue-next";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
@@ -171,11 +172,17 @@ onUnmounted(() => {
 	window.removeEventListener("xpos:toggle-sidebar", handleToggleSidebar);
 });
 
-const mainNavItems = [
-	{ route: "/pos", label: __("POS"), icon: LayoutGrid },
-	{ route: "/orders", label: __("Orders"), icon: FileText },
-	{ route: "/reports", label: __("Reports"), icon: BarChart3 },
-];
+const mainNavItems = computed(() => [
+	{ route: "/pos", label: __("POS"), icon: LayoutGrid, show: true },
+	{ route: "/orders", label: __("Orders"), icon: FileText, show: true },
+	{
+		route: "/cashier",
+		label: __("Cashier"),
+		icon: Banknote,
+		show: posStore.enableCashierSettlement && posStore.isCashier,
+	},
+	{ route: "/reports", label: __("Reports"), icon: BarChart3, show: true },
+]);
 
 const purchaseNavItems = [
 	{ route: "/purchase-order", label: __("Purchase Order"), icon: ClipboardList },

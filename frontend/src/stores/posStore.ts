@@ -20,6 +20,7 @@ import { isOnline } from "@/utils";
 export const usePosStore = defineStore("pos", () => {
 	const isLoading = ref(true);
 	const isReady = ref(false);
+	const isCashier = ref(true);
 	const currentView = ref("pos");
 	const posOpeningShift = ref<POSOpeningShift | null>(null);
 	const posProfile = ref<POSProfile | null>(null);
@@ -158,6 +159,10 @@ export const usePosStore = defineStore("pos", () => {
 
 	const allowPrintDraftInvoices = computed(() => !!posProfile.value?.allow_print_draft_invoices);
 
+	const enableCashierSettlement = computed(() => !!posProfile.value?.enable_cashier_settlement);
+
+	const printBackupReceipt = computed(() => !!posProfile.value?.print_backup_receipt);
+
 	const cashModeOfPayment = computed(() => posProfile.value?.cash_mode_of_payment || "Cash");
 
 	const purchaseTaxes = computed(() => posProfile.value?.purchase_taxes || []);
@@ -172,6 +177,7 @@ export const usePosStore = defineStore("pos", () => {
 		disableRoundedTotal.value = false;
 		printSettings.value = null;
 		isReady.value = false;
+		isCashier.value = true;
 		printFormats.value = [];
 		lastInvoiceName.value = "";
 	}
@@ -185,6 +191,7 @@ export const usePosStore = defineStore("pos", () => {
 		taxInclusiveMode.value = !!result.tax_inclusive;
 		disableRoundedTotal.value = !!result.disable_rounded_total;
 		printSettings.value = result.print_settings || null;
+		isCashier.value = result.is_cashier ?? true;
 		showOpeningDialog.value = false;
 		isReady.value = true;
 	}
@@ -465,6 +472,7 @@ export const usePosStore = defineStore("pos", () => {
 	return {
 		isLoading,
 		isReady,
+		isCashier,
 		currentView,
 		posOpeningShift,
 		posProfile,
@@ -524,6 +532,8 @@ export const usePosStore = defineStore("pos", () => {
 		useCustomerCredit,
 		applyCustomerDiscount,
 		allowPrintDraftInvoices,
+		enableCashierSettlement,
+		printBackupReceipt,
 		cashModeOfPayment,
 		purchaseTaxes,
 		hideImages,

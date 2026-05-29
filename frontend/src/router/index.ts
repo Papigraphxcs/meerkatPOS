@@ -2,19 +2,15 @@ import { createRouter, createWebHistory, createWebHashHistory, type Router, type
 import { useAuthStore } from "@/stores/authStore";
 import { isElectron } from "@/services/electronBridge";
 import routes from "./routes";
+import { usePosStore } from "@/stores/posStore";
 
-// Electron uses hash-based routing (file:// protocol, no server for SPA fallback).
-// Browser/PWA uses history-based routing with /xpos base path.
-const history = isElectron()
-  ? createWebHashHistory()
-  : createWebHistory("/xpos");
+const history = isElectron() ? createWebHashHistory() : createWebHistory("/xpos");
 
 export const router: Router = createRouter({
   history,
   routes,
 });
 
-// Track first-run status (only checked once)
 let _firstRunChecked = false;
 let _isFirstRun = false;
 
@@ -28,21 +24,19 @@ async function checkFirstRun(): Promise<boolean> {
   try {
     _isFirstRun = await window.electronAPI!.isFirstRun();
   } catch {
-    // If the IPC call fails, assume first run (show setup wizard)
     _isFirstRun = true;
   }
   _firstRunChecked = true;
   return _isFirstRun;
 }
 
-/** Call after setup wizard completes to skip future redirects. */
 export function markSetupComplete(): void {
   _isFirstRun = false;
   _firstRunChecked = true;
 }
 
 router.beforeEach(async (to, _from, next) => {
-  // First-run check: redirect to setup wizard if needed
+  
   const firstRun = await checkFirstRun();
   if (firstRun && to.meta.isSetupPage !== true) {
     next({ name: "setup" });
@@ -58,6 +52,7 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   const authStore = useAuthStore();
+  const posStore = usePosStore();
 
   if (!authStore.isAuthenticated && !authStore.isLoading) {
     await authStore.checkAuth();
@@ -80,6 +75,10 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   if (to.name === "settings" && !isElectron()) {
+    next({ name: "pos" });
+    return;
+  }
+  if (to.name === "cashier" && (!posStore.enableCashierSettlement || !posStore.isCashier)) {
     next({ name: "pos" });
     return;
   }

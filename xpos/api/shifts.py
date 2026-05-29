@@ -6,7 +6,7 @@ import json
 import frappe
 from frappe import Any, _
 from frappe.utils import cint, flt, now_datetime, nowdate
-from xpos.api.utilities import get_invoice_type
+from xpos.api.utilities import get_invoice_type, is_pos_cashier
 
 
 def _row_value(row: dict | object, key: str, default: Any | None = None):
@@ -391,6 +391,7 @@ def _enrich_shift_data(data: dict, pos_profile: str):
 		profile = frappe.get_doc("POS Profile", pos_profile)
 	data["pos_profile"] = profile.as_dict()
 	data["company"] = frappe.get_cached_doc("Company", profile.company).as_dict()
+	data["is_cashier"] = is_pos_cashier(frappe.session.user, pos_profile)
 
 	allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock") or 0)
 	data["stock_settings"] = {"allow_negative_stock": bool(allow_negative_stock)}
