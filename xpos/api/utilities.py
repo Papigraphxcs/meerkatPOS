@@ -203,3 +203,15 @@ def is_pos_cashier(user: str | None = None, pos_profile: str | None = None) -> b
 			"is_cashier",
 		)
 	)
+
+
+def can_close_shift(user: str | None = None, pos_profile: str | None = None) -> bool:
+	"""Return whether ``user`` may close a cashier/sales shift (the ``close_shift`` right).
+
+	Resolved from the user's POS Role permission map so it stays in sync with
+	the Role Permissions admin screen. Administrators / System Managers always
+	qualify.
+	"""
+	from xpos.api.auth import user_has_pos_permission
+
+	return user_has_pos_permission("close_shift", user, pos_profile)

@@ -82,6 +82,10 @@ router.beforeEach(async (to, _from, next) => {
     next({ name: "pos" });
     return;
   }
+  if (to.meta.requiresAdmin === true && (isElectron() || !authStore.canManagePermissions)) {
+    next({ name: "pos" });
+    return;
+  }
 
   if (to.meta.title) {
     document.title = `${to.meta.title} | X POS`;

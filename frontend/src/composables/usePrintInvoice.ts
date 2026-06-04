@@ -1,5 +1,5 @@
 import { usePosStore } from "@/stores/posStore";
-import { showError } from "@/services/api";
+import { call, showError } from "@/services/api";
 import { __ } from "@/lib/translate";
 
 export interface PrintInvoiceOptions {
@@ -42,6 +42,12 @@ export function usePrintInvoice() {
 					setTimeout(() => {
 						printWindow.print();
 					}, 500);
+					call("xpos.api.print_formats.mark_invoice_printed", {
+						doctype,
+						name: invoiceName,
+					}).catch(() => {
+						/* non-fatal: reprint control is best-effort */
+					});
 				};
 			} else {
 				window.open(printUrl, "_blank");

@@ -6,6 +6,7 @@ import { isOnline } from "@/utils";
 import { showError, showSuccess } from "@/services/api";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { usePosStore } from "@/stores/posStore";
+import { hasPermission } from "@/services/userRights";
 
 export interface Shortcut {
 	id: string;
@@ -267,6 +268,7 @@ export function useKeyboardShortcuts() {
 			description: "Print Last Receipt",
 			category: "POS",
 			action: () => {
+				if (!hasPermission("allow_reprint_invoice")) return;
 				window.dispatchEvent(new CustomEvent("xpos:print-last"));
 			},
 		},
@@ -312,6 +314,7 @@ export function useKeyboardShortcuts() {
 			description: "Close Shift",
 			category: "Shift",
 			action: () => {
+				if (!hasPermission("close_shift")) return;
 				window.dispatchEvent(new CustomEvent("xpos:close-shift"));
 			},
 		},

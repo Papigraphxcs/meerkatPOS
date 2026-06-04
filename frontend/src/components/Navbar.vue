@@ -108,7 +108,7 @@
 		</TooltipWrapper>
 
 		<TooltipWrapper
-			v-if="posStore.allowPrintLastInvoice && posStore.lastInvoiceName"
+			v-if="posStore.allowPrintLastInvoice && posStore.lastInvoiceName && hasPermission('allow_reprint_invoice')"
 			:content="__('Print Last Invoice')"
 		>
 			<Button
@@ -241,6 +241,7 @@ import { usePosStore } from "@/stores/posStore";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { useAuthStore } from "@/stores/authStore";
 import { __ } from "@/lib/translate";
+import { hasPermission } from "@/services/userRights";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { TooltipWrapper } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";

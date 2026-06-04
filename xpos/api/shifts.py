@@ -6,7 +6,7 @@ import json
 import frappe
 from frappe import Any, _
 from frappe.utils import cint, flt, now_datetime, nowdate
-from xpos.api.utilities import get_invoice_type, is_pos_cashier
+from xpos.api.utilities import can_close_shift, get_invoice_type, is_pos_cashier
 
 
 def _row_value(row: dict | object, key: str, default: Any | None = None):
@@ -142,6 +142,9 @@ def close_shift(opening_shift: str, closing_details: str | list[dict] | None):
 	- Tax summary per shift
 	- Payment reconciliation with expected vs actual amounts
 	"""
+	if not can_close_shift():
+		frappe.throw(_("Only a Supervisor can close a shift."), frappe.PermissionError)
+
 	closing_details = json.loads(closing_details) if isinstance(closing_details, str) else closing_details
 
 	opening = frappe.get_doc("POS Opening Shift", opening_shift)
@@ -515,6 +518,9 @@ def create_closing_shift(data: str | dict, local_id: str | None = None) -> dict:
 	Returns:
 	    dict with 'name' key containing the server docname
 	"""
+	if not can_close_shift():
+		frappe.throw(_("Only a Supervisor can close a shift."), frappe.PermissionError)
+
 	data = json.loads(data) if isinstance(data, str) else data
 
 	if local_id:

@@ -1,8 +1,9 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { call } from "@/services/api";
 import { cachePOSData, getCachedPOSData } from "@/services/dbBridge";
 import { isElectron } from "@/services/electronBridge";
+import { loadPermissions } from "@/services/userRights";
 import {
 	type POSOpeningShift,
 	type POSProfile,
@@ -41,6 +42,12 @@ export const usePosStore = defineStore("pos", () => {
 	const profileName = computed(() => posProfile.value?.name || "");
 	const warehouse = computed(() => posProfile.value?.warehouse || "");
 	const currency = computed(() => posProfile.value?.currency);
+
+	watch(profileName, async (name, prev) => {
+		if (isElectron() || !name || name === prev) return;
+		const { useAuthStore } = await import("@/stores/authStore");
+		await loadPermissions(useAuthStore().userName, name);
+	});
 
 	const currencySymbol = computed(() => {
 		if (window.xpos) {

@@ -15,6 +15,7 @@ const LoginView = () => import("@/views/LoginView.vue");
 const ResetPasswordView = () => import("@/views/ResetPasswordView.vue");
 const BarcodePrintView = () => import("@/views/BarcodePrintView.vue");
 const SetupWizardView = () => import("@/views/SetupWizardView.vue");
+const RolePermissionsView = () => import("@/views/RolePermissionsView.vue");
 import { RouteRecordRaw } from "vue-router";
 
 const routes: RouteRecordRaw[] = [
@@ -123,6 +124,12 @@ const routes: RouteRecordRaw[] = [
 		name: "bank-drops",
 		component: BankDropView,
 		meta: { title: "Bank Drops", requiresAuth: true },
+	},
+	{
+		path: "/role-permissions",
+		name: "role-permissions",
+		component: RolePermissionsView,
+		meta: { title: "Role Permissions", requiresAuth: true, requiresAdmin: true },
 	},
 ];
 
