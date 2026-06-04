@@ -18,6 +18,14 @@ export const useAuthStore = defineStore("auth", () => {
 	const userEmail = computed(() => user.value?.user_email || "");
 	const userFullName = computed(() => user.value?.user_fullname || "");
 	const isGuest = computed(() => !user.value || user.value.user === "Guest");
+	const isSystemManager = computed(() =>
+		Boolean((window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_is_system_manager),
+	);
+	const canManagePermissions = computed(() =>
+		Boolean(
+			(window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_permissions,
+		),
+	);
 
 	async function checkAuth(): Promise<boolean> {
 		try {
@@ -239,6 +247,8 @@ export const useAuthStore = defineStore("auth", () => {
 		userEmail,
 		userFullName,
 		isGuest,
+		isSystemManager,
+		canManagePermissions,
 		checkAuth,
 		login,
 		sendResetPasswordEmail,

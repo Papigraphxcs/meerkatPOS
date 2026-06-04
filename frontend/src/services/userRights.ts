@@ -1,9 +1,12 @@
 import { ref, computed } from "vue";
 import { isElectron } from "./electronBridge";
+import { call } from "./api";
 
 export interface PosPermissions {
   close_bill: boolean;
+  close_shift: boolean;
   allow_reprint_invoice: boolean;
+  shift_report: boolean;
   allow_cancel_invoice: boolean;
   unsettled_invoices: boolean;
   apply_additional_discount: boolean;
@@ -41,7 +44,9 @@ export interface PosPermissions {
 
 const DEFAULT_PERMISSIONS: PosPermissions = {
   close_bill: true,
+  close_shift: false,
   allow_reprint_invoice: false,
+  shift_report: false,
   allow_cancel_invoice: false,
   unsettled_invoices: false,
   apply_additional_discount: false,
@@ -81,12 +86,32 @@ const currentRole = ref<string>("");
 const permissions = ref<PosPermissions>({ ...DEFAULT_PERMISSIONS });
 const isLoaded = ref(false);
 
-export async function loadPermissions(userEmail: string): Promise<void> {
+function mergePermissions(source: unknown): PosPermissions {
+  const merged = { ...DEFAULT_PERMISSIONS };
+  if (source && typeof source === "object") {
+    for (const [key, val] of Object.entries(source as Record<string, unknown>)) {
+      if (key in merged) {
+        (merged as Record<string, boolean>)[key] = Boolean(val);
+      }
+    }
+  }
+  return merged;
+}
+
+export async function loadPermissions(userEmail: string, posProfile?: string): Promise<void> {
   if (!isElectron()) {
-    permissions.value = Object.keys(DEFAULT_PERMISSIONS).reduce((acc, key) => {
-      acc[key] = true;
-      return acc;
-    }, {} as Record<string, boolean>) as unknown as PosPermissions;
+    const boot = (window.xpos?.boot as Record<string, unknown>) ?? {};
+    currentRole.value = (boot.xpos_role as string) || "";
+    try {
+      const res = await call(
+        "xpos.api.auth.get_my_pos_permissions",
+        posProfile ? { pos_profile: posProfile } : {},
+      );
+      permissions.value = mergePermissions(res);
+    } catch (err) {
+      console.error("[UserRights] Failed to load permissions, using boot fallback:", err);
+      permissions.value = mergePermissions(boot.xpos_permissions);
+    }
     isLoaded.value = true;
     return;
   }
@@ -95,19 +120,7 @@ export async function loadPermissions(userEmail: string): Promise<void> {
     const posUser = await window.electronAPI!.db.getPosUser(userEmail);
     if (posUser) {
       currentRole.value = (posUser as Record<string, unknown>).role as string || "";
-      const userPerms = (posUser as Record<string, unknown>).permissions;
-
-      if (userPerms && typeof userPerms === "object") {
-        const merged = { ...DEFAULT_PERMISSIONS };
-        for (const [key, val] of Object.entries(userPerms as Record<string, unknown>)) {
-          if (key in merged) {
-            (merged as Record<string, boolean>)[key] = Boolean(val);
-          }
-        }
-        permissions.value = merged;
-      } else {
-        permissions.value = { ...DEFAULT_PERMISSIONS };
-      }
+      permissions.value = mergePermissions(posUser);
     } else {
       permissions.value = { ...DEFAULT_PERMISSIONS };
     }
