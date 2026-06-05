@@ -314,11 +314,15 @@ def create_invoice(data: str | dict):
 
 	rate_precision = _get_item_rate_precision()
 
+	from xpos.api.auth import user_has_pos_permission
+
+	allow_rate_change = user_has_pos_permission("allow_change_price", pos_profile=pos.name)
+
 	for item_data in items:
 		item_rate = flt(item_data.get("rate", 0), rate_precision)
 		item_qty = flt(item_data.get("qty", 1), 3)
 
-		if not cint(pos.get("allow_rate_change")):
+		if not allow_rate_change:
 			price_list = pos.get("selling_price_list")
 			if price_list:
 				price_list_rate = frappe.db.get_value(

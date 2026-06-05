@@ -29,10 +29,7 @@ export interface POSProfile {
 	write_off_cost_center?: string;
 	selling_price_list?: string;
 	default_customer?: string;
-	allow_rate_change?: boolean;
 	allow_change_posting_date?: boolean;
-	allow_user_to_edit_additional_discount?: boolean;
-	allow_discount_change?: boolean;
 	display_items_in_stock?: boolean;
 	allow_partial_payment?: boolean;
 	allow_credit_sale?: boolean;
@@ -40,13 +37,11 @@ export interface POSProfile {
 	allow_return_without_invoice?: boolean;
 	allow_sales_order?: boolean;
 	allow_delete_offline_invoice?: boolean;
-	allow_print_last_invoice?: boolean;
 	display_additional_notes?: boolean;
 	allow_write_off_change?: boolean;
 	input_qty?: boolean;
 	display_item_code?: boolean;
 	allow_zero_rated_items?: boolean;
-	allow_print_draft_invoices?: boolean;
 	enable_cashier_settlement?: boolean;
 	print_backup_receipt?: boolean;
 	auto_set_batch?: boolean;

@@ -139,7 +139,7 @@
 		<div class="flex gap-2">
 			<TooltipWrapper :content="__('Additional Discount')">
 				<Button
-					v-if="posStore.allowEditAdditionalDiscount"
+					v-if="hasPermission('apply_additional_discount')"
 					variant="outline"
 					size="sm"
 					:class="{
@@ -343,6 +343,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
+import { hasPermission } from "@/services/userRights";
 import { useCartStore } from "@/stores/cartStore";
 import { useOfferStore } from "@/stores/offerStore";
 import { call, showSuccess, showError } from "@/services/api";

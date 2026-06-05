@@ -3,82 +3,32 @@ import { isElectron } from "./electronBridge";
 import { call } from "./api";
 
 export interface PosPermissions {
-  close_bill: boolean;
   close_shift: boolean;
   allow_reprint_invoice: boolean;
+  print_draft_invoice: boolean;
   shift_report: boolean;
-  allow_cancel_invoice: boolean;
-  unsettled_invoices: boolean;
   apply_additional_discount: boolean;
-  apply_standard_discount: boolean;
   show_edit_discount_field: boolean;
-  edit_tax_template: boolean;
   allow_change_price: boolean;
-  quotation: boolean;
   sale_return: boolean;
-  local_purchase: boolean;
-  purchase_order: boolean;
-  purchase_invoice: boolean;
-  stock_adjustment: boolean;
-  stock_entry: boolean;
-  near_expiry_items: boolean;
   expense: boolean;
   bank_drop: boolean;
-  list_of_invoices: boolean;
-  list_of_cancelled_invoices: boolean;
-  list_of_errors: boolean;
-  list_of_purchase_invoices: boolean;
-  list_of_quotations: boolean;
-  list_of_stock_entries: boolean;
-  list_of_local_purchases: boolean;
-  list_of_stock_adjustments: boolean;
-  list_of_expense: boolean;
-  list_of_bank_drops: boolean;
-  invoice_settlement_report: boolean;
-  sales_report_by_time: boolean;
-  sales_summary_by_hour: boolean;
   current_stock_by_brand: boolean;
-  stock_register: boolean;
   current_stock_report: boolean;
 }
 
 const DEFAULT_PERMISSIONS: PosPermissions = {
-  close_bill: true,
   close_shift: false,
   allow_reprint_invoice: false,
+  print_draft_invoice: false,
   shift_report: false,
-  allow_cancel_invoice: false,
-  unsettled_invoices: false,
   apply_additional_discount: false,
-  apply_standard_discount: false,
   show_edit_discount_field: false,
-  edit_tax_template: false,
   allow_change_price: false,
-  quotation: false,
   sale_return: false,
-  local_purchase: false,
-  purchase_order: false,
-  purchase_invoice: false,
-  stock_adjustment: false,
-  stock_entry: false,
-  near_expiry_items: false,
   expense: false,
   bank_drop: false,
-  list_of_invoices: true,
-  list_of_cancelled_invoices: false,
-  list_of_errors: false,
-  list_of_purchase_invoices: false,
-  list_of_quotations: false,
-  list_of_stock_entries: false,
-  list_of_local_purchases: false,
-  list_of_stock_adjustments: false,
-  list_of_expense: false,
-  list_of_bank_drops: false,
-  invoice_settlement_report: false,
-  sales_report_by_time: false,
-  sales_summary_by_hour: false,
   current_stock_by_brand: false,
-  stock_register: false,
   current_stock_report: false,
 };
 

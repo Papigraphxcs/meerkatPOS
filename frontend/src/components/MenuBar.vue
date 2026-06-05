@@ -364,6 +364,7 @@ const menus = computed<Menu[]>(() => [
 				label: "Return Invoice",
 				icon: RotateCcw,
 				shortcut: "Ctrl+R",
+				hidden: () => !hasPermission("sale_return"),
 				disabled: () => !posStore.allowReturn,
 				action: () => {
 					window.dispatchEvent(new CustomEvent("xpos:show-return-dialog"));

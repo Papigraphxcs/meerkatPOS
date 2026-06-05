@@ -82,8 +82,6 @@ export const usePosStore = defineStore("pos", () => {
 
 	const defaultCustomer = computed(() => posProfile.value?.customer || "");
 
-	const allowEditRate = computed(() => !!posProfile.value?.allow_rate_change);
-
 	const hideImages = computed(() => !!posProfile.value?.hide_images);
 
 	const hideUnavailableItems = computed(() => !!posProfile.value?.hide_unavailable_items);
@@ -100,12 +98,6 @@ export const usePosStore = defineStore("pos", () => {
 
 	const useOfflineMode = computed(() => !!posProfile.value?.use_offline_mode);
 
-	const allowEditItemDiscount = computed(() => !!posProfile.value?.allow_discount_change);
-
-	const allowEditAdditionalDiscount = computed(
-		() => !!posProfile.value?.allow_user_to_edit_additional_discount,
-	);
-
 	const allowChangePostingDate = computed(() => !!posProfile.value?.allow_change_posting_date);
 
 	const displayItemsInStock = computed(() => !!posProfile.value?.display_items_in_stock);
@@ -121,8 +113,6 @@ export const usePosStore = defineStore("pos", () => {
 	const allowSalesOrder = computed(() => !!posProfile.value?.allow_sales_order);
 
 	const allowDeleteOfflineInvoice = computed(() => !!posProfile.value?.allow_delete_offline_invoice);
-
-	const allowPrintLastInvoice = computed(() => !!posProfile.value?.allow_print_last_invoice);
 
 	const displayAdditionalNotes = computed(() => !!posProfile.value?.display_additional_notes);
 
@@ -163,8 +153,6 @@ export const usePosStore = defineStore("pos", () => {
 	const useCustomerCredit = computed(() => !!posProfile.value?.use_customer_credit);
 
 	const applyCustomerDiscount = computed(() => !!posProfile.value?.apply_customer_discount);
-
-	const allowPrintDraftInvoices = computed(() => !!posProfile.value?.allow_print_draft_invoices);
 
 	const enableCashierSettlement = computed(() => !!posProfile.value?.enable_cashier_settlement);
 
@@ -506,9 +494,6 @@ export const usePosStore = defineStore("pos", () => {
 		companyName,
 		sellingPriceList,
 		defaultCustomer,
-		allowEditRate,
-		allowEditItemDiscount,
-		allowEditAdditionalDiscount,
 		allowChangePostingDate,
 		displayItemsInStock,
 		allowPartialPayment,
@@ -517,7 +502,6 @@ export const usePosStore = defineStore("pos", () => {
 		allowReturnWithoutInvoice,
 		allowSalesOrder,
 		allowDeleteOfflineInvoice,
-		allowPrintLastInvoice,
 		displayAdditionalNotes,
 		allowWriteOffChange,
 		displayItemCode,
@@ -538,7 +522,6 @@ export const usePosStore = defineStore("pos", () => {
 		returnValidityDays,
 		useCustomerCredit,
 		applyCustomerDiscount,
-		allowPrintDraftInvoices,
 		enableCashierSettlement,
 		printBackupReceipt,
 		cashModeOfPayment,

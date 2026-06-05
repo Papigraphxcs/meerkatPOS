@@ -65,7 +65,7 @@
 							{{ __("Price") }}
 						</label>
 						<NumberInput
-							v-if="posStore.allowEditRate"
+							v-if="hasPermission('allow_change_price')"
 							v-model="priceInput"
 							:min="0"
 							:precision="2"
@@ -192,6 +192,7 @@ import { ref, computed, watch, nextTick } from "vue";
 import { useItemStore } from "@/stores/itemStore";
 import { useCartStore } from "@/stores/cartStore";
 import { usePosStore } from "@/stores/posStore";
+import { hasPermission } from "@/services/userRights";
 import { showError } from "@/services/api";
 import {
 	Dialog,
