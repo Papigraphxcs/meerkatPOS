@@ -208,12 +208,6 @@ docs: update installation instructions
 
 ## License
 
-MIT — see [license.txt](license.txt) for full terms.
+MIT — see [LICENSE](LICENSE) for full terms.
 
 ---
-
-<div align="center">
-
-Developed and maintained by **Ali Raza** — [ar.frappe.dev@gmail.com](mailto:ar.frappe.dev@gmail.com)
-
-</div>
