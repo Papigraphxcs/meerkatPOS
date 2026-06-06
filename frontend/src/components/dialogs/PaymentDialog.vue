@@ -407,30 +407,6 @@
 						/>
 					</div>
 
-					<div class="space-y-1">
-						<div class="flex items-center justify-between">
-							<label
-								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
-							>
-								{{ __("Posting Date") }}
-							</label>
-							<span
-								v-if="!posStore.allowChangePostingDate"
-								class="text-xs text-muted-foreground"
-							>
-								{{ __("Locked by POS Profile") }}
-							</span>
-						</div>
-						<DateTimePicker
-							v-model="cartStore.postingDate"
-							mode="date"
-							:disabled="!posStore.allowChangePostingDate"
-							:clearable="false"
-							placeholder="Posting date"
-							class="text-sm"
-						/>
-					</div>
-
 					<div class="flex gap-2 mt-auto">
 						<div
 							v-if="changeAmount > 0"
@@ -462,6 +438,30 @@
 								{{ outstandingSubmissionHint }}
 							</p>
 						</div>
+					</div>
+
+					<div class="space-y-1">
+						<div class="flex items-center justify-between">
+							<label
+								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+							>
+								{{ __("Posting Date") }}
+							</label>
+							<span
+								v-if="!posStore.allowChangePostingDate"
+								class="text-xs text-muted-foreground"
+							>
+								{{ __("Locked by POS Profile") }}
+							</span>
+						</div>
+						<DateTimePicker
+							v-model="cartStore.postingDate"
+							mode="date"
+							:disabled="!posStore.allowChangePostingDate"
+							:clearable="false"
+							placeholder="Posting date"
+							class="text-sm"
+						/>
 					</div>
 				</div>
 

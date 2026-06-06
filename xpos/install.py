@@ -9,48 +9,21 @@ import frappe
 
 POS_PERMISSIONS = (
 	# Billing & Invoicing
-	("close_bill", "Close Bill", "Billing & Invoicing"),
 	("close_shift", "Close Shift", "Billing & Invoicing"),
 	("allow_reprint_invoice", "Reprint Invoice", "Billing & Invoicing"),
+	("print_draft_invoice", "Print Draft Invoice", "Billing & Invoicing"),
 	("shift_report", "Shift Report", "Billing & Invoicing"),
-	("allow_cancel_invoice", "Cancel Invoice", "Billing & Invoicing"),
-	("unsettled_invoices", "Unsettled Invoices", "Billing & Invoicing"),
 	# Discounts & Pricing
 	("apply_additional_discount", "Apply Additional Discount", "Discounts & Pricing"),
-	("apply_standard_discount", "Apply Standard Discount", "Discounts & Pricing"),
 	("show_edit_discount_field", "Edit Discount Field", "Discounts & Pricing"),
-	("edit_tax_template", "Edit Tax Template", "Discounts & Pricing"),
 	("allow_change_price", "Change Price", "Discounts & Pricing"),
 	# Sales Operations
-	("quotation", "Quotation", "Sales Operations"),
 	("sale_return", "Sale Return", "Sales Operations"),
-	# Purchasing & Stock
-	("local_purchase", "Local Purchase", "Purchasing & Stock"),
-	("purchase_order", "Purchase Order", "Purchasing & Stock"),
-	("purchase_invoice", "Purchase Invoice", "Purchasing & Stock"),
-	("stock_adjustment", "Stock Adjustment", "Purchasing & Stock"),
-	("stock_entry", "Stock Entry", "Purchasing & Stock"),
-	("near_expiry_items", "Near Expiry Items", "Purchasing & Stock"),
 	# Cash Management
 	("expense", "Expense", "Cash Management"),
 	("bank_drop", "Bank Drop", "Cash Management"),
-	# Lists
-	("list_of_invoices", "List of Invoices", "Lists"),
-	("list_of_cancelled_invoices", "List of Cancelled Invoices", "Lists"),
-	("list_of_errors", "List of Errors", "Lists"),
-	("list_of_purchase_invoices", "List of Purchase Invoices", "Lists"),
-	("list_of_quotations", "List of Quotations", "Lists"),
-	("list_of_stock_entries", "List of Stock Entries", "Lists"),
-	("list_of_local_purchases", "List of Local Purchases", "Lists"),
-	("list_of_stock_adjustments", "List of Stock Adjustments", "Lists"),
-	("list_of_expense", "List of Expenses", "Lists"),
-	("list_of_bank_drops", "List of Bank Drops", "Lists"),
 	# Reports
-	("invoice_settlement_report", "Invoice Settlement Report", "Reports"),
-	("sales_report_by_time", "Sales Report by Time", "Reports"),
-	("sales_summary_by_hour", "Sales Summary by Hour", "Reports"),
 	("current_stock_by_brand", "Current Stock by Brand", "Reports"),
-	("stock_register", "Stock Register", "Reports"),
 	("current_stock_report", "Current Stock Report", "Reports"),
 	# Administration
 	("manage_role_permissions", "Manage Role Permissions", "Administration"),
@@ -58,8 +31,10 @@ POS_PERMISSIONS = (
 
 ALL_PERMISSION_NAMES = tuple(name for name, _label, _group in POS_PERMISSIONS)
 
-_CASHIER_ENABLED = {"close_bill", "list_of_invoices"}
-_MANAGER_DISABLED = {"list_of_errors", "manage_role_permissions"}
+# Cashiers ring up sales out of the box; every catalog permission is an elevated
+# capability, so none are enabled by default.
+_CASHIER_ENABLED: set[str] = set()
+_MANAGER_DISABLED = {"manage_role_permissions"}
 
 DEFAULT_ROLES = (
 	("Cashier", _CASHIER_ENABLED),

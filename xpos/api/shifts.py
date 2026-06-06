@@ -427,10 +427,14 @@ def _enrich_shift_data(data: dict, pos_profile: str):
 		data["taxes"] = []
 		data["tax_inclusive"] = 0
 
+	from xpos.api.auth import user_has_pos_permission
+
 	data["print_settings"] = {
 		"print_format": profile.get("print_format") or "POS Invoice",
 		"print_format_for_online": profile.get("print_format_for_online"),
-		"allow_print_before_pay": cint(profile.get("allow_print_draft_invoices")) or 0,
+		"allow_print_before_pay": 1
+		if user_has_pos_permission("print_draft_invoice", pos_profile=pos_profile)
+		else 0,
 		"auto_print_receipt": cint(profile.get("auto_print_receipt")) or 0,
 		"letter_head": profile.get("letter_head") or "",
 	}
