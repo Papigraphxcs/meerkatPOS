@@ -88,118 +88,123 @@ const reportUtilityFields = new Set([
 const reportDefinitions: ReportDefinition[] = [
 	{
 		slug: "current-stock-report",
-		title: "Current Stock Report",
+		title: __("Current Stock Report"),
 		reportName: "Current Stock Report",
-		description: "Live stock valuation by item, warehouse, supplier, brand, and group.",
+		description: __("Live stock valuation by item, warehouse, supplier, brand, and group."),
 		category: "Inventory",
 		permissionKey: "current_stock_report",
 	},
 	{
 		slug: "current-stock-by-brand",
-		title: "Current Stock By Brand",
+		title: __("Current Stock By Brand"),
 		reportName: "Current Stock By Brand",
-		description: "Brand-wise stock snapshot with quantities and valuation.",
+		description: __("Brand-wise stock snapshot with quantities and valuation."),
 		category: "Inventory",
 		permissionKey: "current_stock_by_brand",
 	},
 	{
 		slug: "current-stock-summary",
-		title: "Current Stock Summary",
+		title: __("Current Stock Summary"),
 		reportName: "Current Stock Summary",
-		description: "Compact warehouse stock overview with totals and stock movement levels.",
+		description: __("Compact warehouse stock overview with totals and stock movement levels."),
 		category: "Inventory",
 	},
 	{
 		slug: "current-stock-with-levels",
-		title: "Current Stock With Levels",
+		title: __("Current Stock With Levels"),
 		reportName: "Current Stock With Levels",
-		description: "Stock snapshot grouped with reorder and alert levels.",
+		description: __("Stock snapshot grouped with reorder and alert levels."),
 		category: "Inventory",
 	},
 	{
 		slug: "dead-stock-report",
-		title: "Dead Stock Report",
+		title: __("Dead Stock Report"),
 		reportName: "Dead Stock Report",
-		description: "Stock that has been sitting too long with low value movement.",
+		description: __("Stock that has been sitting too long with low value movement."),
 		category: "Inventory",
 	},
 	{
 		slug: "stock-value-by-warehouse",
-		title: "Stock Value By Warehouse",
+		title: __("Stock Value By Warehouse"),
 		reportName: "Stock Value By Warehouse",
-		description: "Warehouse value and quantity summary for quick inventory valuation.",
+		description: __("Warehouse value and quantity summary for quick inventory valuation."),
 		category: "Inventory",
 	},
 	{
 		slug: "stock-value-summary-by-date",
-		title: "Stock Value Summary By Date",
+		title: __("Stock Value Summary By Date"),
 		reportName: "Stock Value Summary By Date",
-		description: "Snapshot stock balance by posting date for trend review.",
+		description: __("Snapshot stock balance by posting date for trend review."),
 		category: "Inventory",
 	},
 	{
 		slug: "warehouse-stock-movement",
-		title: "Warehouse Stock Movement",
+		title: __("Warehouse Stock Movement"),
 		reportName: "Warehouse Stock Movement",
-		description: "Movement summary by warehouse and voucher type over time.",
+		description: __("Movement summary by warehouse and voucher type over time."),
 		category: "Operations",
 	},
 	{
 		slug: "branch-item-summary",
-		title: "Branch Item Summary",
+		title: __("Branch Item Summary"),
 		reportName: "Branch Item Summary",
-		description: "Item movement and sales summary for a branch and warehouse window.",
+		description: __("Item movement and sales summary for a branch and warehouse window."),
 		category: "Operations",
 	},
 	{
 		slug: "branch-set-summary",
-		title: "Branch Set Summary",
+		title: __("Branch Set Summary"),
 		reportName: "Branch Set Summary",
-		description: "Set-level summary for branch stock and movement tracking.",
+		description: __("Set-level summary for branch stock and movement tracking."),
 		category: "Operations",
 	},
 	{
 		slug: "low-qty-sales-report",
-		title: "Low Qty Sales Report",
+		title: __("Low Qty Sales Report"),
 		reportName: "Low Qty Sales Report",
 		description: "Items sold in low quantities over a selected period.",
 		category: "Sales",
 	},
 	{
 		slug: "zero-qty-sales-report",
-		title: "Zero Qty Sales Report",
+		title: __("Zero Qty Sales Report"),
 		reportName: "Zero Qty Sales Report",
-		description: "Sales lines where no quantity was fulfilled during the period.",
+		description: __("Sales lines where no quantity was fulfilled during the period."),
 		category: "Sales",
 	},
 	{
 		slug: "slow-fast-moving-items",
-		title: "Slow Fast Moving Items",
+		title: __("Slow Fast Moving Items"),
 		reportName: "Slow Fast Moving Items",
-		description: "Movement velocity overview to identify fast and slow sellers.",
+		description: __("Movement velocity overview to identify fast and slow sellers."),
 		category: "Sales",
 	},
+	// prettier-ignore
 	{
 		slug: "stock-audit-report",
-		title: "Stock Audit Report",
+		title: __("Stock Audit Report"),
 		reportName: "Stock Audit Report",
-		description:
-			"Thermal-printable stock audit by item with available qty. Filter by warehouse, brand, supplier, or item.",
+		description: __(
+			"Thermal-printable stock audit by item with available qty. Filter by warehouse, brand, supplier, or item."
+		),
 		category: "Inventory",
 		thermalPrint: true,
 	},
 	{
 		slug: "purchase-order-report",
-		title: "Purchase Order Report",
+		title: __("Purchase Order Report"),
 		reportName: "Purchase Order Report",
-		description: "Purchase order summary with supplier, date range, and type filters.",
+		description: __("Purchase order summary with supplier, date range, and type filters."),
 		category: "Purchasing",
 	},
+	// prettier-ignore
 	{
 		slug: "pos-shift-reconciliation",
-		title: "Shift Reconciliation",
+		title: __("Shift Reconciliation"),
 		reportName: "POS Shift Reconciliation",
-		description: "Z-report: items sold with quantities plus totals by payment mode for end-of-shift cash-up.",
+		description: __(
+			"Z-report: items sold with quantities plus totals by payment mode for end-of-shift cash-up."
+		),
 		category: "Sales",
 		permissionKey: "shift_report",
 		thermalPrint: true,
@@ -463,7 +468,9 @@ export function buildReportDelimitedRows(
 	const header = columns.map((column) => escapeDelimited(column.label, delimiter)).join(delimiter);
 	const body = rows.map((row) =>
 		columns
-			.map((column) => escapeDelimited(formatReportCell(column, row[column.fieldname], currencySymbol), delimiter))
+			.map((column) =>
+				escapeDelimited(formatReportCell(column, row[column.fieldname], currencySymbol), delimiter),
+			)
 			.join(delimiter),
 	);
 	return [header, ...body].join("\n");
