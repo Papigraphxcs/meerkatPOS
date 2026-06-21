@@ -108,8 +108,9 @@ function clearSearch() {
 							</h1>
 							<p class="text-sm sm:text-base text-muted-foreground max-w-2xl">
 								{{
+									// prettier-ignore
 									__(
-										"Browse the reports library, open any report in a dedicated viewer, and export or copy the data directly from the app.",
+										"Browse the reports library, open any report in a dedicated viewer, and export or copy the data directly from the app."
 									)
 								}}
 							</p>
@@ -157,7 +158,9 @@ function clearSearch() {
 				<section v-for="section in sectionReports" :key="section.category" class="space-y-3">
 					<div class="flex items-center justify-between gap-3">
 						<div>
-							<h2 class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+							<h2
+								class="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+							>
 								{{ section.category }}
 							</h2>
 							<p class="text-xs text-muted-foreground mt-1">
@@ -185,7 +188,10 @@ function clearSearch() {
 							<div class="p-5 space-y-4">
 								<div class="flex items-start justify-between gap-3">
 									<div class="min-w-0 flex-1 space-y-2">
-										<Badge :class="categoryAccent[report.category].chip" variant="outline">
+										<Badge
+											:class="categoryAccent[report.category].chip"
+											variant="outline"
+										>
 											{{ report.category }}
 										</Badge>
 										<h3 class="text-lg font-semibold text-foreground leading-tight">

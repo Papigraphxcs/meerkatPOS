@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-06-07 18:38+0428\n"
-"PO-Revision-Date: 2026-06-07 18:38+0428\n"
+"POT-Creation-Date: 2026-06-16 05:51-0631\n"
+"PO-Revision-Date: 2026-06-16 05:51-0631\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -601,6 +601,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:149
 #: xpos/x_pos/report/branch_item_summary/branch_item_summary.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Branch Item Summary"
@@ -608,6 +609,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:156
 #: xpos/x_pos/report/branch_set_summary/branch_set_summary.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Branch Set Summary"
@@ -631,8 +633,16 @@ msgstr ""
 msgid "Brand"
 msgstr ""
 
+#: frontend/src/services/reports.ts:101
+msgid "Brand-wise stock snapshot with quantities and valuation."
+msgstr ""
+
 #: frontend/src/components/items/CommandSearch.vue:318
 msgid "Browse analytics reports"
+msgstr ""
+
+#: frontend/src/views/ReportsIndexView.vue:111
+msgid "Browse the reports library, open any report in a dedicated viewer, and export or copy the data directly from the app."
 msgstr ""
 
 #: frontend/src/components/dialogs/AboutDialog.vue:77
@@ -930,6 +940,10 @@ msgstr ""
 msgid "Commit"
 msgstr ""
 
+#: frontend/src/services/reports.ts:109
+msgid "Compact warehouse stock overview with totals and stock movement levels."
+msgstr ""
+
 #. Label of the company (Link) field in DocType 'Delivery Charges'
 #. Label of the company (Link) field in DocType 'POS Cash Movement'
 #. Label of the company (Link) field in DocType 'POS Closing Shift'
@@ -1214,6 +1228,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:99
 #: xpos/x_pos/report/current_stock_by_brand/current_stock_by_brand.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Current Stock By Brand"
@@ -1221,6 +1236,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:91
 #: xpos/x_pos/report/current_stock_report/current_stock_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Current Stock Report"
@@ -1228,9 +1244,14 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:107
 #: xpos/x_pos/report/current_stock_summary/current_stock_summary.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Current Stock Summary"
+msgstr ""
+
+#: frontend/src/services/reports.ts:114
+msgid "Current Stock With Levels"
 msgstr ""
 
 #. Name of a report
@@ -1370,6 +1391,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:121
 #: xpos/x_pos/report/dead_stock_report/dead_stock_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Dead Stock Report"
@@ -2657,6 +2679,10 @@ msgstr ""
 msgid "Item code starting position"
 msgstr ""
 
+#: frontend/src/services/reports.ts:151
+msgid "Item movement and sales summary for a branch and warehouse window."
+msgstr ""
+
 #: frontend/src/stores/cartStore.ts:467
 msgid "Item not found"
 msgstr ""
@@ -2743,6 +2769,10 @@ msgstr ""
 msgid "List"
 msgstr ""
 
+#: frontend/src/services/reports.ts:93
+msgid "Live stock valuation by item, warehouse, supplier, brand, and group."
+msgstr ""
+
 #: frontend/src/views/PurchaseInvoiceView.vue:1043
 msgid "Load"
 msgstr ""
@@ -2788,6 +2818,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:163
 #: xpos/x_pos/report/low_qty_sales_report/low_qty_sales_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Low Qty Sales Report"
@@ -3004,6 +3035,14 @@ msgstr ""
 
 #: xpos/x_pos/doctype/pos_cash_movement/pos_cash_movement.py:94
 msgid "Movement Type must be Expense or Deposit."
+msgstr ""
+
+#: frontend/src/services/reports.ts:144
+msgid "Movement summary by warehouse and voucher type over time."
+msgstr ""
+
+#: frontend/src/services/reports.ts:179
+msgid "Movement velocity overview to identify fast and slow sellers."
 msgstr ""
 
 #: frontend/src/components/items/CommandSearch.vue:46
@@ -4460,6 +4499,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:193
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Purchase Order Report"
@@ -4521,6 +4561,10 @@ msgstr ""
 
 #: frontend/src/stores/purchaseStore.ts:481
 msgid "Purchase order saved offline. Will sync when online."
+msgstr ""
+
+#: frontend/src/services/reports.ts:195
+msgid "Purchase order summary with supplier, date range, and type filters."
 msgstr ""
 
 #: frontend/src/stores/purchaseStore.ts:679
@@ -5101,6 +5145,10 @@ msgstr ""
 msgid "Sales User"
 msgstr ""
 
+#: frontend/src/services/reports.ts:172
+msgid "Sales lines where no quantity was fulfilled during the period."
+msgstr ""
+
 #. Option for the 'FBR Environment' (Select) field in DocType 'POS Profile'
 #: xpos/x_pos/custom/pos_profile.json
 msgid "Sandbox"
@@ -5366,6 +5414,10 @@ msgstr ""
 msgid "Set by X POS when the terminal sends an order to the cashier for settlement. The cashier collects payment and submits the invoice from the Cashier screen."
 msgstr ""
 
+#: frontend/src/services/reports.ts:158
+msgid "Set-level summary for branch stock and movement tracking."
+msgstr ""
+
 #. Label of the settings_section (Section Break) field in DocType 'POS Profile'
 #: frontend/src/components/Sidebar.vue:195
 #: frontend/src/components/items/CommandSearch.vue:379
@@ -5380,6 +5432,10 @@ msgstr ""
 
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:143
 msgid "Shift Management"
+msgstr ""
+
+#: frontend/src/services/reports.ts:200
+msgid "Shift Reconciliation"
 msgstr ""
 
 #: frontend/src/components/dialogs/ClosingDialog.vue:333
@@ -5429,6 +5485,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:177
 #: xpos/x_pos/report/slow_fast_moving_items/slow_fast_moving_items.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Slow Fast Moving Items"
@@ -5440,6 +5497,10 @@ msgstr ""
 
 #: frontend/src/components/dialogs/PaymentDialog.vue:397
 msgid "Small remaining amounts"
+msgstr ""
+
+#: frontend/src/services/reports.ts:137
+msgid "Snapshot stock balance by posting date for trend review."
 msgstr ""
 
 #: frontend/src/components/dialogs/ReturnDialog.vue:105
@@ -5563,6 +5624,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:184
 #: xpos/x_pos/report/stock_audit_report/stock_audit_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Stock Audit Report"
@@ -5615,8 +5677,16 @@ msgstr ""
 msgid "Stock Value"
 msgstr ""
 
+#: frontend/src/services/reports.ts:128
+msgid "Stock Value By Warehouse"
+msgstr ""
+
 #: xpos/x_pos/report/warehouse_stock_movement/warehouse_stock_movement.py:53
 msgid "Stock Value Difference"
+msgstr ""
+
+#: frontend/src/services/reports.ts:135
+msgid "Stock Value Summary By Date"
 msgstr ""
 
 #. Name of a report
@@ -5631,6 +5701,14 @@ msgstr ""
 #: xpos/x_pos/report/stock_value_by_warehouse/stock_value_by_warehouse.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Stock Value by Warehouse"
+msgstr ""
+
+#: frontend/src/services/reports.ts:116
+msgid "Stock snapshot grouped with reorder and alert levels."
+msgstr ""
+
+#: frontend/src/services/reports.ts:123
+msgid "Stock that has been sitting too long with low value movement."
 msgstr ""
 
 #. Description of the 'FBR Bearer Token' (Password) field in DocType 'POS
@@ -5871,6 +5949,10 @@ msgstr ""
 
 #: frontend/src/components/Navbar.vue:307
 msgid "Theme: System ({0}) (click to switch to Light)"
+msgstr ""
+
+#: frontend/src/services/reports.ts:187
+msgid "Thermal-printable stock audit by item with available qty. Filter by warehouse, brand, supplier, or item."
 msgstr ""
 
 #: xpos/x_pos/api/customer.py:59
@@ -6261,6 +6343,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:142
 #: xpos/x_pos/report/warehouse_stock_movement/warehouse_stock_movement.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Warehouse Stock Movement"
@@ -6268,6 +6351,10 @@ msgstr ""
 
 #: xpos/x_pos/api/purchase_orders.py:664
 msgid "Warehouse is required when receiving stock with a Purchase Invoice."
+msgstr ""
+
+#: frontend/src/services/reports.ts:130
+msgid "Warehouse value and quantity summary for quick inventory valuation."
 msgstr ""
 
 #: xpos/x_pos/report/stock_audit_report/stock_audit_report.js:16
@@ -6421,6 +6508,10 @@ msgstr ""
 msgid "You do not have permission to open this report from the app."
 msgstr ""
 
+#: frontend/src/services/reports.ts:202
+msgid "Z-report: items sold with quantities plus totals by payment mode for end-of-shift cash-up."
+msgstr ""
+
 #: frontend/src/views/PurchaseOrderView.vue:490
 #: frontend/src/views/PurchaseOrderView.vue:497
 msgid "Zero Qty"
@@ -6428,6 +6519,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
+#: frontend/src/services/reports.ts:170
 #: xpos/x_pos/report/zero_qty_sales_report/zero_qty_sales_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Zero Qty Sales Report"
@@ -6607,4 +6699,3 @@ msgstr ""
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "{} Active"
 msgstr ""
-
