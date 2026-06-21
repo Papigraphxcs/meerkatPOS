@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-06-16 05:51-0631\n"
-"PO-Revision-Date: 2026-06-16 05:51-0631\n"
+"POT-Creation-Date: 2026-06-21 23:49+0428\n"
+"PO-Revision-Date: 2026-06-21 23:49+0428\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: ar.frappe.dev@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -641,7 +641,7 @@ msgstr ""
 msgid "Browse analytics reports"
 msgstr ""
 
-#: frontend/src/views/ReportsIndexView.vue:111
+#: frontend/src/views/ReportsIndexView.vue:112
 msgid "Browse the reports library, open any report in a dedicated viewer, and export or copy the data directly from the app."
 msgstr ""
 
@@ -832,7 +832,7 @@ msgstr ""
 #: frontend/src/components/ui/datetime-picker/DateTimePicker.vue:851
 #: frontend/src/views/PurchaseInvoiceView.vue:904
 #: frontend/src/views/PurchaseOrderView.vue:605
-#: frontend/src/views/ReportsIndexView.vue:136
+#: frontend/src/views/ReportsIndexView.vue:137
 msgid "Clear"
 msgstr ""
 
@@ -2808,7 +2808,7 @@ msgstr ""
 msgid "Local Item Name"
 msgstr ""
 
-#: frontend/src/views/ReportsIndexView.vue:213
+#: frontend/src/views/ReportsIndexView.vue:219
 msgid "Locked"
 msgstr ""
 
@@ -3115,7 +3115,7 @@ msgid "New invoices from terminals will appear here automatically."
 msgstr ""
 
 #: frontend/src/components/core/ListFilterBar.vue:39
-#: frontend/src/services/reports.ts:518
+#: frontend/src/services/reports.ts:525
 #: frontend/src/views/PurchaseOrderView.vue:494
 msgid "No"
 msgstr ""
@@ -3315,7 +3315,7 @@ msgstr ""
 msgid "No redeemable loyalty points for this invoice total"
 msgstr ""
 
-#: frontend/src/views/ReportsIndexView.vue:150
+#: frontend/src/views/ReportsIndexView.vue:151
 msgid "No reports match your search"
 msgstr ""
 
@@ -3503,7 +3503,7 @@ msgid "Only users marked as cashier in the POS Profile can settle bills. Ask a m
 msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
-#: frontend/src/views/ReportsIndexView.vue:222
+#: frontend/src/views/ReportsIndexView.vue:228
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Open"
 msgstr ""
@@ -4499,7 +4499,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
-#: frontend/src/services/reports.ts:193
+#: frontend/src/services/reports.ts:195
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Purchase Order Report"
@@ -4563,7 +4563,7 @@ msgstr ""
 msgid "Purchase order saved offline. Will sync when online."
 msgstr ""
 
-#: frontend/src/services/reports.ts:195
+#: frontend/src/services/reports.ts:197
 msgid "Purchase order summary with supplier, date range, and type filters."
 msgstr ""
 
@@ -5290,7 +5290,7 @@ msgstr ""
 msgid "Search items, scan barcode..."
 msgstr ""
 
-#: frontend/src/views/ReportsIndexView.vue:125
+#: frontend/src/views/ReportsIndexView.vue:126
 msgid "Search reports or categories..."
 msgstr ""
 
@@ -5434,7 +5434,7 @@ msgstr ""
 msgid "Shift Management"
 msgstr ""
 
-#: frontend/src/services/reports.ts:200
+#: frontend/src/services/reports.ts:203
 msgid "Shift Reconciliation"
 msgstr ""
 
@@ -5624,7 +5624,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
-#: frontend/src/services/reports.ts:184
+#: frontend/src/services/reports.ts:185
 #: xpos/x_pos/report/stock_audit_report/stock_audit_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Stock Audit Report"
@@ -6077,7 +6077,7 @@ msgstr ""
 msgid "Try Again"
 msgstr ""
 
-#: frontend/src/views/ReportsIndexView.vue:152
+#: frontend/src/views/ReportsIndexView.vue:153
 msgid "Try a different keyword or clear the search field."
 msgstr ""
 
@@ -6458,7 +6458,7 @@ msgid "XPOS Local ID"
 msgstr ""
 
 #: frontend/src/components/core/ListFilterBar.vue:38
-#: frontend/src/services/reports.ts:518
+#: frontend/src/services/reports.ts:525
 #: frontend/src/views/PurchaseOrderView.vue:495
 msgid "Yes"
 msgstr ""
@@ -6508,7 +6508,7 @@ msgstr ""
 msgid "You do not have permission to open this report from the app."
 msgstr ""
 
-#: frontend/src/services/reports.ts:202
+#: frontend/src/services/reports.ts:205
 msgid "Z-report: items sold with quantities plus totals by payment mode for end-of-shift cash-up."
 msgstr ""
 
@@ -6610,7 +6610,7 @@ msgid "received"
 msgstr ""
 
 #: frontend/src/views/ReportsIndexView.vue:99
-#: frontend/src/views/ReportsIndexView.vue:164
+#: frontend/src/views/ReportsIndexView.vue:167
 msgid "reports"
 msgstr ""
 

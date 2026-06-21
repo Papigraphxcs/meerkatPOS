@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: X POS VERSION\n"
 "Report-Msgid-Bugs-To: ar.frappe.dev@gmail.com\n"
-"POT-Creation-Date: 2026-06-16 05:51-0631\n"
-"PO-Revision-Date: 2026-06-16 05:51-0631\n"
+"POT-Creation-Date: 2026-06-21 23:49+0428\n"
+"PO-Revision-Date: 2026-06-16 05:51-0729\n"
 "Last-Translator: ar.frappe.dev@gmail.com\n"
 "Language-Team: es_ES <ar.frappe.dev@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -117,9 +117,7 @@ msgstr "Descuento adicional"
 #. Label of the additional_notes (Small Text) field in DocType 'POS Invoice
 #. Item'
 #. Label of the additional_notes (Small Text) field in DocType 'Sales Invoice
-#. Item'
 #. Label of the pos_additional_notes (Small Text) field in DocType 'Sales Order
-#. Item'
 #: xpos/x_pos/custom/pos_invoice_item.json
 #: xpos/x_pos/custom/sales_invoice_item.json
 #: xpos/x_pos/custom/sales_order_item.json
@@ -332,7 +330,6 @@ msgstr "Modificado desde"
 #. Label of the paid_amount (Currency) field in DocType 'POS Payment Entry
 #. Reference'
 #. Label of the grand_total (Currency) field in DocType 'Sales Invoice
-#. Reference'
 #: frontend/src/components/dialogs/BankDropDetailDialog.vue:37
 #: frontend/src/components/dialogs/CashMovementDialog.vue:64
 #: frontend/src/components/dialogs/ExpenseDetailDialog.vue:37
@@ -641,7 +638,7 @@ msgstr "Instantánea de stock por marca con cantidades y valoración."
 msgid "Browse analytics reports"
 msgstr "Explorar informes analíticos"
 
-#: frontend/src/views/ReportsIndexView.vue:111
+#: frontend/src/views/ReportsIndexView.vue:112
 msgid "Browse the reports library, open any report in a dedicated viewer, and export or copy the data directly from the app."
 msgstr "Explore la biblioteca de informes, abra cualquier informe en un visor dedicado y exporte o copie los datos directamente desde la app."
 
@@ -755,7 +752,7 @@ msgstr "El carrito está vacío"
 #: frontend/src/components/dialogs/BankDropDetailDialog.vue:137
 #: frontend/src/components/dialogs/CashMovementDialog.vue:29
 #: frontend/src/components/dialogs/KeyboardShortcutsDialog.vue:153
-#: frontend/src/items/CommandSearch.vue:483
+#: frontend/src/components/items/CommandSearch.vue:483
 #: frontend/src/views/BankDropView.vue:219
 #: frontend/src/views/BankDropView.vue:503
 msgid "Cash Deposit"
@@ -832,7 +829,7 @@ msgstr "Localidad"
 #: frontend/src/components/ui/datetime-picker/DateTimePicker.vue:851
 #: frontend/src/views/PurchaseInvoiceView.vue:904
 #: frontend/src/views/PurchaseOrderView.vue:605
-#: frontend/src/views/ReportsIndexView.vue:136
+#: frontend/src/views/ReportsIndexView.vue:137
 msgid "Clear"
 msgstr "Limpiar"
 
@@ -1009,7 +1006,6 @@ msgstr "La empresa debe coincidir con la empresa seleccionada en el perfil de TP
 msgid "Configure which POS actions each role may perform."
 msgstr "Configure qué acciones de TPV puede realizar cada rol."
 
-#. Key-value pairs for Spanish (Spain) localization
 #: frontend/src/components/dialogs/LoyaltyDialog.vue:168
 msgid "Contact administrator to set up loyalty programs"
 msgstr "Contacte con el administrador para configurar los programas de fidelización"
@@ -1097,7 +1093,6 @@ msgstr "Tipo de cupón"
 #. Label of the section_break_pos_coupons (Section Break) field in DocType 'POS
 #. Invoice'
 #. Label of the section_break_gcyhc (Section Break) field in DocType 'Sales
-#. Invoice'
 #: xpos/x_pos/custom/pos_invoice.json xpos/x_pos/custom/sales_invoice.json
 msgid "Coupon and Offers"
 msgstr "Cupones y ofertas"
@@ -1493,7 +1488,6 @@ msgstr "Gastos de envío del perfil de TPV"
 #. Label of the pos_delivery_charges_rate (Currency) field in DocType 'POS
 #. Invoice'
 #. Label of the pos_delivery_charges_rate (Currency) field in DocType 'Sales
-#. Invoice'
 #: xpos/x_pos/custom/pos_invoice.json xpos/x_pos/custom/sales_invoice.json
 msgid "Delivery Charges Rate"
 msgstr "Tarifa de gastos de envío"
@@ -1518,7 +1512,7 @@ msgstr "Ingreso"
 
 #: frontend/src/components/dialogs/BankDropDetailDialog.vue:53
 #: frontend/src/components/dialogs/CashMovementDialog.vue:57
-#: frontend/src/views/BankDropView.vue:253
+#: frontend/src/views/BankDropView.vue:229
 #: frontend/src/views/BankDropView.vue:388
 msgid "Deposit To"
 msgstr "Ingresar en"
@@ -2809,7 +2803,7 @@ msgstr "Cargando..."
 msgid "Local Item Name"
 msgstr "Nombre local del artículo"
 
-#: frontend/src/views/ReportsIndexView.vue:213
+#: frontend/src/views/ReportsIndexView.vue:219
 msgid "Locked"
 msgstr "Bloqueado"
 
@@ -2993,7 +2987,6 @@ msgstr "Método de pago"
 #. Label of the mode_of_payment (Link) field in DocType 'POS Closing Shift
 #. Detail'
 #. Label of the mode_of_payment (Link) field in DocType 'POS Opening Shift
-#. Detail'
 #: xpos/x_pos/api/payment_processing/data.py:181
 #: xpos/x_pos/doctype/pos_closing_shift/closing_shift_details.html:58
 #: xpos/x_pos/doctype/pos_closing_shift_detail/pos_closing_shift_detail.json
@@ -3116,7 +3109,7 @@ msgid "New invoices from terminals will appear here automatically."
 msgstr "Las nuevas facturas de los terminales aparecerán aquí automáticamente."
 
 #: frontend/src/components/core/ListFilterBar.vue:39
-#: frontend/src/services/reports.ts:518
+#: frontend/src/services/reports.ts:525
 #: frontend/src/views/PurchaseOrderView.vue:494
 msgid "No"
 msgstr "No"
@@ -3316,7 +3309,7 @@ msgstr "No hay filtros de consulta. Haz clic en \"Añadir filtro\" para añadir 
 msgid "No redeemable loyalty points for this invoice total"
 msgstr "No hay puntos de fidelización canjeables para el total de esta factura"
 
-#: frontend/src/views/ReportsIndexView.vue:150
+#: frontend/src/views/ReportsIndexView.vue:151
 msgid "No reports match your search"
 msgstr "Ningún informe coincide con tu búsqueda"
 
@@ -3504,7 +3497,7 @@ msgid "Only users marked as cashier in the POS Profile can settle bills. Ask a m
 msgstr "Solo los usuarios marcados como cajero en el perfil de TPV pueden liquidar cuentas. Pídele a un administrador que te lo active."
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Shift'
-#: frontend/src/views/ReportsIndexView.vue:222
+#: frontend/src/views/ReportsIndexView.vue:228
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Open"
 msgstr "Abierto"
@@ -4058,7 +4051,6 @@ msgstr "Fecha de fin del periodo"
 #. Label of the period_start_date (Datetime) field in DocType 'POS Closing
 #. Shift'
 #. Label of the period_start_date (Datetime) field in DocType 'POS Opening
-#. Shift'
 #: xpos/x_pos/doctype/pos_closing_shift/pos_closing_shift.json
 #: xpos/x_pos/doctype/pos_opening_shift/pos_opening_shift.json
 msgid "Period Start Date"
@@ -4500,7 +4492,7 @@ msgstr "Detalles del pedido de compra"
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
-#: frontend/src/services/reports.ts:193
+#: frontend/src/services/reports.ts:195
 #: xpos/x_pos/report/purchase_order_report/purchase_order_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Purchase Order Report"
@@ -4564,7 +4556,7 @@ msgstr "El pedido de compra requiere al menos un artículo."
 msgid "Purchase order saved offline. Will sync when online."
 msgstr "Pedido de compra guardado en modo offline. Se sincronizará cuando haya conexión."
 
-#: frontend/src/services/reports.ts:195
+#: frontend/src/services/reports.ts:197
 msgid "Purchase order summary with supplier, date range, and type filters."
 msgstr "Resumen de pedidos de compra con filtros de proveedor, rango de fechas y tipo."
 
@@ -5291,7 +5283,7 @@ msgstr "Buscar artículos, páginas, acciones..."
 msgid "Search items, scan barcode..."
 msgstr "Buscar artículos, escanear código de barras..."
 
-#: frontend/src/views/ReportsIndexView.vue:125
+#: frontend/src/views/ReportsIndexView.vue:126
 msgid "Search reports or categories..."
 msgstr "Buscar informes o categorías..."
 
@@ -5410,7 +5402,6 @@ msgstr "Establecer fecha de contabilización"
 #. Description of the 'POS Awaiting Settlement' (Check) field in DocType 'POS
 #. Invoice'
 #. Description of the 'POS Awaiting Settlement' (Check) field in DocType 'Sales
-#. Invoice'
 #: xpos/x_pos/custom/pos_invoice.json xpos/x_pos/custom/sales_invoice.json
 msgid "Set by X POS when the terminal sends an order to the cashier for settlement. The cashier collects payment and submits the invoice from the Cashier screen."
 msgstr "Establecido por X POS cuando el terminal envía un pedido al cajero para su liquidación. El cajero realiza el cobro y contabiliza la factura desde la pantalla de caja."
@@ -5435,7 +5426,7 @@ msgstr "Configuración"
 msgid "Shift Management"
 msgstr "Gestión de turnos"
 
-#: frontend/src/services/reports.ts:200
+#: frontend/src/services/reports.ts:203
 msgid "Shift Reconciliation"
 msgstr "Conciliación de turno"
 
@@ -5625,7 +5616,7 @@ msgstr "Stock"
 
 #. Name of a report
 #. Label of a Link in the X POS Workspace
-#: frontend/src/services/reports.ts:184
+#: frontend/src/services/reports.ts:185
 #: xpos/x_pos/report/stock_audit_report/stock_audit_report.json
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "Stock Audit Report"
@@ -6078,7 +6069,7 @@ msgstr "Forzar sincronización manual"
 msgid "Try Again"
 msgstr "Reintentar"
 
-#: frontend/src/views/ReportsIndexView.vue:152
+#: frontend/src/views/ReportsIndexView.vue:153
 msgid "Try a different keyword or clear the search field."
 msgstr "Pruebe con una palabra clave diferente o limpie el campo de búsqueda."
 
@@ -6189,7 +6180,6 @@ msgstr "Actualizar información del cliente"
 #. Description of the 'Update Buying Price' (Check) field in DocType 'POS
 #. Profile'
 #. Description of the 'Update Selling Price' (Check) field in DocType 'POS
-#. Profile'
 #: xpos/x_pos/custom/pos_profile.json
 msgid "Update selling price using profiles' selling price list"
 msgstr "Actualizar el precio de venta utilizando la lista de precios de venta del perfil"
@@ -6459,7 +6449,7 @@ msgid "XPOS Local ID"
 msgstr "ID local de XPOS"
 
 #: frontend/src/components/core/ListFilterBar.vue:38
-#: frontend/src/services/reports.ts:518
+#: frontend/src/services/reports.ts:525
 #: frontend/src/views/PurchaseOrderView.vue:495
 msgid "Yes"
 msgstr "Sí"
@@ -6509,7 +6499,7 @@ msgstr "No tiene acceso a este informe."
 msgid "You do not have permission to open this report from the app."
 msgstr "No tiene permisos para abrir este informe desde la aplicación."
 
-#: frontend/src/services/reports.ts:202
+#: frontend/src/services/reports.ts:205
 msgid "Z-report: items sold with quantities plus totals by payment mode for end-of-shift cash-up."
 msgstr "Informe Z: artículos vendidos con cantidades más totales por modo de pago para el arqueo de caja al final del turno."
 
@@ -6611,7 +6601,7 @@ msgid "received"
 msgstr "recibido"
 
 #: frontend/src/views/ReportsIndexView.vue:99
-#: frontend/src/views/ReportsIndexView.vue:164
+#: frontend/src/views/ReportsIndexView.vue:167
 msgid "reports"
 msgstr "informes"
 
