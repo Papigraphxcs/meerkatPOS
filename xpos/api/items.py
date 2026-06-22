@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe.utils import cint, flt, getdate, nowdate
+
 from xpos.api.utilities import get_invoice_type
 
 
@@ -21,7 +22,7 @@ def get_pos_items(
 	pos = frappe.get_cached_doc("POS Profile", pos_profile)
 	warehouse = pos.warehouse
 
-	filters = {"disabled": 0, "is_sales_item": 1, "is_stock_item": 1}
+	filters = {"disabled": 0, "is_sales_item": 1}
 
 	if not (include_templates or pos.get("show_template_items")):
 		filters["has_variants"] = 0
@@ -320,6 +321,7 @@ def search_barcode(barcode: str, pos_profile: str | None = None):
 			"rate": _get_item_rate(item.name),
 			"has_batch_no": item.has_batch_no,
 			"has_serial_no": item.has_serial_no,
+			"is_stock_item": item.is_stock_item,
 			"image": item.image,
 			"actual_qty": get_stock_qty(item.name, warehouse, pos_profile=pos_profile) if warehouse else 0,
 		}
@@ -336,6 +338,7 @@ def search_barcode(barcode: str, pos_profile: str | None = None):
 			"rate": _get_item_rate(item.name),
 			"has_batch_no": item.has_batch_no,
 			"has_serial_no": item.has_serial_no,
+			"is_stock_item": item.is_stock_item,
 			"image": item.image,
 			"actual_qty": get_stock_qty(item.name, warehouse, pos_profile=pos_profile) if warehouse else 0,
 		}
