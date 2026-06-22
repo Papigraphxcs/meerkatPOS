@@ -30,7 +30,7 @@
 			<Inbox class="w-12 h-12 mb-3 opacity-40" />
 			<p class="font-medium">{{ __("Cashier settlement is disabled") }}</p>
 			<p class="text-sm max-w-sm mt-1">
-				{{ __("Enable \"Enable cashier settlement\" in the POS Profile to use this screen.") }}
+				{{ __('Enable "Enable cashier settlement" in the POS Profile to use this screen.') }}
 			</p>
 		</div>
 
@@ -42,7 +42,11 @@
 			<Lock class="w-12 h-12 mb-3 opacity-40" />
 			<p class="font-medium">{{ __("You are not a cashier") }}</p>
 			<p class="text-sm max-w-sm mt-1">
-				{{ __("Only users marked as cashier in the POS Profile can settle bills. Ask a manager to enable it for you.") }}
+				{{
+					__(
+						"Only users marked as cashier in the POS Profile can settle bills. Ask a manager to enable it for you.",
+					)
+				}}
 			</p>
 		</div>
 
@@ -53,7 +57,9 @@
 		>
 			<Inbox class="w-12 h-12 mb-3 opacity-40" />
 			<p class="font-medium">{{ __("No unsettled invoices") }}</p>
-			<p class="text-sm mt-1">{{ __("New invoices from terminals will appear here automatically.") }}</p>
+			<p class="text-sm mt-1">
+				{{ __("New invoices from terminals will appear here automatically.") }}
+			</p>
 		</div>
 
 		<!-- List -->
@@ -82,7 +88,9 @@
 									{{ inv.customer_name || inv.customer }}
 								</span>
 							</div>
-							<div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+							<div
+								class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground"
+							>
 								<span class="truncate max-w-[140px] sm:max-w-none">{{ inv.name }}</span>
 								<span class="flex items-center gap-1 whitespace-nowrap">
 									<CalendarIcon class="h-3 w-3 shrink-0" />

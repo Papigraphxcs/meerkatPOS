@@ -6598,4 +6598,3 @@ msgstr "تبدیلی کی ادائیگی کے اندراجات بنانے سے �
 #: xpos/x_pos/workspace/x_pos/x_pos.json
 msgid "{} Active"
 msgstr "{} فعال"
-

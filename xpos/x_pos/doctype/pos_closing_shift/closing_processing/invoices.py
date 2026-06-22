@@ -2,6 +2,7 @@ import frappe
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 )
+
 from xpos.api.utilities import get_invoice_type
 
 
@@ -97,7 +98,7 @@ def delete_draft_invoices(pos_opening_shift, pos_profile):
 			doctype,
 			invoice_name,
 			force=True,
-			)
+		)
 
 
 def submit_printed_invoices(pos_opening_shift, doctype):

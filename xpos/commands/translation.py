@@ -49,9 +49,6 @@ def _update_csv_from_po(app: str, locale: str | None = None):
 					continue
 
 				writer.writerow([message.id, message.string, message.context or ""])
-    
-    
-    
 
 
 @click.command("update-csv-from-po")

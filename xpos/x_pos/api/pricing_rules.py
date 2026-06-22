@@ -8,7 +8,6 @@ rules with ERPNext's official pricing rule engine.
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Dict, List, Tuple
 
 import frappe
 from frappe import _

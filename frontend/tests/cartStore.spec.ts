@@ -1,283 +1,345 @@
 /**
  * @vitest-environment jsdom
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { setActivePinia, createPinia } from 'pinia'
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { setActivePinia, createPinia } from "pinia";
 
-useCartStore
+useCartStore;
 
 // Mock the API module
-vi.mock('@/services/api', () => ({
-  call: vi.fn(),
-  default: { call: vi.fn() },
-}))
+vi.mock("@/services/api", () => ({
+	call: vi.fn(),
+	default: { call: vi.fn() },
+}));
 
 // Mock usePosStore
-vi.mock('@/stores/posStore', () => ({
-  usePosStore: vi.fn(() => ({
-    taxes: [],
-    taxInclusiveMode: false,
-    profile: {
-      name: 'POS-PROFILE-1',
-      warehouse: 'Store - TC',
-      currency: 'USD',
-    },
-    currency: 'USD',
-  })),
-}))
+vi.mock("@/stores/posStore", () => ({
+	usePosStore: vi.fn(() => ({
+		taxes: [],
+		taxInclusiveMode: false,
+		profile: {
+			name: "POS-PROFILE-1",
+			warehouse: "Store - TC",
+			currency: "USD",
+		},
+		currency: "USD",
+	})),
+}));
 
 // Import after mocking
-import { useCartStore } from '@/stores/cartStore.ts'
-import type { CartItem } from '@/types/pos.types'
+import { useCartStore } from "@/stores/cartStore.ts";
+import type { CartItem } from "@/types/pos.types";
 
-describe('Cart Store', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-    vi.clearAllMocks()
-  })
+describe("Cart Store", () => {
+	beforeEach(() => {
+		setActivePinia(createPinia());
+		vi.clearAllMocks();
+	});
 
-  describe('Item Management', () => {
-    it('should start with empty cart', () => {
-      const cartStore = useCartStore()
-      
-      expect(cartStore.items).toEqual([])
-      expect(cartStore.itemCount).toBe(0)
-      expect(cartStore.isEmpty).toBe(true)
-    })
+	describe("Item Management", () => {
+		it("should start with empty cart", () => {
+			const cartStore = useCartStore();
 
-    it('should add item to cart', () => {
-      const cartStore = useCartStore()
-      const item: CartItem = {
-        item_code: 'ITEM-001',
-        item_name: 'Test Item',
-        qty: 1,
-        rate: 100,
-        uom: 'Nos',
-        discount_percentage: 0,
-        discount_amount: 0,
-      }
+			expect(cartStore.items).toEqual([]);
+			expect(cartStore.itemCount).toBe(0);
+			expect(cartStore.isEmpty).toBe(true);
+		});
 
-      cartStore.items.push(item)
+		it("should add item to cart", () => {
+			const cartStore = useCartStore();
+			const item: CartItem = {
+				item_code: "ITEM-001",
+				item_name: "Test Item",
+				qty: 1,
+				rate: 100,
+				uom: "Nos",
+				discount_percentage: 0,
+				discount_amount: 0,
+			};
 
-      expect(cartStore.items.length).toBe(1)
-      expect(cartStore.items[0].item_code).toBe('ITEM-001')
-    })
+			cartStore.items.push(item);
 
-    it('should calculate item count correctly', () => {
-      const cartStore = useCartStore()
-      cartStore.items = [
-        { item_code: 'ITEM-001', item_name: 'Item 1', qty: 2, rate: 50, uom: 'Nos', discount_percentage: 0, discount_amount: 0 },
-        { item_code: 'ITEM-002', item_name: 'Item 2', qty: 3, rate: 30, uom: 'Nos', discount_percentage: 0, discount_amount: 0 },
-      ]
+			expect(cartStore.items.length).toBe(1);
+			expect(cartStore.items[0].item_code).toBe("ITEM-001");
+		});
 
-      expect(cartStore.itemCount).toBe(5)
-    })
+		it("should calculate item count correctly", () => {
+			const cartStore = useCartStore();
+			cartStore.items = [
+				{
+					item_code: "ITEM-001",
+					item_name: "Item 1",
+					qty: 2,
+					rate: 50,
+					uom: "Nos",
+					discount_percentage: 0,
+					discount_amount: 0,
+				},
+				{
+					item_code: "ITEM-002",
+					item_name: "Item 2",
+					qty: 3,
+					rate: 30,
+					uom: "Nos",
+					discount_percentage: 0,
+					discount_amount: 0,
+				},
+			];
 
-    it('should handle return items with negative quantities', () => {
-      const cartStore = useCartStore()
-      cartStore.items = [
-        { item_code: 'ITEM-001', item_name: 'Return Item', qty: -2, rate: 50, uom: 'Nos', discount_percentage: 0, discount_amount: 0 },
-      ]
+			expect(cartStore.itemCount).toBe(5);
+		});
 
-      expect(cartStore.itemCount).toBe(2) // Absolute value
-    })
-  })
+		it("should handle return items with negative quantities", () => {
+			const cartStore = useCartStore();
+			cartStore.items = [
+				{
+					item_code: "ITEM-001",
+					item_name: "Return Item",
+					qty: -2,
+					rate: 50,
+					uom: "Nos",
+					discount_percentage: 0,
+					discount_amount: 0,
+				},
+			];
 
-  describe('Subtotal Calculation', () => {
-    it('should calculate subtotal without discounts', () => {
-      const cartStore = useCartStore()
-      cartStore.items = [
-        { item_code: 'ITEM-001', item_name: 'Item 1', qty: 2, rate: 50, uom: 'Nos', discount_percentage: 0, discount_amount: 0 },
-        { item_code: 'ITEM-002', item_name: 'Item 2', qty: 1, rate: 100, uom: 'Nos', discount_percentage: 0, discount_amount: 0 },
-      ]
+			expect(cartStore.itemCount).toBe(2); // Absolute value
+		});
+	});
 
-      expect(cartStore.subtotal).toBe(200) // 2*50 + 1*100
-    })
+	describe("Subtotal Calculation", () => {
+		it("should calculate subtotal without discounts", () => {
+			const cartStore = useCartStore();
+			cartStore.items = [
+				{
+					item_code: "ITEM-001",
+					item_name: "Item 1",
+					qty: 2,
+					rate: 50,
+					uom: "Nos",
+					discount_percentage: 0,
+					discount_amount: 0,
+				},
+				{
+					item_code: "ITEM-002",
+					item_name: "Item 2",
+					qty: 1,
+					rate: 100,
+					uom: "Nos",
+					discount_percentage: 0,
+					discount_amount: 0,
+				},
+			];
 
-    it('should apply percentage discount to items', () => {
-      const cartStore = useCartStore()
-      cartStore.items = [
-        { item_code: 'ITEM-001', item_name: 'Item 1', qty: 1, rate: 100, uom: 'Nos', discount_percentage: 10, discount_amount: 0 },
-      ]
+			expect(cartStore.subtotal).toBe(200); // 2*50 + 1*100
+		});
 
-      expect(cartStore.subtotal).toBe(90) // 100 - 10% = 90
-    })
+		it("should apply percentage discount to items", () => {
+			const cartStore = useCartStore();
+			cartStore.items = [
+				{
+					item_code: "ITEM-001",
+					item_name: "Item 1",
+					qty: 1,
+					rate: 100,
+					uom: "Nos",
+					discount_percentage: 10,
+					discount_amount: 0,
+				},
+			];
 
-    it('should apply amount discount to items', () => {
-      const cartStore = useCartStore()
-      cartStore.items = [
-        { item_code: 'ITEM-001', item_name: 'Item 1', qty: 1, rate: 100, uom: 'Nos', discount_percentage: 0, discount_amount: 15 },
-      ]
+			expect(cartStore.subtotal).toBe(90); // 100 - 10% = 90
+		});
 
-      expect(cartStore.subtotal).toBe(85) // 100 - 15 = 85
-    })
+		it("should apply amount discount to items", () => {
+			const cartStore = useCartStore();
+			cartStore.items = [
+				{
+					item_code: "ITEM-001",
+					item_name: "Item 1",
+					qty: 1,
+					rate: 100,
+					uom: "Nos",
+					discount_percentage: 0,
+					discount_amount: 15,
+				},
+			];
 
-    it('should handle return item discounts correctly', () => {
-      const cartStore = useCartStore()
-      cartStore.items = [
-        { item_code: 'ITEM-001', item_name: 'Return Item', qty: -1, rate: 100, uom: 'Nos', discount_percentage: 0, discount_amount: 10 },
-      ]
+			expect(cartStore.subtotal).toBe(85); // 100 - 15 = 85
+		});
 
-      // For returns: qty*rate = -100, discount should increase refund
-      expect(cartStore.subtotal).toBe(-90) // -100 - (-10) = -90
-    })
-  })
+		it("should handle return item discounts correctly", () => {
+			const cartStore = useCartStore();
+			cartStore.items = [
+				{
+					item_code: "ITEM-001",
+					item_name: "Return Item",
+					qty: -1,
+					rate: 100,
+					uom: "Nos",
+					discount_percentage: 0,
+					discount_amount: 10,
+				},
+			];
 
-  describe('Return Mode', () => {
-    it('should enable return mode', () => {
-      const cartStore = useCartStore()
-      
-      cartStore.isReturnMode = true
-      cartStore.returnAgainst = 'INV-001'
+			// For returns: qty*rate = -100, discount should increase refund
+			expect(cartStore.subtotal).toBe(-90); // -100 - (-10) = -90
+		});
+	});
 
-      expect(cartStore.isReturnMode).toBe(true)
-      expect(cartStore.returnAgainst).toBe('INV-001')
-    })
+	describe("Return Mode", () => {
+		it("should enable return mode", () => {
+			const cartStore = useCartStore();
 
-    it('should exit return mode', () => {
-      const cartStore = useCartStore()
-      cartStore.isReturnMode = true
-      cartStore.returnAgainst = 'INV-001'
-      
-      cartStore.isReturnMode = false
-      cartStore.returnAgainst = ''
+			cartStore.isReturnMode = true;
+			cartStore.returnAgainst = "INV-001";
 
-      expect(cartStore.isReturnMode).toBe(false)
-      expect(cartStore.returnAgainst).toBe('')
-    })
-  })
+			expect(cartStore.isReturnMode).toBe(true);
+			expect(cartStore.returnAgainst).toBe("INV-001");
+		});
 
-  describe('Customer Management', () => {
-    it('should set customer', () => {
-      const cartStore = useCartStore()
-      const customer = {
-        name: 'CUST-001',
-        customer_name: 'John Doe',
-        mobile_no: '1234567890',
-        email_id: 'john@example.com',
-      }
+		it("should exit return mode", () => {
+			const cartStore = useCartStore();
+			cartStore.isReturnMode = true;
+			cartStore.returnAgainst = "INV-001";
 
-      cartStore.customer = customer
+			cartStore.isReturnMode = false;
+			cartStore.returnAgainst = "";
 
-      expect(cartStore.customer?.name).toBe('CUST-001')
-      expect(cartStore.customer?.customer_name).toBe('John Doe')
-    })
+			expect(cartStore.isReturnMode).toBe(false);
+			expect(cartStore.returnAgainst).toBe("");
+		});
+	});
 
-    it('should clear customer', () => {
-      const cartStore = useCartStore()
-      cartStore.customer = { name: 'CUST-001', customer_name: 'John Doe' }
-      
-      cartStore.customer = null
+	describe("Customer Management", () => {
+		it("should set customer", () => {
+			const cartStore = useCartStore();
+			const customer = {
+				name: "CUST-001",
+				customer_name: "John Doe",
+				mobile_no: "1234567890",
+				email_id: "john@example.com",
+			};
 
-      expect(cartStore.customer).toBeNull()
-    })
-  })
+			cartStore.customer = customer;
 
-  describe('Discount Application', () => {
-    it('should apply percentage discount to cart', () => {
-      const cartStore = useCartStore()
-      cartStore.discountPercentage = 10
+			expect(cartStore.customer?.name).toBe("CUST-001");
+			expect(cartStore.customer?.customer_name).toBe("John Doe");
+		});
 
-      expect(cartStore.discountPercentage).toBe(10)
-    })
+		it("should clear customer", () => {
+			const cartStore = useCartStore();
+			cartStore.customer = { name: "CUST-001", customer_name: "John Doe" };
 
-    it('should apply amount discount to cart', () => {
-      const cartStore = useCartStore()
-      cartStore.discountAmount = 50
+			cartStore.customer = null;
 
-      expect(cartStore.discountAmount).toBe(50)
-    })
-  })
+			expect(cartStore.customer).toBeNull();
+		});
+	});
 
-  describe('Payments', () => {
-    it('should add payment method', () => {
-      const cartStore = useCartStore()
-      cartStore.payments = [
-        { mode_of_payment: 'Cash', amount: 100 },
-      ]
+	describe("Discount Application", () => {
+		it("should apply percentage discount to cart", () => {
+			const cartStore = useCartStore();
+			cartStore.discountPercentage = 10;
 
-      expect(cartStore.payments.length).toBe(1)
-      expect(cartStore.payments[0].mode_of_payment).toBe('Cash')
-    })
+			expect(cartStore.discountPercentage).toBe(10);
+		});
 
-    it('should handle split payments', () => {
-      const cartStore = useCartStore()
-      cartStore.payments = [
-        { mode_of_payment: 'Cash', amount: 50 },
-        { mode_of_payment: 'Card', amount: 50 },
-      ]
+		it("should apply amount discount to cart", () => {
+			const cartStore = useCartStore();
+			cartStore.discountAmount = 50;
 
-      const totalPaid = cartStore.payments.reduce((sum: any, p: any) => sum + p.amount, 0)
-      expect(totalPaid).toBe(100)
-    })
-  })
+			expect(cartStore.discountAmount).toBe(50);
+		});
+	});
 
-  describe('Loyalty Points', () => {
-    it('should track loyalty points redemption', () => {
-      const cartStore = useCartStore()
-      cartStore.redeemLoyaltyPoints = true
-      cartStore.loyaltyPoints = 100
-      cartStore.loyaltyAmount = 10 // 100 points = $10
+	describe("Payments", () => {
+		it("should add payment method", () => {
+			const cartStore = useCartStore();
+			cartStore.payments = [{ mode_of_payment: "Cash", amount: 100 }];
 
-      expect(cartStore.redeemLoyaltyPoints).toBe(true)
-      expect(cartStore.loyaltyPoints).toBe(100)
-      expect(cartStore.loyaltyAmount).toBe(10)
-    })
-  })
+			expect(cartStore.payments.length).toBe(1);
+			expect(cartStore.payments[0].mode_of_payment).toBe("Cash");
+		});
 
-  describe('Offers and Coupons', () => {
-    it('should track applied offers', () => {
-      const cartStore = useCartStore()
-      const offer = {
-        name: 'OFFER-001',
-        offer_title: '10% Off',
-        discount_percentage: 10,
-      }
+		it("should handle split payments", () => {
+			const cartStore = useCartStore();
+			cartStore.payments = [
+				{ mode_of_payment: "Cash", amount: 50 },
+				{ mode_of_payment: "Card", amount: 50 },
+			];
 
-      cartStore.appliedOffers = [offer as any]
+			const totalPaid = cartStore.payments.reduce((sum: any, p: any) => sum + p.amount, 0);
+			expect(totalPaid).toBe(100);
+		});
+	});
 
-      expect(cartStore.appliedOffers.length).toBe(1)
-    })
+	describe("Loyalty Points", () => {
+		it("should track loyalty points redemption", () => {
+			const cartStore = useCartStore();
+			cartStore.redeemLoyaltyPoints = true;
+			cartStore.loyaltyPoints = 100;
+			cartStore.loyaltyAmount = 10; // 100 points = $10
 
-    it('should track applied coupon', () => {
-      const cartStore = useCartStore()
-      cartStore.couponCode = 'SUMMER10'
-      cartStore.appliedCoupon = {
-        name: 'COUPON-001',
-        coupon_code: 'SUMMER10',
-        coupon_type: 'Discount',
-        discount_percentage: 10,
-      } as any
+			expect(cartStore.redeemLoyaltyPoints).toBe(true);
+			expect(cartStore.loyaltyPoints).toBe(100);
+			expect(cartStore.loyaltyAmount).toBe(10);
+		});
+	});
 
-      expect(cartStore.couponCode).toBe('SUMMER10')
-      expect(cartStore.appliedCoupon?.coupon_code).toBe('SUMMER10')
-    })
-  })
+	describe("Offers and Coupons", () => {
+		it("should track applied offers", () => {
+			const cartStore = useCartStore();
+			const offer = {
+				name: "OFFER-001",
+				offer_title: "10% Off",
+				discount_percentage: 10,
+			};
 
-  describe('Draft Management', () => {
-    it('should track draft state', () => {
-      const cartStore = useCartStore()
-      cartStore.currentDraftName = 'DRAFT-001'
-      cartStore.isSavingDraft = true
+			cartStore.appliedOffers = [offer as any];
 
-      expect(cartStore.currentDraftName).toBe('DRAFT-001')
-      expect(cartStore.isSavingDraft).toBe(true)
-    })
-  })
+			expect(cartStore.appliedOffers.length).toBe(1);
+		});
 
-  describe('Order Notes and Delivery', () => {
-    it('should store order notes', () => {
-      const cartStore = useCartStore()
-      cartStore.orderNotes = 'Please gift wrap'
+		it("should track applied coupon", () => {
+			const cartStore = useCartStore();
+			cartStore.couponCode = "SUMMER10";
+			cartStore.appliedCoupon = {
+				name: "COUPON-001",
+				coupon_code: "SUMMER10",
+				coupon_type: "Discount",
+				discount_percentage: 10,
+			} as any;
 
-      expect(cartStore.orderNotes).toBe('Please gift wrap')
-    })
+			expect(cartStore.couponCode).toBe("SUMMER10");
+			expect(cartStore.appliedCoupon?.coupon_code).toBe("SUMMER10");
+		});
+	});
 
-    it('should store delivery date', () => {
-      const cartStore = useCartStore()
-      cartStore.deliveryDate = '2026-01-20'
+	describe("Draft Management", () => {
+		it("should track draft state", () => {
+			const cartStore = useCartStore();
+			cartStore.currentDraftName = "DRAFT-001";
+			cartStore.isSavingDraft = true;
 
-      expect(cartStore.deliveryDate).toBe('2026-01-20')
-    })
-  })
-})
+			expect(cartStore.currentDraftName).toBe("DRAFT-001");
+			expect(cartStore.isSavingDraft).toBe(true);
+		});
+	});
+
+	describe("Order Notes and Delivery", () => {
+		it("should store order notes", () => {
+			const cartStore = useCartStore();
+			cartStore.orderNotes = "Please gift wrap";
+
+			expect(cartStore.orderNotes).toBe("Please gift wrap");
+		});
+
+		it("should store delivery date", () => {
+			const cartStore = useCartStore();
+			cartStore.deliveryDate = "2026-01-20";
+
+			expect(cartStore.deliveryDate).toBe("2026-01-20");
+		});
+	});
+});

@@ -2,7 +2,6 @@ import json
 import time
 
 import frappe
-from frappe import _
 from frappe.utils import nowdate
 
 from xpos.x_pos.api.item_fetchers import ItemDetailAggregator, get_batches
@@ -21,7 +20,7 @@ def get_items_details(
 
 	started_at = time.perf_counter()
 
-	pos_profile, _ = _ensure_pos_profile(pos_profile)
+	pos_profile = _ensure_pos_profile(pos_profile)
 	items_data = json.loads(items_data)
 
 	if not items_data:
@@ -194,7 +193,7 @@ def get_item_variants(
 	customer: str | None = None,
 ):
 	"""Return variants of an item along with attribute metadata."""
-	pos_profile, pos_profile_json = _ensure_pos_profile(pos_profile)
+	pos_profile = _ensure_pos_profile(pos_profile)
 	price_list = price_list or pos_profile.get("selling_price_list")
 
 	fields = [
@@ -226,7 +225,7 @@ def get_item_variants(
 		return {"variants": [], "attributes_meta": {}}
 
 	details = get_items_details(
-		pos_profile_json,
+		pos_profile,
 		json.dumps(items_data),
 		price_list=price_list,
 		customer=customer,

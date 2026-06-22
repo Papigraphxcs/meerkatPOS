@@ -53,7 +53,7 @@ class CustomPOSInvoiceMergeLog:
 		from POS return invoices whose net_rate may be slightly higher due to
 		rounding in different calculation paths.  Capping them to the SI rate
 		lets validate_returned_items pass without bypassing the check.
-  		"""
+		"""
 		credit_notes = {}
 		for key, value in data.items():
 			if not value:

@@ -50,7 +50,7 @@ def get_closing_shift_overview(pos_opening_shift: str | dict):
 	pos_profile = opening_shift_doc.pos_profile
 	company = opening_shift_doc.company
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
-	
+
 	doctype = get_invoice_type()
 	invoices = get_pos_invoices(opening_shift_doc.name, doctype)
 

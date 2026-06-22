@@ -1,15 +1,11 @@
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+from erpnext.accounts.party import get_party_account
 from frappe import _
 from frappe.utils import (
-	cint,
 	flt,
-	getdate,
 	nowdate,
 )
-
-from xpos.x_pos.api.payment_processing.utils import get_bank_cash_account as get_bank_account_processing
-from xpos.x_pos.api.payment_processing.utils import get_party_account
 
 
 def _create_change_payment_entries(invoice_doc, data, pos_profile=None, cash_account=None):

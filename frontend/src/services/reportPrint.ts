@@ -24,8 +24,9 @@ function pickItemColumn(columns: ReportColumn[]): ReportColumn | undefined {
 function pickQtyColumn(columns: ReportColumn[]): ReportColumn | undefined {
 	const numeric = columns.filter(isNumericColumn);
 	return (
-		numeric.find((column) => /qty|quantity/i.test(column.fieldname) || /qty|quantity/i.test(column.label)) ||
-		numeric[0]
+		numeric.find(
+			(column) => /qty|quantity/i.test(column.fieldname) || /qty|quantity/i.test(column.label),
+		) || numeric[0]
 	);
 }
 

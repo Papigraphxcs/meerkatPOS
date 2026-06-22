@@ -107,9 +107,7 @@ def _is_superuser(user: str) -> bool:
 	return user == "Administrator" or "System Manager" in frappe.get_roles(user)
 
 
-def user_has_pos_permission(
-	key: str, user: str | None = None, pos_profile: str | None = None
-) -> bool:
+def user_has_pos_permission(key: str, user: str | None = None, pos_profile: str | None = None) -> bool:
 	"""Whether ``user``'s POS Role grants the permission ``key``.
 
 	Single source of truth for server-side POS permission checks. Resolves the
@@ -263,7 +261,9 @@ def get_pos_users(
 			continue
 		role_name = pu.pos_role or DEFAULT_ROLE
 		perms = _get_role_permissions(role_name)
-		discount_limit = flt(pu.discount_limit) if pu.discount_limit not in (None, "") else DEFAULT_DISCOUNT_LIMIT
+		discount_limit = (
+			flt(pu.discount_limit) if pu.discount_limit not in (None, "") else DEFAULT_DISCOUNT_LIMIT
+		)
 		row = {
 			"name": user.name,
 			"username": user.username or user.name,

@@ -93,7 +93,9 @@ const filteredRows = computed(() => {
 	const rows = dataRows.value.filter((row) => {
 		if (!query) return true;
 		return visibleColumns.value.some((column) =>
-			formatReportCell(column, row[column.fieldname], posStore.currencySymbol).toLowerCase().includes(query),
+			formatReportCell(column, row[column.fieldname], posStore.currencySymbol)
+				.toLowerCase()
+				.includes(query),
 		);
 	});
 
@@ -204,7 +206,9 @@ async function runReport() {
 	}
 
 	if (missingRequiredFilters.value.length > 0) {
-		errorMessage.value = __("Please fill the required filters: {0}", [missingRequiredFilters.value.join(", ")]);
+		errorMessage.value = __("Please fill the required filters: {0}", [
+			missingRequiredFilters.value.join(", "),
+		]);
 		showError(errorMessage.value);
 		return;
 	}
@@ -216,14 +220,21 @@ async function runReport() {
 		const payload = normalizeReportFilters(filters.value, filterState);
 		const response = await fetchReportData(report.reportName, payload);
 		reportColumns.value = response.columns || [];
-		reportRows.value = normalizeReportRows(reportColumns.value, Array.isArray(response.result) ? response.result : [], {
-			addTotalRow: response.add_total_row,
-			skipTotalRow: response.skip_total_row,
-		});
+		reportRows.value = normalizeReportRows(
+			reportColumns.value,
+			Array.isArray(response.result) ? response.result : [],
+			{
+				addTotalRow: response.add_total_row,
+				skipTotalRow: response.skip_total_row,
+			},
+		);
 		reportSummary.value = Array.isArray(response.report_summary) ? response.report_summary : [];
 		lastRefreshedAt.value = new Date().toLocaleString();
 		currentPage.value = 1;
-		await router.replace({ path: route.path, query: serializeReportFiltersToQuery(filters.value, filterState) });
+		await router.replace({
+			path: route.path,
+			query: serializeReportFiltersToQuery(filters.value, filterState),
+		});
 		if (response.message) showSuccess(response.message);
 	} catch (error) {
 		errorMessage.value = extractErrorMessage(error);
@@ -350,7 +361,10 @@ function goBack() {
 
 <template>
 	<div class="flex h-full flex-col overflow-hidden bg-background">
-		<div v-if="!isReportVisible || !activeReport" class="flex h-full items-center justify-center p-6 text-center">
+		<div
+			v-if="!isReportVisible || !activeReport"
+			class="flex h-full items-center justify-center p-6 text-center"
+		>
 			<Card class="w-full max-w-xl border-border/70 bg-card p-8">
 				<div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
 					<BarChart3 class="h-7 w-7 text-muted-foreground" />
@@ -405,7 +419,13 @@ function goBack() {
 					</div>
 
 					<div class="flex flex-wrap items-center gap-2">
-						<Button variant="outline" size="sm" class="h-9" :disabled="isLoading" @click="runReport">
+						<Button
+							variant="outline"
+							size="sm"
+							class="h-9"
+							:disabled="isLoading"
+							@click="runReport"
+						>
 							<RefreshCw class="h-4 w-4" :class="{ 'animate-spin': isLoading }" />
 							{{ __("Refresh") }}
 						</Button>
@@ -463,7 +483,11 @@ function goBack() {
 								<Search
 									class="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
 								/>
-								<Input v-model="searchTerm" :placeholder="__('Search rows...')" class="h-10 ps-9" />
+								<Input
+									v-model="searchTerm"
+									:placeholder="__('Search rows...')"
+									class="h-10 ps-9"
+								/>
 							</div>
 							<Select
 								:items="sortFieldOptions"
@@ -471,7 +495,12 @@ function goBack() {
 								:model-value="sortState?.fieldname || ''"
 								@update:model-value="setSortField"
 							/>
-							<Button variant="outline" size="icon-sm" :disabled="!sortState" @click="toggleSortDirection">
+							<Button
+								variant="outline"
+								size="icon-sm"
+								:disabled="!sortState"
+								@click="toggleSortDirection"
+							>
 								<ArrowUpDown class="h-4 w-4" />
 							</Button>
 						</div>
@@ -481,7 +510,10 @@ function goBack() {
 						</div>
 					</div>
 
-					<div v-if="errorMessage" class="mb-4 rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+					<div
+						v-if="errorMessage"
+						class="mb-4 rounded-xl border border-destructive/20 bg-destructive/5 p-4"
+					>
 						<div class="flex items-start gap-3">
 							<AlertTriangle class="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
 							<div class="min-w-0 flex-1 space-y-3">

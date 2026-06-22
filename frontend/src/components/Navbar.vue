@@ -95,7 +95,10 @@
 			</Button>
 		</TooltipWrapper>
 
-		<TooltipWrapper v-if="posStore.allowReturn && hasPermission('sale_return')" :content="__('Process Return')">
+		<TooltipWrapper
+			v-if="posStore.allowReturn && hasPermission('sale_return')"
+			:content="__('Process Return')"
+		>
 			<Button
 				variant="ghost"
 				size="sm"

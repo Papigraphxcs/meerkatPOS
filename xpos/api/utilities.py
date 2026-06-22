@@ -15,7 +15,6 @@ import platform
 import subprocess
 
 import frappe
-from frappe import _
 from frappe.utils import cint
 
 

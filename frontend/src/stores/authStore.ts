@@ -22,9 +22,7 @@ export const useAuthStore = defineStore("auth", () => {
 		Boolean((window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_is_system_manager),
 	);
 	const canManagePermissions = computed(() =>
-		Boolean(
-			(window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_permissions,
-		),
+		Boolean((window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_permissions),
 	);
 
 	async function checkAuth(): Promise<boolean> {

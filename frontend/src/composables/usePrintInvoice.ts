@@ -17,9 +17,7 @@ export function usePrintInvoice() {
 	const posStore = usePosStore();
 
 	function resolveDoctype(): "Sales Invoice" | "POS Invoice" {
-		return xpos.boot?.pos_settings?.invoice_type === "POS Invoice"
-			? "POS Invoice"
-			: "Sales Invoice";
+		return xpos.boot?.pos_settings?.invoice_type === "POS Invoice" ? "POS Invoice" : "Sales Invoice";
 	}
 
 	async function printInvoice(invoiceName: string, options: PrintInvoiceOptions = {}) {
