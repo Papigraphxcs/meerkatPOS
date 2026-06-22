@@ -9,7 +9,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 )
 from frappe import _
-from frappe.utils import cstr, flt, get_datetime, nowdate
+from frappe.utils import cstr, flt, get_datetime
 from frappe.utils.caching import redis_cache
 
 from .utils import fetch_sales_person_names

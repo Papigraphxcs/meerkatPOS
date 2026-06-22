@@ -19,7 +19,13 @@ def execute(filters=None):
 	filters = frappe.parse_json(filters) if filters else {}
 	doctype = get_invoice_type()
 	invoices = _get_invoices(filters, doctype)
-	return get_columns(), _get_items_sold(invoices, doctype), None, None, _get_report_summary(invoices, doctype)
+	return (
+		get_columns(),
+		_get_items_sold(invoices, doctype),
+		None,
+		None,
+		_get_report_summary(invoices, doctype),
+	)
 
 
 def _get_invoices(filters, doctype):
@@ -94,12 +100,15 @@ def _get_report_summary(invoices, doctype):
 	summary = [
 		{"label": _("Total Invoices"), "value": len(invoices), "indicator": "Blue"},
 		{"label": _("Returns"), "value": returns_count, "indicator": "Red" if returns_count else "Grey"},
-		{"label": _("Grand Total"), "value": flt(grand_total, 2), "datatype": "Currency", "indicator": "Green"},
+		{
+			"label": _("Grand Total"),
+			"value": flt(grand_total, 2),
+			"datatype": "Currency",
+			"indicator": "Green",
+		},
 	]
 	for mode, amount in sorted(payment_summary.items()):
-		summary.append(
-			{"label": mode, "value": flt(amount, 2), "datatype": "Currency", "indicator": "Green"}
-		)
+		summary.append({"label": mode, "value": flt(amount, 2), "datatype": "Currency", "indicator": "Green"})
 	return summary
 
 

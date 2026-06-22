@@ -7,10 +7,7 @@ Keep whitelisted paths in this module stable for clients and route heavy
 implementation work to `xpos.x_pos.api.item_processing` modules.
 """
 
-import json
-
 import frappe
-from frappe import _
 
 from xpos.x_pos.api.item_processing.search import (
 	normalize_brand,

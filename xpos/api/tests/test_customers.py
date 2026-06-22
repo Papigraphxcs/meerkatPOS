@@ -45,7 +45,7 @@ class TestGetCustomers(unittest.TestCase):
 			}
 		]
 
-		result = customers.get_customers(search_term="John")
+		customers.get_customers(search_term="John")
 
 		mock_frappe.db.sql.assert_called_once()
 		call_args = mock_frappe.db.sql.call_args
@@ -63,7 +63,7 @@ class TestGetCustomers(unittest.TestCase):
 		mock_frappe.db.sql.return_value = []
 		mock_frappe.db.escape.side_effect = lambda x: f"'{x}'"
 
-		result = customers.get_customers(pos_profile="POS-PROFILE-1")
+		customers.get_customers(pos_profile="POS-PROFILE-1")
 
 		mock_get_groups.assert_called()
 
@@ -72,7 +72,7 @@ class TestGetCustomers(unittest.TestCase):
 		"""Test that get_customers respects the limit parameter."""
 		mock_frappe.db.sql.return_value = []
 
-		result = customers.get_customers(limit=10)
+		customers.get_customers(limit=10)
 
 		call_args = mock_frappe.db.sql.call_args
 		self.assertIn("10", str(call_args))
@@ -121,7 +121,7 @@ class TestGetCustomerInfo(unittest.TestCase):
 			{"parent": "ADDR-002"},
 		]
 
-		result = customers.get_customer_info("CUST-001")
+		customers.get_customer_info("CUST-001")
 
 		mock_frappe.get_all.assert_called()
 
@@ -143,7 +143,7 @@ class TestCreateCustomer(unittest.TestCase):
 			"email_id": "new@example.com",
 		}
 
-		result = customers.create_customer(data)
+		customers.create_customer(data)
 
 		mock_frappe.get_doc.assert_called()
 		mock_customer.insert.assert_called_once()
@@ -160,7 +160,7 @@ class TestCreateCustomer(unittest.TestCase):
 			"customer_name": "New Customer",
 		}
 
-		result = customers.create_customer(data)
+		customers.create_customer(data)
 
 		mock_frappe.get_doc.assert_called()
 
@@ -176,7 +176,7 @@ class TestUpdateCustomer(unittest.TestCase):
 		mock_customer.as_dict.return_value = {"name": "CUST-001", "customer_name": "Updated Name"}
 		mock_frappe.get_doc.return_value = mock_customer
 
-		result = customers.update_customer("CUST-001", {"customer_name": "Updated Name"})
+		customers.update_customer("CUST-001", {"customer_name": "Updated Name"})
 
 		mock_frappe.get_doc.assert_called_with("Customer", "CUST-001")
 		mock_customer.save.assert_called_once()
@@ -203,7 +203,7 @@ class TestGetLoyaltyPoints(unittest.TestCase):
 		"""Test that get_loyalty_points returns loyalty information."""
 		mock_frappe.db.sql.return_value = [{"loyalty_program": "VIP Program", "loyalty_points": 150}]
 
-		result = customers.get_loyalty_points("CUST-001")
+		customers.get_loyalty_points("CUST-001")
 
 		mock_frappe.db.sql.assert_called()
 

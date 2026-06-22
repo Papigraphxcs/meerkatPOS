@@ -162,7 +162,9 @@ def _get_git_commit_info(app_name: str = "xpos") -> dict[str, Any]:
 		return {}
 
 	def _run(cmd: list[str]) -> str:
-		return subprocess.check_output(cmd, cwd=app_path, stderr=subprocess.DEVNULL).decode("utf-8").strip()  # nosemgrep: frappe-subprocess-exec — static argument list, no user input
+		return (
+			subprocess.check_output(cmd, cwd=app_path, stderr=subprocess.DEVNULL).decode("utf-8").strip()
+		)  # nosemgrep: frappe-subprocess-exec — static argument list, no user input
 
 	try:
 		commit_hash = _run(["git", "rev-parse", "HEAD"])

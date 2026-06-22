@@ -13,7 +13,10 @@
 			</Button>
 		</div>
 
-		<div v-if="error" class="m-4 p-3 rounded border border-destructive/40 bg-destructive/10 text-sm text-destructive">
+		<div
+			v-if="error"
+			class="m-4 p-3 rounded border border-destructive/40 bg-destructive/10 text-sm text-destructive"
+		>
 			{{ error }}
 		</div>
 
@@ -70,10 +73,7 @@
 				</section>
 			</div>
 
-			<div
-				v-else
-				class="flex-1 flex items-center justify-center text-sm text-muted-foreground"
-			>
+			<div v-else class="flex-1 flex items-center justify-center text-sm text-muted-foreground">
 				{{ __("Select a role to view its permissions.") }}
 			</div>
 		</template>
@@ -149,13 +149,9 @@ const isLoading = ref(false);
 const error = ref("");
 const selectedRole = ref("");
 
-const roleOptions = computed(() =>
-	roles.value.map((role) => ({ label: role.role_name, value: role.name })),
-);
+const roleOptions = computed(() => roles.value.map((role) => ({ label: role.role_name, value: role.name })));
 
-const totalCount = computed(() =>
-	PERMISSION_GROUPS.reduce((sum, group) => sum + group.items.length, 0),
-);
+const totalCount = computed(() => PERMISSION_GROUPS.reduce((sum, group) => sum + group.items.length, 0));
 
 const enabledCount = computed(() => {
 	const perms = matrix.value[selectedRole.value] ?? {};

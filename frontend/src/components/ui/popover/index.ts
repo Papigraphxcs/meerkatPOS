@@ -1,11 +1,11 @@
 export {
-  PopoverRoot,
-  PopoverTrigger,
-  PopoverPortal,
-  PopoverContent,
-  PopoverClose,
-  PopoverArrow,
-  PopoverAnchor,
+	PopoverRoot,
+	PopoverTrigger,
+	PopoverPortal,
+	PopoverContent,
+	PopoverClose,
+	PopoverArrow,
+	PopoverAnchor,
 } from "radix-vue";
 
 export { default as Popover } from "./Popover.vue";

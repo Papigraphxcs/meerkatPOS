@@ -276,6 +276,10 @@ export const useCartStore = defineStore("cart", () => {
 			return { allowed: true };
 		}
 
+		if (Number(item.is_stock_item) === 0) {
+			return { allowed: true };
+		}
+
 		const actualQty = item.actual_qty ?? 0;
 		if (actualQty <= 0) {
 			return {
@@ -334,6 +338,7 @@ export const useCartStore = defineStore("cart", () => {
 				serial_no: item.serial_no || "",
 				batch_no: item.batch_no || "",
 				actual_qty: item.actual_qty || 0,
+				is_stock_item: item.is_stock_item,
 				has_serial_no: item.has_serial_no,
 				has_batch_no: item.has_batch_no,
 				conversion_factor: (item as CartItem).conversion_factor || 1,
@@ -352,6 +357,10 @@ export const useCartStore = defineStore("cart", () => {
 		const allowNegativeStock = posStore.stockSettings?.allow_negative_stock;
 
 		if (allowNegativeStock) {
+			return { allowed: true };
+		}
+
+		if (Number(item.is_stock_item) === 0) {
 			return { allowed: true };
 		}
 
@@ -432,6 +441,7 @@ export const useCartStore = defineStore("cart", () => {
 			serial_no: serialNo || "",
 			batch_no: batchNo || "",
 			actual_qty: item.actual_qty || 0,
+			is_stock_item: item.is_stock_item,
 			has_serial_no: item.has_serial_no,
 			has_batch_no: item.has_batch_no,
 			conversion_factor: conversionFactor || 1,
@@ -466,7 +476,7 @@ export const useCartStore = defineStore("cart", () => {
 		const item = items.value[index];
 		if (!item) return { success: false, message: __("Item not found") };
 
-		if (!isReturnMode.value && qty > item.qty) {
+		if (!isReturnMode.value && qty > item.qty && Number(item.is_stock_item) !== 0) {
 			const posStore = usePosStore();
 			const allowNegativeStock = posStore.stockSettings?.allow_negative_stock;
 
@@ -796,6 +806,7 @@ export const useCartStore = defineStore("cart", () => {
 						serial_no: item.serial_no || "",
 						batch_no: item.batch_no || "",
 						actual_qty: actualQty,
+						is_stock_item: item.is_stock_item,
 						has_serial_no: item.has_serial_no || false,
 						has_batch_no: item.has_batch_no || false,
 						conversion_factor: 1,

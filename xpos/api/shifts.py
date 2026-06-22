@@ -6,6 +6,7 @@ import json
 import frappe
 from frappe import Any, _
 from frappe.utils import cint, flt, now_datetime, nowdate
+
 from xpos.api.utilities import can_close_shift, get_invoice_type, is_pos_cashier
 
 

@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.utils import nowdate
 
 from xpos.x_pos.api.payment_processing.utils import get_bank_cash_account, get_party_account
@@ -84,7 +85,9 @@ def create_direct_journal_entry(
 
 		if not bank_account:
 			frappe.throw(
-				_("Could not determine bank/cash account for payment. Please set default cash account for company.")
+				_(
+					"Could not determine bank/cash account for payment. Please set default cash account for company."
+				)
 			)
 
 		frappe.log_error(f"Final bank/cash account: {bank_account}", "Direct JE Debug")
@@ -109,8 +112,7 @@ def create_direct_journal_entry(
 			},
 		)
 
-		# Credit Customer (Receivable)
-		credit_row = je.append(
+		je.append(
 			"accounts",
 			{
 				"account": receivable_account,
