@@ -25,7 +25,7 @@ const props = withDefaults(
 	},
 );
 
-const modelValue = defineModel<string>({ default: "" });
+const modelValue = defineModel<string | undefined>({ default: "" });
 const triggerRef = ref<{ $el?: HTMLElement | null } | null>(null);
 
 function getTriggerEl(): HTMLElement | null {
@@ -40,8 +40,13 @@ defineExpose({ focus, getTriggerEl });
 </script>
 
 <template>
-	<Select :model-value="modelValue" @update:model-value="modelValue = $event as string">
-		<SelectTriggerStyled ref="triggerRef" :placeholder="placeholder" :disabled="disabled" :class="class">
+	<Select :model-value="modelValue" @update:model-value="modelValue = $event">
+		<SelectTriggerStyled
+			ref="triggerRef"
+			:placeholder="placeholder"
+			:disabled="disabled"
+			:class="props.class"
+		>
 			<SelectValue :placeholder="placeholder" />
 		</SelectTriggerStyled>
 		<SelectContentStyled :placeholder="placeholder" :disabled="disabled" :side="side">
