@@ -1103,11 +1103,11 @@ def get_invoice_details(invoice_name: str, doctype: str = ""):
 
 
 @frappe.whitelist()
-def delete_draft_invoice(invoice_name: str, doctype: str = ""):
+def delete_draft_invoice(name: str, doctype: str = ""):
 	"""Delete a draft invoice."""
 	if not doctype:
-		doctype = _detect_invoice_doctype(invoice_name)
-	doc = frappe.get_doc(doctype, invoice_name)
+		doctype = _detect_invoice_doctype(name)
+	doc = frappe.get_doc(doctype, name)
 	if doc.docstatus != 0:
 		frappe.throw(_("Only draft invoices can be deleted"))
 	doc.delete(ignore_permissions=True)

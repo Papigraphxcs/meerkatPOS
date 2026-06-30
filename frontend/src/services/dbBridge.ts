@@ -680,12 +680,7 @@ export async function deleteExpense(id: number | string) {
 
 export async function getModesOfPayment() {
 	if (isElectron()) return getDb().getModesOfPayment();
-	const { getList } = await import("./api");
-	return getList("Mode of Payment", {
-		fields: ["name"],
-		filters: [["enabled", "=", 1]],
-		order_by: "name",
-	});
+	return [];
 }
 
 export async function createBankDrop(drop: Record<string, unknown>) {
