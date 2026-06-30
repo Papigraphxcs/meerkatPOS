@@ -335,7 +335,7 @@
    "creation": "2026-05-28 00:00:00.000000",
    "default": "0",
    "depends_on": null,
-   "description": "Set by X POS when the terminal sends an order to the cashier for settlement. The cashier collects payment and submits the invoice from the Cashier screen.",
+   "description": "",
    "docstatus": 0,
    "dt": "Sales Invoice",
    "fetch_from": null,
