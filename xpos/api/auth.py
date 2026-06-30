@@ -325,7 +325,7 @@ def get_role_permission_matrix() -> dict:
 
 
 @frappe.whitelist()
-def set_role_permission(role: str, permission: str, enabled) -> dict:
+def set_role_permission(role: str, permission: str, enabled: bool | int | str) -> dict:
 	"""Upsert a single POS Role Permission child row and bust the cache."""
 	_require_manage_permissions()
 	if not frappe.db.exists("POS Role", role):
