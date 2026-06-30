@@ -50,7 +50,9 @@ function mergePermissions(source: unknown): PosPermissions {
 
 export async function loadPermissions(userEmail: string, posProfile?: string): Promise<void> {
 	if (!isElectron()) {
-		const boot = (window.xpos?.boot as Record<string, unknown>) ?? {};
+		const boot =
+			(typeof window !== "undefined" ? (window.xpos?.boot as Record<string, unknown>) : undefined) ??
+			{};
 		currentRole.value = (boot.xpos_role as string) || "";
 		try {
 			const res = await call(
