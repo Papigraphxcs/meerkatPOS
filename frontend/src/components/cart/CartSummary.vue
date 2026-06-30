@@ -522,6 +522,20 @@ watch(
 	{ immediate: true },
 );
 
+watch(
+	() => cartStore.isEmpty,
+	(empty) => {
+		if (!empty) return;
+		discountInput.value = 0;
+		discountType.value = "percentage";
+		couponInput.value = "";
+		couponError.value = "";
+		showDiscount.value = false;
+		showCoupon.value = false;
+		showDelivery.value = false;
+	},
+);
+
 async function toggleDelivery() {
 	showDelivery.value = !showDelivery.value;
 	if (showDelivery.value) {
