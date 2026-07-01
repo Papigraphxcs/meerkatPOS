@@ -323,6 +323,25 @@ async function runMigrations(): Promise<void> {
 			log.warn(`Migration for pos_users rename ${oldCol} -> ${newCol} failed`, err);
 		}
 	}
+
+	for (const tbl of ["pending_invoices", "pending_purchases"]) {
+		try {
+			const [cols] = await db.execute<RowDataPacket[]>(
+				"SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = 'status'",
+				[tbl],
+			);
+			const colType = (cols as RowDataPacket[])[0]?.COLUMN_TYPE as string | undefined;
+			if (colType && !colType.includes("dead_letter")) {
+				await db.execute(
+					`ALTER TABLE \`${tbl}\` MODIFY COLUMN \`status\` ` +
+						"ENUM('pending','syncing','synced','failed','dead_letter') DEFAULT 'pending'",
+				);
+				log.info(`Migration: added 'dead_letter' status to ${tbl}`);
+			}
+		} catch (err) {
+			log.warn(`Migration for ${tbl} dead_letter status failed`, err);
+		}
+	}
 }
 
 async function executeSchemaFile(filePath: string): Promise<void> {

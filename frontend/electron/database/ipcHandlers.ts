@@ -396,6 +396,37 @@ export function registerDbHandlers(): void {
 		return rows[0]?.cnt ?? 0;
 	});
 
+	ipcMain.handle("db:get-dead-letters", async () => {
+		const invoices = await query(
+			"SELECT * FROM `pending_invoices` WHERE `status` = 'dead_letter' ORDER BY `created_at`",
+		);
+		const purchases = await query(
+			"SELECT * FROM `pending_purchases` WHERE `status` = 'dead_letter' ORDER BY `created_at`",
+		);
+		return { invoices, purchases };
+	});
+
+	ipcMain.handle("db:count-dead-letters", async () => {
+		const inv = await queryOne<{ cnt: number }>(
+			"SELECT COUNT(*) as cnt FROM `pending_invoices` WHERE `status` = 'dead_letter'",
+		);
+		const pur = await queryOne<{ cnt: number }>(
+			"SELECT COUNT(*) as cnt FROM `pending_purchases` WHERE `status` = 'dead_letter'",
+		);
+		return (inv?.cnt ?? 0) + (pur?.cnt ?? 0);
+	});
+
+	ipcMain.handle("db:retry-dead-letter", async (_e, table: string, id: number) => {
+		if (table !== "pending_invoices" && table !== "pending_purchases") {
+			throw new Error(`Invalid dead-letter table: ${table}`);
+		}
+		await execute(
+			`UPDATE \`${table}\` SET \`status\` = 'pending', \`retry_count\` = 0, \`error\` = NULL WHERE \`id\` = ? AND \`status\` = 'dead_letter'`,
+			[id],
+		);
+		return true;
+	});
+
 	ipcMain.handle("db:add-sync-id", async (_e, localId: string, serverName: string, doctype: string) => {
 		await execute(
 			`INSERT INTO \`sync_id_map\` (\`local_id\`, \`server_name\`, \`doctype\`)
