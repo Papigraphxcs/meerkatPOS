@@ -79,8 +79,15 @@ repos:
     hooks:
       - id: frappe-semgrep-rules
         name: "Run Frappe semgrep rules"
-        entry: semgrep --error --quiet --config=../../semgrep-rules/rules
-        language: system
+        entry: semgrep
+        language: python
+        additional_dependencies: ['semgrep==1.168.0']
+        args:
+          - '--config=.semgrep'
+          - '--error'
+          - '--quiet'
+          - '--metrics=off'
+          - '--disable-version-check'
         types_or: [python, javascript]
         pass_filenames: true
         exclude: |

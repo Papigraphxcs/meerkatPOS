@@ -8,7 +8,7 @@
 			isRtl ? 'rtl' : 'ltr',
 		]"
 	>
-		<template v-if="isAuthPage">
+		<template v-if="isAuthPage || isFullScreen">
 			<router-view v-slot="{ Component }">
 				<transition name="fade" mode="out-in">
 					<component :is="Component" />
@@ -167,6 +167,7 @@ const {
 } = keyboardShortcuts;
 
 const isAuthPage = computed(() => route.meta.isAuthPage === true || route.meta.isSetupPage === true);
+const isFullScreen = computed(() => route.meta.fullScreen === true);
 
 async function handleClearCart() {
 	cartStore.clearCart();
