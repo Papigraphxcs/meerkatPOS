@@ -181,10 +181,41 @@ def _ensure_pos_invoice_payment_row(invoice_doc, pos_profile_doc, require_paymen
 	)
 
 
+def find_invoice_by_local_id(local_id: str | None, warehouse: str | None = None) -> tuple[str, str] | None:
+	"""Return (doctype, name) of an invoice already created for this client local_id.
+
+	The desktop/offline client assigns every cart a stable ``local_id`` and may
+	re-push it after a dropped response. Looking it up here makes invoice creation
+	idempotent so a retry returns the original invoice instead of creating a second
+	real Sales Invoice (double stock depletion + double revenue).
+	"""
+	if not local_id:
+		return None
+	for dt in ("Sales Invoice", "POS Invoice"):
+		name = frappe.db.get_value(dt, {"xpos_local_id": local_id, "set_warehouse": warehouse}, "name")
+		if name:
+			return dt, name
+	return None
+
+
 @frappe.whitelist()
-def create_invoice(data: str | dict):
-	"""Create a POS Sales Invoice from cart data."""
+def create_invoice(data: str | dict, local_id: str | None = None):
+	"""Create a POS Sales Invoice from cart data.
+
+	Args:
+	    data: JSON string (or dict) containing the cart payload.
+	    local_id: Stable client-side id used to deduplicate sync retries so the
+	        same cart is never committed twice (exactly-once invoice creation).
+	"""
 	data = json.loads(data) if isinstance(data, str) else data
+
+	local_id = local_id or data.get("local_id")
+
+	warehouse = data.get("warehouse")
+	existing = find_invoice_by_local_id(local_id, warehouse)
+	if existing:
+		dt, name = existing
+		return {**_build_invoice_response(frappe.get_doc(dt, name)), "duplicate": True}
 
 	pos_profile = data.get("pos_profile")
 	customer = data.get("customer")
@@ -241,6 +272,8 @@ def create_invoice(data: str | dict):
 		invoice_doc = frappe.new_doc(doctype)
 
 	invoice_doc.is_pos = 1
+	if local_id:
+		invoice_doc.xpos_local_id = local_id
 	invoice_doc.pos_profile = pos_profile
 	invoice_doc.customer = customer
 	invoice_doc.company = pos.company
@@ -529,10 +562,18 @@ def create_invoice(data: str | dict):
 	except Exception:
 		pass
 
-	if is_existing_draft:
-		invoice_doc.save(ignore_permissions=True)
-	else:
-		invoice_doc.insert(ignore_permissions=True)
+	try:
+		if is_existing_draft:
+			invoice_doc.save(ignore_permissions=True)
+		else:
+			invoice_doc.insert(ignore_permissions=True)
+	except frappe.exceptions.UniqueValidationError:
+		frappe.db.rollback()
+		existing = find_invoice_by_local_id(local_id, warehouse)
+		if existing:
+			dt, name = existing
+			return {**_build_invoice_response(frappe.get_doc(dt, name)), "duplicate": True}
+		raise
 
 	_validate_unpaid_balance_permissions(invoice_doc, pos, data)
 

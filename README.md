@@ -119,7 +119,7 @@ X POS is a feature-rich, offline-first Point of Sale application built on Frappe
 |---|---|
 | Python | >= 3.14 |
 | Frappe Framework | v16 |
-| ERPNext | v18 |
+| ERPNext | v16 |
 | Node.js | >= 24 (for builds) |
 
 ---
