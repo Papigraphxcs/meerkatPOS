@@ -148,6 +148,7 @@ import {
 	Landmark,
 	BarChart3,
 	Banknote,
+	ScanBarcode,
 } from "lucide-vue-next";
 
 import LogoDark from "@/assets/images/xpos-logo-dark.svg";
@@ -191,6 +192,7 @@ const purchaseNavItems = [
 ];
 
 const toolsNavItems = [
+	{ route: "/price-checker", label: __("Price Checker"), icon: ScanBarcode, show: true },
 	{ route: "/barcode-print", label: __("Barcode Printer"), icon: Printer, show: true },
 	{ route: "/settings", label: __("Settings"), icon: Settings, show: isElectron() },
 ];
