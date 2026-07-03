@@ -8,6 +8,7 @@ import { isElectron, getApiBaseUrl, warmApiCredentials } from "@/services/electr
 import { usePosStore } from "./stores/posStore";
 import { initializeNamespaces } from "./utils";
 import { dayjs } from "@/utils/datetime";
+import translate from "./lib/translate";
 
 if (!isElectron() && import.meta.env.PROD) {
 	import("virtual:pwa-register").then(({ registerSW }) => {
@@ -53,10 +54,10 @@ async function initializeBrowserStorage(): Promise<void> {
 	}
 }
 
-async function bootstrap(): Promise<void> {
+(async () => {
 	const app = createApp(App);
 	const pinia = createPinia();
-
+	window.__ = translate;
 	app.use(pinia);
 	app.use(router);
 	initializeNamespaces();
@@ -68,6 +69,4 @@ async function bootstrap(): Promise<void> {
 	};
 
 	app.mount("#app");
-}
-
-void bootstrap();
+})();
