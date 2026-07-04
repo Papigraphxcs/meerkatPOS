@@ -63,6 +63,31 @@ contextBridge.exposeInMainWorld("electronAPI", {
 		return () => ipcRenderer.removeListener("sync-complete", handler);
 	},
 
+	onSyncDeadLetter: (
+		callback: (info: {
+			table: string;
+			pendingTable: string;
+			id: number;
+			localId: string;
+			retryCount: number;
+			error: string;
+		}) => void,
+	) => {
+		const handler = (
+			_event: Electron.IpcRendererEvent,
+			info: {
+				table: string;
+				pendingTable: string;
+				id: number;
+				localId: string;
+				retryCount: number;
+				error: string;
+			},
+		) => callback(info);
+		ipcRenderer.on("sync-dead-letter", handler);
+		return () => ipcRenderer.removeListener("sync-dead-letter", handler);
+	},
+
 	onStockUpdated: (
 		callback: (data: { warehouse: string; item_code: string; actual_qty: number }) => void,
 	) => {
@@ -140,6 +165,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
 			ipcRenderer.invoke("db:update-pending-invoice", id, updates),
 		deletePendingInvoice: (id: number) => ipcRenderer.invoke("db:delete-pending-invoice", id),
 		countPendingInvoices: (): Promise<number> => ipcRenderer.invoke("db:count-pending-invoices"),
+		getDeadLetters: () => ipcRenderer.invoke("db:get-dead-letters"),
+		countDeadLetters: (): Promise<number> => ipcRenderer.invoke("db:count-dead-letters"),
+		retryDeadLetter: (table: string, id: number): Promise<boolean> =>
+			ipcRenderer.invoke("db:retry-dead-letter", table, id),
 
 		addPendingPurchase: (record: {
 			type: string;

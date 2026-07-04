@@ -126,6 +126,17 @@
 							{{ __("Load to Cart") }}
 						</Button>
 						<Button
+							v-else-if="inv.status === 'dead_letter'"
+							variant="outline"
+							size="sm"
+							class="flex-1 gap-1 text-xs border-destructive text-destructive"
+							:disabled="!offlineStore.isOnline || offlineStore.isSyncing"
+							@click="inv.id && requeue(inv.id)"
+						>
+							<RefreshCw class="w-3.5 h-3.5" />
+							{{ __("Requeue") }}
+						</Button>
+						<Button
 							v-else
 							variant="outline"
 							size="sm"
@@ -189,6 +200,15 @@ const cartStore = useCartStore();
 onMounted(() => {
 	offlineStore.loadPendingInvoices();
 });
+
+async function requeue(id: number) {
+	const ok = await offlineStore.retryDeadLetterInvoice(id);
+	if (ok) {
+		showSuccess(__("Invoice requeued for sync"));
+	} else {
+		showError(__("Failed to requeue invoice"));
+	}
+}
 
 function isDraft(inv: (typeof offlineStore.pendingInvoices)[number]): boolean {
 	const d = inv.data as Record<string, unknown> | null | undefined;
