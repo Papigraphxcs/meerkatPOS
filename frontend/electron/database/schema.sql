@@ -467,6 +467,7 @@ CREATE TABLE IF NOT EXISTS `pos_users` (
   `username` VARCHAR(255) NOT NULL,
   `full_name` VARCHAR(255) DEFAULT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
+  `password_salt` VARCHAR(64) DEFAULT NULL,
   `role` VARCHAR(100) DEFAULT 'Cashier',
   `pos_profile` VARCHAR(255) DEFAULT NULL,
   `warehouse` VARCHAR(255) DEFAULT NULL,

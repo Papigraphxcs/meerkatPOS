@@ -789,17 +789,49 @@ export function registerDbHandlers(): void {
 				role?: string;
 			},
 		) => {
-			const { createHash } = await import("crypto");
-			const hash = createHash("sha256").update(user.password).digest("hex");
+			const { hashPassword } = await import("./passwordHash");
+			const { hash, salt } = await hashPassword(user.password);
 			await execute(
-				`INSERT INTO \`pos_users\` (\`name\`, \`username\`, \`full_name\`, \`password_hash\`, \`role\`, \`enabled\`)
-       VALUES (?, ?, ?, ?, ?, 1)
-       ON DUPLICATE KEY UPDATE \`password_hash\` = VALUES(\`password_hash\`), \`full_name\` = VALUES(\`full_name\`)`,
-				[user.username, user.username, user.fullName || user.username, hash, user.role || "Manager"],
+				`INSERT INTO \`pos_users\` (\`name\`, \`username\`, \`full_name\`, \`password_hash\`, \`password_salt\`, \`role\`, \`enabled\`)
+       VALUES (?, ?, ?, ?, ?, ?, 1)
+       ON DUPLICATE KEY UPDATE \`password_hash\` = VALUES(\`password_hash\`), \`password_salt\` = VALUES(\`password_salt\`), \`full_name\` = VALUES(\`full_name\`)`,
+				[
+					user.username,
+					user.username,
+					user.fullName || user.username,
+					hash,
+					salt,
+					user.role || "Manager",
+				],
 			);
 			return true;
 		},
 	);
+
+	ipcMain.handle("db:verify-password", async (_e, username: string, password: string) => {
+		const row = await queryOne<{ name: string; password_hash: string; password_salt: string | null }>(
+			"SELECT `name`, `password_hash`, `password_salt` FROM `pos_users` WHERE `username` = ? OR `name` = ?",
+			[username, username],
+		);
+		if (!row || !row.password_hash) return false;
+
+		const { verifyPassword, hashPassword } = await import("./passwordHash");
+		const { valid, needsUpgrade } = await verifyPassword(password, row.password_hash, row.password_salt);
+		if (!valid) return false;
+
+		if (needsUpgrade) {
+			try {
+				const { hash, salt } = await hashPassword(password);
+				await execute(
+					"UPDATE `pos_users` SET `password_hash` = ?, `password_salt` = ? WHERE `name` = ?",
+					[hash, salt, row.name],
+				);
+			} catch (err) {
+				log.warn("Password hash upgrade failed", err);
+			}
+		}
+		return true;
+	});
 
 	ipcMain.handle("db:get-sales-tax-templates", async (_e, company?: string) => {
 		let sql = "SELECT * FROM `sales_taxes_templates` WHERE `disabled` = 0";

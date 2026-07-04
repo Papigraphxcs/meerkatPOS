@@ -532,6 +532,30 @@ ipcMain.handle(
 	},
 );
 
+ipcMain.handle("fbr:fiscalize-local", async (_event, url: string, payload: Record<string, unknown>) => {
+	try {
+		const controller = new AbortController();
+		const timer = setTimeout(() => controller.abort(), 12000);
+		try {
+			const response = await fetch(url, {
+				method: "POST",
+				headers: { "Content-Type": "application/json", Accept: "application/json" },
+				body: JSON.stringify(payload),
+				signal: controller.signal,
+			});
+			if (!response.ok) {
+				return { success: false, error: `Local FBR service responded with HTTP ${response.status}.` };
+			}
+			const data = await response.json();
+			return { success: true, data };
+		} finally {
+			clearTimeout(timer);
+		}
+	} catch (err) {
+		return { success: false, error: err instanceof Error ? err.message : String(err) };
+	}
+});
+
 app.whenReady().then(async () => {
 	Menu.setApplicationMenu(null);
 

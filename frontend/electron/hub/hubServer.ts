@@ -23,12 +23,13 @@ async function getOrCreateHubSecret(): Promise<string> {
 }
 
 function isAuthorized(req: http.IncomingMessage): boolean {
-	if (!hubSecret) return true;
+	if (!hubSecret) return false;
 	const auth = req.headers["authorization"] || "";
-	if (auth.startsWith("Bearer ")) {
-		return crypto.timingSafeEqual(Buffer.from(auth.slice(7)), Buffer.from(hubSecret));
-	}
-	return false;
+	if (!auth.startsWith("Bearer ")) return false;
+	const provided = Buffer.from(auth.slice(7));
+	const expected = Buffer.from(hubSecret);
+	if (provided.length !== expected.length) return false;
+	return crypto.timingSafeEqual(provided, expected);
 }
 
 function json(res: http.ServerResponse, data: unknown, status = 200): void {
