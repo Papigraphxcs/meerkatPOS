@@ -1117,6 +1117,47 @@ export async function getAllPendingInvoices() {
 	return getPendingInvoices();
 }
 
+export async function getDeadLetters(): Promise<{
+	invoices: Record<string, unknown>[];
+	purchases: Record<string, unknown>[];
+}> {
+	if (isElectron()) {
+		return getDb().getDeadLetters();
+	}
+	const idb = await import("./idbService");
+	const invoices = await idb.getPendingInvoicesByStatus("dead_letter" as never);
+	const purchases = (await idb.getAllPendingPurchases()).filter(
+		(p) => (p as { status?: string }).status === "dead_letter",
+	);
+	return {
+		invoices: invoices as unknown as Record<string, unknown>[],
+		purchases: purchases as unknown as Record<string, unknown>[],
+	};
+}
+
+export async function countDeadLetters(): Promise<number> {
+	if (isElectron()) {
+		return getDb().countDeadLetters();
+	}
+	const { invoices, purchases } = await getDeadLetters();
+	return invoices.length + purchases.length;
+}
+
+export async function retryDeadLetter(table: string, id: number): Promise<boolean> {
+	if (isElectron()) {
+		return getDb().retryDeadLetter(table, id);
+	}
+	const idb = await import("./idbService");
+	if (table === "pending_invoices") {
+		const all = await idb.getAllPendingInvoices();
+		const rec = all.find((r) => r.id === id);
+		if (!rec) return false;
+		await idb.updatePendingInvoice({ ...rec, status: "pending", retry_count: 0, error: undefined, id });
+		return true;
+	}
+	return false;
+}
+
 export async function getAllPendingPurchases(): Promise<PendingPurchase[]> {
 	return getPendingPurchases() as Promise<PendingPurchase[]>;
 }

@@ -72,22 +72,26 @@
 			<TooltipWrapper
 				v-if="!isAuthPage && isElectronEnv"
 				:content="
-					syncStatus.lastError.value ||
-					(syncStatus.lastSyncTime.value
-						? 'Last sync: ' + syncStatus.lastSyncTime.value
-						: 'Not synced yet')
+					offlineStore.deadLetterCount > 0
+						? offlineStore.deadLetterCount + ' invoice(s) failed to sync. Click to review'
+						: syncStatus.lastError.value ||
+							(syncStatus.lastSyncTime.value
+								? 'Last sync: ' + syncStatus.lastSyncTime.value
+								: 'Not synced yet')
 				"
 				side="right"
 			>
-				<div
-					class="fixed bottom-3 start-3 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium shadow-md select-none"
+				<button
+					type="button"
+					class="fixed bottom-3 start-3 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium shadow-md select-none cursor-pointer"
 					:class="
 						syncStatus.isSyncing.value
 							? 'bg-blue-600 text-white'
-							: syncStatus.lastError.value
+							: offlineStore.deadLetterCount > 0 || syncStatus.lastError.value
 								? 'bg-destructive text-destructive-foreground'
 								: 'bg-muted text-muted-foreground'
 					"
+					@click="handleOpenOfflinePanel"
 				>
 					<span
 						v-if="syncStatus.isSyncing.value"
@@ -96,7 +100,11 @@
 					<span
 						v-else
 						class="w-2 h-2 rounded-full"
-						:class="syncStatus.lastError.value ? 'bg-white' : 'bg-green-400'"
+						:class="
+							offlineStore.deadLetterCount > 0 || syncStatus.lastError.value
+								? 'bg-white'
+								: 'bg-green-400'
+						"
 					/>
 					<span>
 						<template v-if="syncStatus.isSyncing.value">
@@ -104,13 +112,16 @@
 								syncStatus.syncTable.value ? ": " + syncStatus.syncTable.value : "..."
 							}}
 						</template>
+						<template v-else-if="offlineStore.deadLetterCount > 0"
+							>{{ offlineStore.deadLetterCount }} need attention</template
+						>
 						<template v-else-if="syncStatus.lastError.value">Sync error</template>
 						<template v-else-if="syncStatus.lastSyncTime.value"
 							>Synced {{ syncStatus.lastSyncTime.value }}</template
 						>
 						<template v-else>Sync pending</template>
 					</span>
-				</div>
+				</button>
 			</TooltipWrapper>
 		</Transition>
 	</div>
@@ -140,6 +151,8 @@ import AboutDialog from "@/components/dialogs/AboutDialog.vue";
 import { TooltipWrapper } from "@/components/ui/tooltip";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { initSyncListeners } from "@/services/syncIpcHandler";
+import { showError } from "@/services/api";
+import __ from "@/lib/translate";
 import { useSyncStatus } from "@/composables/useSyncStatus";
 import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
 import { isElectron } from "@/services/electronBridge";
@@ -352,6 +365,26 @@ onMounted(() => {
 	window.addEventListener("xpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
 	window.addEventListener("xpos:show-about-dialog", handleShowAboutDialog as EventListener);
 });
+
+watch(
+	() => syncStatus.deadLetters.value.length,
+	(count, prev) => {
+		if (count > (prev ?? 0)) {
+			offlineStore.refreshDeadLetterCount();
+			const latest = syncStatus.deadLetters.value[0];
+			showError(
+				__(
+					"Invoice {0} failed to sync and needs attention. Open the offline invoices panel to review.",
+					[latest?.localId ?? ""],
+				),
+			);
+		}
+	},
+);
+
+function handleOpenOfflinePanel() {
+	window.dispatchEvent(new CustomEvent("xpos:open-offline-panel"));
+}
 
 watch(isAuthPage, (isAuth, wasAuth) => {
 	if (wasAuth && !isAuth && authStore.isAuthenticated) {

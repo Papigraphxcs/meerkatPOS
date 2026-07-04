@@ -318,9 +318,13 @@ const showAboutDialog = ref(false);
 const showShortcutsDialog = ref(false);
 
 function handleOfflineAction() {
-	if (offlineStore.hasPending || !offlineStore.isOnline) {
+	if (offlineStore.hasPending || offlineStore.hasDeadLetters || !offlineStore.isOnline) {
 		showOfflinePanel.value = true;
 	}
+}
+
+function handleOpenOfflinePanel() {
+	showOfflinePanel.value = true;
 }
 
 function toggleSidebar() {
@@ -356,12 +360,14 @@ onMounted(() => {
 	window.addEventListener("keydown", handleKeyboard);
 	window.addEventListener("xpos:show-repeat-dialog", handleShowRepeatDialog as EventListener);
 	window.addEventListener("xpos:show-return-dialog", handleShowReturnDialog as EventListener);
+	window.addEventListener("xpos:open-offline-panel", handleOpenOfflinePanel as EventListener);
 });
 
 onUnmounted(() => {
 	window.removeEventListener("keydown", handleKeyboard);
 	window.removeEventListener("xpos:show-repeat-dialog", handleShowRepeatDialog as EventListener);
 	window.removeEventListener("xpos:show-return-dialog", handleShowReturnDialog as EventListener);
+	window.removeEventListener("xpos:open-offline-panel", handleOpenOfflinePanel as EventListener);
 });
 
 function printLastInvoice() {

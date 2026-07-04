@@ -26,6 +26,16 @@ export interface ElectronAPI {
 	) => () => void;
 	onSyncError: (callback: (error: { message: string; table?: string }) => void) => () => void;
 	onSyncComplete: (callback: (summary: { pulled: number; pushed: number }) => void) => () => void;
+	onSyncDeadLetter: (
+		callback: (info: {
+			table: string;
+			pendingTable: string;
+			id: number;
+			localId: string;
+			retryCount: number;
+			error: string;
+		}) => void,
+	) => () => void;
 	onStockUpdated: (
 		callback: (data: { warehouse: string; item_code: string; actual_qty: number }) => void,
 	) => () => void;
@@ -232,6 +242,12 @@ export interface ElectronDbAPI {
 	updatePendingInvoice: (id: number, updates: Record<string, unknown>) => Promise<boolean>;
 	deletePendingInvoice: (id: number) => Promise<boolean>;
 	countPendingInvoices: () => Promise<number>;
+	getDeadLetters: () => Promise<{
+		invoices: Record<string, unknown>[];
+		purchases: Record<string, unknown>[];
+	}>;
+	countDeadLetters: () => Promise<number>;
+	retryDeadLetter: (table: string, id: number) => Promise<boolean>;
 	addPendingPurchase: (record: {
 		type: string;
 		data: unknown;

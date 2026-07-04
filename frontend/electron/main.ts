@@ -559,6 +559,10 @@ ipcMain.handle("fbr:fiscalize-local", async (_event, url: string, payload: Recor
 app.whenReady().then(async () => {
 	Menu.setApplicationMenu(null);
 
+	if (process.platform === "win32") {
+		app.setAppUserModelId("com.xpos.app");
+	}
+
 	try {
 		const ses = session.defaultSession;
 		await ses.clearStorageData({ storages: ["cookies"] });
