@@ -5,7 +5,7 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe import _
+from frappe import _, cstr
 from frappe.utils import cint, flt, getdate, now_datetime, nowdate
 from frappe.utils.background_jobs import enqueue
 
@@ -192,7 +192,9 @@ def find_invoice_by_local_id(local_id: str | None, warehouse: str | None = None)
 	if not local_id:
 		return None
 	for dt in ("Sales Invoice", "POS Invoice"):
-		name = frappe.db.get_value(dt, {"xpos_local_id": local_id, "set_warehouse": warehouse}, "name")
+		name = frappe.db.get_value(
+			dt, {"xpos_local_id": local_id, "set_warehouse": warehouse, "docstatus": 1}, "name"
+		)
 		if name:
 			return dt, name
 	return None
@@ -577,6 +579,29 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 
 	_validate_unpaid_balance_permissions(invoice_doc, pos, data)
 
+	from xpos.x_pos.integrations import fbr
+
+	client_fbr_number = cstr(data.get("fbr_invoice_number") or "").strip()
+	if client_fbr_number:
+		fbr.apply_fiscal_number(invoice_doc, client_fbr_number)
+		invoice_doc.save(ignore_permissions=True)
+	else:
+		outcome = fbr.prepare_fiscalization(invoice_doc)
+		if outcome.status == "local_required":
+			return {
+				"status": "fbr_local_required",
+				"name": invoice_doc.name,
+				"doctype": doctype,
+				"fbr_payload": outcome.payload,
+				"fbr_local_service_url": outcome.local_service_url,
+				"grand_total": invoice_doc.grand_total,
+				"customer": invoice_doc.customer,
+				"customer_name": invoice_doc.customer_name,
+			}
+		if outcome.status == "cloud":
+			fbr.apply_fiscal_number(invoice_doc, outcome.fbr_invoice_number, outcome.posted_on)
+			invoice_doc.save(ignore_permissions=True)
+
 	if submit_in_background:
 		enqueue(
 			_submit_invoice_job,
@@ -607,6 +632,55 @@ def _submit_invoice_job(invoice_name: str, doctype: str = "Sales Invoice"):
 	except Exception:
 		frappe.log_error(f"Failed to submit {doctype} {invoice_name}", "X POS Invoice Submission")
 		frappe.db.rollback()
+
+
+@frappe.whitelist()
+def finalize_fiscal_invoice(name: str, fbr_invoice_number: str, doctype: str | None = None):
+	"""Stamp a locally-obtained FBR number on a pending draft and submit it.
+
+	Completes the offline-fiscalization handshake started by ``create_invoice`` when
+	it returned ``fbr_local_required``: the client fetched the number from the local
+	fiscalization service and passes it here to finalize the sale.
+	"""
+	from xpos.x_pos.integrations import fbr
+
+	doctype = doctype or get_invoice_type()
+	fbr_invoice_number = cstr(fbr_invoice_number or "").strip()
+	if not fbr_invoice_number:
+		frappe.throw(_("FBR invoice number is required to finalize this invoice."))
+
+	invoice_doc = frappe.get_doc(doctype, name)
+	if invoice_doc.docstatus != 0:
+		return _build_invoice_response(invoice_doc)
+
+	if invoice_doc.get("pos_profile") and not is_pos_cashier(frappe.session.user, invoice_doc.pos_profile):
+		frappe.throw(_("Only a cashier can finalize this invoice."), frappe.PermissionError)
+
+	fbr.apply_fiscal_number(invoice_doc, fbr_invoice_number)
+	invoice_doc.save(ignore_permissions=True)
+	invoice_doc.submit()
+	return _build_invoice_response(invoice_doc)
+
+
+@frappe.whitelist()
+def discard_draft_invoice(name: str, doctype: str | None = None) -> dict:
+	"""Delete a draft invoice left pending when fiscalization could not complete.
+
+	Used when both the FBR cloud and the local service are unreachable, so the sale
+	could not be finalized and the draft should not linger.
+	"""
+	doctype = doctype or get_invoice_type()
+	if not frappe.db.exists(doctype, name):
+		return {"deleted": False}
+
+	invoice_doc = frappe.get_doc(doctype, name)
+	if invoice_doc.docstatus != 0:
+		frappe.throw(_("Only a draft invoice can be discarded."))
+	if invoice_doc.get("pos_profile") and not is_pos_cashier(frappe.session.user, invoice_doc.pos_profile):
+		frappe.throw(_("Only a cashier can discard this invoice."), frappe.PermissionError)
+
+	frappe.delete_doc(doctype, name, ignore_permissions=True, force=True)
+	return {"deleted": True}
 
 
 @frappe.whitelist()

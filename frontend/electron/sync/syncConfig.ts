@@ -678,7 +678,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 	{
 		doctype: "Purchase Order",
 		label: "Purchase Orders",
-		pushMethod: "xpos.api.purchase.create_purchase_order",
+		pushMethod: "xpos.x_pos.api.purchase_orders.create_purchase_order",
 		fields: ["*"],
 		orderBy: "creation",
 		direction: "push",

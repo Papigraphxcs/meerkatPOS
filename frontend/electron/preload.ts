@@ -271,6 +271,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 		upsertPosUsers: (rows: Record<string, unknown>[]) => ipcRenderer.invoke("db:upsert-pos-users", rows),
 		createLocalUser: (user: { username: string; password: string; fullName: string; role?: string }) =>
 			ipcRenderer.invoke("db:create-local-user", user),
+		verifyPassword: (username: string, password: string) =>
+			ipcRenderer.invoke("db:verify-password", username, password),
 
 		getSalesTaxTemplates: (company?: string) => ipcRenderer.invoke("db:get-sales-tax-templates", company),
 		upsertSalesTaxTemplates: (rows: Record<string, unknown>[]) =>
@@ -406,6 +408,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
 			html: string,
 			options?: { landscape?: boolean; margins?: Record<string, number> },
 		): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke("print:report", html, options),
+	},
+
+	fbr: {
+		fiscalizeLocal: (
+			url: string,
+			payload: Record<string, unknown>,
+		): Promise<{ success: boolean; data?: unknown; error?: string }> =>
+			ipcRenderer.invoke("fbr:fiscalize-local", url, payload),
 	},
 
 	node: {

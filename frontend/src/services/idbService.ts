@@ -68,8 +68,9 @@ function sanitizeForIdb<T>(value: T): T {
 
 export interface PendingInvoice {
 	id?: number;
+	local_id?: string;
 	data: unknown;
-	status: "pending" | "syncing" | "failed";
+	status: "pending" | "syncing" | "failed" | "dead_letter";
 	created_at: string;
 	error?: string;
 	retry_count: number;
@@ -174,6 +175,16 @@ const db = new XPosDB();
 let dbReadyPromise: Promise<void> | null = null;
 
 async function resetDatabaseConnection(): Promise<void> {
+	let savedInvoices: PendingInvoice[] = [];
+	let savedPurchases: PendingPurchase[] = [];
+	try {
+		if (!db.isOpen()) await db.open();
+		savedInvoices = await db.pendingInvoices.toArray();
+		savedPurchases = await db.pendingPurchases.toArray();
+	} catch (err) {
+		console.warn("[XPOS] Could not read pending records before DB reset", err);
+	}
+
 	try {
 		db.close();
 	} catch {
@@ -182,6 +193,18 @@ async function resetDatabaseConnection(): Promise<void> {
 
 	await Dexie.delete(DB_NAME);
 	await db.open();
+
+	if (savedInvoices.length || savedPurchases.length) {
+		try {
+			if (savedInvoices.length) await db.pendingInvoices.bulkAdd(savedInvoices);
+			if (savedPurchases.length) await db.pendingPurchases.bulkAdd(savedPurchases);
+			console.warn(
+				`[XPOS] Restored ${savedInvoices.length} pending invoice(s) and ${savedPurchases.length} pending purchase(s) after DB reset`,
+			);
+		} catch (err) {
+			console.error("[XPOS] Failed to restore pending records after DB reset", err);
+		}
+	}
 }
 
 export async function ensureDatabaseReady(forceReset = false): Promise<void> {

@@ -153,22 +153,26 @@ export const useOfflineStore = defineStore("offline", () => {
 				if ((invoice.data as Record<string, unknown>)?.is_draft) {
 					continue;
 				}
+				if (invoice.status === "dead_letter") {
+					continue;
+				}
 				try {
 					invoice.status = "syncing";
 					if (invoice.id) await updatePendingInvoice(invoice.id, { status: "syncing" });
 
 					await call<{ name: string }>("xpos.api.invoices.create_invoice", {
 						data: JSON.stringify(invoice.data),
+						local_id: invoice.local_id,
 					});
 					if (invoice.id) await deletePendingInvoice(invoice.id);
 					synced++;
 				} catch (error: unknown) {
 					failed++;
-					invoice.status = "failed";
 					invoice.retry_count = (invoice.retry_count || 0) + 1;
 					invoice.error = error instanceof Error ? error.message : String(error);
+					invoice.status = invoice.retry_count >= MAX_RETRIES ? "dead_letter" : "failed";
 
-					if (invoice.retry_count >= MAX_RETRIES) {
+					if (invoice.status === "dead_letter") {
 						syncErrors.value.push(
 							`Invoice for ${invoice.customer_name || "Unknown"}: ${invoice.error}`,
 						);
@@ -176,7 +180,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
 					if (invoice.id)
 						await updatePendingInvoice(invoice.id, {
-							status: "failed",
+							status: invoice.status,
 							retry_count: invoice.retry_count,
 							error: invoice.error,
 						});
@@ -221,6 +225,7 @@ export const useOfflineStore = defineStore("offline", () => {
 
 			await call<{ name: string }>("xpos.api.invoices.create_invoice", {
 				data: JSON.stringify(invoice.data),
+				local_id: invoice.local_id,
 			});
 
 			await deletePendingInvoice(id);
@@ -229,11 +234,11 @@ export const useOfflineStore = defineStore("offline", () => {
 			showSuccess(__("Invoice synced successfully"));
 			return true;
 		} catch (error: unknown) {
-			invoice.status = "failed";
 			invoice.retry_count = (invoice.retry_count || 0) + 1;
 			invoice.error = error instanceof Error ? error.message : String(error);
+			invoice.status = invoice.retry_count >= MAX_RETRIES ? "dead_letter" : "failed";
 			await updatePendingInvoice(invoice.id!, {
-				status: "failed",
+				status: invoice.status,
 				retry_count: invoice.retry_count,
 				error: invoice.error,
 			});

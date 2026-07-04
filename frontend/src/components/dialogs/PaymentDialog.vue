@@ -553,6 +553,7 @@ import { useOfflineStore } from "@/stores/offlineStore";
 import { __ } from "@/lib/translate";
 import { usePrintInvoice } from "@/composables/usePrintInvoice";
 import { isElectron } from "@/services/electronBridge";
+import { fiscalizeViaLocalService } from "@/services/fbrLocalService";
 import {
 	Dialog,
 	DialogContent,
@@ -1092,9 +1093,12 @@ async function submitPayment(withPrint: boolean = true) {
 			}
 			return;
 		}
-		const result = await call<{ name: string }>("xpos.api.invoices.create_invoice", {
+		let result = await call<CreateInvoiceResult>("xpos.api.invoices.create_invoice", {
 			data: JSON.stringify(invoiceData),
 		});
+		if (result.status === "fbr_local_required") {
+			result = await finalizeWithLocalFbr(result);
+		}
 
 		posStore.lastInvoiceName = result.name;
 
@@ -1139,6 +1143,40 @@ async function submitPayment(withPrint: boolean = true) {
 	} finally {
 		isSubmitting.value = false;
 		printAfterSave.value = false;
+	}
+}
+
+interface CreateInvoiceResult {
+	name: string;
+	status?: string;
+	doctype?: string;
+	fbr_payload?: Record<string, unknown>;
+	fbr_local_service_url?: string;
+}
+
+async function finalizeWithLocalFbr(pending: CreateInvoiceResult): Promise<CreateInvoiceResult> {
+	try {
+		const { invoiceNumber } = await fiscalizeViaLocalService(
+			pending.fbr_payload || {},
+			pending.fbr_local_service_url || "",
+		);
+		return await call<CreateInvoiceResult>("xpos.api.invoices.finalize_fiscal_invoice", {
+			name: pending.name,
+			fbr_invoice_number: invoiceNumber,
+			doctype: pending.doctype,
+		});
+	} catch (err) {
+		await call("xpos.api.invoices.discard_draft_invoice", {
+			name: pending.name,
+			doctype: pending.doctype,
+		}).catch(() => {
+			/* best-effort cleanup */
+		});
+		throw new Error(
+			__("FBR fiscalization failed — both the FBR cloud and the local service are unavailable.") +
+				" " +
+				extractErrorMessage(err),
+		);
 	}
 }
 

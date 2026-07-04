@@ -43,6 +43,14 @@ export interface ElectronAPI {
 	update: ElectronUpdateAPI;
 	node: ElectronNodeAPI;
 	print: ElectronPrintAPI;
+	fbr: ElectronFbrAPI;
+}
+
+export interface ElectronFbrAPI {
+	fiscalizeLocal: (
+		url: string,
+		payload: Record<string, unknown>,
+	) => Promise<{ success: boolean; data?: unknown; error?: string }>;
 }
 
 export interface ElectronPrintAPI {
@@ -256,6 +264,7 @@ export interface ElectronDbAPI {
 		password: string;
 		role?: string;
 	}) => Promise<{ success: boolean; error?: string }>;
+	verifyPassword: (username: string, password: string) => Promise<boolean>;
 	createPosOpeningShift: (shift: Record<string, unknown>) => Promise<Record<string, unknown>>;
 	getOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
 	checkOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
