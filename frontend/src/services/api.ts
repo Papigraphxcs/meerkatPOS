@@ -5,6 +5,7 @@ import {
 } from "@/composables/useToast";
 import { isOnline, isNetworkError } from "@/utils";
 import { isElectron, getApiBaseUrlSync, getApiCredentialsSync } from "@/services/electronBridge";
+import { captureError } from "@/services/errorLog";
 import { getMeta } from "./idbService";
 
 export { isNetworkError } from "@/utils";
@@ -75,6 +76,16 @@ async function fetchCall<T = unknown>(method: string, args: Record<string, unkno
 		} else {
 			errorMsg = data.message || `HTTP error! status: ${response.status}`;
 		}
+		captureError({
+			source: "api",
+			title: `${response.status} ${method}`,
+			message: errorMsg,
+			method,
+			status: response.status,
+			args,
+			traceback: Array.isArray(data.exc) ? data.exc.join("\n") : data.exc,
+			exceptionType: data.exc_type,
+		});
 
 		throw new Error(errorMsg);
 	}
