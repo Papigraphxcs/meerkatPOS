@@ -4,6 +4,7 @@ import { createPinia } from "pinia";
 import App from "./App.vue";
 import { router } from "./router";
 import { showError } from "@/services/api";
+import { captureError } from "@/services/errorLog";
 import { isElectron, getApiBaseUrl, warmApiCredentials } from "@/services/electronBridge";
 import { usePosStore } from "./stores/posStore";
 import { initializeNamespaces } from "./utils";
@@ -40,6 +41,14 @@ if (!isElectron() && import.meta.env.PROD) {
 	warmApiCredentials().then(() => {
 		console.log("[XPOS Electron] API credentials cache warmed");
 	});
+	window.electronAPI?.onMainError?.((err) => {
+		captureError({
+			source: "main",
+			title: `Main process: ${err.message}`,
+			message: err.message,
+			traceback: err.stack,
+		});
+	});
 }
 
 async function initializeBrowserStorage(): Promise<void> {
@@ -65,8 +74,37 @@ async function initializeBrowserStorage(): Promise<void> {
 	app.config.globalProperties.$dayjs = dayjs;
 	app.config.errorHandler = (err: unknown, _instance: unknown, info: string) => {
 		console.error("X POS Error:", err, info);
-		showError(`Error: ${err instanceof Error ? err.message : String(err)}`);
+		const message = err instanceof Error ? err.message : String(err);
+		captureError({
+			source: "renderer",
+			title: `Vue error: ${message}`,
+			message,
+			traceback: err instanceof Error ? err.stack : undefined,
+			meta: { info },
+		});
+		showError(`Error: ${message}`);
 	};
+
+	window.addEventListener("error", (event) => {
+		const err = event.error;
+		captureError({
+			source: "renderer",
+			title: `Uncaught: ${event.message}`,
+			message: err instanceof Error ? err.message : event.message,
+			traceback: err instanceof Error ? err.stack : undefined,
+			meta: { filename: event.filename, lineno: event.lineno, colno: event.colno },
+		});
+	});
+	window.addEventListener("unhandledrejection", (event) => {
+		const reason = event.reason;
+		const message = reason instanceof Error ? reason.message : String(reason);
+		captureError({
+			source: "promise",
+			title: `Unhandled rejection: ${message}`,
+			message,
+			traceback: reason instanceof Error ? reason.stack : undefined,
+		});
+	});
 
 	app.mount("#app");
 })();

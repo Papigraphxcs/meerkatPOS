@@ -99,6 +99,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
 		return () => ipcRenderer.removeListener("stock-updated", handler);
 	},
 
+	onMainError: (callback: (err: { message: string; stack?: string }) => void) => {
+		const handler = (_event: Electron.IpcRendererEvent, err: { message: string; stack?: string }) =>
+			callback(err);
+		ipcRenderer.on("main-process-error", handler);
+		return () => ipcRenderer.removeListener("main-process-error", handler);
+	},
+
+	logs: {
+		list: (): Promise<string[]> => ipcRenderer.invoke("logs:list"),
+		read: (name: string): Promise<string> => ipcRenderer.invoke("logs:read", name),
+	},
+
 	triggerSync: (): Promise<boolean> => ipcRenderer.invoke("trigger-sync"),
 	startSyncEngine: (opts?: {
 		csrfToken?: string;

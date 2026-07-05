@@ -39,6 +39,8 @@ export interface ElectronAPI {
 	onStockUpdated: (
 		callback: (data: { warehouse: string; item_code: string; actual_qty: number }) => void,
 	) => () => void;
+	onMainError: (callback: (err: { message: string; stack?: string }) => void) => () => void;
+	logs: ElectronLogsAPI;
 	triggerSync: () => Promise<boolean>;
 	startSyncEngine: (opts?: {
 		csrfToken?: string;
@@ -54,6 +56,11 @@ export interface ElectronAPI {
 	node: ElectronNodeAPI;
 	print: ElectronPrintAPI;
 	fbr: ElectronFbrAPI;
+}
+
+export interface ElectronLogsAPI {
+	list: () => Promise<string[]>;
+	read: (name: string) => Promise<string>;
 }
 
 export interface ElectronFbrAPI {

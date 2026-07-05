@@ -67,6 +67,19 @@
 			close-button
 			:dir="isRtl ? 'rtl' : 'ltr'"
 		/>
+		<ErrorInspector v-model:open="showErrorInspector" />
+		<Transition name="fade">
+			<button
+				v-if="!isAuthPage && errorCount > 0 && !showErrorInspector"
+				type="button"
+				class="fixed bottom-3 end-3 z-50 flex items-center gap-1.5 rounded-full bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground shadow-md select-none cursor-pointer"
+				:title="__('Open Error Inspector')"
+				@click="showErrorInspector = true"
+			>
+				<AlertTriangle class="w-3.5 h-3.5" />
+				<span>{{ errorCount }}</span>
+			</button>
+		</Transition>
 
 		<Transition name="fade">
 			<TooltipWrapper
@@ -149,6 +162,7 @@ import DraftInvoiceDialog from "@/components/dialogs/DraftInvoiceDialog.vue";
 import KeyboardShortcutsDialog from "@/components/dialogs/KeyboardShortcutsDialog.vue";
 import AboutDialog from "@/components/dialogs/AboutDialog.vue";
 import { TooltipWrapper } from "@/components/ui/tooltip";
+import { AlertTriangle } from "lucide-vue-next";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { initSyncListeners } from "@/services/syncIpcHandler";
 import { showError } from "@/services/api";
@@ -156,6 +170,8 @@ import __ from "@/lib/translate";
 import { useSyncStatus } from "@/composables/useSyncStatus";
 import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
 import { isElectron } from "@/services/electronBridge";
+import ErrorInspector from "@/components/errors/ErrorInspector.vue";
+import { unseenCount as errorUnseenCount } from "@/services/errorLog";
 import { get_full_url } from "@/utils";
 import { getCustomer } from "./utils";
 
@@ -169,6 +185,8 @@ const authStore = useAuthStore();
 const offlineStore = useOfflineStore();
 const syncStatus = useSyncStatus();
 const isElectronEnv = isElectron();
+const showErrorInspector = ref(false);
+const errorCount = errorUnseenCount;
 const isRtl = computed(() => document.documentElement.dir === "rtl");
 
 const keyboardShortcuts = useKeyboardShortcuts();
@@ -275,6 +293,10 @@ function handleShowAboutDialog() {
 	showAboutDialog.value = true;
 }
 
+function handleToggleErrorInspector() {
+	showErrorInspector.value = !showErrorInspector.value;
+}
+
 const theme = ref<"light" | "dark" | "system">("system");
 const systemPrefersDark = ref(window.matchMedia("(prefers-color-scheme: dark)").matches);
 
@@ -364,6 +386,7 @@ onMounted(() => {
 	window.addEventListener("xpos:print-last", handlePrintLast as EventListener);
 	window.addEventListener("xpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
 	window.addEventListener("xpos:show-about-dialog", handleShowAboutDialog as EventListener);
+	window.addEventListener("xpos:toggle-error-inspector", handleToggleErrorInspector as EventListener);
 });
 
 watch(
@@ -429,5 +452,6 @@ onUnmounted(() => {
 	window.removeEventListener("xpos:print-last", handlePrintLast as EventListener);
 	window.removeEventListener("xpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
 	window.removeEventListener("xpos:show-about-dialog", handleShowAboutDialog as EventListener);
+	window.removeEventListener("xpos:toggle-error-inspector", handleToggleErrorInspector as EventListener);
 });
 </script>
