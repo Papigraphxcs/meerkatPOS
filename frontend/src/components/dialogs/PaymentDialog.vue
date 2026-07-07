@@ -547,6 +547,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { useCartStore } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { call, showSuccess, showError, showInfo, isNetworkError } from "@/services/api";
 import { useOfflineStore } from "@/stores/offlineStore";
@@ -596,6 +597,7 @@ import {
 const posStore = usePosStore();
 const { printInvoice, printInvoiceLocal } = usePrintInvoice();
 const cartStore = useCartStore();
+const authStore = useAuthStore();
 const paymentStore = usePaymentStore();
 const offlineStore = useOfflineStore();
 
@@ -1051,6 +1053,7 @@ async function submitPayment(withPrint: boolean = true) {
 					pos_opening_shift_local_id: shiftName,
 					is_draft: false,
 					is_return: cartStore.isReturnMode,
+					receipt: cartStore.getReceiptSnapshot("", authStore.userFullName),
 				},
 				customer_name: cartStore.customerName,
 				grand_total: cartStore.grandTotal,
