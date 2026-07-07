@@ -381,6 +381,7 @@ async function pushTable(config: SyncTableConfig): Promise<{ synced: number; fai
 						: (rawData as Record<string, unknown>) || {};
 
 				if (pendingTable === "pending_invoices") {
+					delete data.receipt;
 					const localShiftId = data.pos_opening_shift || data.pos_opening_shift_local_id;
 					if (localShiftId) {
 						const serverShiftName = await getServerShiftName(String(localShiftId));

@@ -998,6 +998,29 @@ export async function getCachedOffers(posProfile: string): Promise<unknown[] | n
 	return idb.getCachedOffers(posProfile);
 }
 
+export async function cacheReceiptContext(
+	posProfile: string,
+	context: import("@/types/pos.types").ReceiptContext,
+): Promise<void> {
+	if (isElectron()) {
+		await getDb().setMeta(`receipt_context::${posProfile}`, JSON.stringify(context));
+		return;
+	}
+	const idb = await import("./idbService");
+	await idb.cacheReceiptContext(posProfile, context);
+}
+
+export async function getCachedReceiptContext(
+	posProfile: string,
+): Promise<import("@/types/pos.types").ReceiptContext | null> {
+	if (isElectron()) {
+		const val = await getDb().getMeta(`receipt_context::${posProfile}`);
+		return val ? JSON.parse(val) : null;
+	}
+	const idb = await import("./idbService");
+	return idb.getCachedReceiptContext(posProfile);
+}
+
 export async function cacheItemTax(
 	itemCode: string,
 	company: string,

@@ -583,6 +583,20 @@ export async function getCachedOffers(posProfile: string): Promise<unknown[] | n
 	return val ? (val as unknown[]) : null;
 }
 
+export async function cacheReceiptContext(
+	posProfile: string,
+	context: import("@/types/pos.types").ReceiptContext,
+): Promise<void> {
+	await setMeta(`receipt_context::${posProfile}`, context);
+}
+
+export async function getCachedReceiptContext(
+	posProfile: string,
+): Promise<import("@/types/pos.types").ReceiptContext | null> {
+	const val = await getMeta(`receipt_context::${posProfile}`);
+	return val ? (val as import("@/types/pos.types").ReceiptContext) : null;
+}
+
 export async function clearAllData(): Promise<void> {
 	await db.transaction(
 		"rw",
