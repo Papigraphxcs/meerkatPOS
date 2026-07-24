@@ -366,7 +366,6 @@ const menus = computed<Menu[]>(() => [
 				disabled: () => !posStore.allowReturn,
 				action: () => {
 					window.dispatchEvent(new CustomEvent("xpos:show-return-dialog"));
-					window.location.reload();
 				},
 			},
 			{ id: "sep-f0", separator: true },

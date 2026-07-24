@@ -432,7 +432,6 @@ const actions: CommandResult[] = [
 		icon: RotateCcw,
 		action: () => {
 			window.dispatchEvent(new CustomEvent("xpos:show-return-dialog"));
-			window.location.reload();
 		},
 	},
 	{
