@@ -8,6 +8,8 @@
 			isRtl ? 'rtl' : 'ltr',
 		]"
 	>
+		<SplashScreen :show="showSplash" />
+
 		<template v-if="isAuthPage || isFullScreen">
 			<router-view v-slot="{ Component }">
 				<transition name="fade" mode="out-in">
@@ -161,6 +163,8 @@ import CashMovementDialog from "@/components/dialogs/CashMovementDialog.vue";
 import DraftInvoiceDialog from "@/components/dialogs/DraftInvoiceDialog.vue";
 import KeyboardShortcutsDialog from "@/components/dialogs/KeyboardShortcutsDialog.vue";
 import AboutDialog from "@/components/dialogs/AboutDialog.vue";
+import SplashScreen from "@/components/SplashScreen.vue";
+import { useBranding } from "@/composables/useBranding";
 import { TooltipWrapper } from "@/components/ui/tooltip";
 import { AlertTriangle } from "lucide-vue-next";
 import { useOfflineStore } from "@/stores/offlineStore";
@@ -341,6 +345,9 @@ provide("isDark", isDark);
 provide("theme", theme);
 provide("toggleDarkMode", toggleDarkMode);
 
+const { initBranding, enableSplash } = useBranding();
+const showSplash = ref(false);
+
 let mediaQuery: MediaQueryList | null = null;
 let cleanupSyncListeners: (() => void) | null = null;
 function handleSystemThemeChange(e: MediaQueryListEvent) {
@@ -362,6 +369,14 @@ onMounted(() => {
 	}
 
 	applyThemeToDocument(isDark.value);
+
+	const brandingReady = initBranding();
+	showSplash.value = enableSplash.value;
+	brandingReady.finally(() => {
+		window.setTimeout(() => {
+			showSplash.value = false;
+		}, 700);
+	});
 
 	mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 	mediaQuery.addEventListener("change", handleSystemThemeChange);

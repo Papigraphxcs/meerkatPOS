@@ -430,7 +430,10 @@ const actions: CommandResult[] = [
 		description: __("Process a return"),
 		shortcut: "Ctrl+R",
 		icon: RotateCcw,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:show-return-dialog")),
+		action: () => {
+			window.dispatchEvent(new CustomEvent("xpos:show-return-dialog"));
+			window.location.reload();
+		},
 	},
 	{
 		id: "act-print",

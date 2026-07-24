@@ -10,7 +10,7 @@
 				class="fixed start-0 top-0 h-full w-64 bg-card ltr:border-r rtl:border-l border-border z-50 flex flex-col shadow-xl"
 			>
 				<div class="p-4 border-b border-border flex items-center gap-3">
-					<img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-8 h-8" />
+					<img :src="isDark ? logoDark : logoLight" alt="X POS Logo" class="w-8 h-8" />
 					<div>
 						<h1 class="font-semibold text-foreground">X POS</h1>
 						<p class="text-xs text-muted-foreground">{{ posStore.companyName }}</p>
@@ -151,13 +151,13 @@ import {
 	ScanBarcode,
 } from "lucide-vue-next";
 
-import LogoDark from "@/assets/images/xpos-logo-dark.svg";
-import LogoLight from "@/assets/images/xpos-logo-light.svg";
+import { useBranding } from "@/composables/useBranding";
 import { isElectron } from "@/services/electronBridge";
 
 const route = useRoute();
 const posStore = usePosStore();
 const isDark = inject<Ref<boolean>>("isDark")!;
+const { logoLight, logoDark } = useBranding();
 
 const isOpen = ref(false);
 

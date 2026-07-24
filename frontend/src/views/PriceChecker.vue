@@ -8,15 +8,8 @@
 		>
 			<div class="flex min-w-0 items-center gap-3.5">
 				<img
-					v-if="!isDark"
 					class="h-[clamp(38px,5vh,48px)] w-[clamp(38px,5vh,48px)] flex-shrink-0 rounded-lg"
-					src="@/assets/images/xpos-logo-light.svg"
-					alt="X POS"
-				/>
-				<img
-					v-else
-					class="h-[clamp(38px,5vh,48px)] w-[clamp(38px,5vh,48px)] flex-shrink-0 rounded-lg"
-					src="@/assets/images/xpos-logo-dark.svg"
+					:src="isDark ? logoDark : logoLight"
 					alt="X POS"
 				/>
 				<div class="flex min-w-0 flex-col leading-tight">
@@ -193,6 +186,9 @@ import { call } from "@/services/api";
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from "vue";
 import __ from "@/lib/translate";
 import { ScanBarcode } from "lucide-vue-next";
+import { useBranding } from "@/composables/useBranding";
+
+const { logoLight, logoDark } = useBranding();
 
 const props = defineProps({
 	appName: { type: String, default: "X POS" },

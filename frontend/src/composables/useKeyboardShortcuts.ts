@@ -42,6 +42,7 @@ export function useKeyboardShortcuts() {
 			if (isOnline()) {
 				void Promise.allSettled([settingsStore.fetchSettings()]);
 			}
+			window.location.reload();
 		} catch (error) {
 			console.error("Failed to clear cached data:", error);
 			showError("Failed to clear cached data");
