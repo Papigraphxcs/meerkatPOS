@@ -12,6 +12,26 @@ from frappe.utils.background_jobs import enqueue
 from xpos.api.utilities import get_invoice_type, is_pos_cashier
 
 
+def enforce_stock_availability(invoice_doc):
+	"""
+	Block the sale when it would take stock below zero.
+	"""
+
+	from xpos.x_pos.api.invoice_processing.stock import validate_stock_on_invoice
+	from xpos.x_pos.api.item_processing.stock import lock_bins_for_update
+
+	if invoice_doc.get("is_return"):
+		return
+
+	lock_bins_for_update(
+		[
+			{"item_code": row.item_code, "warehouse": row.warehouse}
+			for row in (invoice_doc.get("items") or []) + (invoice_doc.get("packed_items") or [])
+		]
+	)
+	validate_stock_on_invoice(invoice_doc)
+
+
 def _get_item_rate_precision():
 	"""Return item rate precision from System Settings float_precision, default 3."""
 	val = frappe.db.get_default("float_precision")
@@ -577,6 +597,8 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 			return {**_build_invoice_response(frappe.get_doc(dt, name)), "duplicate": True}
 		raise
 
+	enforce_stock_availability(invoice_doc)
+
 	_validate_unpaid_balance_permissions(invoice_doc, pos, data)
 
 	from xpos.x_pos.integrations import fbr
@@ -625,13 +647,20 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 
 def _submit_invoice_job(invoice_name: str, doctype: str = "Sales Invoice"):
 	"""Background job to submit an invoice."""
+	user = frappe.session.user
 	try:
 		doc = frappe.get_doc(doctype, invoice_name)
+		enforce_stock_availability(doc)
 		doc.submit()
 		frappe.db.commit()
-	except Exception:
-		frappe.log_error(f"Failed to submit {doctype} {invoice_name}", "X POS Invoice Submission")
+	except Exception as e:
 		frappe.db.rollback()
+		frappe.log_error(f"Failed to submit {doctype} {invoice_name}: {e}", "X POS Invoice Submission")
+		frappe.publish_realtime(
+			"pos_invoice_submit_error",
+			{"invoice": invoice_name, "error": str(e)},
+			user=user,
+		)
 
 
 @frappe.whitelist()
@@ -658,6 +687,7 @@ def finalize_fiscal_invoice(name: str, fbr_invoice_number: str, doctype: str | N
 
 	fbr.apply_fiscal_number(invoice_doc, fbr_invoice_number)
 	invoice_doc.save(ignore_permissions=True)
+	enforce_stock_availability(invoice_doc)
 	invoice_doc.submit()
 	return _build_invoice_response(invoice_doc)
 
