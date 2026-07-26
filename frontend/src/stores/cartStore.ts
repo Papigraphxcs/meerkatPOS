@@ -273,6 +273,19 @@ export const useCartStore = defineStore("cart", () => {
 		return row.qty * (row.conversion_factor || 1);
 	}
 
+	function getStockReservations(): { item_code: string; stock_qty: number }[] {
+		const totals = new Map<string, number>();
+
+		for (const row of items.value) {
+			if (Number(row.is_stock_item) === 0) continue;
+			totals.set(row.item_code, (totals.get(row.item_code) || 0) + stockQtyOf(row));
+		}
+
+		return [...totals.entries()]
+			.filter(([, stock_qty]) => stock_qty !== 0)
+			.map(([item_code, stock_qty]) => ({ item_code, stock_qty }));
+	}
+
 	function committedStockQty(itemCode: string, batchNo?: string): number {
 		return items.value
 			.filter((i: CartItem) => {
@@ -1209,6 +1222,7 @@ export const useCartStore = defineStore("cart", () => {
 		hasOffers,
 		canAddItem,
 		revalidateStock,
+		getStockReservations,
 		canAddItemWithDetails,
 		addItem,
 		addItemWithDetails,

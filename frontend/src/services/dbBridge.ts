@@ -891,6 +891,25 @@ export async function getCachedStockForItem(warehouse: string, itemCode: string)
 	return idb.getCachedStockForItem(warehouse, itemCode);
 }
 
+export async function adjustCachedStock(
+	warehouse: string,
+	deltas: { item_code: string; delta: number }[],
+): Promise<void> {
+	if (!warehouse || deltas.length === 0) return;
+
+	for (const { item_code, delta } of deltas) {
+		if (!delta) continue;
+		try {
+			const current = await getCachedStockForItem(warehouse, item_code);
+			if (!current) continue;
+
+			await updateStockQty(warehouse, item_code, (current.actual_qty || 0) + delta);
+		} catch (error) {
+			console.warn("[XPOS Offline] Failed to adjust cached stock for", item_code, error);
+		}
+	}
+}
+
 export async function cacheCustomers(customers: Customer[]): Promise<void> {
 	if (isElectron()) {
 		await getDb().upsertCustomers(customers as unknown as Record<string, unknown>[]);

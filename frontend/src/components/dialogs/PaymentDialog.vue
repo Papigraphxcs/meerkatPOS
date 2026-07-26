@@ -1091,6 +1091,7 @@ async function submitPayment(withPrint: boolean = true) {
 				invoiceData,
 				cartStore.customerName,
 				cartStore.grandTotal,
+				cartStore.getStockReservations(),
 			);
 			if (result.success) {
 				showInfo(
@@ -1136,6 +1137,7 @@ async function submitPayment(withPrint: boolean = true) {
 				invoiceData,
 				cartStore.customerName,
 				cartStore.grandTotal,
+				cartStore.getStockReservations(),
 			);
 			if (result.success) {
 				showInfo(

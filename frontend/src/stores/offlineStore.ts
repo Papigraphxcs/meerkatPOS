@@ -10,6 +10,7 @@ import {
 	countPendingInvoices,
 	countDeadLetters,
 	retryDeadLetter as retryDeadLetterBridge,
+	adjustCachedStock,
 } from "@/services/dbBridge";
 import type { PendingInvoice } from "@/services/idbService";
 import type { InvoiceData } from "@/types/pos.types";
@@ -134,10 +135,52 @@ export const useOfflineStore = defineStore("offline", () => {
 		}
 	}
 
+	function itemCodesOf(invoice: OfflineInvoice): string[] {
+		const items = (invoice.data as InvoiceData | undefined)?.items;
+		return Array.isArray(items) ? items.map((i) => i.item_code).filter(Boolean) : [];
+	}
+
+	async function reserveStock(reservations?: { item_code: string; stock_qty: number }[]): Promise<void> {
+		if (!reservations?.length) return;
+		const warehouse = usePosStore().warehouse;
+		if (!warehouse) return;
+
+		await adjustCachedStock(
+			warehouse,
+			reservations.map((r) => ({ item_code: r.item_code, delta: -r.stock_qty })),
+		);
+	}
+
+	async function reconcileStockFromServer(itemCodes: string[]): Promise<void> {
+		const posStore = usePosStore();
+		const warehouse = posStore.warehouse;
+		if (!warehouse || itemCodes.length === 0) return;
+
+		try {
+			const fresh = await call<{ item_code: string; actual_qty: number }[]>(
+				"xpos.api.items.get_stock_availability",
+				{
+					items: JSON.stringify([...new Set(itemCodes)]),
+					warehouse,
+					pos_profile: posStore.profileName || undefined,
+				},
+			);
+			if (!fresh?.length) return;
+
+			const { updateStockQty } = await import("@/services/dbBridge");
+			for (const row of fresh) {
+				await updateStockQty(warehouse, row.item_code, row.actual_qty || 0);
+			}
+		} catch (error) {
+			console.warn("[XPOS Offline] Failed to reconcile stock after rejection:", error);
+		}
+	}
+
 	async function saveOffline(
 		invoiceData: InvoiceData,
 		customerName?: string,
 		grandTotal?: number,
+		reservations?: { item_code: string; stock_qty: number }[],
 	): Promise<{ success: boolean; localId?: number }> {
 		try {
 			const record = {
@@ -147,6 +190,9 @@ export const useOfflineStore = defineStore("offline", () => {
 			};
 
 			const result = await addPendingInvoice(record);
+
+			await reserveStock(reservations);
+
 			await refreshPendingCount();
 			await loadPendingInvoices();
 
@@ -222,6 +268,8 @@ export const useOfflineStore = defineStore("offline", () => {
 								status: "dead_letter",
 								error: invoice.error,
 							});
+
+						await reconcileStockFromServer(itemCodesOf(invoice));
 						continue;
 					}
 
