@@ -78,8 +78,9 @@ export const POS_PROFILE_DOC = {
 	selling_price_list: PRICE_LIST,
 	customer: CUSTOMER_IN_GROUP.name,
 	payments: [{ mode_of_payment: "Cash", default: 1 }],
-	// Needed for the offline specs: gates IndexedDB initialisation in main.ts.
 	use_offline_mode: 1,
+	allow_open_tab_recall: 1,
+	allow_outstanding_settlement: 1,
 	ignore_pricing_rule: 0,
 	allow_change_posting_date: 0,
 	display_additional_notes: 0,
@@ -123,11 +124,88 @@ export const PERMISSIONS = {
 	show_edit_discount_field: true,
 	allow_change_price: true,
 	sale_return: true,
+	recall_other_shift_tabs: true,
+	settle_outstanding_invoice: true,
 	expense: true,
 	bank_drop: true,
 	current_stock_by_brand: true,
 	current_stock_report: true,
 };
+
+export const CURRENT_SHIFT = OPEN_SHIFT.pos_opening_shift.name;
+export const OTHER_SHIFT = "POS-OS-0002";
+
+export const OWN_TAB = {
+	name: "ACC-SINV-2026-0001",
+	customer: CUSTOMER_IN_GROUP.name,
+	customer_name: CUSTOMER_IN_GROUP.customer_name,
+	posting_date: "2026-08-10",
+	grand_total: 100,
+	total_qty: 1,
+	currency: CURRENCY,
+	creation: "2026-08-10 10:15:00",
+	modified: "2026-08-10 10:15:00",
+	pos_opening_shift: CURRENT_SHIFT,
+	owner: "cashier@example.com",
+	paid_amount: 0,
+	pos_awaiting_settlement: 0,
+};
+
+export const FOREIGN_TAB = {
+	name: "ACC-SINV-2026-0002",
+	customer: CUSTOMER_OUT_OF_GROUP.name,
+	customer_name: CUSTOMER_OUT_OF_GROUP.customer_name,
+	posting_date: "2026-08-10",
+	grand_total: 140,
+	total_qty: 2,
+	currency: CURRENCY,
+	creation: "2026-08-09 21:40:00",
+	modified: "2026-08-09 21:40:00",
+	pos_opening_shift: OTHER_SHIFT,
+	owner: "bartender@example.com",
+	paid_amount: 40,
+	pos_awaiting_settlement: 0,
+};
+
+export const TAB_DETAILS: Record<string, Record<string, unknown>> = {
+	[OWN_TAB.name]: {
+		...OWN_TAB,
+		items: [{ ...ITEM_A, qty: 1, rate: ITEM_A.rate, price_list_rate: ITEM_A.rate }],
+	},
+	[FOREIGN_TAB.name]: {
+		...FOREIGN_TAB,
+		items: [
+			{ ...ITEM_B, qty: 2, rate: ITEM_B.rate, price_list_rate: ITEM_B.rate },
+			{ ...ITEM_GIFT, qty: 1, rate: ITEM_GIFT.rate, price_list_rate: ITEM_GIFT.rate },
+		],
+	},
+};
+
+export const UNPAID_FULL = {
+	name: "ACC-SINV-2026-0100",
+	customer: CUSTOMER_IN_GROUP.name,
+	customer_name: CUSTOMER_IN_GROUP.customer_name,
+	posting_date: "2026-08-01",
+	grand_total: 300,
+	paid_amount: 0,
+	outstanding_amount: 300,
+	currency: CURRENCY,
+	status: "Unpaid",
+};
+
+export const UNPAID_PARTIAL = {
+	name: "ACC-SINV-2026-0101",
+	customer: CUSTOMER_OUT_OF_GROUP.name,
+	customer_name: CUSTOMER_OUT_OF_GROUP.customer_name,
+	posting_date: "2026-08-05",
+	grand_total: 500,
+	paid_amount: 200,
+	outstanding_amount: 300,
+	currency: CURRENCY,
+	status: "Partly Paid",
+};
+
+export const OUTSTANDING_INVOICES = [UNPAID_FULL, UNPAID_PARTIAL];
 
 export const ITEM_GROUPS = [
 	{ name: "All Item Groups", parent_item_group: "", is_group: 1 },
@@ -177,7 +255,27 @@ export function defaultRoutes(): Record<string, unknown> {
 		"xpos.api.taxes.get_item_tax_template": { item_tax_template: null, item_tax_map: {} },
 		"xpos.api.offers.get_offers": [],
 		"xpos.api.offers.get_applicable_delivery_charges": [],
-		"xpos.api.invoices.get_draft_invoices": [],
+		"xpos.api.invoices.get_draft_invoices": (args: Record<string, unknown>) =>
+			args.scope === "profile" ? [OWN_TAB, FOREIGN_TAB] : [OWN_TAB],
+		"xpos.api.invoices.get_invoice_details": (args: Record<string, unknown>) =>
+			TAB_DETAILS[String(args.invoice_name)] || null,
+		"xpos.api.invoices.delete_draft_invoice": { success: true },
+		"xpos.api.payments.get_outstanding_invoices": (args: Record<string, unknown>) => {
+			const term = String(args.search_term || "")
+				.trim()
+				.toLowerCase();
+			if (!term) return OUTSTANDING_INVOICES;
+			return OUTSTANDING_INVOICES.filter((invoice) =>
+				[invoice.name, invoice.customer, invoice.customer_name].some((field) =>
+					String(field).toLowerCase().includes(term),
+				),
+			);
+		},
+		"xpos.api.payments.settle_outstanding_invoice": (args: Record<string, unknown>) => ({
+			payment_entry: "ACC-PAY-2026-0001",
+			allocated_amount: args.amount,
+			outstanding_after: 0,
+		}),
 		// Pricing: no rules by default. Specs replace these.
 		"xpos.api.pricing_rules.get_active_pricing_rules": [],
 		"xpos.api.pricing_rules.reconcile_line_prices": noPricingChange,

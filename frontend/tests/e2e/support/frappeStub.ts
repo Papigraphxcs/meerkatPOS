@@ -59,6 +59,22 @@ export function stub(method: string, route: StubRoute): void {
 	state().routes.set(method, route);
 }
 
+const ERROR_MARKER = "__xposStubError";
+
+interface StubbedError {
+	[ERROR_MARKER]: true;
+	message: string;
+	excType: string;
+}
+
+function isStubbedError(value: unknown): value is StubbedError {
+	return !!value && typeof value === "object" && ERROR_MARKER in (value as Record<string, unknown>);
+}
+
+export function stubError(method: string, message: string, excType = "ValidationError"): void {
+	stub(method, { [ERROR_MARKER]: true, message, excType } as StubRoute);
+}
+
 export function stubMany(table: Record<string, StubRoute>): void {
 	for (const [method, route] of Object.entries(table)) stub(method, route);
 }
@@ -122,9 +138,24 @@ export function installFrappeStub(): void {
 
 		state().calls.push({ method, args });
 		const delay = state().delays.get(method);
+		const resolved = resolve(method, args);
+
+		if (isStubbedError(resolved)) {
+			req.reply({
+				statusCode: 417,
+				body: {
+					exc_type: resolved.excType,
+					exception: `frappe.exceptions.${resolved.excType}: ${resolved.message}`,
+					_server_messages: JSON.stringify([JSON.stringify({ message: resolved.message })]),
+				},
+				...(delay ? { delay } : {}),
+			});
+			return;
+		}
+
 		req.reply({
 			statusCode: 200,
-			body: { message: resolve(method, args) },
+			body: { message: resolved },
 			...(delay ? { delay } : {}),
 		});
 	}).as("frappe");

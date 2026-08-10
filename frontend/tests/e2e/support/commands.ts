@@ -108,6 +108,13 @@ Cypress.Commands.add("goOnline", () => {
 	});
 });
 
+Cypress.Commands.add("openRecallDialog", () => {
+	cy.window().then((win) => {
+		win.dispatchEvent(new CustomEvent("xpos:show-drafts"));
+	});
+	cy.contains("[role='dialog']", "Recall Order").should("be.visible");
+});
+
 /** The visible cart row for an item, so assertions can scope to it. */
 Cypress.Commands.add("cartRow", (itemName: string) => {
 	return cy.get("[data-cart-index]:visible").filter(`:contains(${itemName})`).first();
@@ -127,6 +134,7 @@ declare global {
 			addItemToCart(itemName: string): Chainable<void>;
 			goOffline(): Chainable<void>;
 			goOnline(): Chainable<void>;
+			openRecallDialog(): Chainable<void>;
 			cartRow(itemName: string): Chainable<JQuery<HTMLElement>>;
 			cartRows(): Chainable<JQuery<HTMLElement>>;
 			cartSummary(): Chainable<JQuery<HTMLElement>>;

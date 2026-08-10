@@ -43,6 +43,8 @@ export interface POSProfile {
 	display_item_code?: boolean;
 	allow_zero_rated_items?: boolean;
 	enable_cashier_settlement?: boolean;
+	allow_open_tab_recall?: boolean;
+	allow_outstanding_settlement?: boolean;
 	print_backup_receipt?: boolean;
 	auto_set_batch?: boolean;
 	search_serial_no?: boolean;
@@ -369,6 +371,7 @@ export interface InvoicePayment {
 
 export interface InvoiceData {
 	name?: string;
+	modified?: string;
 	doctype?: string;
 	pos_profile: string;
 	customer: string;
@@ -545,6 +548,26 @@ export interface OutstandingInvoice {
 	outstanding_amount: number;
 	posting_date: string;
 	customer: string;
+	customer_name?: string;
+	paid_amount?: number;
+	currency?: string;
+	status?: string;
+}
+
+export interface OpenTab {
+	name: string;
+	customer: string;
+	customer_name?: string;
+	posting_date?: string;
+	grand_total?: number;
+	total_qty?: number;
+	currency?: string;
+	creation?: string;
+	modified?: string;
+	pos_opening_shift?: string;
+	owner?: string;
+	paid_amount?: number;
+	pos_awaiting_settlement?: boolean | number;
 }
 
 export interface PaymentRequest {

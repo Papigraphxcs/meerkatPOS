@@ -587,7 +587,7 @@ import {
 } from "lucide-vue-next";
 
 import type { InvoiceData, InvoicePayment } from "@/types/pos.types";
-import { isOnline, extractErrorMessage } from "@/utils";
+import { isOnline, extractErrorMessage, isTabConflictError } from "@/utils";
 import { nowDate } from "@/utils/datetime";
 import {
 	isPaymentDialogSaveAndPrintShortcut,
@@ -1124,7 +1124,11 @@ async function submitPayment(withPrint: boolean = true) {
 
 		cartStore.clearAll();
 	} catch (error: unknown) {
-		if (isNetworkError(error)) {
+		if (isTabConflictError(error)) {
+			showError(__("This tab was changed on another terminal. Reload it and try again."));
+			close();
+			cartStore.openDraftDialog();
+		} else if (isNetworkError(error)) {
 			const invoiceData = cartStore.getInvoiceData(
 				posStore.profileName,
 				posStore.posOpeningShift?.name || "",

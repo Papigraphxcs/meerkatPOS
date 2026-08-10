@@ -15,6 +15,7 @@ import type {
 	CalculatedTax,
 	DeliveryCharge,
 	ReceiptSnapshot,
+	OpenTab,
 } from "@/types/pos.types";
 import __ from "@/lib/translate";
 import {
@@ -39,10 +40,6 @@ function nextRowId(): string {
 	return `row-${Date.now().toString(36)}-${cartRowSeq}`;
 }
 
-/**
- * `Sales Invoice Item.pricing_rules` holds a JSON list for price rules but a
- * bare rule name for free lines. Normalise both.
- */
 function parsePricingRules(value: unknown): string[] {
 	if (!value) return [];
 	if (Array.isArray(value)) return value.map(String);
@@ -98,6 +95,7 @@ export const useCartStore = defineStore("cart", () => {
 	const couponCode = ref("");
 	const payments = ref<InvoicePayment[]>([]);
 	const currentDraftName = ref("");
+	const currentDraftModified = ref("");
 	const isSavingDraft = ref(false);
 	const showDraftDialog = ref(false);
 	const isLoadingDrafts = ref(false);
@@ -1085,6 +1083,7 @@ export const useCartStore = defineStore("cart", () => {
 		salesPerson.value = "";
 		payments.value = [];
 		currentDraftName.value = "";
+		currentDraftModified.value = "";
 		currency.value = "";
 		conversionRate.value = 1;
 		selectedDeliveryCharge.value = null;
@@ -1115,11 +1114,12 @@ export const useCartStore = defineStore("cart", () => {
 		showPaymentDialog.value = false;
 	}
 
-	async function fetchDraftInvoices(): Promise<any[]> {
+	async function fetchDraftInvoices(scope: "shift" | "profile" = "shift"): Promise<OpenTab[]> {
 		try {
 			isLoadingDrafts.value = true;
-			const result = await call<any[]>("xpos.api.invoices.get_draft_invoices", {
+			const result = await call<OpenTab[]>("xpos.api.invoices.get_draft_invoices", {
 				pos_opening_shift: posStore.posOpeningShift?.name || "",
+				scope,
 			});
 			return result || [];
 		} catch (error) {
@@ -1229,6 +1229,7 @@ export const useCartStore = defineStore("cart", () => {
 				};
 			}
 			currentDraftName.value = draftName;
+			currentDraftModified.value = result.modified || "";
 
 			return true;
 		} catch (error) {
@@ -1348,6 +1349,9 @@ export const useCartStore = defineStore("cart", () => {
 
 		if (currentDraftName.value) {
 			data.name = currentDraftName.value;
+			if (currentDraftModified.value) {
+				data.modified = currentDraftModified.value;
+			}
 		}
 
 		if (payments.value.length > 0) {
@@ -1497,6 +1501,7 @@ export const useCartStore = defineStore("cart", () => {
 		payments,
 		selectedCartIndex,
 		currentDraftName,
+		currentDraftModified,
 		isSavingDraft,
 		showDraftDialog,
 		isLoadingDrafts,

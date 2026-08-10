@@ -9,7 +9,7 @@ from frappe import _, cstr
 from frappe.utils import cint, flt, getdate, now_datetime, nowdate
 from frappe.utils.background_jobs import enqueue
 
-from xpos.api.utilities import get_invoice_type, is_pos_cashier
+from xpos.api.utilities import can_recall_other_shift_tabs, get_invoice_type, is_pos_cashier
 
 
 def enforce_stock_availability(invoice_doc):
@@ -137,6 +137,28 @@ def _get_unpaid_balance(invoice_doc) -> float:
 		_coerce_amount(getattr(invoice_doc, "write_off_amount", 0))
 	)
 	return max(0.0, round(grand_total - settled_amount, 2))
+
+
+def _guard_stale_draft(doctype: str, invoice_name: str, client_modified) -> None:
+	"""Reject a write that was built on a stale copy of a shared open tab.
+
+	Once a tab can be recalled from another shift, two terminals can hold the same
+	draft at once and the second save would silently wipe the first one's lines.
+	The client echoes back the ``modified`` timestamp it loaded; if the row has
+	moved on since, the write is refused so the cashier can reload and retry.
+
+	No token means no check, which keeps offline replay and every pre-existing
+	caller working exactly as before.
+	"""
+	if not client_modified:
+		return
+
+	current_modified = frappe.db.get_value(doctype, invoice_name, "modified")
+	if current_modified and str(current_modified) != str(client_modified):
+		frappe.throw(
+			_("This tab was changed on another terminal. Reload it and try again."),
+			frappe.TimestampMismatchError,
+		)
 
 
 def _validate_unpaid_balance_permissions(invoice_doc, pos_profile_doc, data: dict):
@@ -274,6 +296,8 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 		invoice_doc = frappe.get_doc(doctype, invoice_name)
 		if invoice_doc.docstatus != 0:
 			frappe.throw(_("Only draft invoices can be updated and submitted"))
+
+		_guard_stale_draft(doctype, invoice_name, data.get("modified"))
 
 		if invoice_doc.get("pos_awaiting_settlement") and not is_pos_cashier(
 			frappe.session.user, pos_profile
@@ -752,6 +776,7 @@ def save_draft_invoice(data: str | dict):
 		invoice_doc = frappe.get_doc(doctype, invoice_name)
 		if invoice_doc.docstatus != 0:
 			frappe.throw(_("Invoice {0} is not a draft and cannot be updated").format(invoice_name))
+		_guard_stale_draft(doctype, invoice_name, data.get("modified"))
 		is_update = True
 		invoice_doc.set("items", [])
 		invoice_doc.set("taxes", [])
@@ -875,30 +900,48 @@ def save_draft_invoice(data: str | dict):
 
 
 @frappe.whitelist()
-def get_draft_invoices(pos_opening_shift: str):
-	"""Get draft invoices for the current shift."""
-	filters = {"docstatus": 0, "is_pos": 1}
-
-	if pos_opening_shift:
-		filters["pos_opening_shift"] = pos_opening_shift
-
+def get_draft_invoices(pos_opening_shift: str, scope: str = "shift"):
+	"""Get draft invoices (open tabs) for the current shift, or for the whole profile."""
 	doctype = get_invoice_type()
+	filters = {"docstatus": 0, "is_pos": 1}
+	fields = [
+		"name",
+		"customer",
+		"customer_name",
+		"posting_date",
+		"grand_total",
+		"total_qty",
+		"currency",
+		"creation",
+		"modified",
+	]
+	limit = 50
+
+	if scope == "profile":
+		pos_profile = frappe.db.get_value("POS Opening Shift", pos_opening_shift, "pos_profile")
+		if not pos_profile:
+			frappe.throw(_("A POS Profile is required to list open tabs across shifts."))
+
+		if not can_recall_other_shift_tabs(pos_profile):
+			frappe.throw(
+				_("You are not permitted to recall open tabs from other shifts."),
+				frappe.PermissionError,
+			)
+
+		filters["pos_profile"] = pos_profile
+		filters["is_return"] = 0
+		fields += ["pos_opening_shift", "owner", "paid_amount"]
+		if frappe.db.has_column(doctype, "pos_awaiting_settlement"):
+			fields.append("pos_awaiting_settlement")
+		limit = 200
+	elif pos_opening_shift:
+		filters["pos_opening_shift"] = pos_opening_shift
 
 	invoices = frappe.get_list(
 		doctype,
 		filters=filters,
-		fields=[
-			"name",
-			"customer",
-			"customer_name",
-			"posting_date",
-			"grand_total",
-			"total_qty",
-			"currency",
-			"creation",
-			"modified",
-		],
-		limit_page_length=50,
+		fields=fields,
+		limit_page_length=limit,
 		order_by="modified desc",
 	)
 
@@ -1203,6 +1246,8 @@ def get_invoice_details(invoice_name: str, doctype: str = ""):
 		"customer_name": doc.customer_name,
 		"posting_date": str(doc.posting_date),
 		"posting_time": str(doc.posting_time),
+		"modified": str(doc.modified),
+		"pos_opening_shift": getattr(doc, "pos_opening_shift", None),
 		"grand_total": doc.grand_total,
 		"net_total": doc.net_total,
 		"total_taxes_and_charges": doc.total_taxes_and_charges,
@@ -1274,13 +1319,22 @@ def get_invoice_details(invoice_name: str, doctype: str = ""):
 
 
 @frappe.whitelist()
-def delete_draft_invoice(name: str, doctype: str = ""):
+def delete_draft_invoice(name: str, doctype: str = "", pos_opening_shift: str = ""):
 	"""Delete a draft invoice."""
 	if not doctype:
 		doctype = _detect_invoice_doctype(name)
 	doc = frappe.get_doc(doctype, name)
 	if doc.docstatus != 0:
 		frappe.throw(_("Only draft invoices can be deleted"))
+
+	draft_shift = doc.get("pos_opening_shift")
+	is_foreign_tab = bool(draft_shift) and bool(pos_opening_shift) and draft_shift != pos_opening_shift
+	if is_foreign_tab and not can_recall_other_shift_tabs(doc.get("pos_profile")):
+		frappe.throw(
+			_("You are not permitted to delete an open tab from another shift."),
+			frappe.PermissionError,
+		)
+
 	doc.delete(ignore_permissions=True)
 	return {"success": True}
 

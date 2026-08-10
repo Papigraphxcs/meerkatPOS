@@ -183,6 +183,7 @@
 					size="sm"
 					class="dark:border-border dark:text-foreground"
 					:disabled="cartStore.isEmpty"
+					data-testid="hold-order"
 					@click="holdOrder"
 				>
 					<Clock class="w-4 h-4" />
@@ -358,6 +359,7 @@ import { useOfferStore } from "@/stores/offerStore";
 import { call, showSuccess, showError } from "@/services/api";
 import { __ } from "@/lib/translate";
 import { isElectron } from "@/services/electronBridge";
+import { isTabConflictError } from "@/utils";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { usePrintInvoice } from "@/composables/usePrintInvoice";
 import { Button } from "@/components/ui/button";
@@ -699,8 +701,17 @@ async function holdOrder() {
 			}
 		}
 	} catch (error: unknown) {
+		if (handleTabConflict(error)) return;
 		showError(__("Failed to save draft: {0}", [extractErrorMessage(error)]));
 	}
+}
+
+function handleTabConflict(error: unknown): boolean {
+	if (!isTabConflictError(error)) return false;
+
+	showError(__("This tab was changed on another terminal. Reload it and try again."));
+	cartStore.openDraftDialog();
+	return true;
 }
 
 async function sendToCashier() {
@@ -781,6 +792,7 @@ async function sendToCashier() {
 			}
 		}
 	} catch (error: unknown) {
+		if (handleTabConflict(error)) return;
 		showError(__("Failed to send to cashier: {0}", [extractErrorMessage(error)]));
 	}
 }
