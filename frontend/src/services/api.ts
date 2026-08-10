@@ -95,9 +95,8 @@ function extractErrorMessage(data: Record<string, unknown>, status: number, trac
 }
 
 function stripHtml(value: string): string {
-	return value
-		.replace(/<br\s*\/?>/gi, " ")
-		.replace(/<[^>]+>/g, "")
+	const doc = new DOMParser().parseFromString(value, "text/html");
+	return (doc.body.textContent || "")
 		.replace(/\s+/g, " ")
 		.trim();
 }
