@@ -1,5 +1,13 @@
 <template>
 	<div class="shrink-0 border-t border-border bg-background px-4 py-4 space-y-3 dark:border-border">
+		<div
+			v-if="cartStore.pricingSource === 'offline'"
+			class="flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400"
+		>
+			<WifiOff class="w-3 h-3 shrink-0" />
+			{{ __("Prices calculated offline, will be confirmed when the invoice syncs") }}
+		</div>
+
 		<div class="space-y-1.5">
 			<div class="flex items-center justify-between text-sm">
 				<span class="text-muted-foreground">{{ __("Subtotal") }}</span>
@@ -368,6 +376,7 @@ import {
 	Percent,
 	FileText,
 	Truck,
+	WifiOff,
 	X,
 } from "lucide-vue-next";
 import type { DeliveryCharge } from "@/types/pos.types";

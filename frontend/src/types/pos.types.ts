@@ -183,6 +183,11 @@ export interface CartItem extends POSItem {
 	item_tax_template?: string;
 	item_tax_map?: Record<string, number>;
 	pos_offer_applied?: boolean;
+	uid?: string;
+	pos_pricing_rules?: string[];
+	pos_rate_overridden?: boolean;
+	pos_is_free_item?: boolean;
+	pos_free_item_rule?: string;
 }
 
 export interface ItemGroup {
@@ -350,6 +355,8 @@ export interface InvoiceItem {
 	offer_applied?: boolean;
 	is_offer?: boolean;
 	is_replace?: boolean;
+	is_free_item?: number;
+	pricing_rules?: string;
 }
 
 export interface InvoicePayment {
@@ -369,6 +376,7 @@ export interface InvoiceData {
 	posting_date?: string;
 	additional_discount_percentage?: number;
 	discount_amount?: number;
+	apply_discount_on?: string;
 	payments?: InvoicePayment[];
 	pos_notes?: string;
 	pos_delivery_date?: string;

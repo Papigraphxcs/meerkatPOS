@@ -1017,6 +1017,24 @@ export async function getCachedOffers(posProfile: string): Promise<unknown[] | n
 	return idb.getCachedOffers(posProfile);
 }
 
+export async function cachePricingRules(posProfile: string, rules: unknown[]): Promise<void> {
+	if (isElectron()) {
+		await getDb().setMeta(`pricing_rules::${posProfile}`, JSON.stringify(rules));
+		return;
+	}
+	const idb = await import("./idbService");
+	await idb.cachePricingRules(posProfile, rules);
+}
+
+export async function getCachedPricingRules(posProfile: string): Promise<unknown[] | null> {
+	if (isElectron()) {
+		const val = await getDb().getMeta(`pricing_rules::${posProfile}`);
+		return val ? JSON.parse(val) : null;
+	}
+	const idb = await import("./idbService");
+	return idb.getCachedPricingRules(posProfile);
+}
+
 export async function cacheReceiptContext(
 	posProfile: string,
 	context: import("@/types/pos.types").ReceiptContext,

@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { call } from "@/services/api";
 import { usePosStore } from "./posStore";
 import { useSettingsStore } from "./settingsStore";
@@ -22,7 +22,49 @@ import {
 	computeGrandTotalDiscountPct,
 	type OfferEvaluationResult,
 } from "@/services/offerEngine";
+import {
+	resolveCartPricing,
+	refreshPricingRuleSnapshot,
+	type PricingSource,
+	type ResolvedCartPricing,
+} from "@/services/pricingService";
+import type { CartPricingLine, FreeItemLine } from "@/services/pricingEngine";
 import { nowDate, toDateOrNow } from "@/utils/datetime";
+import { debounce } from "@/utils";
+
+let cartRowSeq = 0;
+
+function nextRowId(): string {
+	cartRowSeq += 1;
+	return `row-${Date.now().toString(36)}-${cartRowSeq}`;
+}
+
+/**
+ * `Sales Invoice Item.pricing_rules` holds a JSON list for price rules but a
+ * bare rule name for free lines. Normalise both.
+ */
+function parsePricingRules(value: unknown): string[] {
+	if (!value) return [];
+	if (Array.isArray(value)) return value.map(String);
+	const raw = String(value).trim();
+	if (!raw) return [];
+	if (raw.startsWith("[")) {
+		try {
+			const parsed = JSON.parse(raw);
+			return Array.isArray(parsed) ? parsed.map(String) : [];
+		} catch {
+			return [];
+		}
+	}
+	return raw
+		.split(",")
+		.map((name) => name.trim())
+		.filter(Boolean);
+}
+
+function parseRuleName(value: unknown): string | undefined {
+	return parsePricingRules(value)[0];
+}
 
 export const useCartStore = defineStore("cart", () => {
 	const items = ref<CartItem[]>([]);
@@ -33,6 +75,8 @@ export const useCartStore = defineStore("cart", () => {
 		image?: string;
 		mobile_no?: string;
 		email_id?: string;
+		customer_group?: string;
+		territory?: string;
 	} | null>(null);
 	const discountPercentage = ref(0);
 	const discountAmount = ref(0);
@@ -61,6 +105,12 @@ export const useCartStore = defineStore("cart", () => {
 	const conversionRate = ref(1);
 	const selectedDeliveryCharge = ref<DeliveryCharge | null>(null);
 	const settingsStore = useSettingsStore();
+
+	const ruleDiscountPercentage = ref(0);
+	const ruleDiscountAmount = ref(0);
+	const applyDiscountOn = ref("Grand Total");
+	const isPricingCart = ref(false);
+	const pricingSource = ref<PricingSource>("server");
 
 	const itemRatePrecision = computed(() => {
 		const val = parseInt(String(settingsStore.currencyPrecision?.float_precision || ""), 10);
@@ -236,7 +286,8 @@ export const useCartStore = defineStore("cart", () => {
 		}
 
 		if (discountPercentage.value > 0) {
-			total -= (total * discountPercentage.value) / 100;
+			const base = applyDiscountOn.value === "Net Total" ? subtotal.value : total;
+			total -= (base * discountPercentage.value) / 100;
 		} else if (discountAmount.value > 0) {
 			total -= discountAmount.value;
 		}
@@ -456,6 +507,7 @@ export const useCartStore = defineStore("cart", () => {
 			existing.qty += isReturnMode.value ? -1 : 1;
 		} else {
 			items.value.push({
+				uid: nextRowId(),
 				item_code: item.item_code,
 				item_name: item.item_name,
 				local_item_name: item.local_item_name,
@@ -473,6 +525,9 @@ export const useCartStore = defineStore("cart", () => {
 				has_serial_no: item.has_serial_no,
 				has_batch_no: item.has_batch_no,
 				conversion_factor: (item as CartItem).conversion_factor || 1,
+				item_group: item.item_group,
+				brand: item.brand,
+				variant_of: item.variant_of,
 			});
 		}
 
@@ -529,6 +584,7 @@ export const useCartStore = defineStore("cart", () => {
 		}
 
 		items.value.push({
+			uid: nextRowId(),
 			item_code: item.item_code,
 			item_name: item.item_name,
 			local_item_name: item.local_item_name,
@@ -546,6 +602,9 @@ export const useCartStore = defineStore("cart", () => {
 			has_serial_no: item.has_serial_no,
 			has_batch_no: item.has_batch_no,
 			conversion_factor: conversionFactor || 1,
+			item_group: item.item_group,
+			brand: item.brand,
+			variant_of: item.variant_of,
 		});
 
 		return { success: true };
@@ -597,6 +656,7 @@ export const useCartStore = defineStore("cart", () => {
 
 	function updateItemRate(index: number, rate: number): void {
 		items.value[index].rate = normalizeItemRate(rate);
+		items.value[index].pos_rate_overridden = true;
 	}
 
 	function updateItemDiscount(index: number, type: "percentage" | "amount", value: number): void {
@@ -607,6 +667,7 @@ export const useCartStore = defineStore("cart", () => {
 			items.value[index].discount_amount = value;
 			items.value[index].discount_percentage = 0;
 		}
+		items.value[index].pos_pricing_rules = [];
 	}
 
 	function updateItemUOM(index: number, uom: string, rate: number, conversionFactor: number): void {
@@ -630,6 +691,8 @@ export const useCartStore = defineStore("cart", () => {
 			image?: string;
 			mobile_no?: string;
 			email_id?: string;
+			customer_group?: string;
+			territory?: string;
 		} | null,
 	): void {
 		customer.value = cust;
@@ -651,6 +714,8 @@ export const useCartStore = defineStore("cart", () => {
 			discountAmount.value = value;
 			discountPercentage.value = 0;
 		}
+		ruleDiscountPercentage.value = 0;
+		ruleDiscountAmount.value = 0;
 	}
 
 	function enterReturnMode(invoiceName: string, allowedItemCodes?: string[]): void {
@@ -720,6 +785,7 @@ export const useCartStore = defineStore("cart", () => {
 		for (const free of eval_.freeItems) {
 			if (!free.item_code) continue;
 			items.value.push({
+				uid: nextRowId(),
 				item_code: free.item_code,
 				item_name: free.item_name,
 				rate: normalizeItemRate(free.rate),
@@ -743,19 +809,238 @@ export const useCartStore = defineStore("cart", () => {
 		}
 	}
 
+	/**
+	 * Replace the free lines a Product pricing rule generated.
+	 *
+	 * Kept separate from POS Offer free items (`pos_is_offer`), which are a
+	 * different feature with its own lifecycle.
+	 */
+	function syncPricingRuleFreeItems(freeLines: FreeItemLine[]): void {
+		const current = items.value
+			.filter((i) => i.pos_is_free_item)
+			.map((i) => `${i.item_code}:${i.qty}:${i.rate}:${i.pos_free_item_rule}`)
+			.join("|");
+		const incoming = freeLines
+			.map((f) => `${f.item_code}:${f.qty}:${normalizeItemRate(f.rate)}:${f.pricing_rules}`)
+			.join("|");
+		if (current === incoming) return;
+
+		items.value = items.value.filter((i) => !i.pos_is_free_item);
+
+		for (const free of freeLines) {
+			if (!free.item_code) continue;
+			items.value.push({
+				uid: nextRowId(),
+				item_code: free.item_code,
+				item_name: free.item_name || free.item_code,
+				rate: normalizeItemRate(free.rate),
+				qty: free.qty,
+				uom: free.uom || free.stock_uom || "",
+				stock_uom: free.stock_uom || free.uom || "",
+				image: "",
+				discount_percentage: 0,
+				discount_amount: 0,
+				serial_no: "",
+				batch_no: "",
+				actual_qty: 0,
+				has_serial_no: false,
+				has_batch_no: false,
+				conversion_factor: free.conversion_factor || 1,
+				pos_is_free_item: true,
+				pos_free_item_rule: free.pricing_rules,
+			} as CartItem);
+		}
+	}
+
+	function buildPricingLines(): CartPricingLine[] {
+		for (const item of items.value) {
+			if (!item.uid) item.uid = nextRowId();
+		}
+
+		return items.value
+			.filter((item) => !item.pos_is_free_item && !item.pos_is_offer && item.qty !== 0)
+			.map((item) => ({
+				row_id: item.uid as string,
+				item_code: item.item_code,
+				item_group: item.item_group,
+				brand: item.brand as string | undefined,
+				variant_of: item.variant_of,
+				qty: item.qty,
+				uom: item.uom || item.stock_uom,
+				conversion_factor: item.conversion_factor || 1,
+				rate: item.rate,
+				price_list_rate: item.rate,
+				warehouse: posStore.warehouse,
+				pricing_rules: item.pos_pricing_rules?.length
+					? JSON.stringify(item.pos_pricing_rules)
+					: undefined,
+			}));
+	}
+
+	let lastSnapshotRefresh = 0;
+	const SNAPSHOT_TTL_MS = 5 * 60 * 1000;
+
+	/**
+	 * Cache the rule snapshot the offline engine needs. Called on POS boot and
+	 * opportunistically after a server reconcile, so the cache is warm before the
+	 * network drops. Throttled - rules change far slower than carts do.
+	 */
+	async function refreshPricingSnapshot(force = false): Promise<void> {
+		if (!force && Date.now() - lastSnapshotRefresh < SNAPSHOT_TTL_MS) return;
+		lastSnapshotRefresh = Date.now();
+		await refreshPricingRuleSnapshot({
+			pos_profile: posStore.profileName,
+			company: posStore.companyName,
+			price_list: posStore.sellingPriceList,
+			currency: currency.value || posStore.currency,
+		});
+	}
+
+	function applyPricingResult(result: ResolvedCartPricing): void {
+		const byRow = new Map(result.updates.map((u) => [u.row_id, u]));
+
+		for (const item of items.value) {
+			if (item.pos_is_free_item || item.pos_is_offer) continue;
+			const update = item.uid ? byRow.get(item.uid) : undefined;
+
+			if (update && update.pricing_rules.length) {
+				if (!item.pos_rate_overridden && update.price_list_rate) {
+					item.rate = normalizeItemRate(update.price_list_rate);
+				}
+				item.discount_percentage = update.discount_percentage;
+				item.discount_amount = update.discount_percentage ? 0 : update.discount_amount;
+				item.pos_pricing_rules = update.pricing_rules;
+			} else if (item.pos_pricing_rules?.length) {
+				item.discount_percentage = 0;
+				item.discount_amount = 0;
+				item.pos_pricing_rules = [];
+			}
+		}
+
+		syncPricingRuleFreeItems(result.free_lines);
+		applyTransactionDiscount(result.invoice_updates);
+		pricingSource.value = result.source;
+	}
+
+	function applyTransactionDiscount(update: ResolvedCartPricing["invoice_updates"]): void {
+		applyDiscountOn.value = update.apply_discount_on || "Grand Total";
+
+		if (update.from_pricing_rule) {
+			discountPercentage.value = update.additional_discount_percentage;
+			discountAmount.value = update.discount_amount;
+			ruleDiscountPercentage.value = update.additional_discount_percentage;
+			ruleDiscountAmount.value = update.discount_amount;
+			return;
+		}
+
+		const ownsPercentage =
+			ruleDiscountPercentage.value > 0 && discountPercentage.value === ruleDiscountPercentage.value;
+		const ownsAmount = ruleDiscountAmount.value > 0 && discountAmount.value === ruleDiscountAmount.value;
+		if (ownsPercentage || ownsAmount) {
+			discountPercentage.value = 0;
+			discountAmount.value = 0;
+		}
+		ruleDiscountPercentage.value = 0;
+		ruleDiscountAmount.value = 0;
+	}
+
+	let pricingRequestId = 0;
+
+	/**
+	 * Re-price the cart against the Pricing Rules.
+	 *
+	 * Debounced by the watcher below; safe to call directly (e.g. after loading a
+	 * draft). Responses are tagged with a request id so a slow reply cannot
+	 * overwrite a newer one.
+	 */
+	async function applyPricingRules(): Promise<void> {
+		if (isReturnMode.value) return;
+
+		const lines = buildPricingLines();
+		if (!lines.length) {
+			syncPricingRuleFreeItems([]);
+			applyTransactionDiscount({
+				additional_discount_percentage: 0,
+				discount_amount: 0,
+				apply_discount_on: "Grand Total",
+				from_pricing_rule: false,
+			});
+			return;
+		}
+
+		const requestId = ++pricingRequestId;
+		isPricingCart.value = true;
+		try {
+			const result = await resolveCartPricing({
+				lines,
+				context: {
+					pos_profile: posStore.profileName,
+					company: posStore.companyName,
+					customer: customer.value?.name,
+					customer_group: customer.value?.customer_group,
+					territory: customer.value?.territory,
+					price_list: posStore.sellingPriceList,
+					currency: currency.value || posStore.currency,
+					conversion_rate: conversionRate.value,
+					warehouse: posStore.warehouse,
+					coupon_code: couponCode.value,
+					posting_date: postingDate.value,
+				},
+			});
+
+			if (requestId !== pricingRequestId) return; // superseded
+			if (result.source === "unavailable") return; // leave prices as they are
+
+			applyPricingResult(result);
+
+			if (result.source === "server") {
+				refreshPricingSnapshot().catch(() => {});
+			}
+		} finally {
+			if (requestId === pricingRequestId) isPricingCart.value = false;
+		}
+	}
+
+	const schedulePricingRules = debounce(() => {
+		applyPricingRules().catch((error) => {
+			console.error("Pricing rule reconciliation failed:", error);
+		});
+	}, 250);
+
+	watch(
+		() =>
+			[
+				customer.value?.name || "",
+				couponCode.value,
+				postingDate.value,
+				posStore.sellingPriceList,
+				items.value
+					.filter((i) => !i.pos_is_free_item && !i.pos_is_offer)
+					.map(
+						(i) =>
+							`${i.uid}:${i.item_code}:${i.qty}:${i.uom}:${i.rate}:${i.batch_no}:${i.serial_no}`,
+					)
+					.join("|"),
+			].join("~"),
+		() => schedulePricingRules(),
+	);
+
 	function clearAllDiscounts(): void {
 		discountPercentage.value = 0;
 		discountAmount.value = 0;
+		ruleDiscountPercentage.value = 0;
+		ruleDiscountAmount.value = 0;
 		for (const item of items.value) {
 			if (!item.pos_is_offer) {
 				item.discount_percentage = 0;
 				item.discount_amount = 0;
+				item.pos_pricing_rules = [];
 			}
 		}
 		appliedCoupon.value = null;
 		couponCode.value = "";
 		appliedOffers.value = [];
-		items.value = items.value.filter((i) => !i.pos_is_offer);
+		items.value = items.value.filter((i) => !i.pos_is_offer && !i.pos_is_free_item);
 	}
 
 	function addPayment(modeOfPayment: string, amount: number): void {
@@ -785,6 +1070,10 @@ export const useCartStore = defineStore("cart", () => {
 		selectedCartIndex.value = -1;
 		discountPercentage.value = 0;
 		discountAmount.value = 0;
+		ruleDiscountPercentage.value = 0;
+		ruleDiscountAmount.value = 0;
+		applyDiscountOn.value = "Grand Total";
+		pricingSource.value = "server";
 		clearLoyalty();
 		appliedOffers.value = [];
 		appliedCoupon.value = null;
@@ -892,10 +1181,11 @@ export const useCartStore = defineStore("cart", () => {
 					}
 
 					items.value.push({
+						uid: nextRowId(),
 						item_code: item.item_code,
 						item_name: item.item_name,
 						local_item_name: item.local_item_name,
-						rate: normalizeItemRate(item.rate || 0),
+						rate: normalizeItemRate(item.price_list_rate || item.rate || 0),
 						qty: item.qty || 1,
 						uom: item.uom || item.stock_uom || "",
 						stock_uom: item.stock_uom || item.uom || "",
@@ -911,6 +1201,9 @@ export const useCartStore = defineStore("cart", () => {
 						conversion_factor: 1,
 						pos_notes: item.additional_notes || "",
 						pos_delivery_date: item.delivery_date || "",
+						pos_is_free_item: !!item.is_free_item,
+						pos_free_item_rule: item.is_free_item ? parseRuleName(item.pricing_rules) : undefined,
+						pos_pricing_rules: parsePricingRules(item.pricing_rules),
 					} as CartItem);
 				}
 			}
@@ -961,6 +1254,7 @@ export const useCartStore = defineStore("cart", () => {
 			local_item_name?: string;
 			qty: number;
 			rate: number;
+			price_list_rate?: number;
 			uom: string;
 			stock_uom?: string;
 			discount_percentage?: number;
@@ -976,10 +1270,11 @@ export const useCartStore = defineStore("cart", () => {
 		};
 		for (const item of invoiceData.items) {
 			items.value.push({
+				uid: nextRowId(),
 				item_code: item.item_code,
 				item_name: item.item_name,
 				local_item_name: item.local_item_name,
-				rate: normalizeItemRate(item.rate || 0),
+				rate: normalizeItemRate(item.price_list_rate || item.rate || 0),
 				qty: item.qty || 1,
 				uom: item.uom || item.stock_uom || "",
 				stock_uom: item.stock_uom || item.uom || "",
@@ -1019,12 +1314,15 @@ export const useCartStore = defineStore("cart", () => {
 					offers: item.pos_offers,
 					is_offer: item.pos_is_offer,
 					is_replace: item.pos_is_replace,
+					is_free_item: item.pos_is_free_item ? 1 : undefined,
+					pricing_rules: item.pos_free_item_rule,
 				}),
 			),
 			pos_opening_shift: posOpeningShift,
 			posting_date: posStore.allowChangePostingDate ? postingDate.value || nowDate() : nowDate(),
 			additional_discount_percentage: discountPercentage.value,
 			discount_amount: discountAmount.value,
+			apply_discount_on: applyDiscountOn.value,
 		};
 
 		const _hasOfferDisc = offerItemDiscountTotal.value > 0 || offerGrandTotalDiscountPct.value > 0;
@@ -1205,6 +1503,9 @@ export const useCartStore = defineStore("cart", () => {
 		currency,
 		conversionRate,
 		selectedDeliveryCharge,
+		applyDiscountOn,
+		isPricingCart,
+		pricingSource,
 		offerEvaluation,
 		offerItemDiscountTotal,
 		offerGrandTotalDiscountPct,
@@ -1246,6 +1547,8 @@ export const useCartStore = defineStore("cart", () => {
 		applyCoupon,
 		removeCoupon,
 		syncFreeItems,
+		applyPricingRules,
+		refreshPricingSnapshot,
 		clearAllDiscounts,
 		addPayment,
 		setPayments,

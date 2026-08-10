@@ -376,8 +376,9 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 	for item_data in items:
 		item_rate = flt(item_data.get("rate", 0), rate_precision)
 		item_qty = flt(item_data.get("qty", 1), 3)
+		is_free_item = cint(item_data.get("is_free_item"))
 
-		if not allow_rate_change:
+		if not allow_rate_change and not is_free_item:
 			price_list = pos.get("selling_price_list")
 			if price_list:
 				price_list_rate = frappe.db.get_value(
@@ -425,12 +426,17 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 		disc_amt = flt(item_data.get("discount_amount", 0), 2)
 
 		max_discount = flt(pos.get("max_discount_percentage_allowed", 0))
-		if max_discount > 0 and disc_pct > max_discount:
+		if max_discount > 0 and disc_pct > max_discount and not is_free_item:
 			frappe.throw(
 				_("Item {0}: Discount {1}% exceeds maximum allowed {2}%").format(
 					item_data.get("item_code"), disc_pct, max_discount
 				)
 			)
+
+		if is_free_item:
+			item.is_free_item = 1
+			if item_data.get("pricing_rules"):
+				item.pricing_rules = item_data["pricing_rules"]
 
 		item.price_list_rate = item_rate
 		if disc_pct:
@@ -790,18 +796,35 @@ def save_draft_invoice(data: str | dict):
 	except Exception:
 		pass
 
+	rate_precision = _get_item_rate_precision()
+
 	for item_data in items:
+		item_rate = flt(item_data.get("rate", 0), rate_precision)
+		disc_pct = flt(item_data.get("discount_percentage", 0), 2)
+		disc_amt = flt(item_data.get("discount_amount", 0), 2)
+
 		item = invoice_doc.append("items", {})
 		item.item_code = item_data.get("item_code")
 		item.item_name = item_data.get("item_name")
 		item.qty = flt(item_data.get("qty", 1))
-		item.rate = flt(item_data.get("rate", 0))
 		item.uom = item_data.get("uom") or item_data.get("stock_uom")
 		item.warehouse = item_data.get("warehouse") or pos.warehouse
-		if item_data.get("discount_percentage"):
-			item.discount_percentage = flt(item_data["discount_percentage"])
-		if item_data.get("discount_amount"):
-			item.discount_amount = flt(item_data["discount_amount"])
+
+		if cint(item_data.get("is_free_item")):
+			item.is_free_item = 1
+			if item_data.get("pricing_rules"):
+				item.pricing_rules = item_data["pricing_rules"]
+
+		item.price_list_rate = item_rate
+		if disc_pct:
+			item.discount_percentage = disc_pct
+			item.rate = flt(item_rate * (1.0 - disc_pct / 100.0), rate_precision)
+		elif disc_amt:
+			item.discount_amount = disc_amt
+			item.rate = flt(item_rate - disc_amt, rate_precision)
+		else:
+			item.rate = item_rate
+
 		if item_data.get("serial_no"):
 			item.serial_no = item_data["serial_no"]
 		if item_data.get("batch_no"):
@@ -1220,10 +1243,13 @@ def get_invoice_details(invoice_name: str, doctype: str = ""):
 				"item_name": i.item_name,
 				"qty": i.qty,
 				"rate": i.rate,
+				"price_list_rate": i.price_list_rate,
 				"amount": i.amount,
 				"uom": i.uom,
 				"discount_percentage": i.discount_percentage,
 				"discount_amount": i.discount_amount,
+				"is_free_item": getattr(i, "is_free_item", 0),
+				"pricing_rules": getattr(i, "pricing_rules", None),
 				"serial_no": getattr(i, "serial_no", None),
 				"batch_no": getattr(i, "batch_no", None),
 			}
