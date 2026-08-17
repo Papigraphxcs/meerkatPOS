@@ -133,6 +133,21 @@ software before going live.
 
 ---
 
+## Testing
+
+| Suite | Covers |
+|---|---|
+| `xpos/api/tests/test_scale_barcode.py` | The decoding itself: prefixes, digit windows, implied decimals, malformed input |
+| `frontend/tests/e2e/specs/scale-barcodes.cy.ts` | What the screen does with the result: the weight reaching the cart line, the price, the quantity prompt being skipped, and the not-found path |
+
+Watch the e2e run at human speed with:
+
+```bash
+node scripts/run-cypress.mjs run --with-server --demo --spec tests/e2e/specs/scale-barcodes.cy.ts
+```
+
+---
+
 ## Tips
 
 - Scale barcode formats vary by manufacturer — consult your scale's manual for the exact format

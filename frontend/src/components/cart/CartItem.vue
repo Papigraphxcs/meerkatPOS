@@ -124,6 +124,7 @@
 						:value="item.qty"
 						type="number"
 						min="0"
+						data-testid="cart-qty"
 						class="w-9 h-5 text-center text-[10px] font-semibold text-foreground bg-muted/50 rounded border border-border focus:outline-none focus:ring-1 focus:ring-ring dark:bg-accent/50 dark:border-muted-foreground/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none px-1"
 						@change="onQtyChange"
 						@keydown.up.prevent="focusAdjacentItem(-1, 'qty')"
@@ -208,7 +209,7 @@
 		</div>
 
 		<div class="flex flex-col items-end gap-0.5 shrink-0">
-			<span class="text-xs font-bold text-foreground tabular-nums">
+			<span class="text-xs font-bold text-foreground tabular-nums" data-testid="cart-amount">
 				{{ currencySymbol }}{{ formatPrice(lineTotal) }}
 			</span>
 			<span v-if="hasItemDiscount" class="text-[9px] text-emerald-600 dark:text-emerald-400">

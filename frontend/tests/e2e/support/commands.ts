@@ -96,6 +96,10 @@ Cypress.Commands.add("addItemToCart", (itemName: string) => {
 	cy.contains(itemName).click();
 });
 
+Cypress.Commands.add("scanBarcode", (barcode: string) => {
+	cy.get("[data-testid='barcode-input']").clear().type(`${barcode}{enter}`);
+});
+
 /**
  * PosView renders <Cart /> twice - a desktop panel and a mobile one - and both
  * stay in the DOM, hidden by CSS. Every cart assertion must scope to the panel
@@ -143,6 +147,7 @@ declare global {
 			bootPos(options?: BootOptions): Chainable<void>;
 			selectCustomer(customerName: string): Chainable<void>;
 			addItemToCart(itemName: string): Chainable<void>;
+			scanBarcode(barcode: string): Chainable<void>;
 			goOffline(): Chainable<void>;
 			goOnline(): Chainable<void>;
 			openRecallDialog(): Chainable<void>;
