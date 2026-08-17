@@ -606,7 +606,7 @@ def get_closing_shift_overview(pos_opening_shift: str | dict):
 			if include_count:
 				record["invoice_count"] = row.get("invoice_count", 0)
 			output.append(record)
-		return sorted(output, key=lambda r: (r.get("currency") or ""))
+		return sorted(output, key=lambda r: r.get("currency") or "")
 
 	def prepare_payment_rows(container):
 		output = []
@@ -642,7 +642,7 @@ def get_closing_shift_overview(pos_opening_shift: str | dict):
 					"total": flt(row.get("total")),
 				}
 			)
-		output.sort(key=lambda r: (r.get("movement_type") or ""))
+		output.sort(key=lambda r: r.get("movement_type") or "")
 		return output
 
 	return {
@@ -686,7 +686,7 @@ def get_closing_shift_overview(pos_opening_shift: str | dict):
 			"company_currency_total": flt(cash_expected_company_currency_total),
 			"by_currency": sorted(
 				cash_expected_totals,
-				key=lambda row: (row.get("currency") or ""),
+				key=lambda row: row.get("currency") or "",
 			),
 		},
 		"cash_movements": {

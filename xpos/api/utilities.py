@@ -152,7 +152,7 @@ def get_profile_setting(profile: str, setting: str, default=None):
 
 @frappe.whitelist()
 def get_default_warehouse(company: str | None = None):
-	"""Returns default warehouse for a company."""
+	"""Return the default warehouse, preferring Stock Settings over the Company default."""
 
 	if not company:
 		company = frappe.defaults.get_user_default("company")
@@ -162,7 +162,7 @@ def get_default_warehouse(company: str | None = None):
 	warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
 	if warehouse:
 		return warehouse
-	return frappe.db.get_value("Company", company, "default_warehouse_for_sales")
+	return frappe.db.get_value("Company", company, "default_warehouse_for_sales_return")
 
 
 def get_invoice_type():

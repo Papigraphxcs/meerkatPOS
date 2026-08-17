@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import Any, _
@@ -14,6 +15,84 @@ def _row_value(row: dict | object, key: str, default: Any | None = None):
 	if isinstance(row, dict):
 		return row.get(key, default)
 	return getattr(row, key, default)
+
+
+CLOSING_INVOICE_FIELDS = [
+	"name",
+	"posting_date",
+	"grand_total",
+	"net_total",
+	"total_taxes_and_charges",
+	"change_amount",
+	"customer",
+	"is_return",
+]
+
+
+def get_shift_payment_totals(doctype: str, invoices: list) -> dict[str, float]:
+	"""Return ``{mode_of_payment: amount collected}`` for a shift, net of change given.
+
+	Fetches every invoice's payment rows in one query rather than one query per
+	invoice, so the cost is flat in the number of invoices in the shift.
+	"""
+	names = [_row_value(invoice, "name") for invoice in invoices]
+	names = [name for name in names if name]
+	if not names:
+		return {}
+
+	payments_by_invoice = defaultdict(list)
+	for row in frappe.get_all(
+		"Sales Invoice Payment",
+		filters={"parent": ["in", names], "parenttype": doctype},
+		fields=["parent", "mode_of_payment", "amount"],
+	):
+		payments_by_invoice[_row_value(row, "parent")].append(row)
+
+	totals: dict[str, float] = {}
+	for invoice in invoices:
+		payments = payments_by_invoice.get(_row_value(invoice, "name"), [])
+		change = flt(_row_value(invoice, "change_amount", 0))
+		paid = sum(flt(_row_value(payment, "amount", 0)) for payment in payments)
+
+		for payment in payments:
+			mode = _row_value(payment, "mode_of_payment")
+			amount = flt(_row_value(payment, "amount", 0))
+			# Change is handed back out of the drawer, so it never counts as collected.
+			if paid > 0 and change > 0:
+				amount -= amount / paid * change
+			totals[mode] = totals.get(mode, 0) + amount
+
+	return totals
+
+
+def get_shift_expected_amounts(opening, doctype: str, invoices: list) -> dict[str, float]:
+	"""Return the expected closing amount per mode of payment, computed server-side.
+
+	Expected = opening float + payments collected - cash taken out of the drawer
+	by submitted POS Cash Movements. This must never be taken from the client:
+	it is the figure the counted cash is reconciled against.
+	"""
+	expected: dict[str, float] = {}
+
+	for detail in opening.balance_details:
+		expected[detail.mode_of_payment] = expected.get(detail.mode_of_payment, 0) + flt(detail.amount)
+
+	for mode, amount in get_shift_payment_totals(doctype, invoices).items():
+		expected[mode] = expected.get(mode, 0) + amount
+
+	movement_total = sum(
+		flt(_row_value(row, "amount", 0))
+		for row in frappe.get_all(
+			"POS Cash Movement",
+			filters={"pos_opening_shift": opening.name, "docstatus": 1},
+			fields=["amount"],
+		)
+	)
+	if movement_total:
+		cash_mode = frappe.db.get_value("POS Profile", opening.pos_profile, "cash_mode_of_payment") or "Cash"
+		expected[cash_mode] = expected.get(cash_mode, 0) - movement_total
+
+	return expected
 
 
 def _get_open_shift_rows(user: str):
@@ -159,19 +238,7 @@ def close_shift(opening_shift: str, closing_details: str | list[dict] | None):
 	if doctype == "POS Invoice":
 		filters["consolidated_invoice"] = ["in", ["", None]]
 
-	invoices = frappe.get_all(
-		doctype,
-		filters=filters,
-		fields=[
-			"name",
-			"posting_date",
-			"grand_total",
-			"net_total",
-			"total_taxes_and_charges",
-			"customer",
-			"is_return",
-		],
-	)
+	invoices = frappe.get_all(doctype, filters=filters, fields=CLOSING_INVOICE_FIELDS)
 
 	if not invoices:
 		fallback_filters = {
@@ -184,19 +251,7 @@ def close_shift(opening_shift: str, closing_details: str | list[dict] | None):
 		if doctype == "POS Invoice":
 			fallback_filters["consolidated_invoice"] = ["in", ["", None]]
 
-		invoices = frappe.get_all(
-			doctype,
-			filters=fallback_filters,
-			fields=[
-				"name",
-				"posting_date",
-				"grand_total",
-				"net_total",
-				"total_taxes_and_charges",
-				"customer",
-				"is_return",
-			],
-		)
+		invoices = frappe.get_all(doctype, filters=fallback_filters, fields=CLOSING_INVOICE_FIELDS)
 
 	grand_total = sum(flt(_row_value(inv, "grand_total", 0)) for inv in invoices)
 	net_total = sum(flt(_row_value(inv, "net_total", 0)) for inv in invoices)
@@ -222,15 +277,22 @@ def close_shift(opening_shift: str, closing_details: str | list[dict] | None):
 	)
 
 	if closing_details:
+		expected_amounts = get_shift_expected_amounts(opening, doctype, invoices)
+		opening_amounts = {detail.mode_of_payment: flt(detail.amount) for detail in opening.balance_details}
+
 		for detail in closing_details:
+			mode_of_payment = detail.get("mode_of_payment")
+			closing_amount = flt(detail.get("closing_amount", 0))
+			expected_amount = flt(expected_amounts.get(mode_of_payment, 0))
+
 			closing_shift.append(
 				"payment_reconciliation",
 				{
-					"mode_of_payment": detail.get("mode_of_payment"),
-					"opening_amount": flt(detail.get("opening_amount", 0)),
-					"expected_amount": flt(detail.get("expected_amount", 0)),
-					"closing_amount": flt(detail.get("closing_amount", 0)),
-					"difference": flt(detail.get("difference", 0)),
+					"mode_of_payment": mode_of_payment,
+					"opening_amount": flt(opening_amounts.get(mode_of_payment, 0)),
+					"expected_amount": expected_amount,
+					"closing_amount": closing_amount,
+					"difference": closing_amount - expected_amount,
 				},
 			)
 
@@ -333,28 +395,7 @@ def get_shift_summary(opening_shift: str):
 	net_total = sum(flt(_row_value(inv, "net_total", 0)) for inv in invoices)
 	returns_count = sum(1 for inv in invoices if inv.get("is_return"))
 
-	payment_summary = {}
-	for inv in invoices:
-		inv_name = _row_value(inv, "name")
-		payments = frappe.get_all(
-			"Sales Invoice Payment",
-			filters={"parent": inv_name, "parenttype": doctype},
-			fields=["mode_of_payment", "amount"],
-		)
-		inv_change = flt(_row_value(inv, "change_amount", 0))
-		if not inv_change:
-			inv_change = flt(frappe.db.get_value(doctype, inv_name, "change_amount") or 0)
-
-		inv_paid = sum(flt(_row_value(p, "amount", 0)) for p in payments)
-
-		for p in payments:
-			mode = _row_value(p, "mode_of_payment")
-			if mode not in payment_summary:
-				payment_summary[mode] = 0
-			pay_amount = flt(_row_value(p, "amount", 0))
-			if inv_paid > 0 and inv_change > 0:
-				pay_amount -= pay_amount / inv_paid * inv_change
-			payment_summary[mode] += pay_amount
+	payment_summary = get_shift_payment_totals(doctype, invoices)
 
 	opening_balances = {}
 	for detail in opening.balance_details:
@@ -370,6 +411,7 @@ def get_shift_summary(opening_shift: str):
 		"returns_count": returns_count,
 		"payment_summary": payment_summary,
 		"opening_balances": opening_balances,
+		"expected_amounts": get_shift_expected_amounts(opening, doctype, invoices),
 		"tax_summary": tax_summary,
 		"pos_profile": opening.pos_profile,
 		"company": opening.company,

@@ -105,21 +105,26 @@ def _all_enabled() -> dict:
 	return {key: True for key in ALL_PERMISSION_KEYS}
 
 
-def _is_superuser(user: str) -> bool:
+def is_superuser(user: str) -> bool:
 	return user == "Administrator" or "System Manager" in frappe.get_roles(user)
 
 
-def user_has_pos_permission(key: str, user: str | None = None, pos_profile: str | None = None) -> bool:
-	"""Whether ``user``'s POS Role grants the permission ``key``.
-
-	Single source of truth for server-side POS permission checks. Resolves the
-	role from the user's POS Profile User row (preferring ``pos_profile`` when
-	supplied). Administrators and System Managers always qualify; Guest never.
-	"""
+def is_pos_manager(user: str | None = None) -> bool:
+	"""Whether ``user`` may act on POS records owned by another cashier."""
 	user = user or frappe.session.user
 	if user == "Guest":
 		return False
-	if _is_superuser(user):
+	if is_superuser(user):
+		return True
+	return user_has_pos_permission("recall_other_shift_tabs", user)
+
+
+def user_has_pos_permission(key: str, user: str | None = None, pos_profile: str | None = None) -> bool:
+	"""Whether ``user``'s POS Role grants the permission ``key``."""
+	user = user or frappe.session.user
+	if user == "Guest":
+		return False
+	if is_superuser(user):
 		return True
 	role_name = _get_user_pos_role(user, pos_profile)
 	return bool(_get_role_permissions(role_name).get(key))
@@ -167,7 +172,7 @@ def get_my_pos_permissions(pos_profile: str | None = None) -> dict:
 	if user == "Guest":
 		return {key: False for key in ALL_PERMISSION_KEYS}
 
-	if _is_superuser(user):
+	if is_superuser(user):
 		return _all_enabled()
 
 	role_name = _get_user_pos_role(user, pos_profile)
@@ -187,7 +192,7 @@ def get_current_user_permissions() -> dict:
 
 	role_name = _get_user_pos_role(user)
 
-	if _is_superuser(user):
+	if is_superuser(user):
 		permissions = _all_enabled()
 	else:
 		permissions = _get_role_permissions(role_name)

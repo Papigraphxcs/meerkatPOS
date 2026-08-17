@@ -142,16 +142,6 @@ def get_active_gift_coupons(customer: str, company: str):
 
 
 @frappe.whitelist()
-def get_delivery_charges(pos_profile: str):
-	"""Backward-compatible delivery charges API."""
-	return frappe.get_all(
-		"Delivery Charges",
-		filters={"pos_profile": ["in", [pos_profile, "", None]], "disabled": 0},
-		fields=["name", "label", "charge_type", "amount"],
-	)
-
-
-@frappe.whitelist()
 def get_applicable_delivery_charges(
 	company: str,
 	pos_profile: str,
@@ -159,19 +149,11 @@ def get_applicable_delivery_charges(
 	shipping_address_name: str | None = None,
 ):
 	"""Returns applicable delivery charges"""
-	try:
-		from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
-			get_applicable_delivery_charges as _get_applicable_delivery_charges,
-		)
+	from xpos.x_pos.doctype.delivery_charges.delivery_charges import (
+		get_applicable_delivery_charges as resolve_delivery_charges,
+	)
 
-		return _get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name)
-	except (ImportError, AttributeError):
-		charges = frappe.get_all(
-			"Delivery Charges",
-			filters={"company": company, "disabled": 0},
-			fields=["name", "label", "charge_type", "amount"],
-		)
-		return charges
+	return resolve_delivery_charges(company, pos_profile, customer, shipping_address_name)
 
 
 def _is_coupon_active(coupon_data: dict | object, today: Any):

@@ -97,6 +97,11 @@ jinja = {
 # before_install = "xpos.install.before_install"
 after_install = "xpos.install.after_install"
 
+# Migration
+# ---------
+
+after_migrate = ["xpos.patches.add_pos_query_indexes.execute"]
+
 # Uninstallation
 # ------------
 

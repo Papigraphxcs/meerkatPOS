@@ -279,6 +279,7 @@ def search_barcode(barcode: str, pos_profile: str | None = None):
 
 	Also supports scale barcodes (weighted items) if configured on the POS Profile.
 	"""
+	barcode = (barcode or "").strip()
 	if not barcode:
 		return None
 
@@ -604,32 +605,6 @@ def get_stock_availability(items: str | list, warehouse: str | None = None, pos_
 		results.append({"item_code": item_code, "actual_qty": qty})
 
 	return results
-
-
-@frappe.whitelist()
-def update_price_list_rate(item_code: str, price_list: str, rate: float, uom: str | None = None):
-	"""Create or update an Item Price record."""
-	filters = {"item_code": item_code, "price_list": price_list, "selling": 1}
-	if uom:
-		filters["uom"] = uom
-
-	existing = frappe.db.get_value("Item Price", filters, "name")
-	if existing:
-		frappe.db.set_value("Item Price", existing, "price_list_rate", flt(rate))
-	else:
-		doc = frappe.get_doc(
-			{
-				"doctype": "Item Price",
-				"item_code": item_code,
-				"price_list": price_list,
-				"selling": 1,
-				"price_list_rate": flt(rate),
-				"uom": uom,
-			}
-		)
-		doc.insert(ignore_permissions=True)
-
-	return {"success": True, "rate": flt(rate)}
 
 
 @frappe.whitelist()

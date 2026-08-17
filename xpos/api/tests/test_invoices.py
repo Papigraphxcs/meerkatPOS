@@ -41,9 +41,10 @@ class TestCreateInvoice(unittest.TestCase):
 
 		mock_frappe.throw.assert_called()
 
+	@patch("xpos.api.invoices.get_invoice_type", return_value="Sales Invoice")
 	@patch("xpos.api.invoices._validate_return_invoice")
 	@patch("xpos.api.invoices.frappe")
-	def test_create_invoice_creates_sales_invoice(self, mock_frappe, mock_validate_return):
+	def test_create_invoice_creates_sales_invoice(self, mock_frappe, mock_validate_return, mock_invoice_type):
 		"""Test that create_invoice creates a Sales Invoice document."""
 		mock_pos = MagicMock()
 		mock_pos.company = "Test Company"

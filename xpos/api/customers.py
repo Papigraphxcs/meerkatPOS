@@ -599,7 +599,7 @@ def register_customer_loyalty(customer: str, loyalty_program: str):
 		else:
 			frappe.throw(
 				_(
-					"Customer is already enrolled in {0}. " "Please unenroll from the current program first."
+					"Customer is already enrolled in {0}. Please unenroll from the current program first."
 				).format(cust_doc.loyalty_program)
 			)
 

@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import unittest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from xpos.api import shifts
@@ -160,8 +161,123 @@ class TestCheckOpenShift(unittest.TestCase):
 		)
 
 
+class TestShiftExpectedAmounts(unittest.TestCase):
+	"""Tests that shift reconciliation figures are derived server-side."""
+
+	@staticmethod
+	def _opening(balance_details):
+		opening = MagicMock()
+		opening.name = "POS-OPEN-001"
+		opening.pos_profile = "POS-PROFILE-1"
+		opening.balance_details = [
+			SimpleNamespace(mode_of_payment=mode, amount=amount) for mode, amount in balance_details
+		]
+		return opening
+
+	@patch("xpos.api.shifts.frappe")
+	def test_payment_totals_are_net_of_change(self, mock_frappe):
+		"""Change handed back out of the drawer is not counted as collected."""
+		mock_frappe.get_all.return_value = [
+			{"parent": "INV-001", "mode_of_payment": "Cash", "amount": 500},
+		]
+
+		totals = shifts.get_shift_payment_totals("Sales Invoice", [{"name": "INV-001", "change_amount": 100}])
+
+		self.assertEqual(totals["Cash"], 400)
+
+	@patch("xpos.api.shifts.frappe")
+	def test_payment_totals_use_one_query_for_many_invoices(self, mock_frappe):
+		"""Payment rows are fetched in a single query, not one per invoice."""
+		mock_frappe.get_all.return_value = [
+			{"parent": "INV-001", "mode_of_payment": "Cash", "amount": 100},
+			{"parent": "INV-002", "mode_of_payment": "Cash", "amount": 200},
+			{"parent": "INV-003", "mode_of_payment": "Card", "amount": 300},
+		]
+
+		totals = shifts.get_shift_payment_totals(
+			"Sales Invoice",
+			[
+				{"name": "INV-001", "change_amount": 0},
+				{"name": "INV-002", "change_amount": 0},
+				{"name": "INV-003", "change_amount": 0},
+			],
+		)
+
+		self.assertEqual(mock_frappe.get_all.call_count, 1)
+		self.assertEqual(totals, {"Cash": 300, "Card": 300})
+
+	@patch("xpos.api.shifts.frappe")
+	def test_expected_amount_deducts_cash_movements(self, mock_frappe):
+		"""Cash taken out of the drawer lowers the expected cash on hand."""
+		mock_frappe.get_all.side_effect = [
+			[{"parent": "INV-001", "mode_of_payment": "Cash", "amount": 1000}],  # payments
+			[{"amount": 250}, {"amount": 150}],  # POS Cash Movement
+		]
+		mock_frappe.db.get_value.return_value = "Cash"
+
+		expected = shifts.get_shift_expected_amounts(
+			self._opening([("Cash", 500)]),
+			"Sales Invoice",
+			[{"name": "INV-001", "change_amount": 0}],
+		)
+
+		# 500 opening float + 1000 collected - 400 moved out
+		self.assertEqual(expected["Cash"], 1100)
+
+	@patch("xpos.api.shifts.frappe")
+	def test_expected_amount_includes_opening_float_for_unused_modes(self, mock_frappe):
+		"""A mode with an opening float but no sales still reports that float."""
+		mock_frappe.get_all.side_effect = [[], []]
+
+		expected = shifts.get_shift_expected_amounts(
+			self._opening([("Cash", 500), ("Card", 0)]), "Sales Invoice", []
+		)
+
+		self.assertEqual(expected, {"Cash": 500, "Card": 0})
+
+
 class TestCloseShift(unittest.TestCase):
 	"""Tests for close_shift function."""
+
+	@patch("xpos.api.shifts.get_shift_expected_amounts", return_value={"Cash": 400})
+	@patch("xpos.api.shifts.frappe")
+	def test_close_shift_ignores_client_supplied_expected_amount(self, mock_frappe, mock_expected):
+		"""A client-sent expected_amount must not be able to mask a cash shortfall."""
+		opening = MagicMock()
+		opening.name = "POS-OPEN-001"
+		opening.pos_profile = "POS-PROFILE-1"
+		opening.company = "Test Company"
+		opening.posting_date = "2026-01-15"
+		opening.period_start_date = "2026-01-15 09:00:00"
+		opening.user = "cashier@test.com"
+		opening.balance_details = [SimpleNamespace(mode_of_payment="Cash", amount=100)]
+
+		closing = MagicMock()
+		closing.name = "POS-CLOSE-001"
+		closing.as_dict.return_value = {"name": "POS-CLOSE-001"}
+		appended = []
+		closing.append.side_effect = lambda table, row: appended.append((table, row))
+
+		mock_frappe.get_doc.side_effect = lambda *a, **kw: (
+			opening if a and a[0] == "POS Opening Shift" else closing
+		)
+		mock_frappe.get_all.return_value = []
+		mock_frappe.session.user = "cashier@test.com"
+
+		shifts.close_shift(
+			opening_shift="POS-OPEN-001",
+			# Cashier claims 300 was expected and 300 counted, i.e. no variance.
+			closing_details='[{"mode_of_payment": "Cash", "opening_amount": 999, '
+			'"expected_amount": 300, "closing_amount": 300, "difference": 0}]',
+		)
+
+		rows = [row for table, row in appended if table == "payment_reconciliation"]
+		self.assertEqual(len(rows), 1)
+		# Server figure wins, exposing the 100 shortfall the client tried to hide.
+		self.assertEqual(rows[0]["expected_amount"], 400)
+		self.assertEqual(rows[0]["closing_amount"], 300)
+		self.assertEqual(rows[0]["difference"], -100)
+		self.assertEqual(rows[0]["opening_amount"], 100)
 
 	@patch("xpos.api.shifts.frappe")
 	def test_close_shift_creates_closing_shift(self, mock_frappe):

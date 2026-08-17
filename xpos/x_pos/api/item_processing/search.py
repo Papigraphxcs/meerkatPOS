@@ -14,7 +14,7 @@ from xpos.x_pos.api.item_processing.barcode import search_serial_or_batch_or_bar
 from xpos.x_pos.api.item_processing.details import get_items_details
 from xpos.x_pos.api.utils import (
 	HAS_VARIANTS_EXCLUSION,
-	_ensure_pos_profile,
+	ensure_pos_profile,
 	expand_item_groups,
 	get_item_groups,
 	log_perf_event,
@@ -513,7 +513,7 @@ def _execute_item_search(
 def _normalize_profile_context(pos_profile: str | dict) -> ProfileContext:
 	"""Return the active profile metadata required by :func:`get_items`."""
 
-	profile_dict, profile_json = _ensure_pos_profile(pos_profile)
+	profile_dict, profile_json = ensure_pos_profile(pos_profile)
 	ttl = profile_dict.get("server_cache_duration")
 	try:
 		ttl = int(ttl) * 60 if ttl else None
@@ -669,7 +669,7 @@ def get_items_groups():
 
 @frappe.whitelist()
 def get_items_count(pos_profile: str | dict, item_groups: str | Sequence[str] | None = None):
-	pos_profile, _ = _ensure_pos_profile(pos_profile)
+	pos_profile, _ = ensure_pos_profile(pos_profile)
 	if isinstance(item_groups, str):
 		try:
 			item_groups = json.loads(item_groups)
