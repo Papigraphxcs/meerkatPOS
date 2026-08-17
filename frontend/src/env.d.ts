@@ -30,7 +30,14 @@ interface Locals {
 declare global {
 	interface XPosGlobal {
 		boot?: Record<string, any> & {
-			currencies: Array<{ name?: string; currency_name?: string; symbol?: string }>;
+			currencies: Array<{
+				name?: string;
+				currency_name?: string;
+				symbol?: string;
+				number_format?: string;
+				smallest_currency_fraction_value?: number;
+				symbol_on_right?: number;
+			}>;
 			countries: Array<{ name?: string }>;
 			accounts_settings?: Record<string, any>;
 			buying_settings?: Record<string, any>;

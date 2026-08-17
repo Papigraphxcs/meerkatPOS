@@ -9,3 +9,4 @@ xpos.patches.remove_retired_pos_profile_fields
 xpos.patches.seed_pos_role_permissions
 xpos.patches.add_open_tab_permissions
 xpos.patches.add_pos_query_indexes
+xpos.patches.enable_pos_change_gl_entries

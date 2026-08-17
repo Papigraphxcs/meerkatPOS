@@ -14,7 +14,14 @@ def extend_bootinfo(bootinfo):
 		bootinfo.currencies = frappe.get_all(
 			"Currency",
 			filters={"enabled": 1},
-			fields=["name", "currency_name", "symbol"],
+			fields=[
+				"name",
+				"currency_name",
+				"symbol",
+				"number_format",
+				"smallest_currency_fraction_value",
+				"symbol_on_right",
+			],
 			order_by="name asc",
 		)
 		bootinfo.territories = frappe.get_all(

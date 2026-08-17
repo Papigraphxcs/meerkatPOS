@@ -5,7 +5,7 @@
 from frappe.model.document import Document
 
 
-class POSClosingShiftDetail(Document):
+class POSChangeLeg(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -14,12 +14,11 @@ class POSClosingShiftDetail(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		closing_amount: DF.Currency
-		currency: DF.Link | None
-		difference: DF.Currency
-		expected_amount: DF.Currency
+		amount: DF.Currency
+		base_amount: DF.Currency
+		currency: DF.Link
+		exchange_rate: DF.Float
 		mode_of_payment: DF.Link
-		opening_amount: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

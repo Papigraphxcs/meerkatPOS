@@ -51,7 +51,7 @@ OBSOLETE_INDEXES = (("Item", "item_name_description_ft"),)
 
 def execute():
 	for doctype, columns, index_name in INDEXES:
-		frappe.logger("xpos").info(frappe.db.has_index(doctype, columns, index_name))
+		frappe.logger("xpos").info(frappe.db.has_index(f"tab{doctype}", index_name))
 
 	for doctype, index_name in OBSOLETE_INDEXES:
 		frappe.logger("xpos").info(drop_index(doctype, index_name))

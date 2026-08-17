@@ -1155,6 +1155,32 @@ export async function getCachedCurrencies(): Promise<string[]> {
 	return idb.getCachedCurrencies();
 }
 
+export interface CachedCurrencyMeta {
+	name: string;
+	symbol?: string;
+	number_format?: string;
+	smallest_currency_fraction_value?: number;
+	symbol_on_right?: number;
+}
+
+export async function cacheCurrencyMeta(currencies: CachedCurrencyMeta[]): Promise<void> {
+	if (isElectron()) {
+		await getDb().setMeta("currency_meta", JSON.stringify(currencies));
+		return;
+	}
+	const idb = await import("./idbService");
+	await idb.setMeta("currency_meta", currencies);
+}
+
+export async function getCachedCurrencyMeta(): Promise<CachedCurrencyMeta[]> {
+	if (isElectron()) {
+		const val = await getDb().getMeta("currency_meta");
+		return val ? JSON.parse(val) : [];
+	}
+	const idb = await import("./idbService");
+	return ((await idb.getMeta("currency_meta")) as CachedCurrencyMeta[]) || [];
+}
+
 export async function cacheLanguages(languages: string[]): Promise<void> {
 	if (isElectron()) {
 		await getDb().setMeta("languages", JSON.stringify(languages));

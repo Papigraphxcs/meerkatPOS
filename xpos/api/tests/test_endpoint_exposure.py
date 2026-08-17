@@ -36,6 +36,28 @@ class TestPrivilegedHelpersAreNotExposed(unittest.TestCase):
 		self.assertTrue(is_whitelisted("xpos.api.payments", "settle_outstanding_invoice"))
 
 
+class TestExchangeRateHelpersAreNotExposed(unittest.TestCase):
+	"""The rate resolver must stay server-side only."""
+
+	def test_resolve_tender_rate_exists_but_is_not_an_endpoint(self):
+		"""Exposing it would let a caller pick which rate a tender leg is valued at.
+
+		The whole point of resolving rates server-side is that a client cannot choose
+		one. `get_tender_rates` is the read-only public view of the same data.
+		"""
+		self.assertTrue(function_exists("xpos.api.exchange", "resolve_tender_rate"))
+		self.assertFalse(is_whitelisted("xpos.api.exchange", "resolve_tender_rate"))
+
+	def test_rate_payload_builder_is_not_an_endpoint(self):
+		"""It takes a doc rather than a name, so it performs no permission check."""
+		self.assertTrue(function_exists("xpos.api.exchange", "build_tender_rate_payload"))
+		self.assertFalse(is_whitelisted("xpos.api.exchange", "build_tender_rate_payload"))
+
+	def test_get_tender_rates_remains_the_public_entry_point(self):
+		"""The POS needs to read the current rate per payment mode."""
+		self.assertTrue(is_whitelisted("xpos.api.exchange", "get_tender_rates"))
+
+
 class TestForceDeleteEndpointsAreGone(unittest.TestCase):
 	"""Endpoints that force-deleted submitted invoices have been removed."""
 

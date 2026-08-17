@@ -7,11 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
-
-def _row_value(row: dict | object, key: str, default=None):
-	if isinstance(row, dict):
-		return row.get(key, default)
-	return getattr(row, key, default)
+from xpos.utils import row_value
 
 
 @frappe.whitelist()
@@ -30,7 +26,7 @@ def get_customers(search_term: str = "", limit: int = 20, pos_profile: str = Non
 			if customer_groups:
 				allowed_groups = []
 				for cg in customer_groups:
-					group_name = _row_value(cg, "customer_group")
+					group_name = row_value(cg, "customer_group")
 					if group_name:
 						allowed_groups.extend(_get_child_groups("Customer Group", group_name))
 				if allowed_groups:
@@ -102,7 +98,7 @@ def get_customer_info(customer: str):
 		},
 		fields=["parent"],
 	)
-	address_names = [_row_value(addr, "parent") for addr in addresses if _row_value(addr, "parent")]
+	address_names = [row_value(addr, "parent") for addr in addresses if row_value(addr, "parent")]
 	address_list = []
 	if address_names:
 		address_docs = frappe.get_all(

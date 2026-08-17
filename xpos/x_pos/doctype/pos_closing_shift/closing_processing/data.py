@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import frappe
 
+from xpos.api.exchange import change_leg_table_exists
 from xpos.api.utilities import get_invoice_type
 from xpos.x_pos.doctype.pos_closing_shift.closing_processing.invoices import (
 	submit_printed_invoices,
@@ -47,10 +48,10 @@ def get_cashiers(
 @frappe.whitelist()
 def get_pos_invoices(pos_opening_shift: str, doctype: str | None = None):
 	"""
-	Return the submitted invoices of a shift with their tax and payment rows.
+	Return the submitted invoices of a shift with their tax, payment and change rows.
 
-	Runs three queries regardless of shift size: one for the invoices, one for
-	the tax rows and one for the payment rows.
+	Runs four queries regardless of shift size: one for the invoices, one each for
+	the tax rows, the payment rows and the change legs.
 	"""
 	if not pos_opening_shift:
 		return []
@@ -71,10 +72,16 @@ def get_pos_invoices(pos_opening_shift: str, doctype: str | None = None):
 	names = [invoice.name for invoice in invoices]
 	taxes_by_invoice = get_child_rows("Sales Taxes and Charges", doctype, "taxes", names)
 	payments_by_invoice = get_child_rows("Sales Invoice Payment", doctype, "payments", names)
+	change_legs_by_invoice = (
+		get_child_rows("POS Change Leg", doctype, "pos_change_legs", names)
+		if change_leg_table_exists()
+		else {}
+	)
 
 	for invoice in invoices:
 		invoice.taxes = taxes_by_invoice.get(invoice.name, [])
 		invoice.payments = payments_by_invoice.get(invoice.name, [])
+		invoice.pos_change_legs = change_legs_by_invoice.get(invoice.name, [])
 
 	return invoices
 

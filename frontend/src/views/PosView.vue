@@ -348,7 +348,7 @@ async function onBarcodeScan(barcode: string) {
 	try {
 		const result = await itemStore.searchByBarcode(barcode, posStore.profileName);
 		if (result && result.item_code) {
-			handleAddItem({
+			const item = {
 				item_code: result.item_code,
 				item_name: result.item_name,
 				rate: result.rate || 0,
@@ -358,7 +358,14 @@ async function onBarcodeScan(barcode: string) {
 				has_batch_no: result.has_batch_no,
 				has_serial_no: result.has_serial_no,
 				actual_qty: result.actual_qty ?? 9999,
-			} as POSItem);
+			} as POSItem;
+
+			const scaleQty = Number(result.qty) || 0;
+			if (result.is_scale_barcode && scaleQty > 0) {
+				addScaleItem(item, scaleQty);
+			} else {
+				handleAddItem(item);
+			}
 			barcodeScannerRef.value?.showSuccess();
 		} else {
 			showError(__(`Item not found for barcode: ${barcode}`));
@@ -453,6 +460,18 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 function selectGroup(group: string) {
 	itemStore.setSelectedGroup(group);
 	itemStore.fetchItems(posStore.profileName);
+}
+
+function addScaleItem(item: POSItem, qty: number) {
+	if (!cartStore.customer) {
+		showError(__("Please select a customer before adding items to the cart"));
+		return;
+	}
+
+	const result = cartStore.addItemWithDetails(item, qty, item.rate || 0, item.uom || item.stock_uom);
+	if (!result.success) {
+		showError(result.message || __("Could not add item to cart"));
+	}
 }
 
 function handleAddItem(item: POSItem) {

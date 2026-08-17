@@ -24,6 +24,7 @@ export interface POSProfile {
 	currency: string;
 	company: string;
 	payments: POSPaymentMethod[];
+	pos_mixed_currency_tender?: boolean;
 	taxes_and_charges?: string;
 	write_off_account?: string;
 	write_off_cost_center?: string;
@@ -86,6 +87,13 @@ export interface POSPaymentMethod {
 	mode_of_payment: string;
 	default?: boolean;
 	amount?: number;
+	pos_tender_currency?: string;
+	type?: string;
+	is_foreign_tender?: boolean;
+	exchange_rate?: number;
+	rate_date?: string;
+	precision?: number;
+	symbol?: string;
 }
 
 export interface Company {
@@ -169,6 +177,8 @@ export interface POSItem {
 	has_variants?: boolean;
 	variant_of?: string;
 	is_template?: boolean;
+	qty?: number;
+	is_scale_barcode?: boolean;
 	[key: string]: unknown;
 }
 
@@ -367,6 +377,26 @@ export interface InvoicePayment {
 	base_amount?: number;
 	account?: string;
 	type?: string;
+	pos_tender_currency?: string;
+	pos_tender_amount?: number;
+	pos_exchange_rate?: number;
+}
+
+export interface TenderLeg {
+	id: string;
+	mode_of_payment: string;
+	currency: string;
+	native_amount: number;
+	exchange_rate: number;
+	base_amount: number;
+}
+
+export interface InvoiceChangeLeg {
+	mode_of_payment: string;
+	currency: string;
+	amount: number;
+	base_amount: number;
+	exchange_rate: number;
 }
 
 export interface InvoiceData {
@@ -397,6 +427,7 @@ export interface InvoiceData {
 	write_off_amount?: number;
 	write_off_account?: string;
 	change_amount?: number;
+	pos_change_legs?: InvoiceChangeLeg[];
 	currency?: string;
 	conversion_rate?: number;
 	is_credit_sale?: boolean;
@@ -694,6 +725,10 @@ export interface ReceiptSnapshotTax {
 export interface ReceiptSnapshotPayment {
 	mode_of_payment: string;
 	amount: number;
+	currency?: string;
+	native_amount?: number;
+	exchange_rate?: number;
+	rate_date?: string;
 }
 
 export interface ReceiptSnapshot {
@@ -712,6 +747,8 @@ export interface ReceiptSnapshot {
 	grand_total: number;
 	total_qty: number;
 	change: number;
+	change_legs?: InvoiceChangeLeg[];
+	currency?: string;
 	notes?: string;
 }
 

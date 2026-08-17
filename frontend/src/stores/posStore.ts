@@ -63,13 +63,42 @@ export const usePosStore = defineStore("pos", () => {
 		return "$";
 	});
 
+	const invoiceCurrency = computed(
+		() => posProfile.value?.currency || company.value?.default_currency || "",
+	);
+
 	const paymentMethods = computed(() => {
 		if (!posProfile.value?.payments) return [];
 		return posProfile.value.payments.map((p) => ({
 			mode_of_payment: p.mode_of_payment,
 			default: p.default,
+			pos_tender_currency: p.pos_tender_currency || invoiceCurrency.value,
+			type: p.type || "",
+			is_foreign_tender: !!p.is_foreign_tender,
+			exchange_rate: p.exchange_rate ?? 1,
+			rate_date: p.rate_date || "",
 		}));
 	});
+
+	const foreignTenderModes = computed(() => paymentMethods.value.filter((m) => m.is_foreign_tender));
+
+	const cashTenderModes = computed(() => paymentMethods.value.filter((m) => m.type === "Cash"));
+
+	const allowMixedCurrencyTender = computed(
+		() => !!posProfile.value?.pos_mixed_currency_tender && foreignTenderModes.value.length > 0,
+	);
+
+	function tenderModeFor(modeOfPayment: string) {
+		return paymentMethods.value.find((m) => m.mode_of_payment === modeOfPayment);
+	}
+
+	function tenderRateFor(modeOfPayment: string): number {
+		return tenderModeFor(modeOfPayment)?.exchange_rate ?? 1;
+	}
+
+	function tenderCurrencyFor(modeOfPayment: string): string {
+		return tenderModeFor(modeOfPayment)?.pos_tender_currency || invoiceCurrency.value;
+	}
 
 	const companyName = computed(() => company.value?.name || "");
 
@@ -514,7 +543,14 @@ export const usePosStore = defineStore("pos", () => {
 		warehouse,
 		currency,
 		currencySymbol,
+		invoiceCurrency,
 		paymentMethods,
+		foreignTenderModes,
+		cashTenderModes,
+		allowMixedCurrencyTender,
+		tenderModeFor,
+		tenderRateFor,
+		tenderCurrencyFor,
 		companyName,
 		sellingPriceList,
 		defaultCustomer,

@@ -346,11 +346,17 @@ def search_barcode(barcode: str, pos_profile: str | None = None):
 			"actual_qty": get_stock_qty(item.name, warehouse, pos_profile=pos_profile) if warehouse else 0,
 		}
 
-	if pos_profile:
-		result = _parse_scale_barcode(barcode, pos_profile)
-		if result:
-			result["rate"] = _get_item_rate(result["item_code"])
-			return result
+	result = resolve_scale_barcode(barcode)
+	if result:
+		scale_price = result.pop("scale_price", None)
+		rate = _get_item_rate(result["item_code"])
+		if scale_price is not None and flt(result.get("qty")):
+			rate = flt(scale_price) / flt(result["qty"])
+		result["rate"] = rate
+		result["actual_qty"] = (
+			get_stock_qty(result["item_code"], warehouse, pos_profile=pos_profile) if warehouse else 0
+		)
+		return result
 
 	return None
 
@@ -802,63 +808,56 @@ def _get_batch_data(item_code: str, warehouse: str, today: str | None = None):
 	return result
 
 
-def _parse_scale_barcode(barcode: str, pos_profile: str):
-	"""Parse scale barcodes for weighted items (e.g. deli scale barcodes)."""
-	try:
-		settings = frappe.get_all(
-			"Scale Barcode Settings",
-			filters={"pos_profile": pos_profile},
-			fields=[
-				"barcode_prefix",
-				"item_code_start",
-				"item_code_end",
-				"qty_start",
-				"qty_end",
-				"qty_decimals",
-			],
-			limit=1,
-		)
-		if not settings:
-			return None
+def resolve_scale_barcode(barcode: str):
+	"""Decode a scale barcode into an item and its weighed quantity."""
+	from xpos.x_pos.api.item_processing.barcode import (
+		get_scale_barcode_settings,
+		parse_scale_barcode_data,
+	)
 
-		s = settings[0]
-		prefix = s.get("barcode_prefix", "")
-		if prefix and not barcode.startswith(prefix):
-			return None
-
-		ic_start = cint(s.get("item_code_start", 0))
-		ic_end = cint(s.get("item_code_end", 0))
-		qty_start = cint(s.get("qty_start", 0))
-		qty_end = cint(s.get("qty_end", 0))
-		qty_decimals = cint(s.get("qty_decimals", 3))
-
-		if not ic_start or not ic_end or not qty_start or not qty_end:
-			return None
-
-		item_barcode = barcode[ic_start:ic_end]
-		qty_str = barcode[qty_start:qty_end]
-
-		barcode_data = frappe.db.get_value(
-			"Item Barcode",
-			{"barcode": item_barcode},
-			["parent as item_code", "barcode", "uom"],
-			as_dict=True,
-		)
-		if not barcode_data:
-			return None
-
-		qty = flt(qty_str) / (10**qty_decimals) if qty_str else 0
-
-		item = frappe.get_cached_doc("Item", barcode_data.item_code)
-		return {
-			"item_code": item.name,
-			"item_name": item.item_name,
-			"barcode": barcode_data.barcode,
-			"uom": barcode_data.uom or item.stock_uom,
-			"has_batch_no": item.has_batch_no,
-			"has_serial_no": item.has_serial_no,
-			"qty": qty,
-			"is_scale_barcode": True,
-		}
-	except Exception:
+	data = parse_scale_barcode_data(barcode)
+	if not data or not data.get("item_code"):
 		return None
+
+	settings = get_scale_barcode_settings()
+	weight_configured = (
+		settings and cint(settings.weight_starting_digit) and cint(settings.weight_total_digits)
+	)
+	if weight_configured and data.get("qty") is None:
+		return None
+
+	decoded = data["item_code"]
+	item_code = None
+	uom = None
+
+	if frappe.db.exists("Item", decoded):
+		item_code = decoded
+	else:
+		row = frappe.db.get_value(
+			"Item Barcode", {"barcode": decoded}, ["parent as item_code", "uom"], as_dict=True
+		)
+		if row:
+			item_code = row.item_code
+			uom = row.uom
+
+	if not item_code:
+		return None
+
+	item = frappe.get_cached_doc("Item", item_code)
+	qty = flt(data.get("qty"))
+
+	return {
+		"item_code": item.name,
+		"item_name": item.item_name,
+		"local_item_name": item.get("local_item_name"),
+		"barcode": barcode,
+		"uom": uom or item.stock_uom,
+		"stock_uom": item.stock_uom,
+		"has_batch_no": item.has_batch_no,
+		"has_serial_no": item.has_serial_no,
+		"is_stock_item": item.is_stock_item,
+		"image": item.image,
+		"qty": qty,
+		"is_scale_barcode": True,
+		"scale_price": flt(data["price"]) if data.get("price") is not None else None,
+	}

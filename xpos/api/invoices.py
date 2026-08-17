@@ -9,6 +9,8 @@ from frappe import _, cstr
 from frappe.utils import cint, flt, getdate, now_datetime, nowdate
 from frappe.utils.background_jobs import enqueue
 
+from xpos.api.exchange import get_currency_precision
+from xpos.api.tender import build_change_legs, build_tender_legs, invoice_currency_of
 from xpos.api.utilities import can_recall_other_shift_tabs, get_invoice_type, is_pos_cashier
 
 
@@ -523,20 +525,10 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 		_prepare_invoice_totals_for_loyalty_validation(invoice_doc)
 		loyalty_paid = _resolve_loyalty_paid_amount(invoice_doc)
 
-	total_payment = 0
-	for payment in payments:
-		pay_amount = flt(payment.get("amount", 0), 2)
-		if pay_amount != 0:
-			invoice_doc.append(
-				"payments",
-				{
-					"mode_of_payment": payment.get("mode_of_payment"),
-					"amount": pay_amount,
-					"account": payment.get("account"),
-					"type": payment.get("type"),
-				},
-			)
-			total_payment += pay_amount
+	rate_cache: dict = {}
+	tender_rows, total_payment = build_tender_legs(payments, invoice_doc, rate_cache)
+	for row in tender_rows:
+		invoice_doc.append("payments", row)
 
 	_ensure_pos_invoice_payment_row(invoice_doc, pos, bool(invoice_doc.is_pos and not invoice_doc.is_return))
 
@@ -556,10 +548,19 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 	if is_return and doctype == "POS Invoice":
 		invoice_doc.validate_change_amount = lambda: None
 	else:
-		invoice_doc.paid_amount = flt(total_payment + loyalty_paid, 2)
-		invoice_doc.base_paid_amount = flt(invoice_doc.paid_amount * flt(invoice_doc.conversion_rate or 1), 2)
+		paid_precision = get_currency_precision(invoice_currency_of(invoice_doc))
+		invoice_doc.paid_amount = flt(total_payment + loyalty_paid, paid_precision)
+		invoice_doc.base_paid_amount = flt(
+			invoice_doc.paid_amount * flt(invoice_doc.conversion_rate or 1), paid_precision
+		)
 
-	change_amount = flt(data.get("change_amount", 0))
+	change_legs, change_total = build_change_legs(data.get("pos_change_legs") or [], invoice_doc, rate_cache)
+	if change_legs:
+		invoice_doc.set("pos_change_legs", [])
+		for leg in change_legs:
+			invoice_doc.append("pos_change_legs", leg)
+
+	change_amount = change_total if change_legs else flt(data.get("change_amount", 0))
 	if change_amount > 0:
 		invoice_doc.change_amount = change_amount
 
@@ -861,17 +862,9 @@ def save_draft_invoice(data: str | dict):
 	payments = data.get("payments", [])
 	if payments:
 		invoice_doc.set("payments", [])
-		for payment in payments:
-			pay_amount = flt(payment.get("amount", 0), 2)
-			invoice_doc.append(
-				"payments",
-				{
-					"mode_of_payment": payment.get("mode_of_payment"),
-					"amount": pay_amount,
-					"account": payment.get("account"),
-					"type": payment.get("type"),
-				},
-			)
+		tender_rows, _total = build_tender_legs(payments, invoice_doc)
+		for row in tender_rows:
+			invoice_doc.append("payments", row)
 
 	_ensure_pos_invoice_payment_row(invoice_doc, pos, doctype == "POS Invoice")
 
