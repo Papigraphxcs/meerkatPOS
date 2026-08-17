@@ -1494,6 +1494,7 @@ export const useCartStore = defineStore("cart", () => {
 								currency: p.pos_tender_currency,
 								native_amount: p.pos_tender_amount,
 								exchange_rate: p.pos_exchange_rate,
+								rate_date: posStore.tenderModeFor(p.mode_of_payment)?.rate_date || "",
 							}
 						: {}),
 				})),

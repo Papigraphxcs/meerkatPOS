@@ -1,3 +1,4 @@
+import { formatFor } from "@/composables/useCurrency";
 import type { ReceiptContext, ReceiptSnapshot } from "@/types/pos.types";
 
 function esc(value: unknown): string {
@@ -25,6 +26,10 @@ function fmtMoney(amount: number, currency: string): string {
 		maximumFractionDigits: 2,
 	}).format(value);
 	return currency ? `${currency} ${plain}` : plain;
+}
+
+function fmtNative(amount: number, currency: string): string {
+	return `${currency} ${formatFor(currency, amount)}`;
 }
 
 function fmtDate(date: string): string {
@@ -130,6 +135,61 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
         </div>`
 			: "";
 
+	const paymentRowHtml = (p: ReceiptSnapshot["payments"][number]) => {
+		const isForeign = !!p.currency && p.currency !== currency && p.native_amount !== undefined;
+		const headline = isForeign
+			? fmtNative(Math.abs(p.native_amount!), p.currency!)
+			: money(Math.abs(p.amount));
+		const rateLine = isForeign
+			? `
+        <div class="payment-rate-line" style="font-size:8px;color:#555;padding-left:6px;">
+            @ ${formatFor(currency, p.exchange_rate || 0)}${
+				p.rate_date ? ` (${fmtDate(p.rate_date)})` : ""
+			} = ${money(Math.abs(p.amount))}
+        </div>`
+			: "";
+		return `
+        <div class="payment-row">
+            <span>${esc(p.mode_of_payment)}</span>
+            <span style="font-weight:700;">${headline}</span>
+        </div>${rateLine}`;
+	};
+
+	const changeLegs = snapshot.change_legs || [];
+
+	const changeHtml =
+		snapshot.change > 0.01
+			? changeLegs.length
+				? `
+        <hr class="div-dashed">
+        <div class="total-row" style="font-size:9px;font-weight:700;text-transform:uppercase;color:#000;margin-bottom:2px;">
+            <span>Change</span>
+        </div>
+        ${changeLegs
+			.map(
+				(leg) => `
+        <div class="payment-row change-leg-row">
+            <span>${esc(leg.mode_of_payment)}</span>
+            <span>${
+				leg.currency && leg.currency !== currency
+					? fmtNative(leg.amount, leg.currency)
+					: money(leg.amount)
+			}</span>
+        </div>`,
+			)
+			.join("")}
+        <div class="payment-row change-row" style="font-weight:700;">
+            <span>Total Change</span>
+            <span>${money(snapshot.change)}</span>
+        </div>`
+				: `
+        <hr class="div-dashed">
+        <div class="payment-row change-row">
+            <span>Change</span>
+            <span>${money(snapshot.change)}</span>
+        </div>`
+			: "";
+
 	const paymentsHtml = snapshot.payments.length
 		? `
     <hr class="div-dashed">
@@ -137,25 +197,8 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
         <div class="total-row" style="font-size:9px;font-weight:700;text-transform:uppercase;color:#000;margin-bottom:2px;">
             <span>Payment Details</span>
         </div>
-        ${snapshot.payments
-			.map(
-				(p) => `
-        <div class="payment-row">
-            <span>${esc(p.mode_of_payment)}</span>
-            <span style="font-weight:700;">${money(Math.abs(p.amount))}</span>
-        </div>`,
-			)
-			.join("")}
-        ${
-			snapshot.change > 0.01
-				? `
-        <hr class="div-dashed">
-        <div class="payment-row change-row">
-            <span>Change</span>
-            <span>${money(snapshot.change)}</span>
-        </div>`
-				: ""
-		}
+        ${snapshot.payments.map(paymentRowHtml).join("")}
+        ${changeHtml}
     </div>`
 		: "";
 

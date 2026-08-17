@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Ali Raza and contributors
 # For license information, please see license.txt
 
-"""Jinja template helpers for barcode and QR code generation.
+"""Jinja template helpers for barcodes, QR codes and mixed-currency receipts.
 
 These functions are registered via ``hooks.py`` under ``jenv`` so they can
 be called directly in Jinja / Print Format templates:
@@ -9,15 +9,25 @@ be called directly in Jinja / Print Format templates:
     {{ xpos_barcode("12345", barcode_type="code128") }}
     {{ xpos_qrcode("https://example.com") }}
     {{ xpos_item_barcode("ITEM-001") }}
+    {{ xpos_tender_rate(payment.pos_exchange_rate, doc.currency) }}
 """
 
 from __future__ import annotations
+
+from frappe.utils import flt, fmt_money
 
 from xpos.x_pos.api.barcode_generator import (
 	generate_barcode,
 	generate_item_barcode_label,
 	generate_qrcode,
 )
+
+
+def xpos_tender_rate(rate, currency: str | None = None) -> str:
+	"""Jinja helper: an exchange rate as a plain grouped number, with no currency symbol."""
+	from xpos.api.exchange import get_currency_precision
+
+	return fmt_money(flt(rate), precision=get_currency_precision(currency))
 
 
 def xpos_barcode(

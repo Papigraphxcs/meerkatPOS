@@ -77,6 +77,7 @@ The specs here assume the stub.
 | `support/commands.ts` | `cy.bootPos`, `cy.addItemToCart`, `cy.cartRow`, offline toggles |
 | `fixtures/pos.ts` | POS profile, items, customers, default routes |
 | `fixtures/pricingRules.ts` | Builders for pricing responses and rule snapshots |
+| `fixtures/mixedCurrency.ts` | LBP/USD profile, tagged payment modes, per-currency shift summary |
 
 ## Gotchas worth knowing
 
@@ -89,3 +90,9 @@ The specs here assume the stub.
 - **IndexedDB persists across specs.** `cy.bootPos()` deletes `xpos_offline_v3`
   before the app loads; otherwise a stale cache can make an offline test pass
   that should have failed.
+- **A spec that swaps the catalogue must pass `readyItem`.** `cy.bootPos()` waits
+  for an item tile to prove the shift/profile boot landed, and defaults to
+  `Espresso Beans` from `fixtures/pos.ts`.
+- **Currency decimals come from `number_format`,** which `cy.bootPos()` injects
+  through its `currencies` option. A spec covering a zero-decimal currency has to
+  supply it, or every amount renders at two decimals and the assertions drift.

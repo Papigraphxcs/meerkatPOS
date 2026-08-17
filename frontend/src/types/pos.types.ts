@@ -770,13 +770,19 @@ export interface OpeningData {
 	payment_methods: POSPaymentMethod[];
 }
 
+export interface ShiftModeTotal {
+	amount: number;
+	currency: string;
+}
+
 export interface ShiftSummary {
 	net_total: number;
 	grand_total: number;
 	total_invoices: number;
 	returns_count: number;
-	payment_summary: Record<string, number>;
-	opening_balances: Record<string, number>;
+	payment_summary: Record<string, ShiftModeTotal>;
+	opening_balances: Record<string, ShiftModeTotal>;
+	expected_amounts: Record<string, ShiftModeTotal>;
 	tax_summary: POSClosingShiftTax[];
 	pos_profile: string;
 	company: string;

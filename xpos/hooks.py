@@ -88,6 +88,7 @@ jinja = {
 		"xpos.x_pos.api.jinja_helpers.xpos_qrcode",
 		"xpos.x_pos.api.jinja_helpers.xpos_qrcode_uri",
 		"xpos.x_pos.api.jinja_helpers.xpos_item_barcode",
+		"xpos.x_pos.api.jinja_helpers.xpos_tender_rate",
 	],
 }
 

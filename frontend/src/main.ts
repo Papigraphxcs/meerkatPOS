@@ -71,6 +71,15 @@ async function initializeBrowserStorage(): Promise<void> {
 	}
 }
 
+async function initializeCurrencyMeta(): Promise<void> {
+	try {
+		const { primeCurrencyCache } = await import("@/composables/useCurrency");
+		await primeCurrencyCache();
+	} catch (error) {
+		console.warn("[XPOS] Currency metadata initialization failed", error);
+	}
+}
+
 (async () => {
 	const app = createApp(App);
 	const pinia = createPinia();
@@ -79,6 +88,7 @@ async function initializeBrowserStorage(): Promise<void> {
 	app.use(router);
 	initializeNamespaces();
 	await initializeBrowserStorage();
+	await initializeCurrencyMeta();
 	app.config.globalProperties.$dayjs = dayjs;
 	app.config.errorHandler = (err: unknown, _instance: unknown, info: string) => {
 		console.error("X POS Error:", err, info);

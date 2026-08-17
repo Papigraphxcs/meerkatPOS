@@ -23,6 +23,8 @@ vi.mock("@/stores/posStore", () => ({
 			currency: "USD",
 		},
 		currency: "USD",
+		// The receipt snapshot reads the rate date off the mode, not the payment row.
+		tenderModeFor: vi.fn(() => undefined),
 	})),
 }));
 

@@ -175,6 +175,8 @@
 										if (el) methodRefs[idx] = el as HTMLButtonElement;
 									}
 								"
+								data-testid="payment-method"
+								:data-mode="method.mode_of_payment"
 								@click="selectMethod(method.mode_of_payment)"
 								@keydown.left.prevent="focusMethod(idx - 1)"
 								@keydown.right.prevent="focusMethod(idx + 1)"
@@ -490,7 +492,13 @@
 							</p>
 						</div>
 
-						<div v-for="(leg, idx) in changeLegs" :key="`${leg.mode_of_payment}-${idx}`">
+						<div
+							v-for="(leg, idx) in changeLegs"
+							:key="`${leg.mode_of_payment}-${idx}`"
+							data-testid="change-leg"
+							:data-mode="leg.mode_of_payment"
+							:data-currency="leg.currency"
+						>
 							<div class="flex items-center gap-2">
 								<component
 									:is="getMethodIcon(leg.mode_of_payment)"
@@ -504,6 +512,7 @@
 									:min="0"
 									:precision="precisionFor(leg.currency)"
 									class="w-28 text-right text-sm py-1"
+									data-testid="change-leg-input"
 									@update:model-value="updateChangeLeg(idx, Number($event) || 0)"
 								/>
 								<button
@@ -530,6 +539,8 @@
 								variant="outline"
 								size="sm"
 								class="text-xs h-7"
+								data-testid="add-change-leg"
+								:data-mode="mode.mode_of_payment"
 								:disabled="changeRemaining <= 0"
 								@click="addChangeLeg(mode.mode_of_payment)"
 							>
@@ -661,6 +672,7 @@
 					<Button
 						variant="outline"
 						class="font-medium"
+						data-testid="save-payment"
 						:disabled="isSubmitting || !canSubmit"
 						@click="submitPayment(false)"
 					>

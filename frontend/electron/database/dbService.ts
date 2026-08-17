@@ -339,6 +339,30 @@ async function runMigrations(): Promise<void> {
 		}
 	}
 
+	const columnMigrations: [string, string, string][] = [
+		["sales_invoice_payments", "pos_tender_currency", "VARCHAR(10) DEFAULT NULL"],
+		["sales_invoice_payments", "pos_tender_amount", "DECIMAL(18,6) DEFAULT NULL"],
+		["sales_invoice_payments", "pos_exchange_rate", "DECIMAL(21,9) DEFAULT NULL"],
+		["modes_of_payment", "pos_tender_currency", "VARCHAR(10) DEFAULT NULL"],
+		["currencies", "number_format", "VARCHAR(20) DEFAULT NULL"],
+		["currencies", "smallest_currency_fraction_value", "DECIMAL(18,6) DEFAULT 0"],
+		["currencies", "symbol_on_right", "TINYINT(1) DEFAULT 0"],
+	];
+	for (const [table, col, typedef] of columnMigrations) {
+		try {
+			const [existing] = await db.execute<RowDataPacket[]>(
+				"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?",
+				[table, col],
+			);
+			if ((existing as RowDataPacket[]).length === 0) {
+				await db.execute(`ALTER TABLE \`${table}\` ADD COLUMN \`${col}\` ${typedef}`);
+				log.info(`Migration: added ${table}.${col}`);
+			}
+		} catch (err) {
+			log.warn(`Migration for ${table}.${col} failed`, err);
+		}
+	}
+
 	for (const tbl of ["pending_invoices", "pending_purchases"]) {
 		try {
 			const [cols] = await db.execute<RowDataPacket[]>(

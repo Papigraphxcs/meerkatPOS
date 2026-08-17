@@ -1174,6 +1174,8 @@ export async function cacheCurrencyMeta(currencies: CachedCurrencyMeta[]): Promi
 
 export async function getCachedCurrencyMeta(): Promise<CachedCurrencyMeta[]> {
 	if (isElectron()) {
+		const rows = (await getDb().getCurrencies()) as unknown as CachedCurrencyMeta[] | undefined;
+		if (rows?.length) return rows;
 		const val = await getDb().getMeta("currency_meta");
 		return val ? JSON.parse(val) : [];
 	}
