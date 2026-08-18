@@ -58,7 +58,7 @@
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.19",
     "cypress": "13.17.0",
-    "electron": "^35.2.1",
+    "electron": "^39.8.10",
     "electron-builder": "^26.0.12",
     "jsdom": "^29.1.1",
     "postcss": "^8.4.38",
