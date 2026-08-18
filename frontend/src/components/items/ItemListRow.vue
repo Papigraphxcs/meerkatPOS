@@ -42,7 +42,7 @@
 		</div>
 
 		<TooltipWrapper
-			v-if="showStock && item.actual_qty !== undefined"
+			v-if="showStock && !isNonStockItem && item.actual_qty !== undefined"
 			:content="String(isOutOfStock ? __('Out of Stock') : item.actual_qty)"
 		>
 			<Badge :variant="stockVariant" class="shrink-0 text-[10px]">
@@ -102,12 +102,15 @@ const emit = defineEmits(["click", "showDetail"]);
 
 const posStore = usePosStore();
 
-const showStock = computed(() => posStore.displayItemsInStock);
+const showStock = computed(() => true);
 const showItemCode = computed(() => posStore.displayItemCode);
 const allowNegativeStock = computed(() => posStore.stockSettings?.allow_negative_stock);
 const hideImages = computed(() => posStore.hideImages);
 
+const isNonStockItem = computed(() => Number(props.item.is_stock_item) === 0);
+
 const isOutOfStock = computed(() => {
+	if (isNonStockItem.value) return false;
 	const qty = props.item.actual_qty;
 	return qty !== undefined && qty <= 0;
 });

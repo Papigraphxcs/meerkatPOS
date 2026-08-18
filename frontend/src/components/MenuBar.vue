@@ -138,9 +138,7 @@ const activeMenuIdx = computed(() => {
 function getNavigableItems(): MenuItem[] {
 	const idx = activeMenuIdx.value;
 	if (idx < 0) return [];
-	return menus.value[idx].items.filter(
-		(item) => !item.separator && !item.hidden?.() && !item.disabled?.(),
-	);
+	return menus.value[idx].items.filter((item) => !item.separator && !item.hidden?.() && !item.disabled?.());
 }
 
 function toggleMenu(label: string, menuIndex: number) {

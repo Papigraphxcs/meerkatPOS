@@ -4,7 +4,6 @@
 import json
 
 import frappe
-from frappe import _
 
 
 @frappe.whitelist()

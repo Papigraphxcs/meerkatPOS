@@ -1,4 +1,5 @@
-const PosView = () => import("@/views/PosView.vue");
+import PosView from "@/views/PosView.vue";
+
 const OrdersView = () => import("@/views/OrdersView.vue");
 const CashierView = () => import("@/views/CashierView.vue");
 const ReportsIndexView = () => import("@/views/ReportsIndexView.vue");
@@ -130,6 +131,12 @@ const routes: RouteRecordRaw[] = [
 		name: "role-permissions",
 		component: RolePermissionsView,
 		meta: { title: "Role Permissions", requiresAuth: true, requiresAdmin: true },
+	},
+	{
+		path: "/price-checker",
+		name: "price-checker",
+		component: () => import("@/views/PriceChecker.vue"),
+		meta: { title: "Price Checker", requiresAuth: true, fullScreen: true },
 	},
 ];
 

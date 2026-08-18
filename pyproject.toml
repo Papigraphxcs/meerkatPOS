@@ -13,7 +13,7 @@ keywords = ["frappe", "erpnext", "xpos", "point-of-sale", "retail", "offline", "
 dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
     "python-barcode>=0.16.1",
-    "qrcode[pil]>=7.4",
+    "qrcode[pil]>=8.2",
 ]
 
 [project.urls]
@@ -23,7 +23,7 @@ Issues = "https://github.com/kodlyft/xpos/issues"
 Changelog = "https://github.com/kodlyft/xpos/releases"
 
 [build-system]
-requires = ["flit_core >=3.4,<4"]
+requires = ["flit_core >=3.12.0,<4"]
 build-backend = "flit_core.buildapi"
 
 # These dependencies are only installed when developer mode is enabled

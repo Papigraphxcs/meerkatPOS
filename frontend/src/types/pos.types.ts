@@ -1,5 +1,6 @@
 export interface POSSearchField {
 	field: string;
+	fieldname?: string;
 	[key: string]: unknown;
 }
 
@@ -14,8 +15,18 @@ export interface POSAdditionalField {
 export interface POSSettings {
 	invoice_type: string;
 	post_change_gl_entries: boolean;
-	invoice_fields: POSAdditionalField[];
-	pos_search_fields: POSSearchField[];
+	invoice_fields?: POSAdditionalField[];
+	pos_search_fields?: POSSearchField[];
+	item_search_limit?: number;
+	search_serial_no?: number;
+	search_batch_no?: number;
+}
+
+export interface ItemSearchSettings {
+	fields: string[];
+	item_search_limit: number;
+	search_serial_no: number;
+	search_batch_no: number;
 }
 
 export interface POSProfile {
@@ -24,13 +35,13 @@ export interface POSProfile {
 	currency: string;
 	company: string;
 	payments: POSPaymentMethod[];
+	pos_mixed_currency_tender?: boolean;
 	taxes_and_charges?: string;
 	write_off_account?: string;
 	write_off_cost_center?: string;
 	selling_price_list?: string;
 	default_customer?: string;
 	allow_change_posting_date?: boolean;
-	display_items_in_stock?: boolean;
 	allow_partial_payment?: boolean;
 	allow_credit_sale?: boolean;
 	allow_return?: boolean;
@@ -43,9 +54,10 @@ export interface POSProfile {
 	display_item_code?: boolean;
 	allow_zero_rated_items?: boolean;
 	enable_cashier_settlement?: boolean;
+	allow_open_tab_recall?: boolean;
+	allow_outstanding_settlement?: boolean;
 	print_backup_receipt?: boolean;
 	auto_set_batch?: boolean;
-	search_serial_no?: boolean;
 	tax_inclusive?: boolean;
 	default_view?: string;
 	default_sales_order?: boolean;
@@ -84,6 +96,13 @@ export interface POSPaymentMethod {
 	mode_of_payment: string;
 	default?: boolean;
 	amount?: number;
+	pos_tender_currency?: string;
+	type?: string;
+	is_foreign_tender?: boolean;
+	exchange_rate?: number;
+	rate_date?: string;
+	precision?: number;
+	symbol?: string;
 }
 
 export interface Company {
@@ -167,6 +186,8 @@ export interface POSItem {
 	has_variants?: boolean;
 	variant_of?: string;
 	is_template?: boolean;
+	qty?: number;
+	is_scale_barcode?: boolean;
 	[key: string]: unknown;
 }
 
@@ -183,6 +204,11 @@ export interface CartItem extends POSItem {
 	item_tax_template?: string;
 	item_tax_map?: Record<string, number>;
 	pos_offer_applied?: boolean;
+	uid?: string;
+	pos_pricing_rules?: string[];
+	pos_rate_overridden?: boolean;
+	pos_is_free_item?: boolean;
+	pos_free_item_rule?: string;
 }
 
 export interface ItemGroup {
@@ -350,6 +376,8 @@ export interface InvoiceItem {
 	offer_applied?: boolean;
 	is_offer?: boolean;
 	is_replace?: boolean;
+	is_free_item?: number;
+	pricing_rules?: string;
 }
 
 export interface InvoicePayment {
@@ -358,10 +386,31 @@ export interface InvoicePayment {
 	base_amount?: number;
 	account?: string;
 	type?: string;
+	pos_tender_currency?: string;
+	pos_tender_amount?: number;
+	pos_exchange_rate?: number;
+}
+
+export interface TenderLeg {
+	id: string;
+	mode_of_payment: string;
+	currency: string;
+	native_amount: number;
+	exchange_rate: number;
+	base_amount: number;
+}
+
+export interface InvoiceChangeLeg {
+	mode_of_payment: string;
+	currency: string;
+	amount: number;
+	base_amount: number;
+	exchange_rate: number;
 }
 
 export interface InvoiceData {
 	name?: string;
+	modified?: string;
 	doctype?: string;
 	pos_profile: string;
 	customer: string;
@@ -369,6 +418,7 @@ export interface InvoiceData {
 	posting_date?: string;
 	additional_discount_percentage?: number;
 	discount_amount?: number;
+	apply_discount_on?: string;
 	payments?: InvoicePayment[];
 	pos_notes?: string;
 	pos_delivery_date?: string;
@@ -386,6 +436,7 @@ export interface InvoiceData {
 	write_off_amount?: number;
 	write_off_account?: string;
 	change_amount?: number;
+	pos_change_legs?: InvoiceChangeLeg[];
 	currency?: string;
 	conversion_rate?: number;
 	is_credit_sale?: boolean;
@@ -537,6 +588,26 @@ export interface OutstandingInvoice {
 	outstanding_amount: number;
 	posting_date: string;
 	customer: string;
+	customer_name?: string;
+	paid_amount?: number;
+	currency?: string;
+	status?: string;
+}
+
+export interface OpenTab {
+	name: string;
+	customer: string;
+	customer_name?: string;
+	posting_date?: string;
+	grand_total?: number;
+	total_qty?: number;
+	currency?: string;
+	creation?: string;
+	modified?: string;
+	pos_opening_shift?: string;
+	owner?: string;
+	paid_amount?: number;
+	pos_awaiting_settlement?: boolean | number;
 }
 
 export interface PaymentRequest {
@@ -622,6 +693,74 @@ export interface PrintSettings {
 	letter_head: string;
 }
 
+export interface ReceiptContext {
+	company_name: string;
+	company_phone: string;
+	company_email: string;
+	company_website: string;
+	company_address: string;
+	company_tax_id: string;
+	company_logo: string;
+	receipt_header: string;
+	receipt_footer: string;
+	currency: string;
+	print_discount_amount: number;
+	print_format: string;
+	css: string;
+}
+
+export interface ReceiptSnapshotItem {
+	item_code: string;
+	item_name: string;
+	qty: number;
+	rate: number;
+	amount: number;
+	uom?: string;
+	discount_percentage?: number;
+	discount_amount?: number;
+	price_list_rate?: number;
+	serial_no?: string;
+	batch_no?: string;
+	pos_notes?: string;
+}
+
+export interface ReceiptSnapshotTax {
+	description: string;
+	rate: number;
+	amount: number;
+	included_in_print_rate: boolean;
+}
+
+export interface ReceiptSnapshotPayment {
+	mode_of_payment: string;
+	amount: number;
+	currency?: string;
+	native_amount?: number;
+	exchange_rate?: number;
+	rate_date?: string;
+}
+
+export interface ReceiptSnapshot {
+	name: string;
+	posting_date: string;
+	posting_time: string;
+	is_return: boolean;
+	cashier: string;
+	customer_name: string;
+	items: ReceiptSnapshotItem[];
+	taxes: ReceiptSnapshotTax[];
+	payments: ReceiptSnapshotPayment[];
+	subtotal: number;
+	total_discount: number;
+	net_total: number;
+	grand_total: number;
+	total_qty: number;
+	change: number;
+	change_legs?: InvoiceChangeLeg[];
+	currency?: string;
+	notes?: string;
+}
+
 export interface ShiftCheckResult {
 	pos_opening_shift: POSOpeningShift;
 	pos_profile: POSProfile;
@@ -640,13 +779,19 @@ export interface OpeningData {
 	payment_methods: POSPaymentMethod[];
 }
 
+export interface ShiftModeTotal {
+	amount: number;
+	currency: string;
+}
+
 export interface ShiftSummary {
 	net_total: number;
 	grand_total: number;
 	total_invoices: number;
 	returns_count: number;
-	payment_summary: Record<string, number>;
-	opening_balances: Record<string, number>;
+	payment_summary: Record<string, ShiftModeTotal>;
+	opening_balances: Record<string, ShiftModeTotal>;
+	expected_amounts: Record<string, ShiftModeTotal>;
 	tax_summary: POSClosingShiftTax[];
 	pos_profile: string;
 	company: string;
@@ -1034,6 +1179,8 @@ export interface ERPSettings {
 	buying_settings: BuyingSettings;
 	stock_settings: ERPStockSettings;
 	accounts_settings: AccountsSettings;
+	pos_settings: POSSettings;
+	item_search: ItemSearchSettings;
 	global_defaults: GlobalDefaults;
 	currency_precision: CurrencyPrecision;
 }

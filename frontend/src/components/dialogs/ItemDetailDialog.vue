@@ -174,6 +174,22 @@
 						/>
 					</div>
 				</template>
+
+				<div
+					v-else
+					class="flex flex-col items-center justify-center gap-2 py-10 text-center text-muted-foreground"
+				>
+					<AlertCircle class="w-8 h-8 opacity-50" />
+					<p class="text-sm font-medium text-foreground">
+						{{ itemForDetail?.item_name || __("Item details unavailable") }}
+					</p>
+					<p v-if="itemForDetail?.item_code" class="text-xs font-mono">
+						{{ itemForDetail.item_code }}
+					</p>
+					<p class="text-xs">
+						{{ __("Could not load details for this item. Check your connection and try again.") }}
+					</p>
+				</div>
 			</div>
 
 			<DialogFooter class="shrink-0 border-t border-border px-5 py-4">
@@ -206,7 +222,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Check, Plus } from "lucide-vue-next";
+import { Loader2, Search, Check, Plus, AlertCircle } from "lucide-vue-next";
 import __ from "@/lib/translate";
 
 const itemStore = useItemStore();
@@ -226,6 +242,17 @@ const qtyInputRef = ref<InstanceType<typeof NumberInput> | null>(null);
 
 const itemForDetail = computed(() => itemStore.selectedItemForDetail);
 const detail = computed(() => itemStore.selectedItemDetail);
+
+const itemForCart = computed(() => {
+	if (!itemForDetail.value) return null;
+	if (!detail.value) return itemForDetail.value;
+	const detailQty = detail.value.actual_qty;
+	return {
+		...itemForDetail.value,
+		actual_qty: detailQty === undefined ? itemForDetail.value.actual_qty : Number(detailQty),
+		batches: detail.value.batches,
+	};
+});
 
 watch(detail, (d) => {
 	if (d) {
@@ -332,14 +359,14 @@ function toggleSerial(sn: string): void {
 }
 
 function addToCart(): void {
-	if (!itemForDetail.value || !canAdd.value) return;
+	if (!itemForDetail.value || !itemForCart.value || !canAdd.value) return;
 
 	const rate = priceInput.value;
 
 	if (detail.value?.has_serial_no && selectedSerials.value.length > 0) {
 		for (const sn of selectedSerials.value) {
 			const result = cartStore.addItemWithDetails(
-				itemForDetail.value,
+				itemForCart.value,
 				1,
 				rate,
 				selectedUOM.value,
@@ -354,7 +381,7 @@ function addToCart(): void {
 		}
 	} else {
 		const result = cartStore.addItemWithDetails(
-			itemForDetail.value,
+			itemForCart.value,
 			selectedQty.value,
 			rate,
 			selectedUOM.value,

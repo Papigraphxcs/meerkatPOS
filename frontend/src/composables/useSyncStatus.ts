@@ -1,61 +1,126 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { isElectron } from "@/services/electronBridge";
+import { captureError } from "@/services/errorLog";
+
+export interface SyncErrorEntry {
+	message: string;
+	table?: string;
+	at: string;
+}
+
+export interface DeadLetterEntry {
+	table: string;
+	localId: string;
+	retryCount: number;
+	error: string;
+	at: string;
+}
+
+const MAX_ERROR_LOG = 20;
 
 export function useSyncStatus() {
-  const isSyncing = ref(false);
-  const syncPhase = ref<string>("idle");
-  const syncTable = ref<string | null>(null);
-  const lastSyncTime = ref<string | null>(null);
-  const lastError = ref<string | null>(null);
-  const syncCompleteCount = ref(0);
+	const isSyncing = ref(false);
+	const syncPhase = ref<string>("idle");
+	const syncTable = ref<string | null>(null);
+	const lastSyncTime = ref<string | null>(null);
+	const lastError = ref<string | null>(null);
+	const syncCompleteCount = ref(0);
 
-  const cleanups: Array<() => void> = [];
+	const errorLog = ref<SyncErrorEntry[]>([]);
+	const deadLetters = ref<DeadLetterEntry[]>([]);
+	const cycleHadError = ref(false);
 
-  onMounted(async () => {
-    if (!isElectron() || !window.electronAPI) return;
+	const cleanups: Array<() => void> = [];
 
-    try {
-      const state = await window.electronAPI.getSyncState();
-      if (state?.lastSyncTime) {
-        lastSyncTime.value = new Date(state.lastSyncTime).toLocaleTimeString();
-      }
-    } catch {
-    }
+	onMounted(async () => {
+		if (!isElectron() || !window.electronAPI) return;
 
-    const offStatus = window.electronAPI.onSyncStatus((status) => {
-      syncPhase.value = status.phase;
-      syncTable.value = status.table ?? null;
-      isSyncing.value = status.phase !== "idle";
-    });
+		try {
+			const state = await window.electronAPI.getSyncState();
+			if (state?.lastSyncTime) {
+				lastSyncTime.value = new Date(state.lastSyncTime).toLocaleTimeString();
+			}
+		} catch {}
 
-    const offError = window.electronAPI.onSyncError((error) => {
-      lastError.value = error.message;
-      console.warn("[Sync]", error.message);
-    });
+		const offStatus = window.electronAPI.onSyncStatus((status) => {
+			syncPhase.value = status.phase;
+			syncTable.value = status.table ?? null;
+			isSyncing.value = status.phase !== "idle";
+			if (status.phase === "starting") cycleHadError.value = false;
+		});
 
-    const offComplete = window.electronAPI.onSyncComplete(() => {
-      isSyncing.value = false;
-      syncPhase.value = "idle";
-      syncTable.value = null;
-      lastError.value = null;
-      lastSyncTime.value = new Date().toLocaleTimeString();
-      syncCompleteCount.value++;
-    });
+		const offError = window.electronAPI.onSyncError((error) => {
+			lastError.value = error.message;
+			cycleHadError.value = true;
+			errorLog.value.unshift({
+				message: error.message,
+				table: error.table,
+				at: new Date().toISOString(),
+			});
+			if (errorLog.value.length > MAX_ERROR_LOG) errorLog.value.length = MAX_ERROR_LOG;
+			console.warn("[Sync]", error.table ? `${error.table}: ` : "", error.message);
+			captureError({
+				source: "sync",
+				title: `Sync error${error.table ? `: ${error.table}` : ""}`,
+				message: error.message,
+				meta: { table: error.table },
+			});
+		});
 
-    cleanups.push(offStatus, offError, offComplete);
-  });
+		const offComplete = window.electronAPI.onSyncComplete(() => {
+			isSyncing.value = false;
+			syncPhase.value = "idle";
+			syncTable.value = null;
+			if (!cycleHadError.value) lastError.value = null;
+			lastSyncTime.value = new Date().toLocaleTimeString();
+			syncCompleteCount.value++;
+		});
 
-  onUnmounted(() => {
-    cleanups.forEach((fn) => fn());
-    cleanups.length = 0;
-  });
+		const offDeadLetter = window.electronAPI.onSyncDeadLetter((info) => {
+			deadLetters.value.unshift({
+				table: info.table,
+				localId: info.localId,
+				retryCount: info.retryCount,
+				error: info.error,
+				at: new Date().toISOString(),
+			});
+			lastError.value = `${info.table} #${info.localId} failed permanently: ${info.error}`;
+			cycleHadError.value = true;
+			captureError({
+				source: "dead-letter",
+				title: `Dead-letter: ${info.table} #${info.localId}`,
+				message: info.error,
+				meta: { table: info.table, localId: info.localId, retryCount: info.retryCount },
+			});
+		});
 
-  return {
-    isSyncing,
-    syncPhase,
-    syncTable,
-    lastSyncTime,
-    lastError,
-    syncCompleteCount,
-  };
+		cleanups.push(offStatus, offError, offComplete, offDeadLetter);
+	});
+
+	onUnmounted(() => {
+		cleanups.forEach((fn) => fn());
+		cleanups.length = 0;
+	});
+
+	function clearErrorLog() {
+		errorLog.value = [];
+		lastError.value = null;
+	}
+
+	function clearDeadLetters() {
+		deadLetters.value = [];
+	}
+
+	return {
+		isSyncing,
+		syncPhase,
+		syncTable,
+		lastSyncTime,
+		lastError,
+		syncCompleteCount,
+		errorLog,
+		deadLetters,
+		clearErrorLog,
+		clearDeadLetters,
+	};
 }

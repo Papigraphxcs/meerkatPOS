@@ -15,6 +15,8 @@ ALL_PERMISSION_KEYS = (
 	"show_edit_discount_field",
 	"allow_change_price",
 	"sale_return",
+	"recall_other_shift_tabs",
+	"settle_outstanding_invoice",
 	"expense",
 	"bank_drop",
 	"current_stock_by_brand",
@@ -103,23 +105,26 @@ def _all_enabled() -> dict:
 	return {key: True for key in ALL_PERMISSION_KEYS}
 
 
-def _is_superuser(user: str) -> bool:
+def is_superuser(user: str) -> bool:
 	return user == "Administrator" or "System Manager" in frappe.get_roles(user)
 
 
-def user_has_pos_permission(
-	key: str, user: str | None = None, pos_profile: str | None = None
-) -> bool:
-	"""Whether ``user``'s POS Role grants the permission ``key``.
-
-	Single source of truth for server-side POS permission checks. Resolves the
-	role from the user's POS Profile User row (preferring ``pos_profile`` when
-	supplied). Administrators and System Managers always qualify; Guest never.
-	"""
+def is_pos_manager(user: str | None = None) -> bool:
+	"""Whether ``user`` may act on POS records owned by another cashier."""
 	user = user or frappe.session.user
 	if user == "Guest":
 		return False
-	if _is_superuser(user):
+	if is_superuser(user):
+		return True
+	return user_has_pos_permission("recall_other_shift_tabs", user)
+
+
+def user_has_pos_permission(key: str, user: str | None = None, pos_profile: str | None = None) -> bool:
+	"""Whether ``user``'s POS Role grants the permission ``key``."""
+	user = user or frappe.session.user
+	if user == "Guest":
+		return False
+	if is_superuser(user):
 		return True
 	role_name = _get_user_pos_role(user, pos_profile)
 	return bool(_get_role_permissions(role_name).get(key))
@@ -167,7 +172,7 @@ def get_my_pos_permissions(pos_profile: str | None = None) -> dict:
 	if user == "Guest":
 		return {key: False for key in ALL_PERMISSION_KEYS}
 
-	if _is_superuser(user):
+	if is_superuser(user):
 		return _all_enabled()
 
 	role_name = _get_user_pos_role(user, pos_profile)
@@ -187,7 +192,7 @@ def get_current_user_permissions() -> dict:
 
 	role_name = _get_user_pos_role(user)
 
-	if _is_superuser(user):
+	if is_superuser(user):
 		permissions = _all_enabled()
 	else:
 		permissions = _get_role_permissions(role_name)
@@ -200,10 +205,6 @@ def get_current_user_permissions() -> dict:
 
 @frappe.whitelist()
 def get_pos_users(
-	doctype: str | None = None,
-	fields: list | None = None,
-	filters: dict | None = None,
-	order_by: str = "modified asc",
 	limit_start: int = 0,
 	limit_page_length: int = 100,
 ):
@@ -263,7 +264,9 @@ def get_pos_users(
 			continue
 		role_name = pu.pos_role or DEFAULT_ROLE
 		perms = _get_role_permissions(role_name)
-		discount_limit = flt(pu.discount_limit) if pu.discount_limit not in (None, "") else DEFAULT_DISCOUNT_LIMIT
+		discount_limit = (
+			flt(pu.discount_limit) if pu.discount_limit not in (None, "") else DEFAULT_DISCOUNT_LIMIT
+		)
 		row = {
 			"name": user.name,
 			"username": user.username or user.name,
@@ -325,7 +328,7 @@ def get_role_permission_matrix() -> dict:
 
 
 @frappe.whitelist()
-def set_role_permission(role: str, permission: str, enabled) -> dict:
+def set_role_permission(role: str, permission: str, enabled: bool | int | str) -> dict:
 	"""Upsert a single POS Role Permission child row and bust the cache."""
 	_require_manage_permissions()
 	if not frappe.db.exists("POS Role", role):

@@ -69,7 +69,9 @@ def create_payment_entry(
 	pe.paid_from = party_account if payment_type == "Receive" else bank.account  # nosemgrep: useless-eqeq
 	pe.paid_to = party_account if payment_type == "Pay" else bank.account  # nosemgrep: useless-eqeq
 	pe.paid_from_account_currency = (
-		party_account_currency if payment_type == "Receive" else bank.account_currency  # nosemgrep: useless-eqeq
+		party_account_currency
+		if payment_type == "Receive"
+		else bank.account_currency  # nosemgrep: useless-eqeq
 	)
 	pe.paid_to_account_currency = party_account_currency if payment_type == "Pay" else bank.account_currency
 	pe.paid_amount = paid_amount

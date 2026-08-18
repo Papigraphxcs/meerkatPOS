@@ -1,5 +1,13 @@
 <template>
 	<div class="shrink-0 border-t border-border bg-background px-4 py-4 space-y-3 dark:border-border">
+		<div
+			v-if="cartStore.pricingSource === 'offline'"
+			class="flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400"
+		>
+			<WifiOff class="w-3 h-3 shrink-0" />
+			{{ __("Prices calculated offline, will be confirmed when the invoice syncs") }}
+		</div>
+
 		<div class="space-y-1.5">
 			<div class="flex items-center justify-between text-sm">
 				<span class="text-muted-foreground">{{ __("Subtotal") }}</span>
@@ -175,6 +183,7 @@
 					size="sm"
 					class="dark:border-border dark:text-foreground"
 					:disabled="cartStore.isEmpty"
+					data-testid="hold-order"
 					@click="holdOrder"
 				>
 					<Clock class="w-4 h-4" />
@@ -345,10 +354,12 @@ import { ref, computed, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { hasPermission } from "@/services/userRights";
 import { useCartStore } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
 import { useOfferStore } from "@/stores/offerStore";
 import { call, showSuccess, showError } from "@/services/api";
 import { __ } from "@/lib/translate";
 import { isElectron } from "@/services/electronBridge";
+import { isTabConflictError } from "@/utils";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { usePrintInvoice } from "@/composables/usePrintInvoice";
 import { Button } from "@/components/ui/button";
@@ -367,12 +378,14 @@ import {
 	Percent,
 	FileText,
 	Truck,
+	WifiOff,
 	X,
 } from "lucide-vue-next";
 import type { DeliveryCharge } from "@/types/pos.types";
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
+const authStore = useAuthStore();
 const offerStore = useOfferStore();
 const offlineStore = useOfflineStore();
 const { printInvoice, printInvoiceLocal } = usePrintInvoice();
@@ -520,6 +533,20 @@ watch(
 		void syncAutoDeliveryCharge();
 	},
 	{ immediate: true },
+);
+
+watch(
+	() => cartStore.isEmpty,
+	(empty) => {
+		if (!empty) return;
+		discountInput.value = 0;
+		discountType.value = "percentage";
+		couponInput.value = "";
+		couponError.value = "";
+		showDiscount.value = false;
+		showCoupon.value = false;
+		showDelivery.value = false;
+	},
 );
 
 async function toggleDelivery() {
@@ -674,8 +701,17 @@ async function holdOrder() {
 			}
 		}
 	} catch (error: unknown) {
+		if (handleTabConflict(error)) return;
 		showError(__("Failed to save draft: {0}", [extractErrorMessage(error)]));
 	}
+}
+
+function handleTabConflict(error: unknown): boolean {
+	if (!isTabConflictError(error)) return false;
+
+	showError(__("This tab was changed on another terminal. Reload it and try again."));
+	cartStore.openDraftDialog();
+	return true;
 }
 
 async function sendToCashier() {
@@ -717,7 +753,12 @@ async function sendToCashier() {
 
 		if (isElectron() && window.electronAPI?.db) {
 			const result = await window.electronAPI.db.addPendingInvoice({
-				data: { ...data, is_draft: true, pos_opening_shift_local_id: shiftName },
+				data: {
+					...data,
+					is_draft: true,
+					pos_opening_shift_local_id: shiftName,
+					receipt: cartStore.getReceiptSnapshot("", authStore.userFullName),
+				},
 				customer_name: cartStore.customerName || data.customer,
 				grand_total: cartStore.grandTotal || 0,
 			});
@@ -751,6 +792,7 @@ async function sendToCashier() {
 			}
 		}
 	} catch (error: unknown) {
+		if (handleTabConflict(error)) return;
 		showError(__("Failed to send to cashier: {0}", [extractErrorMessage(error)]));
 	}
 }

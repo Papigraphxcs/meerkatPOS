@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="xpos/public/images/xpos-logo-light.svg" alt="X POS" width="96" height="96">
+
 # X POS
 
 **A modern, offline-capable Point of Sale for Frappe & ERPNext**
@@ -10,7 +12,7 @@ License: MIT · Frappe v16 · ERPNext v16
 
 ---
 
-X POS is a feature-rich, offline-first Point of Sale application built on Frappe and ERPNext. It delivers a fast, keyboard-driven, and fully offline-capable POS experience for retail, hospitality, and service businesses — deployable as a web app, PWA, or Electron desktop application.
+X POS is a feature-rich, offline-first Point of Sale application built on Frappe and ERPNext. It delivers a fast, keyboard-driven, and fully offline-capable POS experience for retail, hospitality, and service businesses, deployable as a web app, PWA, or Electron desktop application.
 
 ## Highlights
 
@@ -23,7 +25,8 @@ X POS is a feature-rich, offline-first Point of Sale application built on Frappe
 | **Dark Mode & RTL** | System theme detection, manual toggle, and full Right-to-Left layout support. |
 | **Multi-Payment** | Split payments across cash, card, mobile money, and custom modes in one transaction. |
 | **Hub & Spoke** | Multi-terminal architecture for networked stores with centralized sync. |
-| **Full Purchasing** | Purchase orders, purchase invoices, and stock receiving — all from the POS. |
+| **Full Purchasing** | Purchase orders, purchase invoices, and stock receiving, all from the POS. |
+| **Customizing** | Customize the theme of the X POS as per your brand for look and feel |
 
 ---
 
@@ -85,9 +88,16 @@ X POS is a feature-rich, offline-first Point of Sale application built on Frappe
 - **Barcode printing** – Generate and print item barcodes and QR codes
 - **Thermal printer support** – Optimized for ESC/POS printers
 
+### Payments
+
+- **Mixed Currency Cash Tender** – Allow user to tender mixed currencies. e.g. USD -> PKR
+- **Multi Currency** – Featuring multi currency in one system
+- **Cash Movemenet Tracking** – Generating Cash Movement (Expense or Bank Drop) based on profiles
+- **Credit Mode** – Enables the credit sales and credit payments
+
 ### User Interface
 
-- **Command palette** (Ctrl+K) – Navigate pages, execute actions, search items, and calculate — all from one bar
+- **Command palette** (Ctrl+K) – Navigate pages, execute actions, search items, and calculate all from one bar
 - **Keyboard shortcuts** – 15+ shortcuts for all major operations with in-app shortcut reference
 - **Dark mode** – System theme detection and manual light/dark/system toggle
 - **RTL support** – Full Right-to-Left interface for Arabic, Hebrew, and other RTL languages
@@ -106,7 +116,7 @@ X POS is a feature-rich, offline-first Point of Sale application built on Frappe
 
 ### Security & Access Control
 
-- **26+ permission flags** per user — discount authority, return privileges, expense access, price overrides, and more
+- **26+ permission flags** per user discount authority, return privileges, expense access, price overrides, and more
 - **POS Profile assignment** – Granular per-location access control
 - **Warehouse-level permissions** – Restrict users to specific inventory locations
 - **Frappe authentication** – Standard login with 2FA, API key, and offline auth cache
@@ -119,7 +129,7 @@ X POS is a feature-rich, offline-first Point of Sale application built on Frappe
 |---|---|
 | Python | >= 3.14 |
 | Frappe Framework | v16 |
-| ERPNext | v18 |
+| ERPNext | v16 |
 | Node.js | >= 24 (for builds) |
 
 ---
@@ -158,7 +168,7 @@ Then open your site and launch **X POS** from the app launcher.
 | Frontend | Vue 3, TypeScript, Pinia, Tailwind CSS, Radix Vue |
 | Build | Vite, vite-plugin-pwa, vite-plugin-electron |
 | Backend | Frappe Framework (Python) |
-| Desktop | Electron with local SQLite |
+| Desktop | Electron with local MariaDB |
 | Linting | Ruff, ESLint, Prettier |
 | Testing | Vitest |
 | CI/CD | GitHub Actions, Semantic Release |
@@ -167,7 +177,7 @@ Then open your site and launch **X POS** from the app launcher.
 
 ## Contributing
 
-We welcome contributions from the community! Whether it's bug reports, feature requests, documentation improvements, or code contributions — every bit helps.
+We welcome contributions from the community! Whether it's bug reports, feature requests, documentation improvements, or code contributions every bit helps.
 
 Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
 
@@ -199,15 +209,20 @@ docs: update installation instructions
 
 ### Community
 
-- Report a Bug — see the issue tracker in the source repository
-- Request a Feature — see the issue tracker in the source repository
+- Report a Bug: See the issue tracker in the source repository
+- Request a Feature: See the issue tracker in the source repository
 - [Security Policy](SECURITY.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ---
 
+
+
+
+> **Note:** Desktop app is currently under development and not ready for production. Please use web version for better results
+
 ## License
 
-MIT — see [LICENSE](LICENSE) for full terms.
+MIT @ [LICENSE](LICENSE)
 
 ---

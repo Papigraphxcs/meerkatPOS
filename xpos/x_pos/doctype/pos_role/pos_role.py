@@ -15,6 +15,7 @@ class POSRole(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
+
 		from xpos.x_pos.doctype.pos_role_permission.pos_role_permission import POSRolePermission
 
 		permissions: DF.Table[POSRolePermission]

@@ -8,6 +8,7 @@ export interface SyncTableConfig {
 	orderBy: string;
 	direction: "pull" | "push" | "both";
 	idbStore: string;
+	primaryKey?: string;
 	localIdField: string;
 	incremental: boolean;
 	batchSize: number;
@@ -48,7 +49,15 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 	{
 		doctype: "Currency",
 		label: "Currencies",
-		fields: ["name", "currency_name", "symbol", "enabled"],
+		fields: [
+			"name",
+			"currency_name",
+			"symbol",
+			"number_format",
+			"smallest_currency_fraction_value",
+			"symbol_on_right",
+			"enabled",
+		],
 		orderBy: "modified",
 		direction: "pull",
 		idbStore: "currencies",
@@ -98,10 +107,23 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 	{
 		doctype: "Mode of Payment",
 		label: "Modes of Payment",
-		fields: ["name", "mode_of_payment", "type", "enabled"],
+		fields: ["name", "mode_of_payment", "type", "pos_tender_currency", "enabled"],
 		orderBy: "modified",
 		direction: "pull",
 		idbStore: "modes_of_payment",
+		localIdField: "xpos_local_id",
+		incremental: false,
+		regetAll: true,
+		batchSize: 500,
+		pullOrder: 3,
+	},
+	{
+		doctype: "Currency Exchange",
+		label: "Exchange Rates",
+		fields: ["name", "from_currency", "to_currency", "exchange_rate", "date", "for_selling"],
+		orderBy: "date desc",
+		direction: "pull",
+		idbStore: "currency_exchange_rates",
 		localIdField: "xpos_local_id",
 		incremental: false,
 		regetAll: true,
@@ -207,7 +229,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 			"hide_images",
 			"hide_unavailable_items",
 			"block_sale_beyond_available_qty",
-			"display_items_in_stock",
 			"cash_mode_of_payment",
 			"apply_customer_discount",
 			"allow_print_draft_invoices",
@@ -259,6 +280,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 		orderBy: "modified",
 		direction: "pull",
 		idbStore: "items",
+		primaryKey: "item_code",
 		localIdField: "xpos_local_id",
 		incremental: true,
 		batchSize: 500,
@@ -676,7 +698,7 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 	{
 		doctype: "Purchase Order",
 		label: "Purchase Orders",
-		pushMethod: "xpos.api.purchase.create_purchase_order",
+		pushMethod: "xpos.x_pos.api.purchase_orders.create_purchase_order",
 		fields: ["*"],
 		orderBy: "creation",
 		direction: "push",
@@ -688,6 +710,20 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 		dependsOn: ["suppliers", "items"],
 	},
 ];
+
+const PRIMARY_KEY_BY_STORE: Record<string, string> = Object.fromEntries(
+	SYNC_TABLES.filter((t) => t.primaryKey).map((t) => [t.idbStore, t.primaryKey as string]),
+);
+
+/**
+ * Central source of truth for a store's local primary-key column.
+ *
+ * Both the sync engine and the hub till-client must resolve upsert keys through
+ * here so the two paths can never drift (a mismatch silently corrupts upserts).
+ */
+export function getPrimaryKeyForTable(idbStore: string): string {
+	return PRIMARY_KEY_BY_STORE[idbStore] || "name";
+}
 
 export const SYNC_DEFAULTS = {
 	intervalMs: 5 * 60 * 1000,

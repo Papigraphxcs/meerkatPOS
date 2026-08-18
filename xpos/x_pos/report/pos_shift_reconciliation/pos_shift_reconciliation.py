@@ -12,6 +12,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from xpos.api.exchange import get_currency_precision
+from xpos.api.shifts import get_shift_payment_totals, resolve_cash_mode_of_payment
 from xpos.api.utilities import get_invoice_type
 
 
@@ -19,7 +21,13 @@ def execute(filters=None):
 	filters = frappe.parse_json(filters) if filters else {}
 	doctype = get_invoice_type()
 	invoices = _get_invoices(filters, doctype)
-	return get_columns(), _get_items_sold(invoices, doctype), None, None, _get_report_summary(invoices, doctype)
+	return (
+		get_columns(),
+		_get_items_sold(invoices, doctype),
+		None,
+		None,
+		_get_report_summary(invoices, doctype, filters),
+	)
 
 
 def _get_invoices(filters, doctype):
@@ -40,7 +48,7 @@ def _get_invoices(filters, doctype):
 	return frappe.get_all(
 		doctype,
 		filters=conditions,
-		fields=["name", "grand_total", "net_total", "change_amount", "is_return"],
+		fields=["name", "currency", "grand_total", "net_total", "change_amount", "is_return"],
 	)
 
 
@@ -49,44 +57,36 @@ def _get_items_sold(invoices, doctype):
 	if not names:
 		return []
 
-	item_table = f"`tab{doctype} Item`"
-	return frappe.db.sql(
-		f"""
-		SELECT
-			item_code,
-			item_name,
-			uom,
-			ROUND(SUM(qty), 3) AS qty,
-			ROUND(SUM(amount), 2) AS amount
-		FROM {item_table}
-		WHERE parent IN %(names)s AND parenttype = %(dt)s
-		GROUP BY item_code
-		ORDER BY item_name ASC
-		""",
-		{"names": names, "dt": doctype},
-		as_dict=True,
+	from frappe.query_builder import DocType
+	from frappe.query_builder.functions import Round, Sum
+
+	item = DocType(f"{doctype} Item")
+	return (
+		frappe.qb.from_(item)
+		.select(
+			item.item_code,
+			item.item_name,
+			item.uom,
+			Round(Sum(item.qty), 3).as_("qty"),
+			Round(Sum(item.amount), 2).as_("amount"),
+		)
+		.where((item.parent.isin(names)) & (item.parenttype == doctype))
+		.groupby(item.item_code)
+		.orderby(item.item_name)
+		.run(as_dict=True)
 	)
 
 
-def _get_report_summary(invoices, doctype):
-	# Totals by payment mode, mirroring xpos.api.shifts.get_shift_summary so the
-	# report and the closing dialog always agree (change is distributed across
-	# the modes used on each invoice).
-	payment_summary = {}
-	for inv in invoices:
-		payments = frappe.get_all(
-			"Sales Invoice Payment",
-			filters={"parent": inv["name"], "parenttype": doctype},
-			fields=["mode_of_payment", "amount"],
-		)
-		inv_change = flt(inv.get("change_amount"))
-		inv_paid = sum(flt(p["amount"]) for p in payments)
-		for p in payments:
-			pay_amount = flt(p["amount"])
-			if inv_paid > 0 and inv_change > 0:
-				pay_amount -= pay_amount / inv_paid * inv_change
-			mode = p["mode_of_payment"]
-			payment_summary[mode] = payment_summary.get(mode, 0) + pay_amount
+def _resolve_report_cash_mode(filters):
+	"""The cash mode the shift's change came out of, for the leg-less legacy fallback."""
+	pos_profile = filters.get("pos_profile")
+	if not pos_profile and filters.get("pos_opening_shift"):
+		pos_profile = frappe.db.get_value("POS Opening Shift", filters["pos_opening_shift"], "pos_profile")
+	return resolve_cash_mode_of_payment(pos_profile)
+
+
+def _get_report_summary(invoices, doctype, filters):
+	payment_summary = get_shift_payment_totals(doctype, invoices, _resolve_report_cash_mode(filters))
 
 	grand_total = sum(flt(inv.get("grand_total")) for inv in invoices)
 	returns_count = sum(1 for inv in invoices if inv.get("is_return"))
@@ -94,11 +94,23 @@ def _get_report_summary(invoices, doctype):
 	summary = [
 		{"label": _("Total Invoices"), "value": len(invoices), "indicator": "Blue"},
 		{"label": _("Returns"), "value": returns_count, "indicator": "Red" if returns_count else "Grey"},
-		{"label": _("Grand Total"), "value": flt(grand_total, 2), "datatype": "Currency", "indicator": "Green"},
+		{
+			"label": _("Grand Total"),
+			"value": flt(grand_total, 2),
+			"datatype": "Currency",
+			"indicator": "Green",
+		},
 	]
-	for mode, amount in sorted(payment_summary.items()):
+	for mode, row in sorted(payment_summary.items()):
+		currency = row.get("currency") or ""
 		summary.append(
-			{"label": mode, "value": flt(amount, 2), "datatype": "Currency", "indicator": "Green"}
+			{
+				"label": f"{mode} ({currency})" if currency else mode,
+				"value": flt(row.get("amount"), get_currency_precision(currency)),
+				"datatype": "Currency",
+				"currency": currency or None,
+				"indicator": "Green",
+			}
 		)
 	return summary
 

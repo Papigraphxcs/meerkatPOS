@@ -4,7 +4,7 @@
 			<Menu class="w-5 h-5" />
 		</Button>
 		<div class="flex items-center gap-2.5">
-			<img :src="isDark ? LogoDark : LogoLight" alt="X POS Logo" class="w-8 h-8" />
+			<img :src="isDark ? logoDark : logoLight" alt="X POS Logo" class="w-8 h-8" />
 			<span class="hidden md:inline">{{ __("X POS") }}</span>
 		</div>
 		<TooltipWrapper :content="__('Go to Desk')">
@@ -95,7 +95,10 @@
 			</Button>
 		</TooltipWrapper>
 
-		<TooltipWrapper v-if="posStore.allowReturn && hasPermission('sale_return')" :content="__('Process Return')">
+		<TooltipWrapper
+			v-if="posStore.allowReturn && hasPermission('sale_return')"
+			:content="__('Process Return')"
+		>
 			<Button
 				variant="ghost"
 				size="sm"
@@ -280,8 +283,7 @@ import AboutDialog from "@/components/dialogs/AboutDialog.vue";
 import KeyboardShortcutsDialog from "@/components/dialogs/KeyboardShortcutsDialog.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
 
-import LogoDark from "@/assets/images/xpos-logo-dark.svg";
-import LogoLight from "@/assets/images/xpos-logo-light.svg";
+import { useBranding } from "@/composables/useBranding";
 import { get_full_url } from "@/utils";
 import { cn } from "@/lib/utils";
 import { useRouter } from "vue-router";
@@ -292,6 +294,7 @@ const paymentStore = usePaymentStore();
 const authStore = useAuthStore();
 
 const isDark = inject<Ref<boolean>>("isDark")!;
+const { logoLight, logoDark } = useBranding();
 const theme = inject<Ref<"light" | "dark" | "system">>("theme")!;
 const toggleDarkMode = inject<() => void>("toggleDarkMode")!;
 
@@ -315,9 +318,13 @@ const showAboutDialog = ref(false);
 const showShortcutsDialog = ref(false);
 
 function handleOfflineAction() {
-	if (offlineStore.hasPending || !offlineStore.isOnline) {
+	if (offlineStore.hasPending || offlineStore.hasDeadLetters || !offlineStore.isOnline) {
 		showOfflinePanel.value = true;
 	}
+}
+
+function handleOpenOfflinePanel() {
+	showOfflinePanel.value = true;
 }
 
 function toggleSidebar() {
@@ -353,12 +360,14 @@ onMounted(() => {
 	window.addEventListener("keydown", handleKeyboard);
 	window.addEventListener("xpos:show-repeat-dialog", handleShowRepeatDialog as EventListener);
 	window.addEventListener("xpos:show-return-dialog", handleShowReturnDialog as EventListener);
+	window.addEventListener("xpos:open-offline-panel", handleOpenOfflinePanel as EventListener);
 });
 
 onUnmounted(() => {
 	window.removeEventListener("keydown", handleKeyboard);
 	window.removeEventListener("xpos:show-repeat-dialog", handleShowRepeatDialog as EventListener);
 	window.removeEventListener("xpos:show-return-dialog", handleShowReturnDialog as EventListener);
+	window.removeEventListener("xpos:open-offline-panel", handleOpenOfflinePanel as EventListener);
 });
 
 function printLastInvoice() {

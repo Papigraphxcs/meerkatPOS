@@ -132,7 +132,13 @@ def _filters() -> dict:
 			_company_filter(),
 			_date("from_date", "From Date", required=True, default=add_months(today(), -1)),
 			_date("to_date", "To Date", required=True, default=today()),
-			{"fieldname": "min_qty", "label": "Min Qty", "type": "integer", "required": True, "defaultValue": 10},
+			{
+				"fieldname": "min_qty",
+				"label": "Min Qty",
+				"type": "integer",
+				"required": True,
+				"defaultValue": 10,
+			},
 		],
 		"Zero Qty Sales Report": [
 			_company_filter(),

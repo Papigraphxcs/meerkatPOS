@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 import { call } from "@/services/api";
-import { cachePOSData, getCachedPOSData } from "@/services/dbBridge";
+import { cachePOSData, getCachedPOSData, cacheReceiptContext } from "@/services/dbBridge";
 import { isElectron } from "@/services/electronBridge";
-import { loadPermissions } from "@/services/userRights";
+import { hasPermission, loadPermissions } from "@/services/userRights";
 import {
 	type POSOpeningShift,
 	type POSProfile,
@@ -15,6 +15,7 @@ import {
 	type PrintFormat,
 	type TaxDetail,
 	type PrintSettings,
+	type ReceiptContext,
 } from "@/types/pos.types";
 import { isOnline } from "@/utils";
 
@@ -62,13 +63,42 @@ export const usePosStore = defineStore("pos", () => {
 		return "$";
 	});
 
+	const invoiceCurrency = computed(
+		() => posProfile.value?.currency || company.value?.default_currency || "",
+	);
+
 	const paymentMethods = computed(() => {
 		if (!posProfile.value?.payments) return [];
 		return posProfile.value.payments.map((p) => ({
 			mode_of_payment: p.mode_of_payment,
 			default: p.default,
+			pos_tender_currency: p.pos_tender_currency || invoiceCurrency.value,
+			type: p.type || "",
+			is_foreign_tender: !!p.is_foreign_tender,
+			exchange_rate: p.exchange_rate ?? 1,
+			rate_date: p.rate_date || "",
 		}));
 	});
+
+	const foreignTenderModes = computed(() => paymentMethods.value.filter((m) => m.is_foreign_tender));
+
+	const cashTenderModes = computed(() => paymentMethods.value.filter((m) => m.type === "Cash"));
+
+	const allowMixedCurrencyTender = computed(
+		() => !!posProfile.value?.pos_mixed_currency_tender && foreignTenderModes.value.length > 0,
+	);
+
+	function tenderModeFor(modeOfPayment: string) {
+		return paymentMethods.value.find((m) => m.mode_of_payment === modeOfPayment);
+	}
+
+	function tenderRateFor(modeOfPayment: string): number {
+		return tenderModeFor(modeOfPayment)?.exchange_rate ?? 1;
+	}
+
+	function tenderCurrencyFor(modeOfPayment: string): string {
+		return tenderModeFor(modeOfPayment)?.pos_tender_currency || invoiceCurrency.value;
+	}
 
 	const companyName = computed(() => company.value?.name || "");
 
@@ -99,8 +129,6 @@ export const usePosStore = defineStore("pos", () => {
 	const useOfflineMode = computed(() => !!posProfile.value?.use_offline_mode);
 
 	const allowChangePostingDate = computed(() => !!posProfile.value?.allow_change_posting_date);
-
-	const displayItemsInStock = computed(() => !!posProfile.value?.display_items_in_stock);
 
 	const allowPartialPayment = computed(() => !!posProfile.value?.allow_partial_payment);
 
@@ -144,8 +172,6 @@ export const usePosStore = defineStore("pos", () => {
 
 	const autoSetBatch = computed(() => !!posProfile.value?.auto_set_batch);
 
-	const searchSerialNo = computed(() => !!posProfile.value?.search_serial_no);
-
 	const enableReturnValidity = computed(() => !!posProfile.value?.enable_return_validity);
 
 	const returnValidityDays = computed(() => posProfile.value?.return_validity_days || 0);
@@ -155,6 +181,14 @@ export const usePosStore = defineStore("pos", () => {
 	const applyCustomerDiscount = computed(() => !!posProfile.value?.apply_customer_discount);
 
 	const enableCashierSettlement = computed(() => !!posProfile.value?.enable_cashier_settlement);
+
+	const allowOpenTabRecall = computed(
+		() => !!posProfile.value?.allow_open_tab_recall && hasPermission("recall_other_shift_tabs"),
+	);
+
+	const allowOutstandingSettlement = computed(
+		() => !!posProfile.value?.allow_outstanding_settlement && hasPermission("settle_outstanding_invoice"),
+	);
 
 	const printBackupReceipt = computed(() => !!posProfile.value?.print_backup_receipt);
 
@@ -206,6 +240,7 @@ export const usePosStore = defineStore("pos", () => {
 
 				if (result) {
 					applyShiftState(result);
+					refreshReceiptContext(result.pos_profile?.name || "");
 
 					import("@/stores/settingsStore").then(({ useSettingsStore }) => {
 						const settingsStore = useSettingsStore();
@@ -371,6 +406,7 @@ export const usePosStore = defineStore("pos", () => {
 			isReady.value = true;
 
 			fetchPrintFormats();
+			refreshReceiptContext(profileName);
 
 			import("@/stores/settingsStore").then(({ useSettingsStore }) => {
 				const settingsStore = useSettingsStore();
@@ -464,6 +500,19 @@ export const usePosStore = defineStore("pos", () => {
 		}
 	}
 
+	async function refreshReceiptContext(profileName: string): Promise<void> {
+		if (!isElectron() || !isOnline() || !profileName) return;
+		try {
+			const ctx = await call<ReceiptContext>("xpos.api.print_formats.get_receipt_context", {
+				pos_profile: profileName,
+				print_format: defaultPrintFormat.value,
+			});
+			await cacheReceiptContext(profileName, ctx);
+		} catch (error) {
+			console.warn("[XPOS] Failed to cache receipt context:", error);
+		}
+	}
+
 	return {
 		isLoading,
 		isReady,
@@ -490,12 +539,18 @@ export const usePosStore = defineStore("pos", () => {
 		warehouse,
 		currency,
 		currencySymbol,
+		invoiceCurrency,
 		paymentMethods,
+		foreignTenderModes,
+		cashTenderModes,
+		allowMixedCurrencyTender,
+		tenderModeFor,
+		tenderRateFor,
+		tenderCurrencyFor,
 		companyName,
 		sellingPriceList,
 		defaultCustomer,
 		allowChangePostingDate,
-		displayItemsInStock,
 		allowPartialPayment,
 		allowCreditSale,
 		allowReturn,
@@ -517,12 +572,13 @@ export const usePosStore = defineStore("pos", () => {
 		showTemplateItems,
 		hideVariantsItems,
 		autoSetBatch,
-		searchSerialNo,
 		enableReturnValidity,
 		returnValidityDays,
 		useCustomerCredit,
 		applyCustomerDiscount,
 		enableCashierSettlement,
+		allowOpenTabRecall,
+		allowOutstandingSettlement,
 		printBackupReceipt,
 		cashModeOfPayment,
 		purchaseTaxes,

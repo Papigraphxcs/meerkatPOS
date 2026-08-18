@@ -84,7 +84,10 @@ function totalCell(row: Record<string, unknown>, column: ReportColumn): string {
 							@click="emit('sort-change', column.fieldname)"
 						>
 							<span>{{ column.label }}</span>
-							<ArrowUp v-if="sortIndicator(column) === 'asc'" class="h-3.5 w-3.5 text-primary" />
+							<ArrowUp
+								v-if="sortIndicator(column) === 'asc'"
+								class="h-3.5 w-3.5 text-primary"
+							/>
 							<ArrowDown
 								v-else-if="sortIndicator(column) === 'desc'"
 								class="h-3.5 w-3.5 text-primary"
@@ -109,7 +112,10 @@ function totalCell(row: Record<string, unknown>, column: ReportColumn): string {
 						class="px-3 py-2 align-top"
 						:class="isReportNumericColumn(column) ? 'text-end tabular-nums' : 'text-start'"
 					>
-						<div class="max-w-[340px] break-words" :class="isReportNumericColumn(column) ? 'ms-auto' : ''">
+						<div
+							class="max-w-[340px] break-words"
+							:class="isReportNumericColumn(column) ? 'ms-auto' : ''"
+						>
 							{{ formatReportCell(column, row[column.fieldname], currencySymbol) }}
 						</div>
 					</td>

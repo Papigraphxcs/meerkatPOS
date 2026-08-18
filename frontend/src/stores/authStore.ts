@@ -4,7 +4,14 @@ import { loadPermissions, resetPermissions } from "@/services/userRights";
 import { UserSession } from "@/types/pos.types";
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { isOnline } from "@/utils";
+import { isOnline, isNetworkError } from "@/utils";
+
+function friendlyMessage(err: unknown, fallback: string): string {
+	if (isNetworkError(err)) return "Cannot reach the server. Check your connection and try again.";
+	const message = err instanceof Error ? err.message : "";
+	if (!message || message.includes("Traceback") || message.startsWith("__")) return fallback;
+	return message;
+}
 
 export const useAuthStore = defineStore("auth", () => {
 	const isLoading = ref(false);
@@ -22,9 +29,7 @@ export const useAuthStore = defineStore("auth", () => {
 		Boolean((window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_is_system_manager),
 	);
 	const canManagePermissions = computed(() =>
-		Boolean(
-			(window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_permissions,
-		),
+		Boolean((window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_permissions),
 	);
 
 	async function checkAuth(): Promise<boolean> {
@@ -78,7 +83,36 @@ export const useAuthStore = defineStore("auth", () => {
 	}
 
 	async function checkOfflineAuth(): Promise<boolean> {
-		return false;
+		try {
+			const lastUser = await window.electronAPI!.db.getSetting("last_logged_user");
+			if (!lastUser) return false;
+
+			const posUser = (await window.electronAPI!.db.getPosUser(lastUser)) as Record<
+				string,
+				unknown
+			> | null;
+			if (!posUser || posUser.enabled === 0 || posUser.enabled === false) {
+				return false;
+			}
+
+			isAuthenticated.value = true;
+			isOfflineAuth.value = true;
+			user.value = {
+				user: lastUser,
+				user_email: (posUser.email as string) || lastUser,
+				user_fullname: (posUser.full_name as string) || lastUser,
+			};
+
+			window
+				.electronAPI!.startSyncEngine()
+				.catch((err) => console.warn("[XPOS] startSyncEngine error:", err));
+
+			await loadPermissions(lastUser);
+			return true;
+		} catch (err) {
+			console.error("Offline auth check failed:", err);
+			return false;
+		}
 	}
 
 	async function login(username: string, password: string): Promise<boolean> {
@@ -106,7 +140,7 @@ export const useAuthStore = defineStore("auth", () => {
 			return true;
 		} catch (err) {
 			console.error("Login failed:", err);
-			error.value = err instanceof Error ? err.message : "Login failed";
+			error.value = friendlyMessage(err, "Invalid login credentials.");
 			return false;
 		} finally {
 			isLoading.value = false;
@@ -122,14 +156,13 @@ export const useAuthStore = defineStore("auth", () => {
 			}
 
 			const userData = posUser as Record<string, unknown>;
-			const storedHash = userData.password_hash as string | undefined;
-			if (!storedHash) {
+			if (!userData.password_hash) {
 				error.value = "No password configured for this user.";
 				return false;
 			}
 
-			const inputHash = await hashPassword(password);
-			if (inputHash !== storedHash) {
+			const valid = await window.electronAPI!.db.verifyPassword(username, password);
+			if (!valid) {
 				error.value = "Invalid password";
 				return false;
 			}
@@ -158,18 +191,9 @@ export const useAuthStore = defineStore("auth", () => {
 			return true;
 		} catch (err) {
 			console.error("Login failed:", err);
-			error.value = "Login failed";
+			error.value = friendlyMessage(err, "Could not sign in. Please try again.");
 			return false;
 		}
-	}
-
-	async function hashPassword(password: string): Promise<string> {
-		const encoder = new TextEncoder();
-		const data = encoder.encode(password);
-		const hash = await crypto.subtle.digest("SHA-256", data);
-		return Array.from(new Uint8Array(hash))
-			.map((b) => b.toString(16).padStart(2, "0"))
-			.join("");
 	}
 
 	async function sendResetPasswordEmail(email: string): Promise<boolean> {
@@ -184,7 +208,7 @@ export const useAuthStore = defineStore("auth", () => {
 			return true;
 		} catch (err) {
 			console.error("Reset password failed:", err);
-			error.value = err instanceof Error ? err.message : "Failed to send reset email";
+			error.value = friendlyMessage(err, "Failed to send reset email.");
 			return false;
 		} finally {
 			isLoading.value = false;
