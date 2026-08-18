@@ -51,7 +51,7 @@
 					/>
 				</template>
 				<p v-else class="text-[11px] text-muted-foreground">
-					{{ currencySymbol }}{{ formatRate(item.rate) }}
+					{{ moneyRate(item.rate) }}
 				</p>
 
 				<span class="text-[11px] text-muted-foreground">/</span>
@@ -112,7 +112,7 @@
 			<div class="flex items-center gap-1 mt-1 flex-wrap">
 				<template v-if="item.pos_is_free_item">
 					<span class="text-[10px] font-semibold text-muted-foreground px-1">
-						{{ __("Qty") }}: {{ item.qty }}
+						{{ __("Qty") }}: {{ qty(item.qty) }}
 					</span>
 				</template>
 				<template v-else>
@@ -210,10 +210,10 @@
 
 		<div class="flex flex-col items-end gap-0.5 shrink-0">
 			<span class="text-xs font-bold text-foreground tabular-nums" data-testid="cart-amount">
-				{{ currencySymbol }}{{ formatPrice(lineTotal) }}
+				{{ money(lineTotal) }}
 			</span>
 			<span v-if="hasItemDiscount" class="text-[9px] text-emerald-600 dark:text-emerald-400">
-				-{{ currencySymbol }}{{ formatPrice(discountAmount) }}
+				-{{ money(discountAmount) }}
 			</span>
 			<Button
 				variant="ghost"
@@ -237,6 +237,7 @@ import { Button } from "@/components/ui/button";
 import { Package, Minus, Plus, Trash2, Percent, ChevronDown } from "lucide-vue-next";
 import type { ItemUOM } from "@/types/pos.types";
 import __ from "@/lib/translate";
+import { useMoney } from "@/composables/useMoney";
 
 const props = defineProps({
 	item: { type: Object, required: true },
@@ -248,6 +249,7 @@ const emit = defineEmits(["update-qty", "update-rate", "update-discount", "updat
 
 const posStore = usePosStore();
 const cartStore = useCartStore();
+const { money, moneyRate, percent, qty } = useMoney();
 const itemStore = useItemStore();
 
 const qtyInput = ref<HTMLInputElement | null>(null);
@@ -278,10 +280,10 @@ const autoDiscountTitle = computed(() =>
 
 const formatDiscount = computed(() => {
 	if (props.item.discount_percentage > 0) {
-		return `${props.item.discount_percentage}%`;
+		return percent(props.item.discount_percentage);
 	}
 	if (props.item.discount_amount > 0) {
-		return `${props.currencySymbol}${formatPrice(props.item.discount_amount)}`;
+		return money(props.item.discount_amount);
 	}
 	return "";
 });
@@ -445,29 +447,9 @@ const rateStep = computed(() => {
 	return p > 0 ? (1 / 10 ** p).toFixed(p) : "1";
 });
 
-function parseNumeric(value: number | string) {
-	const parsed = parseFloat(String(value ?? 0));
-	return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function roundRate(value: number) {
 	const p = ratePrecision.value;
 	return Math.round((value + Number.EPSILON) * 10 ** p) / 10 ** p;
-}
-
-function roundCurrency(value: number) {
-	return Math.round((value + Number.EPSILON) * 100) / 100;
-}
-
-function formatRate(rate: number | string) {
-	const p = ratePrecision.value;
-	return roundRate(parseNumeric(rate))
-		.toFixed(p)
-		.replace(/\.?0+$/, "");
-}
-
-function formatPrice(price: number | string) {
-	return roundCurrency(parseNumeric(price)).toFixed(2);
 }
 
 function blockInvalidNumericKeys(event: KeyboardEvent) {

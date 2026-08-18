@@ -1174,6 +1174,15 @@ export interface CurrencyPrecision {
 	[key: string]: unknown;
 }
 
+export interface NumberFormatSettings {
+	number_format: string;
+	float_precision: number | string;
+	currency_precision: number | string;
+	use_number_format_from_currency: number | boolean;
+	hide_currency_symbol: number | boolean | string;
+	[key: string]: unknown;
+}
+
 export interface ERPSettings {
 	selling_settings: SellingSettings;
 	buying_settings: BuyingSettings;
@@ -1183,6 +1192,7 @@ export interface ERPSettings {
 	item_search: ItemSearchSettings;
 	global_defaults: GlobalDefaults;
 	currency_precision: CurrencyPrecision;
+	number_format: NumberFormatSettings;
 }
 
 export const DOCSTATUS_MAP: Record<number, string> = {

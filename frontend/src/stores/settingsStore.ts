@@ -4,6 +4,11 @@ import { call } from "@/services/api";
 import { cacheERPSettings, getCachedERPSettings } from "@/services/dbBridge";
 import { isOnline } from "@/utils";
 import { isElectron } from "@/services/electronBridge";
+import {
+	DEFAULT_NUMBER_FORMAT,
+	setNumberFormatSettings,
+	numberFormatSettings as readNumberFormatSettings,
+} from "@/utils/numberFormat";
 import type {
 	ERPSettings,
 	SellingSettings,
@@ -13,6 +18,7 @@ import type {
 	GlobalDefaults,
 	CurrencyPrecision,
 	ItemSearchSettings,
+	NumberFormatSettings,
 } from "@/types/pos.types";
 
 const emptySellingSettings: SellingSettings = {
@@ -89,6 +95,14 @@ const emptyCurrencyPrecision: CurrencyPrecision = {
 	float_precision: "",
 };
 
+const emptyNumberFormat: NumberFormatSettings = {
+	number_format: DEFAULT_NUMBER_FORMAT,
+	float_precision: "",
+	currency_precision: "",
+	use_number_format_from_currency: 0,
+	hide_currency_symbol: 0,
+};
+
 export const useSettingsStore = defineStore("settings", () => {
 	const isLoaded = ref(false);
 	const sellingSettings = ref<SellingSettings>({ ...emptySellingSettings });
@@ -97,6 +111,7 @@ export const useSettingsStore = defineStore("settings", () => {
 	const accountsSettings = ref<AccountsSettings>({ ...emptyAccountsSettings });
 	const globalDefaults = ref<GlobalDefaults>({ ...emptyGlobalDefaults });
 	const currencyPrecision = ref<CurrencyPrecision>({ ...emptyCurrencyPrecision });
+	const numberFormat = ref<NumberFormatSettings>({ ...emptyNumberFormat });
 	const itemSearch = ref<ItemSearchSettings>({ ...emptyItemSearchSettings });
 
 	const defaultSellingPriceList = computed(() => sellingSettings.value.default_selling_price_list);
@@ -145,6 +160,12 @@ export const useSettingsStore = defineStore("settings", () => {
 
 	const searchBatchNo = computed(() => !!itemSearch.value.search_batch_no);
 
+	function applyNumberFormat(data: NumberFormatSettings | undefined) {
+		const resolved = { ...emptyNumberFormat, ...readNumberFormatSettings(), ...(data || {}) };
+		numberFormat.value = resolved;
+		setNumberFormatSettings(resolved);
+	}
+
 	function _applySettings(data: ERPSettings) {
 		sellingSettings.value = { ...emptySellingSettings, ...data.selling_settings };
 		buyingSettings.value = { ...emptyBuyingSettings, ...data.buying_settings };
@@ -152,6 +173,7 @@ export const useSettingsStore = defineStore("settings", () => {
 		accountsSettings.value = { ...emptyAccountsSettings, ...data.accounts_settings };
 		globalDefaults.value = { ...emptyGlobalDefaults, ...data.global_defaults };
 		currencyPrecision.value = { ...emptyCurrencyPrecision, ...data.currency_precision };
+		applyNumberFormat(data.number_format);
 		itemSearch.value = { ...emptyItemSearchSettings, ...data.item_search };
 		isLoaded.value = true;
 	}
@@ -172,6 +194,7 @@ export const useSettingsStore = defineStore("settings", () => {
 					accounts_settings: boot.accounts_settings || {},
 					global_defaults: boot.sysdefaults || {},
 					currency_precision: boot.currency_precision || {},
+					number_format: boot.xpos_number_format || boot.sysdefaults || {},
 					pos_settings: boot.pos_settings || {},
 					item_search: boot.xpos_item_search || {},
 				} as ERPSettings;
@@ -217,6 +240,7 @@ export const useSettingsStore = defineStore("settings", () => {
 		accountsSettings.value = { ...emptyAccountsSettings };
 		globalDefaults.value = { ...emptyGlobalDefaults };
 		currencyPrecision.value = { ...emptyCurrencyPrecision };
+		numberFormat.value = { ...emptyNumberFormat };
 		itemSearch.value = { ...emptyItemSearchSettings };
 		isLoaded.value = false;
 	}
@@ -229,6 +253,7 @@ export const useSettingsStore = defineStore("settings", () => {
 		accountsSettings,
 		globalDefaults,
 		currencyPrecision,
+		numberFormat,
 		itemSearch,
 		defaultSellingPriceList,
 		defaultBuyingPriceList,

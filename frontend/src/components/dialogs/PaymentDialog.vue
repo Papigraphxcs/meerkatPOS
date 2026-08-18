@@ -13,7 +13,7 @@
 			>
 				<div class="flex items-center gap-3">
 					<div
-						class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-sm"
+						class="w-8 h-8 rounded-lg bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-sm"
 					>
 						<Wallet class="w-4 h-4 text-white" />
 					</div>
@@ -33,15 +33,13 @@
 							v-if="customerBalance > 0"
 							class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 font-medium"
 						>
-							{{ __("Outstanding") }}: {{ posStore.currencySymbol
-							}}{{ formatPrice(customerBalance) }}
+							{{ __("Outstanding") }}: {{ money(customerBalance) }}
 						</span>
 						<span
 							v-if="customerCreditLimit > 0"
 							class="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 font-medium"
 						>
-							{{ __("Credit Limit") }}: {{ posStore.currencySymbol
-							}}{{ formatPrice(customerCreditLimit) }}
+							{{ __("Credit Limit") }}: {{ money(customerCreditLimit) }}
 						</span>
 					</div>
 					<Badge v-if="cartStore.isReturnMode" variant="warning" class="text-[10px]">
@@ -78,7 +76,7 @@
 								class="text-3xl font-extrabold tabular-nums"
 								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary'"
 							>
-								{{ posStore.currencySymbol }}{{ formatPrice(Math.abs(cartStore.grandTotal)) }}
+								{{ money(Math.abs(cartStore.grandTotal)) }}
 							</p>
 						</div>
 						<div
@@ -92,9 +90,7 @@
 						>
 							<div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
 								<span>{{ __("Subtotal") }}</span>
-								<span
-									>{{ posStore.currencySymbol }}{{ formatPrice(cartStore.subtotal) }}</span
-								>
+								<span>{{ money(cartStore.subtotal) }}</span>
 							</div>
 							<div
 								v-for="(tax, idx) in cartStore.calculatedTaxes"
@@ -103,7 +99,7 @@
 							>
 								<span class="flex items-center gap-1">
 									{{ tax.description }}
-									<span class="text-[10px]">({{ tax.rate }}%)</span>
+									<span class="text-[10px]">({{ percent(tax.rate) }})</span>
 									<span
 										v-if="tax.included_in_print_rate"
 										class="text-[9px] text-blue-500"
@@ -111,8 +107,7 @@
 									>
 								</span>
 								<span :class="tax.included_in_print_rate ? 'text-blue-500' : ''">
-									{{ tax.included_in_print_rate ? "" : "+" }}{{ posStore.currencySymbol
-									}}{{ formatPrice(tax.amount) }}
+									{{ tax.included_in_print_rate ? "" : "+" }}{{ money(tax.amount) }}
 								</span>
 							</div>
 							<div
@@ -120,20 +115,18 @@
 								class="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400"
 							>
 								<span>{{ __("Offer Discount") }}</span>
-								<span
-									>-{{ posStore.currencySymbol
-									}}{{ formatPrice(cartStore.offerItemDiscountTotal) }}</span
-								>
+								<span>-{{ money(cartStore.offerItemDiscountTotal) }}</span>
 							</div>
 							<div
 								v-if="cartStore.offerGrandTotalDiscountPct > 0"
 								class="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400"
 							>
-								<span>{{ __("Offer") }} ({{ cartStore.offerGrandTotalDiscountPct }}%)</span>
 								<span
-									>-{{ posStore.currencySymbol
-									}}{{ formatPrice(paymentOfferGrandDiscount) }}</span
+									>{{ __("Offer") }} ({{
+										percent(cartStore.offerGrandTotalDiscountPct)
+									}})</span
 								>
+								<span>-{{ money(paymentOfferGrandDiscount) }}</span>
 							</div>
 							<div
 								v-if="cartStore.appliedCoupon"
@@ -181,7 +174,7 @@
 								@keydown.left.prevent="focusMethod(idx - 1)"
 								@keydown.right.prevent="focusMethod(idx + 1)"
 								@keydown.down.prevent="focusAmountInput"
-								class="flex-1 min-w-[80px] p-2.5 rounded-xl border-2 text-center transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
+								class="flex-1 min-w-20 p-2.5 rounded-xl border-2 text-center transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
 								:class="
 									selectedMethod === method.mode_of_payment
 										? 'border-primary bg-primary/5 text-primary shadow-sm'
@@ -362,7 +355,7 @@
 							@keydown.left.prevent="focusQuickAmount(idx - 1)"
 							@keydown.right.prevent="focusQuickAmount(idx + 1)"
 						>
-							{{ posStore.currencySymbol }}{{ amount }}
+							{{ money(amount) }}
 						</Button>
 					</div>
 
@@ -378,8 +371,9 @@
 								}}</span>
 							</div>
 							<Badge variant="secondary" class="text-[10px]">
-								{{ customerLoyaltyPoints }} {{ __("pts") }} ({{ posStore.currencySymbol
-								}}{{ formatPrice(customerLoyaltyAmount) }})
+								{{ customerLoyaltyPoints }} {{ __("pts") }} ({{
+									money(customerLoyaltyAmount)
+								}})
 							</Badge>
 						</div>
 
@@ -387,7 +381,7 @@
 							<div class="flex items-center justify-between text-xs">
 								<span class="text-violet-700 dark:text-violet-300 font-medium">
 									{{ __("Redeeming") }}: {{ cartStore.loyaltyPoints }} {{ __("pts") }} =
-									{{ posStore.currencySymbol }}{{ formatPrice(cartStore.loyaltyAmount) }}
+									{{ money(cartStore.loyaltyAmount) }}
 								</span>
 								<Button
 									variant="ghost"
@@ -418,8 +412,7 @@
 									>
 								</div>
 								<p class="text-[11px] text-violet-600 dark:text-violet-400">
-									{{ __("Discount") }}: {{ posStore.currencySymbol
-									}}{{ formatPrice(redeemInputAmount) }}
+									{{ __("Discount") }}: {{ money(redeemInputAmount) }}
 								</p>
 								<div class="flex gap-1.5">
 									<Button
@@ -470,7 +463,7 @@
 						<NumberInput
 							v-model="writeOffInput"
 							:min="0"
-							:precision="2"
+							:precision="moneyPrecision"
 							placeholder="0.00"
 							class="text-sm"
 							@change="cartStore.writeOffAmount = writeOffInput || 0"
@@ -591,7 +584,7 @@
 								{{ remainingLabel }}
 							</p>
 							<p class="text-lg font-extrabold text-amber-700 dark:text-amber-300 tabular-nums">
-								{{ posStore.currencySymbol }}{{ formatPrice(remainingAmount) }}
+								{{ money(remainingAmount) }}
 							</p>
 							<p
 								v-if="outstandingSubmissionHint"
@@ -709,6 +702,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { usePosStore } from "@/stores/posStore";
+import { useMoney } from "@/composables/useMoney";
 import { useCartStore } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
 import { usePaymentStore } from "@/stores/paymentStore";
@@ -779,6 +773,7 @@ import {
 } from "@/components/dialogs/paymentDialogShortcuts";
 
 const posStore = usePosStore();
+const { moneyPrecision, percent } = useMoney();
 const { printInvoice, printInvoiceLocal } = usePrintInvoice();
 const cartStore = useCartStore();
 const authStore = useAuthStore();
@@ -1492,5 +1487,10 @@ function roundCurrency(value: number): number {
 
 function formatPrice(price: number | string) {
 	return formatFor(invoiceCurrency.value, parseFloat(String(price) || "0"));
+}
+
+/** The same amount with the currency symbol, on the side the Currency doctype asks for. */
+function money(price: number | string) {
+	return formatWithSymbol(invoiceCurrency.value, parseFloat(String(price) || "0"));
 }
 </script>

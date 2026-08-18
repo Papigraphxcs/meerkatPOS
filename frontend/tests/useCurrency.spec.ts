@@ -4,15 +4,18 @@ import {
 	convertToBase,
 	currencyMeta,
 	DEFAULT_CURRENCY_PRECISION,
+	displayPrecisionFor,
 	formatFor,
 	formatWithSymbol,
 	minorUnitFor,
+	numberFormatFor,
 	precisionFor,
 	precisionFromNumberFormat,
 	resetCurrencyCache,
 	roundFor,
 	symbolFor,
 } from "@/composables/useCurrency";
+import { resetNumberFormatSettings, setNumberFormatSettings } from "@/utils/numberFormat";
 
 vi.mock("@/services/dbBridge", () => ({
 	getCachedCurrencyMeta: vi.fn().mockResolvedValue([]),
@@ -35,6 +38,7 @@ function seedBoot() {
 
 beforeEach(() => {
 	seedBoot();
+	resetNumberFormatSettings();
 });
 
 describe("precisionFromNumberFormat", () => {
@@ -181,8 +185,8 @@ describe("formatting", () => {
 	});
 
 	it("puts the symbol on the correct side", () => {
-		// Grouping and the decimal mark follow the viewer's locale; only the decimal count is
-		// currency-specific. SEK is here for symbol_on_right, not for its comma decimal.
+		// Grouping and the decimal mark come from the System Settings mask, here left at its
+		// default. SEK is present for symbol_on_right, not for its own comma decimal.
 		expect(formatWithSymbol("USD", 100)).toBe("$100.00");
 		expect(formatWithSymbol("SEK", 100)).toBe("100.00 kr");
 		expect(formatWithSymbol("LBP", 9000000)).toBe("L£9,000,000");
@@ -190,5 +194,54 @@ describe("formatting", () => {
 
 	it("renders a non-finite value as zero", () => {
 		expect(formatFor("USD", Number.NaN)).toBe("0.00");
+	});
+});
+
+describe("system number format", () => {
+	it("prints an amount with the separators System Settings asks for", () => {
+		setNumberFormatSettings({ number_format: "#.###,##" });
+
+		expect(formatFor("USD", 1234567.89)).toBe("1.234.567,89");
+		expect(formatFor("LBP", 9000000)).toBe("9.000.000");
+	});
+
+	it("uses the mask for grouping but the currency for how many decimals", () => {
+		setNumberFormatSettings({ number_format: "# ###.##" });
+
+		// The mask says two decimals; LBP is a whole-unit currency and wins on decimals.
+		expect(formatFor("LBP", 9000000)).toBe("9 000 000");
+		expect(formatFor("KWD", 1234.5)).toBe("1 234.500");
+	});
+
+	it("lets an explicit currency_precision override the currency's own decimals", () => {
+		setNumberFormatSettings({ number_format: "#,###.##", currency_precision: "3" });
+
+		expect(displayPrecisionFor("USD")).toBe(3);
+		expect(formatFor("USD", 100)).toBe("100.000");
+		// Money maths is untouched: LBP is still quoted in whole units.
+		expect(precisionFor("LBP")).toBe(0);
+		expect(roundFor("LBP", 5892300.6)).toBe(5892301);
+	});
+
+	it("ignores the currency's own mask unless System Settings asks for it", () => {
+		setNumberFormatSettings({ number_format: "#,###.##" });
+		expect(numberFormatFor("SEK")).toBe("#,###.##");
+		expect(formatFor("SEK", 1234.5)).toBe("1,234.50");
+
+		setNumberFormatSettings({ number_format: "#,###.##", use_number_format_from_currency: 1 });
+		expect(numberFormatFor("SEK")).toBe("# ###,##");
+		expect(formatFor("SEK", 1234.5)).toBe("1 234,50");
+	});
+
+	it("falls back to the system mask for a currency that declares none", () => {
+		setNumberFormatSettings({ number_format: "#.###,##", use_number_format_from_currency: 1 });
+
+		expect(numberFormatFor("XYZ")).toBe("#.###,##");
+	});
+
+	it("drops the symbol when the site hides currency symbols", () => {
+		setNumberFormatSettings({ number_format: "#,###.##", hide_currency_symbol: "Yes" });
+
+		expect(formatWithSymbol("USD", 100)).toBe("100.00");
 	});
 });

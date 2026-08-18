@@ -88,9 +88,9 @@ describe("buildReceiptHtml", () => {
 		expect(html).not.toContain("Change");
 	});
 
-	it("formats currency without an ISO code by prefixing the raw value", () => {
+	it("falls back to the currency code as its own symbol when no Currency row is cached", () => {
 		const html = buildReceiptHtml(snapshot, { ...context, currency: "Rs" });
-		expect(html).toContain("Rs ");
+		expect(html).toContain("Rs7.25");
 	});
 });
 
@@ -160,9 +160,9 @@ describe("buildReceiptHtml - mixed-currency tender", () => {
 		const html = buildReceiptHtml(MIXED_SNAPSHOT, LBP_CONTEXT);
 
 		expect(html).toContain("USD 30.00");
-		// A leg already in the invoice currency keeps the receipt's own money formatting, which
-		// is Intl's and separates the code with a non-breaking space.
-		expect(html).toMatch(/LBP\s407,700/);
+		// A leg already in the invoice currency prints with the Currency doctype symbol, the
+		// same way the server-side print format renders it through fmt_money.
+		expect(html).toContain("L£407,700");
 		expect(html).toContain("Total Change");
 		// The legs must still reconcile to the single figure ERPNext computed.
 		expect(html).toMatch(/Total Change<\/span>\s*<span>[^<]*3,107,700/);

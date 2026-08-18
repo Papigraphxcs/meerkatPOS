@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@electron/fuses": "^1.8.0",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.2.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/test-utils": "^2.4.6",

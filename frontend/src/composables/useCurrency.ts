@@ -1,28 +1,44 @@
 import { computed } from "vue";
 
 import { getCachedCurrencyMeta } from "@/services/dbBridge";
+import {
+	currencyPrecisionOverride,
+	formatNumber,
+	hideCurrencySymbol,
+	precisionFromNumberFormat,
+	roundTo,
+	systemNumberFormat,
+	useNumberFormatFromCurrency,
+} from "@/utils/numberFormat";
 
 export interface CurrencyMeta {
 	name: string;
 	symbol: string;
 	precision: number;
 	symbol_on_right: boolean;
+	number_format: string;
 }
 
 export const DEFAULT_CURRENCY_PRECISION = 2;
 
-export function precisionFromNumberFormat(format?: string | null): number {
-	if (!format) return DEFAULT_CURRENCY_PRECISION;
-
-	const groups = format.trim().split(/[^#]+/).filter(Boolean);
-	const separatorCount = groups.length - 1;
-	if (separatorCount < 1) return 0;
-
-	const trailing = groups[groups.length - 1].length;
-	return trailing === 3 && separatorCount === 1 ? 0 : trailing;
-}
+export { precisionFromNumberFormat };
 
 let cachedCurrencies: Record<string, CurrencyMeta> | null = null;
+
+function toMeta(row: {
+	name?: string;
+	symbol?: string;
+	number_format?: string;
+	symbol_on_right?: number | boolean;
+}): CurrencyMeta {
+	return {
+		name: row.name as string,
+		symbol: row.symbol || (row.name as string),
+		precision: precisionFromNumberFormat(row.number_format),
+		symbol_on_right: !!row.symbol_on_right,
+		number_format: row.number_format || "",
+	};
+}
 
 function readBootCurrencies(): Record<string, CurrencyMeta> {
 	const rows = (window.xpos as any)?.boot?.currencies;
@@ -31,12 +47,7 @@ function readBootCurrencies(): Record<string, CurrencyMeta> {
 	const map: Record<string, CurrencyMeta> = {};
 	for (const row of rows) {
 		if (!row?.name) continue;
-		map[row.name] = {
-			name: row.name,
-			symbol: row.symbol || row.name,
-			precision: precisionFromNumberFormat(row.number_format),
-			symbol_on_right: !!row.symbol_on_right,
-		};
+		map[row.name] = toMeta(row);
 	}
 	return map;
 }
@@ -53,12 +64,7 @@ export async function primeCurrencyCache(): Promise<void> {
 		const map: Record<string, CurrencyMeta> = {};
 		for (const row of rows || []) {
 			if (!row?.name) continue;
-			map[row.name] = {
-				name: row.name,
-				symbol: row.symbol || row.name,
-				precision: precisionFromNumberFormat(row.number_format),
-				symbol_on_right: !!row.symbol_on_right,
-			};
+			map[row.name] = toMeta(row);
 		}
 		cachedCurrencies = map;
 	} catch {
@@ -80,12 +86,25 @@ export function currencyMeta(currency?: string | null): CurrencyMeta {
 			symbol: name,
 			precision: DEFAULT_CURRENCY_PRECISION,
 			symbol_on_right: false,
+			number_format: "",
 		}
 	);
 }
 
 export function precisionFor(currency?: string | null): number {
 	return currencyMeta(currency).precision;
+}
+
+export function displayPrecisionFor(currency?: string | null): number {
+	return currencyPrecisionOverride() ?? precisionFor(currency);
+}
+
+export function numberFormatFor(currency?: string | null): string {
+	if (useNumberFormatFromCurrency()) {
+		const own = currencyMeta(currency).number_format;
+		if (own) return own;
+	}
+	return systemNumberFormat();
 }
 
 export function symbolFor(currency?: string | null): string {
@@ -97,26 +116,30 @@ export function minorUnitFor(currency?: string | null): number {
 }
 
 export function roundFor(currency: string | null | undefined, value: number): number {
-	if (!Number.isFinite(value)) return 0;
-
-	const factor = 10 ** precisionFor(currency);
-	const scaled = Number((Math.abs(value) * factor).toPrecision(15));
-	const rounded = Math.round(scaled) / factor;
-
-	return value < 0 ? -rounded : rounded;
+	return roundTo(value, precisionFor(currency));
 }
 
-export function formatFor(currency: string | null | undefined, value: number): string {
-	const digits = precisionFor(currency);
-	return (Number.isFinite(value) ? value : 0).toLocaleString(undefined, {
-		minimumFractionDigits: digits,
-		maximumFractionDigits: digits,
-	});
+export function formatFor(
+	currency: string | null | undefined,
+	value: number,
+	precision?: number | null,
+): string {
+	return formatNumber(
+		Number.isFinite(value) ? value : 0,
+		numberFormatFor(currency),
+		precision ?? displayPrecisionFor(currency),
+	);
 }
 
-export function formatWithSymbol(currency: string | null | undefined, value: number): string {
+export function formatWithSymbol(
+	currency: string | null | undefined,
+	value: number,
+	precision?: number | null,
+): string {
 	const meta = currencyMeta(currency);
-	const amount = formatFor(currency, value);
+	const amount = formatFor(currency, value, precision);
+	if (hideCurrencySymbol() || !meta.symbol) return amount;
+
 	return meta.symbol_on_right ? `${amount} ${meta.symbol}` : `${meta.symbol}${amount}`;
 }
 
@@ -135,6 +158,8 @@ export function useCurrency() {
 	return {
 		currencyMeta,
 		precisionFor,
+		displayPrecisionFor,
+		numberFormatFor,
 		symbolFor,
 		minorUnitFor,
 		roundFor,

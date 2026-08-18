@@ -18,6 +18,7 @@ import {
 	type ReceiptContext,
 } from "@/types/pos.types";
 import { isOnline } from "@/utils";
+import { symbolFor } from "@/composables/useCurrency";
 
 export const usePosStore = defineStore("pos", () => {
 	const isLoading = ref(true);
@@ -50,18 +51,7 @@ export const usePosStore = defineStore("pos", () => {
 		await loadPermissions(useAuthStore().userName, name);
 	});
 
-	const currencySymbol = computed(() => {
-		if (window.xpos) {
-			const _currency = (xpos as any).boot?.currencies?.find(
-				(c: any) => c.name === posProfile.value?.currency,
-			);
-			if (_currency) {
-				return _currency.symbol || _currency.name;
-			}
-			return currency.value || "$";
-		}
-		return "$";
-	});
+	const currencySymbol = computed(() => symbolFor(currency.value) || currency.value || "$");
 
 	const invoiceCurrency = computed(
 		() => posProfile.value?.currency || company.value?.default_currency || "",

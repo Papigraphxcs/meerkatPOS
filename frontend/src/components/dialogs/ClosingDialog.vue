@@ -36,8 +36,7 @@
 									{{ __("Grand Total") }}
 								</p>
 								<p class="text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">
-									{{ posStore.currencySymbol
-									}}{{ formatFor(posStore.invoiceCurrency, summary.grand_total ?? 0) }}
+									{{ money(summary.grand_total ?? 0) }}
 								</p>
 							</CardContent>
 						</Card>
@@ -47,8 +46,7 @@
 									{{ __("Net Total") }}
 								</p>
 								<p class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">
-									{{ posStore.currencySymbol
-									}}{{ formatFor(posStore.invoiceCurrency, summary.net_total ?? 0) }}
+									{{ money(summary.net_total ?? 0) }}
 								</p>
 							</CardContent>
 						</Card>
@@ -77,10 +75,7 @@
 									{{ __("Total Taxes") }}
 								</p>
 								<p class="text-lg font-bold text-violet-700 dark:text-violet-300">
-									{{ posStore.currencySymbol
-									}}{{
-										formatFor(posStore.invoiceCurrency, (summary as any).total_taxes ?? 0)
-									}}
+									{{ money((summary as any).total_taxes ?? 0) }}
 								</p>
 							</CardContent>
 						</Card>
@@ -99,10 +94,9 @@
 								<span class="text-muted-foreground">{{
 									tax.description || tax.account_head
 								}}</span>
-								<span class="font-medium text-foreground"
-									>{{ posStore.currencySymbol
-									}}{{ formatFor(posStore.invoiceCurrency, tax.tax_amount ?? 0) }}</span
-								>
+								<span class="font-medium text-foreground">{{
+									money(tax.tax_amount ?? 0)
+								}}</span>
 							</div>
 						</div>
 					</div>
@@ -113,7 +107,7 @@
 						</h3>
 						<div class="border border-border rounded-lg overflow-hidden">
 							<div class="overflow-x-auto">
-								<table class="w-full text-sm min-w-[420px]">
+								<table class="w-full text-sm min-w-105">
 									<thead class="bg-muted">
 										<tr>
 											<th
@@ -236,6 +230,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { usePosStore } from "@/stores/posStore";
+import { useMoney } from "@/composables/useMoney";
 import { showSuccess, showError } from "@/services/api";
 import { hasPermission } from "@/services/userRights";
 import { formatFor, precisionFor, roundFor } from "@/composables/useCurrency";
@@ -274,6 +269,7 @@ interface ClosingDetail {
 }
 
 const posStore = usePosStore();
+const { money } = useMoney();
 
 const isLoading = ref(true);
 const isClosing = ref(false);

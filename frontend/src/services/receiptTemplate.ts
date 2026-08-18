@@ -1,5 +1,6 @@
-import { formatFor } from "@/composables/useCurrency";
+import { formatFor, formatWithSymbol } from "@/composables/useCurrency";
 import type { ReceiptContext, ReceiptSnapshot } from "@/types/pos.types";
+import { formatFloat, formatQty } from "@/utils/numberFormat";
 
 function esc(value: unknown): string {
 	return String(value ?? "")
@@ -10,22 +11,7 @@ function esc(value: unknown): string {
 }
 
 function fmtMoney(amount: number, currency: string): string {
-	const value = Number(amount || 0);
-	if (currency && /^[A-Z]{3}$/.test(currency)) {
-		try {
-			return new Intl.NumberFormat(undefined, {
-				style: "currency",
-				currency,
-			}).format(value);
-		} catch {
-			/* fall through to plain formatting */
-		}
-	}
-	const plain = new Intl.NumberFormat(undefined, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(value);
-	return currency ? `${currency} ${plain}` : plain;
+	return formatWithSymbol(currency, Number(amount || 0));
 }
 
 function fmtNative(amount: number, currency: string): string {
@@ -84,7 +70,7 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
 			if (item.discount_percentage && item.discount_percentage > 0) {
 				discountLine = ctx.print_discount_amount
 					? `<div class="item-discount">Discount: ${money(item.discount_amount || 0)}</div>`
-					: `<div class="item-discount">Discount: ${item.discount_percentage}%</div>`;
+					: `<div class="item-discount">Discount: ${formatFloat(item.discount_percentage)}%</div>`;
 			} else if (item.discount_amount && item.discount_amount > 0) {
 				discountLine = `<div class="item-discount">Discount: ${money(item.discount_amount)}</div>`;
 			}
@@ -96,9 +82,9 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
         <div class="item-name">${esc(item.item_name)}</div>
         <div class="item-detail-line">
             <span class="col-desc" style="flex:1;">${codeLine}</span>
-            <span class="col-qty">${item.qty}</span>
-            <span class="col-rate">${item.rate}</span>
-            <span class="col-amt">${item.amount}</span>
+            <span class="col-qty">${formatQty(item.qty)}</span>
+            <span class="col-rate">${formatFor(currency, item.rate)}</span>
+            <span class="col-amt">${formatFor(currency, item.amount)}</span>
         </div>
         ${uomLine}${serialLine}${batchLine}${discountLine}${notesLine}
     </div>`;
@@ -268,9 +254,9 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
 
     <div class="totals-section">
         <div class="total-row" style="font-size:9px;color:#333;">
-            <span class="total-label">${totalItems} item${totalItems !== 1 ? "s" : ""} &bull; ${
-				snapshot.total_qty
-			} unit${snapshot.total_qty !== 1 ? "s" : ""}</span>
+            <span class="total-label">${totalItems} item${totalItems !== 1 ? "s" : ""} &bull; ${formatQty(
+				snapshot.total_qty,
+			)} unit${snapshot.total_qty !== 1 ? "s" : ""}</span>
         </div>
         <div class="total-row">
             <span class="total-label">Subtotal</span>
