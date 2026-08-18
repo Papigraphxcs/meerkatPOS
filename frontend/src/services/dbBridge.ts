@@ -812,15 +812,20 @@ export async function getCachedItemByCode(itemCode: string): Promise<POSItem | u
 	return idb.getCachedItemByCode(itemCode);
 }
 
-export async function searchCachedItems(term: string, group: string): Promise<POSItem[]> {
+export async function searchCachedItems(
+	term: string,
+	group: string,
+	searchFields?: string[],
+): Promise<POSItem[]> {
 	if (isElectron()) {
 		return (await getDb().getItems({
 			search: term || undefined,
+			searchFields,
 			group: group && group !== "All Item Groups" ? group : undefined,
 		})) as unknown as POSItem[];
 	}
 	const idb = await import("./idbService");
-	return idb.searchCachedItems(term, group);
+	return idb.searchCachedItems(term, group, searchFields);
 }
 
 export async function cacheItemGroups(groups: ItemGroup[], parentGroups: ItemGroup[]): Promise<void> {

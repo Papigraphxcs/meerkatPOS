@@ -5,6 +5,7 @@ import frappe
 
 from xpos.api.auth import can_manage_role_permissions, get_current_user_permissions
 from xpos.api.settings import get_branding_payload
+from xpos.api.utilities import get_item_search_settings
 
 
 def extend_bootinfo(bootinfo):
@@ -35,6 +36,7 @@ def extend_bootinfo(bootinfo):
 		bootinfo.buying_settings = frappe.get_single("Buying Settings")
 		bootinfo.stock_settings = frappe.get_single("Stock Settings")
 		bootinfo.pos_settings = frappe.get_single("POS Settings")
+		bootinfo.xpos_item_search = get_item_search_settings()
 
 		user_rights = get_current_user_permissions()
 		bootinfo.xpos_role = user_rights.get("role")

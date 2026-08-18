@@ -45,6 +45,7 @@ declare global {
 			selling_settings?: Record<string, any>;
 			territories?: Array<{ name?: string; territory_name?: string }>;
 			pos_settings?: Record<string, any>;
+			xpos_item_search?: Record<string, any>;
 		};
 		_messages?: Record<string, string>;
 		csrf_token?: string;

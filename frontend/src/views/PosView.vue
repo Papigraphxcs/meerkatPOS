@@ -358,6 +358,8 @@ async function onBarcodeScan(barcode: string) {
 				has_batch_no: result.has_batch_no,
 				has_serial_no: result.has_serial_no,
 				actual_qty: result.actual_qty ?? 9999,
+				batch_no: result.batch_no,
+				serial_no: result.serial_no,
 			} as POSItem;
 
 			const scaleQty = Number(result.qty) || 0;

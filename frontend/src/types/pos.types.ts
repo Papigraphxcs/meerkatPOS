@@ -1,5 +1,6 @@
 export interface POSSearchField {
 	field: string;
+	fieldname?: string;
 	[key: string]: unknown;
 }
 
@@ -14,8 +15,18 @@ export interface POSAdditionalField {
 export interface POSSettings {
 	invoice_type: string;
 	post_change_gl_entries: boolean;
-	invoice_fields: POSAdditionalField[];
-	pos_search_fields: POSSearchField[];
+	invoice_fields?: POSAdditionalField[];
+	pos_search_fields?: POSSearchField[];
+	item_search_limit?: number;
+	search_serial_no?: number;
+	search_batch_no?: number;
+}
+
+export interface ItemSearchSettings {
+	fields: string[];
+	item_search_limit: number;
+	search_serial_no: number;
+	search_batch_no: number;
 }
 
 export interface POSProfile {
@@ -31,7 +42,6 @@ export interface POSProfile {
 	selling_price_list?: string;
 	default_customer?: string;
 	allow_change_posting_date?: boolean;
-	display_items_in_stock?: boolean;
 	allow_partial_payment?: boolean;
 	allow_credit_sale?: boolean;
 	allow_return?: boolean;
@@ -48,7 +58,6 @@ export interface POSProfile {
 	allow_outstanding_settlement?: boolean;
 	print_backup_receipt?: boolean;
 	auto_set_batch?: boolean;
-	search_serial_no?: boolean;
 	tax_inclusive?: boolean;
 	default_view?: string;
 	default_sales_order?: boolean;
@@ -1170,6 +1179,8 @@ export interface ERPSettings {
 	buying_settings: BuyingSettings;
 	stock_settings: ERPStockSettings;
 	accounts_settings: AccountsSettings;
+	pos_settings: POSSettings;
+	item_search: ItemSearchSettings;
 	global_defaults: GlobalDefaults;
 	currency_precision: CurrencyPrecision;
 }

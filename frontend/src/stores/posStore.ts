@@ -130,8 +130,6 @@ export const usePosStore = defineStore("pos", () => {
 
 	const allowChangePostingDate = computed(() => !!posProfile.value?.allow_change_posting_date);
 
-	const displayItemsInStock = computed(() => !!posProfile.value?.display_items_in_stock);
-
 	const allowPartialPayment = computed(() => !!posProfile.value?.allow_partial_payment);
 
 	const allowCreditSale = computed(() => !!posProfile.value?.allow_credit_sale);
@@ -173,8 +171,6 @@ export const usePosStore = defineStore("pos", () => {
 	const hideVariantsItems = computed(() => !!posProfile.value?.hide_variants_items);
 
 	const autoSetBatch = computed(() => !!posProfile.value?.auto_set_batch);
-
-	const searchSerialNo = computed(() => !!posProfile.value?.search_serial_no);
 
 	const enableReturnValidity = computed(() => !!posProfile.value?.enable_return_validity);
 
@@ -555,7 +551,6 @@ export const usePosStore = defineStore("pos", () => {
 		sellingPriceList,
 		defaultCustomer,
 		allowChangePostingDate,
-		displayItemsInStock,
 		allowPartialPayment,
 		allowCreditSale,
 		allowReturn,
@@ -577,7 +572,6 @@ export const usePosStore = defineStore("pos", () => {
 		showTemplateItems,
 		hideVariantsItems,
 		autoSetBatch,
-		searchSerialNo,
 		enableReturnValidity,
 		returnValidityDays,
 		useCustomerCredit,

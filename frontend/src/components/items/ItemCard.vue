@@ -100,7 +100,7 @@ const emit = defineEmits(["click", "showDetail"]);
 
 const posStore = usePosStore();
 
-const showStock = computed(() => posStore.displayItemsInStock);
+const showStock = computed(() => true);
 const showItemCode = computed(() => posStore.displayItemCode);
 const allowNegativeStock = computed(() => posStore.stockSettings?.allow_negative_stock);
 const hideImages = computed(() => posStore.hideImages);

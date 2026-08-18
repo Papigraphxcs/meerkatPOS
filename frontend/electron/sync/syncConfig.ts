@@ -229,7 +229,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 			"hide_images",
 			"hide_unavailable_items",
 			"block_sale_beyond_available_qty",
-			"display_items_in_stock",
 			"cash_mode_of_payment",
 			"apply_customer_discount",
 			"allow_print_draft_invoices",

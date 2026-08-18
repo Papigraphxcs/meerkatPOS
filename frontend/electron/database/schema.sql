@@ -342,7 +342,6 @@ CREATE TABLE IF NOT EXISTS `pos_profiles` (
   `hide_images` TINYINT(1) DEFAULT 0,
   `hide_unavailable_items` TINYINT(1) DEFAULT 0,
   `block_sale_beyond_available_qty` TINYINT(1) DEFAULT 0,
-  `display_items_in_stock` TINYINT(1) DEFAULT 0,
   `cash_mode_of_payment` VARCHAR(255) DEFAULT NULL,
   `apply_customer_discount` TINYINT(1) DEFAULT 0,
   `allow_print_draft_invoices` TINYINT(1) DEFAULT 0,

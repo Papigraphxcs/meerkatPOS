@@ -4,15 +4,12 @@
 import frappe
 from frappe.utils import cint, flt
 
+from xpos.api.utilities import get_item_search_settings
+
 
 @frappe.whitelist()
 def get_erp_settings():
-	"""
-	Fetch all relevant ERPNext settings for local POS caching.
-
-	Returns a dict with keys: selling_settings, buying_settings,
-	stock_settings, accounts_settings, pos_settings.
-	"""
+	"""Fetch all relevant ERPNext settings for local POS caching."""
 	settings = {}
 
 	selling = frappe.get_cached_doc("Selling Settings")
@@ -79,6 +76,14 @@ def get_erp_settings():
 			accounts.get("book_asset_depreciation_entry_automatically")
 		),
 	}
+
+	pos = frappe.get_cached_doc("POS Settings")
+	settings["pos_settings"] = {
+		"invoice_type": pos.get("invoice_type") or "Sales Invoice",
+		"post_change_gl_entries": cint(pos.get("post_change_gl_entries")),
+	}
+
+	settings["item_search"] = get_item_search_settings()
 
 	settings["global_defaults"] = {
 		"default_currency": frappe.db.get_default("currency") or "",

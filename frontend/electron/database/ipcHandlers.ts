@@ -24,6 +24,38 @@ import { createLogger } from "../logger";
 
 const log = createLogger("DB-IPC");
 
+const DEFAULT_LOCAL_SEARCH_COLUMNS = ["item_code", "item_name", "local_item_name", "description"];
+const SAFE_COLUMN = /^[a-z_][a-z0-9_]*$/;
+
+let localItemColumns: Set<string> | null = null;
+
+async function getLocalItemColumns(): Promise<Set<string>> {
+	if (!localItemColumns) {
+		const rows = (await query(
+			"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'items'",
+		)) as { COLUMN_NAME: string }[];
+		localItemColumns = new Set(rows.map((r) => r.COLUMN_NAME));
+	}
+	return localItemColumns;
+}
+
+async function resolveItemSearchColumns(requested?: string[]): Promise<string[]> {
+	const wanted = requested?.length ? requested : DEFAULT_LOCAL_SEARCH_COLUMNS;
+	const available = await getLocalItemColumns();
+	const mapped = wanted.map((f) => (f === "name" ? "item_code" : f));
+
+	const usable = [...new Set(mapped.filter((f) => SAFE_COLUMN.test(f) && available.has(f)))];
+	const dropped = [...new Set(mapped)].filter((f) => !usable.includes(f));
+	if (dropped.length) {
+		log.warn(
+			`Offline item search ignoring field(s) with no local column: ${dropped.join(", ")}. ` +
+				"Add them to schema.sql and the sync field list to search them offline.",
+		);
+	}
+
+	return usable.length ? usable : ["item_code", "item_name"];
+}
+
 export function registerDbHandlers(): void {
 	ipcMain.handle("db:get-setting", async (_e, key: string) => {
 		const row = await queryOne<{ value: string }>("SELECT `value` FROM `app_settings` WHERE `key` = ?", [
@@ -75,6 +107,7 @@ export function registerDbHandlers(): void {
 			_e,
 			opts?: {
 				search?: string;
+				searchFields?: string[];
 				group?: string;
 				limit?: number;
 				offset?: number;
@@ -114,10 +147,12 @@ export function registerDbHandlers(): void {
 				params.push(opts.group);
 			}
 			if (opts?.search) {
-				sql +=
-					" AND (i.`item_code` LIKE ? OR i.`item_name` LIKE ? OR i.`local_item_name` LIKE ? OR ib.`barcode` LIKE ? OR i.`description` LIKE ?)";
+				const columns = await resolveItemSearchColumns(opts.searchFields);
+				const clauses = columns.map((c) => `COALESCE(i.\`${c}\`, '') LIKE ?`);
+				clauses.push("ib.`barcode` LIKE ?");
+				sql += ` AND (${clauses.join(" OR ")})`;
 				const like = `%${opts.search}%`;
-				params.push(like, like, like, like, like);
+				for (let i = 0; i < clauses.length; i++) params.push(like);
 			}
 			sql += " ORDER BY i.`item_name` ASC";
 			if (opts?.limit) {
