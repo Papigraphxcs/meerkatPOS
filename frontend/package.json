@@ -55,7 +55,7 @@
     "@electron/fuses": "^1.8.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.2.0",
-    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-vue": "^6.0.8",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.19",
     "cypress": "13.17.0",
