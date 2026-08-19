@@ -83,6 +83,7 @@ export interface POSProfile {
 	back_office_cash_account?: string;
 	block_sale_beyond_available_qty?: boolean;
 	purchase_taxes?: PurchaseTaxEntry[];
+	allowed_sales_persons?: { sales_person: string }[];
 	[key: string]: any;
 }
 

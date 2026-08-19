@@ -134,6 +134,12 @@ export const usePosStore = defineStore("pos", () => {
 
 	const displayAdditionalNotes = computed(() => !!posProfile.value?.display_additional_notes);
 
+	const allowedSalesPersons = computed(() =>
+		(posProfile.value?.allowed_sales_persons ?? []).map((row) => row.sales_person).filter(Boolean),
+	);
+
+	const salesPersonEnabled = computed(() => allowedSalesPersons.value.length > 0);
+
 	const allowWriteOffChange = computed(() => !!posProfile.value?.allow_write_off_change);
 
 	const displayItemCode = computed(() => !!posProfile.value?.display_item_code);
@@ -548,6 +554,8 @@ export const usePosStore = defineStore("pos", () => {
 		allowSalesOrder,
 		allowDeleteOfflineInvoice,
 		displayAdditionalNotes,
+		allowedSalesPersons,
+		salesPersonEnabled,
 		allowWriteOffChange,
 		displayItemCode,
 		allowZeroRatedItems,

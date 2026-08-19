@@ -94,6 +94,43 @@ def _apply_invoice_loyalty_fields(invoice_doc, data: dict):
 	invoice_doc.loyalty_amount = 0
 
 
+def resolve_return_sales_person(return_against: str | None) -> str | None:
+	"""Sales person credited on the invoice being returned, if any."""
+	if not return_against:
+		return None
+
+	doctype = _detect_invoice_doctype(return_against)
+	return frappe.db.get_value(
+		"Sales Team",
+		{"parent": return_against, "parenttype": doctype},
+		"sales_person",
+		order_by="idx asc",
+	)
+
+
+def apply_sales_person(doc, sales_person: str | None, pos_profile: str | None = None):
+	"""Attribute the whole document to a single sales person."""
+	if not doc.meta.get_field("sales_team"):
+		return
+
+	doc.set("sales_team", [])
+	if not sales_person:
+		return
+
+	if pos_profile:
+		from xpos.api.customers import get_allowed_sales_persons
+
+		if sales_person not in get_allowed_sales_persons(pos_profile):
+			frappe.throw(
+				_("Sales Person {0} is not allowed on POS Profile {1}.").format(sales_person, pos_profile)
+			)
+
+	if not frappe.db.get_value("Sales Person", sales_person, "enabled"):
+		frappe.throw(_("Sales Person {0} is disabled.").format(sales_person))
+
+	doc.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+
+
 def _prepare_invoice_totals_for_loyalty_validation(invoice_doc):
 	"""Pre-calculate invoice totals before ERPNext validates loyalty redemption."""
 	from xpos.x_pos.api.invoice import apply_tax_inclusive, calc_delivery_charges
@@ -310,8 +347,6 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 		invoice_doc.set("items", [])
 		invoice_doc.set("payments", [])
 		invoice_doc.set("taxes", [])
-		if hasattr(invoice_doc, "sales_team"):
-			invoice_doc.set("sales_team", [])
 		if hasattr(invoice_doc, "coupons"):
 			invoice_doc.set("coupons", [])
 		if hasattr(invoice_doc, "offers"):
@@ -375,14 +410,12 @@ def create_invoice(data: str | dict, local_id: str | None = None):
 
 	invoice_doc.pos_notes = data.get("pos_notes", "")
 	invoice_doc.pos_delivery_date = data.get("pos_delivery_date", None) or None
-	if data.get("sales_person", None):
-		invoice_doc.append(
-			"sales_team",
-			{
-				"sales_person": data["sales_person"],
-				"allocated_percentage": 100,
-			},
-		)
+
+	sales_person = data.get("sales_person") or None
+	if sales_person:
+		apply_sales_person(invoice_doc, sales_person, pos_profile)
+	else:
+		apply_sales_person(invoice_doc, resolve_return_sales_person(invoice_doc.return_against))
 
 	_apply_invoice_loyalty_fields(invoice_doc, data)
 
@@ -822,6 +855,8 @@ def save_draft_invoice(data: str | dict):
 	except Exception:
 		pass
 
+	apply_sales_person(invoice_doc, data.get("sales_person") or None, pos_profile)
+
 	rate_precision = _get_item_rate_precision()
 
 	for item_data in items:
@@ -1257,6 +1292,7 @@ def get_invoice_details(invoice_name: str, doctype: str = ""):
 		"total_qty": getattr(doc, "total_qty", 0),
 		"total": getattr(doc, "total", 0),
 		"sales_partner": getattr(doc, "sales_partner", None),
+		"sales_person": doc.sales_team[0].sales_person if doc.get("sales_team") else None,
 		"commission_rate": getattr(doc, "commission_rate", 0),
 		"total_commission": getattr(doc, "total_commission", 0),
 		"loyalty_program": getattr(doc, "loyalty_program", None),

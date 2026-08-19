@@ -1235,6 +1235,9 @@ export const useCartStore = defineStore("cart", () => {
 			if (result.pos_delivery_date) {
 				deliveryDate.value = result.pos_delivery_date;
 			}
+			if (result.sales_person) {
+				salesPerson.value = result.sales_person;
+			}
 			if (result.pos_delivery_charges) {
 				selectedDeliveryCharge.value = {
 					name: result.pos_delivery_charges,

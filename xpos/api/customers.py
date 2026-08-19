@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from xpos.api.profiles import resolve_pos_profile
 from xpos.utils import row_value
 
 
@@ -480,14 +481,55 @@ def get_customer_credit(customer: str, company: str):
 	return credits
 
 
+def get_allowed_sales_persons(pos_profile: str | None = None) -> list[str]:
+	"""Sales Person names allow-listed on the POS Profile."""
+	profile = resolve_pos_profile(pos_profile)
+	return [
+		name
+		for name in (row_value(row, "sales_person") for row in profile.get("allowed_sales_persons") or [])
+		if name
+	]
+
+
 @frappe.whitelist()
-def get_sales_person_names():
-	"""
-	Returns the list of enabled sales persons.
-	"""
+def sales_person_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str, **kwargs
+):
+	"""Link query behind the POS sales person field."""
+	filters = filters or {}
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+	pos_profile = filters.get("pos_profile") if isinstance(filters, dict) else None
+
+	allowed = get_allowed_sales_persons(pos_profile)
+	if not allowed:
+		return []
+
+	txt = (txt or "").strip()
 	return frappe.get_all(
 		"Sales Person",
-		filters={"enabled": 1},
+		filters={"enabled": 1, "name": ["in", allowed]},
+		or_filters=(
+			{"name": ["like", f"%{txt}%"], "sales_person_name": ["like", f"%{txt}%"]} if txt else None
+		),
+		fields=["name"],
+		order_by="name asc",
+		offset=cint(start),
+		limit=cint(page_len) or 20,
+		as_list=True,
+	)
+
+
+@frappe.whitelist()
+def get_sales_person_names(pos_profile: str | None = None):
+	"""Enabled sales persons allowed for the given POS Profile."""
+	allowed = get_allowed_sales_persons(pos_profile)
+	if not allowed:
+		return []
+
+	return frappe.get_all(
+		"Sales Person",
+		filters={"enabled": 1, "name": ["in", allowed]},
 		fields=["name", "sales_person_name"],
 		order_by="name asc",
 	)
