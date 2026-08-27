@@ -8,9 +8,9 @@
 				<div class="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
 					<div class="flex items-center gap-2">
 						<div
-							class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-sm"
+							class="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground shadow-sm"
 						>
-							<Bug class="h-4 w-4 text-white" />
+							<Bug class="h-4 w-4 text-background" />
 						</div>
 						<div>
 							<h2 class="text-base font-semibold">{{ __("Error Inspector") }}</h2>
@@ -330,7 +330,7 @@ function exportJson() {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a");
 		a.href = url;
-		a.download = `xpos-errors-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`;
+		a.download = `meerkatpos-errors-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`;
 		a.click();
 		URL.revokeObjectURL(url);
 	} catch {

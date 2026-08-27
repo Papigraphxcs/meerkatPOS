@@ -18,7 +18,18 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, nowdate
 
+from xpos.api.auth import user_has_pos_permission
+from xpos.api.profiles import resolve_pos_profile
+
 from .utils import get_default_warehouse
+
+
+def ensure_pos_permission(key: str):
+	if not user_has_pos_permission(key):
+		frappe.throw(
+			_("You are not permitted to perform this action."),
+			frappe.PermissionError,
+		)
 
 
 @frappe.whitelist()
@@ -218,6 +229,7 @@ def receive_transit_stock(data: str | dict):
 
 	If receive_qty < original qty, the difference is the shortage.
 	"""
+	ensure_pos_permission("stock_entry")
 	payload = json.loads(data) if isinstance(data, str) else data
 
 	outgoing_entry_name = payload.get("outgoing_stock_entry")
@@ -346,6 +358,7 @@ def return_shortage_to_source(data: str | dict):
 	    "remarks": "Items damaged during transport"
 	}
 	"""
+	ensure_pos_permission("stock_entry")
 	payload = json.loads(data) if isinstance(data, str) else data
 
 	outgoing_entry_name = payload.get("outgoing_stock_entry")
@@ -430,4 +443,81 @@ def return_shortage_to_source(data: str | dict):
 		"status": "completed",
 		"items_returned": len(return_se.items),
 		"total_returned_qty": total_returned,
+	}
+
+
+@frappe.whitelist()
+def create_material_receipt(data: str | dict):
+	"""
+	Bring brand-new stock into the system with no supplier/bill attached
+	(opening stock, found stock, samples, corrections).
+
+	data = {
+	    "pos_profile": "HeadOffice",
+	    "target_warehouse": "Stores - SAH",  # optional, defaults to the profile's warehouse
+	    "items": [
+	        {
+	            "item_code": "ITEM-001",
+	            "qty": 10,
+	            "uom": "Nos",
+	            "stock_uom": "Nos",
+	            "conversion_factor": 1,
+	            "valuation_rate": 25.5,
+	        }
+	    ],
+	    "remarks": "Opening stock",
+	}
+	"""
+	ensure_pos_permission("material_receipt")
+	payload = json.loads(data) if isinstance(data, str) else data
+
+	profile = resolve_pos_profile(payload.get("pos_profile"))
+	target_warehouse = payload.get("target_warehouse") or profile.warehouse
+	if not target_warehouse:
+		frappe.throw(_("Target warehouse is required."))
+
+	items_data = payload.get("items", [])
+	if not items_data:
+		frappe.throw(_("No items to add."))
+
+	receipt = frappe.get_doc(
+		{
+			"doctype": "Stock Entry",
+			"purpose": "Material Receipt",
+			"stock_entry_type": "Material Receipt",
+			"company": profile.company,
+			"posting_date": nowdate(),
+			"remarks": payload.get("remarks") or _("Stock added from POS"),
+		}
+	)
+
+	for row in items_data:
+		qty = flt(row.get("qty", 0))
+		if qty <= 0:
+			continue
+
+		receipt.append(
+			"items",
+			{
+				"item_code": row.get("item_code"),
+				"qty": qty,
+				"uom": row.get("uom"),
+				"stock_uom": row.get("stock_uom"),
+				"conversion_factor": row.get("conversion_factor") or 1,
+				"t_warehouse": target_warehouse,
+				"basic_rate": flt(row.get("valuation_rate", 0)),
+			},
+		)
+
+	if not receipt.items:
+		frappe.throw(_("No valid items to add."))
+
+	receipt.flags.ignore_permissions = True
+	receipt.insert()
+	receipt.submit()
+
+	return {
+		"stock_entry": receipt.name,
+		"target_warehouse": target_warehouse,
+		"items_added": len(receipt.items),
 	}

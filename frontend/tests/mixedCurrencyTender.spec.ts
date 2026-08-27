@@ -47,7 +47,7 @@ const ctx: TenderContext = {
 };
 
 beforeEach(() => {
-	(window as any).xpos = {
+	(window as any).meerkatpos = {
 		boot: {
 			currencies: [
 				{ name: "LBP", symbol: "L£", number_format: "#,###" },

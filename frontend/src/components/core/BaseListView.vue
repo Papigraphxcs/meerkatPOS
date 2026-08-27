@@ -126,7 +126,7 @@ const props = withDefaults(
 		queryFilters: () => [],
 		emptyDescription: "",
 		hideStandardFiltersOnMobile: false,
-		scrollClass: "px-3 sm:px-4 py-1 xpos-scrollbar",
+		scrollClass: "px-3 sm:px-4 py-1 meerkatpos-scrollbar",
 		listClass: "space-y-2",
 		loadingSkeletonCount: 5,
 	},

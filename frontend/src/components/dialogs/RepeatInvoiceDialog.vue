@@ -10,7 +10,7 @@
 		<DialogContent class="max-w-2xl max-h-[80vh] flex flex-col p-0 gap-0">
 			<DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
 				<div class="flex items-center gap-2">
-					<Repeat class="w-5 h-5 text-blue-500" />
+					<Repeat class="w-5 h-5 text-primary" />
 					<DialogTitle class="text-base">{{ __("Repeat Invoice") }}</DialogTitle>
 					<Badge variant="outline" class="text-[10px] font-mono">Ctrl+G</Badge>
 				</div>
@@ -19,7 +19,7 @@
 				}}</DialogDescription>
 			</DialogHeader>
 
-			<div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+			<div class="flex-1 overflow-y-auto p-5 space-y-4 meerkatpos-scrollbar">
 				<div class="relative">
 					<Search
 						class="absolute inset-s-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
@@ -37,7 +37,7 @@
 					<Loader2 class="w-6 h-6 text-primary animate-spin" />
 				</div>
 				<div v-else-if="invoices.length > 0" class="space-y-2">
-					<div class="max-h-80 overflow-y-auto space-y-2 xpos-scrollbar">
+					<div class="max-h-80 overflow-y-auto space-y-2 meerkatpos-scrollbar">
 						<button
 							v-for="inv in invoices"
 							:key="inv.name"

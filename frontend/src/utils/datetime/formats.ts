@@ -16,11 +16,11 @@ type BootTimeZones = {
 };
 
 function getBootSysDefaults(): BootSysDefaults {
-	return (window.xpos?.boot as { sysdefaults?: BootSysDefaults } | undefined)?.sysdefaults || {};
+	return (window.meerkatpos?.boot as { sysdefaults?: BootSysDefaults } | undefined)?.sysdefaults || {};
 }
 
 function getBootTimeZones(): BootTimeZones {
-	return (window.xpos?.boot as { time_zone?: BootTimeZones } | undefined)?.time_zone || {};
+	return (window.meerkatpos?.boot as { time_zone?: BootTimeZones } | undefined)?.time_zone || {};
 }
 
 function normalizeDateFormat(format?: string): string {

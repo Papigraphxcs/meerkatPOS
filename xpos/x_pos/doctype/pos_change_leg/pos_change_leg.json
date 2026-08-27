@@ -24,6 +24,7 @@
   },
   {
    "fetch_from": "mode_of_payment.pos_tender_currency",
+   "fetch_if_empty": 1,
    "fieldname": "currency",
    "fieldtype": "Link",
    "in_list_view": 1,

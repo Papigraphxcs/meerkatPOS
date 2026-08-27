@@ -19,6 +19,7 @@ import {
 } from "@/types/pos.types";
 import { isOnline } from "@/utils";
 import { symbolFor } from "@/composables/useCurrency";
+import { useSettingsStore } from "./settingsStore";
 
 export const usePosStore = defineStore("pos", () => {
 	const isLoading = ref(true);
@@ -94,10 +95,11 @@ export const usePosStore = defineStore("pos", () => {
 
 	const sellingPriceList = computed(() => posProfile.value?.selling_price_list || "");
 
-	const invoiceType = computed(() => xpos.boot?.pos_settings?.invoice_type);
+	const settingsStore = useSettingsStore();
+	const invoiceType = computed(() => settingsStore.invoiceType);
 
 	const defaultPrintFormat = computed(
-		() => posProfile.value?.default_print_format || "XPOS Thermal Receipt",
+		() => posProfile.value?.default_print_format || "meerkatPOS Thermal Receipt",
 	);
 
 	const defaultCustomer = computed(() => posProfile.value?.customer || "");
@@ -241,7 +243,7 @@ export const usePosStore = defineStore("pos", () => {
 					import("@/stores/settingsStore").then(({ useSettingsStore }) => {
 						const settingsStore = useSettingsStore();
 						settingsStore.fetchSettings().catch((error) => {
-							console.warn("[XPOS] Failed to fetch ERP settings:", error);
+							console.warn("[meerkatPOS] Failed to fetch ERP settings:", error);
 						});
 					});
 				} else {
@@ -260,12 +262,12 @@ export const usePosStore = defineStore("pos", () => {
 					import("@/stores/settingsStore").then(({ useSettingsStore }) => {
 						const settingsStore = useSettingsStore();
 						settingsStore.fetchSettings().catch((error) => {
-							console.warn("[XPOS] Failed to load cached ERP settings:", error);
+							console.warn("[meerkatPOS] Failed to load cached ERP settings:", error);
 						});
 					});
 					return;
 				} else {
-					console.warn("[XPOS Offline] No cached POS data available");
+					console.warn("[meerkatPOS Offline] No cached POS data available");
 					clearShiftState();
 					showOpeningDialog.value = true;
 					return;
@@ -282,7 +284,7 @@ export const usePosStore = defineStore("pos", () => {
 				import("@/stores/settingsStore").then(({ useSettingsStore }) => {
 					const settingsStore = useSettingsStore();
 					settingsStore.fetchSettings().catch((error) => {
-						console.warn("[XPOS] Failed to fetch ERP settings:", error);
+						console.warn("[meerkatPOS] Failed to fetch ERP settings:", error);
 					});
 				});
 
@@ -293,18 +295,18 @@ export const usePosStore = defineStore("pos", () => {
 						import("@/stores/itemStore").then(async ({ useItemStore }) => {
 							const itemStore = useItemStore();
 							itemStore.cacheAllItems(result.pos_profile.name).catch((error) => {
-								console.warn("[XPOS] Failed to initialize offline item cache:", error);
+								console.warn("[meerkatPOS] Failed to initialize offline item cache:", error);
 							});
 						});
 
 						import("@/stores/customerStore").then(async ({ useCustomerStore }) => {
 							const customerStore = useCustomerStore();
 							customerStore.cacheAllCustomers(result.pos_profile.name).catch((error) => {
-								console.warn("[XPOS] Failed to initialize offline customer cache:", error);
+								console.warn("[meerkatPOS] Failed to initialize offline customer cache:", error);
 							});
 						});
 					} catch (error) {
-						console.warn("[XPOS] Failed to cache POS data:", error);
+						console.warn("[meerkatPOS] Failed to cache POS data:", error);
 					}
 				}
 			} else {
@@ -321,7 +323,7 @@ export const usePosStore = defineStore("pos", () => {
 					return;
 				}
 			} catch {
-				console.warn("[XPOS Offline] Failed to load cached POS data");
+				console.warn("[meerkatPOS Offline] Failed to load cached POS data");
 			}
 
 			clearShiftState();
@@ -407,7 +409,7 @@ export const usePosStore = defineStore("pos", () => {
 			import("@/stores/settingsStore").then(({ useSettingsStore }) => {
 				const settingsStore = useSettingsStore();
 				settingsStore.fetchSettings().catch((error) => {
-					console.warn("[XPOS] Failed to fetch ERP settings:", error);
+					console.warn("[meerkatPOS] Failed to fetch ERP settings:", error);
 				});
 			});
 
@@ -418,18 +420,18 @@ export const usePosStore = defineStore("pos", () => {
 					import("@/stores/itemStore").then(({ useItemStore }) => {
 						const itemStore = useItemStore();
 						itemStore.cacheAllItems(profileName).catch((error) => {
-							console.warn("[XPOS] Failed to initialize offline item cache:", error);
+							console.warn("[meerkatPOS] Failed to initialize offline item cache:", error);
 						});
 					});
 
 					import("@/stores/customerStore").then(({ useCustomerStore }) => {
 						const customerStore = useCustomerStore();
 						customerStore.cacheAllCustomers(profileName).catch((error) => {
-							console.warn("[XPOS] Failed to initialize offline customer cache:", error);
+							console.warn("[meerkatPOS] Failed to initialize offline customer cache:", error);
 						});
 					});
 				} catch (error) {
-					console.warn("[XPOS] Failed to cache POS data:", error);
+					console.warn("[meerkatPOS] Failed to cache POS data:", error);
 				}
 			}
 			return result;
@@ -505,7 +507,7 @@ export const usePosStore = defineStore("pos", () => {
 			});
 			await cacheReceiptContext(profileName, ctx);
 		} catch (error) {
-			console.warn("[XPOS] Failed to cache receipt context:", error);
+			console.warn("[meerkatPOS] Failed to cache receipt context:", error);
 		}
 	}
 

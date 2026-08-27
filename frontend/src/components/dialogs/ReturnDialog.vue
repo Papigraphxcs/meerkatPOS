@@ -18,7 +18,7 @@
 				}}</DialogDescription>
 			</DialogHeader>
 
-			<div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+			<div class="flex-1 overflow-y-auto p-5 space-y-4 meerkatpos-scrollbar">
 				<div v-if="!selectedInvoice">
 					<div class="relative mb-3">
 						<Search
@@ -39,7 +39,7 @@
 
 					<div
 						v-else-if="invoices.length > 0"
-						class="space-y-2 max-h-60 overflow-y-auto xpos-scrollbar"
+						class="space-y-2 max-h-60 overflow-y-auto meerkatpos-scrollbar"
 					>
 						<button
 							v-for="inv in invoices"

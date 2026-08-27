@@ -1,6 +1,6 @@
 <template>
 	<div
-		id="xpos-app"
+		id="meerkatpos-app"
 		:class="[
 			'h-screen w-screen font-sans',
 			isDark ? 'dark' : '',
@@ -27,7 +27,7 @@
 							class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"
 						></div>
 					</div>
-					<h2 class="text-xl font-semibold text-foreground">Loading X POS</h2>
+					<h2 class="text-xl font-semibold text-foreground">Loading meerkatPOS</h2>
 					<p class="text-muted-foreground mt-1">Preparing your workspace...</p>
 				</div>
 			</div>
@@ -338,7 +338,7 @@ function toggleDarkMode() {
 	} else {
 		theme.value = "light";
 	}
-	localStorage.setItem("xpos-theme", theme.value);
+	localStorage.setItem("meerkatpos-theme", theme.value);
 }
 
 provide("isDark", isDark);
@@ -355,17 +355,22 @@ function handleSystemThemeChange(e: MediaQueryListEvent) {
 }
 
 onMounted(() => {
-	const saved = localStorage.getItem("xpos-theme") as "light" | "dark" | "system" | null;
+	const saved = localStorage.getItem("meerkatpos-theme") as "light" | "dark" | "system" | null;
 	if (saved && ["light", "dark", "system"].includes(saved)) {
 		theme.value = saved;
 	} else {
-		const oldSaved = localStorage.getItem("xpos-dark-mode");
-		if (oldSaved === "1") {
-			theme.value = "dark";
-		} else if (oldSaved === "0") {
-			theme.value = "light";
+		const preRename = localStorage.getItem("xpos-theme") as "light" | "dark" | "system" | null;
+		if (preRename && ["light", "dark", "system"].includes(preRename)) {
+			theme.value = preRename;
+		} else {
+			const oldSaved = localStorage.getItem("xpos-dark-mode");
+			if (oldSaved === "1") {
+				theme.value = "dark";
+			} else if (oldSaved === "0") {
+				theme.value = "light";
+			}
 		}
-		localStorage.setItem("xpos-theme", theme.value);
+		localStorage.setItem("meerkatpos-theme", theme.value);
 	}
 
 	applyThemeToDocument(isDark.value);
@@ -381,27 +386,23 @@ onMounted(() => {
 	mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 	mediaQuery.addEventListener("change", handleSystemThemeChange);
 
-	if (!isAuthPage.value) {
-		posStore.checkExistingShift();
-	}
-
 	offlineStore.init();
 	cleanupSyncListeners = initSyncListeners();
 	initKeyboardShortcuts();
 
-	window.addEventListener("xpos:clear-cart", handleClearCart as EventListener);
-	window.addEventListener("xpos:process-payment", handleProcessPayment as EventListener);
-	window.addEventListener("xpos:select-customer", handleSelectCustomer as EventListener);
-	window.addEventListener("xpos:show-drafts", handleShowDrafts as EventListener);
-	window.addEventListener("xpos:hold-invoice", handleHoldInvoice as EventListener);
-	window.addEventListener("xpos:remove-last-item", handleRemoveLastItem as EventListener);
-	window.addEventListener("xpos:close-shift", handleCloseShift as EventListener);
-	window.addEventListener("xpos:cash-expense", handleCashExpense as EventListener);
-	window.addEventListener("xpos:cash-deposit", handleCashDeposit as EventListener);
-	window.addEventListener("xpos:print-last", handlePrintLast as EventListener);
-	window.addEventListener("xpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
-	window.addEventListener("xpos:show-about-dialog", handleShowAboutDialog as EventListener);
-	window.addEventListener("xpos:toggle-error-inspector", handleToggleErrorInspector as EventListener);
+	window.addEventListener("meerkatpos:clear-cart", handleClearCart as EventListener);
+	window.addEventListener("meerkatpos:process-payment", handleProcessPayment as EventListener);
+	window.addEventListener("meerkatpos:select-customer", handleSelectCustomer as EventListener);
+	window.addEventListener("meerkatpos:show-drafts", handleShowDrafts as EventListener);
+	window.addEventListener("meerkatpos:hold-invoice", handleHoldInvoice as EventListener);
+	window.addEventListener("meerkatpos:remove-last-item", handleRemoveLastItem as EventListener);
+	window.addEventListener("meerkatpos:close-shift", handleCloseShift as EventListener);
+	window.addEventListener("meerkatpos:cash-expense", handleCashExpense as EventListener);
+	window.addEventListener("meerkatpos:cash-deposit", handleCashDeposit as EventListener);
+	window.addEventListener("meerkatpos:print-last", handlePrintLast as EventListener);
+	window.addEventListener("meerkatpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
+	window.addEventListener("meerkatpos:show-about-dialog", handleShowAboutDialog as EventListener);
+	window.addEventListener("meerkatpos:toggle-error-inspector", handleToggleErrorInspector as EventListener);
 });
 
 watch(
@@ -421,7 +422,7 @@ watch(
 );
 
 function handleOpenOfflinePanel() {
-	window.dispatchEvent(new CustomEvent("xpos:open-offline-panel"));
+	window.dispatchEvent(new CustomEvent("meerkatpos:open-offline-panel"));
 }
 
 watch(isAuthPage, (isAuth, wasAuth) => {
@@ -429,6 +430,16 @@ watch(isAuthPage, (isAuth, wasAuth) => {
 		posStore.checkExistingShift();
 	}
 });
+
+watch(
+	() => authStore.isAuthenticated,
+	(isAuth) => {
+		if (isAuth && !isAuthPage.value) {
+			posStore.checkExistingShift();
+		}
+	},
+	{ immediate: true },
+);
 
 watch(
 	() => posStore.isReady,
@@ -455,18 +466,18 @@ onUnmounted(() => {
 	offlineStore.destroy();
 	destroyKeyboardShortcuts();
 
-	window.removeEventListener("xpos:clear-cart", handleClearCart as EventListener);
-	window.removeEventListener("xpos:process-payment", handleProcessPayment as EventListener);
-	window.removeEventListener("xpos:select-customer", handleSelectCustomer as EventListener);
-	window.removeEventListener("xpos:show-drafts", handleShowDrafts as EventListener);
-	window.removeEventListener("xpos:hold-invoice", handleHoldInvoice as EventListener);
-	window.removeEventListener("xpos:remove-last-item", handleRemoveLastItem as EventListener);
-	window.removeEventListener("xpos:close-shift", handleCloseShift as EventListener);
-	window.removeEventListener("xpos:cash-expense", handleCashExpense as EventListener);
-	window.removeEventListener("xpos:cash-deposit", handleCashDeposit as EventListener);
-	window.removeEventListener("xpos:print-last", handlePrintLast as EventListener);
-	window.removeEventListener("xpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
-	window.removeEventListener("xpos:show-about-dialog", handleShowAboutDialog as EventListener);
-	window.removeEventListener("xpos:toggle-error-inspector", handleToggleErrorInspector as EventListener);
+	window.removeEventListener("meerkatpos:clear-cart", handleClearCart as EventListener);
+	window.removeEventListener("meerkatpos:process-payment", handleProcessPayment as EventListener);
+	window.removeEventListener("meerkatpos:select-customer", handleSelectCustomer as EventListener);
+	window.removeEventListener("meerkatpos:show-drafts", handleShowDrafts as EventListener);
+	window.removeEventListener("meerkatpos:hold-invoice", handleHoldInvoice as EventListener);
+	window.removeEventListener("meerkatpos:remove-last-item", handleRemoveLastItem as EventListener);
+	window.removeEventListener("meerkatpos:close-shift", handleCloseShift as EventListener);
+	window.removeEventListener("meerkatpos:cash-expense", handleCashExpense as EventListener);
+	window.removeEventListener("meerkatpos:cash-deposit", handleCashDeposit as EventListener);
+	window.removeEventListener("meerkatpos:print-last", handlePrintLast as EventListener);
+	window.removeEventListener("meerkatpos:show-shortcuts-dialog", handleShowShortcutsDialog as EventListener);
+	window.removeEventListener("meerkatpos:show-about-dialog", handleShowAboutDialog as EventListener);
+	window.removeEventListener("meerkatpos:toggle-error-inspector", handleToggleErrorInspector as EventListener);
 });
 </script>

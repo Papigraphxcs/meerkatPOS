@@ -28,7 +28,7 @@ interface Locals {
 }
 
 declare global {
-	interface XPosGlobal {
+	interface MeerkatPosGlobal {
 		boot?: Record<string, any> & {
 			currencies: Array<{
 				name?: string;
@@ -53,13 +53,13 @@ declare global {
 		csrf_token?: string;
 	}
 
-	var xpos: XPosGlobal;
+	var meerkatpos: MeerkatPosGlobal;
 	var locals: Locals;
 
 	interface Window {
 		__: (txt: string, args?: (string | number)[]) => string;
-		__xposBundlePromise?: Promise<unknown>;
-		xpos?: XPosGlobal;
+		__meerkatposBundlePromise?: Promise<unknown>;
+		meerkatpos?: MeerkatPosGlobal;
 		electronAPI?: import("@/services/electronBridge").ElectronAPI;
 		locals?: Locals;
 	}

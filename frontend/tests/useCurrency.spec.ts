@@ -23,7 +23,7 @@ vi.mock("@/services/dbBridge", () => ({
 
 /** LBP is quoted in whole units, USD in cents. Every assertion here rests on that asymmetry. */
 function seedBoot() {
-	(window as any).xpos = {
+	(window as any).meerkatpos = {
 		boot: {
 			currencies: [
 				{ name: "LBP", symbol: "L£", number_format: "#,###" },
@@ -91,14 +91,14 @@ describe("currency metadata", () => {
 	});
 
 	it("uses the currency code as the symbol when none is configured", () => {
-		(window as any).xpos = { boot: { currencies: [{ name: "LBP" }] } };
+		(window as any).meerkatpos = { boot: { currencies: [{ name: "LBP" }] } };
 		resetCurrencyCache();
 
 		expect(symbolFor("LBP")).toBe("LBP");
 	});
 
 	it("survives a missing boot payload", () => {
-		(window as any).xpos = undefined;
+		(window as any).meerkatpos = undefined;
 		resetCurrencyCache();
 
 		expect(currencyMeta("USD").precision).toBe(DEFAULT_CURRENCY_PRECISION);

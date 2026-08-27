@@ -53,7 +53,7 @@ function bootMixedCurrencyPos(routes: Record<string, unknown> = mixedCurrencyRou
 
 function openPaymentDialog() {
 	cy.window().then((win) => {
-		win.dispatchEvent(new CustomEvent("xpos:process-payment"));
+		win.dispatchEvent(new CustomEvent("meerkatpos:process-payment"));
 	});
 	cy.get("[role='dialog']").should("be.visible");
 }
@@ -169,7 +169,7 @@ describe("mixed-currency tender - closing the shift", () => {
 	beforeEach(() => {
 		bootMixedCurrencyPos();
 		cy.window().then((win) => {
-			win.dispatchEvent(new CustomEvent("xpos:close-shift"));
+			win.dispatchEvent(new CustomEvent("meerkatpos:close-shift"));
 		});
 		cy.contains("[role='dialog']", "Close Shift").should("be.visible");
 	});

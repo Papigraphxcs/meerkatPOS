@@ -19,7 +19,7 @@
 				loading="lazy"
 			/>
 			<div v-else class="w-full h-full flex items-center justify-center">
-				<Package class="w-6 h-6 text-muted-foreground/40" />
+				<component :is="typeIcon" class="w-6 h-6 text-muted-foreground/40" />
 			</div>
 
 			<div
@@ -91,7 +91,8 @@ import { useMoney } from "@/composables/useMoney";
 import { formatQty } from "@/utils/numberFormat";
 import { Badge } from "@/components/ui/badge";
 import { TooltipWrapper } from "@/components/ui/tooltip";
-import { Package, Plus, AlertCircle, Ban, Info } from "lucide-vue-next";
+import { Plus, AlertCircle, Ban, Info } from "lucide-vue-next";
+import { getItemTypeIcon } from "@/utils/itemTypeIcon";
 import __ from "@/lib/translate";
 
 const props = defineProps({
@@ -108,7 +109,8 @@ const { money } = useMoney();
 const showStock = computed(() => true);
 const showItemCode = computed(() => posStore.displayItemCode);
 const allowNegativeStock = computed(() => posStore.stockSettings?.allow_negative_stock);
-const hideImages = computed(() => posStore.hideImages);
+const hideImages = computed(() => true);
+const typeIcon = computed(() => getItemTypeIcon(props.item));
 
 const isNonStockItem = computed(() => Number(props.item.is_stock_item) === 0);
 

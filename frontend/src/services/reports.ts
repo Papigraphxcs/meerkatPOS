@@ -215,6 +215,33 @@ const reportDefinitions: ReportDefinition[] = [
 
 const reportMap = new Map(reportDefinitions.map((report) => [report.slug, report]));
 
+let accessibleReportNames: Set<string> | null = null;
+let accessibleReportsPromise: Promise<void> | null = null;
+
+/**
+ * Fetches which reports the current user can actually run (per-report allowed
+ * roles + "report" permission on the doctype it reports on) and caches the
+ * result for the session. Call this before relying on `isReportAccessible` to
+ * hide, not just disable, reports the user isn't permitted to open.
+ */
+export async function ensureReportAccessLoaded(): Promise<void> {
+	if (accessibleReportNames) return;
+	if (!accessibleReportsPromise) {
+		accessibleReportsPromise = call<string[]>("xpos.api.reports.get_accessible_reports", {
+			reports: JSON.stringify(reportDefinitions.map((r) => r.reportName)),
+		})
+			.then((names) => {
+				accessibleReportNames = new Set(names || []);
+			})
+			.catch(() => {
+				// If the check itself fails, fall back to the app-level permissionKey
+				// gating only rather than hiding every report.
+				accessibleReportNames = new Set(reportDefinitions.map((r) => r.reportName));
+			});
+	}
+	await accessibleReportsPromise;
+}
+
 function cloneValue<T>(value: T): T {
 	if (Array.isArray(value)) return [...value] as T;
 	if (value && typeof value === "object") return { ...(value as Record<string, unknown>) } as T;
@@ -231,11 +258,14 @@ export function getReportDefinitions(): ReportDefinition[] {
 }
 
 export function getAccessibleReports(): ReportDefinition[] {
-	return reportDefinitions.filter((report) => !report.permissionKey || hasPermission(report.permissionKey));
+	return reportDefinitions.filter((report) => isReportAccessible(report));
 }
 
 export function isReportAccessible(report: ReportDefinition): boolean {
-	return !report.permissionKey || hasPermission(report.permissionKey);
+	if (report.permissionKey && !hasPermission(report.permissionKey)) return false;
+	// Not loaded yet (see ensureReportAccessLoaded): don't hide it prematurely.
+	if (!accessibleReportNames) return true;
+	return accessibleReportNames.has(report.reportName);
 }
 
 export function buildInitialReportFilters(

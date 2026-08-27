@@ -1,5 +1,5 @@
-appId: com.xpos.app
-productName: X POS
+appId: com.meerkatpos.app
+productName: meerkatPOS
 copyright: Copyright © 2026 Kodlyft
 
 directories:
@@ -28,7 +28,7 @@ win:
         - x64
   artifactName: ${productName}-${version}-Setup.${ext}
   icon: build/icon.ico
-  legalTrademarks: X POS
+  legalTrademarks: meerkatPOS
 
 nsis:
   oneClick: false
@@ -36,7 +36,7 @@ nsis:
   perMachine: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: X POS
+  shortcutName: meerkatPOS
 
 mac:
   target:

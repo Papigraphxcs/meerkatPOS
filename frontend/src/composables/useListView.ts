@@ -129,6 +129,8 @@ export function useListView(options: ListViewOptions) {
 	});
 
 	async function fetch() {
+		if (!doctypeRef.value) return;
+
 		isLoading.value = true;
 		try {
 			const listArgs: Record<string, unknown> = {
@@ -159,6 +161,8 @@ export function useListView(options: ListViewOptions) {
 	}
 
 	async function loadMeta() {
+		if (!doctypeRef.value) return;
+
 		try {
 			const m = await getDoctypeMeta(doctypeRef.value);
 			meta.value = m;

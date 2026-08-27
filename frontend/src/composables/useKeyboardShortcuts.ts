@@ -37,7 +37,7 @@ export function useKeyboardShortcuts() {
 			settingsStore.reset();
 
 			showSuccess("Cached data cleared. Pending invoices and purchases were kept.");
-			window.dispatchEvent(new CustomEvent("xpos:cached-data-cleared"));
+			window.dispatchEvent(new CustomEvent("meerkatpos:cached-data-cleared"));
 
 			if (isOnline()) {
 				void Promise.allSettled([settingsStore.fetchSettings()]);
@@ -57,7 +57,7 @@ export function useKeyboardShortcuts() {
 			category: "General",
 			global: true,
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:clear-cart"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:clear-cart"));
 				router.push("/pos");
 			},
 		},
@@ -78,7 +78,7 @@ export function useKeyboardShortcuts() {
 			category: "General",
 			global: true,
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:toggle-error-inspector"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:toggle-error-inspector"));
 			},
 		},
 		{
@@ -212,7 +212,7 @@ export function useKeyboardShortcuts() {
 			category: "POS",
 			global: true,
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:focus-cart-item"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:focus-cart-item"));
 			},
 		},
 		{
@@ -222,7 +222,7 @@ export function useKeyboardShortcuts() {
 			category: "POS",
 			global: true,
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:process-payment"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:process-payment"));
 			},
 		},
 		{
@@ -232,7 +232,7 @@ export function useKeyboardShortcuts() {
 			category: "POS",
 			global: true,
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:toggle-view"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:toggle-view"));
 			},
 		},
 		{
@@ -242,7 +242,7 @@ export function useKeyboardShortcuts() {
 			category: "POS",
 			global: true,
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:select-customer"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:select-customer"));
 			},
 		},
 		{
@@ -252,7 +252,7 @@ export function useKeyboardShortcuts() {
 			category: "POS",
 			global: true,
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:show-drafts"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:show-drafts"));
 			},
 		},
 		{
@@ -261,7 +261,7 @@ export function useKeyboardShortcuts() {
 			description: "Repeat Last Invoice",
 			category: "POS",
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:show-repeat-dialog"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:show-repeat-dialog"));
 			},
 		},
 		{
@@ -270,7 +270,7 @@ export function useKeyboardShortcuts() {
 			description: "Return Invoice",
 			category: "POS",
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:show-return-dialog"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:show-return-dialog"));
 			},
 		},
 		{
@@ -280,7 +280,7 @@ export function useKeyboardShortcuts() {
 			category: "POS",
 			action: () => {
 				if (!hasPermission("allow_reprint_invoice")) return;
-				window.dispatchEvent(new CustomEvent("xpos:print-last"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:print-last"));
 			},
 		},
 		{
@@ -289,7 +289,7 @@ export function useKeyboardShortcuts() {
 			description: "Apply Discount",
 			category: "POS",
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:focus-discount"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:focus-discount"));
 			},
 		},
 		{
@@ -298,7 +298,7 @@ export function useKeyboardShortcuts() {
 			description: "Hold / Park Invoice",
 			category: "POS",
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:hold-invoice"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:hold-invoice"));
 			},
 		},
 		{
@@ -307,7 +307,7 @@ export function useKeyboardShortcuts() {
 			description: "Clear All Items from Cart",
 			category: "Cart",
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:clear-cart"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:clear-cart"));
 			},
 		},
 		{
@@ -316,7 +316,7 @@ export function useKeyboardShortcuts() {
 			description: "Remove Selected Item from Cart",
 			category: "Cart",
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:remove-last-item"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:remove-last-item"));
 			},
 		},
 		{
@@ -326,7 +326,7 @@ export function useKeyboardShortcuts() {
 			category: "Shift",
 			action: () => {
 				if (!hasPermission("close_shift")) return;
-				window.dispatchEvent(new CustomEvent("xpos:close-shift"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:close-shift"));
 			},
 		},
 		{
@@ -335,7 +335,7 @@ export function useKeyboardShortcuts() {
 			description: "Cash Expense",
 			category: "Shift",
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:cash-expense"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:cash-expense"));
 			},
 		},
 		{
@@ -344,7 +344,7 @@ export function useKeyboardShortcuts() {
 			description: "Cash Deposit",
 			category: "Shift",
 			action: () => {
-				window.dispatchEvent(new CustomEvent("xpos:cash-deposit"));
+				window.dispatchEvent(new CustomEvent("meerkatpos:cash-deposit"));
 			},
 		},
 		{
@@ -421,7 +421,7 @@ export function useKeyboardShortcuts() {
 
 		if (e.key === "Alt" && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
 			e.preventDefault();
-			window.dispatchEvent(new CustomEvent("xpos:focus-menubar"));
+			window.dispatchEvent(new CustomEvent("meerkatpos:focus-menubar"));
 			return;
 		}
 

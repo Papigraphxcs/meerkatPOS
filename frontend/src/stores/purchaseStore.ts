@@ -28,6 +28,8 @@ import type {
 	ReceiveTransitResult,
 	ReturnShortageItem,
 	ReturnShortageResult,
+	MaterialReceiptItem,
+	MaterialReceiptResult,
 } from "@/types/pos.types";
 import { isOnline } from "@/utils";
 import __ from "@/lib/translate";
@@ -96,6 +98,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 	const selectedTransit = ref<InTransitEntry | null>(null);
 	const isReceivingTransit = ref(false);
 	const isReturningShortage = ref(false);
+	const isCreatingReceipt = ref(false);
 
 	// XPOS PO header custom fields
 	const poAliasName = ref("");
@@ -181,7 +184,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 					}));
 					await cacheSuppliers(toCache);
 				} catch (err) {
-					console.warn("[XPOS Purchase] Failed to cache suppliers:", err);
+					console.warn("[meerkatPOS Purchase] Failed to cache suppliers:", err);
 				}
 			}
 		} catch (error) {
@@ -364,7 +367,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 				}
 			}
 		} catch (error) {
-			console.warn("[XPOS Purchase] Failed to fetch stock data:", error);
+			console.warn("[meerkatPOS Purchase] Failed to fetch stock data:", error);
 		}
 	}
 
@@ -496,7 +499,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 				try {
 					await call("xpos.x_pos.api.purchase_orders.delete_po_draft", { name: draftName });
 				} catch (e) {
-					console.warn("[XPOS Purchase] Failed to delete draft after submission:", e);
+					console.warn("[meerkatPOS Purchase] Failed to delete draft after submission:", e);
 				}
 			}
 
@@ -913,6 +916,37 @@ export const usePurchaseStore = defineStore("purchase", () => {
 		selectedTransit.value = null;
 	}
 
+	async function createMaterialReceipt(
+		items: MaterialReceiptItem[],
+		remarks = "",
+	): Promise<MaterialReceiptResult | null> {
+		isCreatingReceipt.value = true;
+		try {
+			const posStore = usePosStore();
+			const result = await call<MaterialReceiptResult>(
+				"xpos.x_pos.api.stock_transfer.create_material_receipt",
+				{
+					data: JSON.stringify({
+						pos_profile: posStore.profileName,
+						target_warehouse: posStore.warehouse,
+						items,
+						remarks,
+					}),
+				},
+			);
+
+			showSuccess(`Stock Entry ${result.stock_entry} created - ${result.items_added} item(s) added`);
+
+			return result;
+		} catch (error) {
+			console.error("Error creating material receipt:", error);
+			showError(error instanceof Error ? error.message : "Failed to add stock");
+			return null;
+		} finally {
+			isCreatingReceipt.value = false;
+		}
+	}
+
 	async function getAllDrafts(): Promise<
 		Array<{
 			name: string;
@@ -938,7 +972,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 			>("xpos.x_pos.api.purchase_orders.list_po_drafts", { limit: 50 });
 			return result || [];
 		} catch (e) {
-			console.warn("[XPOS Purchase] Failed to load drafts:", e);
+			console.warn("[meerkatPOS Purchase] Failed to load drafts:", e);
 			return [];
 		}
 	}
@@ -1155,6 +1189,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 		selectedTransit,
 		isReceivingTransit,
 		isReturningShortage,
+		isCreatingReceipt,
 		poAliasName,
 		poCategory,
 		poType,
@@ -1202,6 +1237,7 @@ export const usePurchaseStore = defineStore("purchase", () => {
 		fetchTransitDetail,
 		receiveTransitStock,
 		returnShortageToSource,
+		createMaterialReceipt,
 		clearSelectedTransit,
 		refreshPendingCount,
 		loadPendingPurchases,

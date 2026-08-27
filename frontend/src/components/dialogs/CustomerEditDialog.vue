@@ -23,7 +23,7 @@
 				<Loader2 class="w-6 h-6 animate-spin text-primary" />
 			</div>
 
-			<div v-else class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+			<div v-else class="flex-1 overflow-y-auto p-5 space-y-4 meerkatpos-scrollbar">
 				<div>
 					<label class="text-xs font-medium text-muted-foreground mb-1 block"
 						>{{ __("Customer Name") }} *</label
@@ -243,7 +243,7 @@ async function loadCustomerData(customerName: string) {
 }
 
 function loadDropdownData() {
-	const boot = window.xpos?.boot;
+	const boot = window.meerkatpos?.boot;
 	if (boot?.countries?.length) {
 		countries.value = boot.countries.map((c) => c.name || "").filter(Boolean);
 	}

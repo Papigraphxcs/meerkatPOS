@@ -10,15 +10,15 @@
 		<DialogContent class="max-w-md">
 			<DialogHeader>
 				<DialogTitle class="flex items-center gap-3">
-					<img :src="isDark ? logoDark : logoLight" alt="X POS Logo" class="w-10 h-10" />
-					<span>{{ __("X POS") }}</span>
+					<img :src="isDark ? logoDark : logoLight" alt="meerkatPOS Logo" class="w-10 h-10" />
+					<span>{{ __("meerkatPOS") }}</span>
 				</DialogTitle>
 			</DialogHeader>
 
 			<div class="space-y-4">
 				<div class="text-center py-4">
 					<p class="text-lg font-semibold text-foreground">
-						{{ isElectronEnv ? __("X POS Desktop") : __("X POS") }}
+						{{ isElectronEnv ? __("meerkatPOS Desktop") : __("meerkatPOS") }}
 					</p>
 					<p class="text-sm text-muted-foreground">
 						{{ __("Point of Sale Application for ERPNext") }}

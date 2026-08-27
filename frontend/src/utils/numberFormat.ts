@@ -42,7 +42,7 @@ const FALLBACK_SETTINGS: NumberFormatSettings = {
 let settings: NumberFormatSettings | null = null;
 
 function readBootSettings(): NumberFormatSettings | null {
-	const boot = (window as any)?.xpos?.boot;
+	const boot = (window as any)?.meerkatpos?.boot;
 	if (!boot) return null;
 
 	const source = boot.xpos_number_format || boot.sysdefaults;

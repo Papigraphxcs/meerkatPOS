@@ -151,11 +151,11 @@ async function loadReport() {
 	resetState();
 
 	if (!report) {
-		document.title = `${__("Reports")} | X POS`;
+		document.title = `${__("Reports")} | meerkatPOS`;
 		return;
 	}
 
-	document.title = `${report.title} | X POS`;
+	document.title = `${report.title} | meerkatPOS`;
 	if (!isReportAccessible(report)) {
 		errorMessage.value = __("You do not have access to this report.");
 		return;

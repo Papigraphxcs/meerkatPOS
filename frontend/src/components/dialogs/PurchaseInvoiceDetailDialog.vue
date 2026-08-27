@@ -171,7 +171,7 @@
 											</div>
 											<div
 												v-if="getField(item, 'batch_no')"
-												class="text-[11px] text-blue-500"
+												class="text-[11px] text-muted-foreground"
 											>
 												{{ __("Batch") }}: {{ getField(item, "batch_no") }}
 											</div>

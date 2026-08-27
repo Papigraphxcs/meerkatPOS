@@ -19,6 +19,7 @@ import type {
 	CurrencyPrecision,
 	ItemSearchSettings,
 	NumberFormatSettings,
+	POSSettings,
 } from "@/types/pos.types";
 
 const emptySellingSettings: SellingSettings = {
@@ -103,6 +104,11 @@ const emptyNumberFormat: NumberFormatSettings = {
 	hide_currency_symbol: 0,
 };
 
+const emptyPosSettings: POSSettings = {
+	invoice_type: "Sales Invoice",
+	post_change_gl_entries: false,
+};
+
 export const useSettingsStore = defineStore("settings", () => {
 	const isLoaded = ref(false);
 	const sellingSettings = ref<SellingSettings>({ ...emptySellingSettings });
@@ -113,6 +119,9 @@ export const useSettingsStore = defineStore("settings", () => {
 	const currencyPrecision = ref<CurrencyPrecision>({ ...emptyCurrencyPrecision });
 	const numberFormat = ref<NumberFormatSettings>({ ...emptyNumberFormat });
 	const itemSearch = ref<ItemSearchSettings>({ ...emptyItemSearchSettings });
+	const posSettings = ref<POSSettings>({ ...emptyPosSettings });
+
+	const invoiceType = computed(() => posSettings.value.invoice_type);
 
 	const defaultSellingPriceList = computed(() => sellingSettings.value.default_selling_price_list);
 
@@ -175,12 +184,13 @@ export const useSettingsStore = defineStore("settings", () => {
 		currencyPrecision.value = { ...emptyCurrencyPrecision, ...data.currency_precision };
 		applyNumberFormat(data.number_format);
 		itemSearch.value = { ...emptyItemSearchSettings, ...data.item_search };
+		posSettings.value = { ...emptyPosSettings, ...data.pos_settings };
 		isLoaded.value = true;
 	}
 
 	async function fetchSettings(): Promise<void> {
-		if (!isElectron() && window.xpos?.boot) {
-			const boot = window.xpos.boot;
+		if (!isElectron() && window.meerkatpos?.boot) {
+			const boot = window.meerkatpos.boot;
 			if (
 				boot.selling_settings ||
 				boot.buying_settings ||
@@ -211,13 +221,13 @@ export const useSettingsStore = defineStore("settings", () => {
 				const { usePosStore } = await import("@/stores/posStore");
 				if (usePosStore().useOfflineMode) {
 					await cacheERPSettings(data).catch((err) =>
-						console.warn("[XPOS] Failed to cache ERP settings:", err),
+						console.warn("[meerkatPOS] Failed to cache ERP settings:", err),
 					);
 				}
 				return;
 			}
 		} catch (error) {
-			console.warn("[XPOS] Failed to fetch ERP settings from server:", error);
+			console.warn("[meerkatPOS] Failed to fetch ERP settings from server:", error);
 		}
 
 		const { usePosStore } = await import("@/stores/posStore");
@@ -228,7 +238,7 @@ export const useSettingsStore = defineStore("settings", () => {
 					_applySettings(cached);
 				}
 			} catch (error) {
-				console.warn("[XPOS] Failed to load cached ERP settings:", error);
+				console.warn("[meerkatPOS] Failed to load cached ERP settings:", error);
 			}
 		}
 	}
@@ -242,6 +252,7 @@ export const useSettingsStore = defineStore("settings", () => {
 		currencyPrecision.value = { ...emptyCurrencyPrecision };
 		numberFormat.value = { ...emptyNumberFormat };
 		itemSearch.value = { ...emptyItemSearchSettings };
+		posSettings.value = { ...emptyPosSettings };
 		isLoaded.value = false;
 	}
 
@@ -255,6 +266,8 @@ export const useSettingsStore = defineStore("settings", () => {
 		currencyPrecision,
 		numberFormat,
 		itemSearch,
+		posSettings,
+		invoiceType,
 		defaultSellingPriceList,
 		defaultBuyingPriceList,
 		defaultCurrency,

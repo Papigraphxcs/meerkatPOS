@@ -1102,6 +1102,22 @@ export interface ReturnShortageResult {
 	total_returned_qty: number;
 }
 
+export interface MaterialReceiptItem {
+	item_code: string;
+	item_name: string;
+	qty: number;
+	uom: string;
+	stock_uom: string;
+	conversion_factor: number;
+	valuation_rate: number;
+}
+
+export interface MaterialReceiptResult {
+	stock_entry: string;
+	target_warehouse: string;
+	items_added: number;
+}
+
 export interface SellingSettings {
 	selling_price_list: string;
 	default_selling_price_list: string;

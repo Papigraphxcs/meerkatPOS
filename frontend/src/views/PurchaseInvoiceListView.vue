@@ -85,7 +85,7 @@ function statusVariant(
 			empty-description="Create a new invoice or adjust your filters"
 			:empty-icon="Receipt"
 			:hide-standard-filters-on-mobile="true"
-			scroll-class="px-3 sm:px-4 py-3 xpos-scrollbar"
+			scroll-class="px-3 sm:px-4 py-3 meerkatpos-scrollbar"
 			item-key="name"
 		>
 			<template #header-actions>

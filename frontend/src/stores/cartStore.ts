@@ -106,6 +106,9 @@ export const useCartStore = defineStore("cart", () => {
 	const conversionRate = ref(1);
 	const selectedDeliveryCharge = ref<DeliveryCharge | null>(null);
 	const settingsStore = useSettingsStore();
+	const orderNumber = ref(0);
+	const orderStartedAt = ref<Date | null>(null);
+	const draftOrderCount = ref(0);
 
 	const ruleDiscountPercentage = ref(0);
 	const ruleDiscountAmount = ref(0);
@@ -309,6 +312,28 @@ export const useCartStore = defineStore("cart", () => {
 	});
 
 	const isEmpty = computed(() => items.value.length === 0);
+
+	function nextOrderSequence(): number {
+		const storageKey = `meerkatpos:order-seq:${posStore.posOpeningShift?.name || "default"}`;
+		const current = parseInt(sessionStorage.getItem(storageKey) || "0", 10) || 0;
+		const next = current + 1;
+		try {
+			sessionStorage.setItem(storageKey, String(next));
+		} catch {
+			/* ignore storage errors */
+		}
+		return next;
+	}
+
+	watch(
+		() => items.value.length,
+		(len, prevLen) => {
+			if (len > 0 && !prevLen) {
+				orderNumber.value = nextOrderSequence();
+				orderStartedAt.value = new Date();
+			}
+		},
+	);
 
 	const customerName = computed(() => {
 		if (!customer.value) return "Walk-in Customer";
@@ -1102,6 +1127,8 @@ export const useCartStore = defineStore("cart", () => {
 		currency.value = "";
 		conversionRate.value = 1;
 		selectedDeliveryCharge.value = null;
+		orderNumber.value = 0;
+		orderStartedAt.value = null;
 	}
 
 	function clearAll(): void {
@@ -1129,20 +1156,30 @@ export const useCartStore = defineStore("cart", () => {
 		showPaymentDialog.value = false;
 	}
 
-	async function fetchDraftInvoices(scope: "shift" | "profile" = "shift"): Promise<OpenTab[]> {
+	async function fetchDraftInvoices(
+		scope: "shift" | "profile" = "shift",
+		options: { silent?: boolean } = {},
+	): Promise<OpenTab[]> {
 		try {
 			isLoadingDrafts.value = true;
-			const result = await call<OpenTab[]>("xpos.api.invoices.get_draft_invoices", {
-				pos_opening_shift: posStore.posOpeningShift?.name || "",
-				scope,
-			});
+			const result = await call<OpenTab[]>(
+				"xpos.api.invoices.get_draft_invoices",
+				{ pos_opening_shift: posStore.posOpeningShift?.name || "", scope },
+				undefined,
+				{ silent: options.silent },
+			);
 			return result || [];
 		} catch (error) {
-			console.error("Error fetching draft invoices:", error);
+			if (!options.silent) console.error("Error fetching draft invoices:", error);
 			return [];
 		} finally {
 			isLoadingDrafts.value = false;
 		}
+	}
+
+	async function refreshDraftOrderCount(): Promise<void> {
+		const result = await fetchDraftInvoices("shift", { silent: true });
+		draftOrderCount.value = result.length;
 	}
 
 	async function loadDraftInvoice(draftName: string): Promise<boolean> {
@@ -1549,6 +1586,9 @@ export const useCartStore = defineStore("cart", () => {
 		currency,
 		conversionRate,
 		selectedDeliveryCharge,
+		orderNumber,
+		orderStartedAt,
+		draftOrderCount,
 		applyDiscountOn,
 		isPricingCart,
 		pricingSource,
@@ -1610,6 +1650,7 @@ export const useCartStore = defineStore("cart", () => {
 		getReceiptSnapshot,
 		loadFromInvoice,
 		fetchDraftInvoices,
+		refreshDraftOrderCount,
 		loadDraftInvoice,
 		openDraftDialog,
 		closeDraftDialog,

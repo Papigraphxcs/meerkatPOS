@@ -8,40 +8,26 @@ const POS_PERMISSION_GROUPS = [
 	{
 		title: "Billing & Invoicing",
 		items: [
-			{ key: "close_bill", label: "Close Bill" },
 			{ key: "close_shift", label: "Close Shift" },
 			{ key: "allow_reprint_invoice", label: "Reprint Invoice" },
+			{ key: "print_draft_invoice", label: "Print Draft Invoice" },
 			{ key: "shift_report", label: "Shift Report" },
-			{ key: "allow_cancel_invoice", label: "Cancel Invoice" },
-			{ key: "unsettled_invoices", label: "Unsettled Invoices" },
 		],
 	},
 	{
 		title: "Discounts & Pricing",
 		items: [
 			{ key: "apply_additional_discount", label: "Apply Additional Discount" },
-			{ key: "apply_standard_discount", label: "Apply Standard Discount" },
 			{ key: "show_edit_discount_field", label: "Edit Discount Field" },
-			{ key: "edit_tax_template", label: "Edit Tax Template" },
 			{ key: "allow_change_price", label: "Change Price" },
 		],
 	},
 	{
 		title: "Sales Operations",
 		items: [
-			{ key: "quotation", label: "Quotation" },
 			{ key: "sale_return", label: "Sale Return" },
-		],
-	},
-	{
-		title: "Purchasing & Stock",
-		items: [
-			{ key: "local_purchase", label: "Local Purchase" },
-			{ key: "purchase_order", label: "Purchase Order" },
-			{ key: "purchase_invoice", label: "Purchase Invoice" },
-			{ key: "stock_adjustment", label: "Stock Adjustment" },
-			{ key: "stock_entry", label: "Stock Entry" },
-			{ key: "near_expiry_items", label: "Near Expiry Items" },
+			{ key: "recall_other_shift_tabs", label: "Recall Other Shifts' Tabs" },
+			{ key: "settle_outstanding_invoice", label: "Settle Outstanding Invoice" },
 		],
 	},
 	{
@@ -52,30 +38,23 @@ const POS_PERMISSION_GROUPS = [
 		],
 	},
 	{
-		title: "Lists",
+		title: "Purchasing & Stock",
 		items: [
-			{ key: "list_of_invoices", label: "List of Invoices" },
-			{ key: "list_of_cancelled_invoices", label: "List of Cancelled Invoices" },
-			{ key: "list_of_errors", label: "List of Errors" },
-			{ key: "list_of_purchase_invoices", label: "List of Purchase Invoices" },
-			{ key: "list_of_quotations", label: "List of Quotations" },
-			{ key: "list_of_stock_entries", label: "List of Stock Entries" },
-			{ key: "list_of_local_purchases", label: "List of Local Purchases" },
-			{ key: "list_of_stock_adjustments", label: "List of Stock Adjustments" },
-			{ key: "list_of_expense", label: "List of Expenses" },
-			{ key: "list_of_bank_drops", label: "List of Bank Drops" },
+			{ key: "purchase_order", label: "Purchase Order" },
+			{ key: "stock_entry", label: "Stock Entry" },
+			{ key: "material_receipt", label: "Add New Stock (Material Receipt)" },
 		],
 	},
 	{
 		title: "Reports",
 		items: [
-			{ key: "invoice_settlement_report", label: "Invoice Settlement Report" },
-			{ key: "sales_report_by_time", label: "Sales Report by Time" },
-			{ key: "sales_summary_by_hour", label: "Sales Summary by Hour" },
 			{ key: "current_stock_by_brand", label: "Current Stock by Brand" },
-			{ key: "stock_register", label: "Stock Register" },
 			{ key: "current_stock_report", label: "Current Stock Report" },
 		],
+	},
+	{
+		title: "Administration",
+		items: [{ key: "manage_role_permissions", label: "Manage Role Permissions" }],
 	},
 ];
 

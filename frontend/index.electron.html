@@ -2,16 +2,17 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="icon" href="./public/pwa-192x192.svg" />
+		<link rel="icon" href="./favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<meta name="theme-color" content="#f97316" />
+		<meta name="theme-color" content="#171717" />
 		<meta http-equiv="Content-Security-Policy"
 			content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' http: https:; img-src 'self' data: http: https:; font-src 'self' data:;" />
-		<title>X POS</title>
+		<title>meerkatPOS</title>
 		<script>
 			// Apply theme immediately before Vue mounts to prevent flash
 			(function () {
-				const theme = localStorage.getItem("xpos-theme") || "system";
+				const theme =
+					localStorage.getItem("meerkatpos-theme") || localStorage.getItem("xpos-theme") || "system";
 				let effectiveTheme = theme;
 
 				if (theme === "system") {
@@ -37,10 +38,10 @@
 		<script>
 			// In Electron mode, boot data comes from the server after login.
 			// Initialize empty – the authStore will populate this.
-			window.xpos = window.xpos || {};
-			window.xpos.boot = {};
-			window.xpos._messages = {};
-			window.xpos.csrf_token = "";
+			window.meerkatpos = window.meerkatpos || {};
+			window.meerkatpos.boot = {};
+			window.meerkatpos._messages = {};
+			window.meerkatpos.csrf_token = "";
 		</script>
 		<script type="module" src="/src/main.ts"></script>
 	</body>

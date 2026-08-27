@@ -10,7 +10,7 @@ import { isElectron } from "@/services/electronBridge";
 import routes from "./routes";
 import { usePosStore } from "@/stores/posStore";
 
-const history = isElectron() ? createWebHashHistory() : createWebHistory("/xpos");
+const history = isElectron() ? createWebHashHistory() : createWebHistory("/meerkatpos");
 
 export const router: Router = createRouter({
 	history,
@@ -93,7 +93,7 @@ router.beforeEach(async (to, _from, next) => {
 	}
 
 	if (to.meta.title) {
-		document.title = `${to.meta.title} | X POS`;
+		document.title = `${to.meta.title} | meerkatPOS`;
 	}
 
 	next();

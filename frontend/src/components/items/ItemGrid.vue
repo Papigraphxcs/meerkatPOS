@@ -4,11 +4,11 @@
 			v-if="isLoading && items.length === 0 && viewMode === 'grid'"
 			class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
 		>
-			<div v-for="i in 12" :key="i" class="xpos-skeleton h-40 rounded-xl"></div>
+			<div v-for="i in 12" :key="i" class="meerkatpos-skeleton h-40 rounded-xl"></div>
 		</div>
 
 		<div v-else-if="isLoading && items.length === 0 && viewMode === 'list'" class="space-y-2">
-			<div v-for="i in 8" :key="i" class="xpos-skeleton h-16 rounded-lg"></div>
+			<div v-for="i in 8" :key="i" class="meerkatpos-skeleton h-16 rounded-lg"></div>
 		</div>
 
 		<div

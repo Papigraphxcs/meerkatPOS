@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { Search, BarChart3, ArrowRight, Lock, Sparkles, Layers3, FolderOpen } from "lucide-vue-next";
+import { Search, BarChart3, ArrowRight, Sparkles, Layers3, FolderOpen, Loader2 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,30 +11,38 @@ import __ from "@/lib/translate";
 import {
 	getReportDefinitions,
 	isReportAccessible,
+	ensureReportAccessLoaded,
 	type ReportCategory,
 	type ReportDefinition,
 } from "@/services/reports";
 
 const router = useRouter();
 const searchTerm = ref("");
+const isCheckingAccess = ref(true);
 
-const reportDefinitions = computed(() => getReportDefinitions());
+onMounted(async () => {
+	try {
+		await ensureReportAccessLoaded();
+	} finally {
+		isCheckingAccess.value = false;
+	}
+});
+
+const accessibleReportDefinitions = computed(() =>
+	getReportDefinitions().filter((report) => isReportAccessible(report)),
+);
 
 const filteredReports = computed(() => {
 	const query = searchTerm.value.trim().toLowerCase();
-	if (!query) return reportDefinitions.value;
+	if (!query) return accessibleReportDefinitions.value;
 
-	return reportDefinitions.value.filter((report) => {
+	return accessibleReportDefinitions.value.filter((report) => {
 		const textParts = [report.title, report.reportName, report.description, report.category, report.slug]
 			.join(" ")
 			.toLowerCase();
 		return textParts.includes(query);
 	});
 });
-
-const accessibleCount = computed(
-	() => reportDefinitions.value.filter((report) => isReportAccessible(report)).length,
-);
 
 const sectionReports = computed(() => {
 	const categories = Array.from(new Set(filteredReports.value.map((report) => report.category)));
@@ -46,24 +54,24 @@ const sectionReports = computed(() => {
 
 const categoryAccent: Record<ReportCategory, { accent: string; chip: string; icon: string }> = {
 	Inventory: {
-		accent: "from-emerald-500/20 via-emerald-500/10 to-transparent",
-		chip: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
-		icon: "text-emerald-500",
+		accent: "from-muted-foreground/20 via-muted-foreground/10 to-transparent",
+		chip: "bg-muted text-foreground border-border",
+		icon: "text-muted-foreground",
 	},
 	Sales: {
-		accent: "from-sky-500/20 via-sky-500/10 to-transparent",
-		chip: "bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20",
-		icon: "text-sky-500",
+		accent: "from-muted-foreground/20 via-muted-foreground/10 to-transparent",
+		chip: "bg-muted text-foreground border-border",
+		icon: "text-muted-foreground",
 	},
 	Purchasing: {
-		accent: "from-amber-500/20 via-amber-500/10 to-transparent",
-		chip: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
-		icon: "text-amber-500",
+		accent: "from-muted-foreground/20 via-muted-foreground/10 to-transparent",
+		chip: "bg-muted text-foreground border-border",
+		icon: "text-muted-foreground",
 	},
 	Operations: {
-		accent: "from-violet-500/20 via-violet-500/10 to-transparent",
-		chip: "bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20",
-		icon: "text-violet-500",
+		accent: "from-muted-foreground/20 via-muted-foreground/10 to-transparent",
+		chip: "bg-muted text-foreground border-border",
+		icon: "text-muted-foreground",
 	},
 };
 
@@ -81,10 +89,10 @@ function clearSearch() {
 	<div class="flex flex-col h-full overflow-hidden bg-background">
 		<div class="shrink-0 p-3 sm:p-4 pb-2 sm:pb-3">
 			<Card
-				class="relative overflow-hidden border-border/70 bg-gradient-to-br from-emerald-500/12 via-card to-background"
+				class="relative overflow-hidden border-border/70 bg-gradient-to-br from-muted via-card to-background"
 			>
 				<div
-					class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.10),transparent_30%)]"
+					class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(120,113,108,0.14),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(120,113,108,0.08),transparent_30%)]"
 				/>
 				<div class="relative p-5 sm:p-6 space-y-4">
 					<div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
@@ -96,11 +104,15 @@ function clearSearch() {
 								</Badge>
 								<Badge variant="secondary" class="gap-1.5">
 									<BarChart3 class="h-3.5 w-3.5" />
-									{{ reportDefinitions.length }} {{ __("reports") }}
+									{{ accessibleReportDefinitions.length }} {{ __("reports") }}
 								</Badge>
-								<Badge variant="secondary" class="gap-1.5">
+								<Badge v-if="isCheckingAccess" variant="secondary" class="gap-1.5">
+									<Loader2 class="h-3.5 w-3.5 animate-spin" />
+									{{ __("Checking access...") }}
+								</Badge>
+								<Badge v-else variant="secondary" class="gap-1.5">
 									<Sparkles class="h-3.5 w-3.5" />
-									{{ accessibleCount }} {{ __("available") }}
+									{{ __("Available to you") }}
 								</Badge>
 							</div>
 							<h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -143,14 +155,25 @@ function clearSearch() {
 		</div>
 
 		<ScrollArea class="flex-1 px-3 sm:px-4 pb-3 sm:pb-4">
+			<div v-if="isCheckingAccess" class="flex flex-col items-center justify-center py-20 text-center">
+				<Loader2 class="h-8 w-8 text-muted-foreground/50 animate-spin mb-4" />
+				<p class="text-sm text-muted-foreground">{{ __("Checking which reports you can access...") }}</p>
+			</div>
+
 			<div
-				v-if="sectionReports.length === 0"
+				v-else-if="sectionReports.length === 0"
 				class="flex flex-col items-center justify-center py-20 text-center"
 			>
 				<FolderOpen class="h-14 w-14 text-muted-foreground/30 mb-4" />
-				<p class="text-lg font-semibold text-foreground">{{ __("No reports match your search") }}</p>
+				<p class="text-lg font-semibold text-foreground">
+					{{ searchTerm ? __("No reports match your search") : __("No reports available to you") }}
+				</p>
 				<p class="text-sm text-muted-foreground mt-1 max-w-md">
-					{{ __("Try a different keyword or clear the search field.") }}
+					{{
+						searchTerm
+							? __("Try a different keyword or clear the search field.")
+							: __("Ask an administrator if you believe this is incorrect.")
+					}}
 				</p>
 			</div>
 
@@ -210,21 +233,7 @@ function clearSearch() {
 								</div>
 
 								<div class="flex items-center justify-end gap-2 pt-1">
-									<Badge
-										v-if="!isReportAccessible(report)"
-										variant="destructive"
-										class="gap-1.5"
-									>
-										<Lock class="h-3 w-3" />
-										{{ __("Locked") }}
-									</Badge>
-									<Button
-										variant="outline"
-										size="sm"
-										class="gap-1.5"
-										:disabled="!isReportAccessible(report)"
-										@click="openReport(report)"
-									>
+									<Button variant="outline" size="sm" class="gap-1.5" @click="openReport(report)">
 										{{ __("Open") }}
 										<ArrowRight class="h-4 w-4" />
 									</Button>

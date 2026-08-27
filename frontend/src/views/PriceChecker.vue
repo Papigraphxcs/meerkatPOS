@@ -4,10 +4,18 @@
 			class="flex flex-none items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-8 sm:py-5"
 		>
 			<div class="flex min-w-0 items-center gap-3.5">
+				<button
+					type="button"
+					class="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+					@click="goBack"
+				>
+					<ArrowLeft class="h-4 w-4" />
+					<span class="hidden sm:inline">{{ __("Back") }}</span>
+				</button>
 				<img
 					class="h-[clamp(38px,5vh,48px)] w-[clamp(38px,5vh,48px)] shrink-0 rounded-lg"
 					:src="isDark ? logoDark : logoLight"
-					alt="X POS"
+					alt="meerkatPOS"
 				/>
 				<div class="flex min-w-0 flex-col leading-tight">
 					<span class="text-[clamp(18px,2.6vh,22px)] font-extrabold tracking-tight">{{
@@ -185,13 +193,19 @@ import { call } from "@/services/api";
 import { formatFor } from "@/composables/useCurrency";
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from "vue";
 import __ from "@/lib/translate";
-import { ScanBarcode } from "lucide-vue-next";
+import { ScanBarcode, ArrowLeft } from "lucide-vue-next";
 import { useBranding } from "@/composables/useBranding";
+import { useRouter } from "vue-router";
 
 const { logoLight, logoDark } = useBranding();
+const router = useRouter();
+
+function goBack() {
+	router.push("/pos");
+}
 
 const props = defineProps({
-	appName: { type: String, default: "X POS" },
+	appName: { type: String, default: "meerkatPOS" },
 	csrfToken: { type: String, default: "" },
 	lang: { type: String, default: "en" },
 	dir: { type: String, default: "ltr" },

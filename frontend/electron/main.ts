@@ -49,7 +49,7 @@ function createWindow(): void {
 		height: 800,
 		minWidth: 1024,
 		minHeight: 600,
-		title: "X POS",
+		title: "meerkatPOS",
 		...(process.platform === "linux"
 			? {
 					icon: path.join(__dirname, "../build/icon.png"),
@@ -605,7 +605,7 @@ app.whenReady().then(async () => {
 	Menu.setApplicationMenu(null);
 
 	if (process.platform === "win32") {
-		app.setAppUserModelId("com.xpos.app");
+		app.setAppUserModelId("com.meerkatpos.app");
 	}
 
 	try {

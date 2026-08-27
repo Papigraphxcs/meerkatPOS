@@ -516,7 +516,7 @@ const invoiceColumns = computed<TableColumn[]>(() => {
 			width: "w-[90px]",
 			align: "right" as const,
 			editable: false,
-			cellClass: "text-green-600 font-medium",
+			cellClass: "text-foreground font-medium",
 			format: (_: any, row: any) => formatCurrency(getTotalAmount(row)),
 		},
 		{
@@ -1084,7 +1084,7 @@ onMounted(() => {
 					>
 						<div class="flex items-center justify-between mb-1">
 							<span class="font-medium">{{ po.name }}</span>
-							<span class="text-green-600 font-medium">{{
+							<span class="text-foreground font-medium">{{
 								formatCurrency(po.grand_total)
 							}}</span>
 						</div>
@@ -1185,7 +1185,7 @@ onMounted(() => {
 						</div>
 						<div>
 							<span class="text-muted-foreground block">{{ __("Item Discount") }}</span>
-							<span class="font-semibold text-sm text-red-500"
+							<span class="font-semibold text-sm text-foreground"
 								>-{{ formatCurrency(totalDiscount) }}</span
 							>
 						</div>
@@ -1244,7 +1244,7 @@ onMounted(() => {
 							</div>
 							<div>
 								<span class="text-sm text-muted-foreground">{{ __("Grand Total") }}</span>
-								<div class="text-xl font-bold text-green-600">
+								<div class="text-xl font-bold text-primary">
 									{{ formatCurrency(grandTotal) }}
 								</div>
 							</div>

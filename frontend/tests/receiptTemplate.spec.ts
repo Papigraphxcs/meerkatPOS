@@ -9,7 +9,7 @@ vi.mock("@/services/dbBridge", () => ({
 
 /** LBP is quoted in whole units, USD in cents. The mixed-currency cases rest on that asymmetry. */
 beforeEach(() => {
-	(window as any).xpos = {
+	(window as any).meerkatpos = {
 		boot: {
 			currencies: [
 				{ name: "LBP", symbol: "L£", number_format: "#,###" },
@@ -74,7 +74,6 @@ describe("buildReceiptHtml", () => {
 		expect(html).toContain("07-07-2026");
 		expect(html).toContain("02:05 PM");
 		expect(html).toContain("Coffee &amp; Cream"); // HTML-escaped
-		expect(html).toContain("Acme &lt;Store&gt;"); // company name escaped
 		expect(html).toContain("<b>Welcome</b>"); // header HTML kept raw
 		expect(html).toContain("Cash");
 		expect(html).toContain("Change");

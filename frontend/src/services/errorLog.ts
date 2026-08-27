@@ -31,7 +31,7 @@ export interface ErrorEntry {
 }
 
 const MAX_ENTRIES = 200;
-const STORAGE_KEY = "xpos:error-log";
+const STORAGE_KEY = "meerkatpos:error-log";
 const REDACT_KEYS = ["password", "api_secret", "apisecret", "pwd", "secret", "token"];
 
 export const entries = ref<ErrorEntry[]>([]);

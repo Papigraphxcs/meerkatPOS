@@ -29,9 +29,9 @@ frontend/dist-electron/
 
 # Frappe build artifacts
 xpos/public/dist/
-xpos/public/xpos/
+xpos/public/meerkatpos/
 xpos/public/node_modules/
-xpos/www/xpos.html
+xpos/www/meerkatpos.html
 
 # Environment & Secrets — NEVER commit these
 .env

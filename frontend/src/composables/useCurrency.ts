@@ -41,7 +41,7 @@ function toMeta(row: {
 }
 
 function readBootCurrencies(): Record<string, CurrencyMeta> {
-	const rows = (window.xpos as any)?.boot?.currencies;
+	const rows = (window.meerkatpos as any)?.boot?.currencies;
 	if (!Array.isArray(rows)) return {};
 
 	const map: Record<string, CurrencyMeta> = {};

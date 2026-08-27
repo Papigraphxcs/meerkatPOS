@@ -23,7 +23,7 @@ import {
 
 /** Reset to "System Settings untouched": the Frappe default mask, blank precisions. */
 beforeEach(() => {
-	(window as any).xpos = undefined;
+	(window as any).meerkatpos = undefined;
 	resetNumberFormatSettings();
 });
 
@@ -37,14 +37,14 @@ describe("settings resolution", () => {
 	});
 
 	it("reads the mask off the boot payload without being told to", () => {
-		(window as any).xpos = { boot: { xpos_number_format: { number_format: "#.###,##" } } };
+		(window as any).meerkatpos = { boot: { xpos_number_format: { number_format: "#.###,##" } } };
 		resetNumberFormatSettings();
 
 		expect(systemNumberFormat()).toBe("#.###,##");
 	});
 
 	it("prefers the xpos payload over frappe's sysdefaults", () => {
-		(window as any).xpos = {
+		(window as any).meerkatpos = {
 			boot: {
 				xpos_number_format: { number_format: "# ###,##" },
 				sysdefaults: { number_format: "#,###.##" },
@@ -56,7 +56,7 @@ describe("settings resolution", () => {
 	});
 
 	it("falls back to frappe's sysdefaults when xpos ships no payload", () => {
-		(window as any).xpos = { boot: { sysdefaults: { number_format: "#'###.##" } } };
+		(window as any).meerkatpos = { boot: { sysdefaults: { number_format: "#'###.##" } } };
 		resetNumberFormatSettings();
 
 		expect(systemNumberFormat()).toBe("#'###.##");

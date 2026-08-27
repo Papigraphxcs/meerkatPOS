@@ -117,7 +117,7 @@
 					</div>
 				</div>
 
-				<div class="flex-1 overflow-y-auto px-4 pb-4 xpos-scrollbar">
+				<div class="flex-1 overflow-y-auto px-4 pb-4 meerkatpos-scrollbar">
 					<div v-if="isSearching" class="flex items-center justify-center py-8">
 						<div
 							class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"
@@ -171,7 +171,7 @@
 			</div>
 
 			<div class="flex-1 flex flex-col min-w-0">
-				<div class="flex-1 overflow-y-auto p-4 xpos-scrollbar">
+				<div class="flex-1 overflow-y-auto p-4 meerkatpos-scrollbar">
 					<div
 						v-if="items.length === 0"
 						class="flex flex-col items-center justify-center h-full text-muted-foreground"

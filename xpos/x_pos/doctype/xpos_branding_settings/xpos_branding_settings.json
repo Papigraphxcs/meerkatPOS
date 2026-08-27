@@ -76,7 +76,7 @@
    "label": "Logo & Splash"
   },
   {
-   "description": "SVG or PNG. Leave empty to use the built-in X POS mark. Light logo shows on light backgrounds, dark logo on dark.",
+   "description": "SVG or PNG. Leave empty to use the built-in meerkatPOS mark. Light logo shows on light backgrounds, dark logo on dark.",
    "fieldname": "logo_section",
    "fieldtype": "Section Break",
    "label": "Logo"
@@ -174,7 +174,7 @@
    "label": "Brand"
   },
   {
-   "default": "#5048e5",
+   "default": "#171717",
    "fieldname": "light_primary",
    "fieldtype": "Color",
    "label": "Primary (Brand)"
@@ -186,7 +186,7 @@
    "label": "Primary Foreground"
   },
   {
-   "default": "#5048e5",
+   "default": "#171717",
    "fieldname": "light_ring",
    "fieldtype": "Color",
    "label": "Ring (Focus)"
@@ -320,7 +320,7 @@
    "label": "Brand"
   },
   {
-   "default": "#6a63e9",
+   "default": "#fafafa",
    "fieldname": "dark_primary",
    "fieldtype": "Color",
    "label": "Primary (Brand)"
@@ -332,7 +332,7 @@
    "label": "Primary Foreground"
   },
   {
-   "default": "#6a63e9",
+   "default": "#fafafa",
    "fieldname": "dark_ring",
    "fieldtype": "Color",
    "label": "Ring (Focus)"

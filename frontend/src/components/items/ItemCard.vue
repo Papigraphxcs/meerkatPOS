@@ -18,11 +18,8 @@
 				class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 				loading="lazy"
 			/>
-			<div
-				v-else
-				class="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50"
-			>
-				<Package class="w-10 h-10 text-muted-foreground/40" />
+			<div v-else class="w-full h-full flex items-center justify-center bg-muted/50">
+				<component :is="typeIcon" class="w-10 h-10 text-muted-foreground/40" />
 			</div>
 
 			<Badge
@@ -89,7 +86,8 @@ import { useMoney } from "@/composables/useMoney";
 import { formatQty } from "@/utils/numberFormat";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Plus, Info, AlertCircle } from "lucide-vue-next";
+import { Plus, Info, AlertCircle } from "lucide-vue-next";
+import { getItemTypeIcon } from "@/utils/itemTypeIcon";
 import __ from "@/lib/translate";
 
 const props = defineProps({
@@ -106,7 +104,8 @@ const { money } = useMoney();
 const showStock = computed(() => true);
 const showItemCode = computed(() => posStore.displayItemCode);
 const allowNegativeStock = computed(() => posStore.stockSettings?.allow_negative_stock);
-const hideImages = computed(() => posStore.hideImages);
+const hideImages = computed(() => true);
+const typeIcon = computed(() => getItemTypeIcon(props.item));
 
 const isNonStockItem = computed(() => Number(props.item.is_stock_item) === 0);
 

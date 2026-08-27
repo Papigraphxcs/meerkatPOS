@@ -14,16 +14,16 @@ import translate from "./lib/translate";
 if (!isElectron() && import.meta.env.PROD) {
 	if ("serviceWorker" in navigator) {
 		navigator.serviceWorker
-			.register("/xpos/sw.js", { scope: "/xpos/" })
+			.register("/meerkatpos/sw.js", { scope: "/meerkatpos/" })
 			.then((registration) => {
-				console.log("[XPOS PWA] Service worker registered for", registration.scope);
+				console.log("[meerkatPOS PWA] Service worker registered for", registration.scope);
 
 				registration.addEventListener("updatefound", () => {
 					const installing = registration.installing;
 					if (!installing) return;
 					installing.addEventListener("statechange", () => {
 						if (installing.state === "installed" && navigator.serviceWorker.controller) {
-							if (confirm("A new version of X POS is available. Reload to update?")) {
+							if (confirm("A new version of meerkatPOS is available. Reload to update?")) {
 								installing.postMessage({ type: "SKIP_WAITING" });
 								window.location.reload();
 							}
@@ -39,15 +39,15 @@ if (!isElectron() && import.meta.env.PROD) {
 				);
 			})
 			.catch((error) => {
-				console.error("[XPOS PWA] Service worker registration failed:", error);
+				console.error("[meerkatPOS PWA] Service worker registration failed:", error);
 			});
 	}
 } else {
 	getApiBaseUrl().then((url) => {
-		console.log("[XPOS Electron] Server URL:", url);
+		console.log("[meerkatPOS Electron] Server URL:", url);
 	});
 	warmApiCredentials().then(() => {
-		console.log("[XPOS Electron] API credentials cache warmed");
+		console.log("[meerkatPOS Electron] API credentials cache warmed");
 	});
 	window.electronAPI?.onMainError?.((err) => {
 		captureError({
@@ -67,7 +67,7 @@ async function initializeBrowserStorage(): Promise<void> {
 		const { ensureDatabaseReady } = await import("@/services/idbService");
 		await ensureDatabaseReady();
 	} catch (error) {
-		console.warn("[XPOS] Browser storage initialization failed", error);
+		console.warn("[meerkatPOS] Browser storage initialization failed", error);
 	}
 }
 
@@ -76,14 +76,14 @@ async function initializeCurrencyMeta(): Promise<void> {
 		const { primeCurrencyCache } = await import("@/composables/useCurrency");
 		await primeCurrencyCache();
 	} catch (error) {
-		console.warn("[XPOS] Currency metadata initialization failed", error);
+		console.warn("[meerkatPOS] Currency metadata initialization failed", error);
 	}
 }
 
 async function initializeNumberFormat(): Promise<void> {
 	try {
 		const { numberFormatSettings, setNumberFormatSettings } = await import("@/utils/numberFormat");
-		if ((window.xpos?.boot as any)?.xpos_number_format) {
+		if ((window.meerkatpos?.boot as any)?.xpos_number_format) {
 			numberFormatSettings();
 			return;
 		}
@@ -94,7 +94,7 @@ async function initializeNumberFormat(): Promise<void> {
 			setNumberFormatSettings(cached.number_format as Parameters<typeof setNumberFormatSettings>[0]);
 		}
 	} catch (error) {
-		console.warn("[XPOS] Number format initialization failed", error);
+		console.warn("[meerkatPOS] Number format initialization failed", error);
 	}
 }
 
@@ -110,7 +110,7 @@ async function initializeNumberFormat(): Promise<void> {
 	await initializeNumberFormat();
 	app.config.globalProperties.$dayjs = dayjs;
 	app.config.errorHandler = (err: unknown, _instance: unknown, info: string) => {
-		console.error("X POS Error:", err, info);
+		console.error("meerkatPOS Error:", err, info);
 		const message = err instanceof Error ? err.message : String(err);
 		captureError({
 			source: "renderer",

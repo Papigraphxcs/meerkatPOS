@@ -52,14 +52,6 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
 
 	const itemsHtml = snapshot.items
 		.map((item) => {
-			const codeLine =
-				item.item_code && item.item_code !== item.item_name
-					? `<span style="font-size:9px;color:#333;font-weight:600;">${esc(item.item_code)}</span>`
-					: "";
-			const uomLine =
-				item.uom && item.uom !== "Nos" && item.uom !== "Unit"
-					? `<div class="item-extras">UOM: ${esc(item.uom)}</div>`
-					: "";
 			const serialLine = item.serial_no
 				? `<div class="item-extras">S/N: ${esc(item.serial_no)}</div>`
 				: "";
@@ -81,12 +73,12 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
     <div class="item-row">
         <div class="item-name">${esc(item.item_name)}</div>
         <div class="item-detail-line">
-            <span class="col-desc" style="flex:1;">${codeLine}</span>
+            <span class="col-desc" style="flex:1;"></span>
             <span class="col-qty">${formatQty(item.qty)}</span>
             <span class="col-rate">${formatFor(currency, item.rate)}</span>
             <span class="col-amt">${formatFor(currency, item.amount)}</span>
         </div>
-        ${uomLine}${serialLine}${batchLine}${discountLine}${notesLine}
+        ${serialLine}${batchLine}${discountLine}${notesLine}
     </div>`;
 		})
 		.join("");
@@ -195,7 +187,6 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
     <div class="receipt-header">
         <div class="header-top">
             ${logo}
-            <div class="store-name-right">${esc(ctx.company_name)}</div>
         </div>
         ${ctx.receipt_header ? `<div class="receipt-header-html">${ctx.receipt_header}</div>` : ""}
         <div class="store-detail">
@@ -292,7 +283,7 @@ export function buildReceiptHtml(snapshot: ReceiptSnapshot, ctx: ReceiptContext)
 				: '<div class="thank-you">Thank You!</div>'
 		}
         ${ctx.receipt_footer ? `<div class="receipt-footer-html">${ctx.receipt_footer}</div>` : ""}
-        <div class="powered-by">Powered by XPOS &bull; ${new Date().getFullYear()}</div>
+        <div class="powered-by">Powered by meerkatPOS &bull; ${new Date().getFullYear()}</div>
     </div>
 </div>`;
 }

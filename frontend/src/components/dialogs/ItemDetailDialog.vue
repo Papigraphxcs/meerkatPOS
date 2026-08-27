@@ -8,14 +8,25 @@
 		"
 	>
 		<DialogContent class="max-w-lg max-h-[80vh] flex flex-col p-0 gap-0">
-			<DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
-				<DialogTitle class="text-base">{{ itemForDetail?.item_name }}</DialogTitle>
-				<DialogDescription class="text-xs font-mono">{{
-					itemForDetail?.item_code
-				}}</DialogDescription>
+			<DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border flex-row items-center gap-3">
+				<div class="w-14 h-14 shrink-0 rounded-lg bg-muted overflow-hidden flex items-center justify-center">
+					<img
+						v-if="itemForDetail?.image"
+						:src="itemForDetail.image"
+						:alt="itemForDetail.item_name"
+						class="w-full h-full object-cover"
+					/>
+					<Package v-else class="w-6 h-6 text-muted-foreground/40" />
+				</div>
+				<div class="min-w-0">
+					<DialogTitle class="text-base">{{ itemForDetail?.item_name }}</DialogTitle>
+					<DialogDescription class="text-xs font-mono">{{
+						itemForDetail?.item_code
+					}}</DialogDescription>
+				</div>
 			</DialogHeader>
 
-			<div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+			<div class="flex-1 overflow-y-auto p-5 space-y-4 meerkatpos-scrollbar">
 				<div v-if="itemStore.isLoadingDetail" class="flex items-center justify-center py-8">
 					<Loader2 class="w-8 h-8 text-primary animate-spin" />
 				</div>
@@ -83,7 +94,7 @@
 								>({{ detail.batches.length }} available)</span
 							>
 						</label>
-						<div class="space-y-1.5 max-h-40 overflow-y-auto xpos-scrollbar">
+						<div class="space-y-1.5 max-h-40 overflow-y-auto meerkatpos-scrollbar">
 							<button
 								v-for="batch in detail.batches"
 								:key="batch.batch_no"
@@ -132,7 +143,7 @@
 								class="ps-9 text-sm"
 							/>
 						</div>
-						<div class="space-y-1 max-h-40 overflow-y-auto xpos-scrollbar">
+						<div class="space-y-1 max-h-40 overflow-y-auto meerkatpos-scrollbar">
 							<button
 								v-for="sn in filteredSerials"
 								:key="sn"
@@ -223,7 +234,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Check, Plus, AlertCircle } from "lucide-vue-next";
+import { Loader2, Search, Check, Plus, AlertCircle, Package } from "lucide-vue-next";
 import __ from "@/lib/translate";
 
 const itemStore = useItemStore();

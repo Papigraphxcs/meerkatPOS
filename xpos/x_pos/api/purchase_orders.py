@@ -8,6 +8,7 @@ from erpnext.accounts.party import get_party_account
 from frappe import _
 from frappe.utils import cint, flt, getdate, nowdate
 
+from xpos.api.auth import user_has_pos_permission
 from xpos.api.profiles import resolve_pos_profile
 
 from .utils import get, get_default_warehouse
@@ -17,6 +18,14 @@ def ensure_allowed(profile: dict, flag: str, label: str):
 	if not cint(profile.get(flag)):
 		frappe.throw(
 			_("{0} is disabled for this POS Profile.").format(label),
+			frappe.PermissionError,
+		)
+
+
+def ensure_pos_permission(key: str, pos_profile: str | None = None):
+	if not user_has_pos_permission(key, pos_profile=pos_profile):
+		frappe.throw(
+			_("You are not permitted to perform this action."),
 			frappe.PermissionError,
 		)
 
@@ -452,6 +461,7 @@ def create_purchase_order(data: str | dict) -> dict:
 	payload = json.loads(data) if isinstance(data, str) else data
 	profile = resolve_pos_profile(payload.get("pos_profile")).as_dict()
 	ensure_allowed(profile, "allow_purchase_order", _("Purchase orders"))
+	ensure_pos_permission("purchase_order", profile.get("name"))
 
 	receive_now = cint(payload.get("receive"))
 	if receive_now:
@@ -627,6 +637,7 @@ def create_purchase_invoice_direct(data: str | dict) -> dict:
 	payload = json.loads(data) if isinstance(data, str) else data
 	profile = resolve_pos_profile(payload.get("pos_profile")).as_dict()
 	ensure_allowed(profile, "allow_purchase_order", _("Purchase invoices"))
+	ensure_pos_permission("purchase_order", profile.get("name"))
 
 	update_stock = cint(payload.get("receive") or payload.get("update_stock"))
 	if update_stock:

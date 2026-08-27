@@ -7,78 +7,128 @@
 			}
 		"
 	>
-		<DialogContent class="max-w-4xl h-[calc(100vh-2rem)] flex flex-col p-0 gap-0" :hide-close="true">
+		<DialogContent
+			class="max-w-5xl h-[50rem] max-h-[calc(100vh-2rem)] flex flex-col p-0 gap-0 overflow-hidden bg-background"
+			:hide-close="true"
+		>
 			<DialogHeader
-				class="shrink-0 flex-row items-center justify-between space-y-0 px-5 py-3 border-b border-border"
+				class="shrink-0 flex-row items-center justify-between space-y-0 px-6 py-4 border-b border-border"
 			>
 				<div class="flex items-center gap-3">
 					<div
-						class="w-8 h-8 rounded-lg bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-sm"
+						class="w-10 h-10 rounded-xl flex items-center justify-center border border-border"
+						:class="cartStore.isReturnMode ? 'bg-foreground text-background' : 'bg-foreground text-background'"
 					>
-						<Wallet class="w-4 h-4 text-white" />
+						<component :is="cartStore.isReturnMode ? RotateCcw : Wallet" class="w-5 h-5" />
 					</div>
 					<div>
-						<DialogTitle class="text-base">
+						<DialogTitle class="text-lg font-bold tracking-tight">
 							{{ cartStore.isReturnMode ? __("Return Payment") : __("Payment") }}
 						</DialogTitle>
-						<DialogDescription class="text-xs">{{ cartStore.customerName }}</DialogDescription>
+						<DialogDescription class="text-xs font-medium">{{
+							cartStore.customerName
+						}}</DialogDescription>
 					</div>
 				</div>
 				<div class="flex items-center gap-2">
 					<div
 						v-if="customerBalance !== null && !cartStore.isReturnMode"
-						class="hidden sm:flex items-center gap-2 text-[10px]"
+						class="hidden sm:flex items-center gap-2 text-[11px]"
 					>
 						<span
 							v-if="customerBalance > 0"
-							class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 font-medium"
+							class="px-2 py-1 rounded-full border border-border text-foreground font-semibold"
 						>
 							{{ __("Outstanding") }}: {{ money(customerBalance) }}
 						</span>
 						<span
 							v-if="customerCreditLimit > 0"
-							class="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 font-medium"
+							class="px-2 py-1 rounded-full border border-border text-foreground font-semibold"
 						>
 							{{ __("Credit Limit") }}: {{ money(customerCreditLimit) }}
 						</span>
 					</div>
-					<Badge v-if="cartStore.isReturnMode" variant="warning" class="text-[10px]">
+					<Badge v-if="cartStore.isReturnMode" variant="outline" class="text-[10px]">
 						<RotateCcw class="w-3 h-3" /> {{ __("Return") }}
 					</Badge>
 					<kbd
 						class="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-muted rounded border border-border"
 						>Esc</kbd
 					>
-					<Button variant="ghost" size="icon-sm" @click="close" tabindex="-1">
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						class="rounded-full hover:bg-muted"
+						@click="close"
+						tabindex="-1"
+					>
 						<X class="w-5 h-5" />
 					</Button>
 				</div>
 			</DialogHeader>
 
-			<div class="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
-				<div class="flex-1 flex flex-col p-4 gap-3 min-w-0 overflow-y-auto xpos-scrollbar">
-					<div
-						class="rounded-xl border"
-						:class="
-							cartStore.isReturnMode
-								? 'bg-amber-500/5 border-amber-500/10'
-								: 'bg-primary/5 border-primary/10'
-						"
-					>
-						<div class="text-center py-3">
-							<p
-								class="text-xs font-medium mb-0.5"
-								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary/70'"
-							>
+			<div class="flex-1 flex flex-col min-h-0 overflow-y-auto meerkatpos-scrollbar p-5 gap-3">
+				<!-- Row 1: action cards (left) + amount due (right) -->
+				<div class="grid grid-cols-1 lg:grid-cols-[15rem_1fr] gap-3 lg:items-stretch lg:min-h-[17rem]">
+					<div class="grid grid-cols-2 grid-rows-2 gap-2 justify-around items-center">
+						<Button
+							variant="outline"
+							class="h-[50%] flex flex-row gap-1.5 rounded-2xl p-3 justify-center items-center hover:bg-red-100 hover:text-black hover:border hover:border-red-400"
+							@click="close"
+							tabindex="-1"
+						>
+							<X class="w-4 h-4 hover:text-black" />
+							<span class="text-xs font-semibold">{{ __("Cancel") }}</span>
+						</Button>
+						<Button
+							variant="outline"
+							class="h-[50%] flex flex-row gap-1.5 rounded-2xl p-3 justify-center items-center"
+							@click="!isSplitPayment ? enableSplitPayment() : (isSplitPayment = false)"
+						>
+							<Plus class="w-4 h-4" />
+							<span class="text-xs font-semibold">{{ __("Split Payment") }}</span>
+						</Button>
+						<Button
+							variant="outline"
+							class="h-[50%] flex flex-row items-start gap-1.5 rounded-2xl p-3 justify-center items-center"
+							data-testid="save-payment"
+							:disabled="isSubmitting || !canSubmit"
+							@click="submitPayment(false)"
+						>
+							<Loader2 v-if="isSubmitting && !printAfterSave" class="w-4 h-4 animate-spin " />
+							<Save v-else class="w-4 h-4" />
+							<span class="text-xs font-semibold">{{ __("Save Only") }}</span>
+						</Button>
+						<Button
+							ref="submitBtn"
+							class="h-[50%] flex flex-row  gap-1.5 rounded-2xl bg-foreground text-background p-3 hover:bg-foreground/90 justify-center items-center"
+							:disabled="isSubmitting || !canSubmit"
+							@click="submitPayment(true)"
+						>
+							<Loader2 v-if="isSubmitting && printAfterSave" class="w-4 h-4 animate-spin" />
+							<Printer v-else class="w-4 h-4" />
+							<span class="text-xs font-semibold">{{
+								cartStore.isReturnMode ? __("Return & Print") : __("Save & Print")
+							}}</span>
+						</Button>
+					</div>
+
+					<div class="rounded-2xl border border-foreground bg-foreground text-background p-6 flex flex-col">
+						<div class="flex items-start justify-between">
+							<p class="text-xs font-semibold uppercase tracking-wider opacity-70">
 								{{ cartStore.isReturnMode ? __("Refund Amount") : __("Amount Due") }}
 							</p>
-							<p
-								class="text-3xl font-extrabold tabular-nums"
-								:class="cartStore.isReturnMode ? 'text-amber-600' : 'text-primary'"
-							>
-								{{ money(Math.abs(cartStore.grandTotal)) }}
-							</p>
+							<Badge v-if="remainingAmount > 0" variant="outline" class="text-[10px] border-background/40 text-background">
+								{{ remainingLabel }}: {{ money(remainingAmount) }}
+							</Badge>
+							<Badge v-else-if="changeAmount > 0" variant="outline" class="text-[10px] border-background/40 text-background">
+								{{ __("Change") }}: {{ formatWithSymbol(invoiceCurrency, changeAmount) }}
+							</Badge>
 						</div>
+						<p class="text-5xl font-extrabold tabular-nums tracking-tight mt-2 mb-2">
+							{{ money(Math.abs(cartStore.grandTotal)) }}
+						</p>
+
 						<div
 							v-if="
 								cartStore.calculatedTaxes.length > 0 ||
@@ -86,302 +136,182 @@
 								cartStore.offerGrandTotalDiscountPct > 0 ||
 								cartStore.appliedCoupon
 							"
-							class="px-4 pb-3 pt-1 border-t border-border/50"
+							class="mt-3 pt-3 border-t border-background/20 space-y-1"
 						>
-							<div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
+							<div class="flex items-center justify-between text-xs opacity-70">
 								<span>{{ __("Subtotal") }}</span>
 								<span>{{ money(cartStore.subtotal) }}</span>
 							</div>
 							<div
 								v-for="(tax, idx) in cartStore.calculatedTaxes"
 								:key="idx"
-								class="flex items-center justify-between text-xs text-muted-foreground"
+								class="flex items-center justify-between text-xs opacity-70"
 							>
 								<span class="flex items-center gap-1">
 									{{ tax.description }}
 									<span class="text-[10px]">({{ percent(tax.rate) }})</span>
-									<span
-										v-if="tax.included_in_print_rate"
-										class="text-[9px] text-blue-500"
-										>{{ __("incl.") }}</span
-									>
+									<span v-if="tax.included_in_print_rate" class="text-[9px]">{{ __("incl.") }}</span>
 								</span>
-								<span :class="tax.included_in_print_rate ? 'text-blue-500' : ''">
-									{{ tax.included_in_print_rate ? "" : "+" }}{{ money(tax.amount) }}
-								</span>
+								<span>{{ tax.included_in_print_rate ? "" : "+" }}{{ money(tax.amount) }}</span>
 							</div>
-							<div
-								v-if="cartStore.offerItemDiscountTotal > 0"
-								class="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400"
-							>
+							<div v-if="cartStore.offerItemDiscountTotal > 0" class="flex items-center justify-between text-xs">
 								<span>{{ __("Offer Discount") }}</span>
 								<span>-{{ money(cartStore.offerItemDiscountTotal) }}</span>
 							</div>
-							<div
-								v-if="cartStore.offerGrandTotalDiscountPct > 0"
-								class="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400"
-							>
-								<span
-									>{{ __("Offer") }} ({{
-										percent(cartStore.offerGrandTotalDiscountPct)
-									}})</span
-								>
+							<div v-if="cartStore.offerGrandTotalDiscountPct > 0" class="flex items-center justify-between text-xs">
+								<span>{{ __("Offer") }} ({{ percent(cartStore.offerGrandTotalDiscountPct) }})</span>
 								<span>-{{ money(paymentOfferGrandDiscount) }}</span>
 							</div>
-							<div
-								v-if="cartStore.appliedCoupon"
-								class="flex items-center justify-between text-xs text-violet-600 dark:text-violet-400"
-							>
-								<span
-									>{{ __("Coupon") }}:
-									{{
-										cartStore.appliedCoupon.coupon_code || cartStore.appliedCoupon.name
-									}}</span
-								>
+							<div v-if="cartStore.appliedCoupon" class="flex items-center justify-between text-xs">
+								<span>{{ __("Coupon") }}: {{ cartStore.appliedCoupon.coupon_code || cartStore.appliedCoupon.name }}</span>
 								<span class="text-[10px]">{{ __("Applied") }}</span>
 							</div>
 						</div>
+
+						<p v-if="outstandingSubmissionHint" class="mt-auto pt-3 text-[11px] opacity-70">
+							{{ outstandingSubmissionHint }}
+						</p>
+					</div>
+				</div>
+
+				<!-- Row 2: tendered + suggestions strip (watchlist-style) -->
+				<div class="rounded-2xl border border-border">
+					<div class="flex items-stretch divide-x divide-border">
+						<div class="flex items-center gap-2 px-3 py-2 shrink-0 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+							<DollarSign class="w-3.5 h-3.5" />
+							{{ __("Tendered") }}
+						</div>
+
+						<div class="flex items-center px-2 py-1.5 shrink-0">
+							<NumberInput
+								ref="amountInput"
+								v-model="tenderedAmount"
+								:min="0"
+								:precision="selectedPrecision"
+								class="w-36 text-center font-bold rounded-xl border border-border"
+								:select-on-focus="true"
+								@keydown.enter.stop.prevent="handleAmountInputSubmit"
+								@keydown.up.prevent="focusMethodByIndex"
+								@keydown.down.prevent="focusFirstQuickAmount"
+							/>
+						</div>
+
+						<div class="flex-1 flex items-stretch divide-x divide-border min-w-0">
+							<template v-if="!isSplitPayment">
+								<button
+									v-for="(amount, idx) in quickAmounts"
+									:key="amount"
+									:ref="
+										(el) => {
+											if (el) quickAmountRefs[idx] = el as HTMLElement;
+										}
+									"
+									class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold hover:bg-muted transition-colors"
+									@click="setQuickAmount(amount)"
+									@keydown.enter.prevent="setQuickAmount(amount)"
+									@keydown.up.prevent="focusAmountInput"
+									@keydown.down.prevent="focusSubmitBtn"
+									@keydown.left.prevent="focusQuickAmount(idx - 1)"
+									@keydown.right.prevent="focusQuickAmount(idx + 1)"
+								>
+									{{ formatWithSymbol(selectedCurrency, amount) }}
+								</button>
+							</template>
+
+							<template v-else>
+								<button
+									class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold hover:bg-muted transition-colors disabled:opacity-40"
+									:disabled="!selectedMethod || tenderedAmount <= 0"
+									@click="addSplitPayment"
+								>
+									<Plus class="w-3.5 h-3.5" />
+									{{ __("Add") }} {{ selectedMethod }} &mdash; {{ formatWithSymbol(selectedCurrency, tenderedAmount) }}
+								</button>
+							</template>
+						</div>
+
+						<button
+							v-if="cartStore.customer && !cartStore.isReturnMode && customerLoyaltyPoints > 0"
+							class="flex items-center gap-1.5 px-3 py-2 shrink-0 text-xs font-semibold hover:bg-muted transition-colors"
+							@click="
+								cartStore.redeemLoyaltyPoints
+									? null
+									: showLoyaltyInput
+										? cancelLoyaltyInput()
+										: openLoyaltyInput()
+							"
+						>
+							<Gift class="w-3.5 h-3.5" />
+							{{ customerLoyaltyPoints }} {{ __("pts") }}
+						</button>
 					</div>
 
-					<div>
-						<div class="flex items-center justify-between mb-2">
-							<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-								{{ __("Method") }}
-							</h3>
-							<div class="flex items-center gap-1">
-								<kbd
-									class="px-1 py-0.5 text-[9px] font-mono text-muted-foreground bg-muted rounded border border-border"
-									>&larr;</kbd
-								>
-								<kbd
-									class="px-1 py-0.5 text-[9px] font-mono text-muted-foreground bg-muted rounded border border-border"
-									>&rarr;</kbd
-								>
-							</div>
-						</div>
-						<div class="flex gap-2 flex-wrap">
-							<button
-								v-for="(method, idx) in availableMethods"
-								:key="method.mode_of_payment"
-								:ref="
-									(el) => {
-										if (el) methodRefs[idx] = el as HTMLButtonElement;
-									}
-								"
-								data-testid="payment-method"
-								:data-mode="method.mode_of_payment"
-								@click="selectMethod(method.mode_of_payment)"
-								@keydown.left.prevent="focusMethod(idx - 1)"
-								@keydown.right.prevent="focusMethod(idx + 1)"
-								@keydown.down.prevent="focusAmountInput"
-								class="flex-1 min-w-20 p-2.5 rounded-xl border-2 text-center transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
-								:class="
-									selectedMethod === method.mode_of_payment
-										? 'border-primary bg-primary/5 text-primary shadow-sm'
-										: 'border-border bg-card text-muted-foreground hover:border-muted-foreground/30'
-								"
-							>
-								<div class="text-lg mb-0.5">
-									<component
-										:is="getMethodIcon(method.mode_of_payment)"
-										class="w-5 h-5 mx-auto"
-									/>
-								</div>
-								<p class="text-[11px] font-medium truncate">
-									{{ method.mode_of_payment }}
-								</p>
-							</button>
-						</div>
-					</div>
-
-					<div>
-						<div class="flex items-center justify-between mb-1.5">
-							<label
-								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
-							>
-								{{ __("Tendered") }}</label
-							>
-							<Button
-								v-if="!isSplitPayment"
-								variant="link"
-								size="sm"
-								class="text-xs h-auto p-0"
-								@click="enableSplitPayment"
-							>
-								{{ __("Split Payment") }}
-							</Button>
-						</div>
-						<NumberInput
-							ref="amountInput"
-							v-model="tenderedAmount"
-							:min="0"
-							:precision="selectedPrecision"
-							class="text-center text-xl font-bold tracking-wider py-3"
-							:select-on-focus="true"
-							@keydown.enter.stop.prevent="handleAmountInputSubmit"
-							@keydown.up.prevent="focusMethodByIndex"
-							@keydown.down.prevent="focusFirstQuickAmount"
-						/>
-
-						<div v-if="selectedIsForeign" class="mt-1.5 space-y-1">
+					<div
+						v-if="hasForeignTenderMethods"
+						class="px-3 py-1.5 border-t border-border h-11 overflow-hidden leading-tight"
+					>
+						<template v-if="selectedIsForeign">
 							<p v-if="selectedRateMissing" class="text-xs font-medium text-destructive">
-								{{
-									__("No exchange rate for {0}. Set today's rate before accepting it.", [
-										selectedCurrency,
-									])
-								}}
+								{{ __("No exchange rate for {0}. Set today's rate before accepting it.", [selectedCurrency]) }}
 							</p>
 							<template v-else>
 								<p class="text-xs text-muted-foreground">
-									{{ formatWithSymbol(selectedCurrency, tenderedAmount) }}
-									{{ __("at") }} {{ formatFor(invoiceCurrency, selectedRate) }} =
+									{{ formatWithSymbol(selectedCurrency, tenderedAmount) }} {{ __("at") }}
+									{{ formatFor(invoiceCurrency, selectedRate) }} =
 									<span class="font-semibold text-foreground">
-										{{
-											formatWithSymbol(
-												invoiceCurrency,
-												convertToBase(
-													selectedCurrency,
-													invoiceCurrency,
-													tenderedAmount,
-													selectedRate,
-												),
-											)
-										}}
+										{{ formatWithSymbol(invoiceCurrency, convertToBase(selectedCurrency, invoiceCurrency, tenderedAmount, selectedRate)) }}
 									</span>
 								</p>
-								<p
-									:class="
-										selectedRateIsStale
-											? 'text-xs font-medium text-amber-600 dark:text-amber-500'
-											: 'text-xs text-muted-foreground'
-									"
-								>
+								<p class="text-xs text-muted-foreground">
 									{{
 										selectedRateIsStale
-											? __("Rate is from {0} and has not been updated today.", [
-													selectedRateDate,
-												])
+											? __("Rate is from {0} and has not been updated today.", [selectedRateDate])
 											: __("Rate as of {0}", [selectedRateDate])
 									}}
 								</p>
 							</template>
-						</div>
+						</template>
 					</div>
 
-					<div v-if="isSplitPayment" class="space-y-2">
-						<Button
-							variant="outline"
-							size="sm"
-							class="w-full"
-							@click="addSplitPayment"
-							:disabled="!selectedMethod || tenderedAmount <= 0"
+					<div v-if="isSplitPayment && splitPayments.length > 0" class="border-t border-border p-2 space-y-1.5">
+						<div
+							v-for="(sp, idx) in splitPayments"
+							:key="sp.id"
+							class="flex items-center justify-between border border-border rounded-xl px-3 py-2 text-sm"
 						>
-							<Plus class="w-4 h-4" />
-							Add {{ selectedMethod }} &mdash;
-							{{ formatWithSymbol(selectedCurrency, tenderedAmount) }}
-						</Button>
-
-						<div v-if="splitPayments.length > 0" class="space-y-1">
-							<div
-								v-for="(sp, idx) in splitPayments"
-								:key="sp.id"
-								class="flex items-center justify-between bg-muted rounded-lg px-3 py-2 text-sm"
-							>
-								<div class="flex items-center gap-2">
-									<component :is="getMethodIcon(sp.mode_of_payment)" class="w-5 h-5" />
-									<span class="font-medium text-foreground">{{ sp.mode_of_payment }}</span>
-								</div>
-								<div class="flex items-center gap-2">
-									<div class="text-right">
-										<span class="font-bold text-foreground">
-											{{ formatWithSymbol(sp.currency, sp.native_amount) }}
-										</span>
-										<span
-											v-if="sp.currency !== invoiceCurrency"
-											class="block text-xs text-muted-foreground"
-										>
-											@ {{ formatFor(invoiceCurrency, sp.exchange_rate) }} =
-											{{ formatWithSymbol(invoiceCurrency, sp.base_amount) }}
-										</span>
-									</div>
-									<button
-										@click="removeSplitPayment(idx)"
-										class="text-muted-foreground hover:text-destructive"
-									>
-										<X class="w-3.5 h-3.5" />
-									</button>
-								</div>
-							</div>
-
-							<div
-								v-if="hasForeignTender"
-								class="border-t border-border mt-1 pt-1 space-y-0.5 px-3"
-							>
-								<div
-									v-for="group in tenderByCurrency"
-									:key="group.currency"
-									class="flex justify-between text-xs text-muted-foreground"
-								>
-									<span>{{ formatWithSymbol(group.currency, group.native) }}</span>
-									<span>{{ formatWithSymbol(invoiceCurrency, group.base) }}</span>
-								</div>
-							</div>
-
-							<div class="flex justify-between text-sm font-semibold px-3 pt-1">
-								<span class="text-muted-foreground">{{ __("Total Paid") }}</span>
-								<span class="text-primary">
-									{{ formatWithSymbol(invoiceCurrency, splitTotal) }}
-								</span>
-							</div>
-						</div>
-					</div>
-
-					<div v-if="!isSplitPayment" class="grid grid-cols-4 gap-1.5">
-						<Button
-							v-for="(amount, idx) in quickAmounts"
-							:key="amount"
-							:ref="
-								(el) => {
-									if (el) quickAmountRefs[idx] = (el as any).$el || el;
-								}
-							"
-							variant="outline"
-							size="sm"
-							class="active:scale-95"
-							@click="setQuickAmount(amount)"
-							@keydown.enter.prevent="setQuickAmount(amount)"
-							@keydown.up.prevent="focusAmountInput"
-							@keydown.down.prevent="focusSubmitBtn"
-							@keydown.left.prevent="focusQuickAmount(idx - 1)"
-							@keydown.right.prevent="focusQuickAmount(idx + 1)"
-						>
-							{{ money(amount) }}
-						</Button>
-					</div>
-
-					<div
-						v-if="cartStore.customer && !cartStore.isReturnMode && customerLoyaltyPoints > 0"
-						class="bg-violet-500/5 border border-violet-500/20 rounded-xl p-3 space-y-2"
-					>
-						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
-								<Gift class="w-4 h-4 text-violet-500" />
-								<span class="text-sm font-medium text-foreground">{{
-									__("Loyalty Points")
-								}}</span>
+								<component :is="getMethodIcon(sp.mode_of_payment)" class="w-3.5 h-3.5" />
+								<span class="font-semibold text-foreground">{{ sp.mode_of_payment }}</span>
 							</div>
-							<Badge variant="secondary" class="text-[10px]">
-								{{ customerLoyaltyPoints }} {{ __("pts") }} ({{
-									money(customerLoyaltyAmount)
-								}})
-							</Badge>
+							<div class="flex items-center gap-2">
+								<div class="text-right">
+									<span class="font-bold text-foreground">{{ formatWithSymbol(sp.currency, sp.native_amount) }}</span>
+									<span v-if="sp.currency !== invoiceCurrency" class="block text-xs text-muted-foreground">
+										@ {{ formatFor(invoiceCurrency, sp.exchange_rate) }} = {{ formatWithSymbol(invoiceCurrency, sp.base_amount) }}
+									</span>
+								</div>
+								<button @click="removeSplitPayment(idx)" class="text-muted-foreground hover:text-destructive">
+									<X class="w-3.5 h-3.5" />
+								</button>
+							</div>
 						</div>
+						<div v-if="hasForeignTender" class="pt-1 space-y-0.5 px-3">
+							<div v-for="group in tenderByCurrency" :key="group.currency" class="flex justify-between text-xs text-muted-foreground">
+								<span>{{ formatWithSymbol(group.currency, group.native) }}</span>
+								<span>{{ formatWithSymbol(invoiceCurrency, group.base) }}</span>
+							</div>
+						</div>
+						<div class="flex justify-between text-sm font-semibold px-3 pt-1">
+							<span class="text-muted-foreground">{{ __("Total Paid") }}</span>
+							<span>{{ formatWithSymbol(invoiceCurrency, splitTotal) }}</span>
+						</div>
+					</div>
 
+					<div v-if="showLoyaltyInput || cartStore.redeemLoyaltyPoints" class="border-t border-border p-3">
 						<template v-if="cartStore.redeemLoyaltyPoints">
 							<div class="flex items-center justify-between text-xs">
-								<span class="text-violet-700 dark:text-violet-300 font-medium">
-									{{ __("Redeeming") }}: {{ cartStore.loyaltyPoints }} {{ __("pts") }} =
-									{{ money(cartStore.loyaltyAmount) }}
+								<span class="text-foreground font-medium">
+									{{ __("Redeeming") }}: {{ cartStore.loyaltyPoints }} {{ __("pts") }} = {{ money(cartStore.loyaltyAmount) }}
 								</span>
 								<Button
 									variant="ghost"
@@ -396,305 +326,228 @@
 								</Button>
 							</div>
 						</template>
-
-						<template v-else-if="showLoyaltyInput">
+						<template v-else>
 							<div class="space-y-1.5">
 								<div class="flex items-center gap-1.5">
-									<NumberInput
-										v-model="redeemPointsInput"
-										:min="1"
-										:max="maxRedeemablePoints"
-										:precision="0"
-										class="flex-1 text-sm"
-									/>
-									<span class="text-xs text-muted-foreground shrink-0"
-										>/ {{ maxRedeemablePoints }} {{ __("pts") }}</span
-									>
+									<NumberInput v-model="redeemPointsInput" :min="1" :max="maxRedeemablePoints" :precision="0" class="flex-1 text-sm" />
+									<span class="text-xs text-muted-foreground shrink-0">/ {{ maxRedeemablePoints }} {{ __("pts") }}</span>
 								</div>
-								<p class="text-[11px] text-violet-600 dark:text-violet-400">
-									{{ __("Discount") }}: {{ money(redeemInputAmount) }}
-								</p>
+								<p class="text-[11px] text-foreground">{{ __("Discount") }}: {{ money(redeemInputAmount) }}</p>
 								<div class="flex gap-1.5">
 									<Button
 										variant="default"
 										size="sm"
-										class="flex-1 bg-violet-600 hover:bg-violet-700 text-white text-xs"
+										class="flex-1 bg-foreground hover:bg-foreground/90 text-background text-xs"
 										:disabled="redeemPointsInput < 1"
 										@click="applyLoyalty"
 									>
 										{{ __("Apply") }}
 									</Button>
-									<Button
-										variant="outline"
-										size="sm"
-										class="flex-1 text-xs"
-										@click="cancelLoyaltyInput"
-									>
+									<Button variant="outline" size="sm" class="flex-1 text-xs" @click="cancelLoyaltyInput">
 										{{ __("Cancel") }}
 									</Button>
 								</div>
 							</div>
 						</template>
-
-						<template v-else>
-							<Button
-								variant="outline"
-								size="sm"
-								class="w-full text-violet-600 dark:hover:bg-violet-950 text-xs"
-								@click="openLoyaltyInput"
-							>
-								<Gift class="w-3 h-3" />
-								{{ __("Redeem Points") }}
-							</Button>
-						</template>
-					</div>
-
-					<div v-if="posStore.allowWriteOffChange && !cartStore.isReturnMode" class="space-y-1">
-						<div class="flex items-center justify-between">
-							<label
-								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
-							>
-								{{ __("Write Off") }}
-							</label>
-							<span class="text-xs text-muted-foreground">{{
-								__("Small remaining amounts")
-							}}</span>
-						</div>
-						<NumberInput
-							v-model="writeOffInput"
-							:min="0"
-							:precision="moneyPrecision"
-							placeholder="0.00"
-							class="text-sm"
-							@change="cartStore.writeOffAmount = writeOffInput || 0"
-						/>
-					</div>
-
-					<div
-						v-if="showChangeAllocator"
-						class="mt-auto rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 space-y-2"
-					>
-						<div class="flex items-center justify-between">
-							<p class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
-								{{ __("Change") }}
-							</p>
-							<p
-								class="text-lg font-extrabold text-emerald-700 dark:text-emerald-300 tabular-nums"
-							>
-								{{ formatWithSymbol(invoiceCurrency, changeAmount) }}
-							</p>
-						</div>
-
-						<div
-							v-for="(leg, idx) in changeLegs"
-							:key="`${leg.mode_of_payment}-${idx}`"
-							data-testid="change-leg"
-							:data-mode="leg.mode_of_payment"
-							:data-currency="leg.currency"
-						>
-							<div class="flex items-center gap-2">
-								<component
-									:is="getMethodIcon(leg.mode_of_payment)"
-									class="w-4 h-4 shrink-0"
-								/>
-								<span class="text-xs font-medium text-foreground truncate flex-1">
-									{{ leg.mode_of_payment }}
-								</span>
-								<NumberInput
-									:model-value="leg.amount"
-									:min="0"
-									:precision="precisionFor(leg.currency)"
-									class="w-28 text-right text-sm py-1"
-									data-testid="change-leg-input"
-									@update:model-value="updateChangeLeg(idx, Number($event) || 0)"
-								/>
-								<button
-									v-if="changeLegs.length > 1"
-									@click="removeChangeLeg(idx)"
-									class="text-muted-foreground hover:text-destructive"
-								>
-									<X class="w-3.5 h-3.5" />
-								</button>
-							</div>
-							<p
-								v-if="leg.currency !== invoiceCurrency"
-								class="pl-6 text-[10px] text-muted-foreground"
-							>
-								@ {{ formatFor(invoiceCurrency, leg.exchange_rate) }} =
-								{{ formatWithSymbol(invoiceCurrency, leg.base_amount) }}
-							</p>
-						</div>
-
-						<div class="flex flex-wrap gap-1">
-							<Button
-								v-for="mode in posStore.cashTenderModes"
-								:key="mode.mode_of_payment"
-								variant="outline"
-								size="sm"
-								class="text-xs h-7"
-								data-testid="add-change-leg"
-								:data-mode="mode.mode_of_payment"
-								:disabled="changeRemaining <= 0"
-								@click="addChangeLeg(mode.mode_of_payment)"
-							>
-								<Plus class="w-3 h-3" />
-								{{ mode.mode_of_payment }}
-								<span v-if="changeRemaining > 0" class="text-muted-foreground">
-									{{
-										formatWithSymbol(
-											mode.pos_tender_currency,
-											changeRemainingIn(mode.pos_tender_currency),
-										)
-									}}
-								</span>
-							</Button>
-						</div>
-
-						<p
-							v-if="!changeAllocationValid"
-							class="text-xs font-medium text-destructive tabular-nums"
-						>
-							{{
-								__("{0} of change is still unallocated", [
-									formatWithSymbol(invoiceCurrency, changeRemaining),
-								])
-							}}
-						</p>
-					</div>
-
-					<div class="flex gap-2" :class="showChangeAllocator ? 'mt-2' : 'mt-auto'">
-						<div
-							v-if="changeAmount > 0 && !showChangeAllocator"
-							class="flex-1 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 text-center"
-						>
-							<p class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mb-0.5">
-								{{ __("Change") }}
-							</p>
-							<p
-								class="text-lg font-extrabold text-emerald-700 dark:text-emerald-300 tabular-nums"
-							>
-								{{ formatWithSymbol(invoiceCurrency, changeAmount) }}
-							</p>
-						</div>
-						<div
-							v-if="remainingAmount > 0"
-							class="flex-1 bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-center"
-						>
-							<p class="text-[10px] font-medium text-amber-600 dark:text-amber-400 mb-0.5">
-								{{ remainingLabel }}
-							</p>
-							<p class="text-lg font-extrabold text-amber-700 dark:text-amber-300 tabular-nums">
-								{{ money(remainingAmount) }}
-							</p>
-							<p
-								v-if="outstandingSubmissionHint"
-								class="mt-1 text-[10px] font-medium text-amber-600 dark:text-amber-400"
-							>
-								{{ outstandingSubmissionHint }}
-							</p>
-						</div>
-					</div>
-
-					<div class="space-y-1">
-						<div class="flex items-center justify-between">
-							<label
-								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
-							>
-								{{ __("Posting Date") }}
-							</label>
-							<span
-								v-if="!posStore.allowChangePostingDate"
-								class="text-xs text-muted-foreground"
-							>
-								{{ __("Locked by POS Profile") }}
-							</span>
-						</div>
-						<DateTimePicker
-							v-model="cartStore.postingDate"
-							mode="date"
-							:disabled="!posStore.allowChangePostingDate"
-							:clearable="false"
-							placeholder="Posting date"
-							class="text-sm"
-						/>
 					</div>
 				</div>
 
-				<div class="hidden lg:flex flex-col w-64 border-s border-border p-4 gap-3">
-					<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-						{{ __("Numpad") }}
-					</h3>
-					<div class="grid grid-cols-3 gap-1.5 flex-1">
-						<Button
-							v-for="(key, idx) in numpadKeys"
-							:key="key"
-							:ref="
-								(el) => {
-									if (el) numpadRefs[idx] = (el as any).$el || el;
-								}
-							"
-							:variant="key === '⌫' ? 'destructive' : key === 'C' ? 'secondary' : 'outline'"
-							class="text-base h-12"
-							@click="handleNumpad(key)"
-							@keydown.enter.prevent="handleNumpad(key)"
-						>
-							<Delete v-if="key === '⌫'" class="w-5 h-5" />
-							<template v-else>{{ key }}</template>
-						</Button>
+				<!-- Row 3: numpad / change / method (allocation-style grid) -->
+				<div class="grid grid-cols-1 lg:grid-cols-4 gap-3 lg:max-h-40">
+					<div class="lg:col-span-2 rounded-2xl border border-border p-2.5 flex flex-col">
+						<h3 class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+							{{ __("Numpad") }}
+						</h3>
+						<div class="grid grid-cols-3 gap-1.5 flex-1">
+							<Button
+								v-for="(key, idx) in numpadKeys"
+								:key="key"
+								:ref="
+									(el) => {
+										if (el) numpadRefs[idx] = (el as any).$el || el;
+									}
+								"
+								variant="outline"
+								class="text-sm font-semibold h-auto rounded-lg border-border active:scale-95 transition-transform"
+								@click="handleNumpad(key)"
+								@keydown.enter.prevent="handleNumpad(key)"
+							>
+								<Delete v-if="key === '⌫'" class="w-3.5 h-3.5" />
+								<template v-else>{{ key }}</template>
+							</Button>
+						</div>
+					</div>
+
+					<div class="rounded-2xl border border-border p-2.5 flex flex-col gap-1.5 overflow-y-auto meerkatpos-scrollbar">
+						<h3 class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+							{{ __("Change") }}
+						</h3>
+						<div>
+							<p class="text-lg font-extrabold tabular-nums">
+								{{ formatWithSymbol(invoiceCurrency, changeAmount) }}
+							</p>
+							<div class="h-1.5 rounded-full bg-muted mt-1.5 overflow-hidden">
+								<div
+									class="h-full bg-foreground"
+									:style="{
+										width:
+											Math.min(
+												100,
+												(effectiveTendered / Math.max(Math.abs(cartStore.grandTotal), 0.01)) * 100,
+											) + '%',
+									}"
+								/>
+							</div>
+						</div>
+
+						<div v-if="remainingAmount > 0" class="text-xs">
+							<p class="font-semibold text-foreground uppercase tracking-wider text-[10px] mb-0.5">
+								{{ remainingLabel }}
+							</p>
+							<p class="text-lg font-bold tabular-nums">{{ money(remainingAmount) }}</p>
+						</div>
+
+						<div v-if="showChangeAllocator" class="space-y-2 pt-1 border-t border-border">
+							<div
+								v-for="(leg, idx) in changeLegs"
+								:key="`${leg.mode_of_payment}-${idx}`"
+								data-testid="change-leg"
+								:data-mode="leg.mode_of_payment"
+								:data-currency="leg.currency"
+								class="border border-border rounded-xl px-2.5 py-2"
+							>
+								<div class="flex items-center gap-2">
+									<component :is="getMethodIcon(leg.mode_of_payment)" class="w-3.5 h-3.5 shrink-0" />
+									<span class="text-xs font-semibold text-foreground truncate flex-1">{{ leg.mode_of_payment }}</span>
+									<NumberInput
+										:model-value="leg.amount"
+										:min="0"
+										:precision="precisionFor(leg.currency)"
+										class="w-24 text-right text-sm py-1 rounded-lg"
+										data-testid="change-leg-input"
+										@update:model-value="updateChangeLeg(idx, Number($event) || 0)"
+									/>
+									<button v-if="changeLegs.length > 1" @click="removeChangeLeg(idx)" class="text-muted-foreground hover:text-destructive">
+										<X class="w-3.5 h-3.5" />
+									</button>
+								</div>
+								<p v-if="leg.currency !== invoiceCurrency" class="pl-5 text-[10px] text-muted-foreground">
+									@ {{ formatFor(invoiceCurrency, leg.exchange_rate) }} = {{ formatWithSymbol(invoiceCurrency, leg.base_amount) }}
+								</p>
+							</div>
+
+							<div class="flex flex-wrap gap-1.5">
+								<Button
+									v-for="mode in posStore.cashTenderModes"
+									:key="mode.mode_of_payment"
+									variant="outline"
+									size="sm"
+									class="text-xs h-7 rounded-full border-border"
+									data-testid="add-change-leg"
+									:data-mode="mode.mode_of_payment"
+									:disabled="changeRemaining <= 0"
+									@click="addChangeLeg(mode.mode_of_payment)"
+								>
+									<Plus class="w-3 h-3" />
+									{{ mode.mode_of_payment }}
+									<span v-if="changeRemaining > 0" class="text-muted-foreground">
+										{{ formatWithSymbol(mode.pos_tender_currency, changeRemainingIn(mode.pos_tender_currency)) }}
+									</span>
+								</Button>
+							</div>
+
+							<p v-if="!changeAllocationValid" class="text-xs font-medium text-destructive tabular-nums">
+								{{ __("{0} of change is still unallocated", [formatWithSymbol(invoiceCurrency, changeRemaining)]) }}
+							</p>
+						</div>
+					</div>
+
+					<div class="rounded-2xl border border-border p-2.5 flex flex-col gap-1.5 overflow-y-auto meerkatpos-scrollbar">
+						<div class="flex items-center justify-between">
+							<h3 class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+								{{ __("Method") }}
+							</h3>
+							<div class="flex items-center gap-1">
+								<kbd class="px-1 py-0.5 text-[9px] font-mono text-muted-foreground bg-muted rounded border border-border">&larr;</kbd>
+								<kbd class="px-1 py-0.5 text-[9px] font-mono text-muted-foreground bg-muted rounded border border-border">&rarr;</kbd>
+							</div>
+						</div>
+						<div class="space-y-1 flex justify-around items-center h-1/2 flex-col">
+							<button
+								v-for="(method, idx) in availableMethods"
+								:key="method.mode_of_payment"
+								:ref="
+									(el) => {
+										if (el) methodRefs[idx] = el as HTMLButtonElement;
+									}
+								"
+								data-testid="payment-method"
+								:data-mode="method.mode_of_payment"
+								@click="selectMethod(method.mode_of_payment)"
+								@keydown.left.prevent="focusMethod(idx - 1)"
+								@keydown.right.prevent="focusMethod(idx + 1)"
+								@keydown.down.prevent="focusAmountInput"
+								class="w-3/4 h-1/2 flex items-center gap-2 p-1.5 rounded-lg border text-left transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+								:class="
+									selectedMethod === method.mode_of_payment
+										? 'border-foreground bg-foreground text-background'
+										: 'border-border text-foreground hover:bg-muted'
+								"
+							>
+								<component :is="getMethodIcon(method.mode_of_payment)" class="w-3.5 h-3.5 shrink-0" />
+								<span class="text-xs font-semibold truncate flex-1">{{ method.mode_of_payment }}</span>
+								<Check v-if="selectedMethod === method.mode_of_payment" class="w-3.5 h-3.5 shrink-0" />
+							</button>
+						</div>
+
+						<div v-if="posStore.allowWriteOffChange && !cartStore.isReturnMode" class="space-y-1 pt-1 border-t border-border">
+							<label class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+								{{ __("Write Off") }}
+							</label>
+							<NumberInput
+								v-model="writeOffInput"
+								:min="0"
+								:precision="moneyPrecision"
+								placeholder="0.00"
+								class="text-sm"
+								@change="cartStore.writeOffAmount = writeOffInput || 0"
+							/>
+						</div>
+
+						<div class="space-y-1 pt-1 border-t border-border mt-auto">
+							<div class="flex items-center justify-between">
+								<label class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+									{{ __("Posting Date") }}
+								</label>
+								<span v-if="!posStore.allowChangePostingDate" class="text-[10px] text-muted-foreground">
+									{{ __("Locked") }}
+								</span>
+							</div>
+							<DateTimePicker
+								v-model="cartStore.postingDate"
+								mode="date"
+								:disabled="!posStore.allowChangePostingDate"
+								:clearable="false"
+								placeholder="Posting date"
+								class="text-sm"
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
 
-			<DialogFooter
-				class="shrink-0 border-t border-border px-5 py-3 bg-muted/30 justify-between sm:justify-between"
-			>
+			<div class="shrink-0 border-t border-border px-6 py-2.5 flex justify-center">
 				<div class="hidden sm:flex items-center gap-2 text-[10px] text-muted-foreground">
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Enter</kbd>
 					<span>{{ __("Save & Print") }}</span>
 					<span class="mx-1">|</span>
-					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border"
-						>Ctrl+Enter</kbd
-					>
+					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Ctrl+Enter</kbd>
 					<span>{{ __("Save Only") }}</span>
 					<span class="mx-1">|</span>
 					<kbd class="px-1.5 py-0.5 font-mono bg-muted rounded border border-border">Esc</kbd>
 					<span>{{ __("Cancel") }}</span>
 				</div>
-				<div class="flex items-center gap-2">
-					<Button variant="outline" @click="close" tabindex="-1">{{ __("Cancel") }}</Button>
-					<Button
-						variant="outline"
-						class="font-medium"
-						data-testid="save-payment"
-						:disabled="isSubmitting || !canSubmit"
-						@click="submitPayment(false)"
-					>
-						<template v-if="isSubmitting && !printAfterSave">
-							<Loader2 class="w-4 h-4 animate-spin" />
-						</template>
-						<template v-else>
-							<Save class="w-4 h-4" />
-						</template>
-						{{ __("Save Only") }}
-					</Button>
-					<Button
-						ref="submitBtn"
-						:variant="cartStore.isReturnMode ? 'destructive' : 'success'"
-						class="font-bold px-4 shadow-md"
-						:disabled="isSubmitting || !canSubmit"
-						@click="submitPayment(true)"
-					>
-						<template v-if="isSubmitting && printAfterSave">
-							<Loader2 class="w-4 h-4 animate-spin" />
-							{{ __("Processing...") }}
-						</template>
-						<template v-else>
-							<Printer class="w-4 h-4" />
-							{{ cartStore.isReturnMode ? __("Return & Print") : __("Save & Print") }}
-						</template>
-					</Button>
-				</div>
-			</DialogFooter>
+			</div>
 		</DialogContent>
 	</Dialog>
 </template>
@@ -716,7 +569,6 @@ import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
-	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
@@ -816,7 +668,9 @@ const availableMethods = computed(() => {
 });
 
 const quickAmounts = computed(() => {
-	const total = Math.abs(cartStore.grandTotal);
+	const totalBase = Math.abs(cartStore.grandTotal);
+	const rate = selectedRate.value || 1;
+	const total = selectedIsForeign.value && rate ? totalBase / rate : totalBase;
 	const amounts: number[] = [];
 	const rounded = Math.ceil(total);
 	amounts.push(rounded);
@@ -827,6 +681,12 @@ const quickAmounts = computed(() => {
 });
 
 const invoiceCurrency = computed(() => posStore.invoiceCurrency || posStore.currency || "");
+
+const hasForeignTenderMethods = computed(() =>
+	availableMethods.value.some(
+		(m) => (posStore.tenderCurrencyFor(m.mode_of_payment) || invoiceCurrency.value) !== invoiceCurrency.value,
+	),
+);
 
 const selectedCurrency = computed(
 	() => posStore.tenderCurrencyFor(selectedMethod.value) || invoiceCurrency.value,
@@ -1139,7 +999,7 @@ function selectMethod(method: string) {
 }
 
 function setQuickAmount(amount: number) {
-	const rounded = roundCurrency(amount);
+	const rounded = roundFor(selectedCurrency.value, amount);
 	tenderedAmount.value = rounded;
 	setTimeout(() => {
 		amountInput.value?.setValue(rounded);

@@ -18,12 +18,12 @@ export function usePrintInvoice() {
 	const posStore = usePosStore();
 
 	function resolveDoctype(): "Sales Invoice" | "POS Invoice" {
-		return xpos.boot?.pos_settings?.invoice_type === "POS Invoice" ? "POS Invoice" : "Sales Invoice";
+		return posStore.invoiceType === "POS Invoice" ? "POS Invoice" : "Sales Invoice";
 	}
 
 	async function printInvoice(invoiceName: string, options: PrintInvoiceOptions = {}) {
 		try {
-			const printFormat = options.format || posStore?.defaultPrintFormat || "XPOS Thermal Receipt";
+			const printFormat = options.format || posStore?.defaultPrintFormat || "meerkatPOS Thermal Receipt";
 			const letterHead = posStore.printSettings?.letter_head || "";
 			const doctype = options.doctype || resolveDoctype();
 

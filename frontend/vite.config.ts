@@ -8,57 +8,57 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-	base: "/xpos/",
+	base: "/meerkatpos/",
 	plugins: [
 		vue(),
 		VitePWA({
 			registerType: "autoUpdate",
 			injectRegister: false,
-			includeAssets: ["pwa-192x192.svg", "pwa-512x512.svg", "apple-touch-icon.svg"],
+			includeAssets: ["pwa-192x192.png", "pwa-512x512.png", "apple-touch-icon.png"],
 			manifest: {
-				name: "X POS - Point of Sale",
-				short_name: "X POS",
+				name: "meerkatPOS - Point of Sale",
+				short_name: "meerkatPOS",
 				description: "Modern Point of Sale application with offline support",
-				theme_color: "#f97316",
+				theme_color: "#171717",
 				background_color: "#ffffff",
 				display: "standalone",
 				orientation: "any",
-				scope: "/xpos/",
-				start_url: "/xpos/",
-				id: "/xpos/",
+				scope: "/meerkatpos/",
+				start_url: "/meerkatpos/",
+				id: "/meerkatpos/",
 				categories: ["business", "finance"],
 				icons: [
 					{
-						src: "pwa-192x192.svg",
+						src: "pwa-192x192.png",
 						sizes: "192x192",
-						type: "image/svg+xml",
+						type: "image/png",
 					},
 					{
-						src: "pwa-512x512.svg",
+						src: "pwa-512x512.png",
 						sizes: "512x512",
-						type: "image/svg+xml",
+						type: "image/png",
 					},
 					{
-						src: "pwa-512x512.svg",
+						src: "pwa-512x512.png",
 						sizes: "512x512",
-						type: "image/svg+xml",
+						type: "image/png",
 						purpose: "any maskable",
 					},
 				],
 				screenshots: [
 					{
-						src: "pwa-512x512.svg",
+						src: "pwa-512x512.png",
 						sizes: "512x512",
-						type: "image/svg+xml",
+						type: "image/png",
 						form_factor: "wide",
-						label: "X POS Dashboard",
+						label: "meerkatPOS Dashboard",
 					},
 					{
-						src: "pwa-512x512.svg",
+						src: "pwa-512x512.png",
 						sizes: "512x512",
-						type: "image/svg+xml",
+						type: "image/png",
 						form_factor: "narrow",
-						label: "X POS Mobile",
+						label: "meerkatPOS Mobile",
 					},
 				],
 			},
@@ -68,14 +68,14 @@ export default defineConfig({
 			workbox: {
 				globPatterns: ["**/*.{js,css,svg,png,ico,woff,woff2,ttf,eot}"],
 				globIgnores: ["**/index.html"],
-				modifyURLPrefix: { "": "/assets/xpos/xpos/" },
+				modifyURLPrefix: { "": "/assets/xpos/meerkatpos/" },
 				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
 				runtimeCaching: [
 					{
-						urlPattern: /^https?:\/\/[^/]+\/xpos\/?$/,
+						urlPattern: /^https?:\/\/[^/]+\/meerkatpos\/?$/,
 						handler: "NetworkFirst",
 						options: {
-							cacheName: "xpos-html-cache",
+							cacheName: "meerkatpos-html-cache",
 							expiration: {
 								maxEntries: 5,
 								maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
@@ -91,7 +91,7 @@ export default defineConfig({
 						handler: "NetworkFirst",
 						method: "GET",
 						options: {
-							cacheName: "xpos-api-cache",
+							cacheName: "meerkatpos-api-cache",
 							expiration: {
 								maxEntries: 200,
 								maxAgeSeconds: 60 * 60 * 24, // 24 hours
@@ -106,7 +106,7 @@ export default defineConfig({
 						urlPattern: /^https?:\/\/.*\/assets\//,
 						handler: "CacheFirst",
 						options: {
-							cacheName: "xpos-assets-cache",
+							cacheName: "meerkatpos-assets-cache",
 							expiration: {
 								maxEntries: 200,
 								maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
@@ -120,7 +120,7 @@ export default defineConfig({
 						urlPattern: /^https?:\/\/.*\/files\//,
 						handler: "CacheFirst",
 						options: {
-							cacheName: "xpos-files-cache",
+							cacheName: "meerkatpos-files-cache",
 							expiration: {
 								maxEntries: 100,
 								maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
@@ -189,7 +189,7 @@ export default defineConfig({
 		exclude: ["@vite/client", "@vite/env"],
 	},
 	build: {
-		outDir: path.resolve(__dirname, "../xpos/public/xpos"),
+		outDir: path.resolve(__dirname, "../xpos/public/meerkatpos"),
 		emptyOutDir: true,
 		sourcemap: true,
 		rollupOptions: {

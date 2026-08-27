@@ -24,6 +24,10 @@ POS_PERMISSIONS = (
 	# Cash Management
 	("expense", "Expense", "Cash Management"),
 	("bank_drop", "Bank Drop", "Cash Management"),
+	# Purchasing & Stock
+	("purchase_order", "Purchase Order", "Purchasing & Stock"),
+	("stock_entry", "Stock Entry", "Purchasing & Stock"),
+	("material_receipt", "Add New Stock (Material Receipt)", "Purchasing & Stock"),
 	# Reports
 	("current_stock_by_brand", "Current Stock by Brand", "Reports"),
 	("current_stock_report", "Current Stock Report", "Reports"),

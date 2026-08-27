@@ -16,10 +16,10 @@ beforeEach(() => {
  * Two classes of noise are expected here:
  *
  * - `Unexpected token '{'` - index.html is a Jinja template served by Frappe
- *   (`window.xpos.boot = {{ boot | json }}`). Under the raw Vite dev server the
+ *   (`window.meerkatpos.boot = {{ boot | json }}`). Under the raw Vite dev server the
  *   placeholders are unrendered, so that inline script is a parse error. It is a
  *   pre-existing `yarn dev` quirk, not a regression, and harmless here because
- *   cy.bootPos() injects `window.xpos` itself in onBeforeLoad.
+ *   cy.bootPos() injects `window.meerkatpos` itself in onBeforeLoad.
  * - offline/network errors, which some specs cause deliberately.
  */
 Cypress.on("uncaught:exception", (err) => {

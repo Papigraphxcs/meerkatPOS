@@ -1,7 +1,7 @@
 {
  "app": "xpos",
  "charts": [],
- "content": "[{\"id\":\"xpos_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">X POS</span>\",\"col\":12}},{\"id\":\"xpos_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"X POS App\",\"col\":3}},{\"id\":\"bExEIm8hyI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"trazJ5ah1v\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pos Invoice\",\"col\":3}},{\"id\":\"xpos_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"1adNPVupDN\",\"type\":\"card\",\"data\":{\"card_name\":\"Setup\",\"col\":4}},{\"id\":\"kCl3eJ9h7e\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers & Coupons\",\"col\":4}},{\"id\":\"UgL618YZqd\",\"type\":\"card\",\"data\":{\"card_name\":\"Cash Movement\",\"col\":4}},{\"id\":\"3-RdUJ4vti\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"xpos_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">meerkatPOS</span>\",\"col\":12}},{\"id\":\"xpos_shortcut\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"meerkatPOS App\",\"col\":3}},{\"id\":\"bExEIm8hyI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"trazJ5ah1v\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pos Invoice\",\"col\":3}},{\"id\":\"xpos_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"1adNPVupDN\",\"type\":\"card\",\"data\":{\"card_name\":\"Setup\",\"col\":4}},{\"id\":\"kCl3eJ9h7e\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers & Coupons\",\"col\":4}},{\"id\":\"UgL618YZqd\",\"type\":\"card\",\"data\":{\"card_name\":\"Cash Movement\",\"col\":4}},{\"id\":\"3-RdUJ4vti\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2026-02-27 00:00:00",
  "custom_blocks": [],
  "docstatus": 0,
@@ -11,7 +11,7 @@
  "icon": "retail",
  "idx": 0,
  "is_hidden": 0,
- "label": "X POS",
+ "label": "meerkatPOS",
  "links": [
   {
    "hidden": 0,
@@ -347,7 +347,7 @@
  "modified": "2026-08-18 22:26:08.697769",
  "modified_by": "Administrator",
  "module": "X POS",
- "name": "X POS",
+ "name": "meerkatPOS",
  "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
@@ -360,10 +360,10 @@
   {
    "color": "Blue",
    "format": "{} Active",
-   "label": "X POS App",
+   "label": "meerkatPOS App",
    "link_to": "",
    "type": "URL",
-   "url": "/xpos/pos"
+   "url": "/meerkatpos/pos"
   },
   {
    "color": "Grey",
@@ -381,6 +381,6 @@
    "type": "DocType"
   }
  ],
- "title": "X POS",
+ "title": "meerkatPOS",
  "type": "Workspace"
 }

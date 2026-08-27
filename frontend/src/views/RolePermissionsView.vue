@@ -130,6 +130,14 @@ const PERMISSION_GROUPS: { title: string; items: { key: string; label: string }[
 		],
 	},
 	{
+		title: "Purchasing & Stock",
+		items: [
+			{ key: "purchase_order", label: "Purchase Order" },
+			{ key: "stock_entry", label: "Stock Entry" },
+			{ key: "material_receipt", label: "Add New Stock (Material Receipt)" },
+		],
+	},
+	{
 		title: "Reports",
 		items: [
 			{ key: "current_stock_by_brand", label: "Current Stock by Brand" },

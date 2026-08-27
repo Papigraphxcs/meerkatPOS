@@ -26,10 +26,10 @@ export const useAuthStore = defineStore("auth", () => {
 	const userFullName = computed(() => user.value?.user_fullname || "");
 	const isGuest = computed(() => !user.value || user.value.user === "Guest");
 	const isSystemManager = computed(() =>
-		Boolean((window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_is_system_manager),
+		Boolean((window.meerkatpos?.boot as Record<string, unknown> | undefined)?.xpos_is_system_manager),
 	);
 	const canManagePermissions = computed(() =>
-		Boolean((window.xpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_permissions),
+		Boolean((window.meerkatpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_permissions),
 	);
 
 	async function checkAuth(): Promise<boolean> {
@@ -41,7 +41,7 @@ export const useAuthStore = defineStore("auth", () => {
 				return await checkOfflineAuth();
 			}
 
-			const response = await call("frappe.auth.get_logged_user");
+			const response = await call("frappe.auth.get_logged_user", {}, undefined, { silent: true });
 
 			if (!response) {
 				isAuthenticated.value = false;
@@ -53,8 +53,8 @@ export const useAuthStore = defineStore("auth", () => {
 			if (loggedUser && loggedUser !== "Guest") {
 				isAuthenticated.value = true;
 				isOfflineAuth.value = false;
-				if (window.xpos) {
-					const bootUserInfo = xpos?.boot?.user_info[loggedUser] as any;
+				if (window.meerkatpos) {
+					const bootUserInfo = meerkatpos?.boot?.user_info[loggedUser] as any;
 					user.value = {
 						user: loggedUser,
 						user_email: bootUserInfo?.user_email || loggedUser,
@@ -105,7 +105,7 @@ export const useAuthStore = defineStore("auth", () => {
 
 			window
 				.electronAPI!.startSyncEngine()
-				.catch((err) => console.warn("[XPOS] startSyncEngine error:", err));
+				.catch((err) => console.warn("[meerkatPOS] startSyncEngine error:", err));
 
 			await loadPermissions(lastUser);
 			return true;
@@ -180,11 +180,11 @@ export const useAuthStore = defineStore("auth", () => {
 				.electronAPI!.startSyncEngine()
 				.then((result) => {
 					if (!result.success) {
-						console.warn("[XPOS] Sync engine start failed:", result.error);
+						console.warn("[meerkatPOS] Sync engine start failed:", result.error);
 					}
 				})
 				.catch((err) => {
-					console.warn("[XPOS] startSyncEngine error:", err);
+					console.warn("[meerkatPOS] startSyncEngine error:", err);
 				});
 
 			await loadPermissions(username);
@@ -237,7 +237,7 @@ export const useAuthStore = defineStore("auth", () => {
 				window.location.hash = "#/login";
 				window.location.reload();
 			} else {
-				window.location.href = "/xpos/login";
+				window.location.href = "/meerkatpos/login";
 			}
 		} catch (err) {
 			console.error("Logout failed:", err);

@@ -12,7 +12,7 @@
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
-   "link_to": "X POS",
+   "link_to": "meerkatPOS",
    "link_type": "Workspace",
    "show_arrow": 0,
    "type": "Link"
@@ -22,12 +22,12 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "X POS App",
+   "label": "meerkatPOS App",
    "link_to": "",
    "link_type": "URL",
    "show_arrow": 0,
    "type": "Link",
-   "url": "/xpos/pos"
+   "url": "/meerkatpos/pos"
   },
   {
    "child": 0,
@@ -63,11 +63,11 @@
    "type": "Link"
   }
  ],
- "modified": "2026-07-24 23:13:29.433665",
+ "modified": "2026-08-21 12:51:55.873385",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "X POS",
+ "name": "meerkatPOS",
  "owner": "Administrator",
  "standard": 1,
- "title": "X POS"
+ "title": "meerkatPOS"
 }

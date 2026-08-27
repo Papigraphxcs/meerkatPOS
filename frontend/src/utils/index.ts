@@ -51,7 +51,7 @@ export const isOnline = (): boolean => {
 };
 
 export const getBootProperty = (key: string): any => {
-	const globalObj = window as unknown as XPosGlobal;
+	const globalObj = window as unknown as MeerkatPosGlobal;
 	return globalObj.boot ? globalObj.boot[key] : undefined;
 };
 
@@ -211,6 +211,6 @@ export function extractErrorMessage(error: unknown): string {
 }
 
 export function initializeNamespaces() {
-	const namespaces = ["xpos", "locals.DocType"];
+	const namespaces = ["meerkatpos", "locals.DocType"];
 	namespaces.forEach(provide);
 }

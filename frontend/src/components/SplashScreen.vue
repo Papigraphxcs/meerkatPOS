@@ -1,7 +1,7 @@
 <template>
-	<Transition name="xpos-splash-fade">
-		<div v-if="show" class="xpos-splash" :style="{ backgroundColor: background }">
-			<img :src="isDark ? logoDark : logoLight" alt="X POS" class="xpos-splash__logo" />
+	<Transition name="meerkatpos-splash-fade">
+		<div v-if="show" class="meerkatpos-splash" :style="{ backgroundColor: background }">
+			<img :src="isDark ? logoDark : logoLight" alt="meerkatPOS" class="meerkatpos-splash__logo" />
 		</div>
 	</Transition>
 </template>
@@ -20,7 +20,7 @@ const background = computed(() => splashBackground.value || "hsl(var(--backgroun
 </script>
 
 <style scoped>
-.xpos-splash {
+.meerkatpos-splash {
 	position: fixed;
 	inset: 0;
 	z-index: 9999;
@@ -29,14 +29,14 @@ const background = computed(() => splashBackground.value || "hsl(var(--backgroun
 	justify-content: center;
 }
 
-.xpos-splash__logo {
+.meerkatpos-splash__logo {
 	width: 96px;
 	height: 96px;
 	border-radius: 22%;
-	animation: xpos-splash-pulse 1.6s ease-in-out infinite;
+	animation: meerkatpos-splash-pulse 1.6s ease-in-out infinite;
 }
 
-@keyframes xpos-splash-pulse {
+@keyframes meerkatpos-splash-pulse {
 	0%,
 	100% {
 		transform: scale(1);
@@ -48,15 +48,15 @@ const background = computed(() => splashBackground.value || "hsl(var(--backgroun
 	}
 }
 
-.xpos-splash-fade-leave-active {
+.meerkatpos-splash-fade-leave-active {
 	transition: opacity 0.35s ease;
 }
-.xpos-splash-fade-leave-to {
+.meerkatpos-splash-fade-leave-to {
 	opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.xpos-splash__logo {
+	.meerkatpos-splash__logo {
 		animation: none;
 	}
 }

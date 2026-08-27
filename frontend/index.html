@@ -2,16 +2,17 @@
 <html lang="{{ lang }}" dir="{{ layout_direction }}">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="icon" href="/public/xpos-logo-light.svg" />
+		<link rel="icon" href="./favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<meta name="theme-color" content="#f97316" />
-		<meta name="description" content="X POS - Modern Point of Sale with offline support" />
-		<link rel="apple-touch-icon" href="./apple-touch-icon.svg" />
+		<meta name="theme-color" content="#171717" />
+		<meta name="description" content="meerkatPOS - Modern Point of Sale with offline support" />
+		<link rel="apple-touch-icon" href="./apple-touch-icon.png" />
 		<link rel="manifest" href="./manifest.webmanifest" />
-		<title>{{ app_name }}</title>
+		<title>meerkatPOS</title>
 		<script>
 			(function () {
-				const theme = localStorage.getItem("xpos-theme") || "system";
+				const theme =
+					localStorage.getItem("meerkatpos-theme") || localStorage.getItem("xpos-theme") || "system";
 				let effectiveTheme = theme;
 
 				if (theme === "system") {
@@ -35,15 +36,15 @@
 	<body>
 		<div id="app"></div>
 		<script>
-			window.xpos = window.xpos || {};
-			window.xpos.boot = {{ boot | json }};
-			window.xpos._messages = window.xpos.boot["__messages"];
-			window.xpos.csrf_token = "{{ csrf_token }}";
+			window.meerkatpos = window.meerkatpos || {};
+			window.meerkatpos.boot = {{ boot | json }};
+			window.meerkatpos._messages = window.meerkatpos.boot["__messages"];
+			window.meerkatpos.csrf_token = "{{ csrf_token }}";
 		</script>
 		<script>
 			(function () {
 				try {
-					var b = (window.xpos && window.xpos.boot && window.xpos.boot.xpos_branding) || null;
+					var b = (window.meerkatpos && window.meerkatpos.boot && window.meerkatpos.boot.xpos_branding) || null;
 					if (!b) return;
 					var TOKENS = ["background","foreground","card","card_foreground","popover","popover_foreground","primary","primary_foreground","secondary","secondary_foreground","muted","muted_foreground","accent","accent_foreground","destructive","destructive_foreground","border","input","ring"];
 					function hexToHsl(hex) {
@@ -63,7 +64,7 @@
 						return d.length ? sel + " {" + d.join("") + "}" : "";
 					}
 					var css = [block(":root", b.light, b.radius), block(".dark", b.dark)].filter(Boolean).join("");
-					if (css) { var st = document.getElementById("xpos-branding"); if (!st) { st = document.createElement("style"); st.id = "xpos-branding"; document.head.appendChild(st); } st.textContent = css; }
+					if (css) { var st = document.getElementById("meerkatpos-branding"); if (!st) { st = document.createElement("style"); st.id = "meerkatpos-branding"; document.head.appendChild(st); } st.textContent = css; }
 					var fav = b.favicon || b.logo_light;
 					if (fav) { var lk = document.querySelector('link[rel="icon"]'); if (!lk) { lk = document.createElement("link"); lk.rel = "icon"; document.head.appendChild(lk); } lk.href = fav; }
 					var tc = b.splash_background || (b.light && b.light.primary);

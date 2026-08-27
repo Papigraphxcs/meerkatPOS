@@ -29,6 +29,7 @@ import __ from "@/lib/translate";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { CreateItemDialog, CreateSupplierDialog } from "@/components/purchase";
+import { hasPermission } from "@/services/userRights";
 
 const router = useRouter();
 const purchaseStore = usePurchaseStore();
@@ -324,7 +325,7 @@ const poColumns = computed<TableColumn[]>(() => [
 		width: "w-[100px]",
 		align: "right" as const,
 		editable: false,
-		cellClass: "text-green-600 font-medium",
+		cellClass: "text-foreground font-medium",
 		format: (_: any, row: any) => formatCurrency(getItemAmount(row as PurchaseCartItem)),
 	},
 ]);
@@ -587,7 +588,7 @@ onMounted(() => {
 							>
 							<span v-if="totalDiscount > 0" class="text-muted-foreground"
 								>{{ __("Discount") }}:
-								<strong class="text-orange-500"
+								<strong class="text-foreground"
 									>-{{ formatCurrency(totalDiscount) }}</strong
 								></span
 							>
@@ -597,7 +598,7 @@ onMounted(() => {
 						>
 							<div class="text-start sm:text-end">
 								<span class="text-sm text-muted-foreground">{{ __("Grand Total") }}</span>
-								<div class="text-xl font-bold text-green-600">
+								<div class="text-xl font-bold text-primary">
 									{{ formatCurrency(grandTotal) }}
 								</div>
 							</div>
@@ -618,6 +619,7 @@ onMounted(() => {
 									{{ purchaseStore.isDraftSaving ? __("Saving...") : __("Save Draft") }}
 								</Button>
 								<Button
+									v-if="hasPermission('purchase_order')"
 									@click="createOrder()"
 									class="w-full sm:w-auto"
 									:disabled="!purchaseStore.canCreateOrder || purchaseStore.isProcessing"

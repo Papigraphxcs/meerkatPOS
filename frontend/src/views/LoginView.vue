@@ -5,10 +5,10 @@
 		<div class="mb-8 text-center">
 			<img
 				:src="isDark ? logoLight : logoDark"
-				alt="X POS Logo"
+				alt="meerkatPOS Logo"
 				class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center"
 			/>
-			<h1 class="text-2xl font-bold text-foreground">X POS</h1>
+			<h1 class="text-2xl font-bold text-foreground">meerkatPOS</h1>
 			<p class="text-muted-foreground text-sm mt-1">Point of Sale System</p>
 		</div>
 

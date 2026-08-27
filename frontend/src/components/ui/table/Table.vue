@@ -749,7 +749,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 			</div>
 			<div class="flex w-full flex-wrap items-center gap-1.5 sm:w-auto sm:justify-end">
 				<template v-if="selectedIndices.size > 0">
-					<span class="text-[11px] font-medium text-blue-600 dark:text-blue-400 me-1">
+					<span class="text-[11px] font-medium text-primary me-1">
 						{{ selectedIndices.size }} {{ __("selected") }}
 					</span>
 					<TooltipWrapper :content="__('Delete selected')">
@@ -854,7 +854,7 @@ function handleTableKeyDown(event: KeyboardEvent): void {
 						:key="`row-${rowIndex}`"
 						class="hover:bg-muted/50 transition-colors ct-row group"
 						:class="{
-							'bg-blue-50/40 dark:bg-blue-900/10': selectedIndices.has(rowIndex),
+							'bg-primary/5 dark:bg-primary/10': selectedIndices.has(rowIndex),
 							'ct-row-dragging': draggingRowIndex === rowIndex,
 							'ct-row-drop-before':
 								dragOverRowIndex === rowIndex && dragInsertPosition === 'before',

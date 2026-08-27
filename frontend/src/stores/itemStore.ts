@@ -88,14 +88,14 @@ export const useItemStore = defineStore("items", () => {
 				await cacheAllStock(posProfile, warehouse, allItems);
 			}
 		} catch (error) {
-			console.warn("[XPOS Offline] Failed to cache items:", error);
+			console.warn("[meerkatPOS Offline] Failed to cache items:", error);
 		}
 	}
 
 	async function cacheAllStock(posProfile: string, warehouse: string, allItems?: POSItem[]): Promise<void> {
 		if (isElectron()) return;
 		if (!isOnline()) {
-			console.warn("[XPOS Offline] Cannot cache stock - system is offline");
+			console.warn("[meerkatPOS Offline] Cannot cache stock - system is offline");
 			return;
 		}
 
@@ -130,7 +130,7 @@ export const useItemStore = defineStore("items", () => {
 
 			await cacheStockForWarehouse(warehouse, stockEntries);
 		} catch (error) {
-			console.warn("[XPOS Offline] Failed to cache stock:", error);
+			console.warn("[meerkatPOS Offline] Failed to cache stock:", error);
 		}
 	}
 
@@ -229,7 +229,7 @@ export const useItemStore = defineStore("items", () => {
 						);
 						items.value = filtered.slice(0, pageLength.value);
 						hasMore.value = filtered.length > pageLength.value;
-						console.log("[XPOS Offline] Serving items from idb cache after fetch failure");
+						console.log("[meerkatPOS Offline] Serving items from idb cache after fetch failure");
 						return;
 					}
 				} catch {

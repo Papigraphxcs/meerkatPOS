@@ -1,11 +1,7 @@
 <template>
 	<div
-		class="group flex items-start gap-2 rounded-xl border-2 p-2 transition-all duration-200 scroll-mt-1 focus:outline-none"
-		:class="
-			isSelected
-				? 'border-primary bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary)/0.18),0_10px_30px_-18px_hsl(var(--primary)/0.9)] dark:bg-primary/10'
-				: 'border-transparent hover:bg-muted/50 dark:hover:bg-accent/50'
-		"
+		class="group flex items-start gap-2 py-2 border-b border-dashed border-border/70 last:border-b-0 transition-colors duration-150 scroll-mt-1 focus:outline-none"
+		:class="isSelected ? 'bg-primary/5 dark:bg-primary/10' : 'hover:bg-muted/40 dark:hover:bg-accent/30'"
 		:data-cart-index="index"
 		tabindex="0"
 		@focusin="selectRow"
@@ -13,15 +9,9 @@
 		@keydown.delete="handleDeleteKey"
 		@keydown="handleRowKeydown"
 	>
-		<div class="w-9 h-9 rounded-md bg-muted overflow-hidden shrink-0 flex items-center justify-center">
-			<img
-				v-if="item.image"
-				:src="item.image"
-				:alt="item.item_name"
-				class="w-full h-full object-cover"
-			/>
-			<Package v-else class="w-4 h-4 text-muted-foreground/40" />
-		</div>
+		<span class="w-9 h-9 shrink-0 rounded-lg overflow-hidden bg-muted flex items-center justify-center mt-0.5">
+			<component :is="typeIcon" class="w-4 h-4 text-muted-foreground/50" />
+		</span>
 
 		<div class="flex-1 min-w-0">
 			<p class="text-[11px] font-medium text-foreground leading-tight truncate">
@@ -36,21 +26,21 @@
 
 			<div class="flex items-center gap-1 mt-0.5 flex-wrap">
 				<template v-if="hasPermission('allow_change_price') && !item.pos_is_free_item">
-					<span class="text-[11px] text-muted-foreground">{{ currencySymbol }}</span>
+					<span class="text-[11px] font-mono text-muted-foreground">{{ currencySymbol }}</span>
 					<input
 						ref="rateInput"
 						:value="item.rate"
 						type="number"
 						min="0"
 						:step="rateStep"
-						class="w-16 h-5 text-[11px] font-medium text-foreground bg-transparent border-b border-dashed border-border focus:outline-none focus:border-primary dark:border-muted-foreground/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+						class="w-16 h-5 text-[11px] font-mono font-medium text-foreground bg-transparent border-b border-dashed border-border focus:outline-none focus:border-primary dark:border-muted-foreground/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 						@change="onRateChange"
 						@keydown.up.prevent="focusAdjacentItem(-1, 'rate')"
 						@keydown.down.prevent="focusAdjacentItem(1, 'rate')"
 						@keydown="blockInvalidNumericKeys"
 					/>
 				</template>
-				<p v-else class="text-[11px] text-muted-foreground">
+				<p v-else class="text-[11px] font-mono text-muted-foreground">
 					{{ moneyRate(item.rate) }}
 				</p>
 
@@ -116,29 +106,30 @@
 					</span>
 				</template>
 				<template v-else>
-					<Button variant="secondary" size="icon-sm" class="w-5 h-5" @click="decrementQty">
+					<button
+						class="w-5 h-5 shrink-0 rounded-full bg-white text-black border border-border flex items-center justify-center hover:opacity-80 transition-opacity"
+						@click="decrementQty"
+					>
 						<Minus class="w-2.5 h-2.5" />
-					</Button>
+					</button>
 					<input
 						ref="qtyInput"
 						:value="item.qty"
 						type="number"
 						min="0"
 						data-testid="cart-qty"
-						class="w-9 h-5 text-center text-[10px] font-semibold text-foreground bg-muted/50 rounded border border-border focus:outline-none focus:ring-1 focus:ring-ring dark:bg-accent/50 dark:border-muted-foreground/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none px-1"
+						class="w-8 h-5 text-center text-[11px] font-mono font-bold text-foreground bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 						@change="onQtyChange"
 						@keydown.up.prevent="focusAdjacentItem(-1, 'qty')"
 						@keydown.down.prevent="focusAdjacentItem(1, 'qty')"
 						@keydown="blockInvalidNumericKeys"
 					/>
-					<Button
-						variant="secondary"
-						size="icon-sm"
-						class="w-5 h-5 bg-primary/10 text-primary hover:bg-primary/20"
+					<button
+						class="w-5 h-5 shrink-0 rounded-full bg-white text-black border border-border flex items-center justify-center hover:opacity-80 transition-opacity"
 						@click="incrementQty"
 					>
 						<Plus class="w-2.5 h-2.5" />
-					</Button>
+					</button>
 				</template>
 
 				<span
@@ -209,10 +200,10 @@
 		</div>
 
 		<div class="flex flex-col items-end gap-0.5 shrink-0">
-			<span class="text-xs font-bold text-foreground tabular-nums" data-testid="cart-amount">
+			<span class="text-xs font-mono font-bold text-foreground tabular-nums" data-testid="cart-amount">
 				{{ money(lineTotal) }}
 			</span>
-			<span v-if="hasItemDiscount" class="text-[9px] text-emerald-600 dark:text-emerald-400">
+			<span v-if="hasItemDiscount" class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400">
 				-{{ money(discountAmount) }}
 			</span>
 			<Button
@@ -234,7 +225,8 @@ import { hasPermission } from "@/services/userRights";
 import { useCartStore } from "@/stores/cartStore";
 import { useItemStore } from "@/stores/itemStore";
 import { Button } from "@/components/ui/button";
-import { Package, Minus, Plus, Trash2, Percent, ChevronDown } from "lucide-vue-next";
+import { Minus, Plus, Trash2, Percent, ChevronDown } from "lucide-vue-next";
+import { getItemTypeIcon } from "@/utils/itemTypeIcon";
 import type { ItemUOM } from "@/types/pos.types";
 import __ from "@/lib/translate";
 import { useMoney } from "@/composables/useMoney";
@@ -265,6 +257,8 @@ const itemUOMs = ref<ItemUOM[]>([]);
 const maxDiscount = computed(() => posStore.maxDiscountAllowed);
 
 const isSelected = computed(() => cartStore.selectedCartIndex === props.index);
+
+const typeIcon = computed(() => getItemTypeIcon(props.item));
 
 const hasMultipleUOMs = computed(() => itemUOMs.value.length > 1);
 

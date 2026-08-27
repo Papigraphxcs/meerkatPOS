@@ -1,5 +1,5 @@
 {
-  "name": "xpos",
+  "name": "meerkatpos",
   "version": "0.0.1",
   "description": "A modern, offline-capable Point of Sale application for Frappe and ERPNext",
   "author": "Ali Raza <ar.frappe.dev@gmail.com>",

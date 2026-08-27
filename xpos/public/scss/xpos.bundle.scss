@@ -1,0 +1,68 @@
+// Desk home page: alphabetical "All apps" style list (Windows Start Menu
+// look) instead of the default centered grid of square icon tiles.
+// Scoped to .icons.xpos-az-list, added only by xpos.bundle.js after it
+// finds the desktop page's icon grid -- every selector here is a two-class
+// compound so it outranks desktop.css's plain single-class rules regardless
+// of which stylesheet loads second.
+//
+// `display` needs !important: DesktopIconGrid.make() in desktop.js sets
+// `style="display: grid"` directly on this element via jQuery .css(), and
+// an inline style beats any class selector regardless of specificity.
+
+.icons.xpos-az-list {
+	display: flex !important;
+	flex-direction: column;
+	gap: 0;
+	width: min(480px, 90vw);
+	max-height: calc(100vh - var(--desktop-navbar-height, 52px) - 80px);
+	overflow-y: auto;
+	justify-items: initial;
+
+	.xpos-az-group-header {
+		padding: 16px 16px 8px;
+		font-size: 13px;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-gray-5, var(--text-light));
+
+		&:not(:first-child) {
+			margin-top: 10px;
+			padding-top: 20px;
+			border-top: 1px solid var(--sidebar-border-color, var(--gray-300));
+		}
+	}
+
+	.desktop-icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		width: 100%;
+		height: auto;
+		gap: 16px;
+		padding: 14px 16px;
+		border-radius: 10px;
+
+		&:hover {
+			background-color: var(--sidebar-hover-color, var(--surface-gray-2));
+		}
+	}
+
+	.icon-container {
+		--desktop-icon-dimension: 34px;
+		flex: none;
+	}
+
+	.icon-caption {
+		height: auto;
+		text-align: left;
+		display: block;
+		width: auto;
+	}
+
+	.icon-title {
+		text-align: left;
+		white-space: nowrap;
+		font-size: var(--text-md, 15px);
+	}
+}

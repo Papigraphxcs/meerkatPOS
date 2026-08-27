@@ -172,7 +172,7 @@ export const useOfflineStore = defineStore("offline", () => {
 				await updateStockQty(warehouse, row.item_code, row.actual_qty || 0);
 			}
 		} catch (error) {
-			console.warn("[XPOS Offline] Failed to reconcile stock after rejection:", error);
+			console.warn("[meerkatPOS Offline] Failed to reconcile stock after rejection:", error);
 		}
 	}
 
@@ -421,20 +421,20 @@ export const useOfflineStore = defineStore("offline", () => {
 			const { useItemStore } = await import("@/stores/itemStore");
 			const itemStore = useItemStore();
 			itemStore.cacheAllItems(posStore.profileName).catch((err) => {
-				console.warn("[XPOS Sync] Failed to sync items:", err);
+				console.warn("[meerkatPOS Sync] Failed to sync items:", err);
 			});
 
 			const { useCustomerStore } = await import("@/stores/customerStore");
 			const customerStore = useCustomerStore();
 			customerStore.cacheAllCustomers(posStore.profileName).catch((err) => {
-				console.warn("[XPOS Sync] Failed to sync customers:", err);
+				console.warn("[meerkatPOS Sync] Failed to sync customers:", err);
 			});
 
 			if (pendingCount.value > 0) {
 				syncPendingInvoices();
 			}
 		} catch (error) {
-			console.warn("[XPOS Sync] Background sync error:", error);
+			console.warn("[meerkatPOS Sync] Background sync error:", error);
 		}
 	}
 

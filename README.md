@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="xpos/public/images/xpos-logo-light.svg" alt="X POS" width="96" height="96">
+<img src="xpos/public/images/xpos-logo-light.svg" alt="meerkatPOS" width="96" height="96">
 
-# X POS
+# meerkatPOS
 
 **A modern, offline-capable Point of Sale for Frappe & ERPNext**
 
@@ -12,7 +12,7 @@ License: MIT · Frappe v16 · ERPNext v16
 
 ---
 
-X POS is a feature-rich, offline-first Point of Sale application built on Frappe and ERPNext. It delivers a fast, keyboard-driven, and fully offline-capable POS experience for retail, hospitality, and service businesses, deployable as a web app, PWA, or Electron desktop application.
+meerkatPOS is a feature-rich, offline-first Point of Sale application built on Frappe and ERPNext. It delivers a fast, keyboard-driven, and fully offline-capable POS experience for retail, hospitality, and service businesses, deployable as a web app, PWA, or Electron desktop application.
 
 ## Highlights
 
@@ -26,7 +26,7 @@ X POS is a feature-rich, offline-first Point of Sale application built on Frappe
 | **Multi-Payment** | Split payments across cash, card, mobile money, and custom modes in one transaction. |
 | **Hub & Spoke** | Multi-terminal architecture for networked stores with centralized sync. |
 | **Full Purchasing** | Purchase orders, purchase invoices, and stock receiving, all from the POS. |
-| **Customizing** | Customize the theme of the X POS as per your brand for look and feel |
+| **Customizing** | Customize the theme of meerkatPOS as per your brand for look and feel |
 
 ---
 
@@ -138,7 +138,7 @@ X POS is a feature-rich, offline-first Point of Sale application built on Frappe
 
 ### Frappe Cloud
 
-X POS is available on Frappe Cloud. Add it as a marketplace app to your site.
+meerkatPOS is available on Frappe Cloud. Add it as a marketplace app to your site.
 
 ### Self-Hosted
 
@@ -148,7 +148,7 @@ bench get-app xpos
 bench --site your-site.com install-app xpos
 ```
 
-Then open your site and launch **X POS** from the app launcher.
+Then open your site and launch **meerkatPOS** from the app launcher.
 
 ---
 
@@ -157,7 +157,7 @@ Then open your site and launch **X POS** from the app launcher.
 1. Create or update a **POS Profile** in ERPNext and assign it to the relevant users.
 2. Set the default warehouse, payment methods, and print format on the POS Profile.
 3. Configure user permissions via the **XPOS Settings** page for granular access control.
-4. Open **X POS** from the app launcher to start selling.
+4. Open **meerkatPOS** from the app launcher to start selling.
 
 ---
 

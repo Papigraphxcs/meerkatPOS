@@ -6,10 +6,10 @@
 			<div class="text-center mb-8">
 				<img
 					:src="logoLight"
-					alt="X POS Logo"
+					alt="meerkatPOS Logo"
 					class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center"
 				/>
-				<h1 class="text-2xl font-bold text-primary-foreground mb-1">X POS</h1>
+				<h1 class="text-2xl font-bold text-primary-foreground mb-1">meerkatPOS</h1>
 				<p class="text-primary-foreground/70 text-sm">{{ __("Open your shift to get started") }}</p>
 			</div>
 

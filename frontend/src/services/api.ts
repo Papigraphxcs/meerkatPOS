@@ -13,7 +13,7 @@ export { isNetworkError } from "@/utils";
 
 function getCsrfToken(): string {
 	return (
-		window.xpos?.csrf_token ||
+		window.meerkatpos?.csrf_token ||
 		(document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ||
 		""
 	);
@@ -100,7 +100,11 @@ function stripHtml(value: string): string {
 	return (doc.body.textContent || "").replace(/\s+/g, " ").trim();
 }
 
-async function fetchCall<T = unknown>(method: string, args: Record<string, unknown> = {}): Promise<T> {
+async function fetchCall<T = unknown>(
+	method: string,
+	args: Record<string, unknown> = {},
+	options: { silent?: boolean } = {},
+): Promise<T> {
 	if (!isOnline()) {
 		throw new Error("__offline__");
 	}
@@ -141,16 +145,18 @@ async function fetchCall<T = unknown>(method: string, args: Record<string, unkno
 		const traceback = toTraceback(data.exc);
 		const errorMsg = extractErrorMessage(data, response.status, traceback);
 
-		captureError({
-			source: "api",
-			title: `${response.status} ${method}`,
-			message: errorMsg,
-			method,
-			status: response.status,
-			args,
-			traceback,
-			exceptionType: data.exc_type,
-		});
+		if (!options.silent) {
+			captureError({
+				source: "api",
+				title: `${response.status} ${method}`,
+				message: errorMsg,
+				method,
+				status: response.status,
+				args,
+				traceback,
+				exceptionType: data.exc_type,
+			});
+		}
 
 		const err = new Error(errorMsg) as Error & { excType?: string };
 		if (data.exc_type) err.excType = data.exc_type;
@@ -166,8 +172,9 @@ export function call<T = unknown>(
 	method: string,
 	args: Record<string, unknown> = {},
 	callback?: (r: { message: T }) => void,
+	options?: { silent?: boolean },
 ): Promise<T> {
-	return fetchCall<T>(method, args).then((message) => {
+	return fetchCall<T>(method, args, options).then((message) => {
 		if (callback) callback({ message });
 		return message;
 	});
@@ -234,7 +241,7 @@ export function searchLink(
 export function formatCurrency(value: number, currency?: string): string {
 	const cur =
 		currency ||
-		(window.xpos?.boot as { sysdefaults?: { currency?: string } })?.sysdefaults?.currency ||
+		(window.meerkatpos?.boot as { sysdefaults?: { currency?: string } })?.sysdefaults?.currency ||
 		"";
 	return formatWithSymbol(cur, value || 0);
 }

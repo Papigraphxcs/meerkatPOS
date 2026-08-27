@@ -97,6 +97,7 @@ import {
 	FileText,
 	Receipt,
 	PackageCheck,
+	PackagePlus,
 	Barcode,
 	Settings,
 	Wallet,
@@ -291,13 +292,13 @@ function focusMenuBar() {
 }
 
 onMounted(() => {
-	window.addEventListener("xpos:focus-menubar", focusMenuBar);
+	window.addEventListener("meerkatpos:focus-menubar", focusMenuBar);
 	window.addEventListener("keydown", handleKeyDown);
 	document.addEventListener("click", handleDocumentClick);
 });
 
 onUnmounted(() => {
-	window.removeEventListener("xpos:focus-menubar", focusMenuBar);
+	window.removeEventListener("meerkatpos:focus-menubar", focusMenuBar);
 	window.removeEventListener("keydown", handleKeyDown);
 	document.removeEventListener("click", handleDocumentClick);
 });
@@ -354,7 +355,7 @@ const menus = computed<Menu[]>(() => [
 				icon: Repeat,
 				shortcut: "Ctrl+G",
 				action: () => {
-					window.dispatchEvent(new CustomEvent("xpos:show-repeat-dialog"));
+					window.dispatchEvent(new CustomEvent("meerkatpos:show-repeat-dialog"));
 				},
 			},
 			{
@@ -365,7 +366,7 @@ const menus = computed<Menu[]>(() => [
 				hidden: () => !hasPermission("sale_return"),
 				disabled: () => !posStore.allowReturn,
 				action: () => {
-					window.dispatchEvent(new CustomEvent("xpos:show-return-dialog"));
+					window.dispatchEvent(new CustomEvent("meerkatpos:show-return-dialog"));
 				},
 			},
 			{ id: "sep-f0", separator: true },
@@ -494,6 +495,7 @@ const menus = computed<Menu[]>(() => [
 				icon: ClipboardList,
 				shortcut: "Alt+3",
 				action: () => router.push("/purchase-order"),
+				hidden: () => !hasPermission("purchase_order"),
 			},
 			{
 				id: "goto-purchase-invoice",
@@ -501,6 +503,7 @@ const menus = computed<Menu[]>(() => [
 				icon: Receipt,
 				shortcut: "Alt+4",
 				action: () => router.push("/purchase-invoices"),
+				hidden: () => !hasPermission("purchase_order"),
 			},
 			{
 				id: "goto-stock-receiving",
@@ -508,6 +511,14 @@ const menus = computed<Menu[]>(() => [
 				icon: PackageCheck,
 				shortcut: "Alt+5",
 				action: () => router.push("/stock-receiving"),
+				hidden: () => !hasPermission("stock_entry"),
+			},
+			{
+				id: "goto-add-stock",
+				label: "Add Stock",
+				icon: PackagePlus,
+				action: () => router.push("/add-stock"),
+				hidden: () => !hasPermission("material_receipt"),
 			},
 		],
 	},
@@ -582,6 +593,7 @@ const menus = computed<Menu[]>(() => [
 				label: "Cash Deposit",
 				icon: ArrowUpCircle,
 				shortcut: "Ctrl+Shift+D",
+				hidden: () => !hasPermission("bank_drop"),
 				disabled: () => !posStore.allowCashDeposit || !posStore.isShiftOpen,
 				action: () => paymentStore.openCashMovement("deposit"),
 			},
@@ -590,6 +602,7 @@ const menus = computed<Menu[]>(() => [
 				label: "Cash Expense",
 				icon: ArrowDownCircle,
 				shortcut: "Ctrl+E",
+				hidden: () => !hasPermission("expense"),
 				disabled: () => !posStore.allowPosExpense || !posStore.isShiftOpen,
 				action: () => paymentStore.openCashMovement("expense"),
 			},
@@ -622,7 +635,7 @@ const menus = computed<Menu[]>(() => [
 			{ id: "sep-h1", separator: true },
 			{
 				id: "about",
-				label: "About X POS",
+				label: "About meerkatPOS",
 				icon: Info,
 				action: () => {
 					showAboutDialog.value = true;

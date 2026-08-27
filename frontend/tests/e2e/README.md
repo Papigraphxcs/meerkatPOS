@@ -114,7 +114,7 @@ The specs here assume the stub.
 - **`index.html` is a Jinja template.** Under the raw Vite dev server the
   `{{ boot | json }}` placeholders are unrendered, so that inline script throws a
   `SyntaxError`. It's ignored in `support/e2e.ts`, and `cy.bootPos()` injects
-  `window.xpos` itself.
+  `window.meerkatpos` itself.
 - **IndexedDB persists across specs.** `cy.bootPos()` deletes `xpos_offline_v3`
   before the app loads; otherwise a stale cache can make an offline test pass
   that should have failed.

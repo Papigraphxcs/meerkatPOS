@@ -58,7 +58,7 @@ def get_receipt_context(pos_profile: str, print_format: str | None = None) -> di
 			if p
 		)
 
-	fmt = print_format or profile.get("default_print_format") or "XPOS Thermal Receipt"
+	fmt = print_format or profile.get("default_print_format") or "meerkatPOS Thermal Receipt"
 	css = frappe.db.get_value("Print Format", fmt, "css") or ""
 
 	return {

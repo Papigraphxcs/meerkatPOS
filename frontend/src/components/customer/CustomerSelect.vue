@@ -37,7 +37,7 @@
 					</div>
 				</DialogHeader>
 
-				<div ref="listContainer" class="flex-1 min-h-0 overflow-y-auto xpos-scrollbar">
+				<div ref="listContainer" class="flex-1 min-h-0 overflow-y-auto meerkatpos-scrollbar">
 					<div v-if="customerStore.isLoading" class="min-h-full p-4 space-y-3">
 						<div v-for="i in 5" :key="i" class="skeleton h-14 w-full rounded-xl"></div>
 					</div>
@@ -123,7 +123,7 @@
 					</div>
 				</DialogHeader>
 
-				<div class="flex-1 min-h-0 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+				<div class="flex-1 min-h-0 overflow-y-auto p-5 space-y-4 meerkatpos-scrollbar">
 					<div>
 						<label class="text-xs font-medium text-muted-foreground mb-1 block"
 							>{{ __("Customer Name") }} *</label
@@ -388,7 +388,7 @@ onMounted(() => {
 });
 
 function loadDropdownData() {
-	const boot = window.xpos?.boot;
+	const boot = window.meerkatpos?.boot;
 	if (boot?.countries?.length) {
 		countries.value = boot.countries.map((c) => c.name || "").filter(Boolean);
 	}

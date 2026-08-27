@@ -10,6 +10,7 @@ const PurchaseOrderListView = () => import("@/views/PurchaseOrderListView.vue");
 const PurchaseInvoiceView = () => import("@/views/PurchaseInvoiceView.vue");
 const PurchaseInvoiceListView = () => import("@/views/PurchaseInvoiceListView.vue");
 const StockReceivingView = () => import("@/views/StockReceivingView.vue");
+const AddStockView = () => import("@/views/AddStockView.vue");
 const ExpenseView = () => import("@/views/ExpenseView.vue");
 const BankDropView = () => import("@/views/BankDropView.vue");
 const LoginView = () => import("@/views/LoginView.vue");
@@ -107,6 +108,12 @@ const routes: RouteRecordRaw[] = [
 		name: "stock-receiving",
 		component: StockReceivingView,
 		meta: { title: "Stock Receiving", requiresAuth: true },
+	},
+	{
+		path: "/add-stock",
+		name: "add-stock",
+		component: AddStockView,
+		meta: { title: "Add Stock", requiresAuth: true },
 	},
 	{
 		path: "/settings",

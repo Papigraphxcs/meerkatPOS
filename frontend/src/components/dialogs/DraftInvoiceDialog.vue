@@ -11,7 +11,7 @@
 			<DialogHeader class="shrink-0 px-5 pt-5 pb-3 border-b border-border">
 				<div class="flex items-center gap-2">
 					<div
-						class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center"
+						class="w-8 h-8 rounded-lg bg-muted text-foreground flex items-center justify-center"
 					>
 						<Clock class="w-4 h-4" />
 					</div>
@@ -69,7 +69,7 @@
 				</div>
 			</div>
 
-			<div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+			<div class="flex-1 overflow-y-auto p-5 space-y-4 meerkatpos-scrollbar">
 				<div v-if="isLoading" class="flex items-center justify-center py-8">
 					<Loader2 class="w-6 h-6 text-primary animate-spin" />
 				</div>
@@ -445,6 +445,7 @@ function onSettled() {
 
 function close() {
 	cartStore.closeDraftDialog();
+	cartStore.refreshDraftOrderCount();
 }
 
 function formatDateTime(isoString: string | undefined) {

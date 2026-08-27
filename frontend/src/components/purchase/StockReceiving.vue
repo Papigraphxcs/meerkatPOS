@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { InTransitEntry, ReceiveTransitItem, ReturnShortageItem } from "@/types/pos.types";
 import __ from "@/lib/translate";
+import { hasPermission } from "@/services/userRights";
 
 const purchaseStore = usePurchaseStore();
 const posStore = usePosStore();
@@ -305,6 +306,7 @@ onMounted(() => {
 						__("Cancel")
 					}}</Button>
 					<Button
+						v-if="hasPermission('stock_entry')"
 						@click="submitTransitReceive"
 						class="flex-1"
 						:disabled="(!hasTransitFormData && !hasShortageData) || isSubmittingTransit"

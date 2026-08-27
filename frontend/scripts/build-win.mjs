@@ -26,7 +26,7 @@ const root = path.join(__dirname, "..");
 const initPy = path.join(root, "..", "xpos", "__init__.py");
 const match = readFileSync(initPy, "utf8").match(/__version__\s*=\s*["']([^"']+)["']/);
 const version = match ? match[1] : "0.0.0";
-console.log(`[build-win] Building X POS v${version} ...`);
+console.log(`[build-win] Building meerkatPOS v${version} ...`);
 
 spawnSync(
 	"npx",
@@ -34,7 +34,7 @@ spawnSync(
 	{ cwd: root, stdio: "inherit", shell: true }
 );
 
-const exePath = path.join(root, "release", "win-unpacked", "X POS.exe");
+const exePath = path.join(root, "release", "win-unpacked", "meerkatPOS.exe");
 if (!existsSync(exePath)) {
 	console.error(`[build-win] ERROR: exe not found at ${exePath}`);
 	console.error("[build-win] electron-builder failed before win-unpacked was created.");
@@ -42,6 +42,6 @@ if (!existsSync(exePath)) {
 }
 
 console.log(
-	`\n[build-win] Done! Branded X POS v${version} at:\n  ${exePath}\n` +
-		"[build-win] Copy release/win-unpacked/ to a Windows machine and run 'X POS.exe'."
+	`\n[build-win] Done! Branded meerkatPOS v${version} at:\n  ${exePath}\n` +
+		"[build-win] Copy release/win-unpacked/ to a Windows machine and run 'meerkatPOS.exe'."
 );

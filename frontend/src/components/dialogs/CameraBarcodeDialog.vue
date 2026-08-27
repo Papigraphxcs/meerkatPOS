@@ -87,7 +87,7 @@
 					v-if="torchSupported"
 					@click="toggleTorch"
 					class="w-12 h-12 flex items-center justify-center rounded-full text-white transition-all active:scale-90"
-					:class="torchOn ? 'bg-amber-500' : 'bg-white/10 hover:bg-white/20'"
+					:class="torchOn ? 'bg-primary' : 'bg-white/10 hover:bg-white/20'"
 				>
 					<Flashlight class="w-6 h-6" />
 				</button>

@@ -15,6 +15,9 @@ export interface PosPermissions {
 	settle_outstanding_invoice: boolean;
 	expense: boolean;
 	bank_drop: boolean;
+	purchase_order: boolean;
+	stock_entry: boolean;
+	material_receipt: boolean;
 	current_stock_by_brand: boolean;
 	current_stock_report: boolean;
 }
@@ -32,6 +35,9 @@ const DEFAULT_PERMISSIONS: PosPermissions = {
 	settle_outstanding_invoice: false,
 	expense: false,
 	bank_drop: false,
+	purchase_order: false,
+	stock_entry: false,
+	material_receipt: false,
 	current_stock_by_brand: false,
 	current_stock_report: false,
 };
@@ -55,7 +61,7 @@ function mergePermissions(source: unknown): PosPermissions {
 export async function loadPermissions(userEmail: string, posProfile?: string): Promise<void> {
 	if (!isElectron()) {
 		const boot =
-			(typeof window !== "undefined" ? (window.xpos?.boot as Record<string, unknown>) : undefined) ??
+			(typeof window !== "undefined" ? (window.meerkatpos?.boot as Record<string, unknown>) : undefined) ??
 			{};
 		currentRole.value = (boot.xpos_role as string) || "";
 		try {

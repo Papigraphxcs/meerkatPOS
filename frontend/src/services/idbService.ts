@@ -182,7 +182,7 @@ async function resetDatabaseConnection(): Promise<void> {
 		savedInvoices = await db.pendingInvoices.toArray();
 		savedPurchases = await db.pendingPurchases.toArray();
 	} catch (err) {
-		console.warn("[XPOS] Could not read pending records before DB reset", err);
+		console.warn("[meerkatPOS] Could not read pending records before DB reset", err);
 	}
 
 	try {
@@ -199,10 +199,10 @@ async function resetDatabaseConnection(): Promise<void> {
 			if (savedInvoices.length) await db.pendingInvoices.bulkAdd(savedInvoices);
 			if (savedPurchases.length) await db.pendingPurchases.bulkAdd(savedPurchases);
 			console.warn(
-				`[XPOS] Restored ${savedInvoices.length} pending invoice(s) and ${savedPurchases.length} pending purchase(s) after DB reset`,
+				`[meerkatPOS] Restored ${savedInvoices.length} pending invoice(s) and ${savedPurchases.length} pending purchase(s) after DB reset`,
 			);
 		} catch (err) {
-			console.error("[XPOS] Failed to restore pending records after DB reset", err);
+			console.error("[meerkatPOS] Failed to restore pending records after DB reset", err);
 		}
 	}
 }
@@ -223,7 +223,7 @@ export async function ensureDatabaseReady(forceReset = false): Promise<void> {
 					throw error;
 				}
 
-				console.warn("[XPOS] IndexedDB open failed, resetting local browser cache", error);
+				console.warn("[meerkatPOS] IndexedDB open failed, resetting local browser cache", error);
 				await resetDatabaseConnection();
 			}
 		})().catch((error) => {

@@ -910,7 +910,7 @@ export async function adjustCachedStock(
 
 			await updateStockQty(warehouse, item_code, (current.actual_qty || 0) + delta);
 		} catch (error) {
-			console.warn("[XPOS Offline] Failed to adjust cached stock for", item_code, error);
+			console.warn("[meerkatPOS Offline] Failed to adjust cached stock for", item_code, error);
 		}
 	}
 }

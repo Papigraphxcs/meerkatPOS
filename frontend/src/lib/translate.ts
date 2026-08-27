@@ -1,6 +1,6 @@
 /**
  * Translation utility for frappe boot translations
- * Uses window.xpos._messages from frappe's boot data
+ * Uses window.meerkatpos._messages from frappe's boot data
  */
 
 type TranslateArgs = (string | number)[];
@@ -9,7 +9,7 @@ type TranslateArgs = (string | number)[];
  * Get the translations dictionary from boot data
  */
 function getMessages(): Record<string, string> {
-	return window.xpos?._messages || {};
+	return window.meerkatpos?._messages || {};
 }
 
 /**

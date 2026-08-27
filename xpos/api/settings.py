@@ -176,9 +176,12 @@ def get_branding_payload():
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_xpos_branding():
-	"""Return the branding payload for online refresh and offline re-caching."""
+	"""Return the branding payload for online refresh and offline re-caching.
+
+	Runs on the pre-login splash/login screen, so guests must be able to call it.
+	"""
 
 	return get_branding_payload()
 

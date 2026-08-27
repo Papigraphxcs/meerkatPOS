@@ -272,7 +272,7 @@
 					v-if="invoice && !invoice.is_return"
 					variant="outline"
 					size="sm"
-					class="text-blue-600 border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950"
+					class="text-primary border-primary/30 hover:bg-primary/10"
 					:disabled="isRepeatLoading"
 					@click="repeatFromOrder(invoice)"
 				>

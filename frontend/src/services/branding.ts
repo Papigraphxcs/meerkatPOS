@@ -35,8 +35,8 @@ export const BRANDING_TOKENS = [
 	"ring",
 ] as const;
 
-const STYLE_ID = "xpos-branding";
-const CACHE_KEY = "xpos_branding";
+const STYLE_ID = "meerkatpos-branding";
+const CACHE_KEY = "meerkatpos_branding_cache";
 
 export function hexToHslTriplet(hex: string): string | null {
 	if (!hex) return null;
@@ -141,7 +141,7 @@ export function applyBranding(branding: BrandingPayload | null | undefined) {
 }
 
 export function getBootBranding(): BrandingPayload | null {
-	const boot = window.xpos?.boot?.xpos_branding as BrandingPayload | undefined;
+	const boot = window.meerkatpos?.boot?.xpos_branding as BrandingPayload | undefined;
 	return boot && Object.keys(boot).length ? boot : null;
 }
 

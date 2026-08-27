@@ -2,10 +2,12 @@
 	<div class="flex flex-col h-dvh overflow-hidden">
 		<MenuBar v-if="isElectron()" />
 		<Navbar v-else />
-		<div class="flex-1 relative overflow-hidden">
+		<div class="flex-1 relative overflow-hidden md:flex">
 			<Sidebar />
-			<main class="h-full overflow-hidden">
-				<slot />
+			<main class="h-full flex-1 overflow-hidden">
+				<div class="h-full w-full">
+					<slot />
+				</div>
 			</main>
 		</div>
 
@@ -74,6 +76,6 @@ import __ from "@/lib/translate";
 const route = useRoute();
 
 function openSidebar() {
-	window.dispatchEvent(new CustomEvent("xpos:toggle-sidebar"));
+	window.dispatchEvent(new CustomEvent("meerkatpos:toggle-sidebar"));
 }
 </script>

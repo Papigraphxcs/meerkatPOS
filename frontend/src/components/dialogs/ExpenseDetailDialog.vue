@@ -11,7 +11,7 @@
 			<DialogHeader>
 				<div class="flex items-start gap-3">
 					<div
-						class="w-9 h-9 rounded-lg flex items-center justify-center bg-red-500/10 text-red-500 shrink-0"
+						class="w-9 h-9 rounded-lg flex items-center justify-center bg-muted text-foreground shrink-0"
 					>
 						<ArrowDownCircle class="w-4 h-4" />
 					</div>
@@ -36,7 +36,7 @@
 					<div class="text-xs text-muted-foreground uppercase tracking-wide mb-1">
 						{{ __("Amount") }}
 					</div>
-					<div class="text-2xl font-bold text-red-500">
+					<div class="text-2xl font-bold text-foreground">
 						{{ money(expense.amount) }}
 					</div>
 				</div>

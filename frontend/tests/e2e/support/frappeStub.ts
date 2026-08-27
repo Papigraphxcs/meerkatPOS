@@ -26,7 +26,7 @@ interface StubState {
 	unstubbed: Set<string>;
 }
 
-const STATE_KEY = "__xposFrappeStub";
+const STATE_KEY = "__meerkatposFrappeStub";
 
 /**
  * Cypress bundles the support file and each spec file separately, so importing
@@ -59,7 +59,7 @@ export function stub(method: string, route: StubRoute): void {
 	state().routes.set(method, route);
 }
 
-const ERROR_MARKER = "__xposStubError";
+const ERROR_MARKER = "__meerkatposStubError";
 
 interface StubbedError {
 	[ERROR_MARKER]: true;

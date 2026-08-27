@@ -40,7 +40,7 @@
 				</div>
 			</DialogHeader>
 
-			<div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+			<div class="flex-1 overflow-y-auto p-5 space-y-4 meerkatpos-scrollbar">
 				<div v-if="paymentStore.isLoadingCashMovement" class="flex items-center justify-center py-8">
 					<Loader2 class="w-6 h-6 text-primary animate-spin" />
 				</div>
@@ -88,7 +88,7 @@
 						<h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
 							{{ __("Recent Movements") }}
 						</h3>
-						<div class="space-y-1.5 max-h-32 overflow-y-auto xpos-scrollbar">
+						<div class="space-y-1.5 max-h-32 overflow-y-auto meerkatpos-scrollbar">
 							<div
 								v-for="mov in recentMovements"
 								:key="mov.name"

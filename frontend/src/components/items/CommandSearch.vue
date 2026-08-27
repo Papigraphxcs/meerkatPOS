@@ -126,7 +126,7 @@
 								</kbd>
 							</div>
 							<div v-if="item.type === 'item'" class="text-end shrink-0">
-								<p class="text-sm font-medium text-green-600">
+								<p class="text-sm font-medium text-primary">
 									{{ money((item.meta as POSItem)?.rate || 0) }}
 								</p>
 							</div>
@@ -394,7 +394,7 @@ const actions: CommandResult[] = [
 		description: __("Clear cart and start new sale"),
 		shortcut: "Ctrl+N",
 		icon: ShoppingCart,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:clear-cart")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:clear-cart")),
 	},
 	{
 		id: "act-payment",
@@ -403,7 +403,7 @@ const actions: CommandResult[] = [
 		description: __("Submit current cart"),
 		shortcut: "F4",
 		icon: CreditCard,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:process-payment")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:process-payment")),
 	},
 	{
 		id: "act-customer",
@@ -423,7 +423,7 @@ const actions: CommandResult[] = [
 		description: __("Repeat a previous invoice"),
 		shortcut: "Ctrl+G",
 		icon: Repeat,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:show-repeat-dialog")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:show-repeat-dialog")),
 	},
 	{
 		id: "act-return",
@@ -433,7 +433,7 @@ const actions: CommandResult[] = [
 		shortcut: "Ctrl+R",
 		icon: RotateCcw,
 		action: () => {
-			window.dispatchEvent(new CustomEvent("xpos:show-return-dialog"));
+			window.dispatchEvent(new CustomEvent("meerkatpos:show-return-dialog"));
 		},
 	},
 	{
@@ -443,7 +443,7 @@ const actions: CommandResult[] = [
 		description: __("Print last invoice"),
 		shortcut: "Ctrl+P",
 		icon: Printer,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:print-last")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:print-last")),
 	},
 	{
 		id: "act-hold",
@@ -452,7 +452,7 @@ const actions: CommandResult[] = [
 		description: __("Park current invoice as draft"),
 		shortcut: "Ctrl+H",
 		icon: Pause,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:hold-invoice")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:hold-invoice")),
 	},
 	{
 		id: "act-drafts",
@@ -461,7 +461,7 @@ const actions: CommandResult[] = [
 		description: __("View held/draft invoices"),
 		shortcut: "F8",
 		icon: FileText,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:show-drafts")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:show-drafts")),
 	},
 	{
 		id: "act-close-shift",
@@ -470,7 +470,7 @@ const actions: CommandResult[] = [
 		description: __("Close the current POS shift"),
 		shortcut: "Ctrl+Shift+O",
 		icon: LogOut,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:close-shift")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:close-shift")),
 	},
 	{
 		id: "act-expense",
@@ -479,7 +479,7 @@ const actions: CommandResult[] = [
 		description: __("Record a POS expense"),
 		shortcut: "Ctrl+E",
 		icon: Wallet,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:cash-expense")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:cash-expense")),
 	},
 	{
 		id: "act-deposit",
@@ -488,7 +488,7 @@ const actions: CommandResult[] = [
 		description: __("Record a cash deposit"),
 		shortcut: "Ctrl+Shift+D",
 		icon: Landmark,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:cash-deposit")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:cash-deposit")),
 	},
 	{
 		id: "act-shortcuts",
@@ -497,15 +497,15 @@ const actions: CommandResult[] = [
 		description: __("View all keyboard shortcuts"),
 		shortcut: "Ctrl+/",
 		icon: Keyboard,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:show-shortcuts-dialog")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:show-shortcuts-dialog")),
 	},
 	{
 		id: "act-about",
 		type: "action",
-		label: __("About X POS"),
+		label: __("About meerkatPOS"),
 		description: __("Version and system information"),
 		icon: Info,
-		action: () => window.dispatchEvent(new CustomEvent("xpos:show-about-dialog")),
+		action: () => window.dispatchEvent(new CustomEvent("meerkatpos:show-about-dialog")),
 	},
 	{
 		id: "act-theme",
@@ -567,15 +567,15 @@ const groupedResults = computed<ResultGroup[]>(() => {
 function getResultIconBg(type: string): string {
 	switch (type) {
 		case "page":
-			return "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300";
+			return "bg-accent text-accent-foreground";
 		case "action":
-			return "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300";
+			return "bg-primary/10 text-primary";
 		case "item":
 			return "bg-muted";
 		case "calculator":
-			return "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300";
+			return "bg-secondary text-secondary-foreground";
 		case "help":
-			return "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300";
+			return "bg-muted text-foreground";
 		default:
 			return "bg-muted";
 	}

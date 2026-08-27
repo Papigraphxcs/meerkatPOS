@@ -58,7 +58,7 @@ export const useCustomerStore = defineStore("customers", () => {
 					try {
 						await cacheCustomers(customers.value);
 					} catch (error) {
-						console.warn("[XPOS Offline] Failed to cache customers:", error);
+						console.warn("[meerkatPOS Offline] Failed to cache customers:", error);
 					}
 				}
 			}
@@ -73,7 +73,7 @@ export const useCustomerStore = defineStore("customers", () => {
 						return;
 					}
 				} catch (cacheError) {
-					console.warn("[XPOS Offline] Failed to load cached customers:", cacheError);
+					console.warn("[meerkatPOS Offline] Failed to load cached customers:", cacheError);
 				}
 			}
 			customers.value = [];
@@ -96,7 +96,7 @@ export const useCustomerStore = defineStore("customers", () => {
 				await cacheCustomers(result);
 			}
 		} catch (error) {
-			console.warn("[XPOS Offline] Failed to pre-cache customers:", error);
+			console.warn("[meerkatPOS Offline] Failed to pre-cache customers:", error);
 		}
 	}
 

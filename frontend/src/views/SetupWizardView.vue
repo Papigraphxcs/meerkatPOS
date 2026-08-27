@@ -6,7 +6,7 @@
 			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary flex items-center justify-center">
 				<Store class="w-8 h-8 text-primary-foreground" />
 			</div>
-			<h1 class="text-2xl font-bold text-foreground">X POS</h1>
+			<h1 class="text-2xl font-bold text-foreground">meerkatPOS</h1>
 			<p class="text-muted-foreground text-sm mt-1">Initial Setup</p>
 		</div>
 
@@ -228,7 +228,7 @@
 					<CardDescription>
 						{{
 							config.role === "hub"
-								? "Connect to your live ERPNext instance for data synchronization"
+								? "Connect to your live ERPNext instance for data synchronization. Optional — leave blank to run fully offline for now and connect later from Settings."
 								: "Connect to the hub server on your local network"
 						}}
 					</CardDescription>
@@ -343,12 +343,12 @@
 					<div
 						class="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm text-muted-foreground"
 					>
-						"This account is stored locally and used to log in to X POS. It is independent of your
+						"This account is stored locally and used to log in to meerkatPOS. It is independent of your
 						ERPNext users.",<br />
 						"Make sure to remember these credentials as they cannot be recovered. You can create
 						additional users later from the settings.",
 						<br />
-						"This account is stored locally and used to log in to X POS. It is independent of your
+						"This account is stored locally and used to log in to meerkatPOS. It is independent of your
 						ERPNext users.",
 					</div>
 					<div class="space-y-3">
@@ -602,7 +602,10 @@ const setupError = ref("");
 
 const canProceedStep3 = computed(() => {
 	if (config.role === "hub") {
-		return config.erpUrl && erpTestResult.value;
+		// No server entered yet -> stay offline-only for now, connect later.
+		// If a URL was entered, require it to actually test successfully.
+		if (!config.erpUrl) return true;
+		return !!erpTestResult.value;
 	}
 	return config.hubUrl && hubTestResult.value;
 });

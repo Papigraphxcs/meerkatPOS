@@ -57,6 +57,31 @@
 				@click="activeZone = 'items'"
 			>
 				<div class="shrink-0 p-3 sm:p-4 pb-1.5 sm:pb-2 space-y-2">
+					<div class="hidden sm:flex items-center justify-between gap-2">
+						<h1 class="text-lg font-bold text-foreground">{{ __("Point of Sale") }}</h1>
+						<div class="flex items-center gap-2">
+							<Button variant="outline" size="sm" class="gap-1.5" @click="cartStore.clearCart()">
+								<Plus class="w-4 h-4" />
+								{{ __("New Sale") }}
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								class="gap-1.5 relative"
+								@click="cartStore.openDraftDialog()"
+							>
+								<FileText class="w-4 h-4" />
+								{{ __("Held Orders") }}
+								<Badge
+									v-if="cartStore.draftOrderCount > 0"
+									variant="secondary"
+									class="h-4 min-w-4 px-1 text-[10px] leading-none"
+								>
+									{{ cartStore.draftOrderCount }}
+								</Badge>
+							</Button>
+						</div>
+					</div>
 					<div class="flex items-center gap-2">
 						<div class="flex-1 min-w-0">
 							<SearchBar
@@ -94,7 +119,7 @@
 							</Button>
 						</div>
 					</div>
-					<div class="flex items-center gap-2 overflow-x-auto pb-1 xpos-scrollbar">
+					<div class="flex items-center gap-2 overflow-x-auto pb-1 meerkatpos-scrollbar">
 						<Autocomplete
 							:model-value="itemStore.selectedGroup"
 							:options="groupAutocompleteOptions"
@@ -126,7 +151,7 @@
 					</div>
 				</div>
 
-				<div class="flex-1 overflow-y-auto p-2 sm:p-4 pt-1 sm:pt-2 xpos-scrollbar">
+				<div class="flex-1 overflow-y-auto p-2 sm:p-4 pt-1 sm:pt-2 meerkatpos-scrollbar">
 					<ItemGrid
 						:items="itemStore.items"
 						:is-loading="itemStore.isLoading"
@@ -191,8 +216,9 @@ import ItemGrid from "@/components/items/ItemGrid.vue";
 import CommandSearch from "@/components/items/CommandSearch.vue";
 import Cart from "@/components/cart/Cart.vue";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Autocomplete } from "@/components/ui/autocomplete";
-import { LayoutGrid, List, Search, ShoppingCart, Package, ScanLine } from "lucide-vue-next";
+import { LayoutGrid, List, Search, ShoppingCart, Package, ScanLine, Plus, FileText } from "lucide-vue-next";
 
 import CameraBarcodeDialog from "@/components/dialogs/CameraBarcodeDialog.vue";
 import type { POSItem } from "@/types/pos.types";
@@ -246,19 +272,19 @@ onMounted(() => {
 		loadInitialData();
 	}
 	document.addEventListener("keydown", handleGlobalKeydown);
-	window.addEventListener("xpos:toggle-view", handleToggleView as EventListener);
-	window.addEventListener("xpos:focus-barcode", handleFocusBarcode as EventListener);
-	window.addEventListener("xpos:focus-search", handleFocusSearch as EventListener);
-	window.addEventListener("xpos:open-command-search", handleOpenCommandSearch as EventListener);
+	window.addEventListener("meerkatpos:toggle-view", handleToggleView as EventListener);
+	window.addEventListener("meerkatpos:focus-barcode", handleFocusBarcode as EventListener);
+	window.addEventListener("meerkatpos:focus-search", handleFocusSearch as EventListener);
+	window.addEventListener("meerkatpos:open-command-search", handleOpenCommandSearch as EventListener);
 	nextTick(() => barcodeScannerRef.value?.focus());
 });
 
 onUnmounted(() => {
 	document.removeEventListener("keydown", handleGlobalKeydown);
-	window.removeEventListener("xpos:toggle-view", handleToggleView as EventListener);
-	window.removeEventListener("xpos:focus-barcode", handleFocusBarcode as EventListener);
-	window.removeEventListener("xpos:focus-search", handleFocusSearch as EventListener);
-	window.removeEventListener("xpos:open-command-search", handleOpenCommandSearch as EventListener);
+	window.removeEventListener("meerkatpos:toggle-view", handleToggleView as EventListener);
+	window.removeEventListener("meerkatpos:focus-barcode", handleFocusBarcode as EventListener);
+	window.removeEventListener("meerkatpos:focus-search", handleFocusSearch as EventListener);
+	window.removeEventListener("meerkatpos:open-command-search", handleOpenCommandSearch as EventListener);
 });
 
 function handleToggleView() {
@@ -317,6 +343,7 @@ async function loadInitialData() {
 	await Promise.all([itemStore.fetchItems(posStore.profileName), itemStore.fetchItemGroups()]);
 
 	cartStore.refreshPricingSnapshot(true).catch(() => {});
+	cartStore.refreshDraftOrderCount().catch(() => {});
 
 	nextTick(() => barcodeScannerRef.value?.focus());
 }

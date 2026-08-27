@@ -4,7 +4,7 @@ import re
 import frappe
 from frappe.website.page_renderers.base_renderer import BaseRenderer
 
-PREFIX = "/xpos/"
+PREFIX = "/meerkatpos/"
 
 ALLOWED = re.compile(r"\A(sw\.js(\.map)?|workbox-[A-Za-z0-9_-]+\.js(\.map)?|manifest\.webmanifest)\Z")
 
@@ -16,7 +16,7 @@ CONTENT_TYPES = {
 
 
 def asset_dir() -> str:
-	return frappe.get_app_path("xpos", "public", "xpos")
+	return frappe.get_app_path("xpos", "public", "meerkatpos")
 
 
 def resolve() -> tuple[str, str] | None:

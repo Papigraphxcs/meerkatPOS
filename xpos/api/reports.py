@@ -12,6 +12,8 @@ Report data itself is still fetched through the standard
 ``frappe.desk.query_report.run`` endpoint.
 """
 
+import json
+
 import frappe
 from frappe import _
 from frappe.utils import add_months, today
@@ -213,3 +215,28 @@ def get_report_meta(report: str) -> dict:
 		frappe.throw(_("Not permitted to view reports"), frappe.PermissionError)
 
 	return {"filters": _apply_company_defaults(filters)}
+
+
+@frappe.whitelist()
+def get_accessible_reports(reports: str | list[str]) -> list[str]:
+	"""Return which of the given report names the current user may actually run.
+
+	Mirrors the checks ``frappe.desk.query_report.get_report_doc`` performs when a
+	report is opened (the report's own allowed-roles list, plus "report" permission
+	on the doctype it reports on), so the frontend catalog can hide reports up front
+	instead of showing every report and only failing once the user opens one.
+	"""
+	names = json.loads(reports) if isinstance(reports, str) else (reports or [])
+
+	accessible = []
+	for name in names:
+		if not frappe.db.exists("Report", name):
+			continue
+		doc = frappe.get_doc("Report", name)
+		if not doc.is_permitted():
+			continue
+		if not frappe.has_permission(doc.ref_doctype, "report"):
+			continue
+		accessible.append(name)
+
+	return accessible

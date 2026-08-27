@@ -13,7 +13,7 @@
 				<DialogDescription>{{ __("Review and reconcile your shift") }}</DialogDescription>
 			</DialogHeader>
 
-			<div class="flex-1 overflow-y-auto p-5 space-y-4 xpos-scrollbar">
+			<div class="flex-1 overflow-y-auto p-5 space-y-4 meerkatpos-scrollbar">
 				<div v-if="isLoading" class="flex items-center justify-center py-12">
 					<Loader2 class="w-8 h-8 text-primary animate-spin" />
 				</div>
@@ -30,22 +30,22 @@
 								</p>
 							</CardContent>
 						</Card>
-						<Card class="bg-emerald-500/5 border-emerald-500/20">
+						<Card class="bg-muted/50 border-border">
 							<CardContent class="p-4 text-center">
-								<p class="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">
+								<p class="text-xs font-medium text-muted-foreground mb-1">
 									{{ __("Grand Total") }}
 								</p>
-								<p class="text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">
+								<p class="text-2xl font-extrabold text-foreground">
 									{{ money(summary.grand_total ?? 0) }}
 								</p>
 							</CardContent>
 						</Card>
-						<Card class="bg-blue-500/5 border-blue-500/20">
+						<Card class="bg-muted/50 border-border">
 							<CardContent class="p-4 text-center">
-								<p class="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">
+								<p class="text-xs font-medium text-muted-foreground mb-1">
 									{{ __("Net Total") }}
 								</p>
-								<p class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">
+								<p class="text-2xl font-extrabold text-foreground">
 									{{ money(summary.net_total ?? 0) }}
 								</p>
 							</CardContent>
@@ -55,26 +55,26 @@
 					<div class="grid grid-cols-2 gap-3">
 						<Card
 							v-if="(summary as any).returns_count > 0"
-							class="bg-amber-500/5 border-amber-500/20"
+							class="bg-muted/50 border-border"
 						>
 							<CardContent class="p-3 text-center">
-								<p class="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">
+								<p class="text-xs font-medium text-muted-foreground mb-1">
 									{{ __("Returns") }}
 								</p>
-								<p class="text-lg font-bold text-amber-700 dark:text-amber-300">
+								<p class="text-lg font-bold text-foreground">
 									{{ (summary as any).returns_count }}
 								</p>
 							</CardContent>
 						</Card>
 						<Card
 							v-if="(summary as any).total_taxes > 0"
-							class="bg-violet-500/5 border-violet-500/20"
+							class="bg-muted/50 border-border"
 						>
 							<CardContent class="p-3 text-center">
-								<p class="text-xs font-medium text-violet-600 dark:text-violet-400 mb-1">
+								<p class="text-xs font-medium text-muted-foreground mb-1">
 									{{ __("Total Taxes") }}
 								</p>
-								<p class="text-lg font-bold text-violet-700 dark:text-violet-300">
+								<p class="text-lg font-bold text-foreground">
 									{{ money((summary as any).total_taxes ?? 0) }}
 								</p>
 							</CardContent>

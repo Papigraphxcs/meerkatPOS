@@ -21,7 +21,7 @@ export interface BootOptions {
 	/** Item whose tile signals the grid has rendered. Override when the fixture swaps the catalogue. */
 	readyItem?: string;
 	/**
-	 * Currency masters for `window.xpos.boot`.
+	 * Currency masters for `window.meerkatpos.boot`.
 	 *
 	 * `number_format` is what decides an amount's decimals, so a spec covering a zero-decimal
 	 * currency has to supply it or every figure comes out at two.
@@ -32,7 +32,7 @@ export interface BootOptions {
 /**
  * Boot the POS to a usable cart.
  *
- * Injects `window.xpos` because index.html is a Jinja template - under the Vite
+ * Injects `window.meerkatpos` because index.html is a Jinja template - under the Vite
  * dev server the boot script is unrendered and never executes.
  */
 Cypress.Commands.add("bootPos", (options: BootOptions = {}) => {
@@ -40,7 +40,7 @@ Cypress.Commands.add("bootPos", (options: BootOptions = {}) => {
 	stubMany({ ...defaultRoutes(), ...(options.routes || {}) });
 	installFrappeStub();
 
-	cy.visit("/xpos/", {
+	cy.visit("/meerkatpos/", {
 		onBeforeLoad(win) {
 			// The app caches items, customers and the pricing rule snapshot here.
 			// Left over, that cache leaks between specs - and would silently
@@ -53,7 +53,7 @@ Cypress.Commands.add("bootPos", (options: BootOptions = {}) => {
 				get: () => win.__cyOnline !== false,
 			});
 
-			(win as unknown as { xpos: unknown }).xpos = {
+			(win as unknown as { meerkatpos: unknown }).meerkatpos = {
 				csrf_token: "cypress-csrf-token",
 				boot: {
 					user_info: {
@@ -125,7 +125,7 @@ Cypress.Commands.add("goOnline", () => {
 
 Cypress.Commands.add("openRecallDialog", () => {
 	cy.window().then((win) => {
-		win.dispatchEvent(new CustomEvent("xpos:show-drafts"));
+		win.dispatchEvent(new CustomEvent("meerkatpos:show-drafts"));
 	});
 	cy.contains("[role='dialog']", "Recall Order").should("be.visible");
 });

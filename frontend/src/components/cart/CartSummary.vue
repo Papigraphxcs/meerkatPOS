@@ -1,5 +1,7 @@
 <template>
-	<div class="shrink-0 border-t border-border bg-background px-4 py-4 space-y-3 dark:border-border">
+	<div
+		class="shrink-0 mx-4 mb-3 border-x border-b border-border rounded-b-2xl bg-muted/40 dark:bg-muted/10 px-4 pt-3 pb-4 space-y-3"
+	>
 		<div
 			v-if="cartStore.pricingSource === 'offline'"
 			class="flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400"
@@ -8,10 +10,10 @@
 			{{ __("Prices calculated offline, will be confirmed when the invoice syncs") }}
 		</div>
 
-		<div class="space-y-1.5">
+		<div class="space-y-1.5 font-mono">
 			<div class="flex items-center justify-between text-sm">
 				<span class="text-muted-foreground">{{ __("Subtotal") }}</span>
-				<span class="font-medium text-foreground">
+				<span class="font-medium text-foreground tabular-nums">
 					{{ money(cartStore.subtotal) }}
 				</span>
 			</div>
@@ -20,12 +22,18 @@
 				<span class="text-muted-foreground flex items-center gap-1">
 					<Percent class="w-3 h-3" /> {{ __("Item Discounts") }}
 				</span>
-				<span class="font-medium text-emerald-600 dark:text-emerald-400">
+				<span class="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
 					-{{ money(itemDiscountTotal) }}
 				</span>
 			</div>
 
-			<template v-if="cartStore.calculatedTaxes.length > 0">
+			<div
+				v-if="cartStore.calculatedTaxes.length > 0"
+				class="rounded-md border border-dashed border-border/70 px-2 py-1.5 space-y-1"
+			>
+				<p class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+					{{ __("VAT") }}
+				</p>
 				<div
 					v-for="(tax, idx) in cartStore.calculatedTaxes"
 					:key="idx"
@@ -36,22 +44,31 @@
 						<span v-if="tax.rate" class="text-xs text-muted-foreground/70"
 							>({{ percent(tax.rate) }})</span
 						>
-						<span v-if="tax.included_in_print_rate" class="text-[10px] text-blue-500">{{
+						<span v-if="tax.included_in_print_rate" class="text-[10px] text-muted-foreground">{{
 							__("incl.")
 						}}</span>
 					</span>
 					<span
-						class="font-medium"
+						class="font-medium tabular-nums"
 						:class="
 							tax.included_in_print_rate
-								? 'text-blue-600 dark:text-blue-400'
+								? 'text-muted-foreground'
 								: 'text-foreground'
 						"
 					>
 						{{ tax.included_in_print_rate ? "" : "+" }}{{ money(tax.amount) }}
 					</span>
 				</div>
-			</template>
+				<div
+					v-if="cartStore.calculatedTaxes.length > 1"
+					class="flex items-center justify-between text-xs pt-1 border-t border-dashed border-border/70"
+				>
+					<span class="text-muted-foreground">{{ __("Total VAT") }}</span>
+					<span class="font-semibold text-foreground tabular-nums">
+						{{ money(cartStore.totalTaxAmount) }}
+					</span>
+				</div>
+			</div>
 
 			<div
 				v-if="cartStore.offerItemDiscountTotal > 0"
@@ -60,7 +77,7 @@
 				<span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
 					<Ticket class="w-3 h-3" /> {{ __("Offer Discount") }}
 				</span>
-				<span class="font-medium text-emerald-600 dark:text-emerald-400">
+				<span class="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
 					-{{ money(cartStore.offerItemDiscountTotal) }}
 				</span>
 			</div>
@@ -73,7 +90,7 @@
 					<Ticket class="w-3 h-3" /> {{ __("Offer") }}
 					<span class="text-xs">({{ percent(cartStore.offerGrandTotalDiscountPct) }})</span>
 				</span>
-				<span class="font-medium text-emerald-600 dark:text-emerald-400">
+				<span class="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
 					-{{ money(grandTotalOfferDiscount) }}
 				</span>
 			</div>
@@ -92,7 +109,7 @@
 						({{ percent(cartStore.discountPercentage) }})
 					</span>
 				</span>
-				<span class="font-medium text-emerald-600 dark:text-emerald-400">
+				<span class="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
 					-{{ money(discountValue) }}
 				</span>
 			</div>
@@ -104,14 +121,14 @@
 				<span class="text-violet-600 dark:text-violet-400 flex items-center gap-1">
 					<Gift class="w-3.5 h-3.5" /> {{ __("Loyalty") }}
 				</span>
-				<span class="font-medium text-violet-600 dark:text-violet-400">
+				<span class="font-medium text-violet-600 dark:text-violet-400 tabular-nums">
 					-{{ money(cartStore.loyaltyAmount) }}
 				</span>
 			</div>
 
 			<div v-if="cartStore.writeOffAmount > 0" class="flex items-center justify-between text-sm">
 				<span class="text-muted-foreground">{{ __("Write Off") }}</span>
-				<span class="font-medium text-amber-600 dark:text-amber-400">
+				<span class="font-medium text-amber-600 dark:text-amber-400 tabular-nums">
 					-{{ money(cartStore.writeOffAmount) }}
 				</span>
 			</div>
@@ -120,122 +137,185 @@
 				<span class="text-muted-foreground flex items-center gap-1">
 					<Truck class="w-3 h-3" /> {{ cartStore.selectedDeliveryCharge.label }}
 				</span>
-				<span class="font-medium text-foreground">
+				<span class="font-medium text-foreground tabular-nums">
 					+{{ money(cartStore.selectedDeliveryCharge.rate) }}
 				</span>
 			</div>
 
 			<Separator class="my-2!" />
 
-			<div class="flex items-center justify-between">
-				<span class="text-base font-bold text-foreground">{{ __("Total") }}</span>
-				<span
-					class="text-xl font-extrabold"
-					:class="
-						cartStore.isReturnMode
-							? 'text-amber-600 dark:text-amber-400'
-							: 'text-primary dark:text-primary'
-					"
-				>
+			<div class="flex items-center justify-between rounded-2xl border border-border px-4 py-3">
+				<span class="text-base font-bold font-sans text-foreground">{{ __("Total") }}</span>
+				<span class="text-2xl font-extrabold tabular-nums text-foreground">
 					{{ cartStore.isReturnMode ? "-" : "" }}{{ money(Math.abs(cartStore.grandTotal)) }}
 				</span>
 			</div>
 		</div>
 
-		<div class="flex gap-2">
-			<TooltipWrapper :content="__('Additional Discount')">
-				<Button
-					v-if="hasPermission('apply_additional_discount')"
-					variant="outline"
-					size="sm"
-					:class="{
-						'border-emerald-300 text-emerald-600 bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:bg-emerald-900/20':
-							hasDiscount,
-					}"
-					:disabled="cartStore.isEmpty"
-					@click="showDiscount = !showDiscount"
-				>
-					<Tag class="w-4 h-4" />
-				</Button>
-			</TooltipWrapper>
+		<div v-if="!cartStore.isEmpty" class="pt-2 border-t border-dashed border-border text-center">
+			<p class="text-xs font-mono font-medium text-foreground">
+				{{ posStore.companyName || __("meerkatPOS") }}
+			</p>
+			<p class="text-[10px] font-mono text-muted-foreground mt-0.5">
+				{{ __("Thank you for your purchase") }}
+			</p>
+		</div>
+	</div>
 
-			<TooltipWrapper :content="__('Coupon')">
-				<Button
-					v-if="posStore.fetchCoupon"
-					variant="outline"
-					size="sm"
-					:class="{
-						'border-violet-300 text-violet-600 bg-violet-50 dark:border-violet-700 dark:text-violet-400 dark:bg-violet-900/20':
-							!!cartStore.appliedCoupon,
-					}"
-					:disabled="cartStore.isEmpty"
-					@click="showCoupon = !showCoupon"
+	<div class="shrink-0 mx-4 mt-3 mb-4 space-y-3">
+		<div class="flex items-center gap-2">
+			<div class="flex-[3] min-w-0 flex items-center gap-2">
+				<button
+					@click="handleCustomerClick"
+					class="flex-1 min-w-0 flex items-center gap-2 p-2 rounded-xl bg-muted text-left transition-colors duration-200 group"
+					:class="cartStore.isReturnMode ? 'cursor-not-allowed opacity-60' : 'hover:bg-muted/70'"
+					:disabled="cartStore.isReturnMode"
 				>
-					<Ticket class="w-4 h-4" />
-				</Button>
-			</TooltipWrapper>
+					<span
+						class="w-7 h-7 shrink-0 rounded-full bg-foreground text-background flex items-center justify-center overflow-hidden"
+					>
+						<img
+							v-if="cartStore.customer && cartStore.customer.image"
+							:src="cartStore.customer.image as string"
+							:alt="cartStore.customer.customer_name"
+							class="w-full h-full object-cover"
+							loading="lazy"
+						/>
+						<User v-else class="w-3.5 h-3.5" />
+					</span>
+					<p class="flex-1 min-w-0 text-xs font-semibold text-foreground truncate">
+						{{ cartStore.customerName }}
+					</p>
+					<Lock v-if="cartStore.isReturnMode" class="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+					<ChevronDown v-else class="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+				</button>
+				<button
+					v-if="cartStore.customer && !cartStore.isReturnMode"
+					class="shrink-0 w-9 h-9 rounded-full bg-background border border-border flex items-center justify-center hover:border-foreground transition-colors"
+					@click.stop="handleEditCustomer"
+					title="Edit Customer"
+				>
+					<Pencil class="w-3.5 h-3.5" />
+				</button>
+			</div>
 
-			<TooltipWrapper :content="__('Save as draft')">
-				<Button
-					variant="outline"
-					size="sm"
-					class="dark:border-border dark:text-foreground"
-					:disabled="cartStore.isEmpty"
-					data-testid="hold-order"
-					@click="holdOrder"
-				>
-					<Clock class="w-4 h-4" />
-				</Button>
-			</TooltipWrapper>
-			<TooltipWrapper :content="__('Restore draft')">
-				<Button
-					variant="outline"
-					size="sm"
-					class="dark:border-border dark:text-foreground"
-					@click="cartStore.openDraftDialog()"
-				>
-					<FileText class="w-4 h-4" />
-				</Button>
-			</TooltipWrapper>
-			<TooltipWrapper :content="__('Clear cart')">
-				<Button
-					variant="outline"
-					size="sm"
-					class="text-destructive hover:text-destructive dark:border-border"
-					:disabled="cartStore.isEmpty"
-					@click="cartStore.clearCart()"
-				>
-					<Trash2 class="w-4 h-4" />
-				</Button>
-			</TooltipWrapper>
-			<TooltipWrapper v-if="!cartStore.isReturnMode" :content="__('Delivery charge')">
-				<Button
-					variant="outline"
-					size="sm"
-					:disabled="cartStore.isEmpty"
-					:class="{
-						'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20':
-							!!cartStore.selectedDeliveryCharge,
-					}"
-					@click="toggleDelivery"
-				>
-					<Truck class="w-4 h-4" />
-				</Button>
-			</TooltipWrapper>
-			<TooltipWrapper :content="__('Clear all discounts')">
-				<Button
-					variant="outline"
-					size="sm"
-					:disabled="!hasAnyDiscount"
-					:class="{
-						'border-blue-300 text-blue-600 bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:bg-blue-900/20':
-							!!cartStore.selectedDeliveryCharge,
-					}"
-					@click="clearAllDiscounts"
-				>
-					<X class="w-4 h-4" />
-				</Button>
-			</TooltipWrapper>
+			<Button
+				v-if="cartStore.customer && !cartStore.isReturnMode"
+				variant="outline"
+				class="flex-1 h-9 px-2 justify-center gap-1.5 rounded-xl border-border text-xs"
+				@click="customerStore.showLoyaltyDialog = true"
+			>
+				<Gift class="w-3.5 h-3.5" />
+				{{ __("Loyalty") }}
+			</Button>
+		</div>
+
+		<div class="flex items-center gap-2 flex-wrap">
+			<Button
+				v-if="hasPermission('apply_additional_discount')"
+				variant="outline"
+				size="sm"
+				class="gap-1.5 rounded-full border-border"
+				:class="{ 'bg-foreground text-background border-foreground': hasDiscount }"
+				:disabled="cartStore.isEmpty"
+				@click="showDiscount = !showDiscount"
+			>
+				<Tag class="w-4 h-4" />
+				{{ __("Discount") }}
+			</Button>
+
+			<Button
+				v-if="posStore.fetchCoupon"
+				variant="outline"
+				size="sm"
+				class="gap-1.5 rounded-full border-border"
+				:class="{ 'bg-foreground text-background border-foreground': !!cartStore.appliedCoupon }"
+				:disabled="cartStore.isEmpty"
+				@click="showCoupon = !showCoupon"
+			>
+				<Ticket class="w-4 h-4" />
+				{{ __("Coupon") }}
+			</Button>
+
+			<Button
+				variant="outline"
+				size="sm"
+				class="gap-1.5 rounded-full border-border text-destructive hover:text-destructive"
+				:disabled="cartStore.isEmpty"
+				@click="cartStore.clearCart()"
+			>
+				<Trash2 class="w-4 h-4" />
+				{{ __("Clear") }}
+			</Button>
+
+			<div class="flex-1"></div>
+
+			<Popover>
+				<PopoverTrigger as-child>
+					<Button variant="outline" size="sm" class="gap-1.5 rounded-full border-border relative">
+						<MoreHorizontal class="w-4 h-4" />
+						{{ __("More") }}
+						<Badge
+							v-if="cartStore.draftOrderCount > 0"
+							variant="secondary"
+							class="absolute -top-1.5 -end-1.5 h-4 min-w-4 px-1 text-[10px] leading-none"
+						>
+							{{ cartStore.draftOrderCount }}
+						</Badge>
+					</Button>
+				</PopoverTrigger>
+				<PopoverContentStyled class="w-52 p-1.5" align="end" side="top">
+					<Button
+						variant="ghost"
+						size="sm"
+						class="w-full justify-start gap-2"
+						:disabled="cartStore.isEmpty"
+						data-testid="hold-order"
+						@click="holdOrder"
+					>
+						<Clock class="w-4 h-4" />
+						{{ __("Save as Draft") }}
+					</Button>
+					<Button
+						variant="ghost"
+						size="sm"
+						class="w-full justify-start gap-2 relative"
+						@click="cartStore.openDraftDialog()"
+					>
+						<FileText class="w-4 h-4" />
+						{{ __("Restore Draft") }}
+						<Badge
+							v-if="cartStore.draftOrderCount > 0"
+							variant="secondary"
+							class="ms-auto h-4 min-w-4 px-1 text-[10px] leading-none"
+						>
+							{{ cartStore.draftOrderCount }}
+						</Badge>
+					</Button>
+					<Button
+						v-if="!cartStore.isReturnMode"
+						variant="ghost"
+						size="sm"
+						class="w-full justify-start gap-2"
+						:disabled="cartStore.isEmpty"
+						:class="{ 'text-primary': !!cartStore.selectedDeliveryCharge }"
+						@click="toggleDelivery"
+					>
+						<Truck class="w-4 h-4" />
+						{{ __("Delivery Charge") }}
+					</Button>
+					<Button
+						variant="ghost"
+						size="sm"
+						class="w-full justify-start gap-2"
+						:disabled="!hasAnyDiscount"
+						@click="clearAllDiscounts"
+					>
+						<X class="w-4 h-4" />
+						{{ __("Clear All Discounts") }}
+					</Button>
+				</PopoverContentStyled>
+			</Popover>
 		</div>
 
 		<transition name="slide-up">
@@ -266,8 +346,8 @@
 						class="px-2.5 py-1.5 rounded-md text-xs font-medium border transition-all"
 						:class="
 							cartStore.selectedDeliveryCharge?.name === charge.name
-								? 'bg-blue-600 text-white border-blue-600'
-								: 'bg-background border-border hover:border-blue-400 hover:text-blue-600'
+								? 'bg-primary text-primary-foreground border-primary'
+								: 'bg-background border-border hover:border-primary/50 hover:text-primary'
 						"
 					>
 						{{ charge.label }} &mdash; {{ money(charge.rate) }}
@@ -316,10 +396,15 @@
 						v-model="couponInput"
 						type="text"
 						:placeholder="__('Enter coupon code...')"
-						class="flex-1"
+						class="flex-1 rounded-full"
 						@keydown.enter="applyCouponCode"
 					/>
-					<Button size="sm" :disabled="!couponInput || isApplyingCoupon" @click="applyCouponCode">
+					<Button
+						size="sm"
+						class="rounded-full bg-foreground text-background hover:bg-foreground/90"
+						:disabled="!couponInput || isApplyingCoupon"
+						@click="applyCouponCode"
+					>
 						<template v-if="isApplyingCoupon">
 							<Loader2 class="w-4 h-4 animate-spin" />
 						</template>
@@ -330,15 +415,27 @@
 			</div>
 		</transition>
 
+		<div
+			v-if="cartStore.appliedCoupon"
+			class="flex items-center justify-between rounded-2xl bg-muted px-4 py-2.5"
+		>
+			<span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+				{{ __("Promotion Code") }}
+			</span>
+			<span class="px-2.5 py-1 rounded-full bg-foreground text-background text-xs font-bold">
+				{{ cartStore.appliedCoupon.coupon_code || cartStore.appliedCoupon.name }}
+			</span>
+		</div>
+
 		<Button
 			size="xl"
-			class="w-full font-bold tracking-wide shadow-lg"
+			class="w-full font-bold tracking-wide rounded-2xl shadow-none"
 			:class="
-				cartStore.isReturnMode
-					? 'bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-500/25 text-white'
-					: 'bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-primary/25'
+				isPayDisabled
+					? 'bg-muted text-muted-foreground disabled:opacity-100'
+					: 'bg-foreground text-background hover:bg-foreground/90'
 			"
-			:disabled="cartStore.isEmpty || !cartStore.customer"
+			:disabled="isPayDisabled"
 			@click="handleCheckout()"
 		>
 			<Wallet class="w-5 h-5" />
@@ -352,6 +449,7 @@ import { ref, computed, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
 import { hasPermission } from "@/services/userRights";
 import { useCartStore } from "@/stores/cartStore";
+import { useCustomerStore } from "@/stores/customerStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useOfferStore } from "@/stores/offerStore";
 import { call, showSuccess, showError } from "@/services/api";
@@ -361,10 +459,11 @@ import { isTabConflictError } from "@/utils";
 import { useOfflineStore } from "@/stores/offlineStore";
 import { usePrintInvoice } from "@/composables/usePrintInvoice";
 import { Button } from "@/components/ui/button";
-import { TooltipWrapper } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContentStyled, PopoverTrigger } from "@/components/ui/popover";
 import {
 	Tag,
 	Ticket,
@@ -378,6 +477,11 @@ import {
 	Truck,
 	WifiOff,
 	X,
+	MoreHorizontal,
+	User,
+	ChevronDown,
+	Lock,
+	Pencil,
 } from "lucide-vue-next";
 import type { DeliveryCharge } from "@/types/pos.types";
 import { useMoney } from "@/composables/useMoney";
@@ -385,6 +489,7 @@ import { useMoney } from "@/composables/useMoney";
 const posStore = usePosStore();
 const { money, moneyPrecision, percent } = useMoney();
 const cartStore = useCartStore();
+const customerStore = useCustomerStore();
 const authStore = useAuthStore();
 const offerStore = useOfferStore();
 const offlineStore = useOfflineStore();
@@ -428,6 +533,19 @@ function clearAllDiscounts() {
 	showCoupon.value = false;
 }
 
+function handleCustomerClick() {
+	if (cartStore.isReturnMode) {
+		showError(__("Customer cannot be changed in return mode"));
+		return;
+	}
+	customerStore.showCustomerDialog = true;
+	customerStore.searchCustomers();
+}
+
+function handleEditCustomer() {
+	customerStore.showCustomerEditDialog = true;
+}
+
 const itemDiscountTotal = computed(() => {
 	return cartStore.items.reduce((sum, item) => {
 		const itemTotal = item.qty * item.rate;
@@ -444,6 +562,8 @@ const discountValue = computed(() => {
 	}
 	return cartStore.discountAmount;
 });
+
+const isPayDisabled = computed(() => cartStore.isEmpty || !cartStore.customer);
 
 const payButtonLabel = computed(() => {
 	if (cartStore.isEmpty) return __("Add items to pay");
@@ -655,7 +775,7 @@ async function holdOrder() {
 	try {
 		const data = cartStore.getInvoiceData(profileName, shiftName);
 		if (!data.customer) {
-			const bootCustomer = (window.xpos?.boot as Record<string, unknown>)?.sysdefaults as
+			const bootCustomer = (window.meerkatpos?.boot as Record<string, unknown>)?.sysdefaults as
 				| Record<string, string>
 				| undefined;
 			data.customer = bootCustomer?.customer || "";
@@ -689,6 +809,7 @@ async function holdOrder() {
 					data: JSON.stringify(serverData),
 				});
 				cartStore.clearAll();
+				cartStore.refreshDraftOrderCount();
 				showSuccess(__("Order saved as draft"));
 			} else {
 				await offlineStore.saveOffline(
@@ -735,7 +856,7 @@ async function sendToCashier() {
 		data.pos_awaiting_settlement = true;
 
 		if (!data.customer) {
-			const bootCustomer = (window.xpos?.boot as Record<string, unknown>)?.sysdefaults as
+			const bootCustomer = (window.meerkatpos?.boot as Record<string, unknown>)?.sysdefaults as
 				| Record<string, string>
 				| undefined;
 			data.customer = bootCustomer?.customer || "";
@@ -780,6 +901,7 @@ async function sendToCashier() {
 					await printInvoice(result.name);
 				}
 				cartStore.clearAll();
+				cartStore.refreshDraftOrderCount();
 				showSuccess(__("Sent to cashier"));
 			} else {
 				await offlineStore.saveOffline(

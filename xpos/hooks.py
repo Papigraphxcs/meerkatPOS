@@ -1,9 +1,10 @@
 app_name = "xpos"
-app_title = "X POS"
+app_title = "meerkatPOS"
 app_publisher = "Ali Raza"
 app_description = "A modern, offline-capable Point of Sale application for Frappe and ERPNext"
 app_email = "ar.frappe.dev@gmail.com"
 app_license = "mit"
+app_logo_url = "/assets/xpos/images/xpos-logo-light.svg"
 
 # Apps
 # ------------------
@@ -13,10 +14,10 @@ required_apps = ["erpnext"]
 # Each item in the list will be shown as an app in the apps page
 add_to_apps_screen = [
 	{
-		"name": "xpos",
+		"name": "meerkatpos",
 		"logo": "/assets/xpos/images/xpos-logo-light.svg",
-		"title": "X POS",
-		"route": "/xpos",
+		"title": "meerkatPOS",
+		"route": "/meerkatpos",
 	}
 ]
 
@@ -24,8 +25,8 @@ add_to_apps_screen = [
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/xpos/css/xpos.css"
-# app_include_js = "/assets/xpos/js/xpos.js"
+app_include_css = "xpos.bundle.css"
+app_include_js = "xpos.bundle.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/xpos/css/xpos.css"
@@ -180,23 +181,11 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"xpos.tasks.all"
-# 	],
-# 	"daily": [
-# 		"xpos.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"xpos.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"xpos.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"xpos.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"hourly": [
+		"xpos.api.rbz_rate_sync.scheduled_sync",
+	],
+}
 
 # Testing
 # -------
@@ -277,9 +266,9 @@ export_python_type_annotations = True
 
 # Website Route Rules
 # -------------------
-# Serve the X POS SPA for deep links under /xpos
+# Serve the meerkatPOS SPA for deep links under /meerkatpos
 
 website_route_rules = [
-	{"from_route": "/xpos", "to_route": "xpos"},
-	{"from_route": "/xpos/<path:app_path>", "to_route": "xpos"},
+	{"from_route": "/meerkatpos", "to_route": "meerkatpos"},
+	{"from_route": "/meerkatpos/<path:app_path>", "to_route": "meerkatpos"},
 ]
