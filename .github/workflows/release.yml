@@ -3,7 +3,7 @@ name: Generate Semantic Release
 on:
   push:
     branches:
-      - version-16
+      - develop
 
 permissions:
   contents: write
@@ -95,7 +95,7 @@ jobs:
       - name: Checkout release commit
         uses: actions/checkout@v7
         with:
-          ref: version-16
+          ref: develop
           fetch-depth: 0
 
       - name: Setup Node.js

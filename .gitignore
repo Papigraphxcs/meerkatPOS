@@ -35,6 +35,7 @@ xpos/www/meerkatpos.html
 
 # Environment & Secrets — NEVER commit these
 .env
+frontend/docs/deployment-info.txt
 .env.*
 !.env.example
 *.pem
