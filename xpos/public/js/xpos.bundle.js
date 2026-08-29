@@ -1,5 +1,25 @@
 frappe.provide("xpos.desktop");
 
+// meerkatPOS is routinely self-hosted on a PC/LAN with no route to the
+// public internet at all (client-premises appliance install). Chrome/Edge's
+// navigator.onLine only reflects the OS network-interface state, not whether
+// *this* server is reachable, so on those installs it permanently reports
+// "offline" even though every request to this same-origin server succeeds
+// fine. Frappe core wires that flag into two places:
+//   - frappe.is_online() (frappe/public/js/frappe/dom.js) is checked at the
+//     top of every frappe.call (frappe/public/js/frappe/request.js), so it
+//     threw a "Connection Lost" alert on literally every desk action.
+//   - frappe/public/js/frappe/dom.js also binds window "online"/"offline"
+//     straight to show_alert, spamming an orange/green toast whenever the
+//     OS flips that flag (e.g. Windows' "no internet access" LAN state).
+// Real connectivity problems (timeouts, connection refused, 5xx) already
+// surface through frappe.call's own statusCode/ajax error handling, so
+// neither of these heuristics is needed here -- just quiet them.
+frappe.is_online = function () {
+	return true;
+};
+$(window).off("online offline");
+
 // Restyles the Desk home page's icon grid (the "Framework / meerkatPOS /
 // Accounting / Stock / ..." tiles you land on at /desk with no route) into
 // a single scrollable, alphabetically-grouped list -- similar to the
