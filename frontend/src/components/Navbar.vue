@@ -184,6 +184,7 @@
 
 		<AboutDialog :open="showAboutDialog" @close="showAboutDialog = false" />
 		<KeyboardShortcutsDialog :open="showShortcutsDialog" @close="showShortcutsDialog = false" />
+		<ExchangeRateDialog :open="showExchangeRateDialog" @close="showExchangeRateDialog = false" />
 	</header>
 </template>
 
@@ -226,6 +227,7 @@ import {
 import OfflinePendingPanel from "@/components/offline/OfflinePendingPanel.vue";
 import AboutDialog from "@/components/dialogs/AboutDialog.vue";
 import KeyboardShortcutsDialog from "@/components/dialogs/KeyboardShortcutsDialog.vue";
+import ExchangeRateDialog from "@/components/dialogs/ExchangeRateDialog.vue";
 import { useOfflineStore } from "@/stores/offlineStore";
 
 import { get_full_url } from "@/utils";
@@ -258,6 +260,7 @@ const showRepeatDialog = ref(false);
 const showOfflinePanel = ref(false);
 const showAboutDialog = ref(false);
 const showShortcutsDialog = ref(false);
+const showExchangeRateDialog = ref(false);
 
 function handleOfflineAction() {
 	if (offlineStore.hasPending || offlineStore.hasDeadLetters || !offlineStore.isOnline) {
@@ -283,6 +286,11 @@ function handleShowReturnDialog() {
 	showReturnDialog.value = true;
 }
 
+function handleShowExchangeRateDialog() {
+	if (!authStore.canManageExchangeRate) return;
+	showExchangeRateDialog.value = true;
+}
+
 function handleKeyboard(e: KeyboardEvent) {
 	if (e.ctrlKey && e.key.toLowerCase() === "g") {
 		e.preventDefault();
@@ -299,6 +307,10 @@ onMounted(() => {
 	window.addEventListener("meerkatpos:show-repeat-dialog", handleShowRepeatDialog as EventListener);
 	window.addEventListener("meerkatpos:show-return-dialog", handleShowReturnDialog as EventListener);
 	window.addEventListener("meerkatpos:open-offline-panel", handleOpenOfflinePanel as EventListener);
+	window.addEventListener(
+		"meerkatpos:show-exchange-rate-dialog",
+		handleShowExchangeRateDialog as EventListener,
+	);
 });
 
 onUnmounted(() => {
@@ -306,6 +318,10 @@ onUnmounted(() => {
 	window.removeEventListener("meerkatpos:show-repeat-dialog", handleShowRepeatDialog as EventListener);
 	window.removeEventListener("meerkatpos:show-return-dialog", handleShowReturnDialog as EventListener);
 	window.removeEventListener("meerkatpos:open-offline-panel", handleOpenOfflinePanel as EventListener);
+	window.removeEventListener(
+		"meerkatpos:show-exchange-rate-dialog",
+		handleShowExchangeRateDialog as EventListener,
+	);
 });
 
 function printLastInvoice() {

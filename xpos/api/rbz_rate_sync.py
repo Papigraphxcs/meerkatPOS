@@ -61,6 +61,29 @@ def _latest_local_rate() -> float | None:
 	return flt(rows[0].exchange_rate) if rows else None
 
 
+def can_manage_exchange_rate(user: str | None = None) -> bool:
+	"""Whether ``user`` may pull or manually set the ZiG->USD tender rate."""
+	return any(role in frappe.get_roles(user) for role in MANAGER_ROLES)
+
+
+def _record_rate(new_rate: float) -> "frappe.model.document.Document":
+	"""Insert a new ZiG->USD ``Currency Exchange`` row dated today."""
+	doc = frappe.get_doc(
+		{
+			"doctype": "Currency Exchange",
+			"date": nowdate(),
+			"from_currency": FROM_CURRENCY,
+			"to_currency": TO_CURRENCY,
+			"exchange_rate": new_rate,
+			"for_buying": 1,
+			"for_selling": 1,
+		}
+	)
+	doc.insert(ignore_permissions=True)
+	frappe.db.commit()
+	return doc
+
+
 def sync_zig_usd_rate(force: bool = False) -> dict:
 	"""Pull the latest ZimPriceCheck rate and record it if it has changed (or ``force``).
 
@@ -82,19 +105,7 @@ def sync_zig_usd_rate(force: bool = False) -> dict:
 			"message": _("Rate unchanged: 1 USD = {0} ZiG.").format(zig_per_usd),
 		}
 
-	doc = frappe.get_doc(
-		{
-			"doctype": "Currency Exchange",
-			"date": nowdate(),
-			"from_currency": FROM_CURRENCY,
-			"to_currency": TO_CURRENCY,
-			"exchange_rate": new_rate,
-			"for_buying": 1,
-			"for_selling": 1,
-		}
-	)
-	doc.insert(ignore_permissions=True)
-	frappe.db.commit()
+	doc = _record_rate(new_rate)
 
 	return {
 		"changed": True,
@@ -122,8 +133,55 @@ def scheduled_sync():
 
 @frappe.whitelist()
 def manual_sync() -> dict:
-	"""Manager-triggered pull, called from the Currency Exchange list view button."""
-	if not any(role in frappe.get_roles() for role in MANAGER_ROLES):
+	"""Manager-triggered pull, called from the POS frontend's Exchange Rate panel."""
+	if not can_manage_exchange_rate():
 		frappe.throw(_("Only a Manager can pull exchange rates."), frappe.PermissionError)
 
 	return sync_zig_usd_rate(force=True)
+
+
+@frappe.whitelist()
+def get_rate_status() -> dict:
+	"""Current ZiG->USD rate and metadata for the POS frontend's Exchange Rate panel."""
+	rows = frappe.get_all(
+		"Currency Exchange",
+		filters={"from_currency": FROM_CURRENCY, "to_currency": TO_CURRENCY, "for_selling": 1},
+		fields=["exchange_rate", "date", "modified"],
+		order_by="date desc, creation desc",
+		limit=1,
+	)
+	latest = rows[0] if rows else None
+	exchange_rate = flt(latest.exchange_rate) if latest else None
+
+	return {
+		"exchange_rate": exchange_rate,
+		"zig_per_usd": flt(1 / exchange_rate, 4) if exchange_rate else None,
+		"date": latest.date if latest else None,
+		"updated_at": latest.modified if latest else None,
+		"can_manage": can_manage_exchange_rate(),
+	}
+
+
+@frappe.whitelist()
+def set_manual_rate(zig_per_usd: float) -> dict:
+	"""Manager-entered fallback rate, for when the ZimRate pull is unavailable or wrong."""
+	if not can_manage_exchange_rate():
+		frappe.throw(_("Only a Manager can set the exchange rate."), frappe.PermissionError)
+
+	zig_per_usd = flt(zig_per_usd)
+	if zig_per_usd <= 0:
+		frappe.throw(_("Enter a positive rate."))
+
+	new_rate = flt(1 / zig_per_usd, 9)
+	previous_rate = _latest_local_rate()
+	doc = _record_rate(new_rate)
+
+	return {
+		"changed": True,
+		"zig_per_usd": zig_per_usd,
+		"exchange_rate": new_rate,
+		"currency_exchange": doc.name,
+		"message": _("Rate set manually: 1 USD = {0} ZiG (was {1}).").format(
+			zig_per_usd, flt(1 / previous_rate, 4) if previous_rate else _("not set")
+		),
+	}

@@ -111,6 +111,7 @@ import {
 	Info,
 	BarChart3,
 	ShieldCheck,
+	Coins,
 } from "lucide-vue-next";
 
 const router = useRouter();
@@ -538,6 +539,13 @@ const menus = computed<Menu[]>(() => [
 				icon: Landmark,
 				shortcut: "Alt+7",
 				action: () => router.push("/bank-drops"),
+			},
+			{
+				id: "exchange-rate",
+				label: "Exchange Rate",
+				icon: Coins,
+				hidden: () => !authStore.canManageExchangeRate,
+				action: () => window.dispatchEvent(new CustomEvent("meerkatpos:show-exchange-rate-dialog")),
 			},
 		],
 	},

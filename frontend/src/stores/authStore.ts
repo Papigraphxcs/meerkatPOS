@@ -31,6 +31,11 @@ export const useAuthStore = defineStore("auth", () => {
 	const canManagePermissions = computed(() =>
 		Boolean((window.meerkatpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_permissions),
 	);
+	const canManageExchangeRate = computed(() =>
+		Boolean(
+			(window.meerkatpos?.boot as Record<string, unknown> | undefined)?.xpos_can_manage_exchange_rate,
+		),
+	);
 
 	async function checkAuth(): Promise<boolean> {
 		try {
@@ -273,6 +278,7 @@ export const useAuthStore = defineStore("auth", () => {
 		isGuest,
 		isSystemManager,
 		canManagePermissions,
+		canManageExchangeRate,
 		checkAuth,
 		login,
 		sendResetPasswordEmail,
