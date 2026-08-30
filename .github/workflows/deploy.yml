@@ -1,9 +1,31 @@
 name: Deploy to Production
 
+# Rebuilds the meerkatpos-app Docker image on the meerkatpos.me VPS and rolls
+# it out to every tenant site sharing that stack (demo.meerkatpos.me,
+# sahh.meerkatpos.me, ...). Requires four repo secrets:
+#   SERVER_HOST            -- VPS IP (currently 92.4.135.71)
+#   SERVER_USER            -- SSH user (currently ubuntu)
+#   SERVER_SSH_KEY         -- private key contents for that user (id_ed25519)
+#   MARIADB_ROOT_PASSWORD  -- the VPS's MariaDB root password
+# SERVER_PORT is optional (defaults to 22).
+#
+# The image build is intentionally split into two Docker layers in
+# images/custom/Containerfile.meerkatpos: a "framework" layer (frappe +
+# erpnext) that only changes when FRAPPE_BRANCH/ERPNEXT_BRANCH below are
+# bumped, and an "app" layer (xpos + frontend build) that is cache-busted
+# on every run via CACHE_BUST. Routine deploys -- the common case, a plain
+# xpos code change -- therefore skip re-installing the whole framework
+# stack and only rebuild what actually changed.
+
 on:
   push:
     branches:
-      - version-16
+      - develop
+    paths-ignore:
+      - "**.md"
+      - "frontend/docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
 
 concurrency:
   group: production-deploy
@@ -13,20 +35,21 @@ permissions:
   contents: read
 
 env:
-  BENCH_PATH: ${{ secrets.BENCH_PATH || '/home/frappe/frappe-bench' }}
-  SITE_NAME: ${{ secrets.SITE_NAME }}
+  # Tenant sites sharing this VPS's stack. Not secret -- just this server's
+  # site list. Add a new client's hostname here once they're onboarded.
+  SITES: "demo.meerkatpos.me sahh.meerkatpos.me"
+  # Pinned release tags, not the floating "version-16" branch -- see the
+  # comment above FRAPPE_BRANCH in Containerfile.meerkatpos for why.
+  FRAPPE_BRANCH: "v16.32.0"
+  ERPNEXT_BRANCH: "v16.33.0"
 
 jobs:
   deploy:
-    name: Deploy to Production
+    name: Deploy to meerkatpos.me VPS
     runs-on: ubuntu-latest
-    environment: pos.xconsol.com
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
       - name: Validate deployment secrets
         run: |
           set -e
@@ -34,143 +57,113 @@ jobs:
           if [ -z "${{ secrets.SERVER_HOST }}" ]; then missing="$missing SERVER_HOST"; fi
           if [ -z "${{ secrets.SERVER_USER }}" ]; then missing="$missing SERVER_USER"; fi
           if [ -z "${{ secrets.SERVER_SSH_KEY }}" ]; then missing="$missing SERVER_SSH_KEY"; fi
-          if [ -z "${{ secrets.SITE_NAME }}" ]; then missing="$missing SITE_NAME"; fi
+          if [ -z "${{ secrets.MARIADB_ROOT_PASSWORD }}" ]; then missing="$missing MARIADB_ROOT_PASSWORD"; fi
           if [ -n "$missing" ]; then
             echo "::error::Missing required secrets:$missing"
             exit 1
           fi
-          echo "✓ All required secrets are configured"
+          echo "All required secrets are configured"
 
-      - name: "Deploy: Frappe app with integrated Vue frontend"
+      - name: Build meerkatpos-app image and redeploy
         uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
-          command_timeout: 20m
+          command_timeout: 55m
+          envs: SITES,FRAPPE_BRANCH,ERPNEXT_BRANCH
           script: |
             set -e
-
-            BENCH_PATH="${{ env.BENCH_PATH }}"
-            SITE_NAME="${{ secrets.SITE_NAME }}"
-            APP_NAME="xpos"
-            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            cd /home/ubuntu/frappe_docker
 
             echo "============================================"
-            echo "  xpos Production Deployment"
+            echo "  meerkatPOS Production Deployment"
             echo "  Started: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-            echo "  Bench:   ${BENCH_PATH}"
-            echo "  Site:    ${SITE_NAME}"
+            echo "  Commit:  ${{ github.sha }}"
             echo "============================================"
 
             echo ""
-            echo ">>> [1/7] Navigating to bench directory..."
-            cd "${BENCH_PATH}" || { echo "::error::Bench path not found: ${BENCH_PATH}"; exit 1; }
-            echo "    Working directory: $(pwd)"
+            echo ">>> [1/6] Reclaiming stale Docker build cache (>72h old)..."
+            sudo docker builder prune -f --filter "until=72h" || true
 
             echo ""
-            echo ">>> [2/7] Pulling latest code for ${APP_NAME}..."
-            cd "apps/${APP_NAME}"
-            git fetch upstream version-16
-            git reset --hard upstream/version-16
-            echo "    Commit: $(git rev-parse --short HEAD)"
-            echo "    Message: $(git log -1 --pretty=%s)"
-            cd "${BENCH_PATH}"
+            echo ">>> [2/6] Building meerkatpos-app image..."
+            echo "    (framework layer is cached -- only the xpos app layer"
+            echo "     rebuilds on a routine deploy)"
+            sudo docker build \
+              -f images/custom/Containerfile.meerkatpos \
+              -t meerkatpos-app:latest \
+              --build-arg FRAPPE_BRANCH="$FRAPPE_BRANCH" \
+              --build-arg ERPNEXT_BRANCH="$ERPNEXT_BRANCH" \
+              --build-arg XPOS_BRANCH=develop \
+              --build-arg NODE_VERSION=24 \
+              --build-arg CACHE_BUST="${{ github.sha }}-$(date +%s)" \
+              .
 
             echo ""
-            echo ">>> [3/7] Enabling maintenance mode..."
-            bench --site "${SITE_NAME}" set-maintenance-mode on || true
+            echo ">>> [3/6] Recreating containers with the new image..."
+            sudo docker compose \
+              -f compose.yaml -f overrides/compose.mariadb.yaml -f overrides/compose.redis.yaml \
+              -f overrides/compose.traefik.yaml -f overrides/compose.traefik-ssl.yaml \
+              -f overrides/compose.arm64.yaml -f overrides/compose.frontend-traefik.yaml \
+              --env-file .env -p meerkatpos up -d
+
+            echo "    Waiting for the backend container to come up..."
+            sleep 20
 
             echo ""
-            echo ">>> [4/7] Creating pre-deployment backup..."
-            bench --site "${SITE_NAME}" backup --with-files 2>&1 | tail -3
-            echo "    Backup completed at: $(date -u '+%H:%M:%S UTC')"
+            echo ">>> [4/6] Ensuring each site's DB user isn't pinned to a stale container IP..."
+            echo "    (recreating containers can hand the backend a new internal IP; a"
+            echo "     DB user granted from the old IP only would then be locked out --"
+            echo "     re-grant it to '%' so this is a no-op once already fixed)"
+            for site in $SITES; do
+              DB_USER=$(sudo docker exec meerkatpos-backend-1 python3 -c \
+                "import json; print(json.load(open('sites/$site/site_config.json'))['db_name'])")
+              STALE_HOST=$(sudo docker exec meerkatpos-db-1 mariadb -uroot -p'${{ secrets.MARIADB_ROOT_PASSWORD }}' -N -B -e \
+                "SELECT Host FROM mysql.user WHERE User='$DB_USER' AND Host NOT IN ('%','localhost') LIMIT 1;")
+              if [ -n "$STALE_HOST" ]; then
+                echo "    $site: re-granting $DB_USER from stale host $STALE_HOST to '%'"
+                sudo docker exec meerkatpos-db-1 mariadb -uroot -p'${{ secrets.MARIADB_ROOT_PASSWORD }}' -e \
+                  "RENAME USER '$DB_USER'@'$STALE_HOST' TO '$DB_USER'@'%'; FLUSH PRIVILEGES;"
+              else
+                echo "    $site: $DB_USER already granted from '%', nothing to do"
+              fi
+            done
 
             echo ""
-            echo ">>> [5/7] Installing dependencies and running migrations..."
-
-            # Python dependencies
-            echo "    Installing Python dependencies..."
-            "${BENCH_PATH}/env/bin/pip" install -q -e "apps/${APP_NAME}" 2>&1 | tail -2
-
-            # Node dependencies (for bench build)
-            echo "    Installing Node dependencies..."
-            if [ -f "apps/${APP_NAME}/frontend/package.json" ]; then
-              cd "apps/${APP_NAME}/frontend"
-              test -f yarn.lock || { echo "ERROR: apps/${APP_NAME}/frontend/yarn.lock is missing"; exit 1; }
-              yarn install --frozen-lockfile --production=false 2>&1 | tail -3
-              cd "${BENCH_PATH}"
-            fi
-
-            # Database migrations
-            echo "    Running database migrations..."
-            bench --site "${SITE_NAME}" migrate 2>&1 | tail -5
-            echo "    Migrations completed at: $(date -u '+%H:%M:%S UTC')"
+            echo ">>> [5/6] Backing up and migrating each site..."
+            for site in $SITES; do
+              echo "    $site: backup..."
+              sudo docker exec meerkatpos-backend-1 bench --site "$site" backup
+              echo "    $site: migrate..."
+              sudo docker exec meerkatpos-backend-1 bench --site "$site" migrate
+              sudo docker exec meerkatpos-backend-1 bench --site "$site" clear-cache
+            done
 
             echo ""
-            echo ">>> [6/7] Building frontend assets..."
-            bench build --app "${APP_NAME}" 2>&1 | tail -10
-            echo "    Build completed at: $(date -u '+%H:%M:%S UTC')"
-
-            echo ""
-            echo ">>> [7/7] Restarting services..."
-
-            # Clear cache first
-            bench --site "${SITE_NAME}" clear-cache
-            bench --site "${SITE_NAME}" clear-website-cache
-
-            # Graceful restart
-            bench restart 2>&1 | head -20 || sudo supervisorctl restart all 2>&1 | head -20 || true
-
-            # Disable maintenance mode
-            bench --site "${SITE_NAME}" set-maintenance-mode off || true
-
-            echo ""
+            echo ">>> [6/6] Done."
+            sudo docker images meerkatpos-app:latest
             echo "============================================"
-            echo "  Deployment completed successfully!"
-            echo "  Finished: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-            echo "  Commit:   $(cd apps/${APP_NAME} && git rev-parse --short HEAD)"
+            echo "  Deployment completed: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             echo "============================================"
 
   health-check:
-    name: Post-Deployment Health Check
+    name: Post-deploy health check
     runs-on: ubuntu-latest
-    environment: pos.xconsol.com
     needs: deploy
     if: success()
     timeout-minutes: 5
 
     steps:
-      - name: Wait for services to stabilize
-        run: sleep 30
-
-      - name: Health check via SSH
-        uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          command_timeout: 5m
-          script: |
-            BENCH_PATH="${{ env.BENCH_PATH }}"
-            SITE_NAME="${{ secrets.SITE_NAME }}"
-
-            echo ">>> Post-deployment health check..."
-
-            # Check supervisor processes
-            echo "    Checking supervisor processes..."
-            sudo supervisorctl status 2>/dev/null | grep -E "RUNNING|FATAL|STOPPED" || echo "    (skipped - sudo not available)"
-
-            # Check if bench doctor reports issues
-            echo "    Running bench doctor..."
-            cd "${BENCH_PATH}"
-            bench doctor 2>&1 | tail -10 || true
-
-            # Check if site is accessible
-            echo "    Checking site accessibility..."
-            bench --site "${SITE_NAME}" execute frappe.ping 2>&1 || true
-
-            echo ""
-            echo ">>> Health check completed"
+      - name: Check site availability
+        run: |
+          set -e
+          for host in $SITES; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "https://${host}/api/method/frappe.ping")
+            echo "$host -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "::error::$host did not return 200 after deploy"
+              exit 1
+            fi
+          done
