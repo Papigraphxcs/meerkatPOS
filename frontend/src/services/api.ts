@@ -105,7 +105,7 @@ async function fetchCall<T = unknown>(
 	args: Record<string, unknown> = {},
 	options: { silent?: boolean } = {},
 ): Promise<T> {
-	if (!isOnline()) {
+	if (isElectron() && !isOnline()) {
 		throw new Error("__offline__");
 	}
 
