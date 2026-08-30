@@ -712,6 +712,17 @@ async function completeSetup() {
 			return;
 		}
 
+		// If ERPNext was connected during setup, pull everything (including POS
+		// Users) now rather than waiting for a login to trigger it. Without this, a
+		// real ERPNext user's very first login attempt would fail with "User not
+		// found" — the local cache would still be empty at that point. This isn't
+		// required for login to eventually work (login itself can bootstrap a user
+		// on demand — see loginOffline in authStore.ts), it just means the app is
+		// already useful the moment setup finishes instead of after a first login.
+		if (config.role === "hub" && config.apiKey && config.apiSecret) {
+			api.startSyncEngine().catch((err) => console.warn("[meerkatPOS] Initial sync failed:", err));
+		}
+
 		toast.success("Setup completed successfully!");
 
 		markSetupComplete();

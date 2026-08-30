@@ -299,6 +299,17 @@ async function runMigrations(): Promise<void> {
 		["stock_register", "TINYINT(1) DEFAULT 0"],
 		["current_stock_report", "TINYINT(1) DEFAULT 0"],
 		["discount_limit", "DECIMAL(18,6) DEFAULT 100"],
+		// The remaining columns needed to match xpos/api/auth.py's ALL_PERMISSION_KEYS
+		// exactly. Without these, `xpos.api.auth.get_pos_users`'s pulled rows contain
+		// keys with no matching local column, and the whole POS Users sync batch fails
+		// on every cycle (caught silently — logged as a per-table sync-error, sync just
+		// moves on, so the local pos_users table never gets populated from ERPNext at
+		// all). Keep this list and ALL_PERMISSION_KEYS in xpos/api/auth.py in sync.
+		["print_draft_invoice", "TINYINT(1) DEFAULT 0"],
+		["recall_other_shift_tabs", "TINYINT(1) DEFAULT 0"],
+		["settle_outstanding_invoice", "TINYINT(1) DEFAULT 0"],
+		["material_receipt", "TINYINT(1) DEFAULT 0"],
+		["manage_role_permissions", "TINYINT(1) DEFAULT 0"],
 	];
 
 	const posUserColumnExists = async (col: string): Promise<boolean> => {
@@ -449,15 +460,17 @@ export async function upsertBatch(
 	table: string,
 	rows: Record<string, unknown>[],
 	primaryKey: string,
+	excludeFromUpdate: string[] = [],
 ): Promise<number> {
 	if (rows.length === 0) return 0;
 
 	const columns = Object.keys(rows[0]);
 	const placeholders = columns.map(() => "?").join(", ");
-	const updateCols = columns
-		.filter((c) => c !== primaryKey)
-		.map((c) => `\`${c}\` = VALUES(\`${c}\`)`)
-		.join(", ");
+	const updateCols =
+		columns
+			.filter((c) => c !== primaryKey && !excludeFromUpdate.includes(c))
+			.map((c) => `\`${c}\` = VALUES(\`${c}\`)`)
+			.join(", ") || `\`${primaryKey}\` = \`${primaryKey}\``;
 
 	const db = getPool();
 	let affected = 0;

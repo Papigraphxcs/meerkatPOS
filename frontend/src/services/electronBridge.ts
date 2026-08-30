@@ -41,6 +41,10 @@ export interface ElectronAPI {
 	) => () => void;
 	onMainError: (callback: (err: { message: string; stack?: string }) => void) => () => void;
 	logs: ElectronLogsAPI;
+	onlineLogin: (
+		username: string,
+		password: string,
+	) => Promise<{ success: boolean; profile?: Record<string, unknown>; error?: string }>;
 	triggerSync: () => Promise<boolean>;
 	startSyncEngine: (opts?: {
 		csrfToken?: string;
@@ -289,6 +293,7 @@ export interface ElectronDbAPI {
 		role?: string;
 	}) => Promise<{ success: boolean; error?: string }>;
 	verifyPassword: (username: string, password: string) => Promise<boolean>;
+	upsertOnlinePosUser: (profile: Record<string, unknown>, password: string) => Promise<boolean>;
 	createPosOpeningShift: (shift: Record<string, unknown>) => Promise<Record<string, unknown>>;
 	getOpenShift: (user: string) => Promise<Record<string, unknown> | null>;
 	checkOpenShift: (user: string) => Promise<Record<string, unknown> | null>;

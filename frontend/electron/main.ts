@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, session, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, shell, session, Menu, net } from "electron";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -326,6 +326,74 @@ ipcMain.handle(
 		} catch (err) {
 			log.error("start-sync-engine failed", err);
 			return { success: false, error: err instanceof Error ? err.message : String(err) };
+		}
+	},
+);
+
+// First-time login for a real ERPNext user the Hub hasn't cached locally yet: verify
+// their credentials against the live server, then hand back their POS identity so the
+// renderer can cache a local password hash for future offline logins. Never touches
+// local pos_users itself — see db:upsert-online-pos-user in ipcHandlers.ts.
+ipcMain.handle(
+	"auth:online-login",
+	async (_event, username: string, password: string) => {
+		if (!net.isOnline()) {
+			return { success: false, error: "Offline" };
+		}
+
+		try {
+			const savedUrl = await getMeta("server_url");
+			const serverUrl = savedUrl || process.env.XPOS_SERVER_URL || SERVER_URL;
+			if (!serverUrl) {
+				return { success: false, error: "No ERPNext server configured for this Hub." };
+			}
+
+			const loginResp = await fetch(`${serverUrl}/api/method/login`, {
+				method: "POST",
+				headers: { "Content-Type": "application/x-www-form-urlencoded" },
+				body: `usr=${encodeURIComponent(username)}&pwd=${encodeURIComponent(password)}`,
+			});
+
+			if (!loginResp.ok) {
+				let message = "Invalid username or password.";
+				try {
+					const body = (await loginResp.json()) as { message?: string };
+					if (body?.message && typeof body.message === "string") message = body.message;
+				} catch {
+					/* keep default message */
+				}
+				return { success: false, error: message };
+			}
+
+			const rawSetCookie =
+				typeof (loginResp.headers as { getSetCookie?: () => string[] }).getSetCookie === "function"
+					? (loginResp.headers as unknown as { getSetCookie: () => string[] }).getSetCookie().join("; ")
+					: loginResp.headers.get("set-cookie") || "";
+			const sidMatch = rawSetCookie.match(/sid=[^;]+/);
+			if (!sidMatch) {
+				return { success: false, error: "Server did not return a session. Try again." };
+			}
+
+			const profileResp = await fetch(`${serverUrl}/api/method/xpos.api.auth.get_my_pos_profile`, {
+				headers: { Accept: "application/json", Cookie: sidMatch[0] },
+			});
+
+			if (!profileResp.ok) {
+				return {
+					success: false,
+					error: "Logged in, but could not load this user's POS profile. Ask an admin to check their POS Profile assignment.",
+				};
+			}
+
+			const profileBody = (await profileResp.json()) as { message?: Record<string, unknown> };
+			if (!profileBody?.message) {
+				return { success: false, error: "Server returned an empty POS profile." };
+			}
+
+			return { success: true, profile: profileBody.message };
+		} catch (err) {
+			log.error("auth:online-login failed", err);
+			return { success: false, error: err instanceof Error ? err.message : "Could not reach server." };
 		}
 	},
 );

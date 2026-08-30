@@ -154,24 +154,51 @@ export const useAuthStore = defineStore("auth", () => {
 
 	async function loginOffline(username: string, password: string): Promise<boolean> {
 		try {
-			const posUser = await window.electronAPI!.db.getPosUser(username);
+			let posUser = (await window.electronAPI!.db.getPosUser(username)) as Record<
+				string,
+				unknown
+			> | null;
+
+			// Not cached locally yet — this happens for any real ERPNext user on a
+			// freshly set-up Hub, since only the wizard's local admin account gets
+			// written to the local cache at setup time. If we're online, verify them
+			// against the live server once and cache them locally so every login after
+			// this one works offline too, same as any other synced user.
 			if (!posUser) {
-				error.value = "User not found. Check your username.";
-				return false;
+				if (!isOnline()) {
+					error.value = "User not found locally. Connect to the internet once to activate this account.";
+					return false;
+				}
+
+				const online = await window.electronAPI!.onlineLogin(username, password);
+				if (!online.success || !online.profile) {
+					error.value = online.error || "Invalid username or password.";
+					return false;
+				}
+
+				await window.electronAPI!.db.upsertOnlinePosUser(online.profile, password);
+				posUser = (await window.electronAPI!.db.getPosUser(username)) as Record<
+					string,
+					unknown
+				> | null;
+				if (!posUser) {
+					error.value = "Could not save this account locally. Try again.";
+					return false;
+				}
+			} else {
+				if (!posUser.password_hash) {
+					error.value = "No password configured for this user.";
+					return false;
+				}
+
+				const valid = await window.electronAPI!.db.verifyPassword(username, password);
+				if (!valid) {
+					error.value = "Invalid password";
+					return false;
+				}
 			}
 
-			const userData = posUser as Record<string, unknown>;
-			if (!userData.password_hash) {
-				error.value = "No password configured for this user.";
-				return false;
-			}
-
-			const valid = await window.electronAPI!.db.verifyPassword(username, password);
-			if (!valid) {
-				error.value = "Invalid password";
-				return false;
-			}
-
+			const userData = posUser;
 			isAuthenticated.value = true;
 			isOfflineAuth.value = true;
 			user.value = {

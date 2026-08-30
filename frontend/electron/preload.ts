@@ -111,6 +111,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
 		read: (name: string): Promise<string> => ipcRenderer.invoke("logs:read", name),
 	},
 
+	onlineLogin: (
+		username: string,
+		password: string,
+	): Promise<{ success: boolean; profile?: Record<string, unknown>; error?: string }> =>
+		ipcRenderer.invoke("auth:online-login", username, password),
+
 	triggerSync: (): Promise<boolean> => ipcRenderer.invoke("trigger-sync"),
 	startSyncEngine: (opts?: {
 		csrfToken?: string;
@@ -313,6 +319,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 		upsertPosUsers: (rows: Record<string, unknown>[]) => ipcRenderer.invoke("db:upsert-pos-users", rows),
 		createLocalUser: (user: { username: string; password: string; fullName: string; role?: string }) =>
 			ipcRenderer.invoke("db:create-local-user", user),
+		upsertOnlinePosUser: (profile: Record<string, unknown>, password: string): Promise<boolean> =>
+			ipcRenderer.invoke("db:upsert-online-pos-user", profile, password),
 		verifyPassword: (username: string, password: string) =>
 			ipcRenderer.invoke("db:verify-password", username, password),
 

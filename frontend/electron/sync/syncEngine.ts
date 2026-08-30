@@ -187,7 +187,7 @@ async function pullTable(config: SyncTableConfig): Promise<number> {
 						}
 						return r;
 					});
-		await upsertBatch(config.idbStore, processedBatch, primaryKey);
+		await upsertBatch(config.idbStore, processedBatch, primaryKey, config.excludeFromUpdate);
 
 		totalPulled += batch.length;
 		start += config.batchSize;

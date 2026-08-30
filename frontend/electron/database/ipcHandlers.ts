@@ -27,6 +27,29 @@ const log = createLogger("DB-IPC");
 const DEFAULT_LOCAL_SEARCH_COLUMNS = ["item_code", "item_name", "local_item_name", "description"];
 const SAFE_COLUMN = /^[a-z_][a-z0-9_]*$/;
 
+// Must match ALL_PERMISSION_KEYS in xpos/api/auth.py exactly — these are the flags
+// xpos.api.auth.get_pos_users / get_my_pos_profile return per user.
+const ALL_POS_PERMISSION_COLUMNS = [
+	"close_shift",
+	"allow_reprint_invoice",
+	"print_draft_invoice",
+	"shift_report",
+	"apply_additional_discount",
+	"show_edit_discount_field",
+	"allow_change_price",
+	"sale_return",
+	"recall_other_shift_tabs",
+	"settle_outstanding_invoice",
+	"expense",
+	"bank_drop",
+	"purchase_order",
+	"stock_entry",
+	"material_receipt",
+	"current_stock_by_brand",
+	"current_stock_report",
+	"manage_role_permissions",
+];
+
 let localItemColumns: Set<string> | null = null;
 
 async function getLocalItemColumns(): Promise<Set<string>> {
@@ -839,6 +862,63 @@ export function registerDbHandlers(): void {
 					user.role || "Manager",
 				],
 			);
+			return true;
+		},
+	);
+
+	// Persists a user just verified against live ERPNext (see auth:online-login in
+	// main.ts) into the local pos_users cache, with a freshly-computed local password
+	// hash of the password they just typed correctly — so future logins work offline
+	// too. profile is the xpos.api.auth.get_my_pos_profile response shape.
+	ipcMain.handle(
+		"db:upsert-online-pos-user",
+		async (_e, profile: Record<string, unknown>, password: string) => {
+			const { hashPassword } = await import("./passwordHash");
+			const { hash, salt } = await hashPassword(password);
+
+			const columns = [
+				"name",
+				"username",
+				"full_name",
+				"password_hash",
+				"password_salt",
+				"role",
+				"pos_profile",
+				"warehouse",
+				"company",
+				"enabled",
+				"discount_limit",
+				...ALL_POS_PERMISSION_COLUMNS,
+			];
+
+			const row: Record<string, unknown> = {
+				name: profile.name,
+				username: profile.username || profile.name,
+				full_name: profile.full_name || profile.name,
+				password_hash: hash,
+				password_salt: salt,
+				role: profile.role || "Cashier",
+				pos_profile: profile.pos_profile || null,
+				warehouse: profile.warehouse || null,
+				company: profile.company || null,
+				enabled: profile.enabled ?? 1,
+				discount_limit: profile.discount_limit ?? 100,
+			};
+			for (const col of ALL_POS_PERMISSION_COLUMNS) {
+				row[col] = profile[col] ?? 0;
+			}
+
+			const updateCols = columns
+				.filter((c) => c !== "name")
+				.map((c) => `\`${c}\` = VALUES(\`${c}\`)`)
+				.join(", ");
+			await execute(
+				`INSERT INTO \`pos_users\` (${columns.map((c) => `\`${c}\``).join(", ")})
+         VALUES (${columns.map(() => "?").join(", ")})
+         ON DUPLICATE KEY UPDATE ${updateCols}`,
+				columns.map((c) => row[c] ?? null),
+			);
+
 			return true;
 		},
 	);

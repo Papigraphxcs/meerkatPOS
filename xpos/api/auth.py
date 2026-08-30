@@ -147,6 +147,50 @@ def get_my_pos_permissions(pos_profile: str | None = None) -> dict:
 	return get_role_permissions(role_name)
 
 
+@frappe.whitelist()
+def get_my_pos_profile() -> dict:
+	"""Return the current session user's POS identity, for the Electron app to cache
+	locally after a first-time online login (see loginOnline in authStore.ts). Session
+	user only — never accepts a ``user`` argument, so a caller can only ever fetch their
+	own record.
+	"""
+	user = frappe.session.user
+	if user == "Guest":
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	user_doc = frappe.get_cached_doc("User", user)
+	role_name = get_user_pos_role(user)
+	perms = all_enabled() if is_superuser(user) else get_role_permissions(role_name)
+
+	profile_row = frappe.db.sql(
+		"""
+        SELECT pu.parent AS pos_profile, pu.discount_limit, pp.warehouse, pp.company
+        FROM `tabPOS Profile User` pu
+        INNER JOIN `tabPOS Profile` pp ON pp.name = pu.parent
+        WHERE pu.user = %(user)s AND pp.disabled = 0
+        ORDER BY pu.parent ASC, pu.idx ASC
+        LIMIT 1
+        """,
+		{"user": user},
+		as_dict=True,
+	)
+	profile = profile_row[0] if profile_row else {}
+	discount_limit = profile.get("discount_limit")
+
+	return {
+		"name": user_doc.name,
+		"username": user_doc.username or user_doc.name,
+		"full_name": user_doc.full_name or user_doc.name,
+		"enabled": cint(user_doc.enabled),
+		"role": role_name,
+		"pos_profile": profile.get("pos_profile") or "",
+		"warehouse": profile.get("warehouse") or "",
+		"company": profile.get("company") or "",
+		"discount_limit": flt(discount_limit) if discount_limit not in (None, "") else DEFAULT_DISCOUNT_LIMIT,
+		**{key: cint(perms.get(key, False)) for key in ALL_PERMISSION_KEYS},
+	}
+
+
 def get_current_user_permissions() -> dict:
 	"""Return the current session user's xPOS role and permission flags."""
 	user = frappe.session.user

@@ -17,6 +17,8 @@ export interface SyncTableConfig {
 	parentDoctype?: string;
 	isCompanyBased?: boolean;
 	regetAll?: boolean;
+	/** Columns to keep as-is on conflict instead of overwriting with the pulled value. */
+	excludeFromUpdate?: string[];
 }
 
 export const SYNC_TABLES: SyncTableConfig[] = [
@@ -638,6 +640,11 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 		incremental: true,
 		batchSize: 100,
 		pullOrder: 35,
+		// ERPNext never sends a real password hash (get_pos_users always returns ""),
+		// so a plain overwrite here would erase any password a user set via the
+		// online-login bootstrap on the very next sync cycle. Leave locally-cached
+		// credentials alone; everything else about the user still stays in sync.
+		excludeFromUpdate: ["password_hash", "password_salt"],
 	},
 	{
 		doctype: "POS Payment Method",

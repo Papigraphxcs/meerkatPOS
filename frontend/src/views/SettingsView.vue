@@ -38,6 +38,47 @@
 								Save
 							</Button>
 						</div>
+
+						<template v-if="nodeRole === 'hub'">
+							<Separator />
+							<div>
+								<label class="text-sm font-medium text-foreground">
+									ERPNext API Key
+									<Badge v-if="hasApiCredentials" variant="secondary" class="ms-1"
+										>Configured</Badge
+									>
+								</label>
+								<Input
+									v-model="settings.apiKey"
+									:placeholder="hasApiCredentials ? 'Enter both fields to replace the current key/secret' : 'API key'"
+									class="mt-1"
+									autocomplete="off"
+								/>
+							</div>
+							<div>
+								<label class="text-sm font-medium text-foreground">ERPNext API Secret</label>
+								<Input
+									v-model="settings.apiSecret"
+									type="password"
+									placeholder="API secret"
+									class="mt-1"
+									autocomplete="off"
+								/>
+								<p class="text-xs text-muted-foreground mt-1">
+									Used to sync ERPNext data (including POS users) to this Hub. Get these from
+									the user's record in ERPNext under API Access. Both fields are required to
+									save.
+								</p>
+							</div>
+							<Button
+								size="sm"
+								@click="saveApiCredentials"
+								:disabled="!settings.apiKey || !settings.apiSecret || savingCredentials"
+							>
+								<Loader2 v-if="savingCredentials" class="w-4 h-4 me-1 animate-spin" />
+								Save & Sync Now
+							</Button>
+						</template>
 					</div>
 				</Card>
 
@@ -237,7 +278,13 @@ const settings = reactive({
 	dbName: "xpos_local",
 	syncInterval: 5,
 	autoSync: true,
+	apiKey: "",
+	apiSecret: "",
 });
+
+const nodeRole = ref<string | null>(null);
+const hasApiCredentials = ref(false);
+const savingCredentials = ref(false);
 
 const syncState = reactive({
 	isSyncing: false,
@@ -261,6 +308,15 @@ onMounted(async () => {
 		await loadPlatformInfo();
 		try {
 			itemCount.value = await countItems();
+		} catch {
+			/* */
+		}
+		try {
+			nodeRole.value = await window.electronAPI!.node.getRole();
+			if (nodeRole.value === "hub") {
+				const existingKey = await window.electronAPI!.db.getMeta("api_key");
+				hasApiCredentials.value = !!existingKey;
+			}
 		} catch {
 			/* */
 		}
@@ -341,6 +397,35 @@ async function saveServerUrl() {
 	}
 	await setSetting("server_url", settings.serverUrl, "connection");
 	toast.success("Server URL saved");
+}
+
+async function saveApiCredentials() {
+	if (!isElectronMode || !settings.apiKey || !settings.apiSecret) return;
+	savingCredentials.value = true;
+	try {
+		await window.electronAPI!.db.setMeta("api_key", settings.apiKey);
+		await window.electronAPI!.db.setMeta("api_secret", settings.apiSecret);
+
+		// Re-applies the new credentials to the running sync engine (or starts it,
+		// if this Hub was set up without a server connection) and kicks off a sync
+		// immediately — same mechanism the Setup Wizard uses when connecting during
+		// initial setup. See completeSetup() in SetupWizardView.vue.
+		const result = await window.electronAPI!.startSyncEngine();
+		if (!result.success) {
+			toast.error(result.error || "Saved, but could not start sync.");
+		} else {
+			toast.success("API credentials saved. Syncing now...");
+		}
+
+		hasApiCredentials.value = true;
+		settings.apiKey = "";
+		settings.apiSecret = "";
+		await loadSyncState();
+	} catch (err) {
+		toast.error(err instanceof Error ? err.message : "Failed to save API credentials");
+	} finally {
+		savingCredentials.value = false;
+	}
 }
 
 async function testDbConnection() {
