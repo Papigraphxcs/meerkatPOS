@@ -159,14 +159,19 @@ export const useAuthStore = defineStore("auth", () => {
 				unknown
 			> | null;
 
-			// Not cached locally yet — this happens for any real ERPNext user on a
-			// freshly set-up Hub, since only the wizard's local admin account gets
-			// written to the local cache at setup time. If we're online, verify them
-			// against the live server once and cache them locally so every login after
-			// this one works offline too, same as any other synced user.
-			if (!posUser) {
+			// Needs the online bootstrap if either: (a) not cached locally at all —
+			// true for any real ERPNext user on a freshly set-up Hub, since only the
+			// wizard's local admin account gets written to the local cache at setup
+			// time; or (b) the regular POS Users sync has already pulled this user in
+			// (it runs independently of login) but left password_hash blank, since
+			// ERPNext never sends real password hashes over that sync. Either way, if
+			// we're online, verify them against the live server once and cache a real
+			// local password so every login after this one works offline too.
+			if (!posUser || !posUser.password_hash) {
 				if (!isOnline()) {
-					error.value = "User not found locally. Connect to the internet once to activate this account.";
+					error.value = posUser
+						? "This account needs to connect to the internet once before it can log in offline."
+						: "User not found locally. Connect to the internet once to activate this account.";
 					return false;
 				}
 
@@ -186,11 +191,6 @@ export const useAuthStore = defineStore("auth", () => {
 					return false;
 				}
 			} else {
-				if (!posUser.password_hash) {
-					error.value = "No password configured for this user.";
-					return false;
-				}
-
 				const valid = await window.electronAPI!.db.verifyPassword(username, password);
 				if (!valid) {
 					error.value = "Invalid password";
