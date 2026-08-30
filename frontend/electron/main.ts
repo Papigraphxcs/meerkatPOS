@@ -365,23 +365,34 @@ ipcMain.handle(
 				return { success: false, error: message };
 			}
 
-			const rawSetCookie =
-				typeof (loginResp.headers as { getSetCookie?: () => string[] }).getSetCookie === "function"
-					? (loginResp.headers as unknown as { getSetCookie: () => string[] }).getSetCookie().join("; ")
-					: loginResp.headers.get("set-cookie") || "";
-			const sidMatch = rawSetCookie.match(/sid=[^;]+/);
-			if (!sidMatch) {
-				return { success: false, error: "Server did not return a session. Try again." };
+			// Don't try to parse Set-Cookie off the Response object — Electron's
+			// main-process fetch is Chromium-backed and can return that header
+			// partial, reordered, or reflecting only the last hop of a redirect. The
+			// login request already wrote the real cookie into the default session's
+			// jar (the same mechanism start-sync-engine above relies on); read it back
+			// from there instead, which is what actually authenticates the follow-up
+			// call.
+			const sidCookies = await session.defaultSession.cookies.get({ url: serverUrl, name: "sid" });
+			const sid = sidCookies[0]?.value;
+			if (!sid || sid === "Guest") {
+				return { success: false, error: "Server did not return a valid session. Try again." };
 			}
 
 			const profileResp = await fetch(`${serverUrl}/api/method/xpos.api.auth.get_my_pos_profile`, {
-				headers: { Accept: "application/json", Cookie: sidMatch[0] },
+				headers: { Accept: "application/json", Cookie: `sid=${sid}` },
 			});
 
 			if (!profileResp.ok) {
+				let detail = "";
+				try {
+					const body = (await profileResp.json()) as { message?: string };
+					if (body?.message && typeof body.message === "string") detail = ` (${body.message})`;
+				} catch {
+					/* keep default message */
+				}
 				return {
 					success: false,
-					error: "Logged in, but could not load this user's POS profile. Ask an admin to check their POS Profile assignment.",
+					error: `Logged in, but could not load this user's POS profile${detail}. Ask an admin to check their POS Profile assignment.`,
 				};
 			}
 
