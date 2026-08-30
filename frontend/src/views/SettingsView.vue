@@ -314,8 +314,11 @@ onMounted(async () => {
 		try {
 			nodeRole.value = await window.electronAPI!.node.getRole();
 			if (nodeRole.value === "hub") {
-				const existingKey = await window.electronAPI!.db.getMeta("api_key");
-				hasApiCredentials.value = !!existingKey;
+				const [existingKey, existingSecret] = await Promise.all([
+					window.electronAPI!.db.getMeta("api_key"),
+					window.electronAPI!.db.getMeta("api_secret"),
+				]);
+				hasApiCredentials.value = !!existingKey && !!existingSecret;
 			}
 		} catch {
 			/* */

@@ -833,7 +833,11 @@ export function registerDbHandlers(): void {
 	});
 
 	ipcMain.handle("db:upsert-pos-users", async (_e, rows: Record<string, unknown>[]) => {
-		return upsertBatch("pos_users", rows, "name");
+		// Same protection as the sync engine's pull of this table (syncConfig.ts's
+		// excludeFromUpdate) — any caller passing rows shaped like ERPNext's
+		// get_pos_users (password_hash: "") must not be able to blank out a
+		// password a user already has cached locally.
+		return upsertBatch("pos_users", rows, "name", ["password_hash", "password_salt"]);
 	});
 
 	ipcMain.handle(
@@ -1765,7 +1769,10 @@ export function registerDbHandlers(): void {
 			if (!allowedTables.has(table)) {
 				throw new Error(`Table "${table}" is not allowed for generic upsert`);
 			}
-			return upsertBatch(table, rows, keyField);
+			// pos_users must never let a generic caller blank out a locally-cached
+			// password (see db:upsert-pos-users above for why).
+			const excludeFromUpdate = table === "pos_users" ? ["password_hash", "password_salt"] : [];
+			return upsertBatch(table, rows, keyField, excludeFromUpdate);
 		},
 	);
 

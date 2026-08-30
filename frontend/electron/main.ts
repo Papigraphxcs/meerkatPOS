@@ -337,10 +337,14 @@ ipcMain.handle(
 ipcMain.handle(
 	"auth:online-login",
 	async (_event, username: string, password: string) => {
-		if (!net.isOnline()) {
-			return { success: false, error: "Offline" };
-		}
-
+		// Deliberately not gated on net.isOnline() — that reflects the OS's public
+		// internet reachability, not whether *this Hub's configured server* is
+		// reachable. meerkatPOS is routinely self-hosted on a LAN with no route to
+		// the public internet at all (see 6429089, which fixed the same false
+		// "offline" misreport elsewhere in this app for the exact same reason); on
+		// that kind of install the ERPNext server is local and perfectly reachable
+		// even though net.isOnline() reports false. Let the actual request below
+		// succeed or fail on its own merits instead.
 		try {
 			const savedUrl = await getMeta("server_url");
 			const serverUrl = savedUrl || process.env.XPOS_SERVER_URL || SERVER_URL;
@@ -348,7 +352,21 @@ ipcMain.handle(
 				return { success: false, error: "No ERPNext server configured for this Hub." };
 			}
 
-			const loginResp = await fetch(`${serverUrl}/api/method/login`, {
+			// Plain global fetch() in the main process is Node's own fetch (undici) -
+			// it is NOT tied to any Electron Session, so it never touches
+			// session.defaultSession's cookie jar at all (see electron.d.ts's Net
+			// interface docs: only net.fetch() "issues requests from the default
+			// session", explicitly contrasted with Node's fetch). Using plain fetch()
+			// here previously meant the login's Set-Cookie response never actually
+			// landed anywhere retrievable, and a since-fixed attempt to manually
+			// re-read it via session.defaultSession.cookies.get() would find nothing
+			// from this request (only ever a stale cookie left over from something
+			// else, if anything). net.fetch() is Chromium's fetch, backed by
+			// session.defaultSession by default: the login response's cookie gets
+			// stored there automatically, and this second net.fetch() call to the
+			// same origin sends it back automatically too - no manual cookie handling
+			// needed at all.
+			const loginResp = await net.fetch(`${serverUrl}/api/method/login`, {
 				method: "POST",
 				headers: { "Content-Type": "application/x-www-form-urlencoded" },
 				body: `usr=${encodeURIComponent(username)}&pwd=${encodeURIComponent(password)}`,
@@ -365,35 +383,29 @@ ipcMain.handle(
 				return { success: false, error: message };
 			}
 
-			// Don't try to parse Set-Cookie off the Response object — Electron's
-			// main-process fetch is Chromium-backed and can return that header
-			// partial, reordered, or reflecting only the last hop of a redirect. The
-			// login request already wrote the real cookie into the default session's
-			// jar (the same mechanism start-sync-engine above relies on); read it back
-			// from there instead, which is what actually authenticates the follow-up
-			// call.
-			const sidCookies = await session.defaultSession.cookies.get({ url: serverUrl, name: "sid" });
-			const sid = sidCookies[0]?.value;
-			if (!sid || sid === "Guest") {
-				return { success: false, error: "Server did not return a valid session. Try again." };
-			}
-
-			const profileResp = await fetch(`${serverUrl}/api/method/xpos.api.auth.get_my_pos_profile`, {
-				headers: { Accept: "application/json", Cookie: `sid=${sid}` },
+			const profileResp = await net.fetch(`${serverUrl}/api/method/xpos.api.auth.get_my_pos_profile`, {
+				headers: { Accept: "application/json" },
 			});
 
 			if (!profileResp.ok) {
 				let detail = "";
 				try {
 					const body = (await profileResp.json()) as { message?: string };
-					if (body?.message && typeof body.message === "string") detail = ` (${body.message})`;
+					if (body?.message && typeof body.message === "string") detail = body.message;
 				} catch {
 					/* keep default message */
 				}
-				return {
-					success: false,
-					error: `Logged in, but could not load this user's POS profile${detail}. Ask an admin to check their POS Profile assignment.`,
-				};
+				// get_my_pos_profile only ever throws this specific message when the
+				// session didn't actually authenticate (frappe.session.user is
+				// "Guest") - a session problem, not a POS Profile one. Any other
+				// message is a genuine server-side error worth surfacing as-is.
+				const error =
+					detail === "Not permitted"
+						? "Logged in, but the session was not accepted on the follow-up request. Try again."
+						: detail
+							? `Logged in, but could not load this user's POS profile (${detail}).`
+							: "Logged in, but could not load this user's POS profile. Ask an admin to check their POS Profile assignment.";
+				return { success: false, error };
 			}
 
 			const profileBody = (await profileResp.json()) as { message?: Record<string, unknown> };

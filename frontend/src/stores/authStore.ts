@@ -168,13 +168,10 @@ export const useAuthStore = defineStore("auth", () => {
 			// we're online, verify them against the live server once and cache a real
 			// local password so every login after this one works offline too.
 			if (!posUser || !posUser.password_hash) {
-				if (!isOnline()) {
-					error.value = posUser
-						? "This account needs to connect to the internet once before it can log in offline."
-						: "User not found locally. Connect to the internet once to activate this account.";
-					return false;
-				}
-
+				// Deliberately not gated on isOnline() first — that's navigator.onLine,
+				// which reflects public-internet reachability, not whether this Hub's
+				// configured (possibly LAN-only) server is reachable. Just attempt it
+				// and let onlineLogin's own result report the real outcome.
 				const online = await window.electronAPI!.onlineLogin(username, password);
 				if (!online.success || !online.profile) {
 					error.value = online.error || "Invalid username or password.";

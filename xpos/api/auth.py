@@ -159,9 +159,13 @@ def get_my_pos_profile() -> dict:
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	user_doc = frappe.get_cached_doc("User", user)
-	role_name = get_user_pos_role(user)
-	perms = all_enabled() if is_superuser(user) else get_role_permissions(role_name)
 
+	# Resolve the profile row first (already filtered to enabled POS Profiles) so
+	# get_user_pos_role below is scoped to that same profile — a user assigned to
+	# both a disabled and an enabled profile would otherwise have its role
+	# resolved from whichever row get_user_pos_role's own unfiltered query
+	# happens to order first, which can be the disabled one while pos_profile /
+	# warehouse / company here come from the enabled one.
 	profile_row = frappe.db.sql(
 		"""
         SELECT pu.parent AS pos_profile, pu.discount_limit, pp.warehouse, pp.company
@@ -176,6 +180,9 @@ def get_my_pos_profile() -> dict:
 	)
 	profile = profile_row[0] if profile_row else {}
 	discount_limit = profile.get("discount_limit")
+
+	role_name = get_user_pos_role(user, profile.get("pos_profile"))
+	perms = all_enabled() if is_superuser(user) else get_role_permissions(role_name)
 
 	return {
 		"name": user_doc.name,
