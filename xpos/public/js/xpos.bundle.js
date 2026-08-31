@@ -20,72 +20,228 @@ frappe.is_online = function () {
 };
 $(window).off("online offline");
 
-// Restyles the Desk home page's icon grid (the "Framework / meerkatPOS /
-// Accounting / Stock / ..." tiles you land on at /desk with no route) into
-// a single scrollable, alphabetically-grouped list -- similar to the
-// Windows Start Menu "All apps" view -- instead of the default centered
-// multi-column grid of square tiles.
+// Adds a welcome header + quick-action shortcuts above the Desk home page's
+// icon grid (the "Framework / meerkatPOS / Accounting / Stock / ..." tiles
+// you land on at /desk with no route, and via the "Desktop" link), so the
+// page opens with something immediately useful instead of just the bare
+// centered grid of tiles.
 //
 // This targets frappe/desk/page/desktop/desktop.js's DesktopIconGrid, which
-// renders into `.desktop-wrapper .desktop-container .icons-container > .icons`.
-// Those classes/instances aren't exposed for prototype patching, so this
-// works by re-arranging the rendered DOM after the grid appears rather than
-// hooking the render pipeline itself.
-xpos.desktop.listify = function ($icons_grid) {
-	if ($icons_grid.hasClass("xpos-az-list")) return;
+// renders into `.desktop-wrapper .desktop-container .icons-container`. That
+// render pipeline isn't exposed for prototype patching, so this works by
+// injecting a sibling block into the DOM after the grid appears, rather than
+// hooking the render itself. A previous version of this file also collapsed
+// the grid into a single-column alphabetized list; that made the page feel
+// sparser, not fuller, so it's been dropped in favour of just adding content
+// on top of Frappe's native multi-column grid.
+xpos.desktop.quick_actions = [
+	{
+		label: __("Point of Sale"),
+		icon: "retail",
+		action: () => (window.location.href = "/meerkatpos/pos"),
+	},
+	{
+		label: __("New Sales Invoice"),
+		icon: "small-add",
+		action: () => frappe.new_doc("Sales Invoice"),
+	},
+	{
+		label: __("New Item"),
+		icon: "small-add",
+		action: () => frappe.new_doc("Item"),
+	},
+	{
+		label: __("New Customer"),
+		icon: "small-add",
+		action: () => frappe.new_doc("Customer"),
+	},
+];
 
-	const $tiles = $icons_grid.children(".desktop-icon");
-	if ($tiles.length < 6) return;
+xpos.desktop.build_header = function () {
+	const $header = $(`
+		<div class="xpos-home-header">
+			<div class="xpos-home-greeting">${__("Welcome to meerkatPOS")}</div>
+			<div class="xpos-home-actions"></div>
+		</div>
+	`);
 
-	const rows = $tiles.get().map((el) => {
-		const $el = $(el);
-		const label = ($el.attr("data-id") || $el.find(".icon-title").first().text() || "").trim();
-		return { el, label };
+	const $actions = $header.find(".xpos-home-actions");
+	xpos.desktop.quick_actions.forEach((action, idx) => {
+		const $btn = $(`
+			<button type="button" class="xpos-home-action">
+				${frappe.utils.icon(action.icon, "sm")}
+				<span>${action.label}</span>
+			</button>
+		`);
+		$btn.on("click", action.action);
+		$actions.append($btn);
 	});
 
-	rows.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));
+	return $header;
+};
 
-	$icons_grid.addClass("xpos-az-list");
+// Real, live numbers (not placeholders) via xpos.api.home_stats.get_home_stats,
+// scoped to the user's default company. Rendered once the call resolves so
+// the row never shows stale/zeroed figures.
+xpos.desktop.stat_tiles = [
+	{ key: "total_sales_today", label: __("Today's Sales"), format: "currency" },
+	{ key: "open_sales_orders", label: __("Open Sales Orders"), format: "count" },
+	{ key: "total_stock_value", label: __("Stock Value"), format: "currency" },
+	{ key: "active_customers", label: __("Active Customers"), format: "count" },
+];
 
-	const fragment = document.createDocumentFragment();
-	let last_letter = null;
-	rows.forEach((row) => {
-		const letter = (row.label[0] || "#").toUpperCase();
-		if (letter !== last_letter) {
-			const header = document.createElement("div");
-			header.className = "xpos-az-group-header";
-			header.textContent = letter;
-			fragment.appendChild(header);
-			last_letter = letter;
-		}
+xpos.desktop.build_stats = function (stats) {
+	const $row = $('<div class="xpos-home-stats"></div>');
+
+	xpos.desktop.stat_tiles.forEach((tile) => {
+		const raw = stats[tile.key] || 0;
+		const value = tile.format === "currency" ? frappe.format(raw, { fieldtype: "Currency" }) : raw;
+		$row.append(`
+			<div class="xpos-home-stat">
+				<div class="xpos-home-stat-label">${tile.label}</div>
+				<div class="xpos-home-stat-value">${value}</div>
+			</div>
+		`);
+	});
+
+	return $row;
+};
+
+xpos.desktop.inject_header = function ($desktop_container) {
+	if ($desktop_container.siblings(".xpos-home-header").length) return;
+	$desktop_container.before(xpos.desktop.build_header());
+
+	frappe.call({ method: "xpos.api.home_stats.get_home_stats", quiet: true }).then((r) => {
+		if (!r.message) return;
+		$(".xpos-home-header").first().append(xpos.desktop.build_stats(r.message));
+	});
+};
+
+// One-line "what is this" text under each tile's label, for the modules
+// that land on this grid. Unmapped tiles (a newly installed app's module,
+// say) are simply left as-is -- no blank/placeholder line.
+xpos.desktop.icon_descriptions = {
+	Framework: __("Frappe framework tools & customization"),
+	meerkatPOS: __("Point of sale & retail operations"),
+	Organization: __("Company structure, branches & departments"),
+	Accounting: __("Ledgers, invoices & financial reports"),
+	Assets: __("Track fixed assets & depreciation"),
+	Buying: __("Purchase orders & supplier management"),
+	Manufacturing: __("Bills of materials, work orders & production"),
+	Projects: __("Project tracking & time management"),
+	Quality: __("Quality inspections & procedures"),
+	Selling: __("Sales orders, quotations & customers"),
+	Stock: __("Inventory, warehouses & stock movement"),
+	Subcontracting: __("Outsourced manufacturing orders"),
+	"ERPNext Settings": __("Global system preferences"),
+};
+
+// desktop_icon.html already ships an (unused, commented-out) ".icon-subtitle"
+// slot with matching CSS in desktop.css -- this fills that slot in rather
+// than inventing a new element, so the description picks up Frappe's own
+// small/muted styling for free.
+xpos.desktop.add_descriptions = function ($icons) {
+	$icons.children(".desktop-icon").each(function () {
+		const $tile = $(this);
+		if ($tile.find(".icon-subtitle").length) return;
+
+		const label = ($tile.attr("data-id") || "").trim();
+		const desc = xpos.desktop.icon_descriptions[label];
+		if (!desc) return;
+
+		$tile.find(".icon-caption").append(`<div class="icon-subtitle" title="${desc}">${desc}</div>`);
+	});
+};
+
+// Which task-based section each tile belongs under. A tile with no entry
+// here (a newly installed app's module, say) falls into a trailing "Other"
+// group rather than being dropped or erroring.
+xpos.desktop.icon_categories = {
+	meerkatPOS: __("Sales & POS"),
+	Selling: __("Sales & POS"),
+	Buying: __("Purchasing & Inventory"),
+	Stock: __("Purchasing & Inventory"),
+	Assets: __("Purchasing & Inventory"),
+	Manufacturing: __("Production"),
+	Subcontracting: __("Production"),
+	Quality: __("Production"),
+	Projects: __("Production"),
+	Accounting: __("Finance"),
+	Organization: __("Administration"),
+	"ERPNext Settings": __("Administration"),
+	Framework: __("Administration"),
+};
+
+xpos.desktop.category_order = [
+	__("Sales & POS"),
+	__("Purchasing & Inventory"),
+	__("Production"),
+	__("Finance"),
+	__("Administration"),
+];
+
+xpos.desktop.OTHER_CATEGORY = __("Other");
+
+// Groups the tiles into labelled sections (in place, within Frappe's own
+// native grid -- the header rows just span the full grid width via CSS;
+// the grid itself stays a multi-column grid). Tiles are sorted A-Z within
+// each section. Re-runs cleanly on route revisits: old headers are removed
+// and rebuilt from scratch rather than accumulating duplicates.
+xpos.desktop.group_icons = function ($icons) {
+	$icons.find(".xpos-icon-group-header").remove();
+
+	const groups = {};
+	$icons.children(".desktop-icon").each(function () {
+		const label = ($(this).attr("data-id") || "").trim();
+		const category = xpos.desktop.icon_categories[label] || xpos.desktop.OTHER_CATEGORY;
+		(groups[category] = groups[category] || []).push(this);
+	});
+
+	const extra_categories = Object.keys(groups).filter(
+		(category) => !xpos.desktop.category_order.includes(category)
+	);
+	const order = xpos.desktop.category_order.concat(extra_categories);
+
+	order.forEach((category) => {
+		const tiles = groups[category];
+		if (!tiles || !tiles.length) return;
+
+		tiles.sort((a, b) => {
+			const label_a = ($(a).attr("data-id") || "").trim();
+			const label_b = ($(b).attr("data-id") || "").trim();
+			return label_a.localeCompare(label_b, undefined, { sensitivity: "base" });
+		});
+
+		$icons.append(`<div class="xpos-icon-group-header">${category}</div>`);
 		// Re-appending an existing node moves it rather than cloning it, so
 		// any state already applied to the tile (tooltips, handlers) survives.
-		fragment.appendChild(row.el);
+		tiles.forEach((el) => $icons.append(el));
 	});
-
-	$icons_grid.append(fragment);
 };
 
 // The desktop page's own script loads and renders after this bundle, and
 // can re-render (route revisits, edit-mode toggles), so poll briefly for
 // the grid rather than trying to hook a specific lifecycle callback. Bounded
 // so it never runs indefinitely on pages that aren't the desktop home page.
-xpos.desktop.try_listify = function (attempts_left) {
+xpos.desktop.try_enhance = function (attempts_left) {
 	if (attempts_left === undefined) attempts_left = 20;
 
-	const $icons_grid = $(".desktop-wrapper .desktop-container .icons-container > .icons").first();
-	if ($icons_grid.length && $icons_grid.children(".desktop-icon").length) {
+	const $desktop_container = $(".desktop-wrapper .desktop-container").first();
+	const $icons = $desktop_container.find(".icons-container > .icons").first();
+	if ($desktop_container.length && $icons.children(".desktop-icon").length) {
 		try {
-			xpos.desktop.listify($icons_grid);
+			xpos.desktop.group_icons($icons);
+			xpos.desktop.add_descriptions($icons);
+			xpos.desktop.inject_header($desktop_container);
 		} catch (e) {
-			console.error("xpos: desktop icon grid A-Z listify failed", e);
+			console.error("xpos: desktop home enhancement failed", e);
 		}
 		return;
 	}
 
 	if (attempts_left <= 0) return;
-	setTimeout(() => xpos.desktop.try_listify(attempts_left - 1), 150);
+	setTimeout(() => xpos.desktop.try_enhance(attempts_left - 1), 150);
 };
 
-frappe.router.on("change", () => xpos.desktop.try_listify());
-xpos.desktop.try_listify();
+frappe.router.on("change", () => xpos.desktop.try_enhance());
+xpos.desktop.try_enhance();

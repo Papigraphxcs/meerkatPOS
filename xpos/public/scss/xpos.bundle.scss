@@ -1,68 +1,180 @@
-// Desk home page: alphabetical "All apps" style list (Windows Start Menu
-// look) instead of the default centered grid of square icon tiles.
-// Scoped to .icons.xpos-az-list, added only by xpos.bundle.js after it
-// finds the desktop page's icon grid -- every selector here is a two-class
-// compound so it outranks desktop.css's plain single-class rules regardless
-// of which stylesheet loads second.
-//
-// `display` needs !important: DesktopIconGrid.make() in desktop.js sets
-// `style="display: grid"` directly on this element via jQuery .css(), and
-// an inline style beats any class selector regardless of specificity.
+// Desk home page: a welcome header + quick-action buttons injected above
+// the icon grid by xpos.bundle.js, on top of Frappe's native centered
+// multi-column grid of square icon tiles (that native grid is left alone).
 
-.icons.xpos-az-list {
-	display: flex !important;
+.xpos-home-header {
+	width: 100%;
+	max-width: 900px;
+	margin: 40px auto 0;
+	padding: 0 20px;
+	display: flex;
 	flex-direction: column;
-	gap: 0;
-	width: min(480px, 90vw);
-	max-height: calc(100vh - var(--desktop-navbar-height, 52px) - 80px);
-	overflow-y: auto;
-	justify-items: initial;
+	align-items: center;
+	gap: 20px;
+	text-align: center;
+}
 
-	.xpos-az-group-header {
-		padding: 16px 16px 8px;
-		font-size: 13px;
-		font-weight: 600;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: var(--ink-gray-5, var(--text-light));
+.xpos-home-greeting {
+	font-size: 22px;
+	font-weight: 600;
+	color: var(--ink-gray-9, var(--text-color));
+}
 
-		&:not(:first-child) {
-			margin-top: 10px;
-			padding-top: 20px;
-			border-top: 1px solid var(--sidebar-border-color, var(--gray-300));
-		}
+.xpos-home-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 10px;
+}
+
+.xpos-home-action {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	height: 36px;
+	padding: 0 14px;
+	border: 1px solid var(--sidebar-border-color, var(--gray-300));
+	border-radius: var(--border-radius-md, 10px);
+	background: var(--card-bg, #fff);
+	color: var(--ink-gray-8, var(--text-color));
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+
+	svg {
+		width: 15px;
+		height: 15px;
 	}
 
-	.desktop-icon {
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-start;
-		width: 100%;
-		height: auto;
-		gap: 16px;
-		padding: 14px 16px;
-		border-radius: 10px;
+	&:hover {
+		background-color: var(--sidebar-hover-color, var(--surface-gray-2));
+	}
+}
 
-		&:hover {
-			background-color: var(--sidebar-hover-color, var(--surface-gray-2));
-		}
+.xpos-home-stats {
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.xpos-home-stat {
+	border: 1px solid var(--sidebar-border-color, var(--gray-300));
+	border-radius: var(--border-radius-md, 10px);
+	padding: 14px 16px;
+	text-align: left;
+}
+
+.xpos-home-stat-label {
+	font-size: 12px;
+	color: var(--ink-gray-5, var(--text-light));
+}
+
+.xpos-home-stat-value {
+	font-size: 19px;
+	font-weight: 600;
+	margin-top: 4px;
+	color: var(--ink-gray-9, var(--text-color));
+}
+
+@media (max-width: 600px) {
+	.xpos-home-stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+// desktop.css sizes tiles for a single-line label only: .desktop-icon is a
+// fixed 127x126px box and .icon-caption forces text-wrap: nowrap. A real
+// sentence-length description doesn't fit in that box at all -- the first
+// version of this truncated to a couple of words, unreadable. Widen tiles
+// that carry a description, and let the description wrap onto two lines
+// instead of being squeezed onto one.
+// A fixed column count, not auto-fit/minmax: .icons-container has no
+// explicit width of its own (it's sized by its flex parent, .desktop-container,
+// which centers it), and auto-fit needs a definite container width to work
+// out how many tracks fit -- without one it was collapsing to a single
+// column instead of wrapping. repeat(6, 1fr) in the same spot, unmodified,
+// already renders as a proper grid (that's the untouched native layout for
+// tiles with no description), so a fixed count here follows the same,
+// already-proven pattern. 4 columns fit the wider 190px tiles at roughly
+// the same total row width as the native 6 columns of 127px tiles.
+.icons:has(.icon-subtitle) {
+	grid-template-columns: repeat(4, 1fr);
+	grid-template-rows: none;
+	// Not minmax(120px, auto): that would force every row -- including a
+	// group-header row, which is just one line of small text -- up to a
+	// 120px minimum. Each tile already carries its own min-height below,
+	// so a plain "auto" track still comes out >=120px for rows that hold
+	// tiles, while a header's own row stays content-sized.
+	grid-auto-rows: auto;
+	row-gap: 20px;
+	justify-items: stretch;
+}
+
+.xpos-icon-group-header {
+	grid-column: 1 / -1;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--ink-gray-5, var(--text-light));
+	padding-top: 20px;
+	margin-top: 4px;
+	border-top: 1px solid var(--sidebar-border-color, var(--gray-300));
+
+	&:first-child {
+		padding-top: 0;
+		margin-top: 0;
+		border-top: none;
+	}
+}
+
+.desktop-icon:has(.icon-subtitle) {
+	width: 100%;
+	max-width: 190px;
+	height: auto;
+	min-height: 120px;
+}
+
+// Fewer columns as the viewport narrows, so tiles never get squeezed
+// below a size the (already-clamped) description can't read in. These
+// thresholds are the tile grid only -- .xpos-home-stats has its own
+// breakpoint below, and .xpos-home-header/.xpos-home-actions already wrap
+// via flexbox at any width.
+@media (max-width: 1000px) {
+	.icons:has(.icon-subtitle) {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+@media (max-width: 700px) {
+	.icons:has(.icon-subtitle) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 460px) {
+	.icons:has(.icon-subtitle) {
+		grid-template-columns: repeat(1, 1fr);
 	}
 
-	.icon-container {
-		--desktop-icon-dimension: 34px;
-		flex: none;
+	.desktop-icon:has(.icon-subtitle) {
+		max-width: none;
 	}
+}
 
-	.icon-caption {
-		height: auto;
-		text-align: left;
-		display: block;
-		width: auto;
-	}
+.icon-caption:has(.icon-subtitle) {
+	height: auto;
+	text-wrap: wrap;
+}
 
-	.icon-title {
-		text-align: left;
-		white-space: nowrap;
-		font-size: var(--text-md, 15px);
-	}
+.icon-subtitle {
+	white-space: normal;
+	line-height: 1.35;
+	margin-top: 2px;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
