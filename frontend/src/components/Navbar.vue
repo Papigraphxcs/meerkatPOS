@@ -1,6 +1,6 @@
 <template>
 	<header class="h-14 bg-background border-b border-border flex items-center px-4 gap-3 shrink-0 z-30">
-		<TooltipWrapper :content="__('Go to Desk')">
+		<TooltipWrapper v-if="!isElectronMode" :content="__('Go to Desk')">
 			<Button
 				variant="outline"
 				size="icon-sm"
@@ -193,6 +193,7 @@ import { computed, inject, onMounted, onUnmounted, ref, nextTick, type Ref } fro
 import { usePosStore } from "@/stores/posStore";
 import { usePaymentStore } from "@/stores/paymentStore";
 import { useAuthStore } from "@/stores/authStore";
+import { isElectron } from "@/services/electronBridge";
 import { __ } from "@/lib/translate";
 import { hasPermission } from "@/services/userRights";
 import { Button } from "@/components/ui/button";
@@ -237,6 +238,7 @@ const router = useRouter();
 const posStore = usePosStore();
 const paymentStore = usePaymentStore();
 const authStore = useAuthStore();
+const isElectronMode = isElectron();
 
 const isDark = inject<Ref<boolean>>("isDark")!;
 const theme = inject<Ref<"light" | "dark" | "system">>("theme")!;

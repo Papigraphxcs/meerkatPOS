@@ -1,7 +1,7 @@
 <template>
 	<div class="flex flex-col h-dvh overflow-hidden">
 		<MenuBar v-if="isElectron()" />
-		<Navbar v-else />
+		<Navbar />
 		<div class="flex-1 relative overflow-hidden md:flex">
 			<Sidebar />
 			<main class="h-full flex-1 overflow-hidden">
