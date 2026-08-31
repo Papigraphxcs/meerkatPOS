@@ -397,6 +397,38 @@ async function runMigrations(): Promise<void> {
 			log.warn(`Migration for ${tbl} dead_letter status failed`, err);
 		}
 	}
+
+	// sync_status on these tables was defined as ENUM('pending','synced','failed'),
+	// but pushTable() in syncEngine.ts sets it to 'syncing' while a push is in
+	// flight - a value the ENUM never allowed. Under strict SQL mode that update
+	// doesn't just get rejected, it errors with "Data truncated for column
+	// 'sync_status' at row 1", surfacing as a sync error on every push attempt.
+	for (const tbl of [
+		"pos_opening_shifts",
+		"pos_closing_entries",
+		"sales_invoices",
+		"expenses",
+		"bank_drops",
+		"stock_adjustments",
+		"quotations",
+	]) {
+		try {
+			const [cols] = await db.execute<RowDataPacket[]>(
+				"SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = 'sync_status'",
+				[tbl],
+			);
+			const colType = (cols as RowDataPacket[])[0]?.COLUMN_TYPE as string | undefined;
+			if (colType && !colType.includes("syncing")) {
+				await db.execute(
+					`ALTER TABLE \`${tbl}\` MODIFY COLUMN \`sync_status\` ` +
+						"ENUM('pending','syncing','synced','failed') DEFAULT 'pending'",
+				);
+				log.info(`Migration: added 'syncing' to ${tbl}.sync_status`);
+			}
+		} catch (err) {
+			log.warn(`Migration for ${tbl}.sync_status failed`, err);
+		}
+	}
 }
 
 async function executeSchemaFile(filePath: string): Promise<void> {
