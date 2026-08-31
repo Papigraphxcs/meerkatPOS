@@ -740,7 +740,7 @@ export function getPrimaryKeyForTable(idbStore: string): string {
 }
 
 export const SYNC_DEFAULTS = {
-	intervalMs: 5 * 60 * 1000,
+	intervalMs: 15 * 60 * 1000,
 	pushIntervalMs: 60 * 1000,
 	maxRetries: 3,
 	onlineGracePeriodMs: 3_000,
