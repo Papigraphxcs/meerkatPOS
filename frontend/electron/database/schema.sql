@@ -300,6 +300,7 @@ CREATE TABLE IF NOT EXISTS `modes_of_payment` (
 
 CREATE TABLE IF NOT EXISTS `currency_exchange_rates` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) DEFAULT NULL,
   `from_currency` VARCHAR(10) NOT NULL,
   `to_currency` VARCHAR(10) NOT NULL,
   `exchange_rate` DECIMAL(21,9) NOT NULL DEFAULT 0,

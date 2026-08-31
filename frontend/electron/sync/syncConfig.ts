@@ -123,10 +123,18 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 		doctype: "Currency Exchange",
 		label: "Exchange Rates",
 		fields: ["name", "from_currency", "to_currency", "exchange_rate", "date", "for_selling"],
-		orderBy: "date desc",
+		// Every other table's orderBy is a bare field name because pullTable()
+		// unconditionally appends " asc" to it - "date desc" here became the
+		// invalid "date desc asc", which Frappe rejects outright (confirmed via
+		// direct request: "Invalid field format in Order By: date desc").
+		orderBy: "date",
 		direction: "pull",
 		idbStore: "currency_exchange_rates",
 		localIdField: "xpos_local_id",
+		// Explicit rather than relying on getPrimaryKeyForTable's "name" fallback -
+		// that ambiguity (a real column vs. an assumed one) is exactly what broke
+		// this table before the currency_exchange_rates.name migration above.
+		primaryKey: "name",
 		incremental: false,
 		regetAll: true,
 		batchSize: 500,
@@ -233,7 +241,6 @@ export const SYNC_TABLES: SyncTableConfig[] = [
 			"block_sale_beyond_available_qty",
 			"cash_mode_of_payment",
 			"apply_customer_discount",
-			"allow_print_draft_invoices",
 			"use_offline_mode",
 		],
 		orderBy: "modified",

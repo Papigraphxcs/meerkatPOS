@@ -357,6 +357,12 @@ async function runMigrations(): Promise<void> {
 		["currencies", "number_format", "VARCHAR(20) DEFAULT NULL"],
 		["currencies", "smallest_currency_fraction_value", "DECIMAL(18,6) DEFAULT 0"],
 		["currencies", "symbol_on_right", "TINYINT(1) DEFAULT 0"],
+		// currency_exchange_rates was the only synced table missing a `name`
+		// column - every other table uses ERPNext's own `name` as its local
+		// primary key, so getPrimaryKeyForTable's fallback ("name") pointed at a
+		// column that didn't exist here, breaking both the upsert and the
+		// deletion-check SELECT ("Unknown column 'name' in 'SELECT'").
+		["currency_exchange_rates", "name", "VARCHAR(255) DEFAULT NULL"],
 	];
 	for (const [table, col, typedef] of columnMigrations) {
 		try {
