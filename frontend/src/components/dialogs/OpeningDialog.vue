@@ -121,13 +121,22 @@
 				</CardContent>
 			</Card>
 
-			<div v-if="!isElectronMode" class="text-center mt-4">
+			<div class="text-center mt-4">
 				<a
+					v-if="!isElectronMode"
 					href="/desk"
 					class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline"
 				>
 					← {{ __("Back to Desk") }}
 				</a>
+				<button
+					v-else
+					type="button"
+					class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors"
+					@click="authStore.logout()"
+				>
+					← {{ __("Log out") }}
+				</button>
 			</div>
 		</div>
 	</div>
@@ -136,6 +145,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { usePosStore } from "@/stores/posStore";
+import { useAuthStore } from "@/stores/authStore";
 import { useMoney } from "@/composables/useMoney";
 import { showError } from "@/services/api";
 import { Button } from "@/components/ui/button";
@@ -166,6 +176,7 @@ interface PaymentMethodEntry {
 }
 
 const posStore = usePosStore();
+const authStore = useAuthStore();
 const { moneyPrecision } = useMoney();
 const syncStatus = useSyncStatus();
 
