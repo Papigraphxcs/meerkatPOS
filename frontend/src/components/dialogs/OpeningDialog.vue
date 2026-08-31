@@ -1,16 +1,16 @@
 <template>
 	<div
-		class="fixed inset-0 bg-linear-to-br from-primary via-primary/90 to-primary/95 z-50 flex flex-col items-center overflow-y-auto p-4"
+		class="fixed inset-0 bg-gradient-to-br from-background to-muted z-50 flex flex-col items-center overflow-y-auto p-4"
 	>
 		<div class="w-full max-w-md animate-in fade-in zoom-in-95 duration-300 my-auto">
 			<div class="text-center mb-8">
 				<img
 					:src="logoLight"
 					alt="meerkatPOS Logo"
-					class="w-16 h-16 mx-auto mb-4 rounded-2xl text-primary-foreground flex items-center justify-center"
+					class="w-16 h-16 mx-auto mb-4 rounded-2xl text-foreground flex items-center justify-center"
 				/>
-				<h1 class="text-2xl font-bold text-primary-foreground mb-1">meerkatPOS</h1>
-				<p class="text-primary-foreground/70 text-sm">{{ __("Open your shift to get started") }}</p>
+				<h1 class="text-2xl font-bold text-foreground mb-1">meerkatPOS</h1>
+				<p class="text-muted-foreground text-sm">{{ __("Open your shift to get started") }}</p>
 			</div>
 
 			<Card>
@@ -125,14 +125,14 @@
 				<a
 					v-if="!isElectronMode"
 					href="/desk"
-					class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors no-underline"
+					class="text-muted-foreground hover:text-foreground text-sm transition-colors no-underline"
 				>
 					← {{ __("Back to Desk") }}
 				</a>
 				<button
 					v-else
 					type="button"
-					class="text-primary-foreground/60 hover:text-primary-foreground text-sm transition-colors"
+					class="text-muted-foreground hover:text-foreground text-sm transition-colors"
 					@click="authStore.logout()"
 				>
 					← {{ __("Log out") }}
