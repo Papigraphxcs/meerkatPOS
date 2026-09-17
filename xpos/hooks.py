@@ -47,6 +47,7 @@ doctype_js = {
 	"POS Profile": "x_pos/api/pos_profile.js",
 	"Sales Invoice": "x_pos/api/invoice.js",
 	"Company": "x_pos/api/company.js",
+	"Currency Exchange": "x_pos/api/currency_exchange.js",
 }
 
 extend_bootinfo = "xpos.startup.boot.extend_bootinfo"
