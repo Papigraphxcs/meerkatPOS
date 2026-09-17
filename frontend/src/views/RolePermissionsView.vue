@@ -146,7 +146,10 @@ const PERMISSION_GROUPS: { title: string; items: { key: string; label: string }[
 	},
 	{
 		title: "Administration",
-		items: [{ key: "manage_role_permissions", label: "Manage Role Permissions" }],
+		items: [
+			{ key: "manage_role_permissions", label: "Manage Role Permissions" },
+			{ key: "manage_exchange_rate", label: "Manage Exchange Rate" },
+		],
 	},
 ];
 

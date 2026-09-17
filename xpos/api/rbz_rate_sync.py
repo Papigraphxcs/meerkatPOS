@@ -10,6 +10,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, nowdate
 
+from xpos.api.auth import user_has_pos_permission
+
 ZIMRATE_URL = "https://zimrate.com/api/rates/latest-grouped"
 REQUEST_TIMEOUT = 15
 RATE_SOURCE_NAME = "ZimPriceCheck"
@@ -62,8 +64,15 @@ def _latest_local_rate() -> float | None:
 
 
 def can_manage_exchange_rate(user: str | None = None) -> bool:
-	"""Whether ``user`` may pull or manually set the ZiG->USD tender rate."""
-	return any(role in frappe.get_roles(user) for role in MANAGER_ROLES)
+	"""Whether ``user`` may pull or manually set the ZiG->USD tender rate.
+
+	Granted either by a real Frappe role (desk-side managers) or by the
+	``manage_exchange_rate`` custom POS Role permission (POS-side staff
+	assigned an "Administrator" POS Role via their POS Profile).
+	"""
+	if any(role in frappe.get_roles(user) for role in MANAGER_ROLES):
+		return True
+	return user_has_pos_permission("manage_exchange_rate", user)
 
 
 def _record_rate(new_rate: float) -> "frappe.model.document.Document":

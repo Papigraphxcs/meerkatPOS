@@ -12,3 +12,4 @@ xpos.patches.add_pos_query_indexes
 xpos.patches.enable_pos_change_gl_entries
 xpos.patches.move_item_search_settings_to_pos_settings
 xpos.patches.add_material_receipt_permission
+xpos.patches.add_manage_exchange_rate_permission

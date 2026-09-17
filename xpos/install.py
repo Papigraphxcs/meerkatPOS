@@ -33,6 +33,7 @@ POS_PERMISSIONS = (
 	("current_stock_report", "Current Stock Report", "Reports"),
 	# Administration
 	("manage_role_permissions", "Manage Role Permissions", "Administration"),
+	("manage_exchange_rate", "Manage Exchange Rate", "Administration"),
 )
 
 ALL_PERMISSION_NAMES = tuple(name for name, _label, _group in POS_PERMISSIONS)
@@ -40,7 +41,7 @@ ALL_PERMISSION_NAMES = tuple(name for name, _label, _group in POS_PERMISSIONS)
 # Cashiers ring up sales out of the box; every catalog permission is an elevated
 # capability, so none are enabled by default.
 _CASHIER_ENABLED: set[str] = set()
-_MANAGER_DISABLED = {"manage_role_permissions"}
+_MANAGER_DISABLED = {"manage_role_permissions", "manage_exchange_rate"}
 
 DEFAULT_ROLES = (
 	("Cashier", _CASHIER_ENABLED),

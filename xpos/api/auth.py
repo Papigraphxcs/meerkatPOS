@@ -25,6 +25,7 @@ ALL_PERMISSION_KEYS = (
 	"current_stock_by_brand",
 	"current_stock_report",
 	"manage_role_permissions",
+	"manage_exchange_rate",
 )
 
 DEFAULT_ROLE = "Cashier"
