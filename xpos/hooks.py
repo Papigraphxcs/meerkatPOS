@@ -50,10 +50,17 @@ doctype_js = {
 	"Currency Exchange": "x_pos/api/currency_exchange.js",
 }
 
+doctype_list_js = {
+	# List views only evaluate __list_js, not __js (see script_manager.js vs
+	# model.js:init_doctype), so the list-view button in currency_exchange.js
+	# needs this separate hook alongside doctype_js above or it silently
+	# never runs.
+	"Currency Exchange": "x_pos/api/currency_exchange.js",
+}
+
 extend_bootinfo = "xpos.startup.boot.extend_bootinfo"
 
 page_renderer = ["xpos.pwa.ServiceWorkerPage"]
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
