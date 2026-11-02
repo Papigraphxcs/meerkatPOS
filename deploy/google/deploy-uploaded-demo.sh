@@ -19,7 +19,8 @@ with (home / 'meerkatpos-app-upload.tar').open('wb') as output:
 print('Uploaded image parts and both installers verified.')
 PY
 git archive --format=tar -o "$HOME/meerkatpos-deployment.tar" HEAD:deploy/google
-python3 -c 'import numpy' 2>/dev/null || python3 -m pip install --user numpy
+python3 -c 'import numpy' 2>/dev/null || python3 -m pip install --user numpy || echo 'Using standard IAP transfer.'
+export CLOUDSDK_PYTHON_SITEPACKAGES=1
 connection=(--project=meerkatpos --zone=us-central1-a --tunnel-through-iap --quiet)
 gcloud compute scp "$HOME/meerkatpos-app-upload.tar" "$HOME/meerkatpos-deployment.tar" \
   "$HOME/linux-installer.part" "$HOME/meerkatPOS-1.0.9-win-x64-portable.zip" \
