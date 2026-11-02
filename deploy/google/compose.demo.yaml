@@ -1,0 +1,30 @@
+services:
+  frontend:
+    environment:
+      FRAPPE_SITE_NAME_HEADER: demo.meerkatpos.me
+  backend:
+    secrets: [db_root, demo_admin, demo_user]
+    volumes:
+      - ./create_demo.py:/opt/meerkatpos/create_demo.py:ro
+      - ./demo_setup.py:/opt/meerkatpos/demo_setup.py:ro
+  public:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    profiles: [public]
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./website:/srv/website:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [frontend]
+
+secrets:
+  demo_admin:
+    file: ./.secrets/demo-admin
+  demo_user:
+    file: ./.secrets/demo-user
+
+volumes:
+  caddy-data:
+  caddy-config:

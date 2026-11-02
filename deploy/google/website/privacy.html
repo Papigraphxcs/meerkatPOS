@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy - meerkatPOS</title>
+<meta name="description" content="How Rootwise Inc. collects and uses information through the meerkatpos.me website, and how data in the meerkatPOS software itself is handled.">
+<link rel="icon" type="image/png" href="images/meerkat-mark-black.png">
+<style>
+
+  :root {
+    --page-bg: #ffffff;
+    --bg: #ffffff;
+    --fg: #171717;
+    --muted: #6b6b6b;
+    --border: #e4e4e4;
+    --card: #f4f4f3;
+    --dark-bg: #0a0a0a;
+    --dark-fg: #f5f5f5;
+    --dark-muted: #a3a3a3;
+    --accent: #171717;
+    --accent-fg: #fafafa;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page-bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1520px; margin: 0 auto; padding: 0 24px; }
+
+  .simple-header { border-bottom: 1px solid var(--border); }
+  .simple-header .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; color: var(--fg); text-decoration: none; }
+  .brand img { width: 30px; height: 30px; display: block; }
+  nav a { color: var(--fg); text-decoration: none; margin: 0 16px; font-size: 0.92rem; font-weight: 500; }
+  nav a:hover { text-decoration: underline; }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-cta:hover { opacity: 0.88; }
+  @media (max-width: 640px) {
+    nav { display: none; }
+  }
+
+  .content { max-width: 760px; margin: 0 auto; padding: 56px 24px 80px; }
+  .content .eyebrow {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  .content h1 { font-size: 2.2rem; margin: 0 0 10px; letter-spacing: -0.02em; font-weight: 800; }
+  .content .updated { color: var(--muted); font-size: 0.88rem; margin: 0 0 36px; }
+  .content .lead { color: var(--muted); font-size: 1.05rem; margin: 0 0 40px; }
+  .content h2 { font-size: 1.25rem; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .content h2:first-of-type { margin-top: 0; }
+  .content p { margin: 0 0 16px; }
+  .content ul, .content ol { margin: 0 0 16px; padding-left: 22px; }
+  .content li { margin-bottom: 8px; }
+  .content a { color: var(--fg); }
+  .content strong { font-weight: 700; }
+  .disclaimer {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 18px 22px;
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin: 0 0 40px;
+  }
+  .disclaimer strong { color: var(--fg); }
+  .toc { background: var(--card); border-radius: 14px; padding: 22px 26px; margin: 0 0 44px; }
+  .toc h2 { margin: 0 0 12px !important; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { margin-bottom: 6px; }
+  .toc a { font-size: 0.92rem; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  footer {
+    padding: 48px 0 32px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 32px;
+    padding-bottom: 32px;
+  }
+  .footer-brand .brand { margin-bottom: 10px; }
+  .footer-brand p { max-width: 260px; font-size: 0.88rem; }
+  .footer-entity { color: var(--muted); font-size: 0.82rem; }
+  .footer-cols { display: flex; gap: 56px; flex-wrap: wrap; }
+  .footer-col h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg);
+    margin: 0 0 14px;
+  }
+  .footer-col ul { list-style: none; margin: 0; padding: 0; }
+  .footer-col li { margin-bottom: 10px; font-size: 0.9rem; }
+  .footer-bottom { border-top: 1px solid var(--border); padding-top: 20px; font-size: 0.82rem; }
+
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin: 0 0 40px; }
+  .contact-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .contact-card .icon-tile {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  .contact-card .icon-tile svg { width: 21px; height: 21px; }
+  .contact-card h3 { margin: 0 0 8px; font-size: 1.02rem; }
+  .contact-card p { margin: 0 0 4px; font-size: 0.92rem; }
+  .contact-card a { display: block; font-weight: 600; text-decoration: none; }
+  .contact-card a:hover { text-decoration: underline; }
+
+</style>
+</head>
+<body>
+
+<header class="simple-header">
+  <div class="wrap">
+    <a class="brand" href="/">
+      <img src="images/meerkat-mark-black.png" alt="meerkatPOS">
+      meerkatPOS
+    </a>
+    <nav>
+      <a href="/#use-cases">Use Cases</a>
+      <a href="/#features">Features</a>
+      <a href="/#download">Download</a>
+      <a href="/#setup">Setup</a>
+    </nav>
+    <a href="/#download" class="nav-cta">Download</a>
+  </div>
+</header>
+
+<main class="content">
+
+<span class="eyebrow">Legal</span>
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated: 29 August 2026</p>
+
+<div class="disclaimer">
+<strong>Plain-language note:</strong> This policy was drafted as a starting point for Rootwise Inc. and covers the meerkatpos.me website in good faith based on how the site actually works today. It is not a substitute for advice from a qualified lawyer, and Rootwise Inc. should have it reviewed before relying on it, especially as the product or its data practices change.
+</div>
+
+<div class="toc">
+<h2>Contents</h2>
+<ol>
+<li><a href="#who-we-are">Who we are</a></li>
+<li><a href="#scope">Scope of this policy</a></li>
+<li><a href="#info-we-collect">Information we collect</a></li>
+<li><a href="#the-software">The meerkatPOS software</a></li>
+<li><a href="#how-we-use">How we use information</a></li>
+<li><a href="#legal-basis">Legal basis and your rights</a></li>
+<li><a href="#retention">Data retention</a></li>
+<li><a href="#security">Security</a></li>
+<li><a href="#third-parties">Third parties and hosting</a></li>
+<li><a href="#children">Children's privacy</a></li>
+<li><a href="#changes">Changes to this policy</a></li>
+<li><a href="#contact">Contact us</a></li>
+</ol>
+</div>
+
+<h2 id="who-we-are">1. Who we are</h2>
+<p>meerkatPOS is a product of <strong>Rootwise Inc.</strong> ("Rootwise," "we," "us," or "our"), a company based in Zimbabwe. This policy explains what information we collect through the meerkatpos.me website, why we collect it, and what rights you have over it.</p>
+
+<h2 id="scope">2. Scope of this policy</h2>
+<p>This policy covers <strong>this website</strong> (meerkatpos.me): browsing it, downloading an installer from it, and contacting us through it. It also covers, in <a href="#the-software">Section 4</a>, how we handle the ERPNext server we set up for your business once you're a customer.</p>
+
+<h2 id="info-we-collect">3. Information we collect</h2>
+<p>We try to collect as little as possible. Specifically:</p>
+<ul>
+<li><strong>Standard web server logs.</strong> Like effectively any website, our hosting infrastructure automatically logs basic technical information for every visit, such as IP address, browser/device type, the page requested, and the time of the request. This is inherent to running a web server and is used only for keeping the site running securely, not for tracking individuals.</li>
+<li><strong>No cookies or analytics, currently.</strong> As of the date at the top of this policy, meerkatpos.me does not set cookies and does not run any analytics, advertising, or tracking scripts. If that changes, this policy will be updated first.</li>
+<li><strong>Downloads.</strong> When you download a Windows or Linux installer from this site, that request is recorded in the server logs described above, the same as any other page request. We don't attach a download to an account or identity.</li>
+<li><strong>Information you send us directly.</strong> If you email <a href="mailto:support@meerkatpos.me">support@meerkatpos.me</a>, we receive your email address, whatever you include in the message, and any attachments you choose to send.</li>
+</ul>
+
+<h2 id="the-software">4. The meerkatPOS software and your ERPNext server</h2>
+<p>meerkatPOS connects to an ERPNext server that <strong>Rootwise sets up for your business</strong> as part of getting you started, you don't configure this yourself. Sales, inventory, customer records, and accounting entries you enter into meerkatPOS are stored on that server.</p>
+<p>Because Rootwise provisions and hosts this infrastructure, we have the technical ability to access it. In the ordinary course of business, we don't access, view, or use the business data stored there. We may access it: (a) to provide support you've asked for, (b) to maintain, secure, or troubleshoot the server, or (c) where required by law. You remain the owner and controller of your own business's transaction and customer records; Rootwise acts as the processor and host of that data on your behalf, not as its owner.</p>
+<p>If your specific arrangement with Rootwise differs from this (for example, if you host the ERPNext server yourself rather than through us), the terms you agreed with us at setup take precedence over this general description.</p>
+
+<h2 id="how-we-use">5. How we use information</h2>
+<p>We use the limited information described in <a href="#info-we-collect">Section 3</a> to:</p>
+<ul>
+<li>Operate, secure, and troubleshoot the website and downloads;</li>
+<li>Respond to support and contact requests;</li>
+<li>Understand, at a basic technical level, that the site and downloads are working as expected.</li>
+</ul>
+<p>We do not sell personal information, and we do not share it with third parties for their own marketing purposes.</p>
+
+<h2 id="legal-basis">6. Legal basis and your rights</h2>
+<p>Rootwise Inc. is based in Zimbabwe, and this policy is written with reference to Zimbabwe's <strong>Cyber and Data Protection Act [Chapter 12:07]</strong>. Depending on where you're located, other laws may also give you rights over your information; if you're unsure which apply to you, treat the rights below as a floor, not a ceiling.</p>
+<p>Where we hold personal information about you (for example, because you emailed us), you can ask us to:</p>
+<ul>
+<li>Tell you what information we hold about you;</li>
+<li>Correct information that's inaccurate;</li>
+<li>Delete information we no longer need to keep;</li>
+</ul>
+<p>by writing to <a href="mailto:support@meerkatpos.me">support@meerkatpos.me</a>. If you believe we've mishandled your information, you also have the right to lodge a complaint with Zimbabwe's data protection authority under the Cyber and Data Protection Act.</p>
+
+<h2 id="retention">7. Data retention</h2>
+<p>Server logs are retained only as long as needed for security and troubleshooting purposes, then rotated out. Support emails are kept for as long as reasonably needed to resolve your request and for a reasonable period afterward in case you follow up, after which they may be deleted.</p>
+
+<h2 id="security">8. Security</h2>
+<p>We take reasonable technical measures to protect the information we hold, including serving this site over HTTPS. No method of transmission or storage is perfectly secure, and we can't guarantee absolute security.</p>
+
+<h2 id="third-parties">9. Third parties and hosting</h2>
+<p>This website, and the ERPNext servers we set up for customers as described in <a href="#the-software">Section 4</a>, run on infrastructure operated by a third-party hosting provider on our behalf. That provider processes data only as needed to keep the infrastructure running, not for its own purposes. We don't share the information described in this policy with any other third party.</p>
+
+<h2 id="children">10. Children's privacy</h2>
+<p>This website is intended for business owners and operators, not children. We don't knowingly collect personal information from children, and if we learn that we have, we'll delete it.</p>
+
+<h2 id="changes">11. Changes to this policy</h2>
+<p>We may update this policy as the website or our data practices change. The "last updated" date at the top of this page will reflect the most recent revision. Material changes will be reflected here before they take effect.</p>
+
+<h2 id="contact">12. Contact us</h2>
+<p>Questions about this policy or your information can be sent to <a href="mailto:support@meerkatpos.me">support@meerkatpos.me</a>, or in writing to Rootwise Inc., Zimbabwe.</p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="/">
+          <img src="images/meerkat-mark-black.png" alt="meerkatPOS" style="width:26px;height:26px;">
+          meerkatPOS
+        </a>
+        <p>Point of sale and accounting, built as one: offline-first, for retail, restaurants, and multi-till stores.</p>
+        <p class="footer-entity">meerkatPOS is built and maintained by Rootwise Inc.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/#use-cases">Use Cases</a></li>
+            <li><a href="/#features">Features</a></li>
+            <li><a href="/#download">Download</a></li>
+            <li><a href="/#setup">Setup</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li><a href="/terms.html">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Rootwise Inc. All rights reserved. meerkatPOS is built on Frappe/ERPNext.
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

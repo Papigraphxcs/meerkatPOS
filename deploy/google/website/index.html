@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>meerkatPOS: Point of Sale for growing businesses</title>
+<meta name="description" content="meerkatPOS is a Zimbabwean offline-first point of sale system built on Frappe/ERPNext, tailored for Zimbabwean businesses. Fast checkout, multi-currency support, real-time inventory, and back-office reporting for retail, restaurants, and multi-till stores.">
+<link rel="icon" type="image/png" href="images/meerkat-mark-black.png">
+<style>
+  :root {
+    --page-bg: #ffffff;
+    --bg: #ffffff;
+    --fg: #171717;
+    --muted: #6b6b6b;
+    --border: #e4e4e4;
+    --card: #f4f4f3;
+    --dark-bg: #0a0a0a;
+    --dark-fg: #f5f5f5;
+    --dark-muted: #a3a3a3;
+    --accent: #171717;
+    --accent-fg: #fafafa;
+    --green: #171717;
+    --green-dark: #000000;
+    --panel: #0d0d0d;
+    --panel-2: #1c1c1c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page-bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1520px; margin: 0 auto; padding: 0 24px; }
+
+  .page-frame {
+    max-width: 1520px;
+    margin: 28px auto;
+    background: var(--bg);
+    border-radius: 32px;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05), 0 25px 55px -18px rgba(0,0,0,0.22);
+    overflow: hidden;
+    padding: 8px 8px 0;
+  }
+
+  header { padding: 18px 28px; }
+  header .inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; color: var(--fg); text-decoration: none; }
+  .brand img { width: 30px; height: 30px; display: block; }
+  nav { text-align: center; }
+  nav a { color: var(--fg); text-decoration: none; margin: 0 16px; font-size: 0.92rem; font-weight: 500; }
+  nav a:hover { text-decoration: underline; }
+  .nav-cta {
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-cta:hover { opacity: 0.88; }
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    padding: 8px;
+    margin: -8px;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .nav-toggle svg { width: 24px; height: 24px; display: block; }
+
+  .hero {
+    padding: 20px 28px 56px;
+    background: #ffffff;
+  }
+  .hero .inner {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+    margin: 0 0 18px;
+  }
+  .hero h1 {
+    font-size: 3.1rem;
+    line-height: 1.08;
+    margin: 0 0 20px;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+  }
+  .hero h1 .hl { color: var(--green); }
+  .hero p.lead {
+    font-size: 1.08rem;
+    color: var(--muted);
+    max-width: 460px;
+    margin: 0 0 18px;
+  }
+  .origin-note {
+    font-size: 0.88rem;
+    color: var(--muted);
+    max-width: 440px;
+    margin: 0 0 28px;
+    padding-left: 14px;
+    border-left: 2px solid var(--border);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 30px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.98rem;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: transform 0.08s ease;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-secondary { background: var(--card); color: var(--fg); }
+  .btn-secondary:hover { background: #f0f0f0; }
+  .btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 34px;
+    max-width: 460px;
+  }
+  .tag-pill {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 0.82rem;
+    color: var(--fg);
+  }
+
+  .hero-panel {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero-panel .panel-shape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  .hero-panel .ring {
+    position: absolute;
+    z-index: 1;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+  }
+  .hero-panel .ring.r1 { width: 92%; height: 92%; }
+  .hero-panel .ring.r2 { width: 70%; height: 70%; }
+  .hero-panel .mark {
+    position: relative;
+    z-index: 1;
+    width: 46%;
+    height: auto;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.35));
+  }
+  .hero-panel .leaf {
+    position: absolute;
+    z-index: 1;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .hero-panel .leaf.l1 { width: 130px; height: 130px; bottom: -30px; left: -30px; }
+  .hero-panel .leaf.l2 { width: 80px; height: 80px; top: 30px; right: -10px; }
+
+  .float-chip {
+    position: absolute;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    color: var(--fg);
+    padding: 9px 16px 9px 10px;
+    border-radius: 999px;
+    box-shadow: 0 14px 26px -10px rgba(0,0,0,0.35);
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .float-chip .chip-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .float-chip .chip-icon svg { width: 13px; height: 13px; }
+  .float-chip.chip-1 { top: 4%; left: -8%; transform: rotate(-6deg); }
+  .float-chip.chip-2 { bottom: 8%; right: 4%; transform: rotate(4deg); }
+  @media (max-width: 860px) {
+    .float-chip { font-size: 0.72rem; padding: 7px 12px 7px 8px; }
+    .float-chip.chip-1 { left: 0; top: -6%; }
+    .float-chip.chip-2 { right: 0; bottom: -4%; }
+  }
+
+  section { padding: 64px 0; }
+  section.alt {
+    background: var(--dark-bg);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  section.alt h2 { color: var(--dark-fg); }
+  section.alt p.section-sub { color: var(--dark-muted); }
+  h2 { font-size: 1.9rem; margin: 0 0 8px; letter-spacing: -0.01em; }
+  p.section-sub { color: var(--muted); margin: 0 0 40px; font-size: 1.05rem; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 24px;
+  }
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  section.alt .card { background: var(--bg); }
+  .card h3 { margin: 0 0 10px; font-size: 1.1rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .card .icon-tile {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .card .icon-tile svg { width: 22px; height: 22px; stroke: #fff; }
+
+  /* Use-cases pinned panel */
+  .usecases-panel {
+    background: linear-gradient(160deg, var(--panel-2), var(--panel));
+    border-radius: 32px;
+    padding: 56px 48px 64px;
+  }
+  .usecases-panel h2 { color: var(--dark-fg); font-size: 1.9rem; margin: 0 0 8px; letter-spacing: -0.01em; max-width: 460px; }
+  .usecases-panel .section-sub { color: var(--dark-muted); margin: 0 0 48px; font-size: 1.05rem; }
+  .pin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  .pin-card {
+    position: relative;
+    background: var(--bg);
+    border-radius: 20px;
+    padding: 22px 20px 20px;
+    box-shadow: 0 20px 40px -18px rgba(0,0,0,0.5);
+  }
+  .pin-grid > .pin-card:nth-child(2) { margin-top: 34px; }
+  .pin-grid > .pin-card:nth-child(4) { margin-top: 14px; }
+  .pin-clip { position: absolute; top: -10px; right: 18px; width: 22px; height: 30px; transform: rotate(14deg); }
+  .pin-clip svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+  .pin-card h3 {
+    font-size: 0.86rem;
+    margin: 0 0 22px;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pin-icon-orb {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    margin: 6px auto 26px;
+    background: radial-gradient(circle at 32% 26%, #4c4c4c 0%, #1a1a1a 48%, #000 100%);
+    box-shadow: inset 0 -6px 12px rgba(255,255,255,0.08), 0 14px 22px -10px rgba(0,0,0,0.45);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pin-icon-orb::after {
+    content: "";
+    position: absolute;
+    top: 13%;
+    left: 20%;
+    width: 34%;
+    height: 22%;
+    background: rgba(255,255,255,0.32);
+    border-radius: 50%;
+    filter: blur(2.5px);
+    transform: rotate(-20deg);
+  }
+  .pin-icon-orb svg { position: relative; z-index: 1; width: 30px; height: 30px; stroke: #fff; fill: none; stroke-width: 1.7; }
+  .pin-tag {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+  }
+  @media (max-width: 900px) {
+    .pin-grid { grid-template-columns: repeat(2, 1fr); }
+    .pin-grid > .pin-card:nth-child(n) { margin-top: 0; }
+  }
+  @media (max-width: 520px) {
+    .pin-grid { grid-template-columns: 1fr; }
+    .usecases-panel { padding: 40px 24px 44px; border-radius: 24px; }
+  }
+
+  .download-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .download-card {
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 28px 28px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+  }
+  .download-badge {
+    display: none;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .download-card.is-recommended .download-badge { display: inline-block; }
+  .download-card .icon-tile {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .download-card .icon-tile svg { width: 22px; height: 22px; }
+  .download-card h3 { margin: 0 0 4px; }
+  .download-card .ver { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; flex-grow: 1; }
+  .download-card .btn { width: 100%; justify-content: center; }
+  .download-checksum {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .download-checksum .checksum-label { font-weight: 700; letter-spacing: 0.04em; }
+  .download-checksum code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--card);
+    padding: 2px 6px;
+    border-radius: 5px;
+  }
+  .checksum-copy {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .checksum-copy:hover { background: var(--card); color: var(--fg); }
+  .download-footnote { text-align: center; color: var(--muted); font-size: 0.9rem; margin: 28px 0 0; }
+  .download-footnote a { color: inherit; }
+
+  .setup-required {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin: 0 0 40px;
+    text-align: left;
+  }
+  .setup-required .icon-tile {
+    flex-shrink: 0;
+    margin: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .setup-required .icon-tile svg { width: 22px; height: 22px; }
+  .setup-required strong { display: block; color: var(--fg); font-size: 1rem; margin-bottom: 6px; }
+  .setup-required p { color: var(--muted); font-size: 0.92rem; margin: 0; }
+  .setup-required a { color: var(--fg); text-decoration: underline; }
+  @media (max-width: 560px) {
+    .setup-required { flex-direction: column; }
+  }
+
+  .steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .steps::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: calc(100% / 8);
+    right: calc(100% / 8);
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .steps li { position: relative; z-index: 1; text-align: center; padding: 0 14px; }
+  .step-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  .step-tag {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 10px;
+    margin-bottom: 10px;
+  }
+  .step-tag--hidden { visibility: hidden; }
+  .step-title { display: block; margin-bottom: 6px; font-size: 1.05rem; font-weight: 700; }
+  .step-desc { display: block; color: var(--muted); font-size: 0.92rem; max-width: 260px; margin: 0 auto; }
+  .step-desc a { color: var(--fg); }
+  .setup-footnote { text-align: center; color: var(--muted); font-size: 0.9rem; margin: 44px 0 0; }
+  .setup-footnote a { color: inherit; }
+  @media (max-width: 760px) {
+    .steps { display: block; }
+    .steps::before { display: none; }
+    .steps li {
+      text-align: left;
+      padding: 0 0 28px 44px;
+      border-left: 2px solid var(--border);
+      margin-left: 15px;
+    }
+    .steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .step-num { position: absolute; left: -15px; top: 0; margin: 0; width: 28px; height: 28px; font-size: 0.85rem; }
+    .step-desc { max-width: none; margin: 0; }
+  }
+
+  footer {
+    padding: 48px 0 32px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 32px;
+    padding-bottom: 32px;
+  }
+  .footer-brand .brand { margin-bottom: 10px; }
+  .footer-brand p { max-width: 260px; font-size: 0.88rem; }
+  .footer-entity { color: var(--muted); font-size: 0.82rem; }
+  .footer-cols {
+    display: flex;
+    gap: 56px;
+    flex-wrap: wrap;
+  }
+  .footer-col h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg);
+    margin: 0 0 14px;
+  }
+  .footer-col ul { list-style: none; margin: 0; padding: 0; }
+  .footer-col li { margin-bottom: 10px; font-size: 0.9rem; }
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    font-size: 0.82rem;
+  }
+
+  @media (max-width: 860px) {
+    .hero .inner { grid-template-columns: 1fr; }
+    .hero-panel { max-width: 420px; margin: 0 auto; }
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 2.1rem; }
+    header .inner { grid-template-columns: auto auto; }
+    .brand { grid-column: 1; grid-row: 1; }
+    .nav-cta { display: none; }
+    .nav-toggle { grid-column: 2; grid-row: 1; display: inline-flex; align-items: center; justify-content: center; }
+    nav {
+      display: none;
+      grid-column: 1 / -1;
+      grid-row: 2;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 2px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    nav.is-open { display: flex; }
+    nav a { margin: 0; padding: 10px 4px; }
+    .page-frame { border-radius: 20px; margin: 12px; }
+  }
+
+  /* Why meerkatPOS: fanned card stack, expands on hover/click */
+  section.why { padding: 40px 0 96px; }
+  .why-head { text-align: center; max-width: 560px; margin: 0 auto 8px; }
+  .why-eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .why-head h2 {
+    font-size: 2.2rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+    font-weight: 800;
+  }
+  .why-head p { color: var(--muted); font-size: 1.05rem; margin: 0; }
+  .why-hint { text-align: center; color: var(--muted); font-size: 0.82rem; margin: 4px 0 0; }
+
+  .why-stack { display: flex; justify-content: center; align-items: flex-end; padding: 64px 0 24px; }
+  .why-card {
+    position: relative;
+    width: 200px;
+    height: 270px;
+    margin-left: -56px;
+    border: none;
+    padding: 0;
+    border-radius: 22px;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--panel);
+    box-shadow: 0 10px 26px -14px rgba(0,0,0,0.4);
+    transform-origin: bottom center;
+    transition: transform 0.32s cubic-bezier(.2,.8,.2,1), box-shadow 0.32s ease;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .why-card:first-child { margin-left: 0; }
+  .why-card:focus-visible { outline: 2px solid var(--fg); outline-offset: 4px; }
+  .why-card:nth-child(1) { transform: rotate(-10deg); z-index: 1; }
+  .why-card:nth-child(2) { transform: rotate(-3.5deg); z-index: 2; }
+  .why-card:nth-child(3) { transform: rotate(3.5deg); z-index: 3; }
+  .why-card:nth-child(4) { transform: rotate(10deg); z-index: 4; }
+  .why-card:hover,
+  .why-card.is-active {
+    transform: translateY(-42px) rotate(0deg) scale(1.05);
+    z-index: 20;
+    box-shadow: 0 30px 50px -18px rgba(0,0,0,0.45);
+  }
+
+  .why-card-art { position: absolute; inset: 0; background: var(--panel); }
+  .why-card-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(1) contrast(1.05);
+    transition: transform 0.5s ease;
+  }
+  .why-card:hover .why-card-art img,
+  .why-card.is-active .why-card-art img { transform: scale(1.06); }
+  .why-card-art::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.25) 100%);
+  }
+  .why-card-label {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    color: rgba(255,255,255,0.82);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .why-card-info {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 18px 16px 20px;
+    text-align: left;
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 30%, rgba(0,0,0,0));
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.28s ease, transform 0.28s ease;
+  }
+  .why-card:hover .why-card-info,
+  .why-card.is-active .why-card-info { opacity: 1; transform: translateY(0); }
+  .why-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .why-card-icon svg { width: 17px; height: 17px; stroke: var(--fg); fill: none; stroke-width: 1.8; }
+  .why-card-title { display: block; color: #fff; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+  .why-card-desc { display: block; color: rgba(255,255,255,0.72); font-size: 0.83rem; line-height: 1.4; }
+
+  @media (max-width: 760px) {
+    .why-stack { flex-wrap: wrap; row-gap: 24px; padding: 40px 0 16px; }
+    .why-card { width: 150px; height: 210px; margin-left: -40px; }
+    .why-card:nth-child(1) { transform: rotate(-6deg); }
+    .why-card:nth-child(2) { transform: rotate(-2deg); }
+    .why-card:nth-child(3) { transform: rotate(2deg); }
+    .why-card:nth-child(4) { transform: rotate(6deg); }
+    .why-card:hover, .why-card.is-active { transform: translateY(-24px) rotate(0deg) scale(1.03); }
+  }
+  @media (max-width: 640px) {
+    .why-head h2 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-frame">
+  <header>
+    <div class="inner">
+      <a class="brand" href="/">
+        <img src="images/meerkat-mark-black.png" alt="meerkatPOS">
+        meerkatPOS
+      </a>
+      <nav id="site-nav">
+        <a href="/#use-cases">Use Cases</a>
+        <a href="/#features">Features</a>
+        <a href="/#download">Download</a>
+        <a href="/#setup">Setup</a>
+        <a href="https://demo.meerkatpos.me/meerkatpos">Try Demo</a>
+      </nav>
+      <a href="/#download" class="nav-cta">Download</a>
+      <button type="button" class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="site-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="inner">
+      <div>
+        <p class="eyebrow">Point of Sale + Accounting, Built in Zimbabwe</p>
+        <h1>Point of Sale<br>and Accounting<br><span class="hl">Built as One</span></h1>
+        <p class="lead">
+          meerkatPOS bundles checkout and full accounting software into a single system.
+          Sell offline, sync automatically, and see real financial numbers without
+          juggling two different tools.
+        </p>
+        <p class="origin-note">Proudly built in Zimbabwe, and tailored for Zimbabwean retail, hospitality, and multi-till businesses, load-shedding and all.</p>
+        <a href="#download" class="btn btn-green">Download meerkatPOS</a>
+        <a href="https://demo.meerkatpos.me/meerkatpos" class="btn btn-secondary">Try the Browser Demo</a>
+        <div class="tag-row">
+          <span class="tag-pill">Zimbabwe</span>
+          <span class="tag-pill">Retail</span>
+          <span class="tag-pill">Restaurants</span>
+          <span class="tag-pill">Accounting</span>
+          <span class="tag-pill">Multi-Till</span>
+          <span class="tag-pill">Offline Sync</span>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <svg class="panel-shape" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="panelGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#1c1c1c"/>
+              <stop offset="1" stop-color="#0d0d0d"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#panelGrad)" d="M 6,0 L 94,0 Q 100,0 100,6 L 100,68 Q 100,74 94.19,75.51 L 5.81,98.49 Q 0,100 0,94 L 0,6 Q 0,0 6,0 Z"/>
+        </svg>
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="leaf l1"></div>
+        <div class="leaf l2"></div>
+        <span class="float-chip chip-1">
+          <span class="chip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span>
+          Wholesale &amp; distribution
+        </span>
+        <span class="float-chip chip-2">
+          <span class="chip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 12v-2a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 12v2a4 4 0 0 1-4 4H3"/></svg></span>
+          USD &amp; ZiG ready
+        </span>
+        <img class="mark" src="images/meerkat-mark-white.png" alt="meerkatPOS mark">
+      </div>
+    </div>
+  </section>
+</div>
+
+<section id="use-cases">
+  <div class="wrap">
+    <div class="usecases-panel">
+      <h2>Built for businesses that can't afford downtime</h2>
+      <p class="section-sub">Whatever you sell, plus the accounting to back it up.</p>
+      <div class="pin-grid">
+        <div class="pin-card">
+          <span class="pin-clip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12.5V6.5a3.5 3.5 0 0 1 7 0v10a5 5 0 0 1-10 0V8"/></svg>
+          </span>
+          <h3>Retail stores</h3>
+          <div class="pin-icon-orb">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </div>
+          <span class="pin-tag">Barcode scanning</span>
+        </div>
+        <div class="pin-card">
+          <span class="pin-clip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12.5V6.5a3.5 3.5 0 0 1 7 0v10a5 5 0 0 1-10 0V8"/></svg>
+          </span>
+          <h3>Restaurants &amp; cafés</h3>
+          <div class="pin-icon-orb">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V2"/><path d="M6 2v20"/><path d="M18 2c-2.2 0-3 2.2-3 5v3a2 2 0 0 0 2 2h1v10"/></svg>
+          </div>
+          <span class="pin-tag">Split billing</span>
+        </div>
+        <div class="pin-card">
+          <span class="pin-clip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12.5V6.5a3.5 3.5 0 0 1 7 0v10a5 5 0 0 1-10 0V8"/></svg>
+          </span>
+          <h3>Multi-till, multi-location</h3>
+          <div class="pin-icon-orb">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10h16V9"/><path d="M9 21v-6h6v6"/></svg>
+          </div>
+          <span class="pin-tag">Local hub sync</span>
+        </div>
+        <div class="pin-card">
+          <span class="pin-clip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12.5V6.5a3.5 3.5 0 0 1 7 0v10a5 5 0 0 1-10 0V8"/></svg>
+          </span>
+          <h3>Bookkeeping &amp; accounting</h3>
+          <div class="pin-icon-orb">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v3h3"/><path d="M9 12h6"/><path d="M9 16h6"/><path d="M9 8h3"/></svg>
+          </div>
+          <span class="pin-tag">Double-entry</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="why">
+  <div class="wrap">
+    <div class="why-head">
+      <span class="why-eyebrow">Why meerkatPOS</span>
+      <h2>The essentials, done properly.</h2>
+      <p>No bloat, no per-feature upsells, just a till that works and books that balance.</p>
+    </div>
+
+    <div class="why-stack" data-why-stack>
+
+      <button class="why-card" type="button" aria-expanded="false">
+        <span class="why-card-art"><img src="images/why-works-offline.jpg" alt="Café counter with two cups on a wooden table"></span>
+        <span class="why-card-label">01</span>
+        <span class="why-card-info">
+          <span class="why-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 8.5a15 15 0 0 1 18 0" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 12.5a10 10 0 0 1 11 0" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 16.3a5 5 0 0 1 4 0" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3l18 18" stroke-linecap="round"/></svg>
+          </span>
+          <span class="why-card-title">Works offline</span>
+          <span class="why-card-desc">Sales keep ringing up even when the network drops, and sync automatically once you're back online.</span>
+        </span>
+      </button>
+
+      <button class="why-card" type="button" aria-expanded="false">
+        <span class="why-card-art"><img src="images/why-full-accounting.jpg" alt="Open notebook and laptop with sketches on a desk"></span>
+        <span class="why-card-label">02</span>
+        <span class="why-card-info">
+          <span class="why-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 2v3h3"/><path d="M9 12h6M9 16h6M9 8h3" stroke-linecap="round"/></svg>
+          </span>
+          <span class="why-card-title">Full accounting, built in</span>
+          <span class="why-card-desc">Powered by ERPNext: proper double-entry accounting, inventory, and reporting, not a bolt-on spreadsheet.</span>
+        </span>
+      </button>
+
+      <button class="why-card" type="button" aria-expanded="false">
+        <span class="why-card-art"><img src="images/why-one-login.jpg" alt="Minimal desk flat-lay with monitor, keyboard, and mouse"></span>
+        <span class="why-card-label">03</span>
+        <span class="why-card-info">
+          <span class="why-card-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="13" rx="1.8"/><path d="M3 8h18"/><path d="M9 21h6M12 17.5v3.5" stroke-linecap="round"/></svg>
+          </span>
+          <span class="why-card-title">One login, everywhere</span>
+          <span class="why-card-desc">Cashiers use the desktop app at the till; managers check numbers from any browser, anywhere.</span>
+        </span>
+      </button>
+
+      <button class="why-card" type="button" aria-expanded="false">
+        <span class="why-card-art"><img src="images/why-grows-with-you.jpg" alt="Hay bales spread across a harvested field"></span>
+        <span class="why-card-label">04</span>
+        <span class="why-card-info">
+          <span class="why-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M3.5 17l6-6.5 4 4 6.5-8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 6h4.5v4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="why-card-title">Grows with you</span>
+          <span class="why-card-desc">Start with one till. Add locations, users, and terminals without changing systems.</span>
+        </span>
+      </button>
+
+    </div>
+    <p class="why-hint">Hover or tap a card</p>
+  </div>
+</section>
+
+<section id="download" class="alt">
+  <div class="wrap">
+    <h2>Download meerkatPOS</h2>
+    <p class="section-sub">Free to install. One machine per location runs as the Hub; every other till connects to it.</p>
+    <div class="setup-required">
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div>
+        <strong>Talk to us before you install</strong>
+        <p>meerkatPOS connects to an ERPNext server set up for your business, that part isn't something you can configure on your own. Email <a href="mailto:support@meerkatpos.me">support@meerkatpos.me</a> first so we can get your server ready, then come back here to download and follow the <a href="#setup">setup steps</a> below.</p>
+      </div>
+    </div>
+    <div class="setup-required">
+      <div class="icon-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>
+      </div>
+      <div>
+        <strong>Each machine needs MariaDB Server installed first</strong>
+        <p>Both the Hub and every Till keep a local MariaDB Server for their offline cache, install and start it <em>before</em> running the meerkatPOS installer: <code>winget install MariaDB.Server</code> on Windows, <code>brew install mariadb</code> on Mac, or <code>sudo apt install mariadb-server</code> on Linux. The <a href="#setup">setup guide</a> below has the full field-by-field walkthrough.</p>
+      </div>
+    </div>
+    <div class="download-grid" data-os-detect>
+      <div class="download-card" data-os="windows">
+        <span class="download-badge">Recommended</span>
+        <div class="icon-tile">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="0.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="0.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="0.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="0.6"/></svg>
+        </div>
+        <h3>Windows</h3>
+        <div class="ver">v1.0.9 · 134.5 MB</div>
+        <a class="btn btn-primary" href="/downloads/meerkatPOS-1.0.9-win-x64-portable.zip">Download for Windows</a>
+        <div class="download-checksum">
+          <span class="checksum-label">SHA256</span>
+          <code title="93f42525a44f21eaaf067e3d13a01931e88742fe080fd59f7efec31414a32c84">93f42525…14a32c84</code>
+          <button type="button" class="checksum-copy" data-checksum="93f42525a44f21eaaf067e3d13a01931e88742fe080fd59f7efec31414a32c84">Copy</button>
+        </div>
+      </div>
+      <div class="download-card" data-os="linux">
+        <span class="download-badge">Recommended</span>
+        <div class="icon-tile">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <ellipse cx="12" cy="15" rx="6" ry="7"/>
+            <ellipse cx="12" cy="7" rx="4" ry="4.2"/>
+            <ellipse cx="9.6" cy="6.8" rx="0.9" ry="1.1" fill="#171717"/>
+            <ellipse cx="14.4" cy="6.8" rx="0.9" ry="1.1" fill="#171717"/>
+            <path d="M11 8.4l1 1.6 1-1.6z" fill="#171717"/>
+          </svg>
+        </div>
+        <h3>Linux</h3>
+        <div class="ver">v1.0.9 · 114.3 MB</div>
+        <a class="btn btn-primary" href="/downloads/meerkatPOS-1.0.9.AppImage">Download for Linux</a>
+        <div class="download-checksum">
+          <span class="checksum-label">SHA256</span>
+          <code title="522575614b46cfc9cfe211deeaca85b48ab00c32a159dcf9308f5b84d30f6e8d">52257561…d30f6e8d</code>
+          <button type="button" class="checksum-copy" data-checksum="522575614b46cfc9cfe211deeaca85b48ab00c32a159dcf9308f5b84d30f6e8d">Copy</button>
+        </div>
+      </div>
+      <div class="download-card" data-os="mac">
+        <span class="download-badge">Recommended</span>
+        <div class="icon-tile">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <ellipse cx="12" cy="14" rx="6.5" ry="6.8"/>
+            <ellipse cx="16.2" cy="9.5" rx="2.2" ry="2.2" fill="#171717"/>
+            <path d="M12.3 7.2c0-1.6 1-2.7 2.3-3-.1 1.4-1 2.6-2.3 3z"/>
+          </svg>
+        </div>
+        <h3>macOS</h3>
+        <div class="ver">Coming soon</div>
+        <a class="btn btn-secondary" aria-disabled="true" href="#">Not yet available</a>
+      </div>
+    </div>
+    <p class="download-footnote">First time installing? See <a href="#setup">the setup guide</a> below.</p>
+  </div>
+</section>
+
+<section id="setup">
+  <div class="wrap">
+    <h2>Getting set up</h2>
+    <p class="section-sub">Two roles, one install for everyone, and one email to start.</p>
+    <ol class="steps">
+      <li>
+        <span class="step-num">1</span>
+        <span class="step-tag">Contact us</span>
+        <strong class="step-title">Get your server set up</strong>
+        <span class="step-desc">Email <a href="mailto:support@meerkatpos.me">support@meerkatpos.me</a> so we can set up your ERPNext server. meerkatPOS connects to it and can't be configured on your own.</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span class="step-tag">Hub</span>
+        <strong class="step-title">Install on one machine as the Hub</strong>
+        <span class="step-desc">This is the machine that talks to your ERPNext server. Install one per store location.</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span class="step-tag">Till</span>
+        <strong class="step-title">Install on every other counter as a Till</strong>
+        <span class="step-desc">Till machines connect to the Hub over your local network. No internet required for a sale to go through.</span>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <span class="step-tag step-tag--hidden" aria-hidden="true">Hub</span>
+        <strong class="step-title">Log in and start selling</strong>
+        <span class="step-desc">Your account details are provided by whoever set up your meerkatPOS server.</span>
+      </li>
+    </ol>
+    <p class="setup-footnote">Haven't grabbed the installer yet? <a href="#download">Back to downloads</a>.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="/">
+          <img src="images/meerkat-mark-black.png" alt="meerkatPOS" style="width:26px;height:26px;">
+          meerkatPOS
+        </a>
+        <p>Point of sale and accounting, built as one: offline-first, for retail, restaurants, and multi-till stores.</p>
+        <p class="footer-entity">meerkatPOS is built and maintained by Rootwise Inc.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/#use-cases">Use Cases</a></li>
+            <li><a href="/#features">Features</a></li>
+            <li><a href="/#download">Download</a></li>
+            <li><a href="/#setup">Setup</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li><a href="/terms.html">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2026 Rootwise Inc. All rights reserved. meerkatPOS is built on Frappe/ERPNext.
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var stack = document.querySelector('[data-why-stack]');
+    if (!stack) return;
+    var cards = Array.prototype.slice.call(stack.querySelectorAll('.why-card'));
+    function setActive(card) {
+      cards.forEach(function (c) {
+        var active = c === card;
+        c.classList.toggle('is-active', active);
+        c.setAttribute('aria-expanded', active ? 'true' : 'false');
+      });
+    }
+    function clearActive() {
+      cards.forEach(function (c) {
+        c.classList.remove('is-active');
+        c.setAttribute('aria-expanded', 'false');
+      });
+    }
+    cards.forEach(function (card) {
+      card.addEventListener('mouseenter', function () { setActive(card); });
+      card.addEventListener('focus', function () { setActive(card); });
+      card.addEventListener('click', function () {
+        var willActivate = !card.classList.contains('is-active');
+        clearActive();
+        if (willActivate) setActive(card);
+      });
+    });
+    stack.addEventListener('mouseleave', function () {
+      if (!stack.matches(':focus-within')) clearActive();
+    });
+    document.addEventListener('click', function (e) {
+      if (!stack.contains(e.target)) clearActive();
+    });
+  })();
+
+  (function () {
+    var grid = document.querySelector('[data-os-detect]');
+    if (!grid) return;
+    var ua = navigator.userAgent || '';
+    var os = /Windows/i.test(ua) ? 'windows'
+      : /Mac OS|Macintosh/i.test(ua) ? 'mac'
+      : /Linux/i.test(ua) && !/Android/i.test(ua) ? 'linux'
+      : null;
+    if (!os) return;
+    var match = grid.querySelector('.download-card[data-os="' + os + '"]');
+    if (match) match.classList.add('is-recommended');
+  })();
+
+  (function () {
+    var toggle = document.querySelector('.nav-toggle');
+    var nav = document.getElementById('site-nav');
+    if (!toggle || !nav) return;
+    function close() {
+      nav.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    toggle.addEventListener('click', function () {
+      var open = nav.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    nav.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', close);
+    });
+    document.addEventListener('click', function (e) {
+      if (!nav.contains(e.target) && !toggle.contains(e.target)) close();
+    });
+  })();
+
+  (function () {
+    document.querySelectorAll('.checksum-copy').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var value = btn.getAttribute('data-checksum');
+        if (!navigator.clipboard) return;
+        navigator.clipboard.writeText(value).then(function () {
+          var original = btn.textContent;
+          btn.textContent = 'Copied';
+          setTimeout(function () { btn.textContent = original; }, 1200);
+        });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

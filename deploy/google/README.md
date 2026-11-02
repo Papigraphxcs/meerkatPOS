@@ -1,6 +1,6 @@
 # Google preparation for Meerkatpos
 
-The user requires ongoing $0 hosting, with no reliance on trial credits. This package therefore separates a small private preparation VM from the full application stack. Nothing here changes DNS, restores customer data, publishes a site or launches a Google resource automatically.
+The initial private preparation VM uses the free-tier shape described below. The user subsequently authorized preparing a paid fresh demo and main website; see [DEMO.md](DEMO.md) for that deployment. The actual paid upgrade still requires a specific budget approval. Customer recovery remains a separate task.
 
 ## Selected code and recovered versions
 
@@ -22,7 +22,7 @@ MariaDB 11.8 and Redis 8.6-alpine are staging choices from that official referen
 
 [Public IPv4 addresses are charged](https://cloud.google.com/vpc/network-pricing#ipaddress), including ephemeral addresses. The proposed preparation VM has no external address and no NAT. It cannot clone GitHub or pull Docker images over the public internet. IAP/private administrative connectivity and transfer permissions must be verified separately. Google budgets send alerts, not hard spending caps; no configuration here guarantees the billing account's total invoice will be zero.
 
-An e2-micro has 1 GB RAM. It can hold configuration and serve the preparation status page, but is not a dependable production host for MariaDB, Redis, Frappe, websocket and workers together. `stage.sh` refuses to start the full stack on a host below approximately 4 GB RAM. No larger paid VM is authorized.
+An e2-micro has 1 GB RAM. It can hold configuration and serve the preparation status page, but is not a dependable production host for MariaDB, Redis, Frappe, websocket and workers together. `stage.sh` refuses to start the full stack on a host below approximately 4 GB RAM. See DEMO.md for the proposed paid demo upgrade.
 
 ## Read-only Google preflight
 

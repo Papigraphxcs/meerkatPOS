@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About meerkatPOS</title>
+<meta name="description" content="meerkatPOS is built and maintained by Rootwise Inc. Learn about the offline-first point of sale and accounting software built for retail, restaurants, and multi-till businesses.">
+<link rel="icon" type="image/png" href="images/meerkat-mark-black.png">
+<style>
+
+  :root {
+    --page-bg: #ffffff;
+    --bg: #ffffff;
+    --fg: #171717;
+    --muted: #6b6b6b;
+    --border: #e4e4e4;
+    --card: #f4f4f3;
+    --dark-bg: #0a0a0a;
+    --dark-fg: #f5f5f5;
+    --dark-muted: #a3a3a3;
+    --accent: #171717;
+    --accent-fg: #fafafa;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page-bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1520px; margin: 0 auto; padding: 0 24px; }
+
+  .simple-header { border-bottom: 1px solid var(--border); }
+  .simple-header .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; color: var(--fg); text-decoration: none; }
+  .brand img { width: 30px; height: 30px; display: block; }
+  nav a { color: var(--fg); text-decoration: none; margin: 0 16px; font-size: 0.92rem; font-weight: 500; }
+  nav a:hover { text-decoration: underline; }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-cta:hover { opacity: 0.88; }
+  @media (max-width: 640px) {
+    nav { display: none; }
+  }
+
+  .content { max-width: 760px; margin: 0 auto; padding: 56px 24px 80px; }
+  .content .eyebrow {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  .content h1 { font-size: 2.2rem; margin: 0 0 10px; letter-spacing: -0.02em; font-weight: 800; }
+  .content .updated { color: var(--muted); font-size: 0.88rem; margin: 0 0 36px; }
+  .content .lead { color: var(--muted); font-size: 1.05rem; margin: 0 0 40px; }
+  .content h2 { font-size: 1.25rem; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .content h2:first-of-type { margin-top: 0; }
+  .content p { margin: 0 0 16px; }
+  .content ul, .content ol { margin: 0 0 16px; padding-left: 22px; }
+  .content li { margin-bottom: 8px; }
+  .content a { color: var(--fg); }
+  .content strong { font-weight: 700; }
+  .disclaimer {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 18px 22px;
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin: 0 0 40px;
+  }
+  .disclaimer strong { color: var(--fg); }
+  .toc { background: var(--card); border-radius: 14px; padding: 22px 26px; margin: 0 0 44px; }
+  .toc h2 { margin: 0 0 12px !important; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { margin-bottom: 6px; }
+  .toc a { font-size: 0.92rem; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  footer {
+    padding: 48px 0 32px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 32px;
+    padding-bottom: 32px;
+  }
+  .footer-brand .brand { margin-bottom: 10px; }
+  .footer-brand p { max-width: 260px; font-size: 0.88rem; }
+  .footer-entity { color: var(--muted); font-size: 0.82rem; }
+  .footer-cols { display: flex; gap: 56px; flex-wrap: wrap; }
+  .footer-col h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg);
+    margin: 0 0 14px;
+  }
+  .footer-col ul { list-style: none; margin: 0; padding: 0; }
+  .footer-col li { margin-bottom: 10px; font-size: 0.9rem; }
+  .footer-bottom { border-top: 1px solid var(--border); padding-top: 20px; font-size: 0.82rem; }
+
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin: 0 0 40px; }
+  .contact-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .contact-card .icon-tile {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  .contact-card .icon-tile svg { width: 21px; height: 21px; }
+  .contact-card h3 { margin: 0 0 8px; font-size: 1.02rem; }
+  .contact-card p { margin: 0 0 4px; font-size: 0.92rem; }
+  .contact-card a { display: block; font-weight: 600; text-decoration: none; }
+  .contact-card a:hover { text-decoration: underline; }
+
+</style>
+</head>
+<body>
+
+<header class="simple-header">
+  <div class="wrap">
+    <a class="brand" href="/">
+      <img src="images/meerkat-mark-black.png" alt="meerkatPOS">
+      meerkatPOS
+    </a>
+    <nav>
+      <a href="/#use-cases">Use Cases</a>
+      <a href="/#features">Features</a>
+      <a href="/#download">Download</a>
+      <a href="/#setup">Setup</a>
+    </nav>
+    <a href="/#download" class="nav-cta">Download</a>
+  </div>
+</header>
+
+<main class="content">
+
+<span class="eyebrow">About</span>
+<h1>About meerkatPOS</h1>
+<p class="lead">meerkatPOS is point-of-sale and accounting software built for businesses that can't afford to stop selling just because the internet did.</p>
+
+<h2>What we build</h2>
+<p>meerkatPOS is an offline-first checkout and back-office system built on the open-source Frappe Framework and ERPNext. It runs as a desktop application: one machine at a location acts as the "Hub," connected to your own ERPNext server, and every other till connects to that Hub over the local network. Sales keep ringing up even when the connection to the wider internet drops, then sync automatically once it's back.</p>
+<p>Unlike a checkout app bolted onto a separate accounting tool, every sale in meerkatPOS posts straight to a real, full double-entry accounting system underneath, so the numbers a business owner sees are the numbers that actually balance the books.</p>
+
+<h2>Who's behind it</h2>
+<p>meerkatPOS is built and maintained by <strong>Rootwise Inc.</strong>, a software company based in Zimbabwe. We build tools for retail, restaurant, and multi-till businesses that need software to work the way their business actually operates: sometimes offline, often across more than one till or location, and always needing the books to be right.</p>
+
+<h2>Our approach</h2>
+<p>We try to keep meerkatPOS to the essentials: no bloat, no per-feature upsells, and no separate subscription just to see your own sales data. The software is free to install, and it's built on top of established open-source foundations (Frappe and ERPNext) rather than a closed proprietary backend, so the data a business enters stays on infrastructure that business controls.</p>
+
+<h2>Get in touch</h2>
+<p>Questions about meerkatPOS, setup, or anything else on this site? Reach us at <a href="mailto:support@meerkatpos.me">support@meerkatpos.me</a>.</p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="/">
+          <img src="images/meerkat-mark-black.png" alt="meerkatPOS" style="width:26px;height:26px;">
+          meerkatPOS
+        </a>
+        <p>Point of sale and accounting, built as one: offline-first, for retail, restaurants, and multi-till stores.</p>
+        <p class="footer-entity">meerkatPOS is built and maintained by Rootwise Inc.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/#use-cases">Use Cases</a></li>
+            <li><a href="/#features">Features</a></li>
+            <li><a href="/#download">Download</a></li>
+            <li><a href="/#setup">Setup</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li><a href="/terms.html">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Rootwise Inc. All rights reserved. meerkatPOS is built on Frappe/ERPNext.
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
