@@ -31,7 +31,7 @@ The original desktop installers are excluded from Git. Copy them separately to `
 
 ## DNS and HTTPS cutover
 
-Namecheap records inspected on 2026-11-02: wildcard `*` and apex `@` A records both point to 92.4.135.71; `www` is a CNAME to meerkatpos.me. Mail CNAMEs `rsend` and `send` and email-forwarding SPF must be preserved. Expand and recheck the record list immediately before editing.
+Namecheap records inspected on 2026-11-02: wildcard `*` and apex `@` A records both point to 92.4.135.71; `www` is a CNAME to meerkatpos.me. Mail CNAMEs `rsend` and `send`, `_dmarc` and `resend._domainkey` TXT records, and email-forwarding SPF must be preserved. Expand and recheck the record list immediately before editing.
 
 After the approved upgrade, firewall configuration and HTTP checks, change only `@` to the Google static IP and add an explicit `demo` A record to that IP. Keep `www` as its existing apex CNAME. Preserve the wildcard pointing to Oracle so SAHH keeps its current destination. Do not change nameservers, mail records, or add SAHH to the Google proxy.
 
