@@ -1,0 +1,20 @@
+{
+  "application_commit": "da85b22d2752c175c63486ac1f89d7cf2f0edfc9",
+  "frappe_commit": "5cba016e86b54b57f34a3864282b92300ef20fb0",
+  "erpnext_commit": "b24c9eba551905e256e336ff170a91a92d197a2f",
+  "frappe_docker_reference": "3d0a0e53d8ab03903f6c3f125976a37d7a0f9875",
+  "deployment_evidence": "https://github.com/Papigraphxcs/meerkatPOS/actions/runs/35995176365",
+  "python": "3.14",
+  "node": "24.21.0",
+  "bench": "5.31.0",
+  "database_version_status": "Oracle server version not recovered. MariaDB 11.8 is a staging choice from the dated official reference; verify before importing customer data.",
+  "redis_version_status": "Redis 8.6-alpine from the dated official reference; Oracle server version unconfirmed.",
+  "resource_sha256": {
+    "resources/FRAPPE_DOCKER_LICENSE": "4234a14fb0a788985bf429eb9ea73bfb93139967e8dcee191f7d4f621970c800",
+    "resources/core/main-entrypoint.sh": "28c301d43cd50b750a050c1706dadf17cce87807e66d2db4a9713d6e6d30af85",
+    "resources/core/nginx/nginx-entrypoint.sh": "a3b59180d973d84cf02fd6ff5980b61c84abe880d0bf8ead3eb00c9880f38f07",
+    "resources/core/nginx/nginx-template.conf": "a9b2b15922fcff718957aca461a16b410dce11a55ab105ce498a4352f61b03ce",
+    "resources/core/nginx/security_headers.conf": "ccb615012f1a7c8592041535a74aa014ef089d66c7ef5800b2a180321a8b0ec8",
+    "resources/core/start.sh": "194a7225d6fb0a49dc0591d1ac450e3ff8060b93ee4a47be503ef40e61bbb48a"
+  }
+}

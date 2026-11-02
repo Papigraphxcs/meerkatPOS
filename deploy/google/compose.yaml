@@ -1,0 +1,139 @@
+# Private staging only. Workers and scheduler require the explicit live profile.
+name: meerkatpos-staging
+
+x-app: &app
+  image: ${APP_IMAGE:-meerkatpos-app:google-da85b22}
+  pull_policy: never
+  platform: linux/amd64
+  restart: unless-stopped
+  volumes:
+    - sites:/home/frappe/frappe-bench/sites
+    - logs:/home/frappe/frappe-bench/logs
+  profiles: [application]
+
+x-ready: &ready
+  configurator:
+    condition: service_completed_successfully
+
+services:
+  db:
+    image: ${MARIADB_IMAGE:-mariadb:11.8}
+    restart: unless-stopped
+    profiles: [application, live]
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root
+    secrets: [db_root]
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  redis-cache:
+    image: ${REDIS_IMAGE:-redis:8.6-alpine}
+    restart: unless-stopped
+    profiles: [application, live]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis-queue:
+    image: ${REDIS_IMAGE:-redis:8.6-alpine}
+    restart: unless-stopped
+    profiles: [application, live]
+    volumes:
+      - redis-queue-data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  configurator:
+    <<: *app
+    restart: 'no'
+    entrypoint: [bash, -ec]
+    command:
+      - |
+        ls -1 apps > sites/apps.txt
+        bench set-config -g db_host db
+        bench set-config -gp db_port 3306
+        bench set-config -g redis_cache redis://redis-cache:6379
+        bench set-config -g redis_queue redis://redis-queue:6379
+        bench set-config -g redis_socketio redis://redis-queue:6379
+        bench set-config -gp socketio_port 9000
+        bench set-config -g chromium_path /usr/bin/chromium-headless-shell
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      redis-queue:
+        condition: service_healthy
+
+  backend:
+    <<: *app
+    depends_on: *ready
+    environment:
+      GUNICORN_WORKERS: '1'
+      GUNICORN_THREADS: '2'
+      GUNICORN_TIMEOUT: '120'
+    secrets: [db_root]
+
+  websocket:
+    <<: *app
+    depends_on: *ready
+    command: [node, /home/frappe/frappe-bench/apps/frappe/socketio.js]
+
+  frontend:
+    <<: *app
+    command: [nginx-entrypoint.sh]
+    ports: ['127.0.0.1:8081:8080']
+    environment:
+      BACKEND: backend:8000
+      SOCKETIO: websocket:9000
+      FRAPPE_SITE_NAME_HEADER: ${STAGING_SITE:-staging.localhost}
+      NGINX_LISTEN_PORT: '8080'
+      UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
+      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
+      UPSTREAM_REAL_IP_RECURSIVE: 'off'
+      PROXY_READ_TIMEOUT: '120'
+      CLIENT_MAX_BODY_SIZE: 50m
+    depends_on: [backend, websocket]
+
+  queue-short:
+    <<: *app
+    profiles: [live]
+    depends_on: *ready
+    command: [bench, worker, --queue, short,default]
+
+  queue-long:
+    <<: *app
+    profiles: [live]
+    depends_on: *ready
+    command: [bench, worker, --queue, long,default,short]
+
+  scheduler:
+    <<: *app
+    profiles: [live]
+    depends_on: *ready
+    command: [bench, schedule]
+
+secrets:
+  db_root:
+    file: ./.secrets/db-root
+
+volumes:
+  sites:
+  logs:
+  db-data:
+  redis-queue-data:

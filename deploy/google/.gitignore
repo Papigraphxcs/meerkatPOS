@@ -1,0 +1,7 @@
+.secrets/
+.env
+*.tar
+*.tar.gz
+backups/
+validation/
+*.log
