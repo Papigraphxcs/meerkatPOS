@@ -15,7 +15,7 @@ gcloud compute instances describe meerkatpos-prep --project=meerkatpos --zone=us
 # Bundle only Git-tracked deployment files. Secrets and local build output are excluded.
 bundle_file=$(mktemp)
 trap 'rm -f -- "$bundle_file"' EXIT
-git archive --format=tar HEAD:deploy/google | gzip -n | base64 -w0 > "$bundle_file"
+git -C ../.. archive --format=tar HEAD:deploy/google | gzip -n | base64 -w0 > "$bundle_file"
 gcloud compute instances create meerkatpos-prep \
   --project=meerkatpos --zone=us-central1-a --machine-type=e2-micro \
   --image-family=ubuntu-2204-lts --image-project=ubuntu-os-cloud \
