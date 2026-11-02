@@ -4,13 +4,13 @@ This package restores the original main website and creates only `demo.meerkatpo
 
 ## Proposed host and cost
 
-Reuse `meerkatpos-prep` in `us-central1-a`, resize to e2-medium (4 GB RAM), retain its existing 30 GB standard disk and attach a static public IPv4. The console estimate on 2026-11-02 was $24.46/month for compute. IPv4 at $0.005/hour adds about $3.65/month. Baseline is approximately $28.11/month, before tax and outbound traffic. A $35 planning budget is proposed, pending approval. Budget alerts do not impose a hard spending cap. Desktop installer downloads add outbound traffic.
+The user approved reusing `meerkatpos-prep` in `us-central1-a`, resizing to e2-small (2 GB RAM), retaining its existing 30 GB standard disk and attaching a static public IPv4. On-demand compute at $0.016752855/hour is about $12.23/month. IPv4 at $0.005/hour adds about $3.65/month. Baseline is approximately $15.88/month, before tax and outbound traffic, assuming the standard disk remains within the billing account's free allowance. Budget alerts do not impose a hard spending cap. Desktop installer downloads add outbound traffic.
 
 Allow public TCP 80/443 only for this VM. Keep SSH restricted to Google IAP (35.235.240.0/20); add an explicit higher-priority deny for other SSH sources if the network has a broad default allow-ssh rule. Keep OS Login and block-project-ssh-keys enabled. Do not attach a broadly privileged VM service account.
 
 ## Prepare and start
 
-Install Docker Engine and its Compose plugin using the [official Ubuntu repository instructions](https://docs.docker.com/engine/install/ubuntu/). Build the pinned image using Containerfile on a suitable build host, then transfer it with `docker save`, gzip and IAP SCP. Load it with `docker load` on the VM. The 4 GB demo VM is intended to run the prebuilt image rather than build frontend assets.
+Install Docker Engine and its Compose plugin using the [official Ubuntu repository instructions](https://docs.docker.com/engine/install/ubuntu/). Transfer the tested image using `docker save`, gzip and IAP SCP. Load it with `docker load` on the VM. The 2 GB demo VM runs the prebuilt image rather than building frontend assets. Configure a 2 GB local swap file for temporary memory spikes. `compose.small.yaml` sets per-service memory limits and a small MariaDB buffer pool. This configuration is for light demo use; scheduled and background jobs remain disabled.
 
 Copy this deployment directory to `/opt/meerkatpos/deployment`. Keep it owned by the deployment administrator; run Docker commands with sudo rather than granting additional users Docker access. Generate secrets on that VM, not in Git or a cloud metadata field:
 
@@ -36,7 +36,7 @@ Namecheap records inspected on 2026-11-02: wildcard `*` and apex `@` A records b
 After the approved upgrade, firewall configuration and HTTP checks, change only `@` to the Google static IP and add an explicit `demo` A record to that IP. Keep `www` as its existing apex CNAME. Preserve the wildcard pointing to Oracle so SAHH keeps its current destination. Do not change nameservers, mail records, or add SAHH to the Google proxy.
 
 ```bash
-sudo docker compose -f compose.yaml -f compose.demo.yaml --profile application --profile public up -d
+sudo docker compose -f compose.yaml -f compose.demo.yaml -f compose.small.yaml --profile application --profile public up -d
 ```
 
 Caddy obtains and renews HTTPS certificates for the apex, www and demo, with certificate data persisted in Docker volumes. Verify all three public HTTPS hostnames, demo login, product prices/stock and installer downloads after DNS propagation. To roll back routing, restore `@` to 92.4.135.71 and remove the newly added demo record; this restores the previous DNS destination but cannot make the terminated Oracle instance available.
