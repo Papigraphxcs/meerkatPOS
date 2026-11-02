@@ -20,6 +20,8 @@ except urllib.error.HTTPError as error:
 else:
     with tarfile.open(fileobj=io.BytesIO(bundle), mode='r:gz') as archive:
         for member in archive.getmembers():
+            if member.isdir():
+                continue
             if member.name.startswith('/') or '..' in member.name.split('/') or not member.isfile():
                 raise ValueError('Unexpected deployment archive member')
             data = archive.extractfile(member).read()
