@@ -32,6 +32,14 @@ After that review, `FREE_TIER_REVIEWED=yes bash provision-private-vm.sh` provisi
 
 ## Build and validate locally
 
+On this Windows machine, Docker Desktop is accessible from PowerShell:
+
+```powershell
+Set-Location deploy/google
+docker build --platform linux/amd64 --file Containerfile --tag meerkatpos-app:google-da85b22 .
+docker run --rm --entrypoint cat meerkatpos-app:google-da85b22 versions.lock
+```
+
 On a Linux/WSL Docker host with sufficient RAM and disk:
 
 ```bash
